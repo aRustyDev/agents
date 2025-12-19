@@ -1,0 +1,70 @@
+name: Add Role
+description: Propose a new role definition for the library
+title: "[ROLE] "
+labels: ["role", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Role
+        Roles define specialized personas or expertise areas for AI agents.
+
+  - type: input
+    id: role-name
+    attributes:
+      label: Role Name
+      description: A descriptive name for the role
+      placeholder: "security-engineer"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What expertise or persona does this role embody?
+      placeholder: |
+        Example: A security-focused engineer who specializes in identifying
+        vulnerabilities, implementing secure coding practices, and conducting
+        security reviews.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this role coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: textarea
+    id: role-content
+    attributes:
+      label: Role Definition
+      description: Paste the full role definition content or provide a link
+      render: markdown
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: When should this role be applied?
+      placeholder: |
+        - Security audits
+        - Code review for security concerns
+        - Implementing authentication/authorization
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this role
+        - label: The role has clear, actionable instructions
+        - label: This role does not duplicate existing functionality

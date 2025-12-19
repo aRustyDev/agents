@@ -1,0 +1,73 @@
+name: Add Slash Command
+description: Propose a new Claude Code slash command for the library
+title: "[COMMAND] "
+labels: ["command", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Slash Command
+        Slash commands are user-invoked operations defined as markdown files in commands/.
+
+  - type: input
+    id: command-name
+    attributes:
+      label: Command Name
+      description: The name users will type (without the leading /)
+      placeholder: "add-homebrew-formula"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this command do? When should users invoke it?
+      placeholder: |
+        Example: Creates a new Homebrew formula for a given GitHub repository.
+        Guides the user through research, implementation, validation, and PR creation.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this command coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: input
+    id: source-path
+    attributes:
+      label: Source Path
+      description: If promoted from a project, provide the path
+      placeholder: "homebrew-tap/.claude/commands/add-homebrew-formula.md"
+
+  - type: textarea
+    id: command-content
+    attributes:
+      label: Command Content
+      description: Paste the full command markdown content or provide a link
+      render: markdown
+
+  - type: input
+    id: arguments
+    attributes:
+      label: Arguments
+      description: What arguments does this command accept?
+      placeholder: "$ARGUMENTS - repository URL or GitHub path"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this command in a project
+        - label: The command includes clear instructions
+        - label: This command does not duplicate existing functionality

@@ -1,0 +1,78 @@
+name: Add Agent
+description: Propose a new agent definition for the library
+title: "[AGENT] "
+labels: ["agent", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Agent
+        Agents are specialized AI configurations with defined capabilities, tools, and behaviors.
+
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent Name
+      description: A descriptive name for the agent
+      placeholder: "documentation-writer"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is this agent's purpose and specialty?
+      placeholder: |
+        Example: An agent specialized in creating and maintaining technical
+        documentation, including READMEs, API docs, and user guides.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this agent coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Capabilities
+      description: What can this agent do?
+      placeholder: |
+        - Generate comprehensive documentation
+        - Analyze code to extract documentation
+        - Create tutorials and guides
+
+  - type: textarea
+    id: tools
+    attributes:
+      label: Tools/MCP Servers
+      description: What tools or MCP servers does this agent use?
+      placeholder: |
+        - filesystem MCP server
+        - markdown linter
+
+  - type: textarea
+    id: agent-content
+    attributes:
+      label: Agent Definition
+      description: Paste the full agent definition or provide a link
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this agent
+        - label: Capabilities and tools are clearly documented
+        - label: This agent does not duplicate existing functionality

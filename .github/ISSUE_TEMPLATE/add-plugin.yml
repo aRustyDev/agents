@@ -1,0 +1,68 @@
+name: Add Plugin
+description: Propose a new plugin for the library
+title: "[PLUGIN] "
+labels: ["plugin", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Plugin
+        Plugins extend AI capabilities with additional tooling or integrations.
+
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Plugin Name
+      description: A descriptive name for the plugin
+      placeholder: "github-integration"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this plugin provide? What capabilities does it add?
+      placeholder: |
+        Example: Integrates with GitHub API to provide issue tracking,
+        PR management, and repository analysis capabilities.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this plugin coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: textarea
+    id: plugin-content
+    attributes:
+      label: Plugin Content
+      description: Paste the plugin definition or provide a link to the files
+      render: markdown
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What external dependencies does this plugin require?
+      placeholder: |
+        - GitHub CLI (gh)
+        - GitHub API token
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this plugin
+        - label: Dependencies are clearly documented
+        - label: This plugin does not duplicate existing functionality
