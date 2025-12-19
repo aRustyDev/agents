@@ -1,0 +1,89 @@
+name: Add MCP Config
+description: Propose a new MCP server configuration for the library
+title: "[MCP] "
+labels: ["mcp", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New MCP Configuration
+        MCP (Model Context Protocol) configs define server connections and capabilities.
+
+  - type: input
+    id: mcp-name
+    attributes:
+      label: MCP Server Name
+      description: Name of the MCP server
+      placeholder: "github"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What capabilities does this MCP server provide?
+      placeholder: |
+        Example: GitHub MCP server for repository management, issue tracking,
+        and PR workflows.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Is this a global or local MCP config?
+      options:
+        - Global (remote/HTTP servers)
+        - Local (project-scoped templates)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this MCP config coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Official MCP registry
+    validations:
+      required: true
+
+  - type: textarea
+    id: config-content
+    attributes:
+      label: MCP Configuration
+      description: Paste the MCP configuration (JSON format)
+      render: json
+
+  - type: textarea
+    id: secrets
+    attributes:
+      label: Secrets/Environment Variables
+      description: What secrets or environment variables are required?
+      placeholder: |
+        - GITHUB_TOKEN (required)
+        - GITHUB_ENTERPRISE_URL (optional)
+
+  - type: textarea
+    id: tools-provided
+    attributes:
+      label: Tools Provided
+      description: What tools does this MCP server expose?
+      placeholder: |
+        - list_issues
+        - create_pr
+        - get_file_contents
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this MCP configuration
+        - label: Required secrets are documented
+        - label: The config works with 1Password references (op://)

@@ -1,0 +1,72 @@
+name: Add Rule
+description: Propose a new instruction rule for the library
+title: "[RULE] "
+labels: ["rule", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Rule
+        Rules are instruction sets that guide AI behavior in specific contexts.
+
+  - type: input
+    id: rule-name
+    attributes:
+      label: Rule Name
+      description: A descriptive name for the rule
+      placeholder: "git-workflow"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What behavior does this rule enforce or guide?
+      placeholder: |
+        Example: Enforces conventional commit format, feature branch workflow,
+        and PR-based issue closure for all git operations.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Where should this rule be applied?
+      options:
+        - Global (all projects)
+        - Project-specific
+        - Tool-specific (Claude Code, Zed, etc.)
+        - Context-dependent
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this rule coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule-content
+    attributes:
+      label: Rule Content
+      description: Paste the full rule content or provide a link
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this rule
+        - label: The rule has clear, actionable instructions
+        - label: This rule does not conflict with existing rules

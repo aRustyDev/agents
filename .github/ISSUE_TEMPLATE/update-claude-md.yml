@@ -1,0 +1,66 @@
+name: Update CLAUDE.md
+description: Propose changes to CLAUDE.md templates or documentation
+title: "[CLAUDE.md] "
+labels: ["claude-md", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Update CLAUDE.md
+        Propose changes to CLAUDE.md templates, examples, or best practices.
+
+  - type: dropdown
+    id: change-type
+    attributes:
+      label: Change Type
+      description: What kind of change is this?
+      options:
+        - New template
+        - Template update
+        - Best practice addition
+        - Documentation improvement
+        - Bug fix
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the proposed change
+      placeholder: |
+        Example: Add a CLAUDE.md template optimized for Python/FastAPI projects
+        with specific patterns for async code and dependency injection.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Current State
+      description: What is the current state of the content (if updating)?
+      render: markdown
+
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed Change
+      description: What changes are you proposing?
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: Why is this change beneficial?
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested the proposed changes
+        - label: The changes follow existing conventions
+        - label: This does not break backward compatibility (or it's intentional)

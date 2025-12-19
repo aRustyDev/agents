@@ -1,0 +1,76 @@
+name: Add Skill
+description: Propose a new Claude Code skill for the library
+title: "[SKILL] "
+labels: ["skill", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Skill
+        Skills are model-invoked capabilities defined by SKILL.md files with YAML frontmatter.
+
+  - type: input
+    id: skill-name
+    attributes:
+      label: Skill Name
+      description: A short, descriptive name for the skill
+      placeholder: "homebrew-formula"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this skill help with? When should the model invoke it?
+      placeholder: |
+        Example: Create, test, and maintain Homebrew formulas. Use when adding packages
+        to a Homebrew tap, debugging formula issues, running brew audit/test, or
+        automating version updates with livecheck.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this skill coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: input
+    id: source-path
+    attributes:
+      label: Source Path
+      description: If promoted from a project, provide the path (e.g., project-name/.claude/skills/skill-name/)
+      placeholder: "homebrew-tap/.claude/skills/homebrew-formula/"
+
+  - type: textarea
+    id: skill-content
+    attributes:
+      label: SKILL.md Content
+      description: Paste the full SKILL.md content or provide a link to the file
+      render: markdown
+
+  - type: textarea
+    id: supporting-files
+    attributes:
+      label: Supporting Files
+      description: List any additional files that should be included with this skill
+      placeholder: |
+        - examples/
+        - templates/
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this skill in a project
+        - label: The SKILL.md has proper YAML frontmatter (name, description)
+        - label: This skill does not duplicate existing functionality

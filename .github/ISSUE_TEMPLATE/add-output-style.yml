@@ -1,0 +1,66 @@
+name: Add Output Style
+description: Propose a new output style definition for the library
+title: "[OUTPUT-STYLE] "
+labels: ["output-style", "component"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add a New Output Style
+        Output styles define how AI responses should be formatted and structured.
+
+  - type: input
+    id: style-name
+    attributes:
+      label: Style Name
+      description: A descriptive name for the output style
+      placeholder: "concise-technical"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What output format does this style produce?
+      placeholder: |
+        Example: A concise, technical writing style that prioritizes brevity
+        and precision. Uses bullet points, avoids unnecessary elaboration.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      description: Where is this output style coming from?
+      options:
+        - New creation
+        - Promoted from project
+        - External contribution
+        - Migrated from legacy/
+    validations:
+      required: true
+
+  - type: textarea
+    id: style-content
+    attributes:
+      label: Style Definition
+      description: Paste the full output style definition or provide a link
+      render: markdown
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example Output
+      description: Provide an example of output in this style
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have tested this output style
+        - label: The style is clearly defined with examples
+        - label: This style does not duplicate existing functionality
