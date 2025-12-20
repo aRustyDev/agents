@@ -104,7 +104,24 @@ See [Issue #1](https://github.com/aRustyDev/ai/issues/1) for full details.
 ## Legacy Content
 
 Previous content is preserved in `legacy/` during migration. This includes:
+
+### From arustydev/agents (archived)
 - `agents/` - Agent definitions
+
+### From arustydev/prompts (archived)
+- `prompts/commands/` - Slash commands (/audit, /plan, /report, etc.)
+- `prompts/processes/` - Workflow processes (CI/CD, code-review, testing)
+- `prompts/core/` - Core patterns (error handling, validation, git operations)
+- `prompts/patterns/` - Development patterns (BDD, TDD, CDD)
+- `prompts/templates/` - Issue, report, and documentation templates
+- `prompts/roles/` - Role definitions (developer levels, security engineer)
+- `prompts/guides/` - Tool usage guides
+- `prompts/knowledge/` - Knowledge bases
+- `prompts/hooks/` - Validation hooks and scripts
+- `prompts/automation/` - Automation scripts
+- `prompts/docs/` - Architecture and planning documentation
+
+### Original legacy
 - `commands/` - Slash commands
 - `rules/` - Instruction rules
 - `skills/` - Skill definitions
@@ -113,7 +130,15 @@ Previous content is preserved in `legacy/` during migration. This includes:
 - `context/` - Context documents
 - And more...
 
-Content will be migrated to the new structure over time.
+Content will be migrated to the new structure over time. Valuable content can be promoted to `components/` using the `/promote-skill` command or similar workflows.
+
+## Merged Repositories
+
+The following repositories have been archived and merged into this repo:
+- **arustydev/agents** → `legacy/agents/`
+- **arustydev/prompts** → `legacy/prompts/`
+
+See `.ai/plans/merge-agents-prompts.md` for the full merge plan and history.
 
 ## License
 
