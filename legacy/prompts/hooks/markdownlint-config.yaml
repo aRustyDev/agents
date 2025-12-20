@@ -1,0 +1,79 @@
+# Markdownlint configuration for Claude modules
+# Full rule reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Default state for all rules
+default: true
+
+# Line length
+MD013:
+  line_length: 120
+  heading_line_length: 100
+  code_block_line_length: 120
+  tables: false
+
+# Heading style
+MD003:
+  style: "atx"
+
+# Unordered list style
+MD004:
+  style: "dash"
+
+# Heading levels should increment by one
+MD001: true
+
+# First line should be a top-level heading
+MD041: true
+
+# No trailing spaces
+MD009: true
+
+# No hard tabs
+MD010: true
+
+# No multiple consecutive blank lines
+MD012:
+  maximum: 2
+
+# No inline HTML
+MD033:
+  allowed_elements:
+    - br
+    - details
+    - summary
+
+# Proper spacing around headings
+MD022: true
+MD023: true
+MD024: true
+
+# Code block style
+MD046:
+  style: "fenced"
+
+# Proper emphasis markers
+MD036: true
+
+# Lists
+MD032: true  # Blank lines around lists
+MD030:       # Spaces after list markers
+  ul_single: 1
+  ul_multi: 1
+  ol_single: 1
+  ol_multi: 1
+
+# Links
+MD042: true  # No empty links
+
+# Images
+MD045: true  # No empty image alt text
+
+# Tables
+MD055: true  # Table pipe style
+
+# Claude-specific: Allow YAML frontmatter
+MD002: false  # First heading doesn't need to be H1 (due to frontmatter)
+
+# Code blocks
+MD040: true  # Fenced code blocks should have language
+MD031: true  # Fenced code blocks surrounded by blank lines

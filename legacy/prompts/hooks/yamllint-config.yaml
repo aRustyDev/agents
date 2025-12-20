@@ -1,0 +1,46 @@
+# YAMLlint configuration for Claude modules
+extends: default
+
+rules:
+  # Line length
+  line-length:
+    max: 120
+    level: warning
+  
+  # Indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  
+  # Comments
+  comments:
+    min-spaces-from-content: 2
+  
+  # Empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+  
+  # Trailing spaces
+  trailing-spaces: enable
+  
+  # Document start
+  document-start:
+    present: true
+  
+  # Document end
+  document-end:
+    present: false
+  
+  # Key ordering
+  key-ordering: disable
+  
+  # Truthy values
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+  
+  # Brackets
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
