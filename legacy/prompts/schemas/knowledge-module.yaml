@@ -1,0 +1,240 @@
+---
+schema_version: 1.0.0
+schema_type: knowledge-module
+description: Schema for shared knowledge modules that roles can inherit
+---
+
+# Knowledge Module Schema
+
+## Structure
+```yaml
+# Module metadata
+id: string              # Unique identifier (e.g., "software-engineering")
+version: semver         # Module version
+name: string           # Human-readable name
+description: string    # Module purpose
+cacheable: boolean     # Can be cached (default: true)
+auto_update: boolean   # Auto-update to latest (default: true)
+
+# Knowledge organization
+core_concepts:
+  - name: string
+    priority: critical|high|medium|low
+    content: |
+      Detailed explanation of the concept
+    examples:
+      - description: string
+        code: string
+    references:
+      - title: string
+        url: string
+
+# Deep topic modules (loaded contextually)
+deep_topics:
+  - name: string
+    description: string
+    triggers:           # Keywords that load this topic
+      - keyword
+    priority: contextual|high|medium|low
+    prerequisites:      # Required knowledge
+      - concept_name
+    content: |
+      In-depth content
+    modules:           # Additional modules to load
+      - path/to/module.md
+
+# Practical knowledge
+patterns:
+  - name: string
+    description: string
+    when_to_use: string
+    implementation: |
+      Code or process
+    trade_offs:
+      pros:
+        - string
+      cons:
+        - string
+
+# Common pitfalls
+pitfalls:
+  - name: string
+    description: string
+    symptoms:
+      - string
+    solution: |
+      How to avoid or fix
+    example: |
+      Code example
+
+# Related knowledge
+relationships:
+  requires:            # Must understand these first
+    - module_id
+  enhances:           # Builds upon these
+    - module_id
+  conflicts:          # May contradict
+    - module_id
+    
+# Metadata
+metadata:
+  domain: string      # Knowledge domain
+  level: beginner|intermediate|advanced|expert
+  update_frequency: frequent|regular|stable
+  maintainer: string
+  tags:
+    - tag
+```
+
+## Validation Rules
+
+### Required Fields
+- `id`: Unique across all knowledge modules
+- `version`: Semantic versioning required
+- `name`: Human-readable, max 100 chars
+- `core_concepts`: At least one required
+
+### Priority Levels
+- `critical`: Always loaded with module
+- `high`: Loaded unless memory constrained
+- `medium`: Loaded on first reference
+- `low`: Loaded only when explicitly needed
+- `contextual`: Loaded based on triggers
+
+### Content Guidelines
+- Use markdown for all content fields
+- Include practical examples
+- Reference authoritative sources
+- Keep concepts focused and modular
+
+## Inheritance Rules
+
+### When roles inherit knowledge:
+1. Critical concepts always included
+2. High priority included by default
+3. Medium/low loaded on demand
+4. Deep topics loaded by triggers
+
+### Conflict resolution:
+- Child module overrides parent
+- Higher version takes precedence
+- Explicit exclusions respected
+
+## Example: Software Engineering Knowledge
+```yaml
+id: software-engineering
+version: 2.1.0
+name: Software Engineering Fundamentals
+description: Core software engineering principles and practices
+cacheable: true
+
+core_concepts:
+  - name: SOLID Principles
+    priority: critical
+    content: |
+      Five design principles for maintainable object-oriented code:
+      - Single Responsibility: A class should have one reason to change
+      - Open/Closed: Open for extension, closed for modification
+      - Liskov Substitution: Subtypes must be substitutable
+      - Interface Segregation: Many specific interfaces
+      - Dependency Inversion: Depend on abstractions
+    examples:
+      - description: "Single Responsibility Principle"
+        code: |
+          # Bad: Multiple responsibilities
+          class User:
+            def save(self): ...
+            def send_email(self): ...
+          
+          # Good: Separated concerns
+          class User:
+            def save(self): ...
+          
+          class EmailService:
+            def send_email(self, user): ...
+
+  - name: DRY Principle
+    priority: high
+    content: |
+      Don't Repeat Yourself - avoid duplication of logic
+    examples:
+      - description: "Extract common logic"
+        code: |
+          # Bad: Repeated logic
+          def calc_price_usd(amount):
+            return amount * 1.1 * 0.9
+          
+          def calc_price_eur(amount):
+            return amount * 1.1 * 0.85
+          
+          # Good: Extracted common logic
+          def calc_base_price(amount):
+            return amount * 1.1
+          
+          def calc_price_usd(amount):
+            return calc_base_price(amount) * 0.9
+
+deep_topics:
+  - name: Design Patterns
+    description: Common solutions to recurring problems
+    triggers: ["pattern", "design pattern", "gang of four"]
+    priority: contextual
+    prerequisites:
+      - SOLID Principles
+      - OOP Concepts
+    content: |
+      Reusable solutions to common software design problems...
+    modules:
+      - knowledge/design-patterns.yaml
+
+patterns:
+  - name: Repository Pattern
+    description: Abstraction over data access
+    when_to_use: When you need to decouple data access from business logic
+    implementation: |
+      interface UserRepository {
+        findById(id: string): User
+        save(user: User): void
+      }
+    trade_offs:
+      pros:
+        - Testability
+        - Flexibility
+      cons:
+        - Additional abstraction
+        - Potential over-engineering
+
+pitfalls:
+  - name: Premature Optimization
+    description: Optimizing before measuring
+    symptoms:
+      - Complex code without performance requirements
+      - Micro-optimizations in non-critical paths
+    solution: |
+      1. Make it work
+      2. Make it right
+      3. Make it fast (only if needed)
+    example: |
+      # Measure first, optimize later
+      profile_code()
+      identify_bottlenecks()
+      optimize_critical_path()
+
+relationships:
+  requires:
+    - programming-fundamentals
+  enhances:
+    - architecture-patterns
+  conflicts: []
+
+metadata:
+  domain: software-development
+  level: intermediate
+  update_frequency: stable
+  maintainer: engineering-team
+  tags:
+    - engineering
+    - best-practices
+    - design
+    - architecture
+```

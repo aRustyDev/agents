@@ -1,0 +1,156 @@
+# Example Project Focus Configuration
+# Copy to ~/.config/projects/focus.yaml and customize
+
+version: "1.0"
+
+# Global defaults for all projects
+defaults:
+  deadline_window: 14        # Days before deadline to flag as "upcoming"
+  completion_threshold: 80   # Percentage to consider "near completion"
+
+# Your tracked projects
+projects:
+  # Example: Full-stack web application
+  - name: "E-Commerce Platform"
+    description: "Main company e-commerce site"
+    github_repo: "mycompany/ecommerce-web"
+    platforms:
+      asana: "1234567890123456"
+      github_projects: 42
+    tags:
+      - "production"
+      - "revenue-critical"
+      - "frontend"
+      - "backend"
+    status: "active"
+    
+  # Example: Mobile application
+  - name: "Mobile App"
+    description: "iOS and Android customer app"
+    github_repo: "mycompany/mobile-app"
+    platforms:
+      jira: "MOBILE"
+      github_projects: 15
+    tags:
+      - "mobile"
+      - "customer-facing"
+    settings:
+      deadline_window: 7  # Tighter deadlines for mobile releases
+    status: "active"
+    
+  # Example: Internal tooling
+  - name: "Admin Dashboard"
+    description: "Internal admin and analytics dashboard"
+    github_repo: "mycompany/admin-dashboard"
+    platforms:
+      notion: "abc123def456"
+    tags:
+      - "internal"
+      - "low-priority"
+    status: "active"
+    
+  # Example: Infrastructure project
+  - name: "Cloud Migration"
+    description: "AWS to multi-cloud migration project"
+    platforms:
+      jira: "INFRA-CLOUD"
+      asana: "9876543210987654"
+    tags:
+      - "infrastructure"
+      - "q4-priority"
+    status: "active"
+    # Note: No github_repo - tracked in PM tools only
+    
+  # Example: New project idea (no repo yet)
+  - name: "ML Feature Service"
+    description: "Machine learning feature store and serving"
+    platforms:
+      notion: "ml-feature-service-spec"
+    tags:
+      - "innovation"
+      - "planning"
+      - "ml"
+    status: "active"
+    
+  # Example: Paused project
+  - name: "Legacy System Rewrite"
+    description: "Rewriting the legacy PHP system"
+    github_repo: "mycompany/legacy-rewrite"
+    platforms:
+      jira: "LEGACY"
+    tags:
+      - "technical-debt"
+    status: "paused"  # Won't show in default queries
+    
+  # Example: Archived project
+  - name: "2023 Marketing Site"
+    description: "Previous version of marketing site"
+    github_repo: "mycompany/marketing-2023"
+    platforms:
+      github_projects: 8
+    tags:
+      - "archived"
+    status: "archived"  # Kept for reference but excluded
+
+# Platform-specific configuration
+platform_config:
+  # GitHub configuration
+  github:
+    organizations:
+      - "mycompany"
+      - "mycompany-oss"
+    include_private: true
+    
+  # Asana configuration
+  asana:
+    workspace_id: "123456789"
+    custom_field_mapping:
+      priority: "custom_fields.123456"    # Your priority field ID
+      sprint: "custom_fields.789012"      # Your sprint field ID
+      team: "custom_fields.345678"        # Your team field ID
+    
+  # Jira configuration
+  jira:
+    instance: "mycompany.atlassian.net"
+    project_categories:
+      - "Development"
+      - "Infrastructure"
+      - "Research"
+    custom_jql_filters:
+      high_priority: "priority in (Highest, High) AND status != Done"
+      current_sprint: "sprint in openSprints()"
+    
+  # Notion configuration
+  notion:
+    database_ids:
+      - "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"  # Projects DB
+      - "ffffffff-gggg-hhhh-iiii-jjjjjjjjjjjj"  # Roadmap DB
+    property_mapping:
+      status: "Status"
+      priority: "Priority"
+      due_date: "Due Date"
+
+# Optional: Team member mapping for assignment filtering
+team_members:
+  - name: "John Doe"
+    github: "johndoe"
+    asana: "john.doe@company.com"
+    jira: "jdoe"
+    
+  - name: "Jane Smith"
+    github: "janesmith"
+    asana: "jane.smith@company.com"
+    jira: "jsmith"
+
+# Optional: Priority overrides by platform
+priority_weights:
+  asana:
+    high: 90
+    medium: 50
+    low: 20
+  jira:
+    highest: 100
+    high: 80
+    medium: 60
+    low: 40
+    lowest: 20
