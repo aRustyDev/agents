@@ -1,0 +1,16 @@
+role_management:
+  preload_strategy:
+    mode: "aggressive" # Load all high/medium priority upfront
+    cache_size: "10GB" # Adjust based on your needs
+
+  context_priority:
+    high: "never_unload"
+    medium: "unload_after_inactive:30min"
+    low: "unload_on_memory_pressure"
+
+  consultation_protocol:
+    mode: "lightweight" # Pass queries, not full context
+    format: |
+      CONSULTING: {{from_role}} → {{to_role}}
+      QUERY: {{question}}
+      CONTEXT_NEEDED: {{specific_knowledge_areas}}

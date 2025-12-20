@@ -1,0 +1,375 @@
+---
+name: repository-audit
+version: 1.0.0
+description: Complete workflow for auditing prompt repositories
+author: Claude
+---
+
+# Repository Audit Workflow
+
+## Purpose
+Orchestrate a comprehensive audit of a prompt repository, identifying optimization opportunities and generating actionable recommendations.
+
+## Prerequisites
+- Repository access with read permissions
+- Git repository (for history analysis)
+- Bash shell environment
+- Claude with prompt-auditor role
+
+## Workflow Phases
+
+### Phase 1: Preparation (15 minutes)
+
+#### 1.1 Environment Setup
+```yaml
+setup_tasks:
+  - verify_prerequisites:
+      check: Repository accessible
+      check: Git initialized
+      check: Required tools available
+      
+  - activate_role:
+      command: /role activate prompt-auditor
+      context: repository-audit
+      
+  - create_workspace:
+      action: Create audit directory
+      location: ./.audit/$(date +%Y%m%d_%H%M%S)
+```
+
+#### 1.2 Initial Configuration
+```bash
+# Set audit parameters
+export AUDIT_ROOT="${1:-.}"
+export AUDIT_DEPTH="${AUDIT_DEPTH:-comprehensive}"
+export AUDIT_OUTPUT="${AUDIT_OUTPUT:-./.audit/report}"
+export TODO_AGE_THRESHOLD="${TODO_AGE_THRESHOLD:-90}"
+
+# Create output directories
+mkdir -p "$AUDIT_OUTPUT"/{data,reports,logs}
+```
+
+### Phase 2: Analysis (1-2 hours)
+
+#### 2.1 Repository Survey
+```yaml
+survey_stage:
+  process: processes/auditing/repository-analysis.md
+  
+  execute:
+    - name: Structure Analysis
+      script: |
+        echo "Starting repository survey..." | tee -a "$AUDIT_OUTPUT/logs/audit.log"
+        survey_repository "$AUDIT_ROOT" > "$AUDIT_OUTPUT/data/survey.txt"
+        
+    - name: Git History
+      script: |
+        analyze_git_history > "$AUDIT_OUTPUT/data/git_history.txt"
+        
+    - name: Initial Metrics
+      output: data/initial_metrics.json
+```
+
+#### 2.2 Targeted Analysis
+```yaml
+deep_analysis:
+  parallel: true
+  timeout: 3600  # 1 hour
+  
+  tasks:
+    - name: Duplication Detection
+      process: processes/auditing/duplication-detection.md
+      output: data/duplication_report.json
+      priority: high
+      
+    - name: Gap Analysis
+      process: processes/auditing/gap-analysis.md
+      output: data/gap_report.json
+      priority: high
+      
+    - name: Dead Context
+      process: processes/auditing/dead-context-detection.md
+      helper: helpers/detect-dead-context.sh
+      output: data/dead_context.json
+      priority: medium
+      
+    - name: Modularization
+      process: processes/auditing/modularization-opportunities.md
+      output: data/modularization.json
+      priority: medium
+      
+    - name: Dependencies
+      helper: helpers/analyze-dependencies.sh
+      output: data/dependencies.dot
+      priority: low
+```
+
+#### 2.3 Pattern Application
+```yaml
+analysis_patterns:
+  - pattern: patterns/analysis/systematic-review.md
+    rounds: 3
+    focus:
+      round_1: Breadth-first survey
+      round_2: Deep investigation  
+      round_3: Synthesis
+      
+  - pattern: patterns/analysis/deep-exploration.md
+    targets: High-priority findings
+    depth: Follow critical threads
+```
+
+### Phase 3: Synthesis (30 minutes)
+
+#### 3.1 Data Aggregation
+```bash
+# Aggregate all findings
+aggregate_findings() {
+  echo "Aggregating analysis results..."
+  
+  # Merge JSON reports
+  jq -s '
+    {
+      duplication: .[0],
+      gaps: .[1],
+      dead_context: .[2],
+      modularization: .[3]
+    }
+  ' "$AUDIT_OUTPUT/data/"*.json > "$AUDIT_OUTPUT/data/aggregated.json"
+  
+  # Generate summary statistics
+  generate_summary_stats > "$AUDIT_OUTPUT/data/summary_stats.json"
+}
+```
+
+#### 3.2 Issue Prioritization
+```yaml
+prioritization_matrix:
+  criteria:
+    - impact: User/system impact (1-5)
+    - effort: Fix complexity (1-5)
+    - risk: If left unfixed (1-5)
+    
+  scoring: (impact * 2) + risk - effort
+  
+  categories:
+    critical: score >= 10
+    high: score >= 7
+    medium: score >= 4
+    low: score < 4
+```
+
+#### 3.3 Recommendation Generation
+```yaml
+recommendations:
+  generate_from:
+    - finding_type: duplication
+      template: Consolidate ${files} into ${target}
+      
+    - finding_type: gap
+      template: Create missing ${component_type}
+      
+    - finding_type: dead_context
+      template: Remove obsolete ${item}
+      
+    - finding_type: modularization
+      template: Split ${file} into ${count} modules
+```
+
+### Phase 4: Reporting (30 minutes)
+
+#### 4.1 Report Generation
+```bash
+# Generate comprehensive report
+generate_audit_report() {
+  local TEMPLATE="templates/reports/audit-findings.md"
+  local DATA="$AUDIT_OUTPUT/data/aggregated.json"
+  local REPORT="$AUDIT_OUTPUT/reports/audit_report.md"
+  
+  echo "Generating audit report..."
+  
+  # Populate template with data
+  populate_template "$TEMPLATE" "$DATA" > "$REPORT"
+  
+  # Generate executive summary
+  generate_executive_summary "$DATA" > "$AUDIT_OUTPUT/reports/executive_summary.md"
+}
+```
+
+#### 4.2 Roadmap Creation
+```yaml
+roadmap_generation:
+  if: findings.count > 10
+  
+  process:
+    - group_by_theme: Group related fixes
+    - estimate_effort: Calculate time/resources
+    - create_phases: Organize into phases
+    - set_milestones: Define success criteria
+    
+  template: templates/reports/optimization-roadmap.md
+  output: reports/optimization_roadmap.md
+```
+
+#### 4.3 Deliverables Package
+```bash
+# Package all deliverables
+package_deliverables() {
+  local PACKAGE="$AUDIT_OUTPUT/audit_package_$(date +%Y%m%d).tar.gz"
+  
+  # Create package contents
+  cp -r "$AUDIT_OUTPUT/reports" "$AUDIT_OUTPUT/package/"
+  cp "$AUDIT_OUTPUT/data/dependencies.dot" "$AUDIT_OUTPUT/package/"
+  
+  # Add README
+  cat > "$AUDIT_OUTPUT/package/README.md" << EOF
+# Repository Audit Package
+
+Generated: $(date)
+Repository: $AUDIT_ROOT
+
+## Contents
+- reports/audit_report.md - Complete findings
+- reports/executive_summary.md - High-level overview
+- reports/optimization_roadmap.md - Implementation plan
+- dependencies.dot - Dependency visualization
+
+## Next Steps
+1. Review audit_report.md
+2. Prioritize recommendations
+3. Follow optimization_roadmap.md
+EOF
+  
+  # Create archive
+  tar -czf "$PACKAGE" -C "$AUDIT_OUTPUT" package/
+  echo "Audit package created: $PACKAGE"
+}
+```
+
+## Workflow Execution
+
+### Command Line Interface
+```bash
+# Basic execution
+./workflows/repository-audit.yaml [repository_path]
+
+# With options
+AUDIT_DEPTH=quick ./workflows/repository-audit.yaml
+TODO_AGE_THRESHOLD=60 ./workflows/repository-audit.yaml
+```
+
+### Interactive Mode
+```yaml
+interactive_prompts:
+  - prompt: "Repository to audit"
+    variable: AUDIT_ROOT
+    default: "."
+    
+  - prompt: "Audit depth (quick/standard/comprehensive)"
+    variable: AUDIT_DEPTH
+    default: "standard"
+    
+  - prompt: "Focus areas (comma-separated)"
+    variable: AUDIT_FOCUS
+    default: "all"
+```
+
+## Error Handling
+
+### Failure Recovery
+```yaml
+error_handling:
+  phase_failure:
+    - log_error: Record in audit.log
+    - save_progress: Checkpoint current state
+    - prompt_user: Continue, retry, or abort?
+    
+  critical_error:
+    - save_partial: Export completed analyses
+    - generate_error_report: Document failure
+    - suggest_remediation: Provide next steps
+```
+
+### Validation Checks
+```yaml
+validation:
+  pre_execution:
+    - validate_repository: Ensure accessible
+    - check_permissions: Verify read access
+    - estimate_duration: Warn if large
+    
+  post_execution:
+    - verify_outputs: All expected files exist
+    - validate_json: Check data integrity
+    - review_metrics: Sanity check results
+```
+
+## Success Metrics
+
+### Workflow Performance
+- Complete execution in <2 hours (typical repo)
+- All analysis phases complete without error
+- Reports generated successfully
+- Actionable recommendations provided
+
+### Audit Quality
+- >90% of issues correctly identified
+- <5% false positive rate
+- Clear prioritization of findings
+- Practical implementation guidance
+
+## Integration Points
+
+### With CI/CD
+```yaml
+ci_integration:
+  trigger: Pull request or scheduled
+  
+  steps:
+    - checkout: Repository code
+    - run_audit: Execute workflow
+    - publish_results: As PR comment
+    - gate_check: Block if critical issues
+```
+
+### With Other Commands
+- `/report bug` - Report audit tool issues
+- `/role compose` - Create custom audit roles
+- `/project:optimize` - Execute recommendations
+
+## Customization
+
+### Audit Profiles
+```yaml
+profiles:
+  quick:
+    phases: [survey, key_analyses]
+    duration: 30 minutes
+    depth: shallow
+    
+  standard:
+    phases: [all]
+    duration: 2 hours
+    depth: moderate
+    
+  comprehensive:
+    phases: [all]
+    duration: 4+ hours
+    depth: deep
+    patterns: [systematic-review, deep-exploration]
+```
+
+### Focus Areas
+```yaml
+focus_configurations:
+  performance:
+    emphasize: [load_times, dependencies, caching]
+    
+  quality:
+    emphasize: [documentation, testing, consistency]
+    
+  maintenance:
+    emphasize: [modularization, dead_code, complexity]
+```
+
+This workflow provides a complete, automated approach to repository auditing with flexibility for different needs and contexts.
