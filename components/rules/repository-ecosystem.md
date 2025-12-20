@@ -59,6 +59,51 @@ Index at `arustydev/mcp`
 - Published to ArtifactHub
 - Serves: `charts.arusty.dev` (planned)
 
+### Homebrew Tap
+
+`arustydev/homebrew-tap`
+
+- Custom Homebrew tap for CLI tools
+- Install: `brew tap arustydev/tap`
+- Formulas for tools not in homebrew-core
+
+## Gist-Based Templates
+
+Reusable template files stored in GitHub Gists. See **`gist-templates.md`** for full documentation.
+
+### Quick Reference
+
+```bash
+# Discover templates
+just list-gists
+gh gist list --filter templates
+
+# Apply templates
+just apply-gist common
+just apply-gist lang_rust type=lib
+just apply-gist github_labels_mcp
+
+# Remove templates
+just remove-gist lang_rust
+```
+
+### Categories
+
+| Category | Purpose |
+|----------|---------|
+| `common` | Universal project files (CoC, CONTRIBUTING, gitignore) |
+| `github/*` | GitHub configs (workflows, rulesets, labels, issues, prs) |
+| `lang/*` | Language tooling (rust, python, go, javascript) |
+| `registry/*` | Distribution registries (homebrew, helm, npm, pre-commit) |
+| `focus/*` | Project-type configs (curated pre-commit by language) |
+| `obsidian/*` | Obsidian vault configs |
+| `platform/*` | Platform configs (cloudflare, docker) |
+
+### Automation
+
+- **Justfile**: https://just.arusty.dev/templates/justfile
+- **Strategy**: `.ai/plans/gist-templates-strategy.md`
+
 ## Content & Brand
 
 ### Documentation
@@ -96,6 +141,7 @@ dotfiles ───────────────────────�
                                                   │
 gha ──────────── (GitHub Actions source)          │
 schemas ──────── (JSON/YAML schemas)              │
+homebrew-tap ─── (Homebrew formulas)              │
 pre-commit-hooks (management repo) ───────────────│
 ├── pre-commit-hooks-rs                           │
 ├── pre-commit-hooks-py                           │
