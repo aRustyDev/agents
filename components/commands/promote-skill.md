@@ -6,6 +6,10 @@ Promote a skill from the current project to the aRustyDev/ai repository.
 
 $ARGUMENTS should be the path to the skill directory (e.g., `.claude/skills/homebrew-formula/`)
 
+Supports optional flags:
+- `--update` - Update an already-promoted skill (skips issue creation, pushes to existing PR or main)
+- `--cleanup` - Clean up feature branch after PR is merged
+
 ## Configuration
 
 The ai repo location is determined in order of precedence:
@@ -16,6 +20,21 @@ The ai repo location is determined in order of precedence:
 Store the resolved path in a variable for use throughout:
 ```bash
 AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.path 2>/dev/null || echo "$HOME/repos/configs/ai")}"
+```
+
+## Project Context
+
+Extract project information for traceability:
+```bash
+# Get project name from git remote or directory
+PROJECT_NAME=$(basename "$(git remote get-url origin 2>/dev/null | sed 's/\.git$//')" 2>/dev/null || basename "$(pwd)")
+
+# Get GitHub org/repo for source links
+PROJECT_REPO=$(git remote get-url origin 2>/dev/null | sed -E 's#.*github\.com[:/](.*)\.git#\1#' || echo "unknown")
+
+# Get current branch/commit for permalink
+SOURCE_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "main")
+SOURCE_BRANCH=$(git branch --show-current 2>/dev/null || echo "main")
 ```
 
 ## Workflow
@@ -53,14 +72,25 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
    - Note any supporting files that need to be promoted
    - Store the absolute path to the skill for later copying
 
-3. **Check for existing skill in ai repo**:
-   - Search `$AI_REPO/components/skills/` for a skill with the same name
-   - Also check `$AI_REPO/legacy/skills/` for legacy versions
-   - If found, compare the content to determine relationship:
-     - **Identical**: No promotion needed
-     - **Extension**: New skill adds functionality to existing
-     - **Upgrade**: New skill replaces/improves existing
-     - **Separate**: New skill is distinct despite similar name
+3. **Check for existing skill in ai repo** (destination check):
+   ```bash
+   # Check components/skills/ first (primary location)
+   if [[ -d "$AI_REPO/components/skills/<skill-name>" ]]; then
+     EXISTING_LOCATION="components/skills"
+     EXISTING_SKILL="$AI_REPO/components/skills/<skill-name>/SKILL.md"
+   # Then check legacy/skills/
+   elif [[ -d "$AI_REPO/legacy/skills/<skill-name>" ]]; then
+     EXISTING_LOCATION="legacy/skills"
+     EXISTING_SKILL="$AI_REPO/legacy/skills/<skill-name>/SKILL.md"
+   fi
+   ```
+
+   If found, compare the content to determine relationship:
+   - **Identical**: No promotion needed (exit early)
+   - **Update**: Same skill, new content (use `--update` flow)
+   - **Extension**: New skill adds functionality to existing
+   - **Upgrade**: New skill replaces/improves existing
+   - **Separate**: New skill is distinct despite similar name
 
 4. **Check for existing branch/issue/PR** (idempotency):
    ```bash
@@ -166,9 +196,58 @@ If an existing skill was found, present options to the user using AskUserQuestio
    - **Component Type**: Check `[x] Skill`
    - **Change Type**: Check `[x] New component`
    - **Related Issues**: `Closes #<issue-number>`
+   - **Source**: Include permalink for traceability:
+     ```
+     **Source:** [`$PROJECT_REPO/$SKILL_PATH`](https://github.com/$PROJECT_REPO/blob/$SOURCE_COMMIT/$SKILL_PATH)
+     ```
    - **Changes Made**: Use changelog format (Added/Changed/Fixed/Removed)
    - **Testing**: Check appropriate boxes
    - **Checklist**: Verify all items
+
+### Phase 4.5: Handle Updates (--update flag or existing PR)
+
+If updating a skill that was recently promoted (or `--update` flag is set):
+
+1. **Check PR state**:
+   ```bash
+   PR_STATE=$(gh pr view "feat/add-skill-<skill-name>" --repo aRustyDev/ai --json state -q '.state' 2>/dev/null || echo "NONE")
+   ```
+
+2. **Handle based on state**:
+
+   | PR State | Action |
+   |----------|--------|
+   | `OPEN` | Push to existing feature branch |
+   | `MERGED` | Commit directly to main |
+   | `CLOSED` | Create new branch and PR |
+   | `NONE` | No existing PR, proceed normally |
+
+3. **If PR is merged, update main directly**:
+   ```bash
+   git -C "$AI_REPO" checkout main
+   git -C "$AI_REPO" pull origin main
+   cp -r "<skill-path>/"* "$AI_REPO/components/skills/<skill-name>/"
+   git -C "$AI_REPO" add components/skills/<skill-name>/
+   git -C "$AI_REPO" commit -m "feat(skill): update <skill-name>
+
+   ### Changed
+   - Updated <skill-name> skill from $PROJECT_NAME
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+   Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+   git -C "$AI_REPO" push origin main
+   ```
+
+4. **If PR is open, push to feature branch**:
+   ```bash
+   git -C "$AI_REPO" checkout feat/add-skill-<skill-name>
+   git -C "$AI_REPO" pull origin feat/add-skill-<skill-name>
+   cp -r "<skill-path>/"* "$AI_REPO/components/skills/<skill-name>/"
+   git -C "$AI_REPO" add components/skills/<skill-name>/
+   git -C "$AI_REPO" commit -m "feat(skill): update <skill-name> content"
+   git -C "$AI_REPO" push origin feat/add-skill-<skill-name>
+   ```
 
 ### Phase 5: Report Results
 
@@ -178,13 +257,39 @@ Report to the user in a summary table:
 |------|-----|
 | Issue | `<issue-url>` |
 | PR | `<pr-url>` |
+| Source | `https://github.com/$PROJECT_REPO/blob/$SOURCE_COMMIT/$SKILL_PATH` |
 
 **Next steps:**
 1. Review and merge PR
 2. Run `just ai-sync` in dotfiles to install globally
 
+### Phase 6: Post-Merge Cleanup (after PR is merged)
+
+After the PR is merged, clean up the feature branch:
+
+1. **Delete local feature branch**:
+   ```bash
+   git -C "$AI_REPO" checkout main
+   git -C "$AI_REPO" pull origin main
+   git -C "$AI_REPO" branch -d feat/add-skill-<skill-name>
+   ```
+
+2. **Delete remote feature branch**:
+   ```bash
+   git -C "$AI_REPO" push origin --delete feat/add-skill-<skill-name>
+   ```
+
+3. **Verify cleanup**:
+   ```bash
+   # Confirm branch is gone
+   git -C "$AI_REPO" branch -a | grep feat/add-skill-<skill-name> || echo "Branch cleaned up successfully"
+   ```
+
+**Note:** This phase can be triggered manually or by running `/promote-skill <path> --cleanup` after merge
+
 ## Example Usage
 
+### New Skill Promotion
 ```
 /promote-skill .claude/skills/homebrew-formula/
 ```
@@ -193,6 +298,27 @@ This will:
 1. Validate the skill at `.claude/skills/homebrew-formula/`
 2. Check if `homebrew-formula` exists in ai repo
 3. Create issue and PR to add it to `components/skills/homebrew-formula/`
+
+### Update Existing Skill
+```
+/promote-skill .claude/skills/github-actions-ci/ --update
+```
+
+This will:
+1. Check if a PR exists for the skill
+2. If PR is open: push updates to the feature branch
+3. If PR is merged: commit directly to main
+4. Skip issue creation
+
+### Cleanup After Merge
+```
+/promote-skill .claude/skills/github-actions-ci/ --cleanup
+```
+
+This will:
+1. Delete the local feature branch
+2. Delete the remote feature branch
+3. Verify cleanup was successful
 
 ## Troubleshooting
 
