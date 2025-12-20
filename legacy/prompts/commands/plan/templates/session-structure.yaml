@@ -1,0 +1,17 @@
+# Session Directory Structure Template
+session_structure:
+  root: .plan/sessions/{session_id}/
+  files:
+    - requirements.md
+    - task-breakdown.yaml
+    - dependencies.md
+    - mvp-scope.md
+    - issues.json
+    - milestones.json
+    - projects.json
+    - labels.json
+    - execute_plan.sh
+    - summary.md
+  directories:
+    - backups/
+    - artifacts/

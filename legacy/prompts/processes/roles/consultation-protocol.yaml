@@ -1,0 +1,382 @@
+---
+name: consultation-protocol
+description: Enables lightweight inter-role consultation without full context switching
+version: 1.0.0
+author: Claude
+---
+
+# Consultation Protocol Process
+
+## Purpose
+Allow roles to consult other specialized roles for specific questions without the overhead of full role switching, maintaining the primary role's context.
+
+## Protocol Overview
+
+### Consultation Flow
+```
+Primary Role → Save Context → Load Consultant → Process Query → Return Response → Restore Context
+     ↓                                                                                    ↓
+ (50ms max)                                                                         (Total: <200ms)
+```
+
+## Implementation
+
+### 1. Context Preservation
+```bash
+save_role_context() {
+  local CONTEXT_ID=$(generate_uuid)
+  local CONTEXT_FILE=".claude/cache/contexts/${CONTEXT_ID}.ctx"
+  
+  # Save current role state
+  cat > "$CONTEXT_FILE" << EOF
+{
+  "role": "$CURRENT_ROLE",
+  "loaded_modules": $(list_loaded_modules | jq -R . | jq -s .),
+  "active_capabilities": $(list_active_capabilities | jq -R . | jq -s .),
+  "conversation_context": {
+    "topic": "$CURRENT_TOPIC",
+    "depth": $CONVERSATION_DEPTH,
+    "key_points": $(echo "$KEY_POINTS" | jq -R . | jq -s .)
+  },
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+  
+  echo "$CONTEXT_ID"
+}
+```
+
+### 2. Minimal Consultant Loading
+```bash
+load_consultant_minimal() {
+  local CONSULTANT_ROLE="$1"
+  local QUESTION_CONTEXT="$2"
+  
+  # Load only core and relevant modules
+  local ROLE_PATH=$(resolve_role "$CONSULTANT_ROLE")
+  local ROLE_DATA=$(yq eval '.' "$ROLE_PATH")
+  
+  # Load core identity only
+  CONSULTANT_CORE=$(echo "$ROLE_DATA" | yq e '.core' -)
+  
+  # Determine relevant capabilities based on question
+  local RELEVANT_CAPABILITIES=$(analyze_question_context "$QUESTION_CONTEXT")
+  
+  # Load only necessary modules
+  for capability in $RELEVANT_CAPABILITIES; do
+    load_capability_minimal "$capability"
+  done
+  
+  # Record what was loaded for cleanup
+  CONSULTANT_LOADED_MODULES=("${LOADED_MODULES[@]}")
+}
+```
+
+### 3. Question Analysis
+```bash
+analyze_question_context() {
+  local QUESTION="$1"
+  local CONSULTANT_ROLE="$2"
+  
+  # Extract keywords from question
+  local KEYWORDS=$(extract_keywords "$QUESTION")
+  
+  # Match against consultant's contextual capabilities
+  local ROLE_PATH=$(resolve_role "$CONSULTANT_ROLE")
+  local CONTEXTUAL_CAPS=$(yq e '.capabilities.contextual[]' "$ROLE_PATH")
+  
+  local RELEVANT_CAPS=()
+  
+  while IFS= read -r capability; do
+    local TRIGGERS=$(echo "$capability" | yq e '.triggers[]' -)
+    local CAP_NAME=$(echo "$capability" | yq e '.name' -)
+    
+    # Check if any trigger matches keywords
+    for trigger in $TRIGGERS; do
+      if [[ " ${KEYWORDS[@]} " =~ " ${trigger} " ]]; then
+        RELEVANT_CAPS+=("$CAP_NAME")
+        break
+      fi
+    done
+  done <<< "$CONTEXTUAL_CAPS"
+  
+  echo "${RELEVANT_CAPS[@]}"
+}
+```
+
+### 4. Consultation Execution
+```bash
+execute_consultation() {
+  local CONSULTANT="$1"
+  local QUESTION="$2"
+  local START_TIME=$(date +%s%N)
+  
+  # Save current context
+  local CONTEXT_ID=$(save_role_context)
+  
+  # Load consultant minimally
+  load_consultant_minimal "$CONSULTANT" "$QUESTION"
+  
+  # Format consultation prompt
+  local CONSULTATION_PROMPT=$(cat << EOF
+As a $CONSULTANT with the following expertise:
+$(echo "$CONSULTANT_CORE" | yq e '.mindset' -)
+
+Question from $CURRENT_ROLE:
+"$QUESTION"
+
+Please provide your specialized perspective on this question.
+EOF
+)
+  
+  # Process consultation
+  local RESPONSE=$(process_with_role "$CONSULTATION_PROMPT")
+  
+  # Cleanup consultant modules
+  unload_modules "${CONSULTANT_LOADED_MODULES[@]}"
+  
+  # Restore original context
+  restore_role_context "$CONTEXT_ID"
+  
+  # Record metrics
+  local CONSULT_TIME=$(($(date +%s%N) - START_TIME))
+  record_consultation_metric "$CURRENT_ROLE" "$CONSULTANT" "$CONSULT_TIME"
+  
+  echo "$RESPONSE"
+}
+```
+
+### 5. Context Restoration
+```bash
+restore_role_context() {
+  local CONTEXT_ID="$1"
+  local CONTEXT_FILE=".claude/cache/contexts/${CONTEXT_ID}.ctx"
+  
+  if [ ! -f "$CONTEXT_FILE" ]; then
+    echo "Error: Context $CONTEXT_ID not found"
+    return 1
+  fi
+  
+  # Restore role state
+  local CONTEXT_DATA=$(cat "$CONTEXT_FILE")
+  
+  CURRENT_ROLE=$(echo "$CONTEXT_DATA" | jq -r '.role')
+  CURRENT_TOPIC=$(echo "$CONTEXT_DATA" | jq -r '.conversation_context.topic')
+  
+  # Verify modules still loaded
+  local EXPECTED_MODULES=$(echo "$CONTEXT_DATA" | jq -r '.loaded_modules[]')
+  for module in $EXPECTED_MODULES; do
+    if ! is_module_loaded "$module"; then
+      load_module "$module" "restore"
+    fi
+  done
+  
+  # Clean up context file
+  rm -f "$CONTEXT_FILE"
+}
+```
+
+## Consultation Styles
+
+### 1. Expert Opinion
+```yaml
+style: expert-opinion
+description: Quick expert assessment
+format: |
+  Based on my expertise in {domain}:
+  - Key consideration: {point}
+  - Recommendation: {action}
+  - Risk to consider: {risk}
+max_response_length: 500_words
+```
+
+### 2. Detailed Analysis
+```yaml
+style: detailed-analysis
+description: Comprehensive examination
+format: |
+  ## Analysis from {role} Perspective
+  
+  ### Key Findings
+  1. {finding_1}
+  2. {finding_2}
+  
+  ### Recommendations
+  - {recommendation_1}
+  - {recommendation_2}
+  
+  ### Additional Considerations
+  {considerations}
+max_response_length: 1000_words
+```
+
+### 3. Quick Check
+```yaml
+style: quick-check
+description: Yes/no with brief explanation
+format: |
+  {yes/no/maybe}
+  
+  Brief explanation: {one_paragraph}
+max_response_length: 150_words
+```
+
+## Performance Optimizations
+
+### 1. Capability Caching
+```bash
+# Pre-cache frequently consulted capability combinations
+cache_consultation_patterns() {
+  local PATTERNS_FILE=".claude/metrics/consultation-patterns.json"
+  
+  # Analyze common consultation patterns
+  local COMMON_PATTERNS=$(jq -s '
+    group_by(.consultant + ":" + .capabilities) |
+    map({
+      pattern: .[0].consultant + ":" + .[0].capabilities,
+      count: length
+    }) |
+    sort_by(.count) |
+    reverse |
+    .[0:10]
+  ' "$PATTERNS_FILE")
+  
+  # Pre-cache common patterns
+  echo "$COMMON_PATTERNS" | jq -r '.[] | .pattern' | while read pattern; do
+    cache_consultation_pattern "$pattern"
+  done
+}
+```
+
+### 2. Response Templates
+```bash
+# Use templates for common consultation types
+get_consultation_template() {
+  local CONSULTANT="$1"
+  local QUESTION_TYPE="$2"
+  
+  case "$QUESTION_TYPE" in
+    security-review)
+      echo "security-assessment-template"
+      ;;
+    performance-analysis)
+      echo "performance-review-template"
+      ;;
+    architecture-opinion)
+      echo "architecture-assessment-template"
+      ;;
+    *)
+      echo "generic-consultation-template"
+      ;;
+  esac
+}
+```
+
+### 3. Parallel Consultation
+```bash
+# Consult multiple roles simultaneously
+consult_multiple() {
+  local QUESTION="$1"
+  shift
+  local CONSULTANTS=("$@")
+  local RESPONSES=()
+  
+  # Launch consultations in parallel
+  for consultant in "${CONSULTANTS[@]}"; do
+    {
+      local RESPONSE=$(execute_consultation "$consultant" "$QUESTION")
+      echo "$consultant:$RESPONSE"
+    } &
+  done
+  
+  # Wait for all consultations
+  wait
+  
+  # Aggregate responses
+  aggregate_consultation_responses
+}
+```
+
+## Integration Examples
+
+### From Command Context
+```bash
+# In a code review command
+if needs_security_review "$CODE"; then
+  SECURITY_OPINION=$(consult_role "security-engineer" \
+    "Review this code for security vulnerabilities: $CODE_SNIPPET")
+  
+  if [ "$SECURITY_OPINION" != "No issues found" ]; then
+    echo "Security consultation suggests: $SECURITY_OPINION"
+  fi
+fi
+```
+
+### From Role Behavior
+```yaml
+# In senior-dev role definition
+behaviors:
+  consultation:
+    auto_consult: true
+    triggers:
+      - pattern: "security implications"
+        consult: security-engineer
+        style: detailed-analysis
+      - pattern: "performance impact"
+        consult: performance-engineer
+        style: quick-check
+```
+
+## Metrics Collection
+
+### Consultation Metrics
+```json
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "primary_role": "senior-dev",
+  "consultant": "security-engineer",
+  "consultation_time_ms": 145,
+  "modules_loaded": 3,
+  "response_length": 256,
+  "trigger": "manual",
+  "satisfaction": "pending"
+}
+```
+
+### Performance Targets
+- Consultation latency: <200ms (p95)
+- Context switch overhead: <50ms
+- Module loading: <100ms
+- Response generation: <500ms
+
+## Error Handling
+
+### Consultant Unavailable
+```bash
+handle_consultant_unavailable() {
+  local CONSULTANT="$1"
+  local ALTERNATIVES=$(suggest_alternative_consultants "$CONSULTANT")
+  
+  echo "Consultant '$CONSULTANT' not available."
+  echo "Alternative consultants: $ALTERNATIVES"
+  echo "Would you like to consult one of these instead?"
+}
+```
+
+### Context Corruption
+```bash
+handle_context_corruption() {
+  local CONTEXT_ID="$1"
+  
+  echo "Warning: Context restoration failed"
+  echo "Falling back to full role reload"
+  
+  # Full reload of primary role
+  load_role "$CURRENT_ROLE" "recovery"
+  
+  # Log incident
+  log_context_corruption "$CONTEXT_ID"
+}
+```
+
+This lightweight consultation protocol enables efficient cross-role expertise sharing while maintaining performance and context integrity.

@@ -1,0 +1,391 @@
+---
+name: role-version-manager
+description: Ensures roles always use the latest module versions while maintaining cache benefits
+version: 1.0.0
+author: Claude
+---
+
+# Role Version Management Process
+
+## Purpose
+Maintain currency of role knowledge and capabilities by automatically detecting and applying module updates while preserving cache performance benefits.
+
+## Version Resolution Strategy
+
+### 1. Module Version Tracking
+```bash
+track_module_version() {
+  local MODULE_PATH="$1"
+  local MODULE_HASH=$(sha256sum "$MODULE_PATH" | cut -d' ' -f1)
+  local MODULE_MTIME=$(stat -f%m "$MODULE_PATH" 2>/dev/null || stat -c%Y "$MODULE_PATH")
+  local VERSION_ENTRY=$(jq -n \
+    --arg path "$MODULE_PATH" \
+    --arg hash "$MODULE_HASH" \
+    --arg mtime "$MODULE_MTIME" \
+    '{
+      path: $path,
+      hash: $hash,
+      modified: ($mtime | tonumber),
+      tracked_at: now
+    }')
+  
+  # Update version registry
+  jq --argjson entry "$VERSION_ENTRY" \
+    '.modules[$entry.path] = $entry' \
+    ".claude/cache/version-registry.json" > ".claude/cache/version-registry.json.tmp"
+  mv ".claude/cache/version-registry.json.tmp" ".claude/cache/version-registry.json"
+}
+```
+
+### 2. Change Detection
+```bash
+detect_module_changes() {
+  local REGISTRY=".claude/cache/version-registry.json"
+  local CHANGED_MODULES=()
+  
+  # Check all tracked modules
+  jq -r '.modules | to_entries[].value.path' "$REGISTRY" | while read module_path; do
+    if [ -f "$module_path" ]; then
+      local CURRENT_HASH=$(sha256sum "$module_path" | cut -d' ' -f1)
+      local TRACKED_HASH=$(jq -r --arg path "$module_path" '.modules[$path].hash' "$REGISTRY")
+      
+      if [ "$CURRENT_HASH" != "$TRACKED_HASH" ]; then
+        CHANGED_MODULES+=("$module_path")
+        echo "Changed: $module_path"
+      fi
+    fi
+  done
+  
+  printf '%s\n' "${CHANGED_MODULES[@]}"
+}
+```
+
+### 3. Dependency Resolution
+```bash
+resolve_module_dependencies() {
+  local MODULE="$1"
+  local DEPS_RESOLVED=()
+  local DEPS_PENDING=("$MODULE")
+  
+  while [ ${#DEPS_PENDING[@]} -gt 0 ]; do
+    local CURRENT="${DEPS_PENDING[0]}"
+    DEPS_PENDING=("${DEPS_PENDING[@]:1}")  # Remove first element
+    
+    if [[ ! " ${DEPS_RESOLVED[@]} " =~ " ${CURRENT} " ]]; then
+      DEPS_RESOLVED+=("$CURRENT")
+      
+      # Extract dependencies from module
+      local MODULE_DEPS=$(extract_module_dependencies "$CURRENT")
+      for dep in $MODULE_DEPS; do
+        if [[ ! " ${DEPS_RESOLVED[@]} " =~ " ${dep} " ]]; then
+          DEPS_PENDING+=("$dep")
+        fi
+      done
+    fi
+  done
+  
+  echo "${DEPS_RESOLVED[@]}"
+}
+```
+
+### 4. Cache Invalidation
+```bash
+invalidate_stale_caches() {
+  local CHANGED_MODULES=("$@")
+  local INVALIDATED_ROLES=()
+  
+  # Find all roles using changed modules
+  for role_dir in .claude/cache/roles/*/; do
+    [ -d "$role_dir" ] || continue
+    
+    local ROLE_NAME=$(basename "$role_dir")
+    local METADATA="$role_dir/metadata.yaml"
+    
+    if [ -f "$METADATA" ]; then
+      local ROLE_MODULES=$(yq e '.modules[]' "$METADATA" 2>/dev/null || echo "")
+      
+      for module in $ROLE_MODULES; do
+        if [[ " ${CHANGED_MODULES[@]} " =~ " ${module} " ]]; then
+          echo "Invalidating cache for role: $ROLE_NAME (module $module updated)"
+          rm -rf "$role_dir"
+          INVALIDATED_ROLES+=("$ROLE_NAME")
+          break
+        fi
+      done
+    fi
+  done
+  
+  # Return invalidated roles for re-caching
+  echo "${INVALIDATED_ROLES[@]}"
+}
+```
+
+## Auto-Update Process
+
+### 1. Scheduled Version Check
+```bash
+schedule_version_check() {
+  # Run version check on these triggers:
+  # - Session start
+  # - Every 4 hours during active use
+  # - On explicit user request
+  # - Before role activation (quick check)
+  
+  local LAST_CHECK_FILE=".claude/cache/.last-version-check"
+  local CURRENT_TIME=$(date +%s)
+  local CHECK_INTERVAL=$((4 * 60 * 60))  # 4 hours
+  
+  if [ -f "$LAST_CHECK_FILE" ]; then
+    local LAST_CHECK=$(cat "$LAST_CHECK_FILE")
+    local TIME_SINCE_CHECK=$((CURRENT_TIME - LAST_CHECK))
+    
+    if [ $TIME_SINCE_CHECK -lt $CHECK_INTERVAL ]; then
+      return 0  # Skip check
+    fi
+  fi
+  
+  # Perform version check
+  check_all_versions
+  echo "$CURRENT_TIME" > "$LAST_CHECK_FILE"
+}
+```
+
+### 2. Smart Re-caching
+```bash
+smart_recache() {
+  local INVALIDATED_ROLES=("$@")
+  local USAGE_DATA=".claude/metrics/usage-analysis.json"
+  
+  # Prioritize re-caching based on usage
+  local PRIORITY_ROLES=$(jq -r --arg roles "${INVALIDATED_ROLES[*]}" '
+    .transitions | 
+    map(.transition | split("->") | .[]) |
+    map(select(. as $r | $roles | split(" ") | index($r))) |
+    group_by(.) |
+    map({role: .[0], frequency: length}) |
+    sort_by(.frequency) |
+    reverse |
+    .[].role
+  ' "$USAGE_DATA" 2>/dev/null || echo "${INVALIDATED_ROLES[@]}")
+  
+  # Re-cache in priority order
+  for role in $PRIORITY_ROLES; do
+    echo "Re-caching $role with updated modules..."
+    cache_role "$role" "$(resolve_role "$role")" &
+    
+    # Limit parallel caching to prevent resource exhaustion
+    while [ $(jobs -r | wc -l) -ge 3 ]; do
+      sleep 0.1
+    done
+  done
+  
+  wait  # Wait for all caching to complete
+}
+```
+
+### 3. Version Compatibility
+```bash
+check_version_compatibility() {
+  local MODULE="$1"
+  local REQUIRED_VERSION="$2"
+  local ACTUAL_VERSION=$(extract_module_version "$MODULE")
+  
+  case "$REQUIRED_VERSION" in
+    ">="*)
+      VERSION_REQ="${REQUIRED_VERSION#>=}"
+      version_gte "$ACTUAL_VERSION" "$VERSION_REQ"
+      ;;
+    "^"*)
+      VERSION_REQ="${REQUIRED_VERSION#^}"
+      version_compatible "$ACTUAL_VERSION" "$VERSION_REQ"
+      ;;
+    "~"*)
+      VERSION_REQ="${REQUIRED_VERSION#~}"
+      version_minor_compatible "$ACTUAL_VERSION" "$VERSION_REQ"
+      ;;
+    *)
+      # Exact match
+      [ "$ACTUAL_VERSION" = "$REQUIRED_VERSION" ]
+      ;;
+  esac
+}
+
+# Semantic version comparison functions
+version_gte() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+version_compatible() {
+  local ACTUAL="$1"
+  local REQUIRED="$2"
+  local ACTUAL_MAJOR="${ACTUAL%%.*}"
+  local REQUIRED_MAJOR="${REQUIRED%%.*}"
+  [ "$ACTUAL_MAJOR" = "$REQUIRED_MAJOR" ] && version_gte "$ACTUAL" "$REQUIRED"
+}
+```
+
+## Update Notification
+
+### 1. User Notification
+```bash
+notify_updates() {
+  local UPDATES=("$@")
+  
+  if [ ${#UPDATES[@]} -gt 0 ]; then
+    cat << EOF
+┌─────────────────────────────────────────┐
+│ Role System Updates Available           │
+└─────────────────────────────────────────┘
+
+The following modules have been updated:
+$(printf '  • %s\n' "${UPDATES[@]}")
+
+Affected roles will be automatically updated.
+This may cause a slight delay on next activation.
+
+To update immediately: /role cache optimize
+EOF
+  fi
+}
+```
+
+### 2. Update Log
+```bash
+log_updates() {
+  local UPDATE_LOG=".claude/cache/update-log.jsonl"
+  local UPDATES=("$@")
+  
+  for module in "${UPDATES[@]}"; do
+    local UPDATE_ENTRY=$(jq -n \
+      --arg module "$module" \
+      --arg version "$(extract_module_version "$module")" \
+      '{
+        timestamp: now | todate,
+        module: $module,
+        version: $version,
+        action: "auto-update"
+      }')
+    
+    echo "$UPDATE_ENTRY" >> "$UPDATE_LOG"
+  done
+}
+```
+
+## Version Rollback
+
+### 1. Backup Management
+```bash
+backup_module_version() {
+  local MODULE="$1"
+  local BACKUP_DIR=".claude/cache/backups/$(date +%Y%m%d)"
+  mkdir -p "$BACKUP_DIR"
+  
+  local MODULE_NAME=$(basename "$MODULE")
+  local BACKUP_PATH="$BACKUP_DIR/${MODULE_NAME}.$(date +%s).bak"
+  
+  cp "$MODULE" "$BACKUP_PATH"
+  echo "Backed up to: $BACKUP_PATH"
+}
+
+rollback_module() {
+  local MODULE="$1"
+  local VERSION="${2:-latest}"
+  
+  local BACKUP_DIR=".claude/cache/backups"
+  local MODULE_NAME=$(basename "$MODULE")
+  
+  # Find available backups
+  local BACKUPS=$(find "$BACKUP_DIR" -name "${MODULE_NAME}.*.bak" | sort -r)
+  
+  if [ -z "$BACKUPS" ]; then
+    echo "No backups found for $MODULE"
+    return 1
+  fi
+  
+  # Select backup
+  local SELECTED_BACKUP
+  if [ "$VERSION" = "latest" ]; then
+    SELECTED_BACKUP=$(echo "$BACKUPS" | head -n1)
+  else
+    SELECTED_BACKUP=$(echo "$BACKUPS" | grep "$VERSION" | head -n1)
+  fi
+  
+  if [ -n "$SELECTED_BACKUP" ]; then
+    cp "$SELECTED_BACKUP" "$MODULE"
+    echo "Rolled back $MODULE to $(basename "$SELECTED_BACKUP")"
+    
+    # Invalidate affected caches
+    invalidate_module_caches "$MODULE"
+  fi
+}
+```
+
+## Integration with Role System
+
+### 1. Pre-activation Check
+```bash
+# In role loader
+pre_activation_version_check() {
+  local ROLE="$1"
+  local QUICK_CHECK_ONLY=true
+  
+  # Quick hash check for role definition
+  local ROLE_PATH=$(resolve_role "$ROLE")
+  local CURRENT_HASH=$(sha256sum "$ROLE_PATH" | cut -d' ' -f1)
+  local CACHED_HASH=$(get_cached_role_hash "$ROLE")
+  
+  if [ "$CURRENT_HASH" != "$CACHED_HASH" ]; then
+    echo "Role definition updated, refreshing..."
+    invalidate_role_cache "$ROLE"
+    return 1
+  fi
+  
+  return 0
+}
+```
+
+### 2. Background Updates
+```bash
+# Run updates in background to avoid blocking
+background_update_check() {
+  {
+    local CHANGED=$(detect_module_changes)
+    if [ -n "$CHANGED" ]; then
+      local INVALIDATED=$(invalidate_stale_caches $CHANGED)
+      smart_recache $INVALIDATED
+      log_updates $CHANGED
+    fi
+  } &
+}
+```
+
+## Performance Optimization
+
+### 1. Incremental Checks
+```bash
+# Only check modules modified since last check
+incremental_version_check() {
+  local LAST_CHECK=$(cat ".claude/cache/.last-version-check" 2>/dev/null || echo "0")
+  
+  find .claude -name "*.yaml" -o -name "*.md" -newer "$LAST_CHECK" | while read module; do
+    track_module_version "$module"
+  done
+}
+```
+
+### 2. Batch Processing
+```bash
+# Process updates in batches to minimize disruption
+batch_cache_updates() {
+  local BATCH_SIZE=5
+  local UPDATES=("$@")
+  
+  for ((i=0; i<${#UPDATES[@]}; i+=BATCH_SIZE)); do
+    local BATCH=("${UPDATES[@]:i:BATCH_SIZE}")
+    process_update_batch "${BATCH[@]}"
+    sleep 0.5  # Brief pause between batches
+  done
+}
+```
+
+This version management system ensures roles always have access to the latest knowledge while maintaining optimal performance through intelligent caching and update strategies.
