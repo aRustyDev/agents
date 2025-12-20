@@ -1,0 +1,248 @@
+---
+id: software-engineering
+version: 1.0.0
+name: Software Engineering Fundamentals
+description: Core software engineering principles, practices, and methodologies
+cacheable: true
+auto_update: true
+---
+
+core_concepts:
+  - name: Software Development Life Cycle (SDLC)
+    priority: critical
+    content: |
+      The process of planning, creating, testing, and deploying software:
+      1. Requirements Analysis - Understanding what to build
+      2. Design - Planning how to build it
+      3. Implementation - Writing the code
+      4. Testing - Verifying it works correctly
+      5. Deployment - Releasing to users
+      6. Maintenance - Ongoing support and updates
+    examples:
+      - description: "Agile SDLC"
+        code: |
+          Sprint Planning → Development → Testing → Review → Retrospective
+          └─────────────── 2-week iteration ──────────────┘
+    references:
+      - title: "Software Engineering Body of Knowledge"
+        url: "https://www.computer.org/education/bodies-of-knowledge/software-engineering"
+
+  - name: Version Control
+    priority: critical
+    content: |
+      Systems for tracking changes to code over time:
+      - Git: Distributed version control
+      - Branching strategies: main/develop/feature
+      - Commit best practices: atomic, meaningful messages
+      - Collaboration: pull requests, code reviews
+    examples:
+      - description: "Git workflow"
+        code: |
+          git checkout -b feature/new-feature
+          # Make changes
+          git add .
+          git commit -m "feat: add new feature"
+          git push origin feature/new-feature
+          # Create pull request
+
+  - name: Testing Pyramid
+    priority: high
+    content: |
+      Balanced testing strategy:
+      - Unit Tests (70%): Fast, isolated component tests
+      - Integration Tests (20%): Component interaction tests
+      - E2E Tests (10%): Full system tests
+      
+      Key principles:
+      - Test behavior, not implementation
+      - Maintain test independence
+      - Keep tests fast and reliable
+    examples:
+      - description: "Unit test example"
+        code: |
+          def test_calculate_total():
+              cart = ShoppingCart()
+              cart.add_item(Item("Book", 10.00))
+              cart.add_item(Item("Pen", 2.00))
+              assert cart.total() == 12.00
+
+  - name: Code Quality
+    priority: high
+    content: |
+      Attributes of high-quality code:
+      - Readability: Clear naming, good structure
+      - Maintainability: Easy to modify and extend
+      - Testability: Easy to test in isolation
+      - Performance: Efficient use of resources
+      - Security: Safe from vulnerabilities
+      
+      Measured through:
+      - Code reviews
+      - Static analysis
+      - Test coverage
+      - Complexity metrics
+    examples:
+      - description: "Clean code principles"
+        code: |
+          # Bad: Unclear naming, complex logic
+          def calc(x, y, z):
+              return x * 1.1 if y > 100 else x * 1.2 if z else x
+          
+          # Good: Clear naming, simple logic
+          def calculate_price_with_discount(base_price, quantity, is_member):
+              if quantity > 100:
+                  return base_price * 1.1  # Bulk discount
+              elif is_member:
+                  return base_price * 1.2  # Member discount
+              return base_price
+
+deep_topics:
+  - name: Software Architecture
+    description: High-level structure and design decisions
+    triggers: ["architecture", "system design", "scalability", "patterns"]
+    priority: contextual
+    prerequisites:
+      - SDLC
+      - Design Principles
+    content: |
+      Key architectural concepts:
+      - Layers: Presentation, Business, Data
+      - Patterns: MVC, Microservices, Event-driven
+      - Principles: Separation of concerns, DRY, YAGNI
+      - Trade-offs: Performance vs maintainability
+    modules:
+      - knowledge/architecture-patterns.yaml
+      - guides/architecture/decision-making.md
+
+  - name: Refactoring
+    description: Improving code structure without changing behavior
+    triggers: ["refactor", "code smell", "technical debt", "improve code"]
+    priority: contextual
+    prerequisites:
+      - Code Quality
+      - Testing
+    content: |
+      Safe refactoring process:
+      1. Ensure tests exist and pass
+      2. Make small, incremental changes
+      3. Run tests after each change
+      4. Commit working states frequently
+      
+      Common refactorings:
+      - Extract method/variable
+      - Rename for clarity
+      - Remove duplication
+      - Simplify conditionals
+    modules:
+      - processes/refactoring/safe-refactoring.md
+      - patterns/refactoring/catalog.md
+
+patterns:
+  - name: Dependency Injection
+    description: Providing dependencies from external sources
+    when_to_use: When you need loose coupling and testability
+    implementation: |
+      # Instead of creating dependencies internally
+      class EmailService:
+          def __init__(self):
+              self.smtp_client = SmtpClient()  # Hard dependency
+      
+      # Inject dependencies
+      class EmailService:
+          def __init__(self, smtp_client):
+              self.smtp_client = smtp_client  # Injected dependency
+    trade_offs:
+      pros:
+        - Improved testability
+        - Loose coupling
+        - Flexibility
+      cons:
+        - More complex setup
+        - Potential runtime errors
+
+  - name: Factory Pattern
+    description: Centralized object creation logic
+    when_to_use: When object creation is complex or varies by type
+    implementation: |
+      class AnimalFactory:
+          @staticmethod
+          def create_animal(animal_type):
+              if animal_type == "dog":
+                  return Dog()
+              elif animal_type == "cat":
+                  return Cat()
+              raise ValueError(f"Unknown animal type: {animal_type}")
+    trade_offs:
+      pros:
+        - Centralized creation logic
+        - Easy to extend
+      cons:
+        - Extra abstraction
+        - Can become complex
+
+pitfalls:
+  - name: Over-Engineering
+    description: Adding unnecessary complexity
+    symptoms:
+      - Abstractions without clear benefit
+      - Patterns used without need
+      - Premature generalization
+    solution: |
+      Follow YAGNI (You Aren't Gonna Need It):
+      1. Implement only what's needed now
+      2. Refactor when requirements emerge
+      3. Keep it simple until complexity is justified
+    example: |
+      # Over-engineered: Abstract factory for simple case
+      class AbstractWidgetFactory:
+          def create_widget(self): pass
+      
+      # Simple and sufficient
+      def create_widget(widget_type):
+          return Widget(widget_type)
+
+  - name: God Object
+    description: Class that does too much
+    symptoms:
+      - Hundreds of methods
+      - Multiple unrelated responsibilities
+      - Difficult to test or modify
+    solution: |
+      Break into smaller, focused classes:
+      1. Identify distinct responsibilities
+      2. Extract related methods to new classes
+      3. Use composition or delegation
+    example: |
+      # Bad: God object
+      class UserManager:
+          def create_user(): ...
+          def authenticate(): ...
+          def send_email(): ...
+          def generate_report(): ...
+          def backup_database(): ...
+      
+      # Good: Separated concerns
+      class UserService: ...
+      class AuthService: ...
+      class EmailService: ...
+      class ReportService: ...
+
+relationships:
+  requires:
+    - programming-fundamentals
+  enhances:
+    - design-patterns
+    - architecture-patterns
+    - distributed-systems
+  conflicts: []
+
+metadata:
+  domain: software-development
+  level: intermediate
+  update_frequency: stable
+  maintainer: engineering-team
+  tags:
+    - engineering
+    - fundamentals
+    - best-practices
+    - methodology

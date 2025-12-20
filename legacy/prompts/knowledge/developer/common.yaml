@@ -1,0 +1,10 @@
+knowledge_module:
+  id: dev-common
+  priority_contexts: # Always stay loaded when referenced
+    - "Code review principles"
+    - "Git workflow"
+    - "Basic design patterns"
+
+  deferred_contexts: # Can be unloaded if memory pressure
+    - "Language-specific syntax guides"
+    - "Framework documentation"
