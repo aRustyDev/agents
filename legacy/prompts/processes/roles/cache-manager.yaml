@@ -1,0 +1,275 @@
+---
+name: cache-manager
+description: Manages persistent caching of role modules for performance optimization
+version: 1.0.0
+author: Claude
+---
+
+# Cache Manager Process
+
+## Purpose
+Manages persistent caching of role modules to minimize load times during role switches while ensuring data freshness through hash validation.
+
+## Cache Structure
+```yaml
+cache/
+├── roles/
+│   ├── manifest.yaml          # Cache index with metadata
+│   ├── {role_name}/          # Per-role cache directories
+│   │   ├── core.zst          # Compressed core components
+│   │   ├── capabilities.zst  # Compressed capabilities
+│   │   └── metadata.yaml     # Cache metadata
+│   └── knowledge/            # Shared knowledge cache
+│       └── {module_id}.zst   # Compressed knowledge modules
+```
+
+## Core Operations
+
+### 1. Cache Write
+```bash
+cache_role() {
+  local ROLE_NAME="$1"
+  local ROLE_PATH="$2"
+  local CACHE_DIR=".claude/cache/roles/${ROLE_NAME}"
+  
+  # Create cache directory
+  mkdir -p "$CACHE_DIR"
+  
+  # Calculate content hash
+  local CONTENT_HASH=$(sha256sum "$ROLE_PATH" | cut -d' ' -f1)
+  
+  # Compress and store
+  zstd -19 --quiet "$ROLE_PATH" -o "$CACHE_DIR/core.zst"
+  
+  # Update metadata
+  cat > "$CACHE_DIR/metadata.yaml" << EOF
+role_name: $ROLE_NAME
+source_path: $ROLE_PATH
+content_hash: $CONTENT_HASH
+cached_at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+compression: zstd-19
+size_original: $(stat -f%z "$ROLE_PATH" 2>/dev/null || stat -c%s "$ROLE_PATH")
+size_compressed: $(stat -f%z "$CACHE_DIR/core.zst" 2>/dev/null || stat -c%s "$CACHE_DIR/core.zst")
+access_count: 0
+last_accessed: null
+EOF
+  
+  # Update manifest
+  update_cache_manifest "$ROLE_NAME" "$CONTENT_HASH"
+}
+```
+
+### 2. Cache Read
+```bash
+read_cached_role() {
+  local ROLE_NAME="$1"
+  local CACHE_DIR=".claude/cache/roles/${ROLE_NAME}"
+  
+  # Check cache existence
+  if [ ! -f "$CACHE_DIR/core.zst" ]; then
+    return 1  # Cache miss
+  fi
+  
+  # Validate hash
+  local EXPECTED_HASH=$(yq e ".content_hash" "$CACHE_DIR/metadata.yaml")
+  local SOURCE_PATH=$(yq e ".source_path" "$CACHE_DIR/metadata.yaml")
+  
+  if [ -f "$SOURCE_PATH" ]; then
+    local CURRENT_HASH=$(sha256sum "$SOURCE_PATH" | cut -d' ' -f1)
+    if [ "$EXPECTED_HASH" != "$CURRENT_HASH" ]; then
+      # Cache invalidated by source change
+      rm -rf "$CACHE_DIR"
+      return 1
+    fi
+  fi
+  
+  # Decompress and return
+  zstd -d --quiet "$CACHE_DIR/core.zst" -c
+  
+  # Update access metrics
+  update_access_metrics "$ROLE_NAME"
+  
+  return 0
+}
+```
+
+### 3. Cache Validation
+```bash
+validate_cache() {
+  local MANIFEST=".claude/cache/roles/manifest.yaml"
+  local INVALID_COUNT=0
+  
+  # Check each cached role
+  for role in $(yq e '.roles[].name' "$MANIFEST"); do
+    local CACHE_DIR=".claude/cache/roles/${role}"
+    local METADATA="$CACHE_DIR/metadata.yaml"
+    
+    if [ ! -f "$METADATA" ]; then
+      echo "Missing metadata for $role"
+      ((INVALID_COUNT++))
+      continue
+    fi
+    
+    # Verify compression integrity
+    if ! zstd -t "$CACHE_DIR/core.zst" 2>/dev/null; then
+      echo "Corrupted cache for $role"
+      rm -rf "$CACHE_DIR"
+      ((INVALID_COUNT++))
+    fi
+  done
+  
+  return $INVALID_COUNT
+}
+```
+
+### 4. Cache Metrics
+```yaml
+# Metrics tracked in manifest.yaml
+metrics:
+  total_cache_size: bytes
+  hit_rate: percentage
+  avg_load_time_cached: milliseconds
+  avg_load_time_uncached: milliseconds
+  most_accessed_roles:
+    - name: role_name
+      count: access_count
+      last_accessed: timestamp
+  cache_efficiency:
+    space_saved: percentage
+    time_saved: percentage
+```
+
+## Optimization Strategies
+
+### 1. Predictive Pre-caching
+```bash
+predictive_cache() {
+  # Analyze usage patterns
+  local PREDICTIONS=$(analyze_role_transitions)
+  
+  # Pre-cache likely next roles
+  for role in $PREDICTIONS; do
+    if [ ! -d ".claude/cache/roles/$role" ]; then
+      cache_role_async "$role" &
+    fi
+  done
+}
+```
+
+### 2. Cache Eviction
+```bash
+evict_stale_cache() {
+  local MAX_CACHE_SIZE="500M"
+  local MAX_AGE_DAYS=30
+  
+  # Remove old entries
+  find .claude/cache/roles -name "metadata.yaml" -mtime +$MAX_AGE_DAYS | \
+    while read metadata; do
+      rm -rf "$(dirname "$metadata")"
+    done
+  
+  # Check total size
+  local CACHE_SIZE=$(du -sh .claude/cache | cut -f1)
+  if [[ "$CACHE_SIZE" > "$MAX_CACHE_SIZE" ]]; then
+    # Remove least recently used
+    remove_lru_entries
+  fi
+}
+```
+
+### 3. Compression Optimization
+```yaml
+compression_levels:
+  # Balance between size and speed
+  quick_access:   # Frequently used
+    level: 3
+    expected_ratio: 3:1
+  standard:       # Normal usage
+    level: 9
+    expected_ratio: 4:1
+  deep_archive:   # Rarely used
+    level: 19
+    expected_ratio: 5:1
+```
+
+## Performance Benchmarks
+
+### Target Metrics
+- **Cache Hit Rate**: >95% for common roles
+- **Load Time (Cached)**: <50ms
+- **Load Time (Uncached)**: <500ms
+- **Compression Ratio**: >4:1 average
+- **Cache Warmup**: <2s on startup
+
+### Monitoring
+```bash
+monitor_cache_performance() {
+  local REPORT=".claude/metrics/cache-performance.yaml"
+  
+  cat > "$REPORT" << EOF
+timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+cache_stats:
+  total_roles_cached: $(find .claude/cache/roles -name "core.zst" | wc -l)
+  total_size_mb: $(du -sm .claude/cache | cut -f1)
+  hit_rate: $(calculate_hit_rate)
+  avg_compression_ratio: $(calculate_compression_ratio)
+performance:
+  avg_cache_read_ms: $(measure_cache_read_time)
+  avg_fresh_load_ms: $(measure_fresh_load_time)
+  speedup_factor: $(calculate_speedup)
+EOF
+}
+```
+
+## Integration Points
+
+### With Role Loader
+```bash
+# Role loader checks cache first
+load_role_with_cache() {
+  local ROLE="$1"
+  
+  # Try cache first
+  if read_cached_role "$ROLE"; then
+    echo "Loaded from cache in $(measure_time)ms"
+    return 0
+  fi
+  
+  # Fall back to fresh load
+  load_role_fresh "$ROLE"
+  
+  # Cache for next time
+  cache_role "$ROLE" &
+}
+```
+
+### With Metrics System
+- Reports cache performance metrics
+- Identifies optimization opportunities
+- Tracks usage patterns for predictive caching
+
+## Error Handling
+
+### Cache Corruption
+- Automatic detection via integrity checks
+- Graceful fallback to fresh load
+- Background rebuild of corrupted entries
+
+### Disk Space
+- Monitor available space before caching
+- Implement size limits with LRU eviction
+- Alert when cache approaches limits
+
+## Maintenance
+
+### Daily Tasks
+- Validate cache integrity
+- Update access metrics
+- Evict stale entries
+
+### Weekly Tasks
+- Analyze usage patterns
+- Optimize compression levels
+- Generate performance reports
+
+This cache system ensures rapid role switching while maintaining data freshness and system performance.

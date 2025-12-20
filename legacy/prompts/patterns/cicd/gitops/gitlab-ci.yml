@@ -1,0 +1,303 @@
+# GitOps GitLab CI Implementation
+stages:
+  - validate
+  - build
+  - update-manifests
+  - sync
+  - cleanup
+
+variables:
+  FLUX_VERSION: "2.1.0"
+  KUBERNETES_VERSION: "1.28.0"
+  OPA_VERSION: "0.57.0"
+  REGISTRY: ${CI_REGISTRY}
+
+# Validation Stage
+validate:manifests:
+  stage: validate
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl bash
+    - |
+      # Install kubeconform
+      curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+      mv kubeconform /usr/local/bin/
+    - |
+      # Install Flux CLI
+      curl -s https://fluxcd.io/install.sh | bash
+  script:
+    - |
+      echo "Validating Kubernetes manifests..."
+      find . -name '*.yaml' -o -name '*.yml' | \
+        grep -v -E '(gitlab-ci|docker-compose)' | \
+        xargs kubeconform -summary -strict -verbose
+    - |
+      echo "Validating Flux components..."
+      flux check --pre
+
+validate:policies:
+  stage: validate
+  image: openpolicyagent/opa:${OPA_VERSION}
+  script:
+    - |
+      echo "Running OPA policy tests..."
+      opa test policies/ -v
+    - |
+      echo "Validating manifests against policies..."
+      find . -name '*.yaml' -o -name '*.yml' | while read manifest; do
+        opa eval -d policies/ -i "$manifest" "data.kubernetes.admission.deny[msg]" || true
+      done
+
+validate:kustomize:
+  stage: validate
+  image: 
+    name: k8s.gcr.io/kustomize/kustomize:v5.0.0
+    entrypoint: [""]
+  script:
+    - |
+      find . -name kustomization.yaml -exec dirname {} \; | while read dir; do
+        echo "Building kustomization in $dir"
+        kustomize build "$dir" > /dev/null || exit 1
+      done
+
+# Build Stage
+.build_template:
+  stage: build
+  image: docker:24.0.7
+  services:
+    - docker:24.0.7-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - |
+      cd services/${SERVICE}
+      docker build -t ${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA} .
+      docker tag ${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA} ${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_REF_NAME}
+      docker push ${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA}
+      docker push ${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_REF_NAME}
+  only:
+    - main
+    - staging
+    - develop
+    - merge_requests
+
+build:api:
+  extends: .build_template
+  variables:
+    SERVICE: api
+
+build:frontend:
+  extends: .build_template
+  variables:
+    SERVICE: frontend
+
+build:worker:
+  extends: .build_template
+  variables:
+    SERVICE: worker
+
+# Update Manifests Stage
+update:manifests:
+  stage: update-manifests
+  image: alpine/git:latest
+  needs: ["build:api", "build:frontend", "build:worker"]
+  before_script:
+    - apk add --no-cache yq
+    - |
+      # Configure Git
+      git config --global user.email "gitlab-ci@example.com"
+      git config --global user.name "GitLab CI"
+    - |
+      # Clone GitOps repository
+      git clone https://gitlab-ci-token:${GITOPS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}-gitops.git gitops
+      cd gitops
+  script:
+    - |
+      # Determine environment
+      case $CI_COMMIT_REF_NAME in
+        main)
+          ENVIRONMENT="production"
+          ;;
+        staging)
+          ENVIRONMENT="staging"
+          ;;
+        develop|merge_requests)
+          ENVIRONMENT="development"
+          ;;
+        *)
+          echo "Unknown branch: $CI_COMMIT_REF_NAME"
+          exit 1
+          ;;
+      esac
+      
+      echo "Updating manifests for environment: $ENVIRONMENT"
+      
+      # Update image tags
+      for SERVICE in api frontend worker; do
+        IMAGE="${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA}"
+        
+        # Update using kustomize
+        if [ -f "environments/${ENVIRONMENT}/${SERVICE}/kustomization.yaml" ]; then
+          cd environments/${ENVIRONMENT}/${SERVICE}
+          # Use sed as kustomize CLI might not be available
+          sed -i "s|newTag: .*|newTag: ${CI_COMMIT_SHA}|" kustomization.yaml
+          cd -
+        fi
+        
+        # Alternative: Update plain YAML files
+        if [ -f "environments/${ENVIRONMENT}/${SERVICE}/deployment.yaml" ]; then
+          yq eval ".spec.template.spec.containers[0].image = \"${IMAGE}\"" \
+            -i environments/${ENVIRONMENT}/${SERVICE}/deployment.yaml
+        fi
+      done
+      
+      # Commit and push
+      git add .
+      git commit -m "Update ${ENVIRONMENT} to ${CI_COMMIT_SHA}" || echo "No changes to commit"
+      git push origin main
+  only:
+    - main
+    - staging
+    - develop
+
+# Preview Environments for MRs
+deploy:preview:
+  stage: update-manifests
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git yq kubectl
+  script:
+    - |
+      PREVIEW_NAME="preview-mr-${CI_MERGE_REQUEST_IID}"
+      
+      # Create preview namespace manifest
+      cat > namespace.yaml <<EOF
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: ${PREVIEW_NAME}
+        labels:
+          type: preview
+          mr: "${CI_MERGE_REQUEST_IID}"
+          ci-pipeline-id: "${CI_PIPELINE_ID}"
+      EOF
+      
+      # Generate preview manifests
+      mkdir -p preview/
+      cp namespace.yaml preview/
+      
+      # Copy development manifests and update namespace
+      cp -r environments/development/* preview/
+      find preview/ -name "*.yaml" -o -name "*.yml" | \
+        xargs sed -i "s/namespace: development/namespace: ${PREVIEW_NAME}/g"
+      
+      # Update image tags to MR specific ones
+      for SERVICE in api frontend worker; do
+        IMAGE="${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA}"
+        yq eval ".spec.template.spec.containers[0].image = \"${IMAGE}\"" \
+          -i preview/${SERVICE}/deployment.yaml
+      done
+      
+      echo "Preview manifests generated for MR !${CI_MERGE_REQUEST_IID}"
+  artifacts:
+    paths:
+      - preview/
+    expire_in: 7 days
+  environment:
+    name: preview/$CI_MERGE_REQUEST_IID
+    url: https://preview-mr-$CI_MERGE_REQUEST_IID.example.com
+    on_stop: cleanup:preview
+  only:
+    - merge_requests
+
+# Sync Stage
+sync:flux:
+  stage: sync
+  image: fluxcd/flux-cli:${FLUX_VERSION}
+  script:
+    - |
+      echo "Triggering Flux reconciliation..."
+      # In a real scenario, this would connect to the cluster
+      # flux reconcile source git flux-system
+      # flux reconcile kustomization flux-system
+  only:
+    - main
+    - staging
+    - develop
+
+check:drift:
+  stage: sync
+  image: bitnami/kubectl:${KUBERNETES_VERSION}
+  script:
+    - |
+      echo "Checking for configuration drift..."
+      # This would compare Git state with cluster state
+      # kubectl diff -k environments/${ENVIRONMENT}/
+  only:
+    - schedules
+
+# Cleanup Stage
+cleanup:preview:
+  stage: cleanup
+  image: bitnami/kubectl:${KUBERNETES_VERSION}
+  script:
+    - |
+      PREVIEW_NAME="preview-mr-${CI_MERGE_REQUEST_IID}"
+      echo "Cleaning up preview environment: ${PREVIEW_NAME}"
+      # kubectl delete namespace ${PREVIEW_NAME}
+  environment:
+    name: preview/$CI_MERGE_REQUEST_IID
+    action: stop
+  when: manual
+  only:
+    - merge_requests
+
+# Monitoring and Alerts
+.notify_template:
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - |
+      curl -X POST ${SLACK_WEBHOOK} \
+        -H 'Content-type: application/json' \
+        --data "{
+          \"text\": \"${NOTIFICATION_MESSAGE}\"
+        }"
+
+notify:sync_failure:
+  extends: .notify_template
+  stage: .post
+  variables:
+    NOTIFICATION_MESSAGE: "⚠️ GitOps sync failed for ${CI_COMMIT_REF_NAME} - ${CI_PIPELINE_URL}"
+  when: on_failure
+  only:
+    - main
+    - staging
+
+# GitOps Metrics
+metrics:deployment:
+  stage: .post
+  image: alpine:latest
+  script:
+    - |
+      # Send deployment metrics
+      cat > metrics.json <<EOF
+      {
+        "environment": "${ENVIRONMENT}",
+        "version": "${CI_COMMIT_SHA}",
+        "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+        "pipeline_id": "${CI_PIPELINE_ID}",
+        "duration": "${CI_PIPELINE_DURATION}",
+        "status": "${CI_PIPELINE_STATUS}"
+      }
+      EOF
+      
+      # Send to monitoring system
+      curl -X POST ${METRICS_ENDPOINT} \
+        -H 'Content-type: application/json' \
+        --data @metrics.json
+  when: always
+  only:
+    - main
+    - staging

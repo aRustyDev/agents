@@ -1,0 +1,232 @@
+# GitOps GitHub Actions Implementation
+name: GitOps Workflow
+
+on:
+  push:
+    branches: [main, staging, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  FLUX_VERSION: 2.1.0
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup tools
+        run: |
+          # Install yq for YAML processing
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+          
+          # Install Flux CLI
+          curl -s https://fluxcd.io/install.sh | sudo bash
+          
+          # Install kubeconform for validation
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin
+      
+      - name: Validate Kubernetes manifests
+        run: |
+          find . -name '*.yaml' -o -name '*.yml' | \
+            grep -E '(deployment|service|configmap|secret)\.ya?ml$' | \
+            xargs kubeconform -summary -strict -verbose
+      
+      - name: Validate Flux manifests
+        run: |
+          flux check --pre
+      
+      - name: Validate Kustomizations
+        run: |
+          find . -name kustomization.yaml -exec dirname {} \; | \
+          while read dir; do
+            echo "Validating kustomization in $dir"
+            kubectl kustomize "$dir" > /dev/null
+          done
+      
+      - name: Policy validation with OPA
+        run: |
+          # Download OPA
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          
+          # Run policy checks
+          ./opa test policies/ -v
+          
+          # Validate manifests against policies
+          find . -name '*.yaml' -o -name '*.yml' | while read manifest; do
+            ./opa eval -d policies/ -i "$manifest" "data.kubernetes.admission.deny[msg]"
+          done
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push'
+    strategy:
+      matrix:
+        service: [api, frontend, worker]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: services/${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  update-manifests:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITOPS_TOKEN }}
+          repository: ${{ github.repository }}-gitops
+          ref: main
+      
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Update image tags
+        run: |
+          ENVIRONMENT=${{ steps.env.outputs.environment }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          
+          # Update each service
+          for service in api frontend worker; do
+            IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/${service}:${{ github.ref_name }}-${SHORT_SHA}"
+            
+            # Update kustomization.yaml
+            cd environments/${ENVIRONMENT}/${service}
+            kustomize edit set image ${service}=${IMAGE}
+            cd -
+            
+            # Alternative: Update with yq if using plain YAML
+            # yq eval ".spec.template.spec.containers[0].image = \"${IMAGE}\"" \
+            #   -i environments/${ENVIRONMENT}/${service}/deployment.yaml
+          done
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add .
+          git commit -m "Update ${{ steps.env.outputs.environment }} images to ${{ github.sha }}"
+          git push
+
+  create-pr-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create preview namespace
+        run: |
+          PREVIEW_NAME="preview-pr-${{ github.event.number }}"
+          
+          # Generate preview manifests
+          mkdir -p preview/
+          
+          cat > preview/namespace.yaml <<EOF
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: ${PREVIEW_NAME}
+            labels:
+              type: preview
+              pr: "${{ github.event.number }}"
+          EOF
+          
+          # Copy and modify manifests for preview
+          cp -r environments/development/* preview/
+          
+          # Update namespace references
+          find preview/ -name "*.yaml" -o -name "*.yml" | \
+            xargs sed -i "s/namespace: development/namespace: ${PREVIEW_NAME}/g"
+      
+      - name: Deploy preview
+        run: |
+          # This would typically push to a GitOps repo
+          # For demo purposes, showing the structure
+          echo "Preview environment manifests generated for PR #${{ github.event.number }}"
+      
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const preview_url = `https://preview-pr-${{ github.event.number }}.example.com`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview environment deploying to: ${preview_url}\n\nThe environment will be automatically cleaned up when the PR is closed.`
+            })
+
+  sync-check:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check Flux sync status
+        run: |
+          # In a real scenario, this would connect to the cluster
+          # For demonstration, showing the commands
+          echo "Checking Flux sync status..."
+          echo "flux get sources git"
+          echo "flux get kustomizations"
+          echo "flux get helmreleases"
+      
+      - name: Alert on sync failures
+        run: |
+          # Check for sync failures and alert
+          echo "Checking for sync failures..."
+
+  cleanup-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    steps:
+      - name: Remove preview environment
+        run: |
+          PREVIEW_NAME="preview-pr-${{ github.event.number }}"
+          echo "Removing preview environment: ${PREVIEW_NAME}"
+          # Commands to remove preview from GitOps repo
