@@ -1,0 +1,73 @@
+# Cloudflare Worker Configuration Template
+# Rename to wrangler.toml and customize
+
+name = "my-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables (non-sensitive)
+[vars]
+ENVIRONMENT = "development"
+API_VERSION = "v1"
+
+# D1 Database (uncomment to enable)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-database"
+# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# KV Namespace (uncomment to enable)
+# [[kv_namespaces]]
+# binding = "KV"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# R2 Bucket (uncomment to enable)
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "my-bucket"
+
+# Durable Objects (uncomment to enable)
+# [[durable_objects.bindings]]
+# name = "MY_DO"
+# class_name = "MyDurableObject"
+
+# [[migrations]]
+# tag = "v1"
+# new_classes = ["MyDurableObject"]
+
+# Queues Producer (uncomment to enable)
+# [[queues.producers]]
+# queue = "my-queue"
+# binding = "QUEUE"
+
+# Queues Consumer (uncomment to enable)
+# [[queues.consumers]]
+# queue = "my-queue"
+# max_batch_size = 10
+
+# AI Binding (uncomment to enable)
+# [ai]
+# binding = "AI"
+
+# Scheduled Triggers (uncomment to enable)
+# [triggers]
+# crons = ["0 * * * *"]
+
+# Routes (uncomment to enable)
+# routes = [
+#   { pattern = "api.example.com/*", zone_name = "example.com" }
+# ]
+
+# --- Staging Environment ---
+[env.staging]
+name = "my-worker-staging"
+vars = { ENVIRONMENT = "staging" }
+
+# --- Production Environment ---
+[env.production]
+name = "my-worker-production"
+vars = { ENVIRONMENT = "production" }
+# routes = [
+#   { pattern = "api.example.com/*", zone_name = "example.com" }
+# ]

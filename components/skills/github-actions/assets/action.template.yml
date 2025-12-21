@@ -1,0 +1,36 @@
+# GitHub Action Template
+# Rename to action.yml and customize
+
+name: 'My Action'
+description: 'A brief description of what this action does'
+author: 'Your Name'
+
+branding:
+  icon: 'check-circle'  # See: https://feathericons.com/
+  color: 'green'        # blue, green, orange, purple, yellow, gray-dark, white
+
+inputs:
+  token:
+    description: 'GitHub token for API access'
+    required: true
+    default: ${{ github.token }}
+  config-path:
+    description: 'Path to configuration file'
+    required: false
+    default: '.github/config.yml'
+  debug:
+    description: 'Enable debug logging'
+    required: false
+    default: 'false'
+
+outputs:
+  result:
+    description: 'The result of the action'
+  duration:
+    description: 'Execution duration in milliseconds'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  # post: 'dist/cleanup.js'     # Optional: cleanup script
+  # post-if: 'always()'         # When to run cleanup
