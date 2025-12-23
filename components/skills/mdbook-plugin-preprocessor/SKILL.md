@@ -153,23 +153,34 @@ So that I can fix issues quickly.
 
 ### Step 3: Create GitHub Repository
 
+Use the MDBook plugin template repo for consistent project structure:
+
 ```bash
-# Create repo with standard naming
+# Create repo from template
 gh repo create arustydev/mdbook-<foo> \
   --public \
+  --template aRustyDev/tmpl-mdbook-plugin \
   --description "MDBook preprocessor for <description>" \
   --clone
 
 cd mdbook-<foo>
 
-# Initialize Rust project
+# Initialize Rust project (template provides structure, Cargo.toml needs creation)
 cargo init --name mdbook-<foo>
-
-# Apply standard templates
-just apply-gist lang_rust type=bin
-just apply-gist github_labels_rust
-just apply-gist common
 ```
+
+**Template provides:**
+- `.github/` - CI/CD workflows
+- `docs/` - MDBook documentation structure with book.toml
+- `.aim/` - AI-assisted development configs
+- `justfile` - Common development recipes
+- `.releaserc` - Semantic release configuration
+- `LICENSE` - GPL-3.0-or-later
+
+**You still need to add:**
+- `Cargo.toml` with dependencies
+- `src/` with main.rs and lib.rs
+- Tests and fixtures
 
 ### Step 4: Set Up Project Structure
 
@@ -496,3 +507,4 @@ mdbook build
 - [mdbook-preprocessor crate](https://docs.rs/mdbook-preprocessor)
 - [GitHub Topic: mdbook-preprocessor](https://github.com/topics/mdbook-preprocessor?l=rust)
 - [Example: mdbook-cmdrun](https://github.com/FauconFan/mdbook-cmdrun)
+- [Template Repo: tmpl-mdbook-plugin](https://github.com/aRustyDev/tmpl-mdbook-plugin)

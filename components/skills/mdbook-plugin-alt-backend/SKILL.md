@@ -149,23 +149,35 @@ So that I can diagnose and fix issues.
 
 ### Step 3: Create GitHub Repository
 
+Use the MDBook plugin template repo for consistent project structure:
+
 ```bash
-# Create repo with standard naming
+# Create repo from template
 gh repo create arustydev/mdbook-<foo> \
   --public \
+  --template aRustyDev/tmpl-mdbook-plugin \
   --description "MDBook backend for <format> output" \
   --clone
 
 cd mdbook-<foo>
 
-# Initialize Rust project
+# Initialize Rust project (template provides structure, Cargo.toml needs creation)
 cargo init --name mdbook-<foo>
-
-# Apply standard templates
-just apply-gist lang_rust type=bin
-just apply-gist github_labels_rust
-just apply-gist common
 ```
+
+**Template provides:**
+- `.github/` - CI/CD workflows
+- `docs/` - MDBook documentation structure with book.toml
+- `.aim/` - AI-assisted development configs
+- `justfile` - Common development recipes
+- `.releaserc` - Semantic release configuration
+- `LICENSE` - GPL-3.0-or-later
+
+**You still need to add:**
+- `Cargo.toml` with dependencies
+- `src/` with main.rs and lib.rs
+- `templates/` directory for output templates (if needed)
+- Tests and fixtures
 
 ### Step 4: Set Up Project Structure
 
@@ -583,3 +595,4 @@ When custom backends are configured, HTML is disabled by default. Add `[output.h
 - [Third-party Plugins Wiki](https://github.com/rust-lang/mdBook/wiki/Third-party-plugins)
 - [Example: mdbook-epub](https://github.com/Michael-F-Bryan/mdbook-epub)
 - [Example: mdbook-typst](https://github.com/LegNeato/mdbook-typst)
+- [Template Repo: tmpl-mdbook-plugin](https://github.com/aRustyDev/tmpl-mdbook-plugin)

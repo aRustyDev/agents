@@ -93,15 +93,31 @@ Present findings to user. If suitable plugin exists, offer to adopt instead.
 
 **Confirm with user before creating the repo.**
 
+Use the MDBook plugin template repo for consistent project structure:
+
 ```bash
+# Create repo from template
 gh repo create arustydev/mdbook-<plugin-name> \
   --public \
+  --template aRustyDev/tmpl-mdbook-plugin \
   --description "MDBook <type> for <description>" \
   --clone
 
 cd mdbook-<plugin-name>
+
+# Initialize Rust project (template provides structure, Cargo.toml needs creation)
 cargo init --name mdbook-<plugin-name>
 ```
+
+**Template provides:**
+- `.github/` - CI/CD workflows
+- `docs/` - MDBook documentation structure
+- `.aim/` - AI-assisted development configs
+- `justfile` - Common development recipes
+- `.releaserc` - Semantic release configuration
+- `LICENSE` - GPL-3.0-or-later
+
+**Template repo:** https://github.com/aRustyDev/tmpl-mdbook-plugin
 
 ### Step 7: Set Up Project Structure
 
@@ -189,4 +205,5 @@ Creates `mdbook-wiki-js` backend plugin.
 - Preprocessors modify content before rendering
 - Backends render content to alternative formats
 - Both types use stdin/stdout JSON communication with mdbook
+- Always use the template repo: https://github.com/aRustyDev/tmpl-mdbook-plugin
 - See MDBook developer docs: https://rust-lang.github.io/mdBook/for_developers/
