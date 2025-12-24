@@ -2,6 +2,51 @@
 
 Guide for choosing between action alternatives.
 
+## Current Stable Versions (December 2024)
+
+**IMPORTANT:** Always verify versions exist before using. Common mistake: using versions that don't exist (e.g., `setup-node@v6`).
+
+### GitHub Official Actions
+
+| Action | Latest Stable | NOT Valid | Check Command |
+|--------|---------------|-----------|---------------|
+| `actions/checkout` | v4 | v5, v6 | `gh api repos/actions/checkout/releases/latest -q .tag_name` |
+| `actions/setup-node` | v4 | v5, v6 | `gh api repos/actions/setup-node/releases/latest -q .tag_name` |
+| `actions/setup-python` | v5 | v6 | `gh api repos/actions/setup-python/releases/latest -q .tag_name` |
+| `actions/setup-go` | v5 | v6 | `gh api repos/actions/setup-go/releases/latest -q .tag_name` |
+| `actions/setup-java` | v4 | v5, v6 | `gh api repos/actions/setup-java/releases/latest -q .tag_name` |
+| `actions/cache` | v4 | v5 | `gh api repos/actions/cache/releases/latest -q .tag_name` |
+| `actions/upload-artifact` | v4 | v5 | `gh api repos/actions/upload-artifact/releases/latest -q .tag_name` |
+| `actions/download-artifact` | v4 | v5 | `gh api repos/actions/download-artifact/releases/latest -q .tag_name` |
+| `actions/github-script` | v7 | v8 | `gh api repos/actions/github-script/releases/latest -q .tag_name` |
+
+### Third-Party Actions
+
+| Action | Latest Stable | Notes |
+|--------|---------------|-------|
+| `dtolnay/rust-toolchain` | `@stable` / `@nightly` | Uses channel names, not versions |
+| `Swatinem/rust-cache` | v2 | |
+| `codecov/codecov-action` | v4 | v5 in beta |
+| `nick-fields/retry` | v3 | v2 still works |
+| `peaceiris/actions-gh-pages` | v4 | |
+
+### Quick Version Check
+
+```bash
+# Check if a specific version exists
+gh api repos/actions/setup-node/git/refs/tags/v4 --silent && echo "v4 exists" || echo "v4 NOT FOUND"
+
+# Get latest version for any action
+gh api repos/<owner>/<action>/releases/latest -q .tag_name
+
+# Bulk check all actions in a workflow
+grep -oE 'uses: [^@]+@v[0-9]+' .github/workflows/*.yml | while read line; do
+  action=$(echo "$line" | sed 's/uses: //' | cut -d@ -f1)
+  version=$(echo "$line" | cut -d@ -f2)
+  gh api "repos/$action/git/refs/tags/$version" --silent && echo "$action@$version: OK" || echo "$action@$version: NOT FOUND"
+done
+```
+
 ## Decision Framework
 
 ### Question 1: Does arustydev/gha have this?

@@ -9,7 +9,7 @@ Use when choosing a reliable action over a feature-rich alternative.
 ```bash
 gh issue create --repo arustydev/gha \
   --title "[REVIEW] Evaluate <fancy-action-name>" \
-  --label "action-review,deferred" \
+  --label "action-review" \
   --body "$(cat <<'EOF'
 ## Context
 
@@ -73,7 +73,7 @@ Use when choosing a third-party action over building in arustydev/gha.
 ```bash
 gh issue create --repo arustydev/gha \
   --title "[CONSIDER] Custom alternative to <action-purpose>" \
-  --label "new-action,deferred" \
+  --label "new-action" \
   --body "$(cat <<'EOF'
 ## Context
 
@@ -257,7 +257,7 @@ gh issue create --repo arustydev/gha \
 ```bash
 gh issue create --repo arustydev/gha \
   --title "[CONSIDER] Build <purpose>" \
-  --label "new-action,deferred" \
+  --label "new-action" \
   --body "Using <third-party> in <repo>. Consider building custom if maintenance lapses."
 ```
 

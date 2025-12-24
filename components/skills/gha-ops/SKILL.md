@@ -157,6 +157,39 @@ Use consistent patterns across all repositories.
 
 ## Systematic Review Workflow
 
+### Phase 0: Fork Detection
+
+Before reviewing, check if the repository is a fork:
+
+```bash
+# Check if repo is a fork
+gh repo view --json isFork,parent -q '{fork: .isFork, parent: .parent.nameWithOwner}'
+```
+
+**If forked, identify upstream-specific patterns:**
+
+| Pattern | Detection | Common Issues |
+|---------|-----------|---------------|
+| External deploy target | `external_repository:` in workflow | Deploys to upstream's gh-pages |
+| Deploy keys | `secrets.DEPLOY_KEY` | Secret doesn't exist in fork |
+| Hardcoded org | `google/timesketch` in workflow | Wrong target org |
+| Upstream branches | `branches: [main]` when fork uses `master` | Branch mismatch |
+
+**Fork handling options:**
+
+1. **Disable** - Rename to `.yml.disabled` (recommended for deploy workflows)
+2. **Adapt** - Modify to work with your fork
+3. **Remove** - Delete if not needed
+4. **Keep** - Leave as-is if it will work (rare)
+
+```bash
+# Disable a workflow
+mv .github/workflows/deploy.yml .github/workflows/deploy.yml.disabled
+
+# Find upstream-specific patterns
+grep -r "external_repository\|DEPLOY_KEY\|google/" .github/workflows/
+```
+
 ### Phase 1: Gather Information
 
 ```bash
@@ -201,6 +234,34 @@ For every non-trivial decision, create appropriate tracking:
 - **Found bug in action** → Issue in action's repo
 - **Need new action** → Issue in `arustydev/gha`
 
+### Phase 5: Validate Before Committing
+
+Before committing workflow changes, validate them:
+
+```bash
+# 1. Check YAML syntax and common issues
+actionlint .github/workflows/*.yml
+
+# 2. Verify action versions exist
+for action in $(grep -h "uses:" .github/workflows/*.yml | grep -oE '[^/]+/[^@]+@v[0-9]+' | sort -u); do
+  repo=$(echo "$action" | cut -d@ -f1)
+  version=$(echo "$action" | cut -d@ -f2)
+  echo -n "$action: "
+  gh api "repos/$repo/git/refs/tags/$version" --silent && echo "OK" || echo "NOT FOUND"
+done
+
+# 3. Check for deprecated actions
+grep -r "actions-rs/\|set-output\|save-state" .github/workflows/ && echo "WARNING: Deprecated patterns found"
+```
+
+**Common validation failures:**
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `action version not found` | Invalid version (v6 doesn't exist) | Check [action-selection.md](references/action-selection.md) for valid versions |
+| `set-output is deprecated` | Old output syntax | Use `echo "name=value" >> $GITHUB_OUTPUT` |
+| `save-state is deprecated` | Old state syntax | Use `echo "name=value" >> $GITHUB_STATE` |
+
 ## Quick Commands
 
 ### View failed runs
@@ -241,3 +302,4 @@ done
 - Reference: [debugging.md](references/debugging.md) - Detailed debugging guide
 - Reference: [action-selection.md](references/action-selection.md) - Action selection criteria
 - Reference: [issue-templates.md](references/issue-templates.md) - Issue templates for tracking
+- Reference: [multi-repo.md](references/multi-repo.md) - Multi-repository batch review
