@@ -51,6 +51,29 @@ If `--dry-run` is specified:
 
 In dry-run mode, prefix all actions with `[DRY-RUN]` in output.
 
+### Step 1c: Assess Complexity
+
+Before diving into fixes, assess the scope:
+
+```bash
+# Quick complexity check
+echo "Workflows: $(ls -1 .github/workflows/*.yml 2>/dev/null | wc -l)"
+echo "Total lines: $(wc -l .github/workflows/*.yml 2>/dev/null | tail -1 | awk '{print $1}')"
+echo "Action refs: $(grep -h 'uses:' .github/workflows/*.yml 2>/dev/null | wc -l)"
+```
+
+| Tier | Workflows | Lines | Strategy |
+|------|-----------|-------|----------|
+| Simple | 1-5 | <500 | Fix all in one PR |
+| Medium | 6-10 | 500-1500 | Fix by priority, 1-2 PRs |
+| Complex | 11+ | 1500+ | Incremental PRs |
+| Massive | 15+ | 3000+ | Disable-first, then incremental |
+
+For **Complex/Massive** repos, use incremental approach:
+1. PR 1: Disable non-essential workflows
+2. PR 2: Add concurrency/path filters
+3. PR 3+: Fix specific failures
+
 ### Step 2: Gather Information
 
 Run these commands in parallel to understand the current state:
@@ -271,6 +294,13 @@ Run without --dry-run: `/fix-gha $REPO`
 - arustydev/gha#XX - [REVIEW] <title>
 - arustydev/gha#XX - [CONSIDER] <title>
 
+### Known Limitations
+<!-- Include if any issues couldn't be fully fixed -->
+
+| Issue | Reason | Impact |
+|-------|--------|--------|
+| <issue> | <why not fixed> | <what doesn't work> |
+
 ### Template Opportunities
 - [ ] Update gist: `templates.hbs(github/workflows)` - <reason>
 - [ ] Update tmpl-*: <repo> - <reason>
@@ -302,3 +332,20 @@ Run without --dry-run: `/fix-gha $REPO`
 - Create tracking issues with full context - future you will thank present you
 - Prefer updating existing gists/templates over creating new ones
 - When in doubt about action selection, choose the more boring option
+
+## When to Accept Partial Fixes
+
+Not everything can be fixed. Accept partial progress when:
+
+| Situation | Action |
+|-----------|--------|
+| Fix requires >50% workflow rewrite | Disable or document limitation |
+| External service dependencies (upstream hubs, registries) | Disable affected jobs |
+| Upstream composite actions referenced | Document as limitation |
+| Fork architecture tightly coupled | Accept reduced CI coverage |
+
+**For forked repos with extensive upstream dependencies:**
+1. Disable non-essential workflows (deploy, publish, scheduled)
+2. Keep core CI (build, test, lint) even if some jobs fail
+3. Document known limitations in PR description
+4. Don't try to fix everything - progress over perfection

@@ -174,6 +174,17 @@ gh repo view --json isFork,parent -q '{fork: .isFork, parent: .parent.nameWithOw
 | Deploy keys | `secrets.DEPLOY_KEY` | Secret doesn't exist in fork |
 | Hardcoded org | `google/timesketch` in workflow | Wrong target org |
 | Upstream branches | `branches: [main]` when fork uses `master` | Branch mismatch |
+| Upstream composite actions | `uses: <upstream>/.github/actions/` | Action path doesn't exist in fork |
+| Hardcoded Docker namespace | `docker.*<upstream-org>/` | Pushes to wrong Docker Hub namespace |
+| External registries | `hub.infinyon.cloud` or similar | Upstream-specific package registry |
+| Upstream secrets | `secrets.ORG_*` or `secrets.DOCKER_*` | Organization secrets not available |
+
+```bash
+# Comprehensive fork detection
+grep -rE "external_repository:|DEPLOY_KEY|\.github/actions/" .github/workflows/
+grep -rE "secrets\.(ORG_|DOCKER_|SLACK_|AWS_)" .github/workflows/
+grep -rE "https?://[a-z-]+\.[a-z]+\.(cloud|io)/" .github/workflows/ | grep -v github
+```
 
 **Fork handling options:**
 
@@ -189,6 +200,46 @@ mv .github/workflows/deploy.yml .github/workflows/deploy.yml.disabled
 # Find upstream-specific patterns
 grep -r "external_repository\|DEPLOY_KEY\|google/" .github/workflows/
 ```
+
+### Phase 0.5: Complexity Assessment
+
+Before diving into fixes, assess the scope of work:
+
+```bash
+# Count workflows and total lines
+echo "=== Workflow Complexity ==="
+ls -1 .github/workflows/*.yml 2>/dev/null | wc -l | xargs echo "Workflow count:"
+wc -l .github/workflows/*.yml 2>/dev/null | tail -1 | awk '{print "Total lines:", $1}'
+
+# Count action dependencies
+echo "=== Action Dependencies ==="
+grep -h "uses:" .github/workflows/*.yml 2>/dev/null | wc -l | xargs echo "Action references:"
+grep -h "uses:" .github/workflows/*.yml 2>/dev/null | grep -oE '[^/]+/[^@]+' | sort -u | wc -l | xargs echo "Unique actions:"
+
+# Count job dependencies (complexity indicator)
+echo "=== Job Dependencies ==="
+grep -c "needs:" .github/workflows/*.yml 2>/dev/null | awk -F: '{sum+=$2} END {print "Total needs: clauses:", sum}'
+
+# Matrix sprawl check
+echo "=== Matrix Size ==="
+grep -A20 "matrix:" .github/workflows/*.yml 2>/dev/null | grep -E "^\s+-\s" | wc -l | xargs echo "Matrix entries:"
+```
+
+**Complexity tiers:**
+
+| Tier | Workflows | Lines | Approach |
+|------|-----------|-------|----------|
+| Simple | 1-5 | <500 | Fix all in one PR |
+| Medium | 6-10 | 500-1500 | Fix by priority, 1-2 PRs |
+| Complex | 11+ | 1500+ | Incremental fixes, multiple PRs |
+| Massive | 15+ | 3000+ | Consider disable-first strategy |
+
+**If complexity is High/Massive:**
+
+1. Start with disabling non-essential workflows
+2. Focus on Priority 2 fixes (concurrency, path filters) first
+3. Address failures incrementally
+4. Document known limitations that won't be fixed
 
 ### Phase 1: Gather Information
 
@@ -261,6 +312,63 @@ grep -r "actions-rs/\|set-output\|save-state" .github/workflows/ && echo "WARNIN
 | `action version not found` | Invalid version (v6 doesn't exist) | Check [action-selection.md](references/action-selection.md) for valid versions |
 | `set-output is deprecated` | Old output syntax | Use `echo "name=value" >> $GITHUB_OUTPUT` |
 | `save-state is deprecated` | Old state syntax | Use `echo "name=value" >> $GITHUB_STATE` |
+
+### Phase 6: Partial Fixes and Known Limitations
+
+Not every issue can or should be fully fixed. Know when to stop.
+
+**When to accept a partial fix:**
+
+| Situation | Action |
+|-----------|--------|
+| Fixing requires rewriting >50% of workflow | Disable or document limitation |
+| Need to create custom actions for fork | Document as future work |
+| External service dependencies can't be removed | Disable affected jobs/workflows |
+| Upstream architecture tightly coupled | Accept reduced CI coverage |
+
+**Documenting known limitations:**
+
+When creating a PR with partial fixes, include a "Known Limitations" section:
+
+```markdown
+### Known Limitations
+
+The following issues remain after this fix:
+
+| Issue | Reason | Impact |
+|-------|--------|--------|
+| `cli_smoke` job fails | Uses upstream's Infinyon Hub | Integration tests don't run |
+| Docker builds use wrong namespace | Would require forking build scripts | Images not pushed |
+
+These would require significant refactoring to address.
+```
+
+**When to ask the user:**
+
+If any of these apply, use AskUserQuestion before proceeding:
+
+- Complete fix requires >2 hours of refactoring
+- Fix would change core project behavior
+- Multiple equally valid approaches exist
+- Fork has diverged significantly from upstream
+
+**Incremental progress strategy:**
+
+For complex repositories, prefer multiple small PRs:
+
+```
+PR 1: Disable non-essential workflows (quick win)
+   ↓
+PR 2: Add concurrency blocks to remaining workflows
+   ↓
+PR 3: Fix path filters and triggers
+   ↓
+PR 4: Address specific test failures
+   ↓
+(Optional) PR 5: Deep refactoring if needed
+```
+
+Each PR should be independently mergeable and improve the situation.
 
 ## Quick Commands
 
