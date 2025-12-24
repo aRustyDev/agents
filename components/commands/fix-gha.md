@@ -1,6 +1,6 @@
 ---
 description: Systematically review and fix GitHub Actions in a repository
-argument-hint: [owner/repo]
+argument-hint: [owner/repo] [--dry-run]
 ---
 
 # Fix GitHub Actions
@@ -10,6 +10,7 @@ Systematically review all PRs and failed action logs in a repository, applying f
 ## Arguments
 
 - `$1` - Repository in `owner/repo` format (optional, defaults to current repo)
+- `--dry-run` - Preview mode: identify and report issues without making changes
 
 ## Skills Required
 
@@ -36,6 +37,19 @@ REPO="${1:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}"
 ```
 
 Parse `$1` if provided, otherwise use the current repository.
+
+### Step 1b: Check for Dry-Run Mode
+
+If `--dry-run` is specified:
+- **DO NOT** make any changes to files
+- **DO NOT** create branches, commits, or PRs
+- **DO NOT** create tracking issues
+- **DO** analyze and report all issues found
+- **DO** categorize issues by priority
+- **DO** suggest fixes without applying them
+- **DO** generate the summary report with "Would fix" status
+
+In dry-run mode, prefix all actions with `[DRY-RUN]` in output.
 
 ### Step 2: Gather Information
 
@@ -115,7 +129,7 @@ When encountering action choices:
 ```bash
 gh issue create --repo arustydev/gha \
   --title "[REVIEW] Evaluate <fancy-action>" \
-  --label "action-review,deferred" \
+  --label "action-review" \
   --body "## Context
 Chose \`<reliable-action>\` over \`<fancy-action>\` in \`$REPO\`.
 
@@ -145,7 +159,7 @@ When using third-party instead of building in arustydev/gha:
 ```bash
 gh issue create --repo arustydev/gha \
   --title "[CONSIDER] Build alternative to <action-purpose>" \
-  --label "new-action,deferred" \
+  --label "new-action" \
   --body "## Context
 Using third-party \`<owner>/<action>\` in \`$REPO\` instead of building custom.
 
@@ -198,18 +212,52 @@ Document prevention opportunities in the fix summary.
 
 ### Step 11: Apply Fixes
 
-For each fix:
+**In dry-run mode**: Skip this step entirely. Report what would be done instead.
+
+**In normal mode**, for each fix:
 
 1. Create a feature branch if not already on one
 2. Make the change
-3. Test locally if possible (`actionlint .github/workflows/*.yml`)
+3. Validate changes before committing:
+   ```bash
+   # Check YAML syntax
+   actionlint .github/workflows/*.yml
+
+   # Verify action versions exist
+   for action in $(grep -h "uses:" .github/workflows/*.yml | grep -oE '[^/]+/[^@]+@v[0-9]+' | sort -u); do
+     repo=$(echo "$action" | cut -d@ -f1)
+     version=$(echo "$action" | cut -d@ -f2)
+     gh api "repos/$repo/git/refs/tags/$version" --silent || echo "WARNING: $action not found"
+   done
+   ```
 4. Commit with conventional commit message
 5. Push and create PR if needed
 
 ### Step 12: Report Summary
 
-Provide a summary table:
+Provide a summary table.
 
+**Dry-run mode format:**
+```markdown
+## [DRY-RUN] Analysis for $REPO
+
+| Priority | Issue | Would Fix | Prevention |
+|----------|-------|-----------|------------|
+| 1 | <issue> | <proposed fix> | <gist/template opportunity> |
+| 2 | <issue> | <proposed fix> | <gist/template opportunity> |
+
+### Issues That Would Be Created
+- [REVIEW] <title> - <reason>
+- [CONSIDER] <title> - <reason>
+
+### Template Opportunities
+- [ ] Update gist: `templates.hbs(github/workflows)` - <reason>
+
+### To Apply These Fixes
+Run without --dry-run: `/fix-gha $REPO`
+```
+
+**Normal mode format:**
 ```markdown
 ## Fix Summary for $REPO
 
@@ -240,6 +288,12 @@ Provide a summary table:
 
 # Fix specific repository
 /fix-gha aRustyDev/mdbook-doc-graph
+
+# Preview issues without making changes (dry-run)
+/fix-gha --dry-run
+
+# Dry-run on specific repository
+/fix-gha aRustyDev/timesketch --dry-run
 ```
 
 ## Notes
