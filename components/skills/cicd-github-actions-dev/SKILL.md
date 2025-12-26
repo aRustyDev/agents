@@ -1,5 +1,5 @@
 ---
-name: github-actions-ci
+name: cicd-github-actions-dev
 description: Develop and troubleshoot GitHub Actions workflows and CI configurations. Use when creating workflows, debugging CI failures, understanding job logs, or optimizing CI pipelines.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: typescript-dev
+name: lang-typescript-patterns-dev
 description: TypeScript development guidelines and patterns. Use this skill when writing TypeScript code, creating React components with TypeScript, configuring tsconfig.json, using advanced types like generics or utility types, or when the user asks about TypeScript best practices.
 ---
 

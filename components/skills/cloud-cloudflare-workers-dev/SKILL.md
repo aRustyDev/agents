@@ -1,5 +1,5 @@
 ---
-name: cloudflare-workers
+name: cloud-cloudflare-workers-dev
 description: Cloudflare Workers development guide for building serverless edge applications. Use this skill when creating Workers, configuring wrangler.toml, using D1/KV/R2 storage, implementing Durable Objects, deploying to Cloudflare, or building edge functions with TypeScript.
 ---
 
