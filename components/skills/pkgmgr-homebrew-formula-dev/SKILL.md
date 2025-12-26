@@ -1,5 +1,5 @@
 ---
-name: homebrew-formula
+name: pkgmgr-homebrew-formula-dev
 description: Create, test, and maintain Homebrew formulas. Use when adding packages to a Homebrew tap, debugging formula issues, running brew audit/test, or automating version updates with livecheck.
 ---
 

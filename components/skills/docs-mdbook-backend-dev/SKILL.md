@@ -1,5 +1,5 @@
 ---
-name: mdbook-plugin-alt-backend
+name: docs-mdbook-backend-dev
 description: Developing custom MDBook alternative backend (renderer) plugins in Rust. Use this skill when the user asks to 'create an mdbook backend', 'build an mdbook renderer', 'develop mdbook-<foo> renderer', or 'scaffold an alt-backend'.
 ---
 
