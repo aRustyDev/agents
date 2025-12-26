@@ -1,5 +1,5 @@
 ---
-name: github-actions
+name: github-actions-dev
 description: Developing custom GitHub Actions (JavaScript, TypeScript, Docker, Composite). Use this skill when the user asks to 'create a GitHub Action', 'build a custom action', 'publish action to marketplace', 'write action.yml', or 'develop reusable action'.
 ---
 
