@@ -1,5 +1,5 @@
 ---
-name: mdbook-plugin-preprocessor
+name: docs-mdbook-preprocessor-dev
 description: Developing custom MDBook preprocessor plugins in Rust. Use this skill when the user asks to 'create an mdbook preprocessor', 'build an mdbook plugin', 'develop mdbook-<foo>', or 'scaffold a new mdbook preprocessor'.
 ---
 
