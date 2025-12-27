@@ -1,6 +1,6 @@
 ---
-name: profiling
-description: Profile code performance using callgrind and valgrind with nextest integration for analyzing instruction counts, cache behavior, and identifying bottlenecks
+name: lang-rust-profiling-eng
+description: Profile and debug Rust code using valgrind and callgrind with nextest integration. Use when debugging crashes, segfaults, memory errors, analyzing instruction counts, cache behavior, or identifying performance bottlenecks.
 ---
 
 # Profiling with Valgrind, Callgrind, and Nextest

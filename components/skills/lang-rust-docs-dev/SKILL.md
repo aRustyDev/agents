@@ -1,6 +1,6 @@
 ---
-name: documenting-rust-code
-description: Rust documentation practices for HASH codebase. Use when writing doc comments, documenting functions/types/traits/modules, creating error sections, using intra-doc links, or following rustdoc conventions.
+name: lang-rust-docs-dev
+description: Rust documentation practices for HASH codebase. Use when writing doc comments, documenting functions/types/traits/modules, creating error sections, using intra-doc links, following rustdoc conventions, or exploring crate APIs with cargo doc.
 license: AGPL-3.0
 metadata:
   triggers:
@@ -12,10 +12,13 @@ metadata:
       - doc comment
       - documentation
       - intra-doc link
+      - cargo doc
+      - crate api
     intent-patterns:
       - "\\bdocument(ing|ation)?\\b.*?\\b(rust|function|type|struct|enum|trait|module)\\b"
       - "\\b(write|add|create)\\b.*?\\bdoc\\s*comment\\b"
       - "\\b#\\s*(Errors|Panics|Examples|Arguments)\\b"
+      - "\\b(explore|understand|learn)\\b.*?\\b(rust|crate|package)\\b"
 ---
 
 # Rust Documentation Practices
@@ -147,6 +150,54 @@ Use explicit `# Arguments` section:
 ```bash
 cargo doc --no-deps --all-features
 ```
+
+## Exploring Crates
+
+Generate and use Rust documentation to understand crate APIs, structure, and code organization.
+
+### Generating Documentation
+
+```bash
+# For a specific package
+cargo doc --no-deps --all-features --package <package-name>
+
+# For the entire workspace
+cargo doc --no-deps --all-features --workspace
+
+# Include private items for internal implementation details
+cargo doc --no-deps --all-features --document-private-items
+```
+
+### Key Flags
+
+| Flag | Purpose |
+|------|---------|
+| `--no-deps` | Document local code only (faster, less noise) |
+| `--all-features` | Include all feature-gated APIs |
+| `--package <name>` | Target a specific crate |
+| `--workspace` | Document all crates in the workspace |
+| `--document-private-items` | Include internal implementation details |
+
+### What Generated Docs Provide
+
+1. **Crate organization** - Module hierarchy and component relationships
+2. **Public API surface** - All public functions, types, traits, and constants
+3. **Usage examples** - Code examples from doctest blocks
+4. **Error documentation** - Documented error conditions and handling
+5. **Type relationships** - Trait implementations, type aliases, associated types
+
+### Viewing Documentation
+
+Docs are generated at:
+
+```txt
+target/doc/<crate_name>/index.html
+```
+
+**Tips:**
+- Generate docs before diving into unfamiliar Rust code
+- Cross-reference `# Errors` sections for error handling patterns
+- Look for `# Examples` sections for idiomatic usage patterns
 
 ## References
 
