@@ -1,6 +1,6 @@
 ---
-name: cicd-github-actions-ops
-description: Systematic review and debugging of GitHub Actions workflows. Use when reviewing PRs, debugging failed actions, analyzing workflow efficiency, or making decisions about which actions to use.
+name: cicd-github-workflows-ops
+description: Systematic review and debugging of GitHub Actions workflow files. Use when reviewing PRs, debugging failed workflows, analyzing workflow efficiency, or making decisions about which actions to use.
 ---
 
 # GitHub Actions Operations
