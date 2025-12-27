@@ -1,11 +1,11 @@
 ---
 name: iac-terraform-orchestration-ops
-description: Orchestrate Terraform and OpenTofu at scale using Terragrunt, Terramate, or Atmos. Use when managing multiple environments, implementing DRY configurations, handling cross-stack dependencies, deploying to many accounts, or establishing infrastructure platform patterns.
+description: Orchestrate Terraform and OpenTofu at scale using Terragrunt, Terramate, or Atmos. Use when managing multiple environments, implementing DRY configurations, handling cross-stack dependencies, deploying to many accounts, managing tool versions with TEnv, or establishing infrastructure platform patterns.
 ---
 
 # Terraform Orchestration Tools
 
-Manage Terraform/OpenTofu configurations at scale using orchestration tools. Choose the right tool for your team's workflow and scale requirements.
+Manage Terraform/OpenTofu configurations at scale using orchestration tools. Choose the right tool for your team's workflow and scale requirements. Use TEnv to manage versions of all these tools.
 
 ## Purpose
 
@@ -21,6 +21,7 @@ Orchestrate infrastructure deployments across multiple environments, accounts, a
 - Manage remote state configuration consistently
 - Establish enterprise infrastructure platforms
 - Migrate from monolithic Terraform to modular stacks
+- Manage tool versions consistently across teams (TEnv)
 
 ## Tool Comparison
 
@@ -142,6 +143,34 @@ components:
 - Deep integration with Spacelift
 
 See `references/atmos.md` for complete patterns.
+
+## TEnv Overview
+
+Unified version manager for Terraform, OpenTofu, Terragrunt, and Atmos.
+
+```bash
+# Install TEnv
+brew install tenv
+
+# Install and use specific versions
+tenv tf install 1.7.0
+tenv tofu install 1.8.0
+tenv tg install 0.55.0
+tenv atmos install 1.63.0
+
+# Auto-detect from version files
+tenv tf detect    # reads .terraform-version
+tenv tofu detect  # reads .opentofu-version
+```
+
+**Key Features:**
+- Single tool replaces tfenv, tofuenv, tgenv
+- Automatic version detection from constraint files
+- Cosign/PGP signature verification
+- TENV_AUTO_INSTALL for seamless switching
+- CI/CD friendly with version pinning
+
+See `references/tenv.md` for complete patterns.
 
 ## Common Patterns
 
@@ -288,6 +317,7 @@ jobs:
 - `references/terragrunt.md` - Complete Terragrunt patterns and examples
 - `references/terramate.md` - Complete Terramate patterns and examples
 - `references/atmos.md` - Complete Atmos patterns and examples
+- `references/tenv.md` - TEnv version management for all tools
 
 ## Related Skills
 
