@@ -1,22 +1,29 @@
 ---
 name: iac-terraform-modules-eng
-description: Build reusable Terraform modules for AWS, Azure, and GCP infrastructure following infrastructure-as-code best practices. Use when creating infrastructure modules, standardizing cloud provisioning, or implementing reusable IaC components.
+description: Build reusable Terraform modules and provider configurations for multi-cloud infrastructure, Kubernetes, CI/CD, databases, networking, security, observability, and virtualization. Use when creating infrastructure modules, standardizing provisioning, or implementing IaC patterns across 40+ Terraform providers.
 ---
 
 # Terraform Module Library
 
-Production-ready Terraform module patterns for AWS, Azure, and GCP infrastructure.
+Production-ready Terraform module patterns for multi-cloud infrastructure and 40+ providers including AWS, Azure, GCP, Kubernetes, Cloudflare, Vault, Grafana, and more.
 
 ## Purpose
 
-Create reusable, well-tested Terraform modules for common cloud infrastructure patterns across multiple cloud providers.
+Create reusable, well-tested Terraform modules for common infrastructure patterns across cloud providers, SaaS platforms, and on-premises virtualization.
 
 ## When to Use
 
-- Build reusable infrastructure components
-- Standardize cloud resource provisioning
-- Implement infrastructure as code best practices
-- Create multi-cloud compatible modules
+- Build reusable infrastructure components for AWS, Azure, GCP
+- Configure Kubernetes clusters with Helm, Talos, or managed services
+- Set up CI/CD pipelines with GitHub, GitLab, or Buildkite
+- Manage databases: MongoDB Atlas, CockroachDB, Elastic, Pinecone
+- Configure networking: Cloudflare, DNS, CDN, VPN (ZeroTier)
+- Implement secrets management with HashiCorp Vault
+- Deploy to PaaS platforms: Vercel, Heroku, DigitalOcean, Linode, Vultr
+- Configure observability with Grafana stack
+- Manage on-premises infrastructure: vSphere, VMC, Proxmox
+- Orchestrate workflows with Ansible, Kestra, or Prefect
+- Implement feature flags with Flagsmith
 - Establish organizational Terraform standards
 
 ## Module Structure
@@ -59,19 +66,39 @@ module-name/
 
 **main.tf:**
 ```hcl
+locals {
+  nat_gateway_count = var.create_nat_gateway ? (var.single_nat_gateway ? 1 : length(var.availability_zones)) : 0
+}
+
 resource "aws_vpc" "main" {
   cidr_block           = var.cidr_block
   enable_dns_hostnames = var.enable_dns_hostnames
   enable_dns_support   = var.enable_dns_support
 
   tags = merge(
+    { Name = var.name },
+    var.tags
+  )
+}
+
+# Public Subnets
+resource "aws_subnet" "public" {
+  count                   = length(var.public_subnet_cidrs)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+
+  tags = merge(
     {
-      Name = var.name
+      Name = "${var.name}-public-${count.index + 1}"
+      Tier = "public"
     },
     var.tags
   )
 }
 
+# Private Subnets
 resource "aws_subnet" "private" {
   count             = length(var.private_subnet_cidrs)
   vpc_id            = aws_vpc.main.id
@@ -87,16 +114,86 @@ resource "aws_subnet" "private" {
   )
 }
 
+# Internet Gateway
 resource "aws_internet_gateway" "main" {
   count  = var.create_internet_gateway ? 1 : 0
   vpc_id = aws_vpc.main.id
 
   tags = merge(
-    {
-      Name = "${var.name}-igw"
-    },
+    { Name = "${var.name}-igw" },
     var.tags
   )
+}
+
+# Elastic IPs for NAT Gateways
+resource "aws_eip" "nat" {
+  count  = local.nat_gateway_count
+  domain = "vpc"
+
+  tags = merge(
+    { Name = "${var.name}-nat-eip-${count.index + 1}" },
+    var.tags
+  )
+
+  depends_on = [aws_internet_gateway.main]
+}
+
+# NAT Gateways
+resource "aws_nat_gateway" "main" {
+  count         = local.nat_gateway_count
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
+
+  tags = merge(
+    { Name = "${var.name}-nat-${count.index + 1}" },
+    var.tags
+  )
+
+  depends_on = [aws_internet_gateway.main]
+}
+
+# Public Route Table
+resource "aws_route_table" "public" {
+  count  = var.create_internet_gateway ? 1 : 0
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main[0].id
+  }
+
+  tags = merge(
+    { Name = "${var.name}-public-rt" },
+    var.tags
+  )
+}
+
+resource "aws_route_table_association" "public" {
+  count          = length(var.public_subnet_cidrs)
+  subnet_id      = aws_subnet.public[count.index].id
+  route_table_id = aws_route_table.public[0].id
+}
+
+# Private Route Tables (one per NAT Gateway)
+resource "aws_route_table" "private" {
+  count  = local.nat_gateway_count > 0 ? length(var.private_subnet_cidrs) : 0
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main[var.single_nat_gateway ? 0 : count.index].id
+  }
+
+  tags = merge(
+    { Name = "${var.name}-private-rt-${count.index + 1}" },
+    var.tags
+  )
+}
+
+resource "aws_route_table_association" "private" {
+  count          = local.nat_gateway_count > 0 ? length(var.private_subnet_cidrs) : 0
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private[count.index].id
 }
 ```
 
@@ -121,6 +218,12 @@ variable "availability_zones" {
   type        = list(string)
 }
 
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for public subnets"
+  type        = list(string)
+  default     = []
+}
+
 variable "private_subnet_cidrs" {
   description = "CIDR blocks for private subnets"
   type        = list(string)
@@ -133,10 +236,48 @@ variable "enable_dns_hostnames" {
   default     = true
 }
 
+variable "enable_dns_support" {
+  description = "Enable DNS support in VPC"
+  type        = bool
+  default     = true
+}
+
+variable "create_internet_gateway" {
+  description = "Create an Internet Gateway for public subnets"
+  type        = bool
+  default     = true
+}
+
+variable "create_nat_gateway" {
+  description = "Create NAT Gateway(s) for private subnets"
+  type        = bool
+  default     = true
+}
+
+variable "single_nat_gateway" {
+  description = "Use a single NAT Gateway for all AZs (cost savings)"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Additional tags"
   type        = map(string)
   default     = {}
+}
+```
+
+**versions.tf:**
+```hcl
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }
 ```
 
@@ -147,14 +288,39 @@ output "vpc_id" {
   value       = aws_vpc.main.id
 }
 
+output "vpc_cidr_block" {
+  description = "CIDR block of VPC"
+  value       = aws_vpc.main.cidr_block
+}
+
+output "public_subnet_ids" {
+  description = "IDs of public subnets"
+  value       = aws_subnet.public[*].id
+}
+
 output "private_subnet_ids" {
   description = "IDs of private subnets"
   value       = aws_subnet.private[*].id
 }
 
-output "vpc_cidr_block" {
-  description = "CIDR block of VPC"
-  value       = aws_vpc.main.cidr_block
+output "internet_gateway_id" {
+  description = "ID of the Internet Gateway"
+  value       = try(aws_internet_gateway.main[0].id, null)
+}
+
+output "nat_gateway_ids" {
+  description = "IDs of NAT Gateways"
+  value       = aws_nat_gateway.main[*].id
+}
+
+output "public_route_table_id" {
+  description = "ID of public route table"
+  value       = try(aws_route_table.public[0].id, null)
+}
+
+output "private_route_table_ids" {
+  description = "IDs of private route tables"
+  value       = aws_route_table.private[*].id
 }
 ```
 
@@ -181,11 +347,20 @@ module "vpc" {
   cidr_block         = "10.0.0.0/16"
   availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
-  private_subnet_cidrs = [
+  public_subnet_cidrs = [
     "10.0.1.0/24",
     "10.0.2.0/24",
     "10.0.3.0/24"
   ]
+
+  private_subnet_cidrs = [
+    "10.0.11.0/24",
+    "10.0.12.0/24",
+    "10.0.13.0/24"
+  ]
+
+  create_nat_gateway = true
+  single_nat_gateway = false  # HA: one NAT per AZ
 
   tags = {
     Environment = "production"
@@ -198,7 +373,7 @@ module "rds" {
 
   identifier     = "production-db"
   engine         = "postgres"
-  engine_version = "15.3"
+  engine_version = "15.4"
   instance_class = "db.t3.large"
 
   vpc_id     = module.vpc.vpc_id
@@ -208,15 +383,67 @@ module "rds" {
     Environment = "production"
   }
 }
+
+module "eks" {
+  source = "../../modules/aws/eks"
+
+  cluster_name    = "production"
+  cluster_version = "1.29"
+
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.private_subnet_ids
+
+  node_groups = {
+    default = {
+      instance_types = ["t3.large"]
+      min_size       = 2
+      max_size       = 10
+      desired_size   = 3
+    }
+  }
+
+  tags = {
+    Environment = "production"
+  }
+}
 ```
 
 ## Reference Files
 
-- `assets/vpc-module/` - Complete VPC module example
-- `assets/rds-module/` - RDS module example
-- `references/aws-modules.md` - AWS module patterns
-- `references/azure-modules.md` - Azure module patterns
-- `references/gcp-modules.md` - GCP module patterns
+### Cloud Providers
+- `references/aws-modules.md` - AWS module patterns (VPC, EKS, RDS, S3, ALB, Lambda)
+- `references/azure-modules.md` - Azure module patterns (VNet, AKS, SQL, Storage)
+- `references/gcp-modules.md` - GCP module patterns (VPC, GKE, Cloud SQL, Cloud Run)
+
+### CI/CD & Version Control
+- `references/cicd-providers.md` - GitHub, GitLab, Buildkite provider patterns
+
+### Kubernetes & Containers
+- `references/kubernetes-providers.md` - Kubernetes, Helm, Talos, Coder provider patterns
+
+### Databases & Data
+- `references/database-providers.md` - MongoDB Atlas, CockroachDB, Elastic, Pinecone, Atlas, Airbyte patterns
+
+### Networking & CDN
+- `references/networking-providers.md` - Cloudflare, DNS, NS1, ZeroTier, Fastly, Akamai patterns
+
+### Security
+- `references/security-providers.md` - HashiCorp Vault, TLS provider patterns
+
+### Utility Providers
+- `references/utility-providers.md` - Template, Time, Local, HTTP provider patterns
+
+### Orchestration & Feature Flags
+- `references/orchestration-providers.md` - Ansible AAP, Kestra, Prefect, Flagsmith patterns
+
+### Observability
+- `references/observability-providers.md` - Grafana, Grafana Cloud, Synthetic Monitoring, Adaptive Metrics
+
+### Platform as a Service
+- `references/platform-providers.md` - Vercel, Heroku, DigitalOcean, Linode, Vultr patterns
+
+### Virtualization
+- `references/virtualization-providers.md` - vSphere, VMware Cloud, Proxmox patterns
 
 ## Testing
 
