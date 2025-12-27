@@ -1,15 +1,15 @@
 ---
 name: iac-terraform-modules-eng
-description: Build reusable Terraform modules and provider configurations for multi-cloud infrastructure, Kubernetes, CI/CD, databases, networking, security, observability, and virtualization. Use when creating infrastructure modules, standardizing provisioning, or implementing IaC patterns across 40+ Terraform providers.
+description: Build reusable Terraform and OpenTofu modules and provider configurations for multi-cloud infrastructure, Kubernetes, CI/CD, databases, networking, security, observability, and virtualization. Use when creating infrastructure modules, standardizing provisioning, migrating from Terraform to OpenTofu, or implementing IaC patterns across 40+ providers.
 ---
 
-# Terraform Module Library
+# Terraform & OpenTofu Module Library
 
-Production-ready Terraform module patterns for multi-cloud infrastructure and 40+ providers including AWS, Azure, GCP, Kubernetes, Cloudflare, Vault, Grafana, and more.
+Production-ready Terraform and OpenTofu module patterns for multi-cloud infrastructure and 40+ providers including AWS, Azure, GCP, Kubernetes, Cloudflare, Vault, Grafana, and more. Modules are compatible with both Terraform and OpenTofu.
 
 ## Purpose
 
-Create reusable, well-tested Terraform modules for common infrastructure patterns across cloud providers, SaaS platforms, and on-premises virtualization.
+Create reusable, well-tested Terraform and OpenTofu modules for common infrastructure patterns across cloud providers, SaaS platforms, and on-premises virtualization. Support both Terraform (HashiCorp BSL) and OpenTofu (MPL 2.0) workflows.
 
 ## When to Use
 
@@ -24,7 +24,9 @@ Create reusable, well-tested Terraform modules for common infrastructure pattern
 - Manage on-premises infrastructure: vSphere, VMC, Proxmox
 - Orchestrate workflows with Ansible, Kestra, or Prefect
 - Implement feature flags with Flagsmith
-- Establish organizational Terraform standards
+- Establish organizational Terraform/OpenTofu standards
+- Migrate existing Terraform configurations to OpenTofu
+- Leverage OpenTofu-specific features (early evaluation, provider-defined functions)
 
 ## Module Structure
 
@@ -269,6 +271,7 @@ variable "tags" {
 
 **versions.tf:**
 ```hcl
+# Compatible with both Terraform >= 1.5.0 and OpenTofu >= 1.6.0
 terraform {
   required_version = ">= 1.5.0"
 
@@ -278,6 +281,14 @@ terraform {
       version = "~> 5.0"
     }
   }
+}
+```
+
+**versions.tofu.tf (OpenTofu-specific, optional):**
+```hcl
+# Use for OpenTofu-specific features like early evaluation
+terraform {
+  required_version = ">= 1.8.0"
 }
 ```
 
@@ -336,6 +347,73 @@ output "private_route_table_ids" {
 8. **Implement conditional resources** with count/for_each
 9. **Test modules** with Terratest
 10. **Tag all resources** consistently
+
+## OpenTofu Compatibility
+
+OpenTofu is an open-source fork of Terraform (MPL 2.0 licensed) that maintains HCL compatibility while adding new features. All modules in this library work with both tools.
+
+### Key Differences
+
+| Feature | Terraform | OpenTofu |
+|---------|-----------|----------|
+| License | BSL 1.1 | MPL 2.0 |
+| State Encryption | Enterprise only | Built-in (1.7+) |
+| Early Evaluation | No | Yes (1.8+) |
+| Provider-defined Functions | Limited | Extended support |
+| CLI Command | `terraform` | `tofu` |
+| Registry | registry.terraform.io | registry.opentofu.org |
+
+### Migration from Terraform to OpenTofu
+
+```bash
+# Install OpenTofu
+brew install opentofu
+
+# Initialize (uses existing .terraform.lock.hcl)
+tofu init
+
+# Validate configuration
+tofu validate
+
+# Plan (state file is compatible)
+tofu plan
+
+# Apply
+tofu apply
+```
+
+### OpenTofu-Specific Features
+
+**State Encryption (1.7+):**
+```hcl
+terraform {
+  encryption {
+    key_provider "pbkdf2" "main" {
+      passphrase = var.state_encryption_passphrase
+    }
+
+    method "aes_gcm" "main" {
+      keys = key_provider.pbkdf2.main
+    }
+
+    state {
+      method = method.aes_gcm.main
+    }
+  }
+}
+```
+
+**Early Evaluation (1.8+):**
+```hcl
+# Variables can be used in backend configuration
+terraform {
+  backend "s3" {
+    bucket = var.state_bucket  # Works in OpenTofu 1.8+
+    key    = var.state_key
+    region = var.aws_region
+  }
+}
+```
 
 ## Module Composition
 
@@ -409,6 +487,9 @@ module "eks" {
 ```
 
 ## Reference Files
+
+### OpenTofu
+- `references/opentofu.md` - OpenTofu migration, state encryption, early evaluation, registry
 
 ### Cloud Providers
 - `references/aws-modules.md` - AWS module patterns (VPC, EKS, RDS, S3, ALB, Lambda)
