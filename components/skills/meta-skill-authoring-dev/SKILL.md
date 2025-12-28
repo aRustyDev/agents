@@ -223,6 +223,137 @@ Documentation loaded as needed into context.
 ### assets/
 Files used in output (templates, images, fonts).
 
+## Meta-Skill Derivatives
+
+Meta-skills provide foundational patterns that language or domain-specific skills extend. This pattern enables knowledge reuse while allowing specialization.
+
+### Meta-Skill Hierarchy
+
+```
+meta-<pattern>-<focus>           # Foundational patterns
+└── <domain>-<pattern>-<focus>   # Specialized derivative
+```
+
+**Examples:**
+| Meta-Skill | Derivatives |
+|------------|-------------|
+| `meta-sdk-patterns-eng` | `aws-sdk-dev`, `stripe-sdk-dev` |
+| `meta-library-dev` | `rust-lib-dev`, `python-lib-dev` |
+| `meta-cli-patterns-dev` | `rust-cli-dev`, `go-cli-dev` |
+
+### Creating a Derivative Skill
+
+**Step 1: Reference the Meta-Skill**
+
+In the derivative's SKILL.md, explicitly reference the parent:
+
+```markdown
+## This Skill Extends
+
+This skill extends `meta-library-dev` with Rust-specific patterns.
+For foundational concepts (API design, versioning, testing strategies),
+see the meta-skill first.
+
+## This Skill Adds
+
+- Rust-specific: Cargo.toml configuration, feature flags
+- Rust idioms: Ownership patterns in public APIs
+- Rust tooling: rustdoc, cargo publish, crates.io
+```
+
+**Step 2: Determine What to Add**
+
+Derivatives should add domain-specific content in these categories:
+
+| Category | What to Add |
+|----------|-------------|
+| **Tooling** | Package managers, build tools, linters |
+| **Idioms** | Language-specific patterns and conventions |
+| **Ecosystem** | Common libraries, registries, community practices |
+| **Examples** | Code samples in the target language |
+| **Gotchas** | Language-specific pitfalls and workarounds |
+
+**Step 3: Avoid Duplication**
+
+Do NOT repeat content from the meta-skill. Instead:
+- Reference sections: "See `meta-library-dev` → Versioning Strategy"
+- Extend with specifics: "In addition to semver (see meta-skill), Rust uses..."
+- Override only when necessary: "Unlike the general pattern, Rust prefers..."
+
+### Derivative Naming Convention
+
+```
+<domain>-<pattern>-<focus>
+
+Where:
+- domain   = language, platform, or service (rust, aws, k8s)
+- pattern  = what the skill covers (lib, sdk, cli, api)
+- focus    = audience (dev, ops, eng, nub, xec)
+```
+
+**Valid derivative names:**
+- `rust-lib-dev` (Rust library development)
+- `python-sdk-dev` (Python SDK development)
+- `go-cli-ops` (Go CLI operations)
+
+### Derivative Template
+
+```markdown
+---
+name: <domain>-<pattern>-<focus>
+description: Use when developing <domain> <pattern>s. Extends meta-<pattern>-<focus> with <domain>-specific tooling, idioms, and ecosystem patterns.
+---
+
+# <Domain> <Pattern> Development
+
+<Domain>-specific patterns for <pattern> development. This skill extends
+`meta-<pattern>-<focus>` with <domain> tooling, idioms, and ecosystem practices.
+
+## This Skill Extends
+
+- `meta-<pattern>-<focus>` - Foundational <pattern> patterns
+
+## This Skill Adds
+
+- <Domain> tooling: [list tools]
+- <Domain> idioms: [list patterns]
+- <Domain> ecosystem: [list libraries, registries]
+
+## <Domain>-Specific Tooling
+
+[Package manager, build tools, testing frameworks]
+
+## <Domain> Idioms
+
+[Language-specific patterns that differ from general guidance]
+
+## Ecosystem
+
+[Common libraries, registries, community practices]
+
+## Quick Reference
+
+| Task | <Domain> Command |
+|------|------------------|
+| Create project | `<command>` |
+| Build | `<command>` |
+| Test | `<command>` |
+| Publish | `<command>` |
+
+## References
+
+- `meta-<pattern>-<focus>` - Foundational patterns
+- [<Domain> documentation](url)
+```
+
+### When to Create Meta vs Derivative
+
+| Create Meta-Skill When | Create Derivative When |
+|------------------------|------------------------|
+| Pattern applies across 3+ domains | Specializing for one domain |
+| Core concepts are language-agnostic | Adding language-specific details |
+| You're establishing a new pattern family | Extending existing meta-skill |
+
 ## Additional Resources
 
 ### Core Documentation
