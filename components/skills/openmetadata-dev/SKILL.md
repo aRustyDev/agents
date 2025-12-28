@@ -801,6 +801,106 @@ def ensure_table_exists(metadata: OpenMetadata, create_request: CreateTableReque
 
 ---
 
+## MCP Server Integration
+
+OpenMetadata provides a Model Context Protocol (MCP) server that enables AI assistants (like Claude and ChatGPT) to interact with your metadata catalog using natural language.
+
+### What is MCP?
+
+MCP (Model Context Protocol) is an open standard that allows AI systems to interact with external tools and data sources in a uniform, secure way. OpenMetadata's MCP server exposes its metadata knowledge graph to AI tools.
+
+### Use Cases
+
+- Natural language queries about data assets
+- "What tables contain customer data?"
+- "Who owns the orders table?"
+- "Show me the lineage for the sales dashboard"
+- AI-powered data discovery
+- Conversational data governance
+
+### Setting Up MCP
+
+#### 1. Install MCP Application
+
+1. Navigate to **Settings → Applications → Marketplace**
+2. Find the **MCP** application
+3. Click **Install**
+4. Configure the application settings
+
+#### 2. Generate Personal Access Token
+
+1. Go to **Profile → Access Token**
+2. Click **Generate New Token**
+3. Set appropriate expiration
+4. Copy token (shown only once)
+
+#### 3. Configure MCP Client
+
+**For Claude Desktop:**
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "openmetadata": {
+      "url": "http://localhost:8585/api/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-token>"
+      }
+    }
+  }
+}
+```
+
+**For API Integration:**
+
+```python
+import requests
+
+MCP_ENDPOINT = "http://localhost:8585/api/v1/mcp"
+TOKEN = "<your-token>"
+
+def query_mcp(prompt: str) -> dict:
+    """Send natural language query to OpenMetadata MCP."""
+    response = requests.post(
+        f"{MCP_ENDPOINT}/query",
+        headers={
+            "Authorization": f"Bearer {TOKEN}",
+            "Content-Type": "application/json",
+        },
+        json={"prompt": prompt},
+    )
+    return response.json()
+
+# Example queries
+result = query_mcp("What tables are in the sales database?")
+result = query_mcp("Show me the owner of the customers table")
+result = query_mcp("What is the lineage for the revenue dashboard?")
+```
+
+### Available MCP Tools
+
+The MCP server exposes tools for:
+
+| Tool | Description |
+|------|-------------|
+| **search_assets** | Search for data assets by keyword |
+| **get_asset_details** | Get detailed metadata for an asset |
+| **get_lineage** | Retrieve lineage for an entity |
+| **get_owner** | Find asset ownership |
+| **list_tables** | List tables in a database |
+| **get_schema** | Get table schema details |
+
+### Security Considerations
+
+1. **Use dedicated tokens** - Don't share personal tokens
+2. **Set appropriate permissions** - MCP uses token's permissions
+3. **Rotate tokens regularly** - Follow security policies
+4. **Audit usage** - Monitor MCP queries in logs
+
+---
+
 ## References
 
 - [OpenMetadata Python SDK](https://docs.open-metadata.org/latest/sdk/python)
@@ -808,5 +908,8 @@ def ensure_table_exists(metadata: OpenMetadata, create_request: CreateTableReque
 - [OpenMetadata API Reference](https://docs.open-metadata.org/swagger.html)
 - [Building Connectors](https://docs.open-metadata.org/latest/sdk/python/build-connector)
 - [Data Governance Automation](https://docs.open-metadata.org/latest/how-to-guides/data-governance)
+- [MCP Server Guide](https://docs.open-metadata.org/latest/how-to-guides/mcp)
 - `openmetadata-sdk-dev` - Implementing SDKs for new languages
 - `openmetadata-ops` - Administering OpenMetadata
+- `openmetadata-user` - UI navigation and discovery
+- `openmetadata-dq` - Data quality and observability
