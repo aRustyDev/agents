@@ -886,6 +886,407 @@ describe('Flag Evaluation API', () => {
 - [ ] Edge case coverage
 - [ ] Concurrency testing (if applicable)
 
+---
+
+## Server SDK Implementation
+
+Server SDKs use the **dynamic-context paradigm** where evaluation context is passed per request. This is the most common pattern for backend services.
+
+### Key Characteristics
+
+| Aspect | Server SDK Behavior |
+|--------|---------------------|
+| Context | Passed per evaluation call |
+| State | Stateless between evaluations |
+| Concurrency | Multi-threaded, concurrent evaluations |
+| Users | Multi-tenant (many users per instance) |
+| Lifecycle | Long-running process |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Server Application                        │
+├─────────────────────────────────────────────────────────────┤
+│  Request 1          Request 2          Request 3            │
+│  ┌─────────┐        ┌─────────┐        ┌─────────┐          │
+│  │Context A│        │Context B│        │Context C│          │
+│  └────┬────┘        └────┬────┘        └────┬────┘          │
+│       │                  │                  │                │
+│       └──────────────────┼──────────────────┘                │
+│                          ▼                                   │
+│                 ┌─────────────────┐                          │
+│                 │ OpenFeature API │ (Singleton)              │
+│                 └────────┬────────┘                          │
+│                          ▼                                   │
+│                 ┌─────────────────┐                          │
+│                 │    Provider     │ (Shared, thread-safe)    │
+│                 └─────────────────┘                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Server SDK Requirements
+
+```typescript
+// Dynamic-context evaluation signature
+interface ServerClient {
+  getBooleanValue(
+    flagKey: string,
+    defaultValue: boolean,
+    context: EvaluationContext,  // Required per-call
+    options?: EvaluationOptions
+  ): boolean;
+}
+
+// Context passed with each request
+app.get('/api/feature', (req, res) => {
+  const context: EvaluationContext = {
+    targetingKey: req.user.id,
+    email: req.user.email,
+    plan: req.user.subscription,
+    // Request-specific context
+  };
+
+  const enabled = client.getBooleanValue('new-feature', false, context);
+  res.json({ enabled });
+});
+```
+
+### Server-Specific Considerations
+
+**Thread Safety**
+```typescript
+// Provider must be thread-safe
+class ThreadSafeProvider implements FeatureProvider {
+  private cache: Map<string, FlagValue> = new Map();
+  private mutex = new Mutex();
+
+  async resolveBooleanValue(
+    flagKey: string,
+    defaultValue: boolean,
+    context: EvaluationContext
+  ): Promise<ResolutionDetails<boolean>> {
+    // Use mutex for cache access in multi-threaded environments
+    return this.mutex.runExclusive(async () => {
+      // Resolution logic
+    });
+  }
+}
+```
+
+**Connection Pooling**
+```go
+// Go - Reuse HTTP connections
+type Provider struct {
+    client *http.Client
+}
+
+func NewProvider() *Provider {
+    return &Provider{
+        client: &http.Client{
+            Transport: &http.Transport{
+                MaxIdleConns:        100,
+                MaxIdleConnsPerHost: 100,
+                IdleConnTimeout:     90 * time.Second,
+            },
+        },
+    }
+}
+```
+
+**Request-Scoped Context Propagation**
+```python
+# Python - Using contextvars for request context
+from contextvars import ContextVar
+
+request_context: ContextVar[EvaluationContext] = ContextVar('request_context')
+
+@app.middleware("http")
+async def add_context(request: Request, call_next):
+    context = EvaluationContext(
+        targeting_key=request.user.id,
+        attributes={"path": request.url.path}
+    )
+    token = request_context.set(context)
+    try:
+        response = await call_next(request)
+    finally:
+        request_context.reset(token)
+    return response
+```
+
+### Server SDK Checklist
+
+- [ ] Thread-safe provider implementation
+- [ ] Connection pooling for external calls
+- [ ] Request context propagation
+- [ ] Graceful shutdown with in-flight request handling
+- [ ] Metrics/telemetry per evaluation
+- [ ] Bulk evaluation support (optional)
+- [ ] Caching strategy for high-throughput
+
+---
+
+## Client SDK Implementation
+
+Client SDKs use the **static-context paradigm** where context is set once and cached. This pattern is used for mobile apps, browser applications, and edge devices.
+
+### Key Characteristics
+
+| Aspect | Client SDK Behavior |
+|--------|---------------------|
+| Context | Set once, cached until changed |
+| State | Stateful, maintains flag cache |
+| Concurrency | Single-threaded (usually) |
+| Users | Single user/device per instance |
+| Lifecycle | Application lifecycle (may be short-lived) |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Application                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                  EvaluationContext                    │   │
+│  │  (Set once: user ID, device, app version, etc.)      │   │
+│  └──────────────────────┬───────────────────────────────┘   │
+│                         │                                    │
+│                         ▼                                    │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │               OpenFeature API                         │   │
+│  │  ┌────────────────────────────────────────────────┐  │   │
+│  │  │              Flag Cache                         │  │   │
+│  │  │  (Evaluated flags stored locally)              │  │   │
+│  │  └────────────────────────────────────────────────┘  │   │
+│  └──────────────────────┬───────────────────────────────┘   │
+│                         │                                    │
+│                         ▼                                    │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                    Provider                           │   │
+│  │  (Syncs with server, manages local cache)            │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Client SDK Requirements
+
+```typescript
+// Static-context evaluation signature (no context parameter)
+interface ClientSdkClient {
+  getBooleanValue(
+    flagKey: string,
+    defaultValue: boolean,
+    options?: EvaluationOptions
+  ): boolean;  // Synchronous - uses cached values
+}
+
+// Context set at initialization or on user change
+OpenFeature.setContext({
+  targetingKey: user.id,
+  email: user.email,
+  deviceType: 'mobile',
+  appVersion: '2.1.0',
+});
+
+// Evaluations use cached context
+const enabled = client.getBooleanValue('new-feature', false);
+```
+
+### Client-Specific Events
+
+```typescript
+// Additional events for client SDKs
+enum ClientProviderEvent {
+  // Standard events
+  PROVIDER_READY = 'PROVIDER_READY',
+  PROVIDER_ERROR = 'PROVIDER_ERROR',
+  PROVIDER_STALE = 'PROVIDER_STALE',
+
+  // Client-specific events
+  PROVIDER_RECONCILING = 'PROVIDER_RECONCILING',      // Context change in progress
+  PROVIDER_CONTEXT_CHANGED = 'PROVIDER_CONTEXT_CHANGED', // Context change complete
+}
+
+// Listen for context reconciliation
+client.addHandler(ProviderEvent.PROVIDER_CONTEXT_CHANGED, () => {
+  // Re-render UI with new flag values
+  refreshUI();
+});
+```
+
+### Context Reconciliation
+
+When context changes, client SDKs must reconcile cached values:
+
+```typescript
+interface ClientProvider extends FeatureProvider {
+  // Called when context changes
+  onContextChange(
+    oldContext: EvaluationContext,
+    newContext: EvaluationContext
+  ): Promise<void>;
+}
+
+class MyClientProvider implements ClientProvider {
+  private cache: Map<string, ResolutionDetails<FlagValue>> = new Map();
+
+  async onContextChange(
+    oldContext: EvaluationContext,
+    newContext: EvaluationContext
+  ): Promise<void> {
+    // Emit RECONCILING event
+    this.emit(ProviderEvent.PROVIDER_RECONCILING);
+
+    try {
+      // Fetch new flag values for new context
+      const newFlags = await this.fetchFlags(newContext);
+      this.cache = new Map(newFlags);
+
+      // Emit CONTEXT_CHANGED event
+      this.emit(ProviderEvent.PROVIDER_CONTEXT_CHANGED);
+    } catch (error) {
+      this.emit(ProviderEvent.PROVIDER_ERROR, { error });
+    }
+  }
+}
+```
+
+### Platform-Specific Patterns
+
+**Mobile (iOS/Android)**
+```swift
+// Swift - iOS lifecycle handling
+class OpenFeatureManager {
+    func applicationDidBecomeActive() {
+        // Refresh flags when app becomes active
+        provider.refresh()
+    }
+
+    func applicationDidEnterBackground() {
+        // Persist cache before backgrounding
+        provider.persistCache()
+    }
+}
+```
+
+```kotlin
+// Kotlin - Android lifecycle
+class FeatureFlagViewModel : ViewModel() {
+    private val client = OpenFeature.getClient()
+
+    init {
+        // Observe provider events
+        OpenFeature.addHandler(ProviderEvent.PROVIDER_READY) {
+            refreshFlags()
+        }
+    }
+
+    override fun onCleared() {
+        // Cleanup when ViewModel is destroyed
+        OpenFeature.shutdown()
+    }
+}
+```
+
+**Browser/Web**
+```typescript
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    // Refresh flags when tab becomes visible
+    provider.refresh();
+  }
+});
+
+// Handle online/offline
+window.addEventListener('online', () => {
+  provider.reconnect();
+});
+
+window.addEventListener('offline', () => {
+  // Use cached values, emit STALE if needed
+  provider.setStatus(ProviderStatus.STALE);
+});
+```
+
+**Edge/Embedded**
+```rust
+// Rust - Resource-constrained environments
+pub struct EdgeProvider {
+    cache: HashMap<String, FlagValue>,
+    max_cache_size: usize,
+    storage: Box<dyn PersistentStorage>,
+}
+
+impl EdgeProvider {
+    pub fn new(max_cache_size: usize) -> Self {
+        Self {
+            cache: HashMap::with_capacity(max_cache_size),
+            max_cache_size,
+            storage: Box::new(FileStorage::new("/data/flags")),
+        }
+    }
+
+    // Load from persistent storage on init
+    pub async fn initialize(&mut self) -> Result<(), Error> {
+        self.cache = self.storage.load().await?;
+        Ok(())
+    }
+}
+```
+
+### Offline Support
+
+```typescript
+interface OfflineCapableProvider extends ClientProvider {
+  // Check if operating offline
+  isOffline(): boolean;
+
+  // Get cached value (works offline)
+  getCachedValue<T>(flagKey: string): T | undefined;
+
+  // Queue context changes for when online
+  queueContextChange(context: EvaluationContext): void;
+}
+
+class OfflineProvider implements OfflineCapableProvider {
+  private pendingContext: EvaluationContext | null = null;
+
+  async onContextChange(old: EvaluationContext, new_: EvaluationContext) {
+    if (this.isOffline()) {
+      this.pendingContext = new_;
+      return; // Will reconcile when back online
+    }
+    await this.reconcile(new_);
+  }
+
+  async onOnline() {
+    if (this.pendingContext) {
+      await this.reconcile(this.pendingContext);
+      this.pendingContext = null;
+    }
+  }
+}
+```
+
+### Client SDK Checklist
+
+- [ ] Static-context evaluation methods (no context param)
+- [ ] Context reconciliation (`onContextChange`)
+- [ ] RECONCILING and CONTEXT_CHANGED events
+- [ ] Local flag cache
+- [ ] Persistent storage for offline support
+- [ ] Application lifecycle handling
+- [ ] Network state awareness (online/offline)
+- [ ] Background refresh strategies
+- [ ] Memory-efficient caching (size limits)
+- [ ] Synchronous evaluation from cache
+
+---
+
 ## Language-Specific Considerations
 
 ### Static vs Dynamic Typing
