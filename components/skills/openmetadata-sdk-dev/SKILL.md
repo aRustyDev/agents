@@ -1,11 +1,11 @@
 ---
 name: openmetadata-sdk-dev
-description: Implement OpenMetadata API as SDKs for new languages or extend existing SDKs. Use when building OpenMetadata clients, adding language support, implementing authentication providers, or extending SDK capabilities with new entity types.
+description: Develop and contribute to OpenMetadata SDKs, connectors, and core platform. Use when implementing new language SDKs, building connectors for contribution, extending SDK capabilities, or setting up the OpenMetadata development environment.
 ---
 
-# OpenMetadata SDK Development
+# OpenMetadata SDK & Connector Development
 
-Guide for implementing OpenMetadata API as SDKs for new languages or extending existing Python/Java SDKs with new features.
+Guide for developing OpenMetadata SDKs, connectors, and contributions to the core platform. All SDK and connector development is intended to be contributed back to the community.
 
 > **Note**: This skill extends patterns from `meta-sdk-patterns-eng`.
 > See that skill for foundational SDK patterns (architecture, error handling,
@@ -15,16 +15,17 @@ Guide for implementing OpenMetadata API as SDKs for new languages or extending e
 
 - Implementing OpenMetadata SDK for a new language
 - Extending existing Python or Java SDK with new features
-- Adding new entity type support to an SDK
+- **Contributing new connectors to OpenMetadata**
+- Adding new entity type support
 - Implementing authentication providers
-- Generating entity models from OpenMetadata JSON Schemas
+- Setting up OpenMetadata development environment
+- Generating entity models from JSON Schemas
 
 ## This Skill Does NOT Cover
 
-- Using the existing Python/Java SDK to interact with OpenMetadata
+- Using the existing Python/Java SDK to interact with OpenMetadata (see `openmetadata-dev`)
 - Deploying or operating OpenMetadata
-- Writing ingestion pipelines or connectors
-- See OpenMetadata user documentation for those topics
+- Administering users, bots, and policies (see `openmetadata-ops`)
 
 ---
 
@@ -1141,12 +1142,519 @@ def test_create_and_get_table(openmetadata):
 
 ---
 
+# Contributing to OpenMetadata
+
+All SDK and connector development should be contributed back to the OpenMetadata community. This section covers setting up the development environment and contribution workflows.
+
+## Development Environment Setup
+
+### Prerequisites
+
+| Tool | Version | Installation |
+|------|---------|--------------|
+| Docker | 20+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
+| Java JDK | 21 | `brew install openjdk@21` or SDKMAN |
+| Maven | 3.5+ | `brew install maven` |
+| Python | 3.9-3.11 | System or pyenv |
+| Node.js | 18.x | `brew install node@18` |
+| Yarn | 1.22+ | `npm install -g yarn` |
+| Antlr | 4.9.2 | `sudo make install_antlr_cli` |
+| JQ | Latest | `brew install jq` |
+
+### Verify Prerequisites
+
+```bash
+make prerequisites
+```
+
+### Clone and Setup
+
+```bash
+# Clone repository
+git clone https://github.com/open-metadata/OpenMetadata
+cd OpenMetadata
+
+# Setup Python environment
+python3 -m venv env
+source env/bin/activate
+pip install pre-commit
+
+# Install development dependencies
+make install_dev
+make install_test
+make precommit_install
+
+# Generate models from schemas
+make generate
+```
+
+### Start Development Stack
+
+```bash
+# MySQL + Elasticsearch (default)
+docker compose -f docker/development/docker-compose.yml up mysql elasticsearch --build -d
+
+# OR PostgreSQL + OpenSearch
+docker compose -f docker/development/docker-compose-postgres.yml up postgresql opensearch --build -d
+```
+
+### Build and Run Server
+
+```bash
+# Build (skip tests for speed)
+mvn clean install -DskipTests
+
+# Bootstrap database
+cd openmetadata-dist/target/openmetadata-*/
+sh bootstrap/openmetadata-ops.sh drop-create
+
+# Start server
+sh bin/openmetadata-server-start.sh conf/openmetadata.yaml
+```
+
+Access at `http://localhost:8585`
+
+---
+
+## Repository Structure
+
+```
+OpenMetadata/
+├── openmetadata-spec/                    # JSON Schemas (source of truth)
+│   └── src/main/resources/json/schema/
+│       ├── entity/                       # Entity definitions
+│       │   ├── data/                     # Table, Database, Dashboard...
+│       │   ├── services/                 # Service definitions
+│       │   └── teams/                    # User, Team...
+│       ├── api/                          # API request schemas
+│       └── type/                         # Common types
+│
+├── openmetadata-service/                 # Java backend
+│   └── src/main/java/org/openmetadata/service/
+│       ├── resources/                    # REST API endpoints (Dropwizard)
+│       ├── jdbi3/                        # Database access layer
+│       ├── events/                       # Change event handlers
+│       ├── security/                     # Auth & authorization
+│       └── secrets/converter/            # ClassConverters for oneOf
+│
+├── ingestion/                            # Python ingestion framework
+│   └── src/metadata/
+│       ├── ingestion/
+│       │   ├── source/                   # Source connectors
+│       │   ├── processor/                # Processors
+│       │   ├── sink/                     # Sinks
+│       │   └── api/                      # Workflow APIs
+│       └── generated/                    # Generated Pydantic models
+│
+└── openmetadata-ui/                      # React frontend
+    └── src/main/resources/ui/
+        ├── src/
+        │   ├── utils/                    # ServiceUtils files
+        │   └── locale/languages/         # i18n translations
+        └── public/locales/               # Entity documentation
+```
+
+### Key Directories for Contributions
+
+| Contribution Type | Primary Directory |
+|-------------------|-------------------|
+| New connector schema | `openmetadata-spec/.../connections/` |
+| Connector Python code | `ingestion/src/metadata/ingestion/source/` |
+| Java ClassConverter | `openmetadata-service/.../secrets/converter/` |
+| UI connector config | `openmetadata-ui/.../utils/` |
+
+---
+
+## Contributing New Connectors
+
+### When to Contribute vs Custom Connector
+
+| Scenario | Approach |
+|----------|----------|
+| Connector useful to many users | **Contribute** to OpenMetadata |
+| Single-use, custom data source | Build Custom Connector (not contributed) |
+
+### Connector Development Workflow
+
+```
+1. Define JSON Schema
+       ↓
+2. Generate Types (Java/Python/TS)
+       ↓
+3. Implement Python Ingestion Code
+       ↓
+4. Create Java ClassConverter (if oneOf used)
+       ↓
+5. Apply UI Changes
+       ↓
+6. Write Tests
+       ↓
+7. Update Documentation
+       ↓
+8. Submit PR
+```
+
+### Step 1: Define JSON Schema
+
+Create connection schema at:
+```
+openmetadata-spec/src/main/resources/json/schema/entity/services/connections/{source_type}/
+```
+
+**Example: `myDatabaseConnection.json`**
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://open-metadata.org/schema/entity/services/connections/database/myDatabaseConnection.json",
+  "title": "MyDatabaseConnection",
+  "description": "Connection to MyDatabase",
+  "type": "object",
+  "javaType": "org.openmetadata.schema.services.connections.database.MyDatabaseConnection",
+  "definitions": {
+    "myDatabaseType": {
+      "description": "Service type",
+      "type": "string",
+      "enum": ["MyDatabase"],
+      "default": "MyDatabase"
+    },
+    "myDatabaseScheme": {
+      "description": "SQLAlchemy driver scheme",
+      "type": "string",
+      "enum": ["mydatabase+driver"],
+      "default": "mydatabase+driver"
+    }
+  },
+  "properties": {
+    "type": {
+      "$ref": "#/definitions/myDatabaseType"
+    },
+    "scheme": {
+      "$ref": "#/definitions/myDatabaseScheme"
+    },
+    "hostPort": {
+      "description": "Host and port",
+      "type": "string"
+    },
+    "username": {
+      "description": "Username",
+      "type": "string"
+    },
+    "password": {
+      "description": "Password",
+      "type": "string",
+      "format": "password"
+    },
+    "database": {
+      "description": "Database name",
+      "type": "string"
+    },
+    "supportsMetadataExtraction": {
+      "$ref": "../connectionBasicType.json#/definitions/supportsMetadataExtraction"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["hostPort"]
+}
+```
+
+**Register in service schema** (`databaseService.json`):
+
+```json
+{
+  "config": {
+    "oneOf": [
+      { "$ref": "./connections/database/myDatabaseConnection.json" }
+    ]
+  }
+}
+```
+
+### Step 2: Generate Types
+
+```bash
+# Regenerate all models
+mvn clean install -DskipTests
+
+# Python models
+cd ingestion
+make generate
+
+# TypeScript models (for UI)
+cd openmetadata-ui/src/main/resources/ui
+yarn install
+./json2ts.sh path/to/myDatabaseConnection.json
+```
+
+### Step 3: Implement Python Ingestion
+
+Create connector at:
+```
+ingestion/src/metadata/ingestion/source/database/mydatabase/
+├── __init__.py
+├── connection.py
+├── metadata.py
+└── service_spec.py
+```
+
+**`service_spec.py`**:
+
+```python
+from metadata.ingestion.source.database.mydatabase.metadata import MydatabaseSource
+from metadata.utils.service_spec.default import DefaultDatabaseSpec
+
+ServiceSpec = DefaultDatabaseSpec(metadata_source_class=MydatabaseSource)
+```
+
+**`connection.py`**:
+
+```python
+from metadata.generated.schema.entity.services.connections.database.myDatabaseConnection import (
+    MyDatabaseConnection,
+)
+from metadata.ingestion.connections.builders import create_generic_db_connection
+from metadata.ingestion.connections.test_connections import test_connection_db_schema_sources
+
+def get_connection(connection: MyDatabaseConnection):
+    return create_generic_db_connection(
+        connection=connection,
+        get_connection_url_fn=get_connection_url,
+    )
+
+def get_connection_url(connection: MyDatabaseConnection) -> str:
+    return f"{connection.scheme.value}://{connection.username}:{connection.password}@{connection.hostPort}/{connection.database}"
+
+def test_connection(engine) -> None:
+    test_connection_db_schema_sources(engine)
+```
+
+**`metadata.py`**:
+
+```python
+from metadata.ingestion.source.database.common_db_source import CommonDbSourceService
+
+class MydatabaseSource(CommonDbSourceService):
+    """MyDatabase metadata extraction source."""
+
+    @classmethod
+    def create(cls, config_dict, metadata, pipeline_name=None):
+        config = WorkflowSource.parse_obj(config_dict)
+        return cls(config, metadata)
+
+    # Override methods as needed for custom extraction logic
+```
+
+### Step 4: Create Java ClassConverter (if using `oneOf`)
+
+Only needed if your schema uses `oneOf` for auth types:
+
+```java
+// openmetadata-service/.../secrets/converter/MyDatabaseConnectionClassConverter.java
+package org.openmetadata.service.secrets.converter;
+
+import org.openmetadata.schema.services.connections.database.MyDatabaseConnection;
+
+public class MyDatabaseConnectionClassConverter extends ClassConverter {
+    @Override
+    public Object convert(Object object) {
+        MyDatabaseConnection connection = (MyDatabaseConnection) JsonUtils.convertValue(object, MyDatabaseConnection.class);
+        // Handle oneOf auth types if needed
+        return connection;
+    }
+}
+```
+
+Register in `ClassConverterFactory.java`:
+
+```java
+Map.entry(MyDatabaseConnection.class, new MyDatabaseConnectionClassConverter())
+```
+
+### Step 5: Apply UI Changes
+
+**Update ServiceUtils** (`DatabaseServiceUtils.ts`):
+
+```typescript
+import myDatabaseConnection from '../jsons/connectionSchemas/connections/database/myDatabaseConnection.json';
+
+// In getDatabaseConfig switch:
+case DatabaseServiceType.MyDatabase: {
+    schema = myDatabaseConnection;
+    break;
+}
+```
+
+**Create documentation** at:
+```
+openmetadata-ui/.../public/locales/en-US/Database/MyDatabase.md
+```
+
+### Step 6: Write Tests
+
+```python
+# ingestion/tests/unit/source/database/test_mydatabase.py
+import pytest
+from metadata.ingestion.source.database.mydatabase.metadata import MydatabaseSource
+
+def test_connection_url():
+    connection = MyDatabaseConnection(
+        hostPort="localhost:5432",
+        username="user",
+        password="pass",
+        database="mydb",
+    )
+    url = get_connection_url(connection)
+    assert url == "mydatabase+driver://user:pass@localhost:5432/mydb"
+```
+
+### Step 7: Update Documentation
+
+Create comprehensive docs following OpenMetadata patterns:
+- Connector overview
+- Prerequisites
+- Configuration steps
+- Troubleshooting
+
+---
+
+## Type Generation
+
+### JSON Schema → Multi-Language Models
+
+```
+JSON Schema (source of truth)
+    ↓
+┌───────────────────────────────────────────┐
+│                                           │
+↓               ↓               ↓           ↓
+Java          Python        TypeScript    (Others)
+POJOs         Pydantic      Interfaces
+              Models
+```
+
+### Generation Commands
+
+| Language | Tool | Command |
+|----------|------|---------|
+| Java | jsonschema2pojo | `mvn clean install` |
+| Python | datamodel-codegen | `make generate` |
+| TypeScript | quicktype | `./json2ts.sh <schema>` |
+
+### Generated Output Locations
+
+| Language | Output Directory |
+|----------|------------------|
+| Java | `openmetadata-spec/target/classes/org/openmetadata/schema/` |
+| Python | `ingestion/src/metadata/generated/` |
+| TypeScript | `openmetadata-ui/.../src/generated/` |
+
+---
+
+## Testing
+
+### Python Tests
+
+```bash
+cd ingestion
+
+# Install test dependencies
+make install_test
+
+# Run all tests with coverage
+make coverage
+
+# Run specific tests
+pytest tests/unit/source/database/test_mydatabase.py -v
+
+# Lint and format
+make lint
+make black
+make isort
+```
+
+### Java Tests
+
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=MyDatabaseConnectionTest
+
+# Skip tests during build
+mvn clean install -DskipTests
+```
+
+### Integration Tests
+
+Require running OpenMetadata server:
+
+```bash
+# Start server first
+sh bin/openmetadata-server-start.sh conf/openmetadata.yaml
+
+# Run integration tests
+pytest tests/integration/ -v
+```
+
+### Pre-commit Hooks
+
+```bash
+# Install hooks
+make precommit_install
+
+# Run manually
+pre-commit run --all-files
+```
+
+---
+
+## Contribution Checklist
+
+### New Connector
+- [ ] JSON Schema defined with all required properties
+- [ ] Schema registered in service type file
+- [ ] Java/Python/TypeScript types generated
+- [ ] Python Source implemented
+- [ ] Java ClassConverter (if oneOf used)
+- [ ] UI ServiceUtils updated
+- [ ] UI documentation created
+- [ ] Unit tests written
+- [ ] Integration tests passing
+- [ ] Documentation updated
+- [ ] Pre-commit hooks passing
+- [ ] PR submitted with description
+
+### SDK Extension
+- [ ] JSON Schema updated/created
+- [ ] Types regenerated
+- [ ] Python/Java code implemented
+- [ ] Tests written
+- [ ] Documentation updated
+
+---
+
 ## References
 
+### SDK Documentation
 - [OpenMetadata SDK Documentation](https://docs.open-metadata.org/latest/sdk)
 - [OpenMetadata Python SDK](https://docs.open-metadata.org/latest/sdk/python)
 - [OpenMetadata Java SDK](https://docs.open-metadata.org/latest/sdk/java)
 - [OpenMetadata API (Swagger)](https://docs.open-metadata.org/swagger.html)
-- [OpenMetadata JSON Schemas](https://github.com/open-metadata/OpenMetadata/tree/main/openmetadata-spec/src/main/resources/json/schema)
+
+### Contributing
+- [Build Prerequisites](https://docs.open-metadata.org/latest/developers/contribute/build-code-and-run-tests/prerequisites)
+- [Build & Run Server](https://docs.open-metadata.org/latest/developers/contribute/build-code-and-run-tests/openmetadata-server)
+- [Ingestion Framework](https://docs.open-metadata.org/latest/developers/contribute/build-code-and-run-tests/ingestion-framework)
+- [Developing New Connectors](https://docs.open-metadata.org/latest/developers/contribute/developing-a-new-connector)
+- [Architecture Overview](https://docs.open-metadata.org/latest/developers/architecture)
+- [Code Layout](https://docs.open-metadata.org/latest/developers/architecture/code-layout)
+
+### Source Code
 - [OpenMetadata GitHub](https://github.com/open-metadata/OpenMetadata)
+- [JSON Schemas](https://github.com/open-metadata/OpenMetadata/tree/main/openmetadata-spec/src/main/resources/json/schema)
+
+### Related Skills
 - `meta-sdk-patterns-eng` - Foundational SDK patterns
+- `openmetadata-dev` - Using OpenMetadata SDKs/APIs
+- `openmetadata-ops` - Administering OpenMetadata
