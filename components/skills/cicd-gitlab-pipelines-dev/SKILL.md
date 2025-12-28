@@ -1,9 +1,9 @@
 ---
-name: cicd-gitlab-cicd-dev
-description: Develop and troubleshoot GitLab CI/CD pipelines. Use when creating pipelines, debugging job failures, understanding GitLab-specific features like DAG, rules, and includes, or optimizing pipeline performance.
+name: cicd-gitlab-pipelines-dev
+description: Develop and troubleshoot GitLab CI/CD pipelines. Use when creating pipeline YAML files, debugging job failures, understanding GitLab-specific features like DAG, rules, and includes, or optimizing pipeline performance.
 ---
 
-# GitLab CI/CD Development
+# GitLab CI/CD Pipeline Development
 
 Guide for developing, debugging, and optimizing GitLab CI/CD pipelines.
 

@@ -1,335 +1,514 @@
 ---
 name: cicd-gitea-actions-dev
-description: Develop and troubleshoot Gitea Actions workflows. Use when creating workflows, debugging CI failures, understanding Gitea-specific syntax differences from GitHub Actions, or migrating workflows between platforms.
+description: Develop custom Gitea Actions (composite or Docker-based). Use when creating reusable actions for Gitea, building action.yml files, packaging actions for distribution, or porting GitHub Actions to Gitea.
 ---
 
 # Gitea Actions Development
 
-Guide for developing, debugging, and optimizing Gitea Actions workflows. Gitea Actions is largely compatible with GitHub Actions syntax but has platform-specific differences.
+Guide for developing custom, reusable Gitea Actions. Gitea Actions are compatible with GitHub Actions format, allowing reuse of existing action patterns.
 
 ## When to Use This Skill
 
-- Creating new Gitea Actions workflows
-- Debugging CI failures in Gitea
-- Migrating workflows from GitHub Actions to Gitea
-- Understanding Gitea-specific features and limitations
-- Troubleshooting runner or environment issues
+- Creating custom composite actions for Gitea
+- Developing Docker-based actions
+- Packaging reusable CI/CD components
+- Porting GitHub Actions to Gitea
+- Building organization-wide action libraries
+- Understanding action.yml structure and inputs/outputs
 
-## Key Differences from GitHub Actions
+## Action Types
 
-| Feature | GitHub Actions | Gitea Actions |
-|---------|---------------|---------------|
-| Workflow location | `.github/workflows/` | `.gitea/workflows/` |
-| Default runner | `ubuntu-latest` | Self-hosted or `ubuntu-latest` (if configured) |
-| Secrets syntax | `${{ secrets.NAME }}` | `${{ secrets.NAME }}` (same) |
-| Context variables | Full `github.*` context | `gitea.*` context with some differences |
-| Marketplace | actions/* available | Limited - use full URLs or self-host |
+### Composite Actions
 
-## Workflow Structure
-
-### File Location
-
-Workflows live in `.gitea/workflows/` with `.yml` or `.yaml` extension.
-
-### Basic Structure
+Run multiple steps as a single action:
 
 ```yaml
-name: Workflow Name
+# action.yml
+name: 'Setup and Build'
+description: 'Install dependencies and build the project'
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
 
-jobs:
-  job-name:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Step name
-        run: echo "Hello from Gitea"
+outputs:
+  build-path:
+    description: 'Path to build output'
+    value: ${{ steps.build.outputs.path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Build
+      id: build
+      shell: bash
+      run: |
+        npm run build
+        echo "path=dist" >> $GITHUB_OUTPUT
 ```
 
-### Using GitHub Actions in Gitea
+### Docker Actions
 
-Most GitHub Actions work in Gitea. Reference them by full URL or short form:
+Run in a container:
 
 ```yaml
-steps:
-  # Short form (requires Gitea to be configured for GitHub)
-  - uses: actions/checkout@v4
+# action.yml
+name: 'Custom Linter'
+description: 'Run custom linting with Docker'
 
-  # Full URL form (always works)
-  - uses: https://github.com/actions/checkout@v4
+inputs:
+  config:
+    description: 'Config file path'
+    required: false
+    default: '.lintrc'
 
-  # Gitea-hosted action
-  - uses: https://gitea.example.com/owner/action@v1
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.config }}
 ```
 
-## Gitea-Specific Context
+```dockerfile
+# Dockerfile
+FROM alpine:3.19
 
-### Available Context Variables
+RUN apk add --no-cache bash jq
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+```
+
+```bash
+#!/bin/bash
+# entrypoint.sh
+CONFIG_FILE="${1:-.lintrc}"
+echo "Running linter with config: $CONFIG_FILE"
+# Linting logic here
+```
+
+## Action Structure
+
+### Directory Layout
+
+```
+my-action/
+├── action.yml          # Action metadata (required)
+├── README.md           # Documentation
+├── Dockerfile          # For Docker actions
+├── entrypoint.sh       # Docker entrypoint
+├── src/                # Source code (if applicable)
+│   └── main.js
+└── dist/               # Compiled output (for JS actions)
+    └── index.js
+```
+
+### action.yml Reference
 
 ```yaml
-# Gitea context (similar to github.*)
-${{ gitea.event_name }}        # push, pull_request, etc.
-${{ gitea.ref }}               # refs/heads/main
-${{ gitea.sha }}               # commit SHA
-${{ gitea.repository }}        # owner/repo
-${{ gitea.actor }}             # username triggering the workflow
-${{ gitea.run_id }}            # workflow run ID
-${{ gitea.run_number }}        # workflow run number
-${{ gitea.server_url }}        # https://gitea.example.com
-${{ gitea.api_url }}           # https://gitea.example.com/api/v1
+name: 'Action Name'
+description: 'What this action does'
+author: 'Your Name'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  input-name:
+    description: 'Description of input'
+    required: true
+    default: 'default value'
+
+outputs:
+  output-name:
+    description: 'Description of output'
+    value: ${{ steps.step-id.outputs.result }}
+
+runs:
+  using: 'composite'  # or 'docker'
+  steps:
+    - name: Step name
+      shell: bash
+      run: echo "Hello"
 ```
 
-### Secrets
+## Input Handling
+
+### Required vs Optional
 
 ```yaml
-env:
-  API_KEY: ${{ secrets.API_KEY }}
-  # Gitea token (like GITHUB_TOKEN)
-  GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+inputs:
+  required-input:
+    description: 'This must be provided'
+    required: true
+
+  optional-input:
+    description: 'This has a default'
+    required: false
+    default: 'default-value'
+
+  boolean-input:
+    description: 'A boolean flag'
+    required: false
+    default: 'false'
 ```
 
-## Common CI Patterns
-
-### Matrix Builds
+### Accessing Inputs
 
 ```yaml
-jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        go: ['1.21', '1.22']
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go }}
-      - run: go test ./...
+# In composite action steps
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        echo "Input value: ${{ inputs.my-input }}"
+
+        # Boolean check
+        if [ "${{ inputs.boolean-input }}" == "true" ]; then
+          echo "Flag is enabled"
+        fi
 ```
+
+```bash
+# In Docker entrypoint (passed as args)
+#!/bin/bash
+INPUT_VALUE="$1"
+echo "Input: $INPUT_VALUE"
+```
+
+## Output Handling
+
+### Setting Outputs
+
+```yaml
+# Composite action
+runs:
+  using: 'composite'
+  steps:
+    - id: generate
+      shell: bash
+      run: |
+        RESULT="computed-value"
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+outputs:
+  my-output:
+    description: 'The computed result'
+    value: ${{ steps.generate.outputs.result }}
+```
+
+### Multi-line Outputs
+
+```yaml
+- id: multi
+  shell: bash
+  run: |
+    EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+    echo "content<<$EOF" >> $GITHUB_OUTPUT
+    cat file.txt >> $GITHUB_OUTPUT
+    echo "$EOF" >> $GITHUB_OUTPUT
+```
+
+## Composite Action Patterns
 
 ### Conditional Steps
 
 ```yaml
-- name: Only on main
-  if: gitea.ref == 'refs/heads/main'
-  run: echo "On main branch"
-
-- name: Only on PR
-  if: gitea.event_name == 'pull_request'
-  run: echo "This is a PR"
+runs:
+  using: 'composite'
+  steps:
+    - name: Only if input provided
+      if: ${{ inputs.optional-value != '' }}
+      shell: bash
+      run: echo "Processing: ${{ inputs.optional-value }}"
 ```
 
-### Caching
+### Calling Other Actions
 
 ```yaml
-- uses: actions/cache@v4
-  with:
-    path: |
-      ~/.cache/go-build
-      ~/go/pkg/mod
-    key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-    restore-keys: |
-      ${{ runner.os }}-go-
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - shell: bash
+      run: npm ci
 ```
 
-### Artifacts
+### Error Handling
 
 ```yaml
-- uses: actions/upload-artifact@v4
-  with:
-    name: build-output
-    path: dist/
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+
+        if ! command -v node &> /dev/null; then
+          echo "::error::Node.js is not installed"
+          exit 1
+        fi
 ```
 
-## Runner Configuration
+## Docker Action Patterns
 
-### Self-Hosted Runners
+### Environment Variables
 
-Gitea primarily uses self-hosted runners via `act_runner`:
+```yaml
+# action.yml
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    MY_VAR: ${{ inputs.my-input }}
+```
+
+### Pre/Post Scripts
+
+```yaml
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  pre-entrypoint: 'setup.sh'
+  entrypoint: 'main.sh'
+  post-entrypoint: 'cleanup.sh'
+```
+
+## Gitea-Specific Considerations
+
+### Hosting Actions
+
+Unlike GitHub, Gitea doesn't have a marketplace. Host actions in:
+
+1. **Same Repository**: Reference with relative path
+   ```yaml
+   uses: ./.gitea/actions/my-action
+   ```
+
+2. **Gitea Repository**: Full URL required
+   ```yaml
+   uses: https://gitea.example.com/org/actions@v1
+   ```
+
+3. **GitHub Actions**: Can use GitHub actions if network allows
+   ```yaml
+   uses: https://github.com/actions/checkout@v4
+   ```
+
+### Context Differences
+
+```yaml
+# Use gitea.* context in workflows, but actions use same syntax
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        # These work in Gitea
+        echo "Repository: ${{ github.repository }}"
+        echo "Ref: ${{ github.ref }}"
+```
+
+### Runner Compatibility
+
+Actions run on `act_runner`. Ensure:
+- Docker is available for Docker actions
+- Required tools are installed for composite actions
+- Network access to fetch dependencies
+
+## Testing Actions
+
+### Local Testing
 
 ```bash
-# Install act_runner
-wget https://gitea.com/gitea/act_runner/releases/latest/download/act_runner-linux-amd64
-chmod +x act_runner-linux-amd64
-
-# Register runner
-./act_runner-linux-amd64 register \
-  --instance https://gitea.example.com \
-  --token <registration-token>
-
-# Start runner
-./act_runner-linux-amd64 daemon
-```
-
-### Runner Labels
-
-```yaml
+# Test composite action
+cd my-action
+cat > test-workflow.yml << 'EOF'
+on: push
 jobs:
-  build:
-    runs-on: ubuntu-latest  # or custom label
-    # runs-on: self-hosted   # for self-hosted runners
-    # runs-on: [self-hosted, linux, x64]  # with labels
-```
-
-## Debugging CI Failures
-
-### View Workflow Logs
-
-In Gitea web UI:
-1. Navigate to repository
-2. Click "Actions" tab
-3. Select the workflow run
-4. Click on failed job to see logs
-
-### Common Issues
-
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Action not found | GitHub action not accessible | Use full URL or mirror action |
-| Runner offline | Self-hosted runner not running | Check `act_runner` service |
-| Permission denied | Missing secrets or permissions | Configure secrets in repo settings |
-| Context undefined | Using `github.*` instead of `gitea.*` | Use `gitea.*` context variables |
-
-### Reproduce Locally with act
-
-```bash
-# Install act
-brew install act
-
-# Run workflow locally
-act -W .gitea/workflows/
-
-# With specific event
-act push -W .gitea/workflows/
-```
-
-## Migrating from GitHub Actions
-
-### Step 1: Move Workflow Files
-
-```bash
-mkdir -p .gitea/workflows
-cp .github/workflows/*.yml .gitea/workflows/
-```
-
-### Step 2: Update Context References
-
-```yaml
-# Before (GitHub)
-if: github.ref == 'refs/heads/main'
-
-# After (Gitea)
-if: gitea.ref == 'refs/heads/main'
-```
-
-### Step 3: Update Action References
-
-```yaml
-# If Gitea can't reach GitHub actions
-steps:
-  # Mirror to your Gitea instance
-  - uses: https://gitea.example.com/mirrors/checkout@v4
-
-  # Or use full GitHub URL
-  - uses: https://github.com/actions/checkout@v4
-```
-
-### Step 4: Configure Secrets
-
-Re-create secrets in Gitea:
-- Repository Settings > Actions > Secrets
-
-## Environment Variables
-
-```yaml
-env:
-  GLOBAL_VAR: value
-
-jobs:
-  build:
-    env:
-      JOB_VAR: value
-    runs-on: ubuntu-latest
-    steps:
-      - env:
-          STEP_VAR: value
-        run: echo $STEP_VAR
-```
-
-## Performance Optimization
-
-### Parallel Jobs
-
-```yaml
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps: [...]
-
   test:
     runs-on: ubuntu-latest
-    steps: [...]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          my-input: 'test-value'
+EOF
 
-  deploy:
-    needs: [lint, test]
+act -W test-workflow.yml
+```
+
+### Test in Gitea
+
+```yaml
+# .gitea/workflows/test-action.yml
+name: Test Action
+on: push
+
+jobs:
+  test:
     runs-on: ubuntu-latest
-    steps: [...]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test action
+        uses: ./path/to/action
+        with:
+          input-name: 'test-value'
+
+      - name: Verify output
+        run: |
+          echo "Output: ${{ steps.test.outputs.output-name }}"
 ```
 
-### Path Filtering
+## Versioning
 
-```yaml
-on:
-  push:
-    paths:
-      - 'src/**'
-      - 'go.mod'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
+### Semantic Versioning
+
+```bash
+# Tag releases
+git tag -a v1.0.0 -m "Initial release"
+git push origin v1.0.0
+
+# Create major version tag
+git tag -fa v1 -m "Update v1 to v1.0.0"
+git push origin v1 --force
 ```
 
-### Concurrency Control
+### Version References
 
 ```yaml
-concurrency:
-  group: ${{ gitea.workflow }}-${{ gitea.ref }}
-  cancel-in-progress: true
+# In workflows
+uses: org/my-action@v1       # Major version (recommended)
+uses: org/my-action@v1.2.3   # Exact version
+uses: org/my-action@main     # Branch (not recommended for production)
 ```
 
-## Pre-commit Hooks
+## Documentation
+
+### README Template
+
+```markdown
+# Action Name
+
+Description of what this action does.
+
+## Inputs
+
+| Input | Description | Required | Default |
+|-------|-------------|----------|---------|
+| `input-name` | What it does | Yes | - |
+
+## Outputs
+
+| Output | Description |
+|--------|-------------|
+| `output-name` | What it contains |
+
+## Usage
+
+\`\`\`yaml
+- uses: org/action-name@v1
+  with:
+    input-name: 'value'
+\`\`\`
+
+## Examples
+
+### Basic Usage
+
+\`\`\`yaml
+- uses: org/action-name@v1
+\`\`\`
+
+### Advanced Usage
+
+\`\`\`yaml
+- uses: org/action-name@v1
+  with:
+    input-name: 'custom-value'
+\`\`\`
+```
+
+## Porting from GitHub Actions
+
+### Compatibility Checklist
+
+- [ ] Replace `github.*` context with equivalent (works in Gitea)
+- [ ] Update action references to use full URLs if needed
+- [ ] Verify runner has required tools/dependencies
+- [ ] Test with `act` locally before deploying
+- [ ] Update documentation for Gitea-specific setup
+
+### Common Adjustments
 
 ```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        files: ^\.gitea/workflows/
-        args: [-c, .yamllint.yml]
+# GitHub-specific features that may differ:
+# - GITHUB_TOKEN → GITEA_TOKEN
+# - github.server_url → gitea.server_url
+# - Marketplace actions → self-hosted or full URL
+```
+
+## Debugging
+
+### Debug Output
+
+```yaml
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        echo "::debug::Debug message"
+        echo "::notice::Notice message"
+        echo "::warning::Warning message"
+        echo "::error::Error message"
+```
+
+### Action Logs
+
+```yaml
+- shell: bash
+  run: |
+    echo "::group::Setup Details"
+    env | sort
+    echo "::endgroup::"
 ```
 
 ## Debugging Checklist
 
-- [ ] Check workflow is in `.gitea/workflows/` (not `.github/workflows/`)
-- [ ] Verify runner is online and registered
-- [ ] Check action URLs are accessible from runner
-- [ ] Verify secrets are configured in Gitea
-- [ ] Use `gitea.*` context instead of `github.*`
-- [ ] Check runner labels match `runs-on` specification
-- [ ] Review Gitea Actions logs in web UI
+- [ ] Verify action.yml syntax is correct
+- [ ] Check all required inputs have values
+- [ ] Ensure shell is specified for composite steps
+- [ ] Verify Docker image builds successfully
+- [ ] Test with act locally before pushing
+- [ ] Check output variable names match declarations
+- [ ] Verify action is accessible from workflow
 
 ## References
 
 - [Gitea Actions Documentation](https://docs.gitea.com/usage/actions/overview)
-- [Gitea Actions Quickstart](https://docs.gitea.com/usage/actions/quickstart)
-- [act_runner Documentation](https://gitea.com/gitea/act_runner)
-- [Comparison with GitHub Actions](https://docs.gitea.com/usage/actions/comparison)
-- [Migrating from GitHub](https://docs.gitea.com/usage/actions/faq#how-to-migrate-from-github-actions)
+- [GitHub Actions Syntax](https://docs.github.com/en/actions/creating-actions) (compatible)
+- [Creating Composite Actions](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action)
+- [Creating Docker Actions](https://docs.github.com/en/actions/creating-actions/creating-a-docker-container-action)
+- [act - Run Actions Locally](https://github.com/nektos/act)
