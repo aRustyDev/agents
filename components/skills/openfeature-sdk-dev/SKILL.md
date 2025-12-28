@@ -5,6 +5,10 @@ description: Develop OpenFeature SDK implementations from the specification. Use
 
 # OpenFeature SDK Development
 
+> **Note**: This skill extends patterns from `meta-sdk-patterns-eng`.
+> See that skill for foundational SDK patterns (architecture, error handling,
+> configuration, testing strategies, packaging).
+
 Guide for implementing OpenFeature SDKs from the specification. This skill covers building SDK implementations, not using existing SDKs (see `openfeature-eng` for usage).
 
 ## When to Use This Skill
