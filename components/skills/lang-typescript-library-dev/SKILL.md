@@ -28,6 +28,56 @@ For general concepts like semantic versioning, module organization principles, a
 
 ---
 
+## Overview
+
+Publishing a TypeScript library requires careful configuration of multiple interconnected systems:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    TypeScript Library Stack                     │
+├─────────────────────────────────────────────────────────────────┤
+│  Source Code (src/)                                             │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐         │
+│  │ tsconfig    │───▶│ TypeScript  │───▶│ Declaration │         │
+│  │   .json     │    │  Compiler   │    │ Files (.d.ts)│         │
+│  └─────────────┘    └─────────────┘    └─────────────┘         │
+│       │                   │                   │                 │
+│       │                   ▼                   │                 │
+│       │            ┌─────────────┐            │                 │
+│       │            │  JavaScript │            │                 │
+│       │            │   Output    │            │                 │
+│       │            └─────────────┘            │                 │
+│       │                   │                   │                 │
+│       ▼                   ▼                   ▼                 │
+│  ┌─────────────────────────────────────────────────────┐       │
+│  │                   package.json                       │       │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐             │       │
+│  │  │ exports │  │  main   │  │  types  │             │       │
+│  │  │  field  │  │ module  │  │  field  │             │       │
+│  │  └─────────┘  └─────────┘  └─────────┘             │       │
+│  └─────────────────────────────────────────────────────┘       │
+│                          │                                      │
+│                          ▼                                      │
+│                    ┌───────────┐                                │
+│                    │    npm    │                                │
+│                    │  publish  │                                │
+│                    └───────────┘                                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Decision Points:**
+
+| Decision | Options | Recommendation |
+|----------|---------|----------------|
+| Module format | ESM-only, CJS-only, Dual | ESM-only for new packages; Dual if supporting legacy |
+| Build tool | tsc, tsup, unbuild, rollup | tsup for simplicity; tsc for control |
+| Declaration files | Inline, Separate dir | Inline (same dir as JS) |
+| Monorepo tool | pnpm workspaces, turborepo, nx | pnpm workspaces for simplicity |
+
+---
+
 ## Quick Reference
 
 | Task | Command |
@@ -642,6 +692,115 @@ npx changeset publish
     "react": "^18.0.0"
   }
 }
+```
+
+---
+
+## Troubleshooting
+
+### Types Not Found by Consumers
+
+**Symptom:** `Cannot find module 'my-lib' or its corresponding type declarations`
+
+**Causes & Fixes:**
+
+| Cause | Fix |
+|-------|-----|
+| Missing `types` field | Add `"types": "./dist/index.d.ts"` to package.json |
+| Wrong export order | Put `types` first in exports conditions |
+| Declaration files not generated | Set `"declaration": true` in tsconfig.json |
+| Files not published | Check `files` field includes `dist` |
+
+**Diagnostic:**
+```bash
+# Check what's actually published
+npm pack --dry-run
+
+# Validate types configuration
+npx @arethetypeswrong/cli my-package
+```
+
+### ESM/CJS Import Errors
+
+**Symptom:** `ERR_REQUIRE_ESM` or `Must use import to load ES Module`
+
+**Common Fixes:**
+
+```json
+// Ensure package.json has correct type
+{
+  "type": "module"  // For ESM-first packages
+}
+
+// Or provide both formats in exports
+{
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  }
+}
+```
+
+### Declaration Files Missing Exports
+
+**Symptom:** Types exist but some exports show as `any`
+
+**Fixes:**
+1. Ensure all exports use `export` keyword (not just `module.exports`)
+2. Check `include` in tsconfig.json covers all source files
+3. Verify no `// @ts-ignore` hiding type errors
+
+### Monorepo Package Resolution
+
+**Symptom:** `Cannot find module '@myorg/shared'` in monorepo
+
+**Fixes:**
+
+```json
+// tsconfig.json - Add path mapping
+{
+  "compilerOptions": {
+    "paths": {
+      "@myorg/*": ["./packages/*/src"]
+    }
+  }
+}
+
+// Or use TypeScript project references
+{
+  "references": [
+    { "path": "../shared" }
+  ]
+}
+```
+
+### Build Output Issues
+
+| Problem | Solution |
+|---------|----------|
+| Output files have wrong extension | Check `module` setting matches desired output |
+| Source maps not working | Enable `sourceMap` and `declarationMap` |
+| Test files in dist | Add test patterns to `exclude` in tsconfig |
+| node_modules in output | Ensure `rootDir` is set to `./src` |
+
+### Publishing Failures
+
+**Pre-publish checklist:**
+```bash
+# 1. Verify package contents
+npm pack --dry-run
+
+# 2. Test local install
+npm pack && npm install ./my-package-1.0.0.tgz
+
+# 3. Test imports work
+node -e "import('my-package').then(console.log)"
+
+# 4. Check for accidental secrets
+grep -r "api_key\|password\|secret" dist/
 ```
 
 ---
