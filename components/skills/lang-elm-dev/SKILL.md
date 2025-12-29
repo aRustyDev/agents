@@ -858,6 +858,508 @@ module Types exposing (User, Msg)
 
 ---
 
+## Concurrency
+
+Elm takes a fundamentally different approach to concurrency compared to traditional imperative languages. Rather than managing threads and locks, Elm's architecture handles concurrency through managed effects. For cross-language comparison, see `patterns-concurrency-dev`.
+
+### Why Traditional Concurrency Doesn't Apply
+
+```elm
+-- Elm has NO:
+-- - Threads or green threads
+-- - Locks or mutexes
+-- - Race conditions
+-- - Shared mutable state
+-- - Async/await keywords
+
+-- Instead: The Elm Runtime manages ALL concurrency
+-- Your code is ALWAYS single-threaded and synchronous
+```
+
+### The Elm Architecture Handles Concurrency
+
+```elm
+-- Multiple HTTP requests "in flight" - runtime manages them
+type Msg
+    = GotUser1 (Result Http.Error User)
+    | GotUser2 (Result Http.Error User)
+    | GotUser3 (Result Http.Error User)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        StartFetching ->
+            -- Runtime executes these concurrently
+            ( { model | loading = True }
+            , Cmd.batch
+                [ Http.get { url = "/api/user/1", expect = Http.expectJson GotUser1 userDecoder }
+                , Http.get { url = "/api/user/2", expect = Http.expectJson GotUser2 userDecoder }
+                , Http.get { url = "/api/user/3", expect = Http.expectJson GotUser3 userDecoder }
+                ]
+            )
+
+        GotUser1 result ->
+            -- Each response handled independently as it arrives
+            -- Runtime ensures update is never called concurrently
+            handleUserResult 1 result model
+
+        GotUser2 result ->
+            handleUserResult 2 result model
+
+        GotUser3 result ->
+            handleUserResult 3 result model
+```
+
+### Cmd and Sub: Managed Effects
+
+```elm
+-- Cmd: Commands that produce effects
+-- The runtime executes these, guarantees serialized updates
+
+type alias Model =
+    { time : Time.Posix
+    , windowSize : ( Int, Int )
+    }
+
+type Msg
+    = Tick Time.Posix
+    | WindowResized Int Int
+
+-- Subscriptions: Stream of events from outside world
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Time.every 1000 Tick           -- Every second
+        , Browser.Events.onResize WindowResized  -- On window resize
+        ]
+        -- Runtime manages these subscriptions
+        -- Messages arrive one at a time in update function
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Tick newTime ->
+            ( { model | time = newTime }, Cmd.none )
+
+        WindowResized width height ->
+            ( { model | windowSize = ( width, height ) }, Cmd.none )
+```
+
+### Task: Sequential Async Operations
+
+```elm
+import Task exposing (Task)
+import Time
+import Http
+
+-- Task: Describes async operation, doesn't execute until performed
+-- Think of it as a "recipe" for an async operation
+
+getCurrentTime : Task Never Time.Posix
+getCurrentTime =
+    Time.now
+
+-- Chain Tasks sequentially
+fetchAndLog : Task Http.Error String
+fetchAndLog =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url = "/api/data"
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver handleResponse
+        , timeout = Nothing
+        }
+        |> Task.andThen (\data ->
+            -- Log happens AFTER fetch completes
+            Task.succeed ("Fetched: " ++ data)
+        )
+
+-- Perform task to create Cmd
+type Msg
+    = GotData (Result Http.Error String)
+
+fetchData : Cmd Msg
+fetchData =
+    Task.attempt GotData fetchAndLog
+
+-- Task combinators for "concurrent" execution
+-- (Runtime manages, you describe relationships)
+fetchMultiple : Cmd Msg
+fetchMultiple =
+    Task.map2 Tuple.pair
+        (Http.task { ... })  -- Fetch 1
+        (Http.task { ... })  -- Fetch 2
+        |> Task.attempt GotBothResults
+        -- Runtime may execute concurrently, delivers result when BOTH complete
+```
+
+### Process: Background Tasks
+
+```elm
+import Process
+import Task
+
+-- Delay execution
+delayed : Msg -> Cmd Msg
+delayed msg =
+    Process.sleep 1000  -- 1 second in milliseconds
+        |> Task.perform (\_ -> msg)
+
+-- Debouncing user input
+type Msg
+    = UserTyped String
+    | DebouncedInput String
+    | CancelDebounce
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UserTyped input ->
+            ( { model | input = input }
+            , Cmd.batch
+                [ Process.sleep 500
+                    |> Task.perform (\_ -> DebouncedInput input)
+                ]
+            )
+
+        DebouncedInput input ->
+            -- Only fires if user stops typing for 500ms
+            ( model, performSearch input )
+```
+
+### Ports: Concurrent JavaScript Interop
+
+```elm
+-- port: Escape hatch for JS concurrency primitives
+port module Main exposing (..)
+
+-- Outgoing: Send to JavaScript
+port sendToWorker : String -> Cmd msg
+
+-- Incoming: Receive from JavaScript (subscription)
+port workerResponse : (String -> msg) -> Sub msg
+
+type Msg
+    = StartWork String
+    | WorkComplete String
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    workerResponse WorkComplete
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        StartWork data ->
+            -- JavaScript can run Web Workers, handle concurrency
+            ( { model | working = True }
+            , sendToWorker data
+            )
+
+        WorkComplete result ->
+            ( { model | working = False, result = result }
+            , Cmd.none
+            )
+
+-- In JavaScript:
+-- app.ports.sendToWorker.subscribe(function(data) {
+--     const worker = new Worker('worker.js');
+--     worker.postMessage(data);
+--     worker.onmessage = function(e) {
+--         app.ports.workerResponse.send(e.data);
+--     };
+-- });
+```
+
+### Key Principles
+
+```elm
+-- 1. Update is NEVER concurrent - always single-threaded
+-- 2. Runtime manages ALL asynchronous operations
+-- 3. No race conditions possible in Elm code
+-- 4. Cmd/Sub provide declarative concurrency
+-- 5. For CPU-intensive work: Use ports + Web Workers
+
+-- Compare to other languages:
+-- - Go/Erlang: Explicit goroutines/processes → Elm: Cmd/Sub
+-- - JavaScript: async/await → Elm: Task
+-- - Rust: threads + channels → Elm: Runtime + messages
+```
+
+---
+
+## Metaprogramming
+
+Elm intentionally does not support traditional metaprogramming like macros or reflection. This is a deliberate design choice to ensure code is explicit, maintainable, and debuggable. For cross-language comparison, see `patterns-metaprogramming-dev`.
+
+### Why Elm Has No Metaprogramming
+
+```elm
+-- Elm has NO:
+-- - Macros (no code that writes code)
+-- - Reflection (can't inspect types at runtime)
+-- - eval() (no runtime code execution)
+-- - Dynamic code generation
+-- - Preprocessor directives
+
+-- Philosophy:
+-- - Explicit is better than implicit
+-- - Code should be readable without magic
+-- - Compiler guarantees should be reliable
+-- - Refactoring should be safe and predictable
+```
+
+### Alternative: Code Generation (elm-codegen)
+
+```bash
+# External tool generates Elm code at build time
+# NOT metaprogramming - generates source files you commit
+
+# Example: Generate API client from OpenAPI spec
+elm-codegen openapi.yaml --output src/Generated/Api.elm
+
+# Result: Normal Elm code you can read and version control
+```
+
+```elm
+-- Generated/Api.elm (example output)
+module Generated.Api exposing (getUser, createUser)
+
+import Http
+import Json.Decode as Decode
+
+getUser : Int -> (Result Http.Error User -> msg) -> Cmd msg
+getUser userId toMsg =
+    Http.get
+        { url = "/api/users/" ++ String.fromInt userId
+        , expect = Http.expectJson toMsg userDecoder
+        }
+
+userDecoder : Decode.Decoder User
+userDecoder =
+    Decode.map3 User
+        (Decode.field "name" Decode.string)
+        (Decode.field "email" Decode.string)
+        (Decode.field "age" Decode.int)
+```
+
+### Alternative: Type-Driven Design
+
+```elm
+-- Instead of metaprogramming, use types to enforce invariants
+
+-- Bad: Use strings, need validation everywhere
+type alias UserId = String
+
+validateUserId : String -> Maybe UserId
+validateUserId str =
+    if String.startsWith "user-" str then
+        Just str
+    else
+        Nothing
+
+-- Good: Make invalid states unrepresentable
+type UserId = UserId String
+
+createUserId : String -> Maybe UserId
+createUserId str =
+    if String.startsWith "user-" str then
+        Just (UserId str)
+    else
+        Nothing
+
+getUserById : UserId -> Cmd Msg
+getUserById (UserId id) =
+    -- Guaranteed to be valid, no runtime checks needed
+    Http.get { url = "/api/users/" ++ id, ... }
+
+-- Type system does the "metaprogramming" work at compile time
+```
+
+### Alternative: Phantom Types
+
+```elm
+-- Encode state in types without runtime cost
+
+type Validated
+type Unvalidated
+
+type Form a
+    = Form
+        { email : String
+        , age : String
+        }
+
+-- Can't use unvalidated form
+submitForm : Form Validated -> Cmd Msg
+submitForm (Form data) =
+    Http.post { ... }
+
+-- Must validate first
+validateForm : Form Unvalidated -> Result (List String) (Form Validated)
+validateForm (Form data) =
+    if String.contains "@" data.email then
+        Ok (Form data)
+    else
+        Err [ "Invalid email" ]
+
+-- Type system prevents: submitForm unvalidatedForm
+-- Type system enforces: validateForm form |> Result.map submitForm
+```
+
+### Alternative: Custom Types for DSLs
+
+```elm
+-- Instead of macros, define DSL as data
+
+type Query
+    = Select (List String) Table (Maybe Condition)
+    | Insert Table (List ( String, Value ))
+
+type Table = Table String
+
+type Condition
+    = Equals String Value
+    | And Condition Condition
+    | Or Condition Condition
+
+type Value
+    = StringVal String
+    | IntVal Int
+
+-- Build queries as data
+query : Query
+query =
+    Select
+        [ "name", "email" ]
+        (Table "users")
+        (Just (Equals "active" (StringVal "true")))
+
+-- Interpret DSL
+toSql : Query -> String
+toSql queryData =
+    case queryData of
+        Select fields (Table tableName) maybeWhere ->
+            "SELECT "
+                ++ String.join ", " fields
+                ++ " FROM "
+                ++ tableName
+                ++ (case maybeWhere of
+                        Just condition ->
+                            " WHERE " ++ conditionToSql condition
+
+                        Nothing ->
+                            ""
+                   )
+
+        _ ->
+            "..."
+
+-- Result: Type-safe SQL without macros
+-- Compiler checks all queries at compile time
+```
+
+### Ports as FFI (Foreign Function Interface)
+
+```elm
+-- Port: Call JavaScript for things Elm can't do
+port module Analytics exposing (trackEvent)
+
+-- Send data to JavaScript
+port trackEvent : { name : String, properties : Json.Encode.Value } -> Cmd msg
+
+-- Use like any other Cmd
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        ButtonClicked ->
+            ( model
+            , trackEvent
+                { name = "button_clicked"
+                , properties =
+                    Json.Encode.object
+                        [ ( "button_id", Json.Encode.string "submit" )
+                        ]
+                }
+            )
+```
+
+```javascript
+// JavaScript side (ports.js)
+app.ports.trackEvent.subscribe(function(event) {
+    // Use any JS metaprogramming/reflection here
+    analytics.track(event.name, event.properties);
+
+    // Can use JS features Elm doesn't have:
+    // - eval()
+    // - Proxy objects
+    // - Reflect API
+    // - Dynamic code loading
+});
+```
+
+### elm-review for Custom Linting
+
+```elm
+-- Instead of macros, write custom compile-time checks
+-- elm-review: Analyze and transform code at build time
+
+module ReviewConfig exposing (config)
+
+import Review.Rule as Rule
+import Elm.Syntax.Expression exposing (Expression)
+
+-- Custom rule: Prevent Debug.log in production
+noDebugLog : Rule
+noDebugLog =
+    Rule.newModuleRuleSchema "NoDebugLog" ()
+        |> Rule.withSimpleExpressionVisitor expressionVisitor
+        |> Rule.fromModuleRuleSchema
+
+expressionVisitor : Expression -> List Rule.Error
+expressionVisitor expression =
+    case expression of
+        FunctionOrValue [ "Debug" ] "log" ->
+            [ Rule.error
+                { message = "Debug.log is not allowed"
+                , details = [ "Remove Debug.log before committing" ]
+                }
+            ]
+
+        _ ->
+            []
+```
+
+### Key Principles
+
+```elm
+-- Elm philosophy on metaprogramming:
+-- 1. No magic - code should be obvious
+-- 2. Use types instead of runtime checks
+-- 3. Generate code externally, commit it
+-- 4. Ports for JS interop when needed
+-- 5. elm-review for custom compile-time checks
+
+-- Compare to other languages:
+-- - Ruby/Lisp macros → Elm: Code generation + types
+-- - Python reflection → Elm: Phantom types
+-- - Template Haskell → Elm: External codegen
+-- - C preprocessor → Elm: Type system + elm-review
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Compare Elm's Cmd/Sub/Task to threads, async/await, actors
+- `patterns-metaprogramming-dev` - Compare Elm's type-driven approach to macros, reflection, codegen
+- `patterns-serialization-dev` - JSON decoders/encoders patterns across languages
+
+---
+
 ## References
 
 - [Elm Guide](https://guide.elm-lang.org/) - Official tutorial
