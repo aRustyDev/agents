@@ -1,6 +1,6 @@
 ---
 name: lang-c-dev
-description: Foundational C programming patterns covering the type system, memory management, pointers, arrays, preprocessor, and compilation. Use when writing C code, understanding manual memory management, working with system-level programming, or needing guidance on which specialized C skill to use. This is the entry point for C development.
+description: Foundational C programming patterns covering type system, memory management, pointers, arrays, preprocessor, compilation, concurrency (pthreads, mutexes, atomics), serialization (binary, JSON, struct packing), and testing (Unity, CMocka, Check). Complete 8/8 pillar coverage. Use when writing C code, understanding manual memory management, working with system-level programming, or needing guidance on which specialized C skill to use. This is the entry point for C development.
 ---
 
 # C Fundamentals
@@ -36,6 +36,9 @@ Foundational C programming patterns and core language features. This skill serve
 - Arrays and strings (null-terminated, manipulation)
 - Preprocessor directives (#define, #include, macros)
 - Header files and compilation process
+- Concurrency (pthreads, mutexes, condition variables, atomics)
+- Serialization (binary, JSON with cJSON, struct packing)
+- Testing (Unity, CMocka, Check frameworks)
 - Common idioms and safety patterns
 
 **This skill does NOT cover (see specialized skills):**
@@ -1148,6 +1151,741 @@ void example(void) {
     printf("%" PRId64 "\n", big);  // Use PRId64 from inttypes.h
 }
 ```
+
+---
+
+## Concurrency
+
+C has no built-in concurrency primitives in the standard. Most concurrent programming uses POSIX threads (pthreads) or platform-specific APIs.
+
+### POSIX Threads (pthreads)
+
+```c
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+// Thread function
+void *thread_function(void *arg) {
+    int *value = (int *)arg;
+    printf("Thread received: %d\n", *value);
+
+    // Return value
+    int *result = malloc(sizeof(int));
+    *result = *value * 2;
+    return result;
+}
+
+int main(void) {
+    pthread_t thread;
+    int input = 42;
+
+    // Create thread
+    if (pthread_create(&thread, NULL, thread_function, &input) != 0) {
+        perror("pthread_create");
+        return 1;
+    }
+
+    // Wait for thread to finish
+    void *result;
+    if (pthread_join(thread, &result) != 0) {
+        perror("pthread_join");
+        return 1;
+    }
+
+    printf("Result: %d\n", *(int *)result);
+    free(result);
+
+    return 0;
+}
+```
+
+### Mutexes (Mutual Exclusion)
+
+```c
+#include <pthread.h>
+
+// Shared data protected by mutex
+typedef struct {
+    int counter;
+    pthread_mutex_t mutex;
+} SafeCounter;
+
+void counter_init(SafeCounter *c) {
+    c->counter = 0;
+    pthread_mutex_init(&c->mutex, NULL);
+}
+
+void counter_increment(SafeCounter *c) {
+    pthread_mutex_lock(&c->mutex);
+    c->counter++;
+    pthread_mutex_unlock(&c->mutex);
+}
+
+int counter_get(SafeCounter *c) {
+    pthread_mutex_lock(&c->mutex);
+    int value = c->counter;
+    pthread_mutex_unlock(&c->mutex);
+    return value;
+}
+
+void counter_destroy(SafeCounter *c) {
+    pthread_mutex_destroy(&c->mutex);
+}
+
+// Usage
+void *increment_thread(void *arg) {
+    SafeCounter *counter = (SafeCounter *)arg;
+    for (int i = 0; i < 1000; i++) {
+        counter_increment(counter);
+    }
+    return NULL;
+}
+```
+
+### Condition Variables
+
+```c
+#include <pthread.h>
+
+typedef struct {
+    int ready;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+} Signal;
+
+void signal_init(Signal *s) {
+    s->ready = 0;
+    pthread_mutex_init(&s->mutex, NULL);
+    pthread_cond_init(&s->cond, NULL);
+}
+
+// Producer: signal when ready
+void signal_notify(Signal *s) {
+    pthread_mutex_lock(&s->mutex);
+    s->ready = 1;
+    pthread_cond_signal(&s->cond);  // Wake one waiter
+    pthread_mutex_unlock(&s->mutex);
+}
+
+// Consumer: wait for signal
+void signal_wait(Signal *s) {
+    pthread_mutex_lock(&s->mutex);
+    while (!s->ready) {
+        pthread_cond_wait(&s->cond, &s->mutex);
+    }
+    pthread_mutex_unlock(&s->mutex);
+}
+
+void signal_destroy(Signal *s) {
+    pthread_mutex_destroy(&s->mutex);
+    pthread_cond_destroy(&s->cond);
+}
+```
+
+### Atomic Operations (C11+)
+
+```c
+#include <stdatomic.h>
+#include <pthread.h>
+
+// Atomic counter (lock-free)
+typedef struct {
+    atomic_int counter;
+} AtomicCounter;
+
+void atomic_counter_init(AtomicCounter *c) {
+    atomic_init(&c->counter, 0);
+}
+
+void atomic_counter_increment(AtomicCounter *c) {
+    atomic_fetch_add(&c->counter, 1);
+}
+
+int atomic_counter_get(AtomicCounter *c) {
+    return atomic_load(&c->counter);
+}
+
+// Compare and swap
+_Bool atomic_compare_exchange_example(atomic_int *ptr, int expected, int desired) {
+    return atomic_compare_exchange_strong(ptr, &expected, desired);
+}
+
+// Memory ordering
+void atomic_with_ordering(void) {
+    atomic_int x, y;
+
+    // Sequential consistency (default)
+    atomic_store(&x, 1);
+
+    // Relaxed ordering (weakest)
+    atomic_store_explicit(&y, 2, memory_order_relaxed);
+
+    // Acquire-release ordering
+    atomic_store_explicit(&x, 1, memory_order_release);
+    atomic_load_explicit(&x, memory_order_acquire);
+}
+```
+
+### Thread-Local Storage
+
+```c
+#include <pthread.h>
+#include <stdio.h>
+
+// Thread-local variable (C11+)
+_Thread_local int thread_id = 0;
+
+void *thread_func(void *arg) {
+    thread_id = *(int *)arg;
+    printf("Thread ID: %d\n", thread_id);
+    return NULL;
+}
+
+// POSIX thread-specific data
+pthread_key_t key;
+
+void cleanup(void *data) {
+    free(data);
+}
+
+void create_thread_data(void) {
+    pthread_key_create(&key, cleanup);
+}
+
+void set_thread_data(int value) {
+    int *data = malloc(sizeof(int));
+    *data = value;
+    pthread_setspecific(key, data);
+}
+
+int get_thread_data(void) {
+    int *data = pthread_getspecific(key);
+    return data ? *data : -1;
+}
+```
+
+**See also:** `patterns-concurrency-dev` for cross-language concurrency patterns
+
+---
+
+## Serialization
+
+C has no standard serialization framework. Data is typically serialized manually or using third-party libraries.
+
+### Manual Binary Serialization
+
+```c
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+typedef struct {
+    uint32_t id;
+    char name[50];
+    float score;
+} Record;
+
+// Serialize to file (binary)
+int serialize_record(const Record *record, const char *filename) {
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        return -1;
+    }
+
+    size_t written = fwrite(record, sizeof(Record), 1, file);
+    fclose(file);
+
+    return written == 1 ? 0 : -1;
+}
+
+// Deserialize from file (binary)
+int deserialize_record(Record *record, const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+        return -1;
+    }
+
+    size_t read = fread(record, sizeof(Record), 1, file);
+    fclose(file);
+
+    return read == 1 ? 0 : -1;
+}
+
+// Network-safe serialization (handle endianness)
+#include <arpa/inet.h>  // For htonl, ntohl
+
+typedef struct {
+    uint32_t id;
+    uint32_t value;
+} NetworkMessage;
+
+void serialize_network(const NetworkMessage *msg, uint8_t *buffer) {
+    uint32_t *ptr = (uint32_t *)buffer;
+    ptr[0] = htonl(msg->id);      // Host to network byte order
+    ptr[1] = htonl(msg->value);
+}
+
+void deserialize_network(NetworkMessage *msg, const uint8_t *buffer) {
+    const uint32_t *ptr = (const uint32_t *)buffer;
+    msg->id = ntohl(ptr[0]);      // Network to host byte order
+    msg->value = ntohl(ptr[1]);
+}
+```
+
+### JSON Serialization (cJSON Library)
+
+```c
+// cJSON: https://github.com/DaveGamble/cJSON
+#include <cJSON.h>
+
+typedef struct {
+    char name[50];
+    int age;
+    char email[100];
+} User;
+
+// Serialize struct to JSON string
+char *user_to_json(const User *user) {
+    cJSON *root = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(root, "name", user->name);
+    cJSON_AddNumberToObject(root, "age", user->age);
+    cJSON_AddStringToObject(root, "email", user->email);
+
+    char *json_str = cJSON_Print(root);  // Caller must free
+    cJSON_Delete(root);
+
+    return json_str;
+}
+
+// Deserialize JSON string to struct
+int user_from_json(User *user, const char *json_str) {
+    cJSON *root = cJSON_Parse(json_str);
+    if (root == NULL) {
+        return -1;
+    }
+
+    cJSON *name = cJSON_GetObjectItem(root, "name");
+    cJSON *age = cJSON_GetObjectItem(root, "age");
+    cJSON *email = cJSON_GetObjectItem(root, "email");
+
+    if (!cJSON_IsString(name) || !cJSON_IsNumber(age) || !cJSON_IsString(email)) {
+        cJSON_Delete(root);
+        return -1;
+    }
+
+    strncpy(user->name, name->valuestring, sizeof(user->name) - 1);
+    user->age = age->valueint;
+    strncpy(user->email, email->valuestring, sizeof(user->email) - 1);
+
+    cJSON_Delete(root);
+    return 0;
+}
+
+// Usage
+void json_example(void) {
+    User user = {"Alice", 30, "alice@example.com"};
+
+    // Serialize
+    char *json = user_to_json(&user);
+    printf("%s\n", json);
+
+    // Deserialize
+    User parsed;
+    if (user_from_json(&parsed, json) == 0) {
+        printf("Parsed: %s, %d, %s\n", parsed.name, parsed.age, parsed.email);
+    }
+
+    free(json);
+}
+```
+
+### Struct Packing and Alignment
+
+```c
+#include <stddef.h>
+
+// Default alignment (padding added)
+struct Unpacked {
+    char a;      // 1 byte
+    // 3 bytes padding
+    int b;       // 4 bytes
+    char c;      // 1 byte
+    // 3 bytes padding
+};  // Total: 12 bytes
+
+// Packed struct (no padding)
+struct __attribute__((packed)) Packed {
+    char a;      // 1 byte
+    int b;       // 4 bytes
+    char c;      // 1 byte
+};  // Total: 6 bytes
+
+// GCC/Clang: #pragma pack
+#pragma pack(push, 1)
+struct PackedPragma {
+    char a;
+    int b;
+    char c;
+};
+#pragma pack(pop)
+
+// Check alignment
+void check_alignment(void) {
+    printf("Unpacked size: %zu\n", sizeof(struct Unpacked));
+    printf("Packed size: %zu\n", sizeof(struct Packed));
+
+    // Get field offset
+    printf("Offset of b: %zu\n", offsetof(struct Unpacked, b));
+}
+
+// Serialization with packed structs
+int serialize_packed(const struct Packed *data, const char *filename) {
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        return -1;
+    }
+
+    // Safe: no padding, predictable layout
+    fwrite(data, sizeof(struct Packed), 1, file);
+    fclose(file);
+    return 0;
+}
+```
+
+### Protocol Buffers / MessagePack (Third-Party)
+
+```c
+// Using protobuf-c: https://github.com/protobuf-c/protobuf-c
+// Define .proto file, generate C code with protoc-c
+
+// Example usage (generated code):
+/*
+Person person = PERSON__INIT;
+person.name = "Alice";
+person.id = 123;
+
+// Serialize
+size_t len = person__get_packed_size(&person);
+uint8_t *buffer = malloc(len);
+person__pack(&person, buffer);
+
+// Deserialize
+Person *parsed = person__unpack(NULL, len, buffer);
+printf("Name: %s, ID: %d\n", parsed->name, parsed->id);
+person__free_unpacked(parsed, NULL);
+*/
+```
+
+**See also:** `patterns-serialization-dev` for cross-language serialization patterns
+
+---
+
+## Testing
+
+C has no built-in test framework. Unit testing typically uses third-party frameworks like Unity, CMocka, or Check.
+
+### Unity Framework
+
+```c
+// Unity: https://github.com/ThrowTheSwitch/Unity
+#include "unity.h"
+
+// Functions under test
+int add(int a, int b) {
+    return a + b;
+}
+
+int divide(int a, int b) {
+    if (b == 0) return -1;  // Error code
+    return a / b;
+}
+
+// Setup/teardown (called before/after each test)
+void setUp(void) {
+    // Initialize test fixtures
+}
+
+void tearDown(void) {
+    // Clean up after test
+}
+
+// Test cases
+void test_add_positive_numbers(void) {
+    TEST_ASSERT_EQUAL_INT(5, add(2, 3));
+    TEST_ASSERT_EQUAL_INT(10, add(7, 3));
+}
+
+void test_add_negative_numbers(void) {
+    TEST_ASSERT_EQUAL_INT(-5, add(-2, -3));
+    TEST_ASSERT_EQUAL_INT(0, add(-5, 5));
+}
+
+void test_divide_success(void) {
+    TEST_ASSERT_EQUAL_INT(2, divide(6, 3));
+    TEST_ASSERT_EQUAL_INT(-2, divide(-6, 3));
+}
+
+void test_divide_by_zero(void) {
+    TEST_ASSERT_EQUAL_INT(-1, divide(10, 0));
+}
+
+// Main test runner
+int main(void) {
+    UNITY_BEGIN();
+
+    RUN_TEST(test_add_positive_numbers);
+    RUN_TEST(test_add_negative_numbers);
+    RUN_TEST(test_divide_success);
+    RUN_TEST(test_divide_by_zero);
+
+    return UNITY_END();
+}
+```
+
+### Common Unity Assertions
+
+```c
+// Integer assertions
+TEST_ASSERT_EQUAL_INT(expected, actual);
+TEST_ASSERT_NOT_EQUAL_INT(expected, actual);
+TEST_ASSERT_GREATER_THAN_INT(threshold, actual);
+TEST_ASSERT_LESS_THAN_INT(threshold, actual);
+TEST_ASSERT_INT_WITHIN(delta, expected, actual);
+
+// Floating point
+TEST_ASSERT_EQUAL_FLOAT(expected, actual);
+TEST_ASSERT_FLOAT_WITHIN(delta, expected, actual);
+
+// Strings
+TEST_ASSERT_EQUAL_STRING(expected, actual);
+TEST_ASSERT_EQUAL_STRING_LEN(expected, actual, length);
+
+// Memory
+TEST_ASSERT_EQUAL_MEMORY(expected, actual, length);
+
+// Pointers
+TEST_ASSERT_NULL(pointer);
+TEST_ASSERT_NOT_NULL(pointer);
+TEST_ASSERT_EQUAL_PTR(expected, actual);
+
+// Boolean
+TEST_ASSERT_TRUE(condition);
+TEST_ASSERT_FALSE(condition);
+
+// Custom message
+TEST_ASSERT_EQUAL_INT_MESSAGE(expected, actual, "Custom failure message");
+```
+
+### CMocka Framework
+
+```c
+// CMocka: https://cmocka.org/
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+
+// Function to test
+char *format_name(const char *first, const char *last) {
+    if (first == NULL || last == NULL) {
+        return NULL;
+    }
+
+    size_t len = strlen(first) + strlen(last) + 2;
+    char *result = malloc(len);
+    snprintf(result, len, "%s %s", first, last);
+    return result;
+}
+
+// Test with setup/teardown
+static int setup(void **state) {
+    char *test_data = strdup("test");
+    *state = test_data;
+    return 0;
+}
+
+static int teardown(void **state) {
+    free(*state);
+    return 0;
+}
+
+// Test functions
+static void test_format_name_success(void **state) {
+    (void)state;  // Unused
+
+    char *result = format_name("John", "Doe");
+    assert_non_null(result);
+    assert_string_equal(result, "John Doe");
+    free(result);
+}
+
+static void test_format_name_null_input(void **state) {
+    (void)state;
+
+    char *result = format_name(NULL, "Doe");
+    assert_null(result);
+
+    result = format_name("John", NULL);
+    assert_null(result);
+}
+
+// Test runner
+int main(void) {
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_format_name_success),
+        cmocka_unit_test(test_format_name_null_input),
+        cmocka_unit_test_setup_teardown(test_with_fixture, setup, teardown),
+    };
+
+    return cmocka_run_group_tests(tests, NULL, NULL);
+}
+```
+
+### Mocking with CMocka
+
+```c
+// Mock a function
+int __wrap_database_get_user(int id);  // Our mock
+int __real_database_get_user(int id);  // Real function
+
+int __wrap_database_get_user(int id) {
+    check_expected(id);
+    return (int)mock();
+}
+
+// Test using mock
+static void test_with_mock(void **state) {
+    (void)state;
+
+    // Expect call with id=1, return 42
+    expect_value(__wrap_database_get_user, id, 1);
+    will_return(__wrap_database_get_user, 42);
+
+    // Function under test calls database_get_user
+    int result = process_user(1);
+    assert_int_equal(result, 42);
+}
+
+// Compile with: -Wl,--wrap=database_get_user
+```
+
+### Check Framework
+
+```c
+// Check: https://libcheck.github.io/check/
+#include <check.h>
+
+START_TEST(test_add) {
+    ck_assert_int_eq(add(2, 3), 5);
+    ck_assert_int_eq(add(-1, 1), 0);
+}
+END_TEST
+
+START_TEST(test_divide) {
+    ck_assert_int_eq(divide(6, 3), 2);
+    ck_assert_int_eq(divide(10, 0), -1);
+}
+END_TEST
+
+Suite *create_suite(void) {
+    Suite *s = suite_create("Math");
+
+    TCase *tc_core = tcase_create("Core");
+    tcase_add_test(tc_core, test_add);
+    tcase_add_test(tc_core, test_divide);
+    suite_add_tcase(s, tc_core);
+
+    return s;
+}
+
+int main(void) {
+    Suite *s = create_suite();
+    SRunner *sr = srunner_create(s);
+
+    srunner_run_all(sr, CK_NORMAL);
+    int failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+
+    return (failed == 0) ? 0 : 1;
+}
+```
+
+### Test Organization
+
+```c
+// test_math.c
+#include "unity.h"
+#include "math_functions.h"
+
+void test_addition(void) {
+    TEST_ASSERT_EQUAL_INT(5, add(2, 3));
+}
+
+void test_subtraction(void) {
+    TEST_ASSERT_EQUAL_INT(2, subtract(5, 3));
+}
+
+// test_string.c
+#include "unity.h"
+#include "string_functions.h"
+
+void test_concat(void) {
+    char *result = concat("Hello", "World");
+    TEST_ASSERT_EQUAL_STRING("HelloWorld", result);
+    free(result);
+}
+
+// test_runner.c
+#include "unity.h"
+
+// External test declarations
+extern void test_addition(void);
+extern void test_subtraction(void);
+extern void test_concat(void);
+
+void setUp(void) {}
+void tearDown(void) {}
+
+int main(void) {
+    UNITY_BEGIN();
+
+    // Math tests
+    RUN_TEST(test_addition);
+    RUN_TEST(test_subtraction);
+
+    // String tests
+    RUN_TEST(test_concat);
+
+    return UNITY_END();
+}
+```
+
+### Coverage and Profiling
+
+```bash
+# Compile with coverage flags (GCC/Clang)
+gcc -fprofile-arcs -ftest-coverage -o test_program test.c functions.c
+
+# Run tests
+./test_program
+
+# Generate coverage report
+gcov functions.c
+lcov --capture --directory . --output-file coverage.info
+genhtml coverage.info --output-directory coverage_html
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Threads, mutexes, atomics, channels
+- `patterns-serialization-dev` - JSON, binary formats, endianness
+- `patterns-metaprogramming-dev` - Macros, code generation
 
 ---
 

@@ -1399,6 +1399,958 @@ def findUser(id: Int): User = {
 
 ---
 
+## Concurrency
+
+Scala provides multiple concurrency models: Futures for simple async operations, Akka actors for complex concurrent systems, and modern effect systems like Cats Effect and ZIO.
+
+### Futures - Basic Async
+
+**Creating and using Futures:**
+
+```scala
+import scala.concurrent.{Future, Await}
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
+// Create Future
+val future = Future {
+  Thread.sleep(1000)
+  42
+}
+
+// Transform with map
+val doubled = future.map(_ * 2)
+
+// Chain with flatMap
+val chained = future.flatMap { value =>
+  Future(value + 10)
+}
+
+// For-comprehension
+val result = for {
+  a <- Future(10)
+  b <- Future(20)
+  c <- Future(30)
+} yield a + b + c
+
+// Blocking (avoid in production)
+val value = Await.result(future, 5.seconds)
+```
+
+**Combining Futures:**
+
+```scala
+// Sequence - converts List[Future[A]] to Future[List[A]]
+val futures = List(Future(1), Future(2), Future(3))
+val combined: Future[List[Int]] = Future.sequence(futures)
+
+// Traverse - map then sequence
+val ids = List(1, 2, 3)
+val users: Future[List[User]] = Future.traverse(ids)(id => fetchUser(id))
+
+// First completed
+val fastest = Future.firstCompletedOf(List(
+  fetchFromPrimary(),
+  fetchFromBackup()
+))
+
+// Recover from failures
+val safe = future.recover {
+  case _: TimeoutException => 0
+  case _: Exception => -1
+}
+
+val safeWith = future.recoverWith {
+  case _: Exception => fetchFromCache()
+}
+```
+
+**Promise - explicit completion:**
+
+```scala
+import scala.concurrent.Promise
+
+val promise = Promise[Int]()
+val future = promise.future
+
+// Complete in another thread
+Future {
+  Thread.sleep(1000)
+  promise.success(42)
+}
+
+// Or fail
+promise.failure(new Exception("Failed"))
+
+// Try complete (doesn't throw if already completed)
+promise.trySuccess(100)
+```
+
+### Akka Actors - Message Passing
+
+**Typed actors (Akka Typed):**
+
+```scala
+import akka.actor.typed._
+import akka.actor.typed.scaladsl.Behaviors
+
+// Define protocol
+sealed trait CounterMessage
+case object Increment extends CounterMessage
+case object Decrement extends CounterMessage
+case class GetCount(replyTo: ActorRef[Int]) extends CounterMessage
+
+// Define behavior
+def counter(count: Int): Behavior[CounterMessage] = Behaviors.receive { (context, message) =>
+  message match {
+    case Increment =>
+      counter(count + 1)
+    case Decrement =>
+      counter(count - 1)
+    case GetCount(replyTo) =>
+      replyTo ! count
+      Behaviors.same
+  }
+}
+
+// Create actor system
+val system = ActorSystem(counter(0), "counter-system")
+
+// Send messages
+system ! Increment
+system ! Increment
+```
+
+**Actor patterns:**
+
+```scala
+// Ask pattern (request-response)
+import akka.actor.typed.scaladsl.AskPattern._
+import akka.util.Timeout
+import scala.concurrent.duration._
+
+implicit val timeout: Timeout = 3.seconds
+
+val futureCount: Future[Int] = system.ask(ref => GetCount(ref))
+
+// Supervision
+def supervisedBehavior(): Behavior[String] = {
+  Behaviors.supervise {
+    Behaviors.receive[String] { (context, message) =>
+      if (message == "fail") throw new Exception("Failed!")
+      else Behaviors.same
+    }
+  }.onFailure[Exception](SupervisorStrategy.restart)
+}
+```
+
+### Cats Effect - Functional Effects
+
+**IO monad for side effects:**
+
+```scala
+import cats.effect._
+
+// Create IO
+val printHello: IO[Unit] = IO.println("Hello")
+val readLine: IO[String] = IO.readLine
+
+// Compose with for-comprehension
+val program = for {
+  _ <- IO.println("What's your name?")
+  name <- IO.readLine
+  _ <- IO.println(s"Hello, $name!")
+} yield ()
+
+// Parallel execution
+import cats.effect.syntax.parallel._
+import cats.syntax.apply._
+
+val parallel = (
+  fetchUser(1),
+  fetchUser(2),
+  fetchUser(3)
+).parMapN((u1, u2, u3) => List(u1, u2, u3))
+
+// Resource management
+def useFile(path: String): IO[String] = {
+  Resource.make(
+    IO(scala.io.Source.fromFile(path))  // Acquire
+  )(source => IO(source.close()))        // Release
+    .use(source => IO(source.mkString))  // Use
+}
+
+// Error handling
+val safeIO = IO.raiseError(new Exception("Error"))
+  .handleErrorWith(_ => IO.pure(0))
+  .attempt  // Returns IO[Either[Throwable, Int]]
+```
+
+**Fibers - lightweight threads:**
+
+```scala
+import cats.effect.IO
+
+def task(n: Int): IO[Unit] = IO.sleep(1.second) >> IO.println(s"Task $n")
+
+val program = for {
+  fiber1 <- task(1).start  // Start fiber
+  fiber2 <- task(2).start
+  _ <- fiber1.join         // Wait for completion
+  _ <- fiber2.join
+} yield ()
+
+// Cancellation
+val cancelable = for {
+  fiber <- IO.sleep(10.seconds).start
+  _ <- IO.sleep(1.second)
+  _ <- fiber.cancel  // Cancel after 1 second
+} yield ()
+```
+
+### ZIO - Effect System
+
+**ZIO basics:**
+
+```scala
+import zio._
+
+// Create ZIO
+val hello: ZIO[Any, Nothing, Unit] = ZIO.succeed(println("Hello"))
+val readLine: ZIO[Any, IOException, String] = ZIO.attempt(scala.io.StdIn.readLine())
+
+// Composition
+val program = for {
+  _ <- Console.printLine("What's your name?")
+  name <- Console.readLine
+  _ <- Console.printLine(s"Hello, $name!")
+} yield ()
+
+// Parallel execution
+val parallel = ZIO.collectAllPar(List(
+  fetchUser(1),
+  fetchUser(2),
+  fetchUser(3)
+))
+
+// Racing
+val raced = fetchFromPrimary() race fetchFromBackup()
+
+// Timeout
+val withTimeout = fetchData().timeout(5.seconds)
+```
+
+**ZIO Layers - dependency injection:**
+
+```scala
+trait UserService {
+  def getUser(id: Int): ZIO[Any, Throwable, User]
+}
+
+case class UserServiceLive(database: Database) extends UserService {
+  def getUser(id: Int): ZIO[Any, Throwable, User] =
+    ZIO.attempt(database.query(s"SELECT * FROM users WHERE id = $id"))
+}
+
+object UserServiceLive {
+  val layer: ZLayer[Database, Nothing, UserService] =
+    ZLayer.fromFunction(UserServiceLive.apply _)
+}
+
+// Use the service
+val program = for {
+  user <- ZIO.serviceWithZIO[UserService](_.getUser(123))
+  _ <- Console.printLine(s"User: $user")
+} yield ()
+
+// Provide dependencies
+program.provide(UserServiceLive.layer, DatabaseLive.layer)
+```
+
+**See also:** `patterns-concurrency-dev` for cross-language concurrency comparison
+
+---
+
+## Build and Dependencies
+
+Scala uses sbt (Simple Build Tool) as the primary build tool, with Mill as a modern alternative. Dependencies are published to Maven Central and Sonatype.
+
+### sbt - Simple Build Tool
+
+**build.sbt basics:**
+
+```scala
+// Project metadata
+name := "my-project"
+version := "0.1.0"
+scalaVersion := "3.3.1"
+
+// Organization (for publishing)
+organization := "com.example"
+
+// Dependencies
+libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-core" % "2.10.0",
+  "org.typelevel" %% "cats-effect" % "3.5.2",
+  "com.lihaoyi" %% "upickle" % "3.1.3",
+
+  // Test dependencies
+  "org.scalatest" %% "scalatest" % "3.2.17" % Test,
+  "org.scalatestplus" %% "mockito-4-11" % "3.2.17.0" % Test
+)
+
+// Compiler options (Scala 3)
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings"
+)
+
+// Resolvers (if needed)
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+```
+
+**Dependency syntax:**
+
+```scala
+// %% - Scala version appended automatically
+"org.typelevel" %% "cats-core" % "2.10.0"
+// Resolves to: org.typelevel:cats-core_3:2.10.0
+
+// % - Exact artifact name (Java libraries)
+"com.google.guava" % "guava" % "32.1.3-jre"
+
+// Cross-version dependencies
+"org.scala-lang" % "scala-reflect" % scalaVersion.value
+
+// Test scope
+"org.scalatest" %% "scalatest" % "3.2.17" % Test
+
+// Provided scope (available at compile, not packaged)
+"javax.servlet" % "javax.servlet-api" % "4.0.1" % Provided
+```
+
+**Multi-module projects:**
+
+```scala
+// build.sbt root project
+lazy val root = (project in file("."))
+  .aggregate(core, api, client)
+  .settings(
+    name := "my-project"
+  )
+
+lazy val core = (project in file("core"))
+  .settings(
+    name := "my-project-core",
+    libraryDependencies ++= coreDeps
+  )
+
+lazy val api = (project in file("api"))
+  .dependsOn(core)
+  .settings(
+    name := "my-project-api",
+    libraryDependencies ++= apiDeps
+  )
+
+lazy val client = (project in file("client"))
+  .dependsOn(core)
+  .settings(
+    name := "my-project-client"
+  )
+```
+
+**Common sbt tasks:**
+
+```bash
+# Compile
+sbt compile
+
+# Run application
+sbt run
+
+# Run tests
+sbt test
+
+# Interactive mode
+sbt
+> compile
+> test
+> ~test  # Watch mode - rerun on file change
+
+# Package JAR
+sbt package
+
+# Create fat JAR (with dependencies)
+sbt assembly  # Requires sbt-assembly plugin
+
+# Show dependency tree
+sbt dependencyTree
+
+# Update dependencies
+sbt update
+
+# Clean build
+sbt clean
+
+# Publish to local Ivy repository
+sbt publishLocal
+
+# Publish to Maven Central
+sbt publishSigned
+```
+
+**project/plugins.sbt - sbt plugins:**
+
+```scala
+// Assembly - fat JAR
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.5")
+
+// Coverage
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.9")
+
+// Publishing
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.21")
+
+// Formatting
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
+
+// Native compilation
+addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.16")
+```
+
+### Mill - Modern Build Tool
+
+**build.sc (Mill build file):**
+
+```scala
+import mill._
+import mill.scalalib._
+
+object core extends ScalaModule {
+  def scalaVersion = "3.3.1"
+
+  def ivyDeps = Agg(
+    ivy"org.typelevel::cats-core:2.10.0",
+    ivy"org.typelevel::cats-effect:3.5.2"
+  )
+
+  object test extends Tests with TestModule.ScalaTest {
+    def ivyDeps = Agg(
+      ivy"org.scalatest::scalatest:3.2.17"
+    )
+  }
+}
+
+object api extends ScalaModule {
+  def scalaVersion = "3.3.1"
+  def moduleDeps = Seq(core)
+}
+```
+
+**Mill commands:**
+
+```bash
+# Compile
+mill core.compile
+
+# Run tests
+mill core.test
+
+# Run application
+mill core.run
+
+# Assembly (fat JAR)
+mill core.assembly
+
+# Watch mode
+mill -w core.test
+```
+
+### Cross-Compilation
+
+**Building for multiple Scala versions:**
+
+```scala
+// build.sbt
+lazy val core = (project in file("core"))
+  .settings(
+    name := "my-library",
+    crossScalaVersions := Seq("2.12.18", "2.13.12", "3.3.1"),
+    scalaVersion := "3.3.1"  // Default
+  )
+```
+
+```bash
+# Compile for all versions
+sbt +compile
+
+# Test all versions
+sbt +test
+
+# Publish all versions
+sbt +publish
+```
+
+**Version-specific code:**
+
+```scala
+// src/main/scala-2.13/compat.scala
+object Compat {
+  def collect[A](list: List[Option[A]]): List[A] = list.flatten
+}
+
+// src/main/scala-3/compat.scala
+object Compat {
+  def collect[A](list: List[Option[A]]): List[A] = list.flatten
+}
+```
+
+### Publishing to Maven Central
+
+**build.sbt publishing configuration:**
+
+```scala
+// Metadata
+organization := "io.github.username"
+homepage := Some(url("https://github.com/username/project"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/username/project"),
+    "scm:git@github.com:username/project.git"
+  )
+)
+developers := List(
+  Developer(
+    id = "username",
+    name = "Your Name",
+    email = "you@example.com",
+    url = url("https://github.com/username")
+  )
+)
+licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+
+// Publishing
+publishMavenStyle := true
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+
+// PGP signing
+usePgpKeyHex("YOUR_KEY_ID")
+```
+
+---
+
+## Testing
+
+Scala has multiple testing frameworks: ScalaTest (most popular), MUnit (lightweight), specs2 (BDD-style), and ScalaCheck for property-based testing.
+
+### ScalaTest - Comprehensive Testing
+
+**Basic test suites:**
+
+```scala
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+class CalculatorSpec extends AnyFlatSpec with Matchers {
+
+  "A Calculator" should "add two numbers" in {
+    val calc = new Calculator
+    calc.add(2, 3) shouldBe 5
+  }
+
+  it should "subtract two numbers" in {
+    val calc = new Calculator
+    calc.subtract(5, 3) shouldBe 2
+  }
+
+  it should "throw on division by zero" in {
+    val calc = new Calculator
+    assertThrows[ArithmeticException] {
+      calc.divide(10, 0)
+    }
+  }
+}
+```
+
+**Test styles:**
+
+```scala
+// FlatSpec - flat, BDD-style
+class UserServiceFlatSpec extends AnyFlatSpec with Matchers {
+  "UserService" should "find user by id" in {
+    // test
+  }
+}
+
+// FunSpec - nested describe/it
+class UserServiceFunSpec extends AnyFunSpec with Matchers {
+  describe("UserService") {
+    describe("findById") {
+      it("should return user when found") {
+        // test
+      }
+      it("should return None when not found") {
+        // test
+      }
+    }
+  }
+}
+
+// WordSpec - BDD "should" style
+class UserServiceWordSpec extends AnyWordSpec with Matchers {
+  "UserService" should {
+    "find user by id" in {
+      // test
+    }
+    "handle missing users" in {
+      // test
+    }
+  }
+}
+
+// FeatureSpec - acceptance testing
+class UserFeatureSpec extends AnyFeatureSpec with GivenWhenThen {
+  Feature("User management") {
+    Scenario("Creating a new user") {
+      Given("a user registration form")
+      When("the user submits valid data")
+      Then("a new user is created")
+    }
+  }
+}
+```
+
+**Matchers:**
+
+```scala
+// Equality
+result shouldBe 42
+result should equal(42)
+result shouldEqual 42
+
+// Comparison
+value should be > 10
+value should be <= 100
+
+// Collections
+list should contain(42)
+list should have size 5
+list shouldBe empty
+list should contain allOf (1, 2, 3)
+list should contain oneOf (1, 2, 3)
+
+// Options
+option shouldBe defined
+option shouldBe empty
+option should contain(42)
+
+// Strings
+string should startWith("Hello")
+string should endWith("World")
+string should include("middle")
+string should fullyMatch regex "\\d+".r
+
+// Exceptions
+the [IllegalArgumentException] thrownBy {
+  service.process(null)
+} should have message "Input cannot be null"
+
+// Custom matchers
+val beEven = be >= 0 and (x => x % 2 == 0)
+value should beEven
+```
+
+**Fixtures and lifecycle:**
+
+```scala
+class DatabaseSpec extends AnyFlatSpec with Matchers with BeforeAndAfter {
+  var db: Database = _
+
+  before {
+    db = Database.connect()
+    db.migrate()
+  }
+
+  after {
+    db.close()
+  }
+
+  "Database" should "insert records" in {
+    db.insert(Record("test"))
+    db.count() shouldBe 1
+  }
+}
+
+// Or use BeforeAndAfterEach
+class ServiceSpec extends AnyFlatSpec with BeforeAndAfterEach {
+  override def beforeEach(): Unit = {
+    // Setup before each test
+  }
+
+  override def afterEach(): Unit = {
+    // Cleanup after each test
+  }
+}
+```
+
+### MUnit - Lightweight Testing
+
+**MUnit basics:**
+
+```scala
+import munit.FunSuite
+
+class CalculatorSuite extends FunSuite {
+  test("addition works") {
+    assertEquals(2 + 3, 5)
+  }
+
+  test("division by zero fails") {
+    intercept[ArithmeticException] {
+      10 / 0
+    }
+  }
+
+  test("async operation".tag(new Tag("async"))) {
+    Future(42).map { result =>
+      assertEquals(result, 42)
+    }
+  }
+}
+```
+
+**Fixtures:**
+
+```scala
+class DatabaseSuite extends FunSuite {
+  val db = FunFixture[Database](
+    setup = { _ => Database.connect() },
+    teardown = { db => db.close() }
+  )
+
+  db.test("insert works") { db =>
+    db.insert(Record("test"))
+    assertEquals(db.count(), 1)
+  }
+}
+```
+
+### specs2 - BDD Style
+
+**specs2 basics:**
+
+```scala
+import org.specs2.mutable.Specification
+
+class CalculatorSpec extends Specification {
+  "Calculator" should {
+    "add two numbers" in {
+      val calc = new Calculator
+      calc.add(2, 3) must_== 5
+    }
+
+    "handle division by zero" in {
+      val calc = new Calculator
+      calc.divide(10, 0) must throwA[ArithmeticException]
+    }
+  }
+}
+```
+
+### ScalaCheck - Property-Based Testing
+
+**Property testing basics:**
+
+```scala
+import org.scalacheck.Properties
+import org.scalacheck.Prop.forAll
+
+object StringProperties extends Properties("String") {
+
+  property("reverse twice is identity") = forAll { (s: String) =>
+    s.reverse.reverse == s
+  }
+
+  property("length of concatenation") = forAll { (s1: String, s2: String) =>
+    (s1 + s2).length == s1.length + s2.length
+  }
+
+  property("startsWith") = forAll { (s: String, prefix: String) =>
+    (prefix + s).startsWith(prefix)
+  }
+}
+```
+
+**Custom generators:**
+
+```scala
+import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+
+case class User(name: String, age: Int)
+
+val genUser: Gen[User] = for {
+  name <- Gen.alphaStr
+  age <- Gen.choose(0, 120)
+} yield User(name, age)
+
+implicit val arbUser: Arbitrary[User] = Arbitrary(genUser)
+
+property("user age is valid") = forAll { (user: User) =>
+  user.age >= 0 && user.age <= 120
+}
+```
+
+**Integration with ScalaTest:**
+
+```scala
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
+class ListPropertiesSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
+
+  "List" should "maintain length on reverse" in {
+    forAll { (list: List[Int]) =>
+      list.reverse.length shouldBe list.length
+    }
+  }
+
+  it should "preserve elements on sort" in {
+    forAll { (list: List[Int]) =>
+      list.sorted.toSet shouldBe list.toSet
+    }
+  }
+}
+```
+
+### Mocking
+
+**Using Mockito with ScalaTest:**
+
+```scala
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers._
+
+class UserServiceSpec extends AnyFlatSpec with MockitoSugar with Matchers {
+
+  "UserService" should "fetch user from repository" in {
+    val repo = mock[UserRepository]
+    val service = new UserService(repo)
+
+    val user = User("Alice", 30)
+    when(repo.findById(123)).thenReturn(Some(user))
+
+    val result = service.getUser(123)
+
+    result shouldBe Some(user)
+    verify(repo).findById(123)
+  }
+
+  it should "handle repository failures" in {
+    val repo = mock[UserRepository]
+    val service = new UserService(repo)
+
+    when(repo.findById(anyInt())).thenThrow(new DatabaseException("Connection failed"))
+
+    assertThrows[DatabaseException] {
+      service.getUser(123)
+    }
+  }
+}
+```
+
+**Using ScalaMock:**
+
+```scala
+import org.scalamock.scalatest.MockFactory
+
+class EmailServiceSpec extends AnyFlatSpec with MockFactory with Matchers {
+
+  "EmailService" should "send email via SMTP" in {
+    val smtp = mock[SmtpClient]
+    val service = new EmailService(smtp)
+
+    (smtp.send _)
+      .expects("alice@example.com", "Hello", "Message body")
+      .returning(true)
+      .once()
+
+    service.sendEmail("alice@example.com", "Hello", "Message body") shouldBe true
+  }
+}
+```
+
+### Async Testing
+
+**Testing Futures:**
+
+```scala
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{Seconds, Span}
+
+class AsyncServiceSpec extends AnyFlatSpec with ScalaFutures with Matchers {
+  implicit val patience = PatienceConfig(timeout = Span(5, Seconds))
+
+  "AsyncService" should "fetch data asynchronously" in {
+    val future = service.fetchData()
+
+    whenReady(future) { result =>
+      result shouldBe "data"
+    }
+  }
+
+  it should "handle failures" in {
+    val future = service.fetchInvalid()
+
+    whenReady(future.failed) { exception =>
+      exception shouldBe a [NotFoundException]
+    }
+  }
+}
+```
+
+**Testing Cats Effect IO:**
+
+```scala
+import cats.effect.testing.scalatest.AsyncIOSpec
+
+class IOServiceSpec extends AsyncIOSpec with Matchers {
+
+  "IOService" should "process data" in {
+    service.processData().asserting { result =>
+      result shouldBe "processed"
+    }
+  }
+
+  it should "handle errors" in {
+    service.processInvalid().assertThrows[ValidationError]
+  }
+}
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Futures, actors, effects comparison across languages
+- `patterns-serialization-dev` - JSON handling, schema validation patterns
+- `patterns-metaprogramming-dev` - Macros, implicits, type classes vs other languages
+
+---
+
 ## References
 
 ### Official Documentation
