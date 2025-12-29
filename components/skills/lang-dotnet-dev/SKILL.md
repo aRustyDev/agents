@@ -1,11 +1,11 @@
 ---
 name: lang-dotnet-dev
-description: Foundational .NET patterns covering runtime, project structure, dependency injection, configuration, and cross-platform development. Use when working with .NET projects or CLI tools. This is the entry point for .NET development.
+description: Foundational .NET patterns covering runtime, project structure, dependency injection, configuration, metaprogramming, and cross-platform development. Use when working with .NET projects or CLI tools. This is the entry point for .NET development.
 ---
 
 # .NET Development Skill
 
-Comprehensive foundational patterns for .NET development, covering runtime fundamentals, project structure, dependency injection, configuration management, logging, middleware, and cross-platform development.
+Comprehensive foundational patterns for .NET development, covering runtime fundamentals, project structure, dependency injection, configuration management, logging, middleware, metaprogramming, and cross-platform development.
 
 ## Table of Contents
 
@@ -19,7 +19,9 @@ Comprehensive foundational patterns for .NET development, covering runtime funda
 - [Middleware Patterns](#middleware-patterns)
 - [NuGet Packages](#nuget-packages)
 - [Cross-Platform Development](#cross-platform-development)
+- [Metaprogramming](#metaprogramming)
 - [Best Practices](#best-practices)
+- [Cross-Cutting Patterns](#cross-cutting-patterns)
 
 ## .NET Runtime and SDK
 
@@ -2874,4 +2876,14 @@ public record Customer(bool IsPremium, int YearsOfMembership);
 
 ---
 
-This skill provides foundational .NET patterns for modern cross-platform development. These patterns cover the .NET runtime, project structure, CLI tools, dependency injection, configuration management, logging, middleware, NuGet packages, and best practices for building robust .NET applications.
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-metaprogramming-dev` - Reflection, attributes, source generators, IL emit, dynamic types
+- `patterns-concurrency-dev` - Async/await, tasks, parallel programming, thread safety
+- `patterns-serialization-dev` - JSON serialization, validation, configuration binding
+
+---
+
+This skill provides foundational .NET patterns for modern cross-platform development. These patterns cover the .NET runtime, project structure, CLI tools, dependency injection, configuration management, logging, middleware, metaprogramming, NuGet packages, and best practices for building robust .NET applications.

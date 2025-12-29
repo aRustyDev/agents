@@ -2243,6 +2243,736 @@ data class User(val name: String) {
 
 ---
 
+## 13. Testing
+
+Kotlin's testing ecosystem provides powerful frameworks with idiomatic DSL support, extension functions, and coroutine testing utilities.
+
+### 13.1 JUnit 5 with Kotlin
+
+```kotlin
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
+
+class CalculatorTest {
+    private lateinit var calculator: Calculator
+
+    @BeforeEach
+    fun setUp() {
+        calculator = Calculator()
+    }
+
+    @Test
+    fun `should add two numbers`() {
+        val result = calculator.add(2, 3)
+        assertEquals(5, result)
+    }
+
+    @Test
+    fun `should throw on division by zero`() {
+        assertThrows<ArithmeticException> {
+            calculator.divide(10, 0)
+        }
+    }
+
+    @Test
+    @DisplayName("Addition is commutative")
+    fun additionIsCommutative() {
+        assertEquals(
+            calculator.add(2, 3),
+            calculator.add(3, 2)
+        )
+    }
+
+    // Parameterized tests
+    @ParameterizedTest
+    @ValueSource(ints = [1, 2, 3, 4, 5])
+    fun `should be positive`(number: Int) {
+        assertTrue(number > 0)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "1, 2, 3",
+        "10, 20, 30",
+        "-1, 1, 0"
+    )
+    fun `should add correctly`(a: Int, b: Int, expected: Int) {
+        assertEquals(expected, calculator.add(a, b))
+    }
+}
+```
+
+### 13.2 Kotest Framework
+
+```kotlin
+import io.kotest.core.spec.style.*
+import io.kotest.matchers.*
+import io.kotest.matchers.collections.*
+import io.kotest.matchers.string.*
+
+// BehaviorSpec - BDD style
+class UserServiceSpec : BehaviorSpec({
+    Given("a new user") {
+        val user = User("Alice", "alice@example.com")
+
+        When("we save the user") {
+            val saved = userService.save(user)
+
+            Then("the user should have an ID") {
+                saved.id shouldNotBe null
+            }
+
+            Then("the user should be retrievable") {
+                val found = userService.findById(saved.id!!)
+                found shouldBe saved
+            }
+        }
+    }
+})
+
+// FunSpec - simple function-based tests
+class CalculatorSpec : FunSpec({
+    test("addition should work") {
+        val result = Calculator().add(2, 3)
+        result shouldBe 5
+    }
+
+    test("division by zero should throw") {
+        shouldThrow<ArithmeticException> {
+            Calculator().divide(10, 0)
+        }
+    }
+
+    context("with positive numbers") {
+        test("multiplication should be positive") {
+            Calculator().multiply(2, 3) shouldBe 6
+        }
+    }
+})
+
+// StringSpec - minimal style
+class StringUtilsSpec : StringSpec({
+    "length should return string length" {
+        "hello".length shouldBe 5
+    }
+
+    "startsWith should check prefix" {
+        "hello" should startWith("hel")
+    }
+
+    "uppercase should convert to upper" {
+        "hello".uppercase() shouldBe "HELLO"
+    }
+})
+
+// DescribeSpec - Jasmine/Mocha style
+class ListSpec : DescribeSpec({
+    describe("a list") {
+        val list = listOf(1, 2, 3)
+
+        it("should have size 3") {
+            list.size shouldBe 3
+        }
+
+        it("should contain 2") {
+            list shouldContain 2
+        }
+
+        describe("when filtered") {
+            val filtered = list.filter { it > 1 }
+
+            it("should have size 2") {
+                filtered.size shouldBe 2
+            }
+
+            it("should only contain values > 1") {
+                filtered shouldContainExactly listOf(2, 3)
+            }
+        }
+    }
+})
+```
+
+### 13.3 Kotest Matchers
+
+```kotlin
+import io.kotest.matchers.*
+import io.kotest.matchers.collections.*
+import io.kotest.matchers.string.*
+import io.kotest.matchers.types.*
+
+// Equality and comparison
+value shouldBe expected
+value shouldNotBe unexpected
+value shouldBeGreaterThan 5
+value shouldBeLessThanOrEqual 10
+
+// Null checks
+value.shouldNotBeNull()
+value.shouldBeNull()
+
+// Type checks
+value shouldBeInstanceOf<String>()
+value.shouldBeTypeOf<User>()
+
+// String matchers
+str shouldStartWith "prefix"
+str shouldEndWith "suffix"
+str shouldContain "middle"
+str shouldMatch "\\d+".toRegex()
+str.shouldBeEmpty()
+str.shouldBeBlank()
+
+// Collection matchers
+list shouldContain element
+list shouldContainAll listOf(1, 2, 3)
+list shouldContainExactly listOf(1, 2, 3)
+list shouldHaveSize 5
+list.shouldBeEmpty()
+list.shouldBeSorted()
+
+// Map matchers
+map shouldContainKey "key"
+map shouldContainValue 42
+map shouldContainAll mapOf("a" to 1, "b" to 2)
+
+// Exception matchers
+shouldThrow<IllegalArgumentException> {
+    validate(null)
+}
+
+val exception = shouldThrow<CustomException> {
+    dangerousOperation()
+}
+exception.message shouldBe "Expected error"
+
+// Boolean matchers
+condition.shouldBeTrue()
+condition.shouldBeFalse()
+
+// Custom matchers
+data class User(val name: String, val age: Int)
+
+fun beAdult() = object : Matcher<User> {
+    override fun test(value: User) = MatcherResult(
+        value.age >= 18,
+        { "User ${value.name} should be adult but was ${value.age}" },
+        { "User ${value.name} should not be adult" }
+    )
+}
+
+user should beAdult()
+```
+
+### 13.4 MockK - Mocking Library
+
+```kotlin
+import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+
+@ExtendWith(MockKExtension::class)
+class UserServiceTest {
+    @MockK
+    private lateinit var repository: UserRepository
+
+    @InjectMockKs
+    private lateinit var service: UserService
+
+    @Test
+    fun `should find user by id`() {
+        // Given
+        val user = User(1, "Alice")
+        every { repository.findById(1) } returns user
+
+        // When
+        val result = service.getUser(1)
+
+        // Then
+        result shouldBe user
+        verify { repository.findById(1) }
+    }
+
+    @Test
+    fun `should throw when user not found`() {
+        // Given
+        every { repository.findById(any()) } returns null
+
+        // When/Then
+        shouldThrow<UserNotFoundException> {
+            service.getUser(999)
+        }
+    }
+
+    @Test
+    fun `should save user`() {
+        // Given
+        val user = User(0, "Bob")
+        val slot = slot<User>()
+        every { repository.save(capture(slot)) } answers { slot.captured.copy(id = 1) }
+
+        // When
+        val saved = service.createUser(user)
+
+        // Then
+        saved.id shouldBe 1
+        saved.name shouldBe "Bob"
+        verify(exactly = 1) { repository.save(any()) }
+    }
+}
+
+// Relaxed mocks - return default values
+val mock = mockk<UserRepository>(relaxed = true)
+
+// Spy - partial mocking
+val spy = spyk(RealUserService())
+every { spy.generateId() } returns 42
+
+// Mock extension functions
+mockkStatic(String::toUpperCase)
+every { "hello".toUpperCase() } returns "MOCKED"
+
+// Mock objects
+object Logger {
+    fun log(message: String) = println(message)
+}
+
+mockkObject(Logger)
+every { Logger.log(any()) } just Runs
+verify { Logger.log("test") }
+```
+
+### 13.5 Coroutine Testing
+
+```kotlin
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.*
+import org.junit.jupiter.api.Test
+
+class CoroutineServiceTest {
+
+    @Test
+    fun `should fetch user data`() = runTest {
+        val service = UserService()
+
+        val user = service.fetchUser(1)
+
+        user shouldNotBe null
+        user.name shouldBe "Alice"
+    }
+
+    @Test
+    fun `should handle concurrent requests`() = runTest {
+        val service = UserService()
+
+        val users = (1..10).map { id ->
+            async { service.fetchUser(id) }
+        }.awaitAll()
+
+        users.size shouldBe 10
+        users.all { it != null }.shouldBeTrue()
+    }
+
+    @Test
+    fun `should timeout on slow operations`() = runTest {
+        val service = SlowService()
+
+        shouldThrow<TimeoutCancellationException> {
+            withTimeout(1000) {
+                service.verySlowOperation()
+            }
+        }
+    }
+
+    @Test
+    fun `should advance time virtually`() = runTest {
+        val service = TimedService()
+
+        // Virtual time - no actual delay
+        delay(5000)
+        val result = service.checkStatus()
+
+        result shouldBe "Ready"
+    }
+
+    @Test
+    fun `should test flow emissions`() = runTest {
+        val flow = flowOf(1, 2, 3, 4, 5)
+
+        val results = mutableListOf<Int>()
+        flow.collect { results.add(it) }
+
+        results shouldContainExactly listOf(1, 2, 3, 4, 5)
+    }
+
+    @Test
+    fun `should test flow transformations`() = runTest {
+        val flow = (1..5).asFlow()
+            .map { it * 2 }
+            .filter { it > 5 }
+
+        val results = flow.toList()
+
+        results shouldContainExactly listOf(6, 8, 10)
+    }
+
+    @Test
+    fun `should use test dispatcher`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val scope = CoroutineScope(dispatcher)
+
+        var completed = false
+        scope.launch {
+            delay(1000)
+            completed = true
+        }
+
+        // Not completed yet - virtual time hasn't advanced
+        completed.shouldBeFalse()
+
+        // Advance virtual time
+        advanceTimeBy(1000)
+
+        // Now completed
+        completed.shouldBeTrue()
+    }
+}
+
+// Testing suspending functions
+class SuspendFunctionTest {
+
+    @Test
+    fun `should test suspend function`() = runTest {
+        suspend fun fetchData(): String {
+            delay(100)
+            return "data"
+        }
+
+        val result = fetchData()
+        result shouldBe "data"
+    }
+
+    @Test
+    fun `should verify mock suspend calls`() = runTest {
+        val repository = mockk<UserRepository>()
+        coEvery { repository.fetchUser(any()) } returns User(1, "Alice")
+
+        val user = repository.fetchUser(1)
+
+        user.name shouldBe "Alice"
+        coVerify { repository.fetchUser(1) }
+    }
+}
+```
+
+### 13.6 kotlin.test Assertions
+
+```kotlin
+import kotlin.test.*
+
+class KotlinTestExample {
+
+    @Test
+    fun `should use kotlin test assertions`() {
+        // Equality
+        assertEquals(5, 2 + 3)
+        assertNotEquals(4, 2 + 3)
+
+        // Boolean
+        assertTrue(2 + 2 == 4)
+        assertFalse(2 + 2 == 5)
+
+        // Null checks
+        assertNull(null)
+        assertNotNull("value")
+
+        // Exceptions
+        assertFails {
+            throw IllegalStateException()
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            require(false) { "Validation failed" }
+        }
+
+        // Content equality
+        assertContentEquals(listOf(1, 2, 3), listOf(1, 2, 3))
+
+        // Custom message
+        assertEquals(5, 2 + 3, "Addition should work")
+    }
+}
+```
+
+### 13.7 Property-Based Testing with Kotest
+
+```kotlin
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.property.*
+import io.kotest.property.arbitrary.*
+
+class PropertyBasedTest : StringSpec({
+
+    "string length is never negative" {
+        checkAll<String> { str ->
+            str.length shouldBeGreaterThanOrEqual 0
+        }
+    }
+
+    "reversing a list twice returns original" {
+        checkAll<List<Int>> { list ->
+            list.reversed().reversed() shouldBe list
+        }
+    }
+
+    "addition is commutative" {
+        checkAll<Int, Int> { a, b ->
+            a + b shouldBe b + a
+        }
+    }
+
+    "custom generators" {
+        val emails = arbitrary {
+            val name = Arb.string(5..10, Codepoint.alphanumeric()).bind()
+            val domain = Arb.string(5..10, Codepoint.alphanumeric()).bind()
+            "$name@$domain.com"
+        }
+
+        checkAll(emails) { email ->
+            email shouldContain "@"
+            email shouldEndWith ".com"
+        }
+    }
+
+    "edge cases" {
+        val config = PropTestConfig(iterations = 1000)
+
+        checkAll(config, Arb.int()) { n ->
+            val doubled = n * 2
+            if (n >= 0) {
+                doubled shouldBeGreaterThanOrEqual n
+            } else {
+                doubled shouldBeLessThanOrEqual n
+            }
+        }
+    }
+})
+```
+
+### 13.8 Test DSL Patterns
+
+```kotlin
+// Custom test DSL
+class TestDsl {
+    fun scenario(name: String, block: ScenarioContext.() -> Unit) {
+        println("Scenario: $name")
+        ScenarioContext().block()
+    }
+}
+
+class ScenarioContext {
+    fun given(description: String, block: () -> Unit) {
+        println("  Given $description")
+        block()
+    }
+
+    fun whenever(description: String, block: () -> Unit) {
+        println("  When $description")
+        block()
+    }
+
+    fun then(description: String, block: () -> Unit) {
+        println("  Then $description")
+        block()
+    }
+}
+
+// Usage
+class UserFlowTest : StringSpec({
+    "user registration flow" {
+        scenario("new user signs up") {
+            var user: User? = null
+
+            given("valid user details") {
+                user = User(name = "Alice", email = "alice@example.com")
+            }
+
+            whenever("user submits registration") {
+                user = userService.register(user!!)
+            }
+
+            then("user should receive confirmation email") {
+                emailService.wasSent(user!!.email).shouldBeTrue()
+            }
+
+            then("user should have active account") {
+                user!!.isActive.shouldBeTrue()
+            }
+        }
+    }
+})
+
+// Fixture DSL
+fun testWithUser(block: suspend (User) -> Unit) = runTest {
+    val user = createTestUser()
+    try {
+        block(user)
+    } finally {
+        cleanup(user)
+    }
+}
+
+// Usage
+@Test
+fun `should update user profile`() = testWithUser { user ->
+    val updated = service.updateProfile(user.id, "New Name")
+    updated.name shouldBe "New Name"
+}
+
+// Data builders with DSL
+fun user(block: UserBuilder.() -> Unit): User {
+    return UserBuilder().apply(block).build()
+}
+
+class UserBuilder {
+    var name: String = "Test User"
+    var email: String = "test@example.com"
+    var age: Int = 30
+    var roles: List<String> = emptyList()
+
+    fun build() = User(name, email, age, roles)
+}
+
+// Usage in tests
+@Test
+fun `should validate admin user`() {
+    val admin = user {
+        name = "Admin"
+        email = "admin@example.com"
+        roles = listOf("ADMIN", "USER")
+    }
+
+    admin.isAdmin().shouldBeTrue()
+}
+```
+
+### 13.9 Integration Testing Patterns
+
+```kotlin
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
+
+@Testcontainers
+class DatabaseIntegrationTest {
+
+    companion object {
+        @Container
+        val postgres = PostgreSQLContainer<Nothing>("postgres:15").apply {
+            withDatabaseName("testdb")
+            withUsername("test")
+            withPassword("test")
+        }
+    }
+
+    @Test
+    fun `should persist and retrieve user`() {
+        val repository = UserRepository(postgres.jdbcUrl)
+        val user = User(name = "Alice", email = "alice@example.com")
+
+        val saved = repository.save(user)
+        val found = repository.findById(saved.id)
+
+        found shouldBe saved
+    }
+}
+
+// HTTP client testing
+@Test
+fun `should call external API`() = runTest {
+    val mockServer = MockWebServer()
+    mockServer.enqueue(
+        MockResponse()
+            .setBody("""{"name": "Alice"}""")
+            .setHeader("Content-Type", "application/json")
+    )
+
+    val client = HttpClient(mockServer.url("/"))
+    val user = client.fetchUser(1)
+
+    user.name shouldBe "Alice"
+    mockServer.shutdown()
+}
+```
+
+### 13.10 Test Organization Best Practices
+
+```kotlin
+// Nested tests for organization
+@Nested
+@DisplayName("User validation")
+inner class UserValidation {
+
+    @Test
+    fun `should reject null name`() {
+        shouldThrow<IllegalArgumentException> {
+            User(name = null, email = "test@example.com")
+        }
+    }
+
+    @Nested
+    @DisplayName("Email validation")
+    inner class EmailValidation {
+
+        @Test
+        fun `should reject invalid email format`() {
+            shouldThrow<IllegalArgumentException> {
+                User(name = "Alice", email = "invalid")
+            }
+        }
+
+        @Test
+        fun `should accept valid email`() {
+            val user = User(name = "Alice", email = "alice@example.com")
+            user.email shouldBe "alice@example.com"
+        }
+    }
+}
+
+// Tags for filtering tests
+@Tag("integration")
+@Tag("slow")
+class SlowIntegrationTest {
+    @Test
+    fun `should complete long operation`() {
+        // Long running test
+    }
+}
+
+// Conditional test execution
+@EnabledIf("customCondition")
+fun customCondition(): Boolean = System.getenv("RUN_INTEGRATION") == "true"
+
+@Test
+fun `should run only in CI`() {
+    // Only runs when condition is true
+}
+```
+
+---
+
+## 14. Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- **patterns-concurrency-dev**: Coroutines, Flow, channels, structured concurrency
+- **patterns-serialization-dev**: kotlinx.serialization, Jackson with Kotlin
+- **patterns-metaprogramming-dev**: Annotations, reflection, DSL builders
+- **patterns-testing-dev**: Test frameworks, mocking, property-based testing
+
+---
+
 ## Further Resources
 
 ### Specialized Skills

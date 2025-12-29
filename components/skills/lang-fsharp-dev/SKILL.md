@@ -773,6 +773,820 @@ and Item = File of string | Folder of Folder
 
 ---
 
+## Serialization
+
+F# works seamlessly with .NET serialization libraries while maintaining functional idioms. For cross-language serialization patterns, see `patterns-serialization-dev`.
+
+### System.Text.Json
+
+```fsharp
+open System.Text.Json
+open System.Text.Json.Serialization
+
+// Simple record serialization
+type Person = {
+    FirstName: string
+    LastName: string
+    Age: int
+}
+
+let person = { FirstName = "Alice"; LastName = "Smith"; Age = 30 }
+let json = JsonSerializer.Serialize(person)
+// {"FirstName":"Alice","LastName":"Smith","Age":30}
+
+let parsed = JsonSerializer.Deserialize<Person>(json)
+
+// Custom options
+let options = JsonSerializerOptions()
+options.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
+options.WriteIndented <- true
+
+let camelCaseJson = JsonSerializer.Serialize(person, options)
+// {
+//   "firstName": "alice",
+//   "lastName": "smith",
+//   "age": 30
+// }
+```
+
+### JsonFSharpConverter for F# Types
+
+```fsharp
+open System.Text.Json
+open System.Text.Json.Serialization
+
+// Configure for F# discriminated unions and options
+let options = JsonSerializerOptions()
+options.Converters.Add(JsonFSharpConverter())
+
+// Discriminated union serialization
+type PaymentMethod =
+    | Cash
+    | CreditCard of cardNumber: string
+    | DebitCard of cardNumber: string * pin: int
+
+let payment = CreditCard "1234-5678-9012-3456"
+let json = JsonSerializer.Serialize(payment, options)
+// {"Case":"CreditCard","Fields":["1234-5678-9012-3456"]}
+
+// Option type handling
+type User = {
+    Name: string
+    Email: string option
+}
+
+let user = { Name = "Bob"; Email = Some "bob@example.com" }
+let userJson = JsonSerializer.Serialize(user, options)
+```
+
+### Custom Converters
+
+```fsharp
+open System
+open System.Text.Json
+open System.Text.Json.Serialization
+
+// Custom converter for EmailAddress
+type EmailAddress = EmailAddress of string
+
+type EmailAddressConverter() =
+    inherit JsonConverter<EmailAddress>()
+
+    override _.Read(reader, typeToConvert, options) =
+        EmailAddress (reader.GetString())
+
+    override _.Write(writer, value, options) =
+        let (EmailAddress email) = value
+        writer.WriteStringValue(email)
+
+// Register converter
+let options = JsonSerializerOptions()
+options.Converters.Add(EmailAddressConverter())
+
+let email = EmailAddress "test@example.com"
+let json = JsonSerializer.Serialize(email, options)
+// "test@example.com"
+```
+
+### FSharp.Json
+
+```fsharp
+open FSharp.Json
+
+// Simple serialization
+type Config = {
+    Port: int
+    Host: string
+    Debug: bool
+}
+
+let config = { Port = 8080; Host = "localhost"; Debug = true }
+let json = Json.serialize config
+let parsed = Json.deserialize<Config> json
+
+// Custom field names
+type ApiResponse = {
+    [<JsonField("response_code")>]
+    ResponseCode: int
+
+    [<JsonField("response_data")>]
+    Data: string
+}
+
+// Transform during serialization
+type Settings = {
+    [<JsonField(Transform=typeof<Transforms.CamelCase>)>]
+    DatabaseUrl: string
+
+    [<JsonField(Transform=typeof<Transforms.SnakeCase>)>]
+    MaxConnections: int
+}
+```
+
+### Type Providers for JSON
+
+```fsharp
+open FSharp.Data
+
+// Infer schema from sample JSON
+type Weather = JsonProvider<"""
+{
+    "temperature": 72.5,
+    "condition": "sunny",
+    "humidity": 65,
+    "forecast": [
+        {"day": "Monday", "high": 75, "low": 60},
+        {"day": "Tuesday", "high": 78, "low": 62}
+    ]
+}
+""">
+
+// Use with type safety
+let weather = Weather.Load("weather.json")
+printfn $"Temperature: {weather.Temperature}°F"
+printfn $"Condition: {weather.Condition}"
+
+weather.Forecast
+|> Array.iter (fun day ->
+    printfn $"{day.Day}: {day.High}°F / {day.Low}°F")
+
+// From URL
+let liveWeather = Weather.Load("https://api.weather.com/current")
+
+// Parse from string
+let jsonString = """{"temperature":68,"condition":"cloudy","humidity":70}"""
+let parsed = Weather.Parse(jsonString)
+```
+
+### Validation Patterns
+
+```fsharp
+// Validation with Result
+type ValidationError = string
+
+let validateEmail (email: string) : Result<string, ValidationError> =
+    if email.Contains("@") then
+        Ok email
+    else
+        Error "Invalid email format"
+
+let validateAge (age: int) : Result<int, ValidationError> =
+    if age >= 0 && age <= 120 then
+        Ok age
+    else
+        Error "Age must be between 0 and 120"
+
+// Combine validations
+type PersonData = {
+    Name: string
+    Email: string
+    Age: int
+}
+
+let validatePerson data =
+    result {
+        let! validEmail = validateEmail data.Email
+        let! validAge = validateAge data.Age
+        return { data with Email = validEmail; Age = validAge }
+    }
+
+// Applicative validation (collect all errors)
+type Validation<'T> = Result<'T, ValidationError list>
+
+let validatePersonApplicative data : Validation<PersonData> =
+    let validateName name =
+        if String.IsNullOrWhiteSpace(name) then
+            Error ["Name cannot be empty"]
+        else
+            Ok name
+
+    match (validateName data.Name, validateEmail data.Email, validateAge data.Age) with
+    | Ok n, Ok e, Ok a -> Ok { Name = n; Email = e; Age = a }
+    | errors ->
+        errors
+        |> fun (n, e, a) ->
+            [n; e; a]
+            |> List.collect (function Error errs -> errs | Ok _ -> [])
+        |> Error
+```
+
+---
+
+## Build and Dependencies
+
+F# uses the standard .NET build ecosystem with project files, NuGet packages, and the dotnet CLI.
+
+### Project File (.fsproj)
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MyApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Order matters in F#! Files are compiled top-to-bottom -->
+    <Compile Include="Types.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Domain.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Data" Version="6.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
+```
+
+### dotnet CLI Commands
+
+```bash
+# Create new project
+dotnet new console -lang F# -o MyApp
+dotnet new classlib -lang F# -o MyLib
+dotnet new webapi -lang F# -o MyApi
+
+# Build and run
+dotnet build
+dotnet run
+dotnet run -- arg1 arg2  # Pass arguments
+
+# Watch mode (rebuild on file changes)
+dotnet watch run
+
+# Clean build artifacts
+dotnet clean
+
+# Restore packages
+dotnet restore
+
+# Create solution
+dotnet new sln -n MySolution
+dotnet sln add MyApp/MyApp.fsproj
+dotnet sln add MyLib/MyLib.fsproj
+```
+
+### NuGet Package Management
+
+```bash
+# Add package
+dotnet add package FSharp.Data
+dotnet add package Newtonsoft.Json --version 13.0.3
+
+# Remove package
+dotnet remove package FSharp.Data
+
+# Update package
+dotnet add package FSharp.Data  # Gets latest
+
+# List packages
+dotnet list package
+
+# List outdated packages
+dotnet list package --outdated
+```
+
+### Package References in .fsproj
+
+```xml
+<ItemGroup>
+  <!-- Exact version -->
+  <PackageReference Include="FSharp.Core" Version="8.0.0" />
+
+  <!-- Version range -->
+  <PackageReference Include="FSharp.Data" Version="[6.0,7.0)" />
+
+  <!-- Latest stable -->
+  <PackageReference Include="Newtonsoft.Json" Version="*" />
+
+  <!-- Development only -->
+  <PackageReference Include="FsCheck" Version="2.16.5">
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
+</ItemGroup>
+```
+
+### Project References
+
+```xml
+<!-- Reference another project -->
+<ItemGroup>
+  <ProjectReference Include="..\MyLib\MyLib.fsproj" />
+</ItemGroup>
+```
+
+```bash
+# Add project reference via CLI
+dotnet add reference ../MyLib/MyLib.fsproj
+```
+
+### Paket (Alternative Package Manager)
+
+```bash
+# Install Paket
+dotnet tool install paket
+
+# Initialize Paket
+dotnet paket init
+
+# Add package
+dotnet paket add FSharp.Data
+
+# Install dependencies
+dotnet paket install
+
+# Update all packages
+dotnet paket update
+```
+
+**paket.dependencies:**
+```
+source https://api.nuget.org/v3/index.json
+
+nuget FSharp.Core >= 8.0
+nuget FSharp.Data ~> 6.3
+nuget Newtonsoft.Json
+
+group Test
+  nuget Expecto
+  nuget FsCheck
+```
+
+**paket.references:**
+```
+FSharp.Data
+Newtonsoft.Json
+
+group Test
+  Expecto
+  FsCheck
+```
+
+### FAKE Build Script
+
+```fsharp
+// build.fsx
+#r "paket:
+nuget Fake.Core.Target
+nuget Fake.DotNet.Cli //"
+#load ".fake/build.fsx/intellisense.fsx"
+
+open Fake.Core
+open Fake.DotNet
+
+let clean _ =
+    !! "**/bin"
+    ++ "**/obj"
+    |> Shell.cleanDirs
+
+let build _ =
+    DotNet.build id ""
+
+let test _ =
+    DotNet.test id ""
+
+let publish _ =
+    DotNet.publish (fun opts ->
+        { opts with
+            Configuration = DotNet.BuildConfiguration.Release
+            OutputPath = Some "./publish" }) ""
+
+// Define targets
+Target.create "Clean" clean
+Target.create "Build" build
+Target.create "Test" test
+Target.create "Publish" publish
+
+// Dependencies
+open Fake.Core.TargetOperators
+
+"Clean"
+  ==> "Build"
+  ==> "Test"
+  ==> "Publish"
+
+Target.runOrDefault "Build"
+```
+
+Run with:
+```bash
+dotnet fake build
+dotnet fake build -t Publish
+```
+
+### Multi-Project Structure
+
+```
+MySolution/
+├── MySolution.sln
+├── src/
+│   ├── MyApp/
+│   │   ├── MyApp.fsproj
+│   │   ├── Program.fs
+│   │   └── Domain.fs
+│   └── MyLib/
+│       ├── MyLib.fsproj
+│       ├── Types.fs
+│       └── Utils.fs
+├── tests/
+│   └── MyApp.Tests/
+│       ├── MyApp.Tests.fsproj
+│       └── Tests.fs
+├── paket.dependencies
+└── build.fsx
+```
+
+### Publishing
+
+```bash
+# Publish for specific runtime
+dotnet publish -r win-x64 -c Release
+dotnet publish -r linux-x64 -c Release
+dotnet publish -r osx-arm64 -c Release
+
+# Self-contained (includes runtime)
+dotnet publish -r linux-x64 -c Release --self-contained
+
+# Framework-dependent (requires .NET runtime installed)
+dotnet publish -c Release --no-self-contained
+
+# Single file
+dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true
+```
+
+### NuGet Package Creation
+
+```xml
+<!-- Add to .fsproj -->
+<PropertyGroup>
+  <PackageId>MyAwesomeLibrary</PackageId>
+  <Version>1.0.0</Version>
+  <Authors>Your Name</Authors>
+  <Description>An awesome F# library</Description>
+  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  <RepositoryUrl>https://github.com/username/repo</RepositoryUrl>
+</PropertyGroup>
+```
+
+```bash
+# Create package
+dotnet pack -c Release
+
+# Publish to NuGet
+dotnet nuget push bin/Release/MyAwesomeLibrary.1.0.0.nupkg --api-key YOUR_KEY --source https://api.nuget.org/v3/index.json
+```
+
+---
+
+## Testing
+
+F# has excellent testing support with Expecto, FsUnit, and FsCheck for property-based testing.
+
+### Expecto
+
+```fsharp
+// Tests.fs
+module Tests
+
+open Expecto
+
+// Simple test
+let simpleTest =
+    testCase "addition works" <| fun () ->
+        let result = 1 + 1
+        Expect.equal result 2 "1 + 1 should equal 2"
+
+// Test list
+let mathTests =
+    testList "Math operations" [
+        testCase "addition" <| fun () ->
+            Expect.equal (2 + 2) 4 "2 + 2 = 4"
+
+        testCase "subtraction" <| fun () ->
+            Expect.equal (5 - 3) 2 "5 - 3 = 2"
+
+        testCase "multiplication" <| fun () ->
+            Expect.equal (3 * 4) 12 "3 * 4 = 12"
+    ]
+
+// Run all tests
+[<EntryPoint>]
+let main args =
+    runTestsWithCLIArgs [] args mathTests
+```
+
+### Expecto Matchers
+
+```fsharp
+open Expecto
+
+let expectTests =
+    testList "Expecto expectations" [
+        testCase "equal" <| fun () ->
+            Expect.equal (1 + 1) 2 "should be equal"
+
+        testCase "not equal" <| fun () ->
+            Expect.notEqual 1 2 "should not be equal"
+
+        testCase "is true" <| fun () ->
+            Expect.isTrue (5 > 3) "5 should be greater than 3"
+
+        testCase "is false" <| fun () ->
+            Expect.isFalse (3 > 5) "3 should not be greater than 5"
+
+        testCase "contains" <| fun () ->
+            Expect.contains [1; 2; 3] 2 "list should contain 2"
+
+        testCase "sequence equal" <| fun () ->
+            Expect.sequenceEqual [1; 2; 3] [1; 2; 3] "sequences should match"
+
+        testCase "throws" <| fun () ->
+            Expect.throws (fun () -> failwith "boom") "should throw"
+
+        testCase "is some" <| fun () ->
+            Expect.isSome (Some 5) "should be Some"
+
+        testCase "is none" <| fun () ->
+            Expect.isNone None "should be None"
+    ]
+```
+
+### Async and Task Testing
+
+```fsharp
+open Expecto
+
+let asyncTests =
+    testList "Async tests" [
+        testCaseAsync "async computation" <| async {
+            let! result = async { return 42 }
+            Expect.equal result 42 "async result"
+        }
+
+        testTask "task computation" {
+            let! result = task { return 42 }
+            Expect.equal result 42 "task result"
+        }
+    ]
+```
+
+### Test Organization
+
+```fsharp
+// Nested test groups
+let allTests =
+    testList "All tests" [
+        testList "Domain" [
+            testList "User" [
+                testCase "create user" <| fun () ->
+                    let user = createUser "Alice" "alice@example.com"
+                    Expect.equal user.Name "Alice" "name matches"
+            ]
+            testList "Order" [
+                testCase "calculate total" <| fun () ->
+                    let total = calculateTotal [10m; 20m; 30m]
+                    Expect.equal total 60m "total is sum"
+            ]
+        ]
+        testList "API" [
+            // API tests
+        ]
+    ]
+
+// Run with filters
+[<EntryPoint>]
+let main args =
+    runTestsWithCLIArgs [] args allTests
+
+// Run specific tests:
+// dotnet run -- --filter "User"
+```
+
+### FsUnit with xUnit
+
+```fsharp
+module Tests
+
+open Xunit
+open FsUnit.Xunit
+
+[<Fact>]
+let ``2 + 2 should equal 4`` () =
+    2 + 2 |> should equal 4
+
+[<Fact>]
+let ``list should contain element`` () =
+    [1; 2; 3] |> should contain 2
+
+[<Fact>]
+let ``string should start with`` () =
+    "hello world" |> should startWith "hello"
+
+[<Fact>]
+let ``option should be Some`` () =
+    Some 5 |> should be (ofCase <@ Some @>)
+
+[<Theory>]
+[<InlineData(1, 2, 3)>]
+[<InlineData(5, 5, 10)>]
+[<InlineData(-1, 1, 0)>]
+let ``addition works for multiple inputs`` a b expected =
+    a + b |> should equal expected
+```
+
+### FsCheck Property-Based Testing
+
+```fsharp
+open Expecto
+open FsCheck
+
+// Property test with Expecto
+let propertyTests =
+    testList "Property tests" [
+        testProperty "reverse twice equals original" <| fun (xs: int list) ->
+            List.rev (List.rev xs) = xs
+
+        testProperty "length of reverse equals length" <| fun (xs: int list) ->
+            List.length (List.rev xs) = List.length xs
+
+        testProperty "addition is commutative" <| fun (a: int) (b: int) ->
+            a + b = b + a
+
+        testProperty "list append length" <| fun (xs: int list) (ys: int list) ->
+            List.length (xs @ ys) = List.length xs + List.length ys
+    ]
+
+// Custom generator
+let positiveInt = Arb.generate<int> |> Gen.map abs
+
+let customGeneratorTest =
+    testProperty "square of positive is positive" <| fun () ->
+        Prop.forAll (Arb.fromGen positiveInt) (fun n ->
+            n * n >= 0)
+
+// Conditional properties
+let conditionalTest =
+    testProperty "division by non-zero" <| fun (a: float) (b: float) ->
+        b <> 0.0 ==> lazy (a / b * b = a)
+```
+
+### FsCheck with xUnit
+
+```fsharp
+open Xunit
+open FsCheck
+open FsCheck.Xunit
+
+[<Property>]
+let ``reverse twice gives original`` (xs: int list) =
+    List.rev (List.rev xs) = xs
+
+[<Property>]
+let ``sort is idempotent`` (xs: int list) =
+    List.sort (List.sort xs) = List.sort xs
+
+[<Property(Arbitrary = [| typeof<CustomGenerators> |])>]
+let ``custom generator property`` (email: string) =
+    email.Contains("@")
+
+// Custom generators
+type CustomGenerators =
+    static member Email() =
+        let genEmail =
+            gen {
+                let! user = Gen.elements ["alice"; "bob"; "charlie"]
+                let! domain = Gen.elements ["example.com"; "test.com"]
+                return $"{user}@{domain}"
+            }
+        Arb.fromGen genEmail
+```
+
+### Test Setup and Teardown
+
+```fsharp
+open Expecto
+
+// Setup/teardown pattern
+let withDatabase test =
+    let db = setupDatabase()  // Setup
+    try
+        test db
+    finally
+        cleanupDatabase db  // Teardown
+
+let databaseTests =
+    testList "Database tests" [
+        testCase "insert user" <| fun () ->
+            withDatabase (fun db ->
+                insertUser db "Alice"
+                let users = getUsers db
+                Expect.contains users "Alice" "user should exist"
+            )
+    ]
+
+// Shared fixture
+type DatabaseFixture() =
+    let db = setupDatabase()
+    member _.Database = db
+    interface System.IDisposable with
+        member _.Dispose() = cleanupDatabase db
+
+let fixtureTests =
+    testSequenced <| testList "Sequenced tests" [
+        let fixture = new DatabaseFixture()
+        yield testCase "test 1" <| fun () ->
+            // use fixture.Database
+            ()
+        yield testCase "test 2" <| fun () ->
+            // use fixture.Database
+            ()
+    ]
+```
+
+### Mocking and Stubs
+
+```fsharp
+// Interface-based mocking
+type IUserRepository =
+    abstract member GetUser: int -> User option
+    abstract member SaveUser: User -> unit
+
+// Create stub for testing
+let createStubRepository users =
+    { new IUserRepository with
+        member _.GetUser(id) =
+            users |> List.tryFind (fun u -> u.Id = id)
+        member _.SaveUser(user) =
+            () // No-op for testing
+    }
+
+let testWithStub =
+    testCase "get user from stub" <| fun () ->
+        let users = [
+            { Id = 1; Name = "Alice"; Email = "alice@example.com"; Age = 30 }
+            { Id = 2; Name = "Bob"; Email = "bob@example.com"; Age = 25 }
+        ]
+        let repo = createStubRepository users
+        let user = repo.GetUser(1)
+        Expect.isSome user "should find user"
+        Expect.equal user.Value.Name "Alice" "name should match"
+```
+
+### Running Tests
+
+```bash
+# Run with dotnet
+dotnet run  # If entry point is defined
+dotnet test  # If using xUnit/NUnit
+
+# Expecto options
+dotnet run -- --help
+dotnet run -- --filter "User"
+dotnet run -- --sequenced
+dotnet run -- --debug
+dotnet run -- --fail-on-focused-tests
+
+# Watch mode
+dotnet watch run
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-serialization-dev` - JSON/YAML handling, validation patterns
+- `patterns-concurrency-dev` - Async workflows, parallel processing, Mailbox processors
+- `patterns-metaprogramming-dev` - Type providers, computation expressions, quotations
+
+---
+
 ## References
 
 - [F# Language Reference](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/)
