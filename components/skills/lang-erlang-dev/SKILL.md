@@ -827,11 +827,408 @@ dbg:stop_clear().
 
 ---
 
+## Testing
+
+### EUnit (Unit Testing)
+
+```erlang
+-module(calculator_tests).
+-include_lib("eunit/include/eunit.hrl").
+
+%% Simple test
+simple_add_test() ->
+    ?assertEqual(5, calculator:add(2, 3)).
+
+%% Test with setup/cleanup
+setup_test_() ->
+    {setup,
+     fun() -> setup() end,           % Setup
+     fun(_) -> cleanup() end,        % Cleanup
+     fun(_) -> ?assertEqual(42, get_value()) end
+    }.
+
+%% Test fixtures (multiple tests with same setup)
+calculator_test_() ->
+    {foreach,
+     fun setup/0,
+     fun cleanup/1,
+     [
+      fun test_addition/1,
+      fun test_subtraction/1,
+      fun test_multiplication/1
+     ]}.
+
+test_addition(_State) ->
+    ?_assertEqual(5, calculator:add(2, 3)).
+
+test_subtraction(_State) ->
+    ?_assertEqual(1, calculator:subtract(3, 2)).
+
+test_multiplication(_State) ->
+    ?_assertEqual(6, calculator:multiply(2, 3)).
+
+%% Assertions
+assertions_test() ->
+    % Equality
+    ?assertEqual(Expected, Actual),
+    ?assertNotEqual(NotExpected, Actual),
+
+    % Boolean
+    ?assert(true),
+    ?assertNot(false),
+
+    % Exceptions
+    ?assertException(error, badarith, 1/0),
+    ?assertError(badarg, list_to_integer("not_a_number")),
+    ?assertThrow(my_exception, throw(my_exception)),
+    ?assertExit(normal, exit(normal)),
+
+    % Pattern matching
+    ?assertMatch({ok, _}, {ok, 42}),
+    ?assertMatch([H|_] when H > 0, [1, 2, 3]).
+
+%% Generator test (multiple test cases)
+divide_test_() ->
+    [
+     ?_assertEqual(2, calculator:divide(6, 3)),
+     ?_assertEqual(5, calculator:divide(10, 2)),
+     ?_assertError(badarith, calculator:divide(10, 0))
+    ].
+
+%% Test descriptions
+named_tests_test_() ->
+    [
+     {"Addition of positive numbers",
+      ?_assertEqual(5, calculator:add(2, 3))},
+     {"Addition with negative numbers",
+      ?_assertEqual(-1, calculator:add(-3, 2))},
+     {"Addition with zero",
+      ?_assertEqual(5, calculator:add(5, 0))}
+    ].
+```
+
+### Common Test (Integration Testing)
+
+```erlang
+-module(database_SUITE).
+-include_lib("common_test/include/ct.hrl").
+
+%% CT callbacks
+-export([all/0, groups/0, init_per_suite/1, end_per_suite/1,
+         init_per_group/2, end_per_group/2,
+         init_per_testcase/2, end_per_testcase/2]).
+
+%% Test cases
+-export([test_insert/1, test_query/1, test_delete/1,
+         test_transaction/1, test_concurrent_access/1]).
+
+%% Define all test cases
+all() ->
+    [
+     {group, basic_operations},
+     {group, advanced_operations}
+    ].
+
+%% Define test groups
+groups() ->
+    [
+     {basic_operations, [sequence], [test_insert, test_query, test_delete]},
+     {advanced_operations, [parallel], [test_transaction, test_concurrent_access]}
+    ].
+
+%% Suite-level setup (runs once)
+init_per_suite(Config) ->
+    application:start(database),
+    [{db_conn, database:connect()} | Config].
+
+end_per_suite(Config) ->
+    Conn = ?config(db_conn, Config),
+    database:disconnect(Conn),
+    application:stop(database),
+    ok.
+
+%% Group-level setup
+init_per_group(basic_operations, Config) ->
+    [{table, create_test_table()} | Config];
+init_per_group(advanced_operations, Config) ->
+    [{table, create_test_table()}, {pool_size, 10} | Config].
+
+end_per_group(_GroupName, Config) ->
+    Table = ?config(table, Config),
+    drop_table(Table),
+    ok.
+
+%% Test case setup/teardown
+init_per_testcase(TestCase, Config) ->
+    ct:log("Starting test: ~p", [TestCase]),
+    Config.
+
+end_per_testcase(TestCase, _Config) ->
+    ct:log("Finished test: ~p", [TestCase]),
+    ok.
+
+%% Test cases
+test_insert(Config) ->
+    Conn = ?config(db_conn, Config),
+    {ok, Id} = database:insert(Conn, #{name => "Alice", age => 30}),
+    true = is_integer(Id).
+
+test_query(Config) ->
+    Conn = ?config(db_conn, Config),
+    {ok, Results} = database:query(Conn, "SELECT * FROM users"),
+    true = length(Results) > 0.
+
+test_delete(Config) ->
+    Conn = ?config(db_conn, Config),
+    ok = database:delete(Conn, 1),
+    {ok, []} = database:find(Conn, 1).
+
+test_transaction(Config) ->
+    Conn = ?config(db_conn, Config),
+    ok = database:transaction(Conn, fun() ->
+        database:insert(Conn, #{name => "Bob"}),
+        database:insert(Conn, #{name => "Charlie"})
+    end).
+
+test_concurrent_access(Config) ->
+    Conn = ?config(db_conn, Config),
+    PoolSize = ?config(pool_size, Config),
+
+    % Spawn concurrent workers
+    Pids = [spawn_link(fun() -> worker(Conn) end) || _ <- lists:seq(1, PoolSize)],
+
+    % Wait for all to complete
+    [receive {done, Pid} -> ok end || Pid <- Pids],
+    ok.
+
+worker(Conn) ->
+    database:insert(Conn, #{data => rand:uniform(1000)}),
+    self() ! {done, self()}.
+```
+
+### PropEr (Property-Based Testing)
+
+```erlang
+-module(list_props).
+-include_lib("proper/include/proper.hrl").
+
+%% Property: reversing a list twice gives the original list
+prop_reverse_twice() ->
+    ?FORALL(List, list(integer()),
+            lists:reverse(lists:reverse(List)) =:= List).
+
+%% Property: length is preserved after reversing
+prop_reverse_length() ->
+    ?FORALL(List, list(any()),
+            length(lists:reverse(List)) =:= length(List)).
+
+%% Property: appending and reversing
+prop_append_reverse() ->
+    ?FORALL({L1, L2}, {list(integer()), list(integer())},
+            lists:reverse(L1 ++ L2) =:=
+            lists:reverse(L2) ++ lists:reverse(L1)).
+
+%% Property with generators
+prop_positive_sum() ->
+    ?FORALL(List, non_empty(list(positive_integer())),
+            lists:sum(List) > 0).
+
+%% Custom generators
+id() ->
+    ?LET(N, range(1, 1000000), N).
+
+user() ->
+    ?LET({Name, Age}, {non_empty(string()), range(0, 150)},
+         #{name => Name, age => Age}).
+
+prop_user_validation() ->
+    ?FORALL(User, user(),
+            validator:is_valid_user(User)).
+
+%% Stateful property testing
+prop_counter_stateful() ->
+    ?FORALL(Cmds, commands(?MODULE),
+            begin
+                {ok, Pid} = counter:start_link(),
+                {History, State, Result} = run_commands(?MODULE, Cmds),
+                counter:stop(Pid),
+                ?WHENFAIL(
+                    io:format("History: ~p\nState: ~p\nResult: ~p\n",
+                             [History, State, Result]),
+                    Result =:= ok
+                )
+            end).
+```
+
+### Mocking with Meck
+
+```erlang
+-module(user_service_tests).
+-include_lib("eunit/include/eunit.hrl").
+
+%% Test with mocking
+mock_database_test() ->
+    % Setup mock
+    meck:new(database, [non_strict]),
+    meck:expect(database, find, fun(1) -> {ok, #{id => 1, name => "Alice"}} end),
+
+    % Test
+    {ok, User} = user_service:get_user(1),
+    ?assertEqual("Alice", maps:get(name, User)),
+
+    % Verify mock was called
+    ?assert(meck:called(database, find, [1])),
+
+    % Cleanup
+    meck:unload(database).
+
+%% Test with multiple mocks
+multiple_mocks_test() ->
+    meck:new([database, cache], [non_strict]),
+
+    meck:expect(cache, get, fun(_Key) -> {error, not_found} end),
+    meck:expect(database, find, fun(1) -> {ok, #{id => 1}} end),
+    meck:expect(cache, put, fun(_Key, _Value) -> ok end),
+
+    % Service should check cache, then database, then update cache
+    {ok, User} = user_service:get_user(1),
+
+    ?assert(meck:called(cache, get, [1])),
+    ?assert(meck:called(database, find, [1])),
+    ?assert(meck:called(cache, put, [1, User])),
+
+    meck:unload([database, cache]).
+
+%% Passthrough mocking (partial mocking)
+passthrough_test() ->
+    meck:new(mymodule, [passthrough]),
+
+    % Mock only specific function
+    meck:expect(mymodule, expensive_function, fun() -> cached_result end),
+
+    % Other functions work normally
+    Result = mymodule:normal_function(),
+
+    meck:unload(mymodule).
+
+%% Sequence mocking (different returns per call)
+sequence_test() ->
+    meck:new(external_api, [non_strict]),
+
+    meck:sequence(external_api, fetch_data, 0, [
+        {error, timeout},
+        {error, timeout},
+        {ok, data}
+    ]),
+
+    % First two calls fail, third succeeds
+    {error, timeout} = external_api:fetch_data(),
+    {error, timeout} = external_api:fetch_data(),
+    {ok, data} = external_api:fetch_data(),
+
+    meck:unload(external_api).
+```
+
+### Test Fixtures and Setup
+
+```erlang
+-module(fixture_examples).
+-include_lib("eunit/include/eunit.hrl").
+
+%% Simple setup/cleanup
+simple_fixture_test_() ->
+    {setup,
+     fun() ->
+         Pid = setup_server(),
+         Pid
+     end,
+     fun(Pid) ->
+         stop_server(Pid)
+     end,
+     fun(Pid) ->
+         [
+          ?_assertEqual(ok, call_server(Pid, ping)),
+          ?_assertEqual({ok, 42}, call_server(Pid, get_value))
+         ]
+     end
+    }.
+
+%% Foreach (setup for each test)
+foreach_fixture_test_() ->
+    {foreach,
+     fun setup/0,
+     fun cleanup/1,
+     [
+      fun test_case_1/1,
+      fun test_case_2/1,
+      fun test_case_3/1
+     ]
+    }.
+
+setup() ->
+    {ok, Pid} = my_server:start_link(),
+    Pid.
+
+cleanup(Pid) ->
+    my_server:stop(Pid).
+
+test_case_1(Pid) ->
+    ?_assertEqual(ok, my_server:call(Pid, command1)).
+
+%% Fixtures with state
+stateful_fixture_test_() ->
+    {foreach,
+     fun() ->
+         ets:new(test_table, [named_table, public]),
+         ets:insert(test_table, {key1, value1}),
+         test_table
+     end,
+     fun(Table) ->
+         ets:delete(Table)
+     end,
+     [
+      fun(Table) ->
+          ?_assertEqual([{key1, value1}], ets:lookup(Table, key1))
+      end
+     ]
+    }.
+
+%% Nested fixtures
+nested_fixture_test_() ->
+    {setup,
+     fun global_setup/0,
+     fun global_cleanup/1,
+     {foreach,
+      fun per_test_setup/0,
+      fun per_test_cleanup/1,
+      [
+       fun test_with_both_fixtures/1
+      ]
+     }
+    }.
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Process patterns, message passing, supervisors
+- `patterns-testing-dev` - Unit testing, property-based testing, mocking strategies
+- `patterns-metaprogramming-dev` - Parse transforms, macros, behaviors
+
+---
+
 ## References
 
 - [Erlang/OTP Documentation](https://www.erlang.org/doc/)
 - [Learn You Some Erlang](https://learnyousomeerlang.com/)
 - [Erlang Design Principles](https://www.erlang.org/doc/design_principles/des_princ.html)
+- [EUnit User's Guide](https://www.erlang.org/doc/apps/eunit/chapter.html)
+- [Common Test User's Guide](https://www.erlang.org/doc/apps/common_test/users_guide.html)
+- [PropEr Documentation](https://proper-testing.github.io/)
+- [Meck GitHub Repository](https://github.com/eproxus/meck)
 - `lang-erlang-patterns-dev` - Advanced design patterns
 - `lang-erlang-release-dev` - Release management
 - `lang-erlang-performance-dev` - Performance optimization

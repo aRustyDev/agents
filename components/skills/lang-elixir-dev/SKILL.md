@@ -1067,6 +1067,483 @@ GenServer.cast(server, :slow_operation)
 
 ---
 
+## Testing
+
+Elixir has excellent testing support built-in with ExUnit, along with doctests, property-based testing, and mocking capabilities.
+
+### ExUnit Basics
+
+```elixir
+# test/math_test.exs
+defmodule MathTest do
+  use ExUnit.Case
+
+  # Test with assertion
+  test "add/2 adds two numbers" do
+    assert Math.add(2, 3) == 5
+    assert Math.add(-1, 1) == 0
+  end
+
+  # Refute (opposite of assert)
+  test "add/2 does not return incorrect sum" do
+    refute Math.add(2, 3) == 6
+  end
+
+  # Pattern matching in assertions
+  test "divide/2 returns ok tuple" do
+    assert {:ok, result} = Math.divide(10, 2)
+    assert result == 5
+  end
+
+  # Testing errors
+  test "divide/2 returns error on division by zero" do
+    assert {:error, :division_by_zero} = Math.divide(10, 0)
+  end
+end
+```
+
+### Test Lifecycle
+
+```elixir
+defmodule UserTest do
+  use ExUnit.Case
+
+  # Setup runs before each test
+  setup do
+    user = %User{name: "Alice", age: 30}
+    {:ok, user: user}
+  end
+
+  # Access setup data via context
+  test "user has name", %{user: user} do
+    assert user.name == "Alice"
+  end
+
+  # Setup with explicit context
+  setup context do
+    if context[:admin] do
+      {:ok, user: %User{name: "Admin", role: :admin}}
+    else
+      :ok
+    end
+  end
+
+  @tag :admin
+  test "admin user has correct role", %{user: user} do
+    assert user.role == :admin
+  end
+
+  # Setup all (runs once before all tests)
+  setup_all do
+    # Start database connection
+    {:ok, conn} = Database.connect()
+    on_exit(fn -> Database.disconnect(conn) end)
+    {:ok, conn: conn}
+  end
+end
+```
+
+### Assertions
+
+```elixir
+# Equality
+assert 1 + 1 == 2
+refute 1 + 1 == 3
+
+# Pattern matching
+assert {:ok, value} = function_that_returns_tuple()
+assert %User{name: name} = get_user()
+
+# Boolean
+assert is_binary("hello")
+assert is_list([1, 2, 3])
+
+# Membership
+assert 3 in [1, 2, 3]
+refute 4 in [1, 2, 3]
+
+# Approximate equality (floats)
+assert_in_delta 0.1 + 0.2, 0.3, 0.0001
+
+# Exception testing
+assert_raise ArithmeticException, fn ->
+  1 / 0
+end
+
+assert_raise ArgumentError, "invalid argument", fn ->
+  raise ArgumentError, "invalid argument"
+end
+
+# Receive message testing
+send(self(), {:hello, "world"})
+assert_receive {:hello, msg}
+assert msg == "world"
+
+# No message received
+refute_receive {:unexpected, _}, 100
+```
+
+### Doctests
+
+```elixir
+defmodule Math do
+  @doc """
+  Adds two numbers together.
+
+  ## Examples
+
+      iex> Math.add(2, 3)
+      5
+
+      iex> Math.add(-1, 1)
+      0
+
+      iex> Math.add(0.1, 0.2)
+      0.30000000000000004
+  """
+  def add(a, b), do: a + b
+
+  @doc """
+  Divides two numbers.
+
+  ## Examples
+
+      iex> Math.divide(10, 2)
+      {:ok, 5.0}
+
+      iex> Math.divide(10, 0)
+      {:error, :division_by_zero}
+  """
+  def divide(_a, 0), do: {:error, :division_by_zero}
+  def divide(a, b), do: {:ok, a / b}
+end
+
+# In test file, enable doctests
+defmodule MathTest do
+  use ExUnit.Case
+  doctest Math
+end
+```
+
+### Async Tests
+
+```elixir
+# Run tests asynchronously (safe if no shared state)
+defmodule FastTest do
+  use ExUnit.Case, async: true
+
+  test "independent test 1" do
+    assert 1 + 1 == 2
+  end
+
+  test "independent test 2" do
+    assert 2 * 2 == 4
+  end
+end
+
+# Synchronous tests (default, for shared resources)
+defmodule DatabaseTest do
+  use ExUnit.Case  # async: false is default
+
+  test "writes to database" do
+    # Safe to share database
+  end
+end
+```
+
+### Test Tags and Filtering
+
+```elixir
+defmodule UserTest do
+  use ExUnit.Case
+
+  # Tag individual test
+  @tag :slow
+  test "slow integration test" do
+    # ...
+  end
+
+  # Tag with value
+  @tag timeout: 5000
+  test "test with custom timeout" do
+    # ...
+  end
+
+  # Multiple tags
+  @tag :integration
+  @tag :database
+  test "database integration" do
+    # ...
+  end
+
+  # Module-level tags (apply to all tests)
+  @moduletag :integration
+end
+```
+
+```bash
+# Run only tagged tests
+mix test --only slow
+mix test --only integration
+
+# Exclude tagged tests
+mix test --exclude slow
+mix test --exclude integration:database
+
+# Include by default excluded tests
+mix test --include pending
+```
+
+### Mocking with Mox
+
+```elixir
+# Define behaviour
+defmodule WeatherAPI do
+  @callback get_temperature(city :: String.t()) :: {:ok, float()} | {:error, term()}
+end
+
+# Define mock in test_helper.exs
+Mox.defmock(WeatherAPIMock, for: WeatherAPI)
+
+# In your module, inject dependency
+defmodule WeatherService do
+  def get_weather(city, api \\ WeatherAPI) do
+    case api.get_temperature(city) do
+      {:ok, temp} -> "Temperature in #{city}: #{temp}°C"
+      {:error, _} -> "Could not fetch weather"
+    end
+  end
+end
+
+# In test
+defmodule WeatherServiceTest do
+  use ExUnit.Case, async: true
+  import Mox
+
+  # Set up expectations
+  setup :verify_on_exit!
+
+  test "returns temperature message" do
+    expect(WeatherAPIMock, :get_temperature, fn "NYC" ->
+      {:ok, 25.0}
+    end)
+
+    result = WeatherService.get_weather("NYC", WeatherAPIMock)
+    assert result == "Temperature in NYC: 25.0°C"
+  end
+
+  test "handles API errors" do
+    expect(WeatherAPIMock, :get_temperature, fn _city ->
+      {:error, :timeout}
+    end)
+
+    result = WeatherService.get_weather("NYC", WeatherAPIMock)
+    assert result == "Could not fetch weather"
+  end
+
+  test "allows multiple calls" do
+    stub(WeatherAPIMock, :get_temperature, fn _city ->
+      {:ok, 20.0}
+    end)
+
+    WeatherService.get_weather("NYC", WeatherAPIMock)
+    WeatherService.get_weather("SF", WeatherAPIMock)
+    # Both calls succeed with stub
+  end
+end
+```
+
+### Property-Based Testing with StreamData
+
+```elixir
+# Add to mix.exs
+defp deps do
+  [
+    {:stream_data, "~> 0.6", only: :test}
+  ]
+end
+
+# Property-based test
+defmodule StringPropertiesTest do
+  use ExUnit.Case
+  use ExUnitProperties
+
+  property "reversing a string twice returns original" do
+    check all string <- string(:printable) do
+      reversed_twice = string |> String.reverse() |> String.reverse()
+      assert reversed_twice == string
+    end
+  end
+
+  property "list concatenation is associative" do
+    check all list1 <- list_of(integer()),
+              list2 <- list_of(integer()),
+              list3 <- list_of(integer()) do
+      assert (list1 ++ list2) ++ list3 == list1 ++ (list2 ++ list3)
+    end
+  end
+
+  property "sorting is idempotent" do
+    check all list <- list_of(integer()) do
+      sorted_once = Enum.sort(list)
+      sorted_twice = Enum.sort(sorted_once)
+      assert sorted_once == sorted_twice
+    end
+  end
+
+  # Custom generator
+  property "user age is always positive" do
+    check all name <- string(:alphanumeric),
+              age <- positive_integer() do
+      user = %User{name: name, age: age}
+      assert User.valid?(user)
+    end
+  end
+end
+```
+
+### Testing Processes and GenServers
+
+```elixir
+defmodule CounterTest do
+  use ExUnit.Case
+
+  test "counter increments" do
+    {:ok, pid} = Counter.start_link(0)
+
+    Counter.increment(pid)
+    Counter.increment(pid)
+
+    assert Counter.get(pid) == 2
+  end
+
+  test "counter handles cast" do
+    {:ok, pid} = Counter.start_link(0)
+
+    Counter.async_increment(pid)
+    # Give it time to process cast
+    Process.sleep(10)
+
+    assert Counter.get(pid) == 1
+  end
+
+  test "counter can be supervised" do
+    children = [
+      {Counter, 0}
+    ]
+
+    {:ok, supervisor} = Supervisor.start_link(children, strategy: :one_for_one)
+
+    # Get counter pid from supervisor
+    [{Counter, pid, _, _}] = Supervisor.which_children(supervisor)
+
+    Counter.increment(pid)
+    assert Counter.get(pid) == 1
+
+    # Clean up
+    Supervisor.stop(supervisor)
+  end
+end
+```
+
+### Testing with ExUnit.CaptureIO
+
+```elixir
+import ExUnit.CaptureIO
+
+test "prints greeting to stdout" do
+  output = capture_io(fn ->
+    IO.puts("Hello, World!")
+  end)
+
+  assert output == "Hello, World!\n"
+end
+
+test "captures user input" do
+  result = capture_io("Alice\n", fn ->
+    name = IO.gets("Enter name: ")
+    String.trim(name)
+  end)
+
+  assert result == "Alice"
+end
+
+test "captures stderr" do
+  output = capture_io(:stderr, fn ->
+    IO.warn("Warning message")
+  end)
+
+  assert output =~ "Warning message"
+end
+```
+
+### Common Testing Patterns
+
+```elixir
+# Test with multiple assertions using pipe
+test "user creation pipeline" do
+  params = %{name: "Alice", email: "alice@example.com"}
+
+  assert {:ok, user} =
+    params
+    |> User.changeset()
+    |> Repo.insert()
+
+  assert user.name == "Alice"
+  assert user.email == "alice@example.com"
+end
+
+# Test with pattern matching and guards
+test "validates positive numbers" do
+  assert {:ok, result} = Math.sqrt(4)
+  assert result == 2.0
+
+  assert {:error, :negative_number} = Math.sqrt(-1)
+end
+
+# Test with describe blocks for organization
+describe "User.create/1" do
+  test "creates user with valid params" do
+    # ...
+  end
+
+  test "returns error with invalid email" do
+    # ...
+  end
+
+  test "returns error with duplicate email" do
+    # ...
+  end
+end
+
+# Test with shared setup using tags
+setup context do
+  case context[:user_type] do
+    :admin -> {:ok, user: create_admin_user()}
+    :regular -> {:ok, user: create_regular_user()}
+    _ -> :ok
+  end
+end
+
+@tag user_type: :admin
+test "admin can delete users", %{user: admin} do
+  assert admin.role == :admin
+end
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Processes, GenServers, supervision trees
+- `patterns-serialization-dev` - JSON encoding/decoding, protocols
+- `patterns-metaprogramming-dev` - Macros, compile-time code generation
+- `patterns-testing-dev` - Testing strategies, property-based testing
+
+---
+
 ## References
 
 - [Elixir Language](https://elixir-lang.org/)
@@ -1074,4 +1551,7 @@ GenServer.cast(server, :slow_operation)
 - [Phoenix Framework](https://www.phoenixframework.org/)
 - [Hex Package Manager](https://hex.pm/)
 - [Elixir Forum](https://elixirforum.com/)
+- [ExUnit Documentation](https://hexdocs.pm/ex_unit/ExUnit.html)
+- [Mox Documentation](https://hexdocs.pm/mox/Mox.html)
+- [StreamData Documentation](https://hexdocs.pm/stream_data/StreamData.html)
 - Specialized skills: `lang-elixir-phoenix-dev`, `lang-elixir-otp-dev`, `lang-elixir-ecto-dev`
