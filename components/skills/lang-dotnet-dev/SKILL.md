@@ -1,11 +1,11 @@
 ---
 name: lang-dotnet-dev
-description: Foundational .NET patterns covering runtime, project structure, dependency injection, configuration, and cross-platform development. Use when working with .NET projects or CLI tools. This is the entry point for .NET development.
+description: Foundational .NET patterns covering runtime, project structure, dependency injection, configuration, metaprogramming, and cross-platform development. Use when working with .NET projects or CLI tools. This is the entry point for .NET development.
 ---
 
 # .NET Development Skill
 
-Comprehensive foundational patterns for .NET development, covering runtime fundamentals, project structure, dependency injection, configuration management, logging, middleware, and cross-platform development.
+Comprehensive foundational patterns for .NET development, covering runtime fundamentals, project structure, dependency injection, configuration management, logging, middleware, metaprogramming, and cross-platform development.
 
 ## Table of Contents
 
@@ -19,7 +19,9 @@ Comprehensive foundational patterns for .NET development, covering runtime funda
 - [Middleware Patterns](#middleware-patterns)
 - [NuGet Packages](#nuget-packages)
 - [Cross-Platform Development](#cross-platform-development)
+- [Metaprogramming](#metaprogramming)
 - [Best Practices](#best-practices)
+- [Cross-Cutting Patterns](#cross-cutting-patterns)
 
 ## .NET Runtime and SDK
 
@@ -2017,6 +2019,610 @@ public class PathHelper
 }
 ```
 
+## Metaprogramming
+
+### Reflection
+
+Reflection allows runtime inspection and manipulation of types, methods, and properties.
+
+```csharp
+using System;
+using System.Reflection;
+
+public class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public void Greet() => Console.WriteLine($"Hello, I'm {Name}");
+}
+
+public class ReflectionExamples
+{
+    public void InspectType()
+    {
+        // Get type information
+        Type type = typeof(User);
+        Type type2 = user.GetType();
+        Type type3 = Type.GetType("Namespace.User");
+
+        // Get type properties
+        Console.WriteLine($"Name: {type.Name}");
+        Console.WriteLine($"FullName: {type.FullName}");
+        Console.WriteLine($"Namespace: {type.Namespace}");
+        Console.WriteLine($"IsClass: {type.IsClass}");
+        Console.WriteLine($"IsPublic: {type.IsPublic}");
+
+        // Get properties
+        foreach (PropertyInfo prop in type.GetProperties())
+        {
+            Console.WriteLine($"{prop.Name}: {prop.PropertyType}");
+        }
+
+        // Get methods
+        foreach (MethodInfo method in type.GetMethods())
+        {
+            Console.WriteLine($"{method.Name}");
+        }
+    }
+
+    public void CreateInstance()
+    {
+        Type type = typeof(User);
+
+        // Create instance with parameterless constructor
+        object instance = Activator.CreateInstance(type);
+
+        // Create instance with constructor parameters
+        object instance2 = Activator.CreateInstance(
+            type,
+            new object[] { "Alice", 30 }
+        );
+
+        // Generic version
+        User user = Activator.CreateInstance<User>();
+    }
+
+    public void AccessMembers()
+    {
+        var user = new User { Name = "Alice", Age = 30 };
+        Type type = typeof(User);
+
+        // Get property value
+        PropertyInfo nameProp = type.GetProperty("Name");
+        string name = (string)nameProp.GetValue(user);
+
+        // Set property value
+        nameProp.SetValue(user, "Bob");
+
+        // Invoke method
+        MethodInfo greetMethod = type.GetMethod("Greet");
+        greetMethod.Invoke(user, null);
+
+        // Access private members
+        FieldInfo privateField = type.GetField(
+            "_privateField",
+            BindingFlags.NonPublic | BindingFlags.Instance
+        );
+        privateField?.SetValue(user, "secret");
+    }
+}
+```
+
+### Attributes
+
+Attributes provide metadata about code elements that can be queried at runtime or compile time.
+
+```csharp
+using System;
+
+// Built-in attributes
+[Obsolete("Use NewMethod instead")]
+public void OldMethod() { }
+
+[Serializable]
+public class DataModel { }
+
+[AttributeUsage(AttributeTargets.Method)]
+public class LoggableAttribute : Attribute
+{
+    public string Message { get; set; }
+    public LogLevel Level { get; set; }
+
+    public LoggableAttribute(string message = "", LogLevel level = LogLevel.Info)
+    {
+        Message = message;
+        Level = level;
+    }
+}
+
+// Custom attribute with multiple targets
+[AttributeUsage(
+    AttributeTargets.Class | AttributeTargets.Method,
+    AllowMultiple = true,
+    Inherited = true
+)]
+public class AuthorAttribute : Attribute
+{
+    public string Name { get; }
+    public string Date { get; set; }
+
+    public AuthorAttribute(string name)
+    {
+        Name = name;
+    }
+}
+
+// Usage
+public class MyService
+{
+    [Loggable("Processing data", LogLevel.Debug)]
+    [Author("Alice", Date = "2024-01-01")]
+    public void ProcessData()
+    {
+        // Method implementation
+    }
+}
+
+// Reading attributes
+public class AttributeReader
+{
+    public void ReadMethodAttributes()
+    {
+        var method = typeof(MyService).GetMethod("ProcessData");
+
+        // Get single attribute
+        var loggable = method.GetCustomAttribute<LoggableAttribute>();
+        if (loggable != null)
+        {
+            Console.WriteLine($"Log: {loggable.Message} at {loggable.Level}");
+        }
+
+        // Get all attributes of a type
+        var authors = method.GetCustomAttributes<AuthorAttribute>();
+        foreach (var author in authors)
+        {
+            Console.WriteLine($"Author: {author.Name} on {author.Date}");
+        }
+
+        // Check if attribute is present
+        bool isLoggable = method.IsDefined(typeof(LoggableAttribute));
+    }
+}
+```
+
+### Source Generators (C# 9+)
+
+Source generators create code at compile time, providing compile-time metaprogramming.
+
+```csharp
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using System.Text;
+
+// Source generator
+[Generator]
+public class AutoNotifyGenerator : ISourceGenerator
+{
+    public void Initialize(GeneratorInitializationContext context)
+    {
+        // Register syntax receiver
+        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+    }
+
+    public void Execute(GeneratorExecutionContext context)
+    {
+        if (context.SyntaxReceiver is not SyntaxReceiver receiver)
+            return;
+
+        foreach (var field in receiver.CandidateFields)
+        {
+            var model = context.Compilation.GetSemanticModel(field.SyntaxTree);
+            var fieldSymbol = model.GetDeclaredSymbol(field) as IFieldSymbol;
+
+            if (fieldSymbol == null)
+                continue;
+
+            var classSymbol = fieldSymbol.ContainingType;
+            var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
+
+            var source = GeneratePropertySource(
+                namespaceName,
+                classSymbol.Name,
+                fieldSymbol.Name
+            );
+
+            context.AddSource(
+                $"{classSymbol.Name}_{fieldSymbol.Name}_AutoNotify.g.cs",
+                SourceText.From(source, Encoding.UTF8)
+            );
+        }
+    }
+
+    private string GeneratePropertySource(
+        string namespaceName,
+        string className,
+        string fieldName)
+    {
+        var propertyName = char.ToUpper(fieldName[1]) + fieldName.Substring(2);
+
+        return $@"
+using System.ComponentModel;
+
+namespace {namespaceName}
+{{
+    public partial class {className} : INotifyPropertyChanged
+    {{
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public {fieldName.TrimStart('_')} {propertyName}
+        {{
+            get => {fieldName};
+            set
+            {{
+                if ({fieldName} != value)
+                {{
+                    {fieldName} = value;
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof({propertyName}))
+                    );
+                }}
+            }}
+        }}
+    }}
+}}";
+    }
+
+    class SyntaxReceiver : ISyntaxReceiver
+    {
+        public List<FieldDeclarationSyntax> CandidateFields { get; } = new();
+
+        public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+        {
+            if (syntaxNode is FieldDeclarationSyntax fieldDeclaration &&
+                fieldDeclaration.AttributeLists.Count > 0)
+            {
+                CandidateFields.Add(fieldDeclaration);
+            }
+        }
+    }
+}
+
+// Usage in consuming code
+public partial class Person
+{
+    [AutoNotify]
+    private string _name = "";
+
+    // Property is generated by source generator
+}
+```
+
+### Expression Trees
+
+Expression trees represent code as data structures for runtime code generation and analysis.
+
+```csharp
+using System;
+using System.Linq.Expressions;
+
+public class ExpressionTreeExamples
+{
+    public void BasicExpressions()
+    {
+        // Lambda expression
+        Expression<Func<int, int, int>> add = (a, b) => a + b;
+
+        // Compile and execute
+        var compiled = add.Compile();
+        int result = compiled(2, 3); // 5
+
+        // Inspect expression tree
+        Console.WriteLine(add.Body);        // (a + b)
+        Console.WriteLine(add.Parameters);  // [a, b]
+    }
+
+    public void BuildExpressionTree()
+    {
+        // Build expression: (a, b) => a + b
+        var paramA = Expression.Parameter(typeof(int), "a");
+        var paramB = Expression.Parameter(typeof(int), "b");
+        var body = Expression.Add(paramA, paramB);
+
+        var lambda = Expression.Lambda<Func<int, int, int>>(
+            body,
+            paramA,
+            paramB
+        );
+
+        var compiled = lambda.Compile();
+        int result = compiled(2, 3); // 5
+    }
+
+    public void ComplexExpressions()
+    {
+        // Build: user => user.Name == "Alice" && user.Age > 18
+        var param = Expression.Parameter(typeof(User), "user");
+
+        var nameProperty = Expression.Property(param, "Name");
+        var nameEquals = Expression.Equal(
+            nameProperty,
+            Expression.Constant("Alice")
+        );
+
+        var ageProperty = Expression.Property(param, "Age");
+        var ageGreater = Expression.GreaterThan(
+            ageProperty,
+            Expression.Constant(18)
+        );
+
+        var condition = Expression.AndAlso(nameEquals, ageGreater);
+
+        var lambda = Expression.Lambda<Func<User, bool>>(
+            condition,
+            param
+        );
+
+        // Use with LINQ
+        var users = new List<User>();
+        var filtered = users.AsQueryable().Where(lambda);
+    }
+
+    public void DynamicPropertyAccess()
+    {
+        // Build property accessor dynamically
+        var param = Expression.Parameter(typeof(User), "user");
+        var property = Expression.Property(param, "Name");
+        var lambda = Expression.Lambda<Func<User, string>>(property, param);
+
+        var accessor = lambda.Compile();
+        var user = new User { Name = "Alice" };
+        string name = accessor(user); // "Alice"
+    }
+}
+```
+
+### IL Emit (Reflection.Emit)
+
+Generate IL code dynamically at runtime for maximum performance and flexibility.
+
+```csharp
+using System;
+using System.Reflection;
+using System.Reflection.Emit;
+
+public class ILEmitExamples
+{
+    public void CreateDynamicMethod()
+    {
+        // Create dynamic method: int Add(int a, int b) => a + b
+        var method = new DynamicMethod(
+            "Add",
+            typeof(int),
+            new[] { typeof(int), typeof(int) }
+        );
+
+        ILGenerator il = method.GetILGenerator();
+
+        // IL: ldarg.0 (load first argument)
+        il.Emit(OpCodes.Ldarg_0);
+        // IL: ldarg.1 (load second argument)
+        il.Emit(OpCodes.Ldarg_1);
+        // IL: add (add top two stack values)
+        il.Emit(OpCodes.Add);
+        // IL: ret (return)
+        il.Emit(OpCodes.Ret);
+
+        // Create delegate
+        var add = (Func<int, int, int>)method.CreateDelegate(
+            typeof(Func<int, int, int>)
+        );
+
+        int result = add(2, 3); // 5
+    }
+
+    public void CreateDynamicType()
+    {
+        // Create assembly
+        var assemblyName = new AssemblyName("DynamicAssembly");
+        var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+            assemblyName,
+            AssemblyBuilderAccess.Run
+        );
+
+        // Create module
+        var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+
+        // Create type
+        var typeBuilder = moduleBuilder.DefineType(
+            "DynamicType",
+            TypeAttributes.Public
+        );
+
+        // Add field
+        var fieldBuilder = typeBuilder.DefineField(
+            "_value",
+            typeof(int),
+            FieldAttributes.Private
+        );
+
+        // Add property
+        var propertyBuilder = typeBuilder.DefineProperty(
+            "Value",
+            PropertyAttributes.HasDefault,
+            typeof(int),
+            null
+        );
+
+        // Add getter
+        var getterBuilder = typeBuilder.DefineMethod(
+            "get_Value",
+            MethodAttributes.Public | MethodAttributes.SpecialName,
+            typeof(int),
+            Type.EmptyTypes
+        );
+
+        var getterIL = getterBuilder.GetILGenerator();
+        getterIL.Emit(OpCodes.Ldarg_0);
+        getterIL.Emit(OpCodes.Ldfld, fieldBuilder);
+        getterIL.Emit(OpCodes.Ret);
+
+        propertyBuilder.SetGetMethod(getterBuilder);
+
+        // Create type
+        Type dynamicType = typeBuilder.CreateType();
+        object instance = Activator.CreateInstance(dynamicType);
+    }
+}
+```
+
+### Dynamic Language Runtime (DLR)
+
+The DLR provides dynamic typing and late binding for .NET.
+
+```csharp
+using System;
+using System.Dynamic;
+
+public class DynamicExamples
+{
+    public void UseDynamic()
+    {
+        // Dynamic variables
+        dynamic obj = "Hello";
+        obj = 42;                    // OK - type can change
+        obj = new { Name = "Alice" }; // OK - anonymous type
+
+        Console.WriteLine(obj.Name); // Late binding
+
+        // Dynamic method calls
+        dynamic calculator = new Calculator();
+        var result = calculator.Add(2, 3); // Resolved at runtime
+    }
+
+    public void ExpandoObject()
+    {
+        // Dynamic object with runtime properties
+        dynamic person = new ExpandoObject();
+        person.Name = "Alice";
+        person.Age = 30;
+        person.Greet = (Action)(() => Console.WriteLine($"Hello, I'm {person.Name}"));
+
+        person.Greet(); // Call dynamic method
+
+        // Can enumerate properties
+        var dict = (IDictionary<string, object>)person;
+        foreach (var kvp in dict)
+        {
+            Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+        }
+    }
+}
+
+// Custom dynamic object
+public class DynamicDictionary : DynamicObject
+{
+    private readonly Dictionary<string, object> _data = new();
+
+    public override bool TryGetMember(GetMemberBinder binder, out object result)
+    {
+        return _data.TryGetValue(binder.Name, out result);
+    }
+
+    public override bool TrySetMember(SetMemberBinder binder, object value)
+    {
+        _data[binder.Name] = value;
+        return true;
+    }
+
+    public override bool TryInvokeMember(
+        InvokeMemberBinder binder,
+        object[] args,
+        out object result)
+    {
+        if (_data.TryGetValue(binder.Name, out var value) && value is Delegate del)
+        {
+            result = del.DynamicInvoke(args);
+            return true;
+        }
+
+        result = null;
+        return false;
+    }
+}
+```
+
+### Proxy and Interception Patterns
+
+Use DispatchProxy for dynamic proxy generation.
+
+```csharp
+using System;
+using System.Reflection;
+
+public interface IUserService
+{
+    User GetUser(int id);
+    void SaveUser(User user);
+}
+
+public class LoggingProxy<T> : DispatchProxy
+{
+    private T _target;
+    private ILogger _logger;
+
+    public static T Create(T target, ILogger logger)
+    {
+        var proxy = Create<T, LoggingProxy<T>>() as LoggingProxy<T>;
+        proxy._target = target;
+        proxy._logger = logger;
+        return (T)(object)proxy;
+    }
+
+    protected override object Invoke(MethodInfo targetMethod, object[] args)
+    {
+        _logger.LogInformation(
+            "Calling {Method} with {Args}",
+            targetMethod.Name,
+            args
+        );
+
+        try
+        {
+            var result = targetMethod.Invoke(_target, args);
+
+            _logger.LogInformation(
+                "Completed {Method} with result {Result}",
+                targetMethod.Name,
+                result
+            );
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error in {Method}",
+                targetMethod.Name
+            );
+            throw;
+        }
+    }
+}
+
+// Usage
+var userService = new UserService();
+var logger = new ConsoleLogger();
+var proxy = LoggingProxy<IUserService>.Create(userService, logger);
+
+proxy.GetUser(1); // Logged automatically
+```
+
+**See also:** `patterns-metaprogramming-dev` for cross-language metaprogramming patterns
+
 ## Best Practices
 
 ### Nullable Reference Types
@@ -2270,4 +2876,14 @@ public record Customer(bool IsPremium, int YearsOfMembership);
 
 ---
 
-This skill provides foundational .NET patterns for modern cross-platform development. These patterns cover the .NET runtime, project structure, CLI tools, dependency injection, configuration management, logging, middleware, NuGet packages, and best practices for building robust .NET applications.
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-metaprogramming-dev` - Reflection, attributes, source generators, IL emit, dynamic types
+- `patterns-concurrency-dev` - Async/await, tasks, parallel programming, thread safety
+- `patterns-serialization-dev` - JSON serialization, validation, configuration binding
+
+---
+
+This skill provides foundational .NET patterns for modern cross-platform development. These patterns cover the .NET runtime, project structure, CLI tools, dependency injection, configuration management, logging, middleware, metaprogramming, NuGet packages, and best practices for building robust .NET applications.
