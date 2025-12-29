@@ -19,12 +19,14 @@ Foundational Clojure patterns and core language features. This skill serves as a
 - Macros and metaprogramming basics
 - Concurrency primitives (atoms, refs, agents)
 - Java interop fundamentals
+- Serialization (EDN, JSON, Transit, clojure.spec)
+- Build/dependencies (Leiningen, deps.edn, tools.build)
+- Testing (clojure.test, test.check, Midje)
 
 **This skill does NOT cover:**
 - ClojureScript and web development - see `lang-clojurescript-dev`
 - Specific frameworks (Ring, Compojure, etc.) - see framework-specific skills
-- Build tooling (Leiningen, deps.edn) - see `lang-clojure-build-dev`
-- Testing patterns - see `lang-clojure-testing-dev`
+- Advanced spec patterns and generative testing - see dedicated testing skills
 
 ---
 
@@ -784,6 +786,461 @@ Foundational Clojure patterns and core language features. This skill serves as a
 ;; Or convert
 (keyword "name") ; => :name
 ```
+
+---
+
+## Serialization
+
+Clojure provides multiple serialization options, from the native EDN format to JSON and Transit for interoperability. Validation is handled through `clojure.spec` and schema libraries.
+
+### EDN (Extensible Data Notation)
+
+```clojure
+;; EDN is Clojure's native data format
+(require '[clojure.edn :as edn])
+
+;; Read EDN string
+(edn/read-string "{:name \"Alice\" :age 30}")
+;; => {:name "Alice" :age 30}
+
+;; Read with custom readers
+(edn/read-string {:readers {'inst #(java.time.Instant/parse %)}}
+                 "#inst \"2024-01-15T10:30:00Z\"")
+
+;; Write EDN
+(pr-str {:name "Alice" :age 30})
+;; => "{:name \"Alice\", :age 30}"
+
+;; Read from file
+(edn/read-string (slurp "config.edn"))
+```
+
+### JSON with Cheshire
+
+```clojure
+;; deps.edn: {:deps {cheshire/cheshire {:mvn/version "5.12.0"}}}
+(require '[cheshire.core :as json])
+
+;; Parse JSON
+(json/parse-string "{\"name\": \"Alice\", \"age\": 30}" true)
+;; => {:name "Alice" :age 30} (true = keywordize keys)
+
+;; Generate JSON
+(json/generate-string {:name "Alice" :age 30})
+;; => "{\"name\":\"Alice\",\"age\":30}"
+
+;; Pretty print
+(json/generate-string {:name "Alice" :items [1 2 3]} {:pretty true})
+
+;; Custom encoders
+(json/generate-string
+  {:timestamp (java.time.Instant/now)}
+  {:encoders {java.time.Instant (fn [v gen] (.writeString gen (str v)))}})
+
+;; Streaming for large files
+(json/parse-stream (io/reader "large.json") true)
+```
+
+### Transit (High-Performance)
+
+```clojure
+;; deps.edn: {:deps {com.cognitect/transit-clj {:mvn/version "1.0.333"}}}
+(require '[cognitect.transit :as transit])
+(import '[java.io ByteArrayOutputStream ByteArrayInputStream])
+
+;; Write Transit
+(defn to-transit [data]
+  (let [out (ByteArrayOutputStream.)]
+    (transit/write (transit/writer out :json) data)
+    (.toString out)))
+
+(to-transit {:name "Alice" :keywords #{:a :b}})
+;; Preserves Clojure types including keywords and sets
+
+;; Read Transit
+(defn from-transit [s]
+  (transit/read (transit/reader (ByteArrayInputStream. (.getBytes s)) :json)))
+
+;; Custom handlers for domain types
+(defrecord User [id name])
+
+(def write-handlers
+  {User (transit/write-handler
+          (constantly "user")
+          (fn [u] [(:id u) (:name u)]))})
+```
+
+### Validation with clojure.spec
+
+```clojure
+(require '[clojure.spec.alpha :as s])
+
+;; Define specs
+(s/def ::name (s/and string? #(< 0 (count %) 100)))
+(s/def ::email (s/and string? #(re-matches #".+@.+\..+" %)))
+(s/def ::age (s/and int? #(< 0 % 150)))
+(s/def ::user (s/keys :req-un [::name ::email]
+                      :opt-un [::age]))
+
+;; Validate
+(s/valid? ::user {:name "Alice" :email "alice@example.com"})
+;; => true
+
+;; Explain failures
+(s/explain ::user {:name "" :email "invalid"})
+;; Prints detailed validation errors
+
+;; Conform (parse + validate)
+(s/def ::id-or-name (s/or :id int? :name string?))
+(s/conform ::id-or-name 42) ; => [:id 42]
+
+;; Validate function arguments
+(defn create-user [{:keys [name email] :as user}]
+  {:pre [(s/valid? ::user user)]}
+  (assoc user :id (java.util.UUID/randomUUID)))
+
+;; Generate test data
+(require '[clojure.spec.gen.alpha :as gen])
+(gen/sample (s/gen ::name) 5)
+```
+
+### See Also
+
+- `patterns-serialization-dev` - Cross-language serialization patterns
+
+---
+
+## Build and Dependencies
+
+Clojure has two primary build ecosystems: Leiningen (the traditional choice) and tools.deps/CLI (the modern Clojure CLI).
+
+### Leiningen (project.clj)
+
+```clojure
+;; project.clj
+(defproject myapp "0.1.0-SNAPSHOT"
+  :description "My Clojure application"
+  :url "https://github.com/user/myapp"
+  :license {:name "EPL-2.0"}
+
+  ;; Dependencies
+  :dependencies [[org.clojure/clojure "1.11.1"]
+                 [cheshire "5.12.0"]
+                 [ring/ring-core "1.10.0"]]
+
+  ;; Development dependencies
+  :profiles {:dev {:dependencies [[midje "1.10.9"]]
+                   :plugins [[lein-midje "3.2.1"]]}}
+
+  ;; Entry point
+  :main myapp.core
+  :aot [myapp.core]
+
+  ;; Resources
+  :resource-paths ["resources"]
+  :source-paths ["src"]
+  :test-paths ["test"]
+
+  ;; REPL configuration
+  :repl-options {:init-ns myapp.core})
+```
+
+```bash
+# Common Leiningen commands
+lein new app myapp          # Create new project
+lein deps                   # Download dependencies
+lein repl                   # Start REPL
+lein run                    # Run main function
+lein test                   # Run tests
+lein uberjar                # Build standalone JAR
+lein install                # Install to local Maven repo
+lein deploy clojars         # Publish to Clojars
+```
+
+### tools.deps (deps.edn)
+
+```clojure
+;; deps.edn
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        cheshire/cheshire {:mvn/version "5.12.0"}
+        ring/ring-core {:mvn/version "1.10.0"}}
+
+ :aliases
+ {:dev {:extra-paths ["dev"]
+        :extra-deps {nrepl/nrepl {:mvn/version "1.0.0"}}}
+
+  :test {:extra-paths ["test"]
+         :extra-deps {io.github.cognitect-labs/test-runner
+                      {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
+
+  :build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.4"}}
+          :ns-default build}
+
+  :outdated {:deps {com.github.liquidz/antq {:mvn/version "2.5.1109"}}
+             :main-opts ["-m" "antq.core"]}}}
+```
+
+```bash
+# Common CLI commands
+clj                         # Start REPL
+clj -X:test                 # Run tests
+clj -M:dev -m myapp.core    # Run with alias
+clj -A:dev:test             # Combine aliases
+clj -Sdeps '{:deps {...}}'  # Add deps inline
+clj -T:build uber           # Build uberjar
+```
+
+### Dependency Sources
+
+```clojure
+;; Maven (Clojars, Maven Central)
+{:deps {ring/ring-core {:mvn/version "1.10.0"}}}
+
+;; Git dependency
+{:deps {io.github.user/lib {:git/tag "v1.0.0" :git/sha "abc123"}}}
+
+;; Local project
+{:deps {mylib {:local/root "../mylib"}}}
+
+;; Git with specific path
+{:deps {lib {:git/url "https://github.com/user/monorepo"
+             :git/sha "abc123"
+             :deps/root "libs/mylib"}}}
+```
+
+### Build Script (tools.build)
+
+```clojure
+;; build.clj
+(ns build
+  (:require [clojure.tools.build.api :as b]))
+
+(def lib 'myapp/myapp)
+(def version "0.1.0")
+(def class-dir "target/classes")
+(def basis (b/create-basis {:project "deps.edn"}))
+(def jar-file (format "target/%s-%s.jar" (name lib) version))
+(def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
+
+(defn clean [_]
+  (b/delete {:path "target"}))
+
+(defn jar [_]
+  (b/write-pom {:class-dir class-dir :lib lib :version version :basis basis})
+  (b/copy-dir {:src-dirs ["src" "resources"] :target-dir class-dir})
+  (b/jar {:class-dir class-dir :jar-file jar-file}))
+
+(defn uber [_]
+  (clean nil)
+  (b/copy-dir {:src-dirs ["src" "resources"] :target-dir class-dir})
+  (b/compile-clj {:basis basis :src-dirs ["src"] :class-dir class-dir})
+  (b/uber {:class-dir class-dir :uber-file uber-file :basis basis
+           :main 'myapp.core}))
+```
+
+### Publishing to Clojars
+
+```clojure
+;; deps.edn alias for deployment
+{:aliases
+ {:deploy {:deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
+           :exec-fn deps-deploy.deps-deploy/deploy
+           :exec-args {:installer :remote :artifact "target/myapp.jar"}}}}
+
+;; Or in project.clj
+{:deploy-repositories [["clojars" {:url "https://repo.clojars.org"
+                                   :username :env/CLOJARS_USERNAME
+                                   :password :env/CLOJARS_TOKEN}]]}
+```
+
+---
+
+## Testing
+
+Clojure's testing ecosystem includes the built-in `clojure.test`, property-based testing with `test.check`, and BDD-style testing with Midje.
+
+### clojure.test (Built-in)
+
+```clojure
+(ns myapp.core-test
+  (:require [clojure.test :refer [deftest testing is are]]
+            [myapp.core :as core]))
+
+;; Basic test
+(deftest add-test
+  (is (= 4 (core/add 2 2)))
+  (is (= 0 (core/add -1 1))))
+
+;; Grouped assertions with testing
+(deftest user-validation-test
+  (testing "valid users"
+    (is (core/valid-user? {:name "Alice" :email "a@b.com"}))
+    (is (core/valid-user? {:name "Bob" :email "b@c.org"})))
+
+  (testing "invalid users"
+    (is (not (core/valid-user? {:name "" :email "a@b.com"})))
+    (is (not (core/valid-user? {:name "Alice" :email "invalid"})))))
+
+;; Table-driven tests with are
+(deftest arithmetic-test
+  (are [x y expected] (= expected (core/add x y))
+    1 1 2
+    2 3 5
+    -1 1 0
+    0 0 0))
+
+;; Testing exceptions
+(deftest divide-test
+  (is (thrown? ArithmeticException (core/divide 1 0)))
+  (is (thrown-with-msg? Exception #"cannot be zero"
+        (core/safe-divide 1 0))))
+
+;; Fixtures for setup/teardown
+(use-fixtures :once
+  (fn [f]
+    (println "Starting test suite")
+    (f)
+    (println "Test suite complete")))
+
+(use-fixtures :each
+  (fn [f]
+    (reset! core/db {})  ; Clean state
+    (f)))
+```
+
+### test.check (Property-Based)
+
+```clojure
+;; deps.edn: {:deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+(ns myapp.props-test
+  (:require [clojure.test :refer [deftest is]]
+            [clojure.test.check :as tc]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.clojure-test :refer [defspec]]))
+
+;; Property: reverse is its own inverse
+(defspec reverse-involutive 100
+  (prop/for-all [v (gen/vector gen/small-integer)]
+    (= v (vec (reverse (reverse v))))))
+
+;; Property: sorted output
+(defspec sort-produces-sorted 100
+  (prop/for-all [v (gen/vector gen/small-integer)]
+    (let [sorted (sort v)]
+      (every? (fn [[a b]] (<= a b))
+              (partition 2 1 sorted)))))
+
+;; Custom generator
+(def user-gen
+  (gen/hash-map
+    :id gen/uuid
+    :name (gen/not-empty gen/string-alphanumeric)
+    :age (gen/choose 18 100)
+    :email (gen/fmap #(str % "@example.com")
+                     gen/string-alphanumeric)))
+
+(defspec user-roundtrip 50
+  (prop/for-all [user user-gen]
+    (= user (core/parse-user (core/serialize-user user)))))
+
+;; Manual property check
+(tc/quick-check 100
+  (prop/for-all [n gen/nat]
+    (= n (core/identity-fn n))))
+```
+
+### Midje (BDD-Style)
+
+```clojure
+;; deps.edn: {:deps {midje/midje {:mvn/version "1.10.9"}}}
+(ns myapp.core-test
+  (:require [midje.sweet :refer :all]
+            [myapp.core :as core]))
+
+;; Facts with arrows
+(fact "addition works correctly"
+  (core/add 2 2) => 4
+  (core/add -1 1) => 0)
+
+;; Tabular facts
+(tabular
+  (fact "multiplication table"
+    (core/multiply ?x ?y) => ?result)
+  ?x ?y ?result
+  1  1  1
+  2  3  6
+  0  5  0)
+
+;; Checking predicates
+(fact "string processing"
+  (core/process "hello") => string?
+  (core/process "hello") => #(> (count %) 0))
+
+;; Mocking/stubbing
+(fact "external API calls"
+  (core/fetch-user 123) => {:id 123 :name "Alice"}
+  (provided
+    (core/http-get "https://api.example.com/users/123")
+      => {:status 200 :body "{\"id\":123,\"name\":\"Alice\"}"}))
+
+;; Checking exceptions
+(fact "division by zero throws"
+  (core/divide 1 0) => (throws ArithmeticException))
+
+;; Prerequisites
+(against-background
+  [(core/get-config) => {:db-url "test://db"}]
+  (fact "uses test config"
+    (core/db-url) => "test://db"))
+```
+
+### Running Tests
+
+```bash
+# Leiningen
+lein test                   # Run all tests
+lein test myapp.core-test   # Run specific namespace
+lein test :only myapp.core-test/add-test  # Run single test
+lein midje                  # Run Midje tests
+
+# tools.deps with test-runner
+clj -X:test                 # Run all tests
+clj -X:test :nses '[myapp.core-test]'  # Specific namespace
+
+# REPL
+(require '[clojure.test :refer [run-tests]])
+(run-tests 'myapp.core-test)
+```
+
+### Test Organization
+
+```
+myapp/
+├── src/
+│   └── myapp/
+│       └── core.clj
+├── test/
+│   └── myapp/
+│       ├── core_test.clj       ; Unit tests
+│       ├── integration_test.clj ; Integration tests
+│       └── props_test.clj      ; Property tests
+├── dev/
+│   └── user.clj                ; REPL utilities
+└── deps.edn
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Async/await, channels, threads
+- `patterns-serialization-dev` - JSON, validation, struct tags
+- `patterns-metaprogramming-dev` - Decorators, macros, annotations
 
 ---
 
