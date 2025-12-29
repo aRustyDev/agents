@@ -862,11 +862,774 @@ def add_item(item, items=None):
 
 ---
 
+## Module System
+
+Python uses a straightforward module and package system for code organization.
+
+### Import and Export
+
+```python
+# Importing modules
+import math
+import json
+from pathlib import Path
+
+# Named imports
+from typing import Optional, List, Dict
+from dataclasses import dataclass
+
+# Import with alias
+import numpy as np
+import pandas as pd
+from collections import defaultdict as dd
+
+# Import everything (avoid in production)
+from math import *  # Pollutes namespace
+
+# Relative imports (within package)
+from . import sibling_module
+from .. import parent_module
+from ..utils import helper_function
+```
+
+### Module Structure
+
+```python
+# my_module.py - A simple module
+"""Module docstring describing purpose."""
+
+# Module-level constants
+VERSION = "1.0.0"
+DEFAULT_TIMEOUT = 30
+
+# Module-level variables
+_private_var = "internal use only"
+public_var = "accessible from outside"
+
+# Functions
+def public_function():
+    """Public API function."""
+    return _private_helper()
+
+def _private_helper():
+    """Private helper (by convention)."""
+    return "helper result"
+
+# Classes
+class MyClass:
+    """Public class."""
+    pass
+```
+
+### Packages and __init__.py
+
+```python
+# Project structure
+mypackage/
+├── __init__.py       # Makes directory a package
+├── module_a.py
+├── module_b.py
+└── subpackage/
+    ├── __init__.py
+    └── module_c.py
+
+# mypackage/__init__.py - Package initialization
+"""MyPackage - A sample package."""
+
+__version__ = "1.0.0"
+__all__ = ["ClassA", "ClassB", "function_a"]  # Controls `from package import *`
+
+# Import and expose public API
+from .module_a import ClassA, function_a
+from .module_b import ClassB
+from .subpackage import module_c
+
+# Package-level initialization
+def init():
+    """Initialize package resources."""
+    pass
+
+# mypackage/module_a.py
+class ClassA:
+    pass
+
+def function_a():
+    pass
+
+# Usage
+from mypackage import ClassA, function_a
+from mypackage.subpackage import module_c
+```
+
+### Namespace Packages (PEP 420)
+
+```python
+# No __init__.py needed for namespace packages (Python 3.3+)
+# Allows multiple directories to contribute to same package
+
+# Directory structure
+site-packages/
+├── mynamespace/
+│   └── plugin_a/
+│       └── core.py
+└── another-location/
+    └── mynamespace/
+        └── plugin_b/
+            └── core.py
+
+# Both are part of 'mynamespace' package
+from mynamespace.plugin_a import core as core_a
+from mynamespace.plugin_b import core as core_b
+```
+
+### Lazy Imports
+
+```python
+# Import at module level (loaded on import)
+import heavy_module  # Loaded immediately
+
+# Lazy import inside function (loaded on use)
+def process_data():
+    import heavy_module  # Only loaded when function is called
+    return heavy_module.process()
+
+# TYPE_CHECKING for type-only imports
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from expensive_module import ExpensiveClass
+
+def my_function(obj: "ExpensiveClass") -> None:
+    # String annotation avoids runtime import
+    pass
+```
+
+### Dynamic Imports
+
+```python
+# importlib for dynamic imports
+import importlib
+
+# Import module by name
+module_name = "json"
+json_module = importlib.import_module(module_name)
+data = json_module.loads('{"key": "value"}')
+
+# Import from package
+module = importlib.import_module(".module_a", package="mypackage")
+
+# Reload module (useful for development)
+importlib.reload(module)
+
+# Check if module exists
+import importlib.util
+spec = importlib.util.find_spec("optional_module")
+if spec is not None:
+    import optional_module
+```
+
+### sys.path and Module Resolution
+
+```python
+import sys
+from pathlib import Path
+
+# View module search paths
+print(sys.path)
+
+# Add directory to search path
+sys.path.insert(0, str(Path(__file__).parent / "lib"))
+
+# Module resolution order:
+# 1. Built-in modules
+# 2. Current directory
+# 3. PYTHONPATH environment variable
+# 4. Installation-dependent defaults (site-packages)
+
+# Check where module was loaded from
+import json
+print(json.__file__)  # /usr/lib/python3.11/json/__init__.py
+```
+
+### __all__ and Public API
+
+```python
+# module.py
+"""Sample module with explicit public API."""
+
+__all__ = ["public_function", "PublicClass"]  # Explicit exports
+
+def public_function():
+    """Part of public API."""
+    pass
+
+class PublicClass:
+    """Part of public API."""
+    pass
+
+def _private_function():
+    """Not exported (by convention)."""
+    pass
+
+class _PrivateClass:
+    """Not exported (by convention)."""
+    pass
+
+# Usage
+from module import *  # Only imports public_function and PublicClass
+```
+
+---
+
+## Concurrency
+
+Python supports multiple concurrency models: threading, multiprocessing, and async/await.
+
+### Threading (I/O-bound tasks)
+
+```python
+import threading
+import time
+from queue import Queue
+
+# Basic thread
+def worker(name: str, delay: float) -> None:
+    time.sleep(delay)
+    print(f"Worker {name} done")
+
+thread = threading.Thread(target=worker, args=("A", 1.0))
+thread.start()
+thread.join()  # Wait for completion
+
+# Thread with return value (using Queue)
+def worker_with_result(queue: Queue, n: int) -> None:
+    result = n * 2
+    queue.put(result)
+
+q: Queue = Queue()
+t = threading.Thread(target=worker_with_result, args=(q, 5))
+t.start()
+t.join()
+result = q.get()  # 10
+
+# ThreadPoolExecutor (easier)
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def fetch_url(url: str) -> str:
+    # I/O-bound operation
+    return f"Content from {url}"
+
+urls = ["http://example.com", "http://example.org"]
+
+with ThreadPoolExecutor(max_workers=5) as executor:
+    futures = [executor.submit(fetch_url, url) for url in urls]
+    for future in as_completed(futures):
+        print(future.result())
+```
+
+### Multiprocessing (CPU-bound tasks)
+
+```python
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor
+
+# Basic process
+def cpu_bound_task(n: int) -> int:
+    # Heavy computation
+    return sum(i * i for i in range(n))
+
+process = mp.Process(target=cpu_bound_task, args=(1000000,))
+process.start()
+process.join()
+
+# ProcessPoolExecutor (recommended)
+def process_item(item: int) -> int:
+    return item * item
+
+with ProcessPoolExecutor(max_workers=4) as executor:
+    items = range(10)
+    results = list(executor.map(process_item, items))
+    print(results)  # [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+
+# Shared memory (for communication)
+from multiprocessing import Value, Array, Manager
+
+# Shared value
+counter = Value('i', 0)  # 'i' = integer
+
+def increment(counter):
+    with counter.get_lock():
+        counter.value += 1
+
+# Shared array
+arr = Array('d', [1.0, 2.0, 3.0])  # 'd' = double
+
+# Manager (for complex types)
+with mp.Manager() as manager:
+    shared_dict = manager.dict()
+    shared_list = manager.list()
+```
+
+### Async/Await (Asyncio)
+
+```python
+import asyncio
+import httpx
+
+# Basic async function
+async def fetch_user(user_id: int) -> dict:
+    await asyncio.sleep(0.1)  # Simulate I/O
+    return {"id": user_id, "name": f"User {user_id}"}
+
+# Run async function
+result = asyncio.run(fetch_user(1))
+
+# Concurrent execution
+async def main():
+    # Sequential (slow)
+    user1 = await fetch_user(1)
+    user2 = await fetch_user(2)
+
+    # Concurrent (fast)
+    users = await asyncio.gather(
+        fetch_user(1),
+        fetch_user(2),
+        fetch_user(3)
+    )
+    print(users)
+
+asyncio.run(main())
+
+# Real HTTP example
+async def fetch_url(url: str) -> str:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return response.text
+
+# Error handling
+async def fetch_with_timeout(url: str) -> str:
+    try:
+        return await asyncio.wait_for(fetch_url(url), timeout=5.0)
+    except asyncio.TimeoutError:
+        return "Request timed out"
+
+# Creating tasks
+async def background_task():
+    while True:
+        print("Working...")
+        await asyncio.sleep(1)
+
+async def main():
+    task = asyncio.create_task(background_task())
+    await asyncio.sleep(3)
+    task.cancel()  # Stop background task
+    try:
+        await task
+    except asyncio.CancelledError:
+        print("Task cancelled")
+
+asyncio.run(main())
+```
+
+### GIL Considerations
+
+```python
+# Global Interpreter Lock (GIL) implications:
+
+# ❌ Threading does NOT help CPU-bound tasks
+# (GIL prevents parallel CPU execution)
+import threading
+import time
+
+def cpu_intensive():
+    sum(i**2 for i in range(10_000_000))
+
+# This is NOT faster (GIL prevents parallel execution)
+threads = [threading.Thread(target=cpu_intensive) for _ in range(4)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+
+# ✓ Threading DOES help I/O-bound tasks
+# (GIL released during I/O operations)
+def io_intensive():
+    time.sleep(1)  # GIL released during sleep
+
+threads = [threading.Thread(target=io_intensive) for _ in range(4)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+
+# ✓ Multiprocessing bypasses GIL
+# (Each process has its own Python interpreter)
+from multiprocessing import Pool
+
+with Pool(4) as pool:
+    pool.map(cpu_intensive, range(4))  # True parallelism
+
+# ✓ Asyncio for many concurrent I/O operations
+# (Single-threaded but non-blocking)
+async def many_io_operations():
+    await asyncio.gather(*[io_task() for _ in range(1000)])
+```
+
+### Choosing the Right Model
+
+```python
+# Decision matrix:
+
+# I/O-bound + simple → Threading
+from concurrent.futures import ThreadPoolExecutor
+with ThreadPoolExecutor() as executor:
+    results = executor.map(fetch_url, urls)
+
+# I/O-bound + many connections → Asyncio
+async def fetch_all():
+    async with httpx.AsyncClient() as client:
+        tasks = [client.get(url) for url in urls]
+        return await asyncio.gather(*tasks)
+
+# CPU-bound → Multiprocessing
+from concurrent.futures import ProcessPoolExecutor
+with ProcessPoolExecutor() as executor:
+    results = executor.map(compute_heavy, data)
+
+# Mixed workload → Combination
+async def mixed():
+    # Async for I/O
+    data = await fetch_data()
+
+    # Process pool for CPU work
+    loop = asyncio.get_event_loop()
+    with ProcessPoolExecutor() as executor:
+        result = await loop.run_in_executor(executor, process_cpu_bound, data)
+
+    return result
+```
+
+### See Also
+
+- `patterns-concurrency-dev` - Cross-language concurrency patterns and translation
+
+---
+
+## Build and Dependencies
+
+Python uses package managers and pyproject.toml for dependency management and build configuration.
+
+### Package Managers
+
+```bash
+# pip (standard package manager)
+pip install requests
+pip install pytest==7.4.0
+pip install "flask>=2.0,<3.0"
+
+# Requirements file
+pip install -r requirements.txt
+pip freeze > requirements.txt
+
+# uv (fast, modern package manager - recommended)
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create project
+uv init my-project
+cd my-project
+
+# Add dependencies
+uv add requests pytest
+
+# Development dependencies
+uv add --dev ruff mypy
+
+# Run commands in virtual environment
+uv run python script.py
+uv run pytest
+
+# Sync dependencies
+uv sync
+```
+
+### Virtual Environments
+
+```bash
+# Standard venv
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+.venv\Scripts\activate     # Windows
+deactivate
+
+# With uv (automatic)
+uv venv           # Creates .venv
+source .venv/bin/activate
+uv pip install requests  # Faster than pip
+
+# poetry (alternative)
+poetry new my-project
+poetry add requests
+poetry install
+poetry shell
+```
+
+### pyproject.toml (PEP 621)
+
+```toml
+# Modern Python project configuration
+[project]
+name = "myproject"
+version = "1.0.0"
+description = "A sample Python project"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+keywords = ["sample", "example"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.11",
+]
+
+# Dependencies
+dependencies = [
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+]
+
+# Optional dependencies (extras)
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "ruff>=0.1.0",
+    "mypy>=1.6.0",
+]
+docs = [
+    "sphinx>=7.0.0",
+]
+
+# Entry points (CLI commands)
+[project.scripts]
+mytool = "myproject.cli:main"
+
+# URLs
+[project.urls]
+Homepage = "https://github.com/user/myproject"
+Documentation = "https://myproject.readthedocs.io"
+Repository = "https://github.com/user/myproject.git"
+Changelog = "https://github.com/user/myproject/blob/main/CHANGELOG.md"
+
+# Build system
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Tool configurations
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = ["-ra", "--strict-markers"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+]
+```
+
+### requirements.txt vs pyproject.toml
+
+```python
+# requirements.txt (legacy, still common)
+# requirements.txt
+requests==2.31.0
+pytest>=7.4.0,<8.0.0
+black==23.10.0
+
+# requirements-dev.txt
+-r requirements.txt
+pytest-cov==4.1.0
+mypy==1.6.0
+
+# Install
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Generate from current environment
+pip freeze > requirements.txt
+
+# pyproject.toml (modern, recommended)
+[project]
+dependencies = [
+    "requests==2.31.0",
+    "pytest>=7.4.0,<8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest-cov==4.1.0",
+    "mypy==1.6.0",
+]
+
+# Install
+pip install .              # Install package
+pip install .[dev]         # Install with dev extras
+uv sync                    # With uv
+```
+
+### Dependency Resolution
+
+```bash
+# pip-tools (for lockfiles)
+pip install pip-tools
+
+# requirements.in (high-level dependencies)
+requests
+pytest>=7.4.0
+
+# Generate lockfile
+pip-compile requirements.in
+# Creates requirements.txt with all transitive dependencies pinned
+
+# Sync environment
+pip-sync requirements.txt
+
+# With uv (built-in lockfile)
+# uv.lock is automatically generated and maintained
+uv add requests    # Updates uv.lock
+uv sync           # Installs from lockfile
+```
+
+### Building Distributions
+
+```bash
+# Build source distribution and wheel
+python -m build
+
+# Creates:
+# dist/myproject-1.0.0.tar.gz (source)
+# dist/myproject-1.0.0-py3-none-any.whl (wheel)
+
+# With uv
+uv build
+
+# Install locally for development
+pip install -e .      # Editable install
+uv pip install -e .   # With uv
+
+# Publish to PyPI
+pip install twine
+twine upload dist/*
+
+# With poetry
+poetry build
+poetry publish
+```
+
+### Project Structure Best Practices
+
+```
+myproject/
+├── pyproject.toml           # Project config (modern)
+├── README.md
+├── LICENSE
+├── .gitignore
+├── src/
+│   └── myproject/           # Source code
+│       ├── __init__.py
+│       ├── core.py
+│       └── cli.py
+├── tests/                   # Tests mirror src/
+│   ├── __init__.py
+│   ├── test_core.py
+│   └── test_cli.py
+├── docs/                    # Documentation
+│   └── conf.py
+└── .venv/                   # Virtual environment (gitignored)
+
+# Alternative (flat layout)
+myproject/
+├── pyproject.toml
+├── myproject/               # Source at root
+│   ├── __init__.py
+│   └── core.py
+└── tests/
+    └── test_core.py
+```
+
+### Environment Variables and Configuration
+
+```python
+# Using python-dotenv
+from dotenv import load_dotenv
+import os
+
+# Load from .env file
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///default.db")
+
+# Using pydantic settings (recommended)
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    api_key: str
+    database_url: str = "sqlite:///default.db"
+    debug: bool = False
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+settings = Settings()
+print(settings.api_key)
+
+# .env file
+# API_KEY=secret123
+# DATABASE_URL=postgresql://localhost/mydb
+# DEBUG=true
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Async/await, threading, multiprocessing patterns across languages
+- `patterns-serialization-dev` - JSON, validation, type-safe parsing across languages
+- `patterns-metaprogramming-dev` - Decorators, metaclasses, dynamic code generation across languages
+
+---
+
 ## References
 
 - [Python Documentation](https://docs.python.org/3/)
 - [PEP 8 - Style Guide](https://peps.python.org/pep-0008/)
 - [Type Hints - PEP 484](https://peps.python.org/pep-0484/)
+- [pyproject.toml - PEP 621](https://peps.python.org/pep-0621/)
 - [uv Documentation](https://docs.astral.sh/uv/)
 - [ruff Documentation](https://docs.astral.sh/ruff/)
 - [mypy Documentation](https://mypy.readthedocs.io/)
