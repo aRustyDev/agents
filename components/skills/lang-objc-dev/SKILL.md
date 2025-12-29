@@ -1086,6 +1086,891 @@ dispatch_barrier_async(self.concurrentQueue, ^{
 
 ---
 
+## Module System
+
+### Header and Implementation Files
+
+```objc
+// Header file (.h) - Public interface
+#import <Foundation/Foundation.h>
+
+// Forward declaration (avoid importing in header)
+@class OtherClass;
+@protocol SomeProtocol;
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MyClass : NSObject
+
+// Public API
+@property (nonatomic, readonly) NSString *publicName;
+- (instancetype)initWithName:(NSString *)name;
+- (void)publicMethod;
+
+@end
+
+NS_ASSUME_NONNULL_END
+```
+
+```objc
+// Implementation file (.m) - Private interface and implementation
+#import "MyClass.h"
+#import "OtherClass.h"  // Import here, not in header
+
+// Private class extension
+@interface MyClass ()
+@property (nonatomic, readwrite) NSString *publicName;  // Make writable internally
+@property (nonatomic, strong) NSMutableArray *privateData;
+- (void)privateMethod;
+@end
+
+@implementation MyClass
+
+- (instancetype)initWithName:(NSString *)name {
+    self = [super init];
+    if (self) {
+        _publicName = [name copy];
+        _privateData = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (void)publicMethod {
+    [self privateMethod];
+}
+
+- (void)privateMethod {
+    // Private implementation
+}
+
+@end
+```
+
+### Import Types
+
+```objc
+// Framework import (system or SDK frameworks)
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+// Local header import
+#import "MyClass.h"
+
+// Umbrella header (for frameworks)
+#import <MyFramework/MyFramework.h>
+
+// Module import (modern, preferred)
+@import Foundation;
+@import UIKit;
+
+// Conditional import
+#if TARGET_OS_IOS
+#import <UIKit/UIKit.h>
+#else
+#import <AppKit/AppKit.h>
+#endif
+```
+
+### Visibility and Encapsulation
+
+```objc
+// Public: Declared in .h file
+// In MyClass.h
+- (void)publicMethod;
+
+// Private: Declared in class extension in .m
+@interface MyClass ()
+- (void)privateMethod;
+@end
+
+// Protected: Use conventions (no language enforcement)
+// By convention, prefix with underscore or document as internal
+- (void)_internalMethod;  // Signals internal use
+
+// Package visibility (via categories in separate header)
+// MyClass+Internal.h - Only import where needed
+@interface MyClass (Internal)
+- (void)internalMethod;
+@end
+```
+
+### Framework Structure
+
+```
+MyFramework.framework/
+├── Headers/
+│   ├── MyFramework.h           # Umbrella header
+│   ├── PublicClass.h           # Public headers
+│   └── AnotherPublicClass.h
+├── PrivateHeaders/             # Private headers (not exposed)
+│   └── InternalClass.h
+├── Modules/
+│   └── module.modulemap        # Module definition
+└── MyFramework                 # Binary
+```
+
+```objc
+// Umbrella header (MyFramework.h)
+#import <MyFramework/PublicClass.h>
+#import <MyFramework/AnotherPublicClass.h>
+// Do NOT import private headers here
+```
+
+---
+
+## Zero and Default Values
+
+### Nil and NULL
+
+```objc
+// nil: Null pointer to Objective-C object
+NSString *string = nil;
+
+// NULL: Null pointer to C data (primitive pointers)
+int *pointer = NULL;
+void (*functionPointer)(void) = NULL;
+
+// Nil: Null pointer to Objective-C class (rarely used)
+Class cls = Nil;
+
+// NSNull: Object representing null (for collections)
+NSArray *array = @[@"one", [NSNull null], @"three"];
+```
+
+### Safe Nil Messaging
+
+```objc
+// Sending messages to nil is safe in Objective-C
+NSString *string = nil;
+
+// All return 0/nil/NO (doesn't crash)
+NSUInteger length = [string length];         // Returns 0
+NSString *upper = [string uppercaseString];  // Returns nil
+BOOL empty = [string isEqualToString:@""];   // Returns NO
+
+// Chaining with nil
+NSArray *items = nil;
+NSNumber *first = items.firstObject;  // nil
+NSString *desc = [first stringValue]; // nil
+```
+
+### Instance Variable Defaults
+
+```objc
+@implementation MyClass {
+    NSString *_string;      // Initialized to nil
+    NSInteger _integer;     // Initialized to 0
+    CGFloat _float;         // Initialized to 0.0
+    BOOL _boolean;          // Initialized to NO
+    id _object;             // Initialized to nil
+}
+
+// Verify defaults in init
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        NSAssert(_string == nil, @"Should be nil");
+        NSAssert(_integer == 0, @"Should be 0");
+        NSAssert(_boolean == NO, @"Should be NO");
+    }
+    return self;
+}
+
+@end
+```
+
+### Default/Empty Values by Type
+
+| Type | Default Value | Empty/Zero Value |
+|------|---------------|------------------|
+| `id`, objects | `nil` | `nil` |
+| `NSInteger` | `0` | `0` |
+| `CGFloat`, `double` | `0.0` | `0.0` |
+| `BOOL` | `NO` | `NO` |
+| `NSString *` | `nil` | `@""` |
+| `NSArray *` | `nil` | `@[]` |
+| `NSDictionary *` | `nil` | `@{}` |
+| `NSNumber *` | `nil` | `@0` |
+
+### Handling Optional Values
+
+```objc
+// Check before use
+if (string != nil && string.length > 0) {
+    [self processString:string];
+}
+
+// Provide defaults
+NSString *name = user.name ?: @"Unknown";
+
+// NSNull checking (from JSON)
+id value = json[@"key"];
+if (value && value != [NSNull null]) {
+    NSString *stringValue = (NSString *)value;
+}
+
+// Safe casting
+NSString *string = [object isKindOfClass:[NSString class]] ? object : nil;
+```
+
+---
+
+## Metaprogramming
+
+Objective-C's runtime enables powerful metaprogramming capabilities. For cross-language comparison, see `patterns-metaprogramming-dev`.
+
+### Runtime Introspection
+
+```objc
+#import <objc/runtime.h>
+
+// Class introspection
+Class cls = [MyClass class];
+NSLog(@"Class name: %s", class_getName(cls));
+NSLog(@"Superclass: %@", [cls superclass]);
+
+// Check class and protocol conformance
+if ([object isKindOfClass:[NSString class]]) {
+    NSLog(@"Object is a string");
+}
+if ([object conformsToProtocol:@protocol(NSCopying)]) {
+    NSLog(@"Object is copyable");
+}
+
+// Check method implementation
+if ([object respondsToSelector:@selector(optionalMethod)]) {
+    [object optionalMethod];
+}
+```
+
+### Listing Methods and Properties
+
+```objc
+// List all methods
+unsigned int methodCount;
+Method *methods = class_copyMethodList([MyClass class], &methodCount);
+for (unsigned int i = 0; i < methodCount; i++) {
+    SEL selector = method_getName(methods[i]);
+    NSLog(@"Method: %@", NSStringFromSelector(selector));
+}
+free(methods);
+
+// List all properties
+unsigned int propCount;
+objc_property_t *properties = class_copyPropertyList([MyClass class], &propCount);
+for (unsigned int i = 0; i < propCount; i++) {
+    const char *name = property_getName(properties[i]);
+    const char *attrs = property_getAttributes(properties[i]);
+    NSLog(@"Property: %s, Attrs: %s", name, attrs);
+}
+free(properties);
+
+// List protocols
+unsigned int protocolCount;
+Protocol * __unsafe_unretained *protocols = class_copyProtocolList([MyClass class], &protocolCount);
+for (unsigned int i = 0; i < protocolCount; i++) {
+    NSLog(@"Protocol: %s", protocol_getName(protocols[i]));
+}
+free(protocols);
+```
+
+### Method Swizzling
+
+```objc
+#import <objc/runtime.h>
+
+@implementation UIViewController (Tracking)
+
++ (void)load {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Class class = [self class];
+
+        SEL originalSelector = @selector(viewDidAppear:);
+        SEL swizzledSelector = @selector(tracking_viewDidAppear:);
+
+        Method originalMethod = class_getInstanceMethod(class, originalSelector);
+        Method swizzledMethod = class_getInstanceMethod(class, swizzledSelector);
+
+        BOOL didAddMethod = class_addMethod(class, originalSelector,
+                                            method_getImplementation(swizzledMethod),
+                                            method_getTypeEncoding(swizzledMethod));
+
+        if (didAddMethod) {
+            class_replaceMethod(class, swizzledSelector,
+                               method_getImplementation(originalMethod),
+                               method_getTypeEncoding(originalMethod));
+        } else {
+            method_exchangeImplementations(originalMethod, swizzledMethod);
+        }
+    });
+}
+
+- (void)tracking_viewDidAppear:(BOOL)animated {
+    // This calls the original viewDidAppear (methods are swapped)
+    [self tracking_viewDidAppear:animated];
+
+    // Add tracking
+    NSLog(@"View appeared: %@", NSStringFromClass([self class]));
+}
+
+@end
+```
+
+### Dynamic Method Resolution
+
+```objc
+@implementation DynamicClass
+
+// Called when method not found
++ (BOOL)resolveInstanceMethod:(SEL)sel {
+    if (sel == @selector(dynamicMethod)) {
+        class_addMethod([self class], sel,
+                       (IMP)dynamicMethodIMP, "v@:");
+        return YES;
+    }
+    return [super resolveInstanceMethod:sel];
+}
+
+void dynamicMethodIMP(id self, SEL _cmd) {
+    NSLog(@"Dynamic method called on %@", self);
+}
+
+@end
+```
+
+### Message Forwarding
+
+```objc
+// Called when no implementation found
+- (id)forwardingTargetForSelector:(SEL)aSelector {
+    if ([self.helper respondsToSelector:aSelector]) {
+        return self.helper;  // Forward to helper
+    }
+    return [super forwardingTargetForSelector:aSelector];
+}
+
+// Full forwarding (if forwardingTargetForSelector returns nil)
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    NSMethodSignature *sig = [super methodSignatureForSelector:aSelector];
+    if (!sig) {
+        sig = [self.helper methodSignatureForSelector:aSelector];
+    }
+    return sig;
+}
+
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
+    if ([self.helper respondsToSelector:anInvocation.selector]) {
+        [anInvocation invokeWithTarget:self.helper];
+    } else {
+        [super forwardInvocation:anInvocation];
+    }
+}
+```
+
+---
+
+## Serialization
+
+For cross-language serialization patterns and comparison, see `patterns-serialization-dev`.
+
+### NSCoding (Archive/Unarchive)
+
+```objc
+@interface User : NSObject <NSSecureCoding>
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, assign) NSInteger age;
+@property (nonatomic, strong) NSDate *createdAt;
+@end
+
+@implementation User
+
+// Required for NSSecureCoding
++ (BOOL)supportsSecureCoding {
+    return YES;
+}
+
+// Encode object
+- (void)encodeWithCoder:(NSCoder *)coder {
+    [coder encodeObject:self.name forKey:@"name"];
+    [coder encodeInteger:self.age forKey:@"age"];
+    [coder encodeObject:self.createdAt forKey:@"createdAt"];
+}
+
+// Decode object
+- (instancetype)initWithCoder:(NSCoder *)coder {
+    self = [super init];
+    if (self) {
+        _name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
+        _age = [coder decodeIntegerForKey:@"age"];
+        _createdAt = [coder decodeObjectOfClass:[NSDate class] forKey:@"createdAt"];
+    }
+    return self;
+}
+
+@end
+
+// Archive to data
+User *user = [[User alloc] init];
+user.name = @"Alice";
+user.age = 30;
+
+NSError *error;
+NSData *data = [NSKeyedArchiver archivedDataWithRootObject:user
+                                     requiringSecureCoding:YES
+                                                     error:&error];
+
+// Unarchive from data
+User *restored = [NSKeyedUnarchiver unarchivedObjectOfClass:[User class]
+                                                   fromData:data
+                                                      error:&error];
+```
+
+### JSON Serialization
+
+```objc
+// Dictionary to JSON
+NSDictionary *dict = @{
+    @"name": @"Alice",
+    @"age": @30,
+    @"email": @"alice@example.com"
+};
+
+NSError *error;
+NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict
+                                                   options:NSJSONWritingPrettyPrinted
+                                                     error:&error];
+NSString *jsonString = [[NSString alloc] initWithData:jsonData
+                                             encoding:NSUTF8StringEncoding];
+
+// JSON to Dictionary
+NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+NSDictionary *parsed = [NSJSONSerialization JSONObjectWithData:data
+                                                       options:0
+                                                         error:&error];
+
+// Handle NSNull in JSON
+id value = parsed[@"nullable_field"];
+if (value && value != [NSNull null]) {
+    // Use value
+}
+```
+
+### Manual JSON Mapping
+
+```objc
+@interface User : NSObject
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, assign) NSInteger age;
+@property (nonatomic, strong) NSDate *createdAt;
+
++ (instancetype)userFromDictionary:(NSDictionary *)dict;
+- (NSDictionary *)toDictionary;
+@end
+
+@implementation User
+
++ (instancetype)userFromDictionary:(NSDictionary *)dict {
+    User *user = [[User alloc] init];
+    user.name = dict[@"name"];
+    user.age = [dict[@"age"] integerValue];
+
+    // Parse date
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+    user.createdAt = [formatter dateFromString:dict[@"created_at"]];
+
+    return user;
+}
+
+- (NSDictionary *)toDictionary {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZ";
+
+    return @{
+        @"name": self.name ?: [NSNull null],
+        @"age": @(self.age),
+        @"created_at": self.createdAt ? [formatter stringFromDate:self.createdAt] : [NSNull null]
+    };
+}
+
+@end
+```
+
+### Property Lists
+
+```objc
+// Save to plist file
+NSDictionary *config = @{
+    @"version": @"1.0.0",
+    @"settings": @{
+        @"darkMode": @YES,
+        @"fontSize": @14
+    }
+};
+
+NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0]
+                  stringByAppendingPathComponent:@"config.plist"];
+[config writeToFile:path atomically:YES];
+
+// Load from plist
+NSDictionary *loaded = [NSDictionary dictionaryWithContentsOfFile:path];
+
+// UserDefaults (plist-based)
+NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+[defaults setObject:@"value" forKey:@"key"];
+[defaults setBool:YES forKey:@"boolKey"];
+[defaults synchronize];
+
+NSString *value = [defaults stringForKey:@"key"];
+BOOL boolValue = [defaults boolForKey:@"boolKey"];
+```
+
+---
+
+## Build and Dependencies
+
+### Xcode Project Structure
+
+```
+MyProject/
+├── MyProject.xcodeproj/      # Xcode project file
+├── MyProject/                # Main target source
+│   ├── AppDelegate.h/m
+│   ├── Models/
+│   ├── Views/
+│   ├── Controllers/
+│   └── Info.plist
+├── MyProjectTests/           # Unit test target
+│   └── MyProjectTests.m
+├── MyProjectUITests/         # UI test target
+│   └── MyProjectUITests.m
+└── Podfile                   # CocoaPods config (if used)
+```
+
+### CocoaPods
+
+```ruby
+# Podfile
+platform :ios, '13.0'
+use_frameworks!
+
+target 'MyApp' do
+  pod 'AFNetworking', '~> 4.0'
+  pod 'Masonry'
+  pod 'SDWebImage'
+
+  target 'MyAppTests' do
+    inherit! :search_paths
+    pod 'OCMock'
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    end
+  end
+end
+```
+
+```bash
+# CocoaPods commands
+pod init                  # Create Podfile
+pod install              # Install dependencies
+pod update               # Update dependencies
+pod outdated             # Check for updates
+pod deintegrate          # Remove CocoaPods
+```
+
+### Swift Package Manager (SPM)
+
+```swift
+// Package.swift (for library development)
+// swift-tools-version:5.5
+import PackageDescription
+
+let package = Package(
+    name: "MyLibrary",
+    platforms: [.iOS(.v13), .macOS(.v10_15)],
+    products: [
+        .library(name: "MyLibrary", targets: ["MyLibrary"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.0.0"),
+    ],
+    targets: [
+        .target(name: "MyLibrary", dependencies: ["Alamofire"]),
+        .testTarget(name: "MyLibraryTests", dependencies: ["MyLibrary"]),
+    ]
+)
+```
+
+In Xcode: File → Add Packages → Enter repository URL
+
+### Carthage
+
+```
+# Cartfile
+github "Alamofire/Alamofire" ~> 5.0
+github "ReactiveX/RxSwift" ~> 6.0
+```
+
+```bash
+# Carthage commands
+carthage update --platform iOS          # Build frameworks
+carthage bootstrap --platform iOS       # Build from resolved versions
+carthage outdated                       # Check for updates
+```
+
+### Build Settings
+
+```
+// Common build settings (Build Settings tab)
+
+// Architectures
+ARCHS = arm64
+VALID_ARCHS = arm64
+
+// Deployment
+IPHONEOS_DEPLOYMENT_TARGET = 13.0
+TARGETED_DEVICE_FAMILY = 1,2  // iPhone and iPad
+
+// Code Signing
+CODE_SIGN_IDENTITY = Apple Development
+DEVELOPMENT_TEAM = XXXXXXXXXX
+
+// Compilation
+GCC_WARN_UNINITIALIZED_AUTOS = YES
+CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES
+CLANG_ENABLE_OBJC_ARC = YES
+
+// Linking
+OTHER_LDFLAGS = -ObjC  // For static libraries with categories
+```
+
+---
+
+## Testing
+
+### XCTest Basics
+
+```objc
+// MyClassTests.m
+#import <XCTest/XCTest.h>
+#import "MyClass.h"
+
+@interface MyClassTests : XCTestCase
+@property (nonatomic, strong) MyClass *sut;  // System Under Test
+@end
+
+@implementation MyClassTests
+
+- (void)setUp {
+    [super setUp];
+    self.sut = [[MyClass alloc] init];
+}
+
+- (void)tearDown {
+    self.sut = nil;
+    [super tearDown];
+}
+
+- (void)testExample {
+    // Arrange
+    NSString *input = @"test";
+
+    // Act
+    NSString *result = [self.sut processInput:input];
+
+    // Assert
+    XCTAssertNotNil(result);
+    XCTAssertEqualObjects(result, @"expected");
+}
+
+@end
+```
+
+### XCTest Assertions
+
+```objc
+// Boolean assertions
+XCTAssertTrue(condition);
+XCTAssertFalse(condition);
+
+// Nil assertions
+XCTAssertNil(object);
+XCTAssertNotNil(object);
+
+// Equality assertions
+XCTAssertEqual(actual, expected);           // Primitive equality
+XCTAssertNotEqual(actual, notExpected);
+XCTAssertEqualObjects(actual, expected);    // Object equality (isEqual:)
+XCTAssertNotEqualObjects(actual, notExpected);
+
+// Numeric assertions
+XCTAssertEqualWithAccuracy(3.14, 3.14159, 0.01);
+XCTAssertGreaterThan(5, 3);
+XCTAssertLessThanOrEqual(3, 5);
+
+// Exception assertions
+XCTAssertThrows([object methodThatThrows]);
+XCTAssertNoThrow([object safeMethod]);
+XCTAssertThrowsSpecific([object method], NSInvalidArgumentException);
+
+// Custom failure
+XCTFail(@"Test failed for reason: %@", reason);
+```
+
+### Async Testing
+
+```objc
+// Using expectations
+- (void)testAsyncOperation {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Async completed"];
+
+    [self.sut performAsyncOperationWithCompletion:^(NSData *data, NSError *error) {
+        XCTAssertNotNil(data);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError *error) {
+        if (error) {
+            XCTFail(@"Timeout: %@", error);
+        }
+    }];
+}
+
+// Multiple expectations
+- (void)testMultipleAsync {
+    XCTestExpectation *exp1 = [self expectationWithDescription:@"First"];
+    XCTestExpectation *exp2 = [self expectationWithDescription:@"Second"];
+
+    [self.service fetchFirst:^{ [exp1 fulfill]; }];
+    [self.service fetchSecond:^{ [exp2 fulfill]; }];
+
+    [self waitForExpectations:@[exp1, exp2] timeout:10.0];
+}
+
+// Inverted expectation (should NOT be called)
+- (void)testCallbackNotCalled {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Should not call"];
+    expectation.inverted = YES;
+
+    [self.sut methodThatShouldNotCallback:^{
+        [expectation fulfill];  // This would fail the test
+    }];
+
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+```
+
+### Mocking with OCMock
+
+```objc
+#import <OCMock/OCMock.h>
+
+- (void)testWithMock {
+    // Create mock
+    id mockService = OCMClassMock([NetworkService class]);
+
+    // Stub method
+    OCMStub([mockService fetchDataWithCompletion:OCMOCK_ANY])
+        .andDo(^(NSInvocation *invocation) {
+            void (^completion)(NSData *, NSError *);
+            [invocation getArgument:&completion atIndex:2];
+            completion([@"mock data" dataUsingEncoding:NSUTF8StringEncoding], nil);
+        });
+
+    // Inject mock
+    self.sut.networkService = mockService;
+
+    // Test
+    [self.sut loadData];
+
+    // Verify
+    OCMVerify([mockService fetchDataWithCompletion:OCMOCK_ANY]);
+}
+
+// Partial mock
+- (void)testPartialMock {
+    id partialMock = OCMPartialMock(self.sut);
+    OCMStub([partialMock expensiveOperation]).andReturn(@"cached");
+
+    NSString *result = [self.sut methodThatCallsExpensiveOperation];
+    XCTAssertEqualObjects(result, @"cached");
+}
+
+// Protocol mock
+- (void)testProtocolMock {
+    id mockDelegate = OCMProtocolMock(@protocol(MyDelegate));
+    self.sut.delegate = mockDelegate;
+
+    [self.sut triggerDelegate];
+
+    OCMVerify([mockDelegate didComplete:OCMOCK_ANY]);
+}
+```
+
+### Test Doubles
+
+```objc
+// Stub: Replace with canned response
+@interface StubNetworkService : NetworkService
+@property (nonatomic, strong) NSData *stubbedData;
+@end
+
+@implementation StubNetworkService
+- (void)fetchWithCompletion:(void (^)(NSData *))completion {
+    completion(self.stubbedData);
+}
+@end
+
+// Spy: Record calls
+@interface SpyLogger : Logger
+@property (nonatomic, strong) NSMutableArray *loggedMessages;
+@end
+
+@implementation SpyLogger
+- (instancetype)init {
+    self = [super init];
+    if (self) { _loggedMessages = [NSMutableArray array]; }
+    return self;
+}
+- (void)log:(NSString *)message {
+    [self.loggedMessages addObject:message];
+}
+@end
+
+// Fake: Working implementation
+@interface FakeUserDefaults : NSUserDefaults
+@property (nonatomic, strong) NSMutableDictionary *storage;
+@end
+
+@implementation FakeUserDefaults
+- (void)setObject:(id)value forKey:(NSString *)key {
+    self.storage[key] = value;
+}
+- (id)objectForKey:(NSString *)key {
+    return self.storage[key];
+}
+@end
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - GCD, NSOperation, threading
+- `patterns-serialization-dev` - NSCoding, JSON, property lists
+- `patterns-metaprogramming-dev` - Runtime, swizzling, introspection
+
+---
+
 ## References
 
 - [Apple Developer Documentation](https://developer.apple.com/documentation/)
