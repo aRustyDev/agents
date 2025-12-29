@@ -106,14 +106,19 @@ Read these skills to understand patterns and gather examples:
    - Idiom translation approaches
    - Testing strategies
 
-2. **Existing conversion skills** (for reference):
+2. **Existing conversion skills** (required - read at least 1):
    - Search for `convert-*` skills in `components/skills/`
-   - Use these as examples for structure and depth
+   - **Read one complete skill** (e.g., `convert-typescript-rust/SKILL.md` lines 1-300) to understand:
+     - Expected depth for type mapping tables
+     - "Why this translation" explanation style
+     - Example complexity progression
    - Borrow patterns that apply to your language pair
 
 3. **Language skills** (if available):
    - `lang-$1-dev` - Source language patterns
    - `lang-$2-dev` - Target language patterns
+
+**Before proceeding**: Confirm you have read at least one complete conversion skill as a reference.
 
 ### Step 2.5: Validate 8 Pillars Coverage (Automated)
 
@@ -195,16 +200,56 @@ Count section headers matching pillars:
 
 ### Step 3: Research Language Pair
 
-Before creating the skill, research the specific language pair:
+Before creating the skill, research the specific language pair using these structured checklists:
 
-1. **Type system differences**: How do types map between languages?
-2. **Error handling**: Exceptions vs Result types vs error returns
-3. **Concurrency models**: async/await, goroutines, threads, etc.
-4. **Memory models**: GC vs ownership vs manual
-5. **Idiomatic patterns**: What's "the way" in each language?
-6. **Ecosystem**: Common library equivalents between languages
+#### 3.1 Type System Differences
+- [ ] Read primitive types sections in both lang skills
+- [ ] Create draft mapping table for primitives
+- [ ] Identify types without direct equivalents
+- [ ] Note numeric precision differences (32-bit vs 64-bit, overflow behavior)
 
-Use WebSearch if needed to find authoritative conversion guides.
+#### 3.2 Error Handling
+- [ ] Identify error model in source (Exceptions? Result types? Error returns?)
+- [ ] Identify error model in target
+- [ ] Map error propagation patterns (try/catch → ?, throw → return Err)
+- [ ] Note any "no runtime errors" guarantees (like Elm)
+
+#### 3.3 Concurrency Models
+- [ ] Identify async model in source (async/await, callbacks, actors?)
+- [ ] Identify async model in target
+- [ ] Map concurrency primitives (Promise → Future, Channel → mpsc)
+- [ ] Note architectural differences (managed runtime vs explicit)
+
+#### 3.4 Memory Models
+- [ ] Source memory model: GC / ownership / manual / managed
+- [ ] Target memory model
+- [ ] If different, plan ownership translation strategy
+- [ ] Note lifetime considerations if applicable
+
+#### 3.5 Idiomatic Patterns
+- [ ] What's considered "the way" in source language?
+- [ ] What's considered "the way" in target language?
+- [ ] Identify patterns that should NOT be directly translated
+- [ ] Note paradigm shifts (OOP → FP, imperative → declarative)
+
+#### 3.6 Ecosystem Equivalents
+- [ ] Common HTTP libraries
+- [ ] JSON/serialization libraries
+- [ ] Testing frameworks
+- [ ] Build tools
+
+#### When to Use WebSearch
+
+Use WebSearch when:
+- Lang skills lack coverage for a pillar
+- Looking for real-world migration guides
+- Finding common pitfalls others have encountered
+
+**Example queries:**
+- `"<Source> to <Target> migration patterns 2024"` - General migration guides
+- `"<Source> <pattern> equivalent in <Target>"` - Specific pattern translations
+- `"Common mistakes converting <Source> to <Target>"` - Pitfalls research
+- `"<Source> vs <Target> error handling"` - Error model comparison
 
 ### Step 4: Create Skill Directory
 
@@ -421,12 +466,38 @@ Fill in the template with specific content for this language pair:
 | Primitive Types | All primitives | Include edge cases (infinity, NaN) |
 | Collection Types | 5+ types | Array, Map, Set, Tuple equivalents |
 | Composite Types | 3+ types | Struct, Class, Interface mappings |
-| Idiom Translations | 5-10 patterns | Common patterns with "why" explanations |
+| Idiom Translations | See priority list below | Common patterns with "why" explanations |
 | Error Handling | Complete section | Full error model translation |
 | Concurrency | Complete section | Async/threading translation |
 | Memory/Ownership | If applicable | Include if languages differ (GC vs ownership) |
 | Examples | 3+ (simple, medium, complex) | Progressive complexity |
 | Pitfalls | 5+ pitfalls | Language-pair specific mistakes |
+
+#### Idiom Translation Priority
+
+**Required patterns (must include):**
+1. Null/optional handling (null → Option, Maybe → nil, etc.)
+2. Collection operations (map, filter, reduce equivalents)
+3. Error propagation (try/catch → Result, throws → Either)
+4. Async/await patterns (if either language has async)
+
+**Language-specific patterns (include 2-6 based on relevance):**
+- Type alias/newtype definitions
+- Pattern matching
+- Generics/type parameters
+- Interface/trait implementations
+- Resource cleanup (using/defer/Drop)
+- Builder patterns
+- Iteration patterns
+
+#### Quality Guidance: Good vs Great
+
+| Aspect | Good | Great |
+|--------|------|-------|
+| Type mapping | `String → &str` | `String → &str for borrowed, String for owned; use Cow<str> when ownership varies` |
+| Why explanation | "Use Result in Rust" | "Use Result because Rust has no exceptions; the ? operator propagates errors like try/catch but at compile time" |
+| Example code | Syntactically correct | Syntactically correct + follows target language conventions (naming, formatting, idioms) |
+| Pitfall | "Don't forget to handle errors" | "TypeScript's `undefined` vs Rust's `Option`: TS allows property access on undefined (runtime error), Rust requires explicit unwrap (compile error)" |
 
 #### Example Complexity Guide
 
