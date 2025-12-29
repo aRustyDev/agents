@@ -760,6 +760,854 @@ goodSum = foldl' (+) 0 [1..1000000]
 
 ---
 
+## Module System
+
+### Module Basics
+
+```haskell
+-- Module declaration (must match file path)
+-- File: src/MyApp/User.hs
+module MyApp.User
+    ( User(..)           -- Export type and all constructors
+    , createUser         -- Export function
+    , validateEmail      -- Export function
+    ) where
+
+import Data.Text (Text)
+import qualified Data.Map as M
+import Data.List (sort, nub)
+
+-- Module contents...
+data User = User { name :: Text, email :: Text }
+
+createUser :: Text -> Text -> User
+createUser n e = User n e
+
+validateEmail :: Text -> Bool
+validateEmail = undefined -- implementation
+```
+
+### Import Variations
+
+```haskell
+-- Import everything
+import Data.List
+
+-- Import specific items
+import Data.List (sort, nub, groupBy)
+
+-- Import with hiding
+import Prelude hiding (head, tail)
+
+-- Qualified import (prevents name collisions)
+import qualified Data.Map as M
+import qualified Data.Text as T
+
+-- Use: M.lookup, T.pack, T.unpack
+
+-- Qualified with original name
+import qualified Data.ByteString.Lazy
+-- Use: Data.ByteString.Lazy.readFile
+
+-- Combined: import some, qualify others
+import Data.Text (Text)
+import qualified Data.Text as T
+```
+
+### Export Control
+
+```haskell
+-- Export everything (not recommended)
+module MyModule where
+
+-- Explicit exports (recommended)
+module MyModule
+    ( -- Types
+      User(..)              -- Export type with all constructors
+    , Config(Config)        -- Export type with specific constructor
+    , Connection            -- Export type only (abstract)
+
+      -- Functions
+    , createUser
+    , updateUser
+
+      -- Re-exports
+    , module Data.Text      -- Re-export entire module
+    ) where
+
+-- Internal/private by default
+internalHelper :: Int -> Int  -- Not exported, private
+internalHelper x = x + 1
+```
+
+### Hierarchical Modules
+
+```
+src/
+├── MyApp.hs              -- module MyApp
+├── MyApp/
+│   ├── Types.hs          -- module MyApp.Types
+│   ├── User.hs           -- module MyApp.User
+│   └── Internal/
+│       └── Utils.hs      -- module MyApp.Internal.Utils
+```
+
+```haskell
+-- Re-export pattern for convenience
+-- File: src/MyApp.hs
+module MyApp
+    ( module MyApp.Types
+    , module MyApp.User
+    ) where
+
+import MyApp.Types
+import MyApp.User
+
+-- Users can now:
+-- import MyApp (User, createUser, ...)
+```
+
+### Package Structure
+
+```yaml
+# package.yaml (hpack) or .cabal
+name: my-app
+version: 0.1.0.0
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - MyApp
+    - MyApp.Types
+    - MyApp.User
+  other-modules:
+    - MyApp.Internal.Utils  # Not exposed to consumers
+```
+
+---
+
+## Zero and Default Values
+
+### Default Type Class
+
+```haskell
+import Data.Default
+
+-- Using Default type class
+data Config = Config
+    { port :: Int
+    , host :: String
+    , debug :: Bool
+    }
+
+instance Default Config where
+    def = Config
+        { port = 8080
+        , host = "localhost"
+        , debug = False
+        }
+
+-- Usage
+config1 = def :: Config                    -- All defaults
+config2 = def { port = 3000 }              -- Override port
+config3 = def { debug = True, port = 80 }  -- Override multiple
+```
+
+### Monoid and Mempty
+
+```haskell
+import Data.Monoid
+
+-- mempty: identity element for Monoid
+emptyList = mempty :: [a]           -- []
+emptyString = mempty :: String      -- ""
+emptySum = mempty :: Sum Int        -- Sum 0
+emptyProduct = mempty :: Product Int -- Product 1
+
+-- Custom monoid with default
+data Settings = Settings
+    { timeout :: Maybe Int
+    , retries :: Maybe Int
+    }
+
+instance Semigroup Settings where
+    a <> b = Settings
+        { timeout = timeout b <|> timeout a
+        , retries = retries b <|> retries a
+        }
+
+instance Monoid Settings where
+    mempty = Settings Nothing Nothing
+```
+
+### Maybe for Optional Values
+
+```haskell
+-- Maybe represents optional values
+data Maybe a = Nothing | Just a
+
+-- Common patterns
+findUser :: UserId -> Maybe User
+findUser uid = lookup uid users
+
+-- Default with fromMaybe
+import Data.Maybe (fromMaybe)
+
+getPort :: Config -> Int
+getPort cfg = fromMaybe 8080 (configPort cfg)
+
+-- Chain with <|>
+getEnv :: String -> Maybe String -> Maybe String
+getEnv key fallback = lookup key env <|> fallback <|> Just "default"
+```
+
+### Empty/Zero Values by Type
+
+| Type | Zero/Empty Value | Function |
+|------|------------------|----------|
+| `Int`, `Integer` | `0` | Literal |
+| `Float`, `Double` | `0.0` | Literal |
+| `String` | `""` | `mempty` |
+| `Text` | `""` | `T.empty` |
+| `[a]` | `[]` | `mempty` |
+| `Maybe a` | `Nothing` | Constructor |
+| `Map k v` | `M.empty` | `mempty` |
+| `Set a` | `S.empty` | `mempty` |
+
+---
+
+## Concurrency
+
+Haskell provides powerful concurrency abstractions with strong safety guarantees. For cross-language comparison, see `patterns-concurrency-dev`.
+
+### Lightweight Threads
+
+```haskell
+import Control.Concurrent
+
+-- Spawn lightweight thread (green thread)
+main = do
+    forkIO $ do
+        threadDelay 1000000  -- 1 second in microseconds
+        putStrLn "Hello from thread"
+
+    putStrLn "Main thread continues"
+    threadDelay 2000000  -- Wait for child
+
+-- Thread with MVar communication
+example = do
+    result <- newEmptyMVar
+
+    forkIO $ do
+        value <- computeExpensive
+        putMVar result value
+
+    -- Block until result available
+    answer <- takeMVar result
+    print answer
+```
+
+### Async for Structured Concurrency
+
+```haskell
+import Control.Concurrent.Async
+
+-- Run two actions concurrently, wait for both
+main = do
+    (result1, result2) <- concurrently
+        (fetchUrl "http://example.com/1")
+        (fetchUrl "http://example.com/2")
+    print (result1, result2)
+
+-- Race: first to complete wins
+winner <- race
+    (fetchFromServer1 key)
+    (fetchFromServer2 key)
+
+-- Map concurrently
+results <- mapConcurrently fetchUrl urls
+
+-- With timeout
+maybeResult <- timeout 5000000 longComputation  -- 5 second timeout
+```
+
+### Software Transactional Memory (STM)
+
+```haskell
+import Control.Concurrent.STM
+
+-- Transactional variables
+type Account = TVar Int
+
+-- Atomic transfer between accounts
+transfer :: Account -> Account -> Int -> STM ()
+transfer from to amount = do
+    fromBalance <- readTVar from
+    when (fromBalance < amount) retry  -- Blocks until condition met
+    modifyTVar from (subtract amount)
+    modifyTVar to (+ amount)
+
+-- Run transaction
+main = do
+    account1 <- newTVarIO 1000
+    account2 <- newTVarIO 0
+
+    atomically $ transfer account1 account2 500
+
+    balances <- atomically $ do
+        b1 <- readTVar account1
+        b2 <- readTVar account2
+        return (b1, b2)
+
+    print balances  -- (500, 500)
+```
+
+### Parallel Evaluation
+
+```haskell
+import Control.Parallel.Strategies
+
+-- Parallel map
+parMap :: (a -> b) -> [a] -> [b]
+parMap f xs = map f xs `using` parList rseq
+
+-- Parallel computation
+compute :: [Int] -> Int
+compute xs = sum squares `using` rpar
+  where squares = map (^2) xs
+
+-- Spark parallel evaluation
+import Control.Parallel (par, pseq)
+
+parFib :: Int -> Int
+parFib n
+    | n < 2 = n
+    | otherwise =
+        let x = parFib (n-1)
+            y = parFib (n-2)
+        in x `par` y `pseq` (x + y)
+```
+
+---
+
+## Metaprogramming
+
+Haskell's metaprogramming uses Template Haskell for compile-time code generation. For cross-language comparison, see `patterns-metaprogramming-dev`.
+
+### Template Haskell Basics
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+
+import Language.Haskell.TH
+
+-- Generate function at compile time
+-- Creates: add5 x = x + 5
+$(do
+    let name = mkName "add5"
+    let body = [| \x -> x + 5 |]
+    [d| $(varP name) = $body |]
+ )
+
+-- Quote expressions
+expr :: Q Exp
+expr = [| 1 + 2 |]  -- Represents the expression (1 + 2)
+
+-- Quote types
+myType :: Q Type
+myType = [t| Maybe Int |]
+
+-- Quote patterns
+myPat :: Q Pat
+myPat = [p| (x, y) |]
+```
+
+### Deriving with Template Haskell
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+
+import Data.Aeson.TH
+
+-- Generate JSON instances
+data User = User
+    { userName :: String
+    , userAge :: Int
+    }
+
+$(deriveJSON defaultOptions ''User)
+-- Generates: instance FromJSON User where ...
+--            instance ToJSON User where ...
+
+-- With options
+$(deriveJSON defaultOptions{fieldLabelModifier = drop 4} ''User)
+-- Strips "user" prefix from JSON keys
+```
+
+### Lens Generation
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+
+import Control.Lens
+
+data Person = Person
+    { _name :: String
+    , _age :: Int
+    }
+
+makeLenses ''Person
+-- Generates: name :: Lens' Person String
+--            age :: Lens' Person Int
+
+-- Usage
+updateAge :: Person -> Person
+updateAge = over age (+1)
+
+getName :: Person -> String
+getName = view name
+```
+
+### GHC Generics (Alternative to TH)
+
+```haskell
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
+import GHC.Generics
+import Data.Aeson
+
+-- Automatic deriving via Generics
+data Config = Config
+    { configPort :: Int
+    , configHost :: String
+    } deriving (Generic, FromJSON, ToJSON)
+
+-- Works out of the box
+config = decode "{\"configPort\":8080,\"configHost\":\"localhost\"}"
+```
+
+---
+
+## Serialization
+
+For cross-language serialization patterns and comparison, see `patterns-serialization-dev`.
+
+### Aeson (JSON)
+
+```haskell
+{-# LANGUAGE DeriveGeneric #-}
+
+import Data.Aeson
+import GHC.Generics
+
+-- Automatic JSON with Generics
+data User = User
+    { name :: String
+    , email :: String
+    , age :: Int
+    } deriving (Generic, Show)
+
+instance FromJSON User
+instance ToJSON User
+
+-- Encode/decode
+encodeUser :: User -> ByteString
+encodeUser = encode
+
+decodeUser :: ByteString -> Maybe User
+decodeUser = decode
+```
+
+### Custom JSON Instances
+
+```haskell
+import Data.Aeson
+import Data.Aeson.Types
+
+data Status = Active | Inactive | Pending
+
+instance ToJSON Status where
+    toJSON Active = String "active"
+    toJSON Inactive = String "inactive"
+    toJSON Pending = String "pending"
+
+instance FromJSON Status where
+    parseJSON = withText "Status" $ \t ->
+        case t of
+            "active" -> return Active
+            "inactive" -> return Inactive
+            "pending" -> return Pending
+            _ -> fail "Invalid status"
+
+-- Complex type with field renaming
+data Config = Config
+    { configPort :: Int
+    , configHost :: String
+    }
+
+instance ToJSON Config where
+    toJSON (Config p h) = object
+        [ "port" .= p
+        , "host" .= h
+        ]
+
+instance FromJSON Config where
+    parseJSON = withObject "Config" $ \v -> Config
+        <$> v .: "port"
+        <*> v .: "host"
+```
+
+### Aeson Options
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+
+import Data.Aeson.TH
+
+data ApiResponse = ApiResponse
+    { responseStatus :: String
+    , responseData :: Value
+    , responseTimestamp :: Int
+    }
+
+$(deriveJSON defaultOptions
+    { fieldLabelModifier = camelTo2 '_' . drop 8  -- Remove "response" prefix, snake_case
+    , omitNothingFields = True
+    } ''ApiResponse)
+
+-- Produces: {"status": "...", "data": ..., "timestamp": ...}
+```
+
+### YAML
+
+```haskell
+import Data.Yaml
+
+-- Same types work with YAML (Aeson-based)
+config <- decodeFileThrow "config.yaml" :: IO Config
+
+-- Encode to YAML
+encodeFile "output.yaml" config
+```
+
+### Validation
+
+```haskell
+-- Manual validation with Either
+validateUser :: User -> Either String User
+validateUser u
+    | null (name u) = Left "Name cannot be empty"
+    | age u < 0 = Left "Age must be non-negative"
+    | '@' `notElem` email u = Left "Invalid email"
+    | otherwise = Right u
+
+-- With Validation Applicative
+import Data.Validation
+
+validateUser' :: User -> Validation [String] User
+validateUser' u = User
+    <$> validateName (name u)
+    <*> validateAge (age u)
+    <*> validateEmail (email u)
+  where
+    validateName n
+        | null n = Failure ["Name cannot be empty"]
+        | otherwise = Success n
+    -- ... etc
+```
+
+---
+
+## Build and Dependencies
+
+### Cabal
+
+```cabal
+-- my-app.cabal
+cabal-version: 2.4
+name:          my-app
+version:       0.1.0.0
+license:       MIT
+author:        Your Name
+
+common shared
+    ghc-options: -Wall
+    default-language: Haskell2010
+
+library
+    import: shared
+    exposed-modules:
+        MyApp
+        MyApp.Types
+    other-modules:
+        MyApp.Internal
+    build-depends:
+        base >= 4.14 && < 5
+      , text >= 1.2
+      , aeson >= 2.0
+      , containers
+    hs-source-dirs: src
+
+executable my-app
+    import: shared
+    main-is: Main.hs
+    build-depends:
+        base
+      , my-app  -- Depend on library
+    hs-source-dirs: app
+
+test-suite my-app-test
+    import: shared
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    build-depends:
+        base
+      , my-app
+      , hspec >= 2.7
+      , QuickCheck
+    hs-source-dirs: test
+```
+
+### Stack
+
+```yaml
+# stack.yaml
+resolver: lts-21.0  # Stackage snapshot
+
+packages:
+  - .
+
+extra-deps:
+  - some-package-1.0.0
+  - git: https://github.com/user/repo
+    commit: abc123
+
+# package.yaml (hpack format, generates .cabal)
+name: my-app
+version: 0.1.0.0
+
+dependencies:
+  - base >= 4.14 && < 5
+  - text
+  - aeson
+
+library:
+  source-dirs: src
+
+executables:
+  my-app:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+      - my-app
+
+tests:
+  my-app-test:
+    main: Spec.hs
+    source-dirs: test
+    dependencies:
+      - my-app
+      - hspec
+      - QuickCheck
+```
+
+### Common Commands
+
+```bash
+# Cabal
+cabal init                    # Initialize new project
+cabal build                   # Build project
+cabal run                     # Build and run executable
+cabal test                    # Run tests
+cabal repl                    # Start REPL with project loaded
+cabal install --lib aeson     # Install library globally
+
+# Stack
+stack new my-project          # Create new project
+stack build                   # Build project
+stack run                     # Build and run
+stack test                    # Run tests
+stack ghci                    # REPL with project
+stack install                 # Install executables
+```
+
+### GHC Options
+
+```cabal
+-- Common GHC options
+ghc-options:
+    -Wall                     -- Enable all warnings
+    -Wcompat                  -- Warn about future incompatibilities
+    -Wincomplete-patterns     -- Warn about incomplete patterns
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
+    -O2                       -- Optimization level 2
+    -threaded                 -- Enable threaded runtime
+    -rtsopts                  -- Enable RTS options
+    -with-rtsopts=-N          -- Use all CPU cores
+```
+
+---
+
+## Testing
+
+### HSpec
+
+```haskell
+-- test/Spec.hs
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+
+-- test/MyApp/UserSpec.hs
+module MyApp.UserSpec where
+
+import Test.Hspec
+import MyApp.User
+
+spec :: Spec
+spec = do
+    describe "createUser" $ do
+        it "creates a user with the given name" $ do
+            let user = createUser "Alice" "alice@example.com"
+            userName user `shouldBe` "Alice"
+
+        it "creates a user with the given email" $ do
+            let user = createUser "Alice" "alice@example.com"
+            userEmail user `shouldBe` "alice@example.com"
+
+    describe "validateEmail" $ do
+        it "returns True for valid email" $ do
+            validateEmail "user@example.com" `shouldBe` True
+
+        it "returns False for email without @" $ do
+            validateEmail "invalid" `shouldBe` False
+```
+
+### HSpec Matchers
+
+```haskell
+import Test.Hspec
+
+spec :: Spec
+spec = do
+    describe "Matchers" $ do
+        -- Equality
+        it "shouldBe" $ 1 + 1 `shouldBe` 2
+
+        -- Boolean
+        it "shouldSatisfy" $ 5 `shouldSatisfy` (> 0)
+
+        -- Lists
+        it "shouldContain" $ [1,2,3] `shouldContain` [2]
+        it "shouldMatchList" $ [1,2,3] `shouldMatchList` [3,1,2]
+
+        -- Maybe
+        it "shouldBe Just" $ Just 5 `shouldBe` Just 5
+        it "shouldBe Nothing" $ (Nothing :: Maybe Int) `shouldBe` Nothing
+
+        -- Exceptions
+        it "shouldThrow" $
+            evaluate (error "boom") `shouldThrow` anyException
+
+        -- Approximate equality
+        it "shouldSatisfy approx" $
+            3.14159 `shouldSatisfy` (\x -> abs (x - pi) < 0.001)
+```
+
+### QuickCheck (Property-Based Testing)
+
+```haskell
+import Test.QuickCheck
+import Test.Hspec
+import Test.Hspec.QuickCheck
+
+spec :: Spec
+spec = do
+    describe "reverse" $ do
+        prop "reversing twice gives original" $ \xs ->
+            reverse (reverse xs) == (xs :: [Int])
+
+        prop "length is preserved" $ \xs ->
+            length (reverse xs) == length (xs :: [Int])
+
+    describe "sort" $ do
+        prop "result is sorted" $ \xs ->
+            isSorted (sort (xs :: [Int]))
+
+        prop "length is preserved" $ \xs ->
+            length (sort xs) == length (xs :: [Int])
+
+        prop "all elements preserved" $ \xs ->
+            sort (xs :: [Int]) `shouldMatchList` xs
+
+isSorted :: Ord a => [a] -> Bool
+isSorted [] = True
+isSorted [_] = True
+isSorted (x:y:xs) = x <= y && isSorted (y:xs)
+```
+
+### Custom Generators
+
+```haskell
+import Test.QuickCheck
+
+-- Generator for positive integers
+positiveInt :: Gen Int
+positiveInt = abs <$> arbitrary `suchThat` (> 0)
+
+-- Generator for valid emails
+validEmail :: Gen String
+validEmail = do
+    user <- listOf1 $ elements ['a'..'z']
+    domain <- listOf1 $ elements ['a'..'z']
+    return $ user ++ "@" ++ domain ++ ".com"
+
+-- Use with forAll
+prop_positiveSquare :: Property
+prop_positiveSquare = forAll positiveInt $ \n ->
+    n * n > 0
+
+-- Arbitrary instance for custom type
+data User = User String Int
+
+instance Arbitrary User where
+    arbitrary = User
+        <$> listOf1 (elements ['a'..'z'])
+        <*> choose (0, 120)
+```
+
+### Hedgehog (Alternative Property Testing)
+
+```haskell
+import Hedgehog
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
+
+prop_reverse :: Property
+prop_reverse = property $ do
+    xs <- forAll $ Gen.list (Range.linear 0 100) Gen.alpha
+    reverse (reverse xs) === xs
+
+prop_sort :: Property
+prop_sort = property $ do
+    xs <- forAll $ Gen.list (Range.linear 0 100) (Gen.int $ Range.linear 0 1000)
+    let sorted = sort xs
+    assert $ isSorted sorted
+    length sorted === length xs
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - STM, async, parallel strategies
+- `patterns-serialization-dev` - Aeson, YAML, validation patterns
+- `patterns-metaprogramming-dev` - Template Haskell, Generics
+
+---
+
 ## References
 
 - [Learn You a Haskell](http://learnyouahaskell.com/)
