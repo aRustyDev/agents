@@ -956,6 +956,494 @@ actor Counter {
 
 ---
 
+## Testing
+
+### XCTest Basics
+
+```swift
+import XCTest
+@testable import MyApp
+
+final class UserTests: XCTestCase {
+    var sut: User!  // System Under Test
+
+    override func setUp() {
+        super.setUp()
+        sut = User(name: "Alice", age: 30)
+    }
+
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
+    }
+
+    func testUserInitialization() {
+        // Arrange & Act (done in setUp)
+
+        // Assert
+        XCTAssertEqual(sut.name, "Alice")
+        XCTAssertEqual(sut.age, 30)
+    }
+
+    func testUserValidation() {
+        // Arrange
+        let invalidUser = User(name: "", age: -1)
+
+        // Act
+        let isValid = invalidUser.validate()
+
+        // Assert
+        XCTAssertFalse(isValid)
+    }
+}
+```
+
+### Swift Testing (@Test Macro)
+
+```swift
+import Testing
+@testable import MyApp
+
+struct UserTests {
+    // Simple test
+    @Test func userInitialization() {
+        let user = User(name: "Alice", age: 30)
+        #expect(user.name == "Alice")
+        #expect(user.age == 30)
+    }
+
+    // Test with custom name
+    @Test("User validation rejects empty names")
+    func userValidation() {
+        let user = User(name: "", age: 30)
+        #expect(!user.validate())
+    }
+
+    // Parameterized tests
+    @Test("Age validation", arguments: [
+        (18, true),
+        (17, false),
+        (65, true),
+        (0, false),
+        (-1, false)
+    ])
+    func ageValidation(age: Int, expected: Bool) {
+        let user = User(name: "Test", age: age)
+        #expect(user.isValidAge() == expected)
+    }
+
+    // Tests with tags
+    @Test(.tags(.critical))
+    func criticalFeature() {
+        let result = performCriticalOperation()
+        #expect(result != nil)
+    }
+}
+
+// Custom tags
+extension Tag {
+    @Tag static var critical: Self
+    @Tag static var integration: Self
+    @Tag static var performance: Self
+}
+```
+
+### XCTest Assertions
+
+```swift
+// Boolean assertions
+XCTAssertTrue(condition)
+XCTAssertFalse(condition)
+
+// Nil assertions
+XCTAssertNil(value)
+XCTAssertNotNil(value)
+
+// Equality assertions
+XCTAssertEqual(actual, expected)
+XCTAssertNotEqual(actual, unexpected)
+XCTAssertIdentical(object1, object2)  // Same instance
+
+// Numeric comparisons
+XCTAssertGreaterThan(5, 3)
+XCTAssertLessThan(3, 5)
+XCTAssertGreaterThanOrEqual(5, 5)
+XCTAssertLessThanOrEqual(3, 5)
+
+// Floating point equality with accuracy
+XCTAssertEqual(3.14, 3.14159, accuracy: 0.01)
+
+// Error assertions
+XCTAssertThrowsError(try riskyOperation()) { error in
+    XCTAssertEqual(error as? MyError, MyError.notFound)
+}
+XCTAssertNoThrow(try safeOperation())
+
+// Custom failure
+XCTFail("Test failed: \(reason)")
+```
+
+### Async Testing
+
+```swift
+// Async/await testing
+func testAsyncFetch() async throws {
+    // Act
+    let user = try await networkService.fetchUser(id: "123")
+
+    // Assert
+    XCTAssertEqual(user.id, "123")
+    XCTAssertNotNil(user.name)
+}
+
+// Testing with expectations
+func testCompletionHandler() {
+    let expectation = expectation(description: "Data fetched")
+
+    networkService.fetchUser(id: "123") { result in
+        switch result {
+        case .success(let user):
+            XCTAssertEqual(user.id, "123")
+            expectation.fulfill()
+        case .failure(let error):
+            XCTFail("Failed with error: \(error)")
+        }
+    }
+
+    waitForExpectations(timeout: 5.0)
+}
+
+// Multiple expectations
+func testMultipleAsync() async throws {
+    async let user = fetchUser(id: "123")
+    async let posts = fetchPosts(userId: "123")
+
+    let (fetchedUser, fetchedPosts) = try await (user, posts)
+
+    XCTAssertEqual(fetchedUser.id, "123")
+    XCTAssertFalse(fetchedPosts.isEmpty)
+}
+
+// Swift Testing async
+@Test func asyncFetch() async throws {
+    let user = try await networkService.fetchUser(id: "123")
+    #expect(user.id == "123")
+}
+
+// Testing actors
+func testActorIsolation() async {
+    let counter = Counter()
+
+    await counter.increment()
+    await counter.increment()
+
+    let value = await counter.value
+    XCTAssertEqual(value, 2)
+}
+```
+
+### Mocking Protocols
+
+```swift
+// Define protocol
+protocol NetworkService {
+    func fetchUser(id: String) async throws -> User
+    func updateUser(_ user: User) async throws
+}
+
+// Mock implementation
+class MockNetworkService: NetworkService {
+    var fetchUserCalled = false
+    var fetchUserCallCount = 0
+    var userToReturn: User?
+    var errorToThrow: Error?
+
+    func fetchUser(id: String) async throws -> User {
+        fetchUserCalled = true
+        fetchUserCallCount += 1
+
+        if let error = errorToThrow {
+            throw error
+        }
+
+        return userToReturn ?? User(id: id, name: "Mock User", age: 30)
+    }
+
+    var updateUserCalled = false
+    var updatedUser: User?
+
+    func updateUser(_ user: User) async throws {
+        updateUserCalled = true
+        updatedUser = user
+
+        if let error = errorToThrow {
+            throw error
+        }
+    }
+}
+
+// Using mock in tests
+func testUserViewModel() async throws {
+    // Arrange
+    let mockService = MockNetworkService()
+    mockService.userToReturn = User(id: "123", name: "Alice", age: 30)
+    let viewModel = UserViewModel(service: mockService)
+
+    // Act
+    await viewModel.loadUser(id: "123")
+
+    // Assert
+    XCTAssertTrue(mockService.fetchUserCalled)
+    XCTAssertEqual(mockService.fetchUserCallCount, 1)
+    XCTAssertEqual(viewModel.user?.name, "Alice")
+}
+```
+
+### Spy Pattern
+
+```swift
+// Spy records all calls and arguments
+class SpyNetworkService: NetworkService {
+    var calls: [(method: String, arguments: Any)] = []
+
+    func fetchUser(id: String) async throws -> User {
+        calls.append((method: "fetchUser", arguments: id))
+        return User(id: id, name: "Spy User", age: 30)
+    }
+
+    func updateUser(_ user: User) async throws {
+        calls.append((method: "updateUser", arguments: user))
+    }
+}
+
+// Using spy
+func testCallSequence() async throws {
+    let spy = SpyNetworkService()
+    let viewModel = UserViewModel(service: spy)
+
+    await viewModel.loadUser(id: "123")
+    await viewModel.updateUserName("Bob")
+
+    XCTAssertEqual(spy.calls.count, 2)
+    XCTAssertEqual(spy.calls[0].method, "fetchUser")
+    XCTAssertEqual(spy.calls[1].method, "updateUser")
+}
+```
+
+### Stub Pattern
+
+```swift
+// Stub returns predetermined responses
+class StubNetworkService: NetworkService {
+    var stubbedUsers: [String: User] = [:]
+
+    func fetchUser(id: String) async throws -> User {
+        guard let user = stubbedUsers[id] else {
+            throw NetworkError.notFound
+        }
+        return user
+    }
+
+    func updateUser(_ user: User) async throws {
+        // No-op for stub
+    }
+}
+
+// Using stub
+func testWithPresetData() async throws {
+    let stub = StubNetworkService()
+    stub.stubbedUsers = [
+        "123": User(id: "123", name: "Alice", age: 30),
+        "456": User(id: "456", name: "Bob", age: 25)
+    ]
+
+    let user = try await stub.fetchUser(id: "123")
+    XCTAssertEqual(user.name, "Alice")
+}
+```
+
+### Testing SwiftUI Views
+
+```swift
+import ViewInspector
+
+struct ContentViewTests: XCTestCase {
+    func testButtonTap() throws {
+        var viewModel = ViewModel()
+        let view = ContentView(viewModel: viewModel)
+
+        // Find button and simulate tap
+        let button = try view.inspect().find(button: "Increment")
+        try button.tap()
+
+        // Verify state changed
+        XCTAssertEqual(viewModel.count, 1)
+    }
+
+    func testTextDisplayed() throws {
+        let view = ContentView(title: "Hello")
+        let text = try view.inspect().find(text: "Hello")
+        XCTAssertNotNil(text)
+    }
+}
+
+// Snapshot testing (with SnapshotTesting library)
+func testViewSnapshot() {
+    let view = ContentView()
+    assertSnapshot(matching: view, as: .image)
+}
+```
+
+### UI Testing Basics
+
+```swift
+import XCTest
+
+final class AppUITests: XCTestCase {
+    var app: XCUIApplication!
+
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launch()
+    }
+
+    func testLoginFlow() {
+        // Find elements
+        let usernameField = app.textFields["Username"]
+        let passwordField = app.secureTextFields["Password"]
+        let loginButton = app.buttons["Login"]
+
+        // Interact with UI
+        usernameField.tap()
+        usernameField.typeText("alice@example.com")
+
+        passwordField.tap()
+        passwordField.typeText("password123")
+
+        loginButton.tap()
+
+        // Verify navigation
+        let welcomeText = app.staticTexts["Welcome, Alice!"]
+        XCTAssertTrue(welcomeText.waitForExistence(timeout: 5))
+    }
+
+    func testSwipeToDelete() {
+        let firstCell = app.cells.firstMatch
+        XCTAssertTrue(firstCell.waitForExistence(timeout: 2))
+
+        firstCell.swipeLeft()
+
+        let deleteButton = firstCell.buttons["Delete"]
+        deleteButton.tap()
+
+        XCTAssertFalse(firstCell.exists)
+    }
+}
+```
+
+### Performance Testing
+
+```swift
+func testPerformance() {
+    measure {
+        // Code to measure
+        _ = heavyComputation()
+    }
+}
+
+// Metrics-based performance testing
+func testPerformanceMetrics() {
+    let options = XCTMeasureOptions()
+    options.iterationCount = 10
+
+    measure(metrics: [XCTClockMetric(), XCTMemoryMetric()], options: options) {
+        processLargeDataset()
+    }
+}
+
+// Swift Testing performance
+@Test(.timeLimit(.minutes(1)))
+func performanceSensitiveOperation() {
+    let result = expensiveComputation()
+    #expect(result != nil)
+}
+```
+
+### Test Organization
+
+```swift
+// Group related tests
+class UserValidationTests: XCTestCase {
+    func testEmailValidation() { }
+    func testPasswordValidation() { }
+    func testAgeValidation() { }
+}
+
+class UserPersistenceTests: XCTestCase {
+    func testSaveUser() { }
+    func testLoadUser() { }
+    func testDeleteUser() { }
+}
+
+// Swift Testing suites
+@Suite("User Management")
+struct UserManagementTests {
+    @Suite("Validation")
+    struct ValidationTests {
+        @Test func emailValidation() { }
+        @Test func passwordValidation() { }
+    }
+
+    @Suite("Persistence")
+    struct PersistenceTests {
+        @Test func saveUser() { }
+        @Test func loadUser() { }
+    }
+}
+```
+
+### Test Helpers
+
+```swift
+// Custom assertions
+func assertUserValid(_ user: User, file: StaticString = #file, line: UInt = #line) {
+    XCTAssertFalse(user.name.isEmpty, "User name is empty", file: file, line: line)
+    XCTAssertGreaterThan(user.age, 0, "User age is invalid", file: file, line: line)
+    XCTAssertNotNil(user.email, "User email is nil", file: file, line: line)
+}
+
+// Test fixtures
+extension User {
+    static func fixture(
+        name: String = "Test User",
+        age: Int = 30,
+        email: String = "test@example.com"
+    ) -> User {
+        User(name: name, age: age, email: email)
+    }
+}
+
+// Usage
+func testUserFeature() {
+    let user = User.fixture(name: "Alice")
+    assertUserValid(user)
+}
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - async/await, actors, task groups
+- `patterns-serialization-dev` - Codable, JSON, property lists
+- `patterns-metaprogramming-dev` - Reflection, type introspection
+
+---
+
 ## References
 
 - [Swift Language Guide](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html)
@@ -964,3 +1452,5 @@ actor Counter {
 - [WWDC Videos](https://developer.apple.com/videos/)
 - [Swift by Sundell](https://www.swiftbysundell.com/)
 - [Hacking with Swift](https://www.hackingwithswift.com/)
+- [Swift Testing Documentation](https://developer.apple.com/documentation/testing)
+- [XCTest Documentation](https://developer.apple.com/documentation/xctest)

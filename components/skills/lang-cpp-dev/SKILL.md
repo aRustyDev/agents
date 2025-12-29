@@ -1259,6 +1259,787 @@ void alsoGood(Base* obj) {  // Pointer
 
 ---
 
+## Build and Dependencies
+
+C++ uses various build systems and package managers. CMake is the de facto standard for cross-platform builds.
+
+### CMake Basics
+
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.20)
+project(MyProject VERSION 1.0.0 LANGUAGES CXX)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Create executable
+add_executable(myapp
+    src/main.cpp
+    src/utils.cpp
+)
+
+# Create library
+add_library(mylib STATIC
+    src/mylib.cpp
+    include/mylib.hpp
+)
+
+# Include directories
+target_include_directories(mylib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+# Link libraries
+target_link_libraries(myapp PRIVATE mylib)
+
+# Compiler flags
+target_compile_options(myapp PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+```
+
+### Build Commands
+
+```bash
+# Configure
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+# Build
+cmake --build build
+
+# Install
+cmake --install build --prefix /usr/local
+
+# Run tests
+ctest --test-dir build
+
+# Clean
+cmake --build build --target clean
+```
+
+### Package Managers
+
+**Conan** - Decentralized package manager
+
+```python
+# conanfile.txt
+[requires]
+fmt/10.1.1
+spdlog/1.12.0
+catch2/3.4.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[options]
+fmt:header_only=True
+```
+
+```cmake
+# CMakeLists.txt
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
+
+target_link_libraries(myapp PRIVATE
+    fmt::fmt
+    spdlog::spdlog
+)
+```
+
+```bash
+# Install dependencies
+conan install . --output-folder=build --build=missing
+
+# Build with Conan toolchain
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
+cmake --build build
+```
+
+**vcpkg** - Microsoft's package manager
+
+```bash
+# Install vcpkg
+git clone https://github.com/microsoft/vcpkg
+./vcpkg/bootstrap-vcpkg.sh
+
+# Install packages
+./vcpkg/vcpkg install fmt spdlog catch2
+
+# Use with CMake
+cmake -B build -S . \
+    -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+```
+
+```json
+// vcpkg.json - Manifest mode
+{
+  "name": "myproject",
+  "version": "1.0.0",
+  "dependencies": [
+    "fmt",
+    "spdlog",
+    "catch2"
+  ]
+}
+```
+
+### Build System Alternatives
+
+**Bazel** - Google's build system
+
+```python
+# BUILD
+cc_binary(
+    name = "myapp",
+    srcs = ["main.cpp"],
+    deps = [":mylib"],
+)
+
+cc_library(
+    name = "mylib",
+    srcs = ["mylib.cpp"],
+    hdrs = ["mylib.hpp"],
+    visibility = ["//visibility:public"],
+)
+```
+
+**Meson** - Fast, user-friendly build system
+
+```python
+# meson.build
+project('myproject', 'cpp',
+    version: '1.0.0',
+    default_options: ['cpp_std=c++20']
+)
+
+mylib = library('mylib',
+    'src/mylib.cpp',
+    include_directories: include_directories('include')
+)
+
+executable('myapp',
+    'src/main.cpp',
+    link_with: mylib
+)
+```
+
+```bash
+# Configure and build
+meson setup build
+meson compile -C build
+```
+
+### Dependency Types
+
+**Header-Only Libraries**
+
+```cpp
+// mylib.hpp - Everything in header
+#ifndef MYLIB_HPP
+#define MYLIB_HPP
+
+namespace mylib {
+
+template<typename T>
+class Container {
+    T* data;
+    size_t size;
+
+public:
+    Container(size_t n) : data(new T[n]), size(n) {}
+    ~Container() { delete[] data; }
+
+    T& operator[](size_t i) { return data[i]; }
+    size_t getSize() const { return size; }
+};
+
+// Non-template functions must be inline
+inline int add(int a, int b) {
+    return a + b;
+}
+
+}  // namespace mylib
+
+#endif
+```
+
+**Compiled Libraries (Static/Shared)**
+
+```cmake
+# Static library (.a, .lib)
+add_library(mylib STATIC
+    src/mylib.cpp
+)
+
+# Shared library (.so, .dll)
+add_library(mylib SHARED
+    src/mylib.cpp
+)
+
+# Object library (compiled objects, no archive)
+add_library(mylib OBJECT
+    src/mylib.cpp
+)
+
+# Interface library (header-only)
+add_library(mylib INTERFACE)
+target_include_directories(mylib INTERFACE include/)
+```
+
+### Modern CMake Patterns
+
+```cmake
+# Find packages
+find_package(Threads REQUIRED)
+find_package(OpenSSL REQUIRED)
+
+# FetchContent for external projects
+include(FetchContent)
+
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG 10.1.1
+)
+
+FetchContent_MakeAvailable(fmt)
+
+# Use targets
+target_link_libraries(myapp PRIVATE
+    Threads::Threads
+    OpenSSL::SSL
+    fmt::fmt
+)
+
+# Installation
+install(TARGETS myapp mylib
+    EXPORT MyProjectTargets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include
+)
+
+install(DIRECTORY include/
+    DESTINATION include
+)
+
+# Export for find_package
+install(EXPORT MyProjectTargets
+    FILE MyProjectTargets.cmake
+    NAMESPACE MyProject::
+    DESTINATION lib/cmake/MyProject
+)
+```
+
+### Precompiled Headers (C++20)
+
+```cmake
+# Create precompiled header
+target_precompile_headers(myapp PRIVATE
+    <vector>
+    <string>
+    <memory>
+    <iostream>
+)
+
+# Reuse across targets
+target_precompile_headers(myapp REUSE_FROM mylib)
+```
+
+### Modules (C++20)
+
+```cpp
+// math.cppm - Module interface
+export module math;
+
+export namespace math {
+    int add(int a, int b) {
+        return a + b;
+    }
+
+    template<typename T>
+    T multiply(T a, T b) {
+        return a * b;
+    }
+}
+
+// main.cpp - Import module
+import math;
+
+int main() {
+    int sum = math::add(2, 3);
+    double product = math::multiply(2.5, 4.0);
+}
+```
+
+```cmake
+# CMake 3.28+ required for module support
+target_sources(myapp PRIVATE
+    FILE_SET CXX_MODULES FILES
+        src/math.cppm
+)
+```
+
+**See also:** `lang-cpp-cmake-dev` for advanced build configuration
+
+---
+
+## Testing
+
+C++ has multiple testing frameworks. Google Test is the most popular.
+
+### Google Test Basics
+
+```cpp
+// test_math.cpp
+#include <gtest/gtest.h>
+#include "math.hpp"
+
+// Basic test
+TEST(MathTest, Addition) {
+    EXPECT_EQ(add(2, 3), 5);
+    EXPECT_EQ(add(-1, 1), 0);
+}
+
+// Test with setup/teardown
+class MathFixture : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // Setup before each test
+        calculator = std::make_unique<Calculator>();
+    }
+
+    void TearDown() override {
+        // Cleanup after each test
+        calculator.reset();
+    }
+
+    std::unique_ptr<Calculator> calculator;
+};
+
+TEST_F(MathFixture, ComplexOperation) {
+    calculator->add(5);
+    calculator->multiply(2);
+    EXPECT_EQ(calculator->result(), 10);
+}
+
+// Parameterized tests
+class AdditionTest : public ::testing::TestWithParam<std::tuple<int, int, int>> {};
+
+TEST_P(AdditionTest, CheckSum) {
+    auto [a, b, expected] = GetParam();
+    EXPECT_EQ(add(a, b), expected);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BasicAddition,
+    AdditionTest,
+    ::testing::Values(
+        std::make_tuple(1, 2, 3),
+        std::make_tuple(0, 0, 0),
+        std::make_tuple(-1, 1, 0)
+    )
+);
+
+// Death tests (expect crashes)
+TEST(MathDeathTest, DivideByZero) {
+    EXPECT_DEATH(divide(1, 0), "divide by zero");
+}
+
+// Main function
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+```
+
+### Google Test Assertions
+
+```cpp
+// Fatal assertions (stop test on failure)
+ASSERT_TRUE(condition);
+ASSERT_FALSE(condition);
+ASSERT_EQ(val1, val2);
+ASSERT_NE(val1, val2);
+ASSERT_LT(val1, val2);
+ASSERT_LE(val1, val2);
+ASSERT_GT(val1, val2);
+ASSERT_GE(val1, val2);
+ASSERT_STREQ(str1, str2);
+ASSERT_THROW(statement, exception_type);
+ASSERT_NO_THROW(statement);
+
+// Non-fatal assertions (continue test on failure)
+EXPECT_TRUE(condition);
+EXPECT_FALSE(condition);
+EXPECT_EQ(val1, val2);
+EXPECT_NE(val1, val2);
+EXPECT_FLOAT_EQ(val1, val2);
+EXPECT_DOUBLE_EQ(val1, val2);
+EXPECT_NEAR(val1, val2, abs_error);
+
+// String matching
+EXPECT_STREQ(str1, str2);
+EXPECT_STRCASEEQ(str1, str2);
+EXPECT_THAT(value, matcher);
+
+// Custom messages
+EXPECT_EQ(result, 42) << "Expected 42, got " << result;
+```
+
+### CMake Integration
+
+```cmake
+# Enable testing
+enable_testing()
+
+# Find Google Test
+find_package(GTest REQUIRED)
+
+# Or use FetchContent
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest
+    GIT_TAG v1.14.0
+)
+FetchContent_MakeAvailable(googletest)
+
+# Create test executable
+add_executable(myapp_test
+    tests/test_math.cpp
+    tests/test_string.cpp
+)
+
+target_link_libraries(myapp_test PRIVATE
+    mylib
+    GTest::gtest
+    GTest::gtest_main  # Provides main() automatically
+)
+
+# Register tests
+include(GoogleTest)
+gtest_discover_tests(myapp_test)
+```
+
+```bash
+# Build and run tests
+cmake --build build
+ctest --test-dir build --output-on-failure
+
+# Run specific test
+./build/myapp_test --gtest_filter=MathTest.*
+```
+
+### Catch2 Framework
+
+```cpp
+// test_math.cpp
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch_test_macros.hpp>
+#include "math.hpp"
+
+TEST_CASE("Addition works", "[math]") {
+    REQUIRE(add(2, 3) == 5);
+    REQUIRE(add(-1, 1) == 0);
+}
+
+TEST_CASE("Calculator operations", "[calculator]") {
+    Calculator calc;
+
+    SECTION("Addition") {
+        calc.add(5);
+        REQUIRE(calc.result() == 5);
+    }
+
+    SECTION("Multiplication") {
+        calc.add(5);
+        calc.multiply(2);
+        REQUIRE(calc.result() == 10);
+    }
+}
+
+// BDD style
+SCENARIO("Users can add numbers", "[math][bdd]") {
+    GIVEN("Two numbers") {
+        int a = 5;
+        int b = 3;
+
+        WHEN("They are added") {
+            int result = add(a, b);
+
+            THEN("The sum is correct") {
+                REQUIRE(result == 8);
+            }
+        }
+    }
+}
+
+// Generators (parameterized tests)
+TEST_CASE("Addition is commutative", "[math]") {
+    auto a = GENERATE(1, 2, 3, 4, 5);
+    auto b = GENERATE(10, 20, 30);
+    REQUIRE(add(a, b) == add(b, a));
+}
+```
+
+### doctest Framework (Lightweight)
+
+```cpp
+// test_math.cpp
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include <doctest/doctest.h>
+#include "math.hpp"
+
+TEST_CASE("Addition") {
+    CHECK(add(2, 3) == 5);
+    CHECK(add(-1, 1) == 0);
+}
+
+TEST_CASE_FIXTURE(Calculator, "Calculator operations") {
+    add(5);
+    CHECK(result() == 5);
+
+    multiply(2);
+    CHECK(result() == 10);
+}
+
+// Subcases
+TEST_CASE("Complex scenario") {
+    Calculator calc;
+
+    SUBCASE("Addition") {
+        calc.add(5);
+        CHECK(calc.result() == 5);
+    }
+
+    SUBCASE("Subtraction") {
+        calc.subtract(3);
+        CHECK(calc.result() == -3);
+    }
+}
+```
+
+### Boost.Test Framework
+
+```cpp
+// test_math.cpp
+#define BOOST_TEST_MODULE MathTests
+#include <boost/test/included/unit_test.hpp>
+#include "math.hpp"
+
+BOOST_AUTO_TEST_SUITE(MathTestSuite)
+
+BOOST_AUTO_TEST_CASE(Addition) {
+    BOOST_TEST(add(2, 3) == 5);
+    BOOST_TEST(add(-1, 1) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(Division) {
+    BOOST_CHECK_THROW(divide(1, 0), std::runtime_error);
+    BOOST_CHECK_NO_THROW(divide(6, 2));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// Fixtures
+struct CalculatorFixture {
+    CalculatorFixture() : calc() {
+        BOOST_TEST_MESSAGE("Setup fixture");
+    }
+    ~CalculatorFixture() {
+        BOOST_TEST_MESSAGE("Teardown fixture");
+    }
+
+    Calculator calc;
+};
+
+BOOST_FIXTURE_TEST_CASE(CalculatorTest, CalculatorFixture) {
+    calc.add(5);
+    BOOST_TEST(calc.result() == 5);
+}
+```
+
+### Mocking with Google Mock (GMock)
+
+```cpp
+// mock_database.hpp
+#include <gmock/gmock.h>
+#include "database.hpp"
+
+class MockDatabase : public Database {
+public:
+    MOCK_METHOD(User, getUser, (int id), (override));
+    MOCK_METHOD(void, saveUser, (const User& user), (override));
+    MOCK_METHOD(bool, deleteUser, (int id), (override));
+};
+
+// test_service.cpp
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include "mock_database.hpp"
+#include "user_service.hpp"
+
+using ::testing::Return;
+using ::testing::_;
+using ::testing::Throw;
+
+TEST(UserServiceTest, GetUserById) {
+    MockDatabase db;
+    UserService service(db);
+
+    User expected{"Alice", 30};
+
+    // Set expectations
+    EXPECT_CALL(db, getUser(1))
+        .WillOnce(Return(expected));
+
+    // Test
+    User result = service.getUserById(1);
+    EXPECT_EQ(result.name, "Alice");
+}
+
+TEST(UserServiceTest, HandleDatabaseError) {
+    MockDatabase db;
+    UserService service(db);
+
+    EXPECT_CALL(db, getUser(_))
+        .WillOnce(Throw(std::runtime_error("Connection failed")));
+
+    EXPECT_THROW(service.getUserById(1), std::runtime_error);
+}
+
+// Argument matching
+TEST(UserServiceTest, SaveUserWithValidation) {
+    MockDatabase db;
+    UserService service(db);
+
+    // Match specific arguments
+    EXPECT_CALL(db, saveUser(::testing::Field(&User::name, "Bob")))
+        .Times(1);
+
+    service.createUser("Bob", 25);
+}
+```
+
+### Test Organization
+
+```
+project/
+├── src/
+│   ├── main.cpp
+│   └── mylib.cpp
+├── include/
+│   └── mylib.hpp
+├── tests/
+│   ├── unit/
+│   │   ├── test_math.cpp
+│   │   └── test_string.cpp
+│   ├── integration/
+│   │   └── test_system.cpp
+│   └── mocks/
+│       └── mock_database.hpp
+└── CMakeLists.txt
+```
+
+```cmake
+# tests/CMakeLists.txt
+
+# Unit tests
+add_executable(unit_tests
+    unit/test_math.cpp
+    unit/test_string.cpp
+)
+
+target_link_libraries(unit_tests PRIVATE
+    mylib
+    GTest::gtest_main
+)
+
+gtest_discover_tests(unit_tests)
+
+# Integration tests
+add_executable(integration_tests
+    integration/test_system.cpp
+)
+
+target_link_libraries(integration_tests PRIVATE
+    mylib
+    GTest::gtest_main
+)
+
+gtest_discover_tests(integration_tests)
+```
+
+### Running Tests
+
+```bash
+# All tests
+ctest --test-dir build
+
+# Verbose output
+ctest --test-dir build --output-on-failure
+
+# Specific test
+ctest --test-dir build -R MathTest
+
+# Parallel execution
+ctest --test-dir build -j 8
+
+# With Google Test filters
+./build/tests/unit_tests --gtest_filter=MathTest.*
+
+# List tests
+./build/tests/unit_tests --gtest_list_tests
+
+# Repeat tests
+./build/tests/unit_tests --gtest_repeat=100
+
+# Shuffle tests
+./build/tests/unit_tests --gtest_shuffle
+```
+
+### Coverage (with gcov/lcov)
+
+```cmake
+# Enable coverage
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+```
+
+```bash
+# Run tests
+cmake --build build
+ctest --test-dir build
+
+# Generate coverage
+lcov --capture --directory build --output-file coverage.info
+lcov --remove coverage.info '/usr/*' --output-file coverage.info
+genhtml coverage.info --output-directory coverage_html
+
+# View report
+open coverage_html/index.html
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Threads, async, synchronization
+- `patterns-serialization-dev` - JSON, validation, data formats
+- `patterns-metaprogramming-dev` - Templates, reflection, code generation
+
+---
+
 ## References
 
 - [C++ Reference](https://en.cppreference.com/)
