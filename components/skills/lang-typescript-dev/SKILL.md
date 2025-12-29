@@ -1451,6 +1451,225 @@ expect.extend({
 
 ---
 
+## Metaprogramming
+
+TypeScript supports decorators for metaprogramming, enabling declarative modifications to classes, methods, and properties. Requires `experimentalDecorators` and optionally `emitDecoratorMetadata` in tsconfig.json.
+
+### Enabling Decorators
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+### Class Decorators
+
+```typescript
+// Class decorator - receives the constructor
+function Sealed(constructor: Function) {
+  Object.seal(constructor);
+  Object.seal(constructor.prototype);
+}
+
+function Entity(tableName: string) {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+    return class extends constructor {
+      static tableName = tableName;
+    };
+  };
+}
+
+@Sealed
+@Entity('users')
+class User {
+  name: string;
+}
+
+// Access metadata
+console.log((User as any).tableName); // 'users'
+```
+
+### Method Decorators
+
+```typescript
+// Method decorator - receives target, key, descriptor
+function Log(target: any, key: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value;
+  descriptor.value = function (...args: any[]) {
+    console.log(`Calling ${key} with`, args);
+    const result = original.apply(this, args);
+    console.log(`${key} returned`, result);
+    return result;
+  };
+  return descriptor;
+}
+
+function Debounce(ms: number) {
+  return function (target: any, key: string, descriptor: PropertyDescriptor) {
+    let timeout: NodeJS.Timeout;
+    const original = descriptor.value;
+    descriptor.value = function (...args: any[]) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => original.apply(this, args), ms);
+    };
+    return descriptor;
+  };
+}
+
+class API {
+  @Log
+  @Debounce(300)
+  search(query: string): string[] {
+    return ['result1', 'result2'];
+  }
+}
+```
+
+### Property Decorators
+
+```typescript
+// Property decorator - receives target and key
+function Required(target: any, key: string) {
+  let value: any;
+  const getter = () => value;
+  const setter = (newValue: any) => {
+    if (newValue === undefined || newValue === null) {
+      throw new Error(`${key} is required`);
+    }
+    value = newValue;
+  };
+  Object.defineProperty(target, key, {
+    get: getter,
+    set: setter,
+    enumerable: true,
+    configurable: true,
+  });
+}
+
+function Column(options: { type: string; nullable?: boolean }) {
+  return function (target: any, key: string) {
+    const columns = Reflect.getMetadata('columns', target) || [];
+    columns.push({ key, ...options });
+    Reflect.defineMetadata('columns', columns, target);
+  };
+}
+
+class User {
+  @Required
+  @Column({ type: 'varchar', nullable: false })
+  name: string;
+}
+```
+
+### Parameter Decorators
+
+```typescript
+// Parameter decorator - receives target, key, parameter index
+function Inject(token: string) {
+  return function (target: any, key: string, index: number) {
+    const injections = Reflect.getMetadata('injections', target, key) || [];
+    injections[index] = token;
+    Reflect.defineMetadata('injections', injections, target, key);
+  };
+}
+
+class UserService {
+  constructor(
+    @Inject('DATABASE') private db: Database,
+    @Inject('LOGGER') private logger: Logger
+  ) {}
+}
+```
+
+### Reflect Metadata
+
+```typescript
+import 'reflect-metadata';
+
+// Define metadata
+Reflect.defineMetadata('role', 'admin', User);
+Reflect.defineMetadata('role', 'user', User.prototype, 'name');
+
+// Get metadata
+const classRole = Reflect.getMetadata('role', User);
+const propRole = Reflect.getMetadata('role', User.prototype, 'name');
+
+// Get design-time type information (with emitDecoratorMetadata)
+function LogType(target: any, key: string) {
+  const type = Reflect.getMetadata('design:type', target, key);
+  console.log(`${key} type:`, type.name); // e.g., "String", "Number"
+}
+
+// Get parameter types
+function LogParams(target: any, key: string, descriptor: PropertyDescriptor) {
+  const paramTypes = Reflect.getMetadata('design:paramtypes', target, key);
+  console.log(`${key} params:`, paramTypes.map((t: any) => t.name));
+}
+```
+
+### Decorator Factories Pattern
+
+```typescript
+// Composable decorator factory
+interface ValidatorOptions {
+  min?: number;
+  max?: number;
+  pattern?: RegExp;
+  message?: string;
+}
+
+function Validate(options: ValidatorOptions) {
+  return function (target: any, key: string) {
+    const validators = Reflect.getMetadata('validators', target) || {};
+    validators[key] = options;
+    Reflect.defineMetadata('validators', validators, target);
+  };
+}
+
+class CreateUserDto {
+  @Validate({ min: 1, max: 100, message: 'Name must be 1-100 chars' })
+  name: string;
+
+  @Validate({ pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' })
+  email: string;
+}
+
+// Runtime validation
+function validate(instance: any): string[] {
+  const validators = Reflect.getMetadata('validators', instance) || {};
+  const errors: string[] = [];
+
+  for (const [key, opts] of Object.entries(validators) as [string, ValidatorOptions][]) {
+    const value = instance[key];
+    if (opts.min && value.length < opts.min) errors.push(opts.message || `${key} too short`);
+    if (opts.max && value.length > opts.max) errors.push(opts.message || `${key} too long`);
+    if (opts.pattern && !opts.pattern.test(value)) errors.push(opts.message || `${key} invalid`);
+  }
+  return errors;
+}
+```
+
+### Common Decorator Libraries
+
+| Library | Purpose | Example |
+|---------|---------|---------|
+| `class-validator` | Validation decorators | `@IsEmail()`, `@Length(1, 100)` |
+| `class-transformer` | Serialization decorators | `@Type()`, `@Expose()` |
+| `typeorm` | ORM decorators | `@Entity()`, `@Column()` |
+| `nestjs` | Framework decorators | `@Controller()`, `@Get()` |
+| `inversify` | DI decorators | `@injectable()`, `@inject()` |
+
+### See Also
+
+- `patterns-metaprogramming-dev` - Cross-language decorator/macro patterns
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:

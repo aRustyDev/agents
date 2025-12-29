@@ -12,11 +12,75 @@ Create a new one-way language conversion skill (`convert-<source>-<target>`) tha
 - `$1` - Source language (lowercase, e.g., `typescript`, `python`, `golang`)
 - `$2` - Target language (lowercase, e.g., `rust`, `python`, `golang`)
 
+## Quick Reference
+
+| Step | Action | Purpose |
+|------|--------|---------|
+| 0 | Check existing | Avoid duplicate skills |
+| 1 | Validate args | Ensure valid language names |
+| 2 | Read foundations | Understand meta-skill patterns |
+| 2.5 | Validate 8 Pillars | Ensure lang skills have coverage |
+| 3 | Research pair | Gather language-specific mappings |
+| 4 | Create directory | Set up skill location |
+| 5 | Generate SKILL.md | Create from template |
+| 6 | Populate content | Fill in language-specific details |
+| 7 | Validate skill | Run quality checklist |
+| 8 | Cross-references | Suggest related skill updates |
+| 9 | Report | Summary of what was created |
+| 10 | Feedback | Self-review and improvement suggestions |
+
+**Modes:**
+- **Create** (default) - New skill from scratch
+- **Update** - Improve existing skill (use `--update` or detect existing)
+
 ## Prerequisites
 
 This command requires the `meta-convert-dev` skill to be available. Read it first to understand the foundational patterns.
 
+---
+
 ## Workflow
+
+### Step 0: Check for Existing Skill
+
+Before creating a new skill, check if one already exists:
+
+```bash
+# Check if skill directory exists
+ls components/skills/convert-$1-$2/
+
+# Search for existing PRs
+gh pr list --search "convert-$1-$2" --state all
+```
+
+**If the skill already exists:**
+
+1. **Confirm with user**: "A `convert-$1-$2` skill already exists. Options:"
+   - **Update mode**: Improve the existing skill (add missing sections, enhance examples)
+   - **Skip**: Move on to next task
+   - **Force create**: Replace existing (requires explicit confirmation)
+
+2. **For update mode**, skip to [Step 6: Populate Content](#step-6-populate-content) and focus on:
+   - Filling gaps identified in validation
+   - Adding missing type mappings
+   - Improving examples
+   - Updating cross-references
+
+3. **Report findings** even if skipping:
+   ```markdown
+   ## Existing Skill Found
+
+   | Field | Value |
+   |-------|-------|
+   | Skill | `convert-$1-$2` |
+   | Status | Already exists |
+   | Location | `components/skills/convert-$1-$2/SKILL.md` |
+   | PR | #XXX (if known) |
+
+   **Recommendation:** [Update / Skip / Review]
+   ```
+
+---
 
 ### Step 1: Validate Arguments
 
@@ -51,71 +115,83 @@ Read these skills to understand patterns and gather examples:
    - `lang-$1-dev` - Source language patterns
    - `lang-$2-dev` - Target language patterns
 
-### Step 2.5: Validate 8 Pillars Coverage
+### Step 2.5: Validate 8 Pillars Coverage (Automated)
 
-Before creating a conversion skill, validate that both source and target language skills have adequate coverage of the **8 Pillars** essential for code conversion:
+Before creating a conversion skill, validate that both source and target language skills have adequate coverage of the **8 Pillars** essential for code conversion.
 
-| Pillar | Description | Why Essential for Conversion |
-|--------|-------------|------------------------------|
-| Module System | Imports, exports, visibility, packages | Import/export translation |
-| Error Handling | Error types, Result/Option, exceptions | Error model translation |
-| Concurrency Model | Async/await, threads, channels | Async pattern translation |
-| Metaprogramming | Decorators, macros, annotations | Attribute/decorator translation |
-| Zero/Default Values | Null, undefined, Option, defaults | Null-safety translation |
-| Serialization Idioms | JSON, struct tags, validation | Data structure translation |
-| Build/Deps | Package managers, build tools | Project migration |
-| Testing Idioms | Test frameworks, mocking | Test suite conversion |
+#### Pillar Reference
 
-#### Validation Process
+| Pillar | Search Terms | Why Essential |
+|--------|-------------|---------------|
+| Module | `## Module`, `import`, `export`, `visibility` | Import/export translation |
+| Error | `## Error`, `Result`, `Exception`, `try/catch` | Error model translation |
+| Concurrency | `## Concurrency`, `async`, `await`, `thread` | Async pattern translation |
+| Metaprogramming | `## Metaprogramming`, `decorator`, `macro`, `annotation` | Attribute translation |
+| Zero/Default | `## Zero`, `## Default`, `null`, `Option`, `None` | Null-safety translation |
+| Serialization | `## Serialization`, `JSON`, `serde`, `marshal` | Data structure translation |
+| Build | `## Build`, `## Dependencies`, `Cargo`, `package.json` | Project migration |
+| Testing | `## Testing`, `#[test]`, `describe`, `unittest` | Test suite conversion |
 
-1. **Read both language skills:**
-   ```
-   components/skills/lang-$1-dev/SKILL.md
-   components/skills/lang-$2-dev/SKILL.md
-   ```
+#### Automated Validation
 
-2. **Check for each pillar** - Look for dedicated sections or substantial coverage:
-   - ✓ = Has a dedicated section or comprehensive coverage
-   - ~ = Mentioned but incomplete
-   - ✗ = Missing entirely
+Run this validation automatically when reading the lang-*-dev skills:
 
-3. **Calculate coverage scores:**
-   - Green: 6-8 pillars covered
-   - Yellow: 4-5 pillars covered
-   - Red: 0-3 pillars covered
+```bash
+# Check for section headers (example for bash, but do this by reading the file)
+for pillar in "Module" "Error" "Concurrency" "Metaprogramming" "Zero\|Default" "Serialization" "Build" "Testing"; do
+  grep -c "## .*$pillar" components/skills/lang-$1-dev/SKILL.md
+done
+```
 
-4. **If either skill scores Yellow or Red:**
+**While reading each skill file, check for these patterns:**
 
-   **Option A: Proceed with warnings** (for time-sensitive tasks)
-   - Document missing pillars in the conversion skill's "Limitations" section
-   - Note that external research was required for those areas
-   - Create follow-up issues to improve lang-*-dev skills
+| Pillar | ✓ Criteria | ~ Criteria | ✗ Criteria |
+|--------|-----------|------------|------------|
+| Module | Has `## Module` section with 50+ lines | Mentioned in another section | No coverage |
+| Error | Has `## Error` section with examples | Has Result/Exception mentions | No coverage |
+| Concurrency | Has `## Concurrency` section | Has async/thread mentions | No coverage |
+| Metaprogramming | Has `## Metaprogramming` section | Has decorator/macro mentions | No coverage |
+| Zero/Default | Has dedicated section or table | Mentioned in types section | No coverage |
+| Serialization | Has `## Serialization` section | Has JSON/serde mentions | No coverage |
+| Build | Has `## Build` section | Has package manager mentions | No coverage |
+| Testing | Has `## Testing` section | Has test framework mentions | No coverage |
 
-   **Option B: Improve lang-*-dev first** (recommended)
-   - Create issues to add missing pillars to lang-*-dev skills
-   - Add the missing content to lang-*-dev skills
-   - Then proceed with conversion skill creation
+#### Quick Score Calculation
 
-   **Option C: Use cross-cutting pattern skills** (for common gaps)
-   - `patterns-concurrency-dev` - Supplements Concurrency gaps
-   - `patterns-serialization-dev` - Supplements Serialization gaps
-   - `patterns-metaprogramming-dev` - Supplements Metaprogramming gaps
-   - Reference these skills in the conversion skill's "See Also" section
+Count section headers matching pillars:
+- **8/8**: Excellent - proceed confidently
+- **6-7/8**: Good - note gaps, proceed with pattern skill references
+- **4-5/8**: Fair - strongly recommend improving lang skills first
+- **0-3/8**: Poor - must improve lang skills before proceeding
 
-   Ask the user which approach they prefer.
+#### Handling Gaps
 
-5. **Report validation results:**
-   ```
-   ## 8 Pillars Validation
+| Score | Action |
+|-------|--------|
+| 6-8/8 | Proceed. Reference pattern skills for missing pillars |
+| 4-5/8 | Ask user: Proceed with gaps documented OR improve skills first |
+| 0-3/8 | Stop. Create issues to improve lang-*-dev skills first |
 
-   | Skill | Module | Error | Concurrency | Metaprog | Zero | Serial | Build | Test | Score |
-   |-------|--------|-------|-------------|----------|------|--------|-------|------|-------|
-   | lang-$1-dev | ✓/~/✗ | ... | ... | ... | ... | ... | ... | ... | X/8 |
-   | lang-$2-dev | ✓/~/✗ | ... | ... | ... | ... | ... | ... | ... | X/8 |
+**Pattern skill supplements:**
+- `patterns-concurrency-dev` → Concurrency gaps
+- `patterns-serialization-dev` → Serialization gaps
+- `patterns-metaprogramming-dev` → Metaprogramming gaps
 
-   **Status:** Green/Yellow/Red
-   **Recommendation:** [Proceed / Improve skills first / Proceed with documented gaps]
-   ```
+#### Report Format
+
+```markdown
+## 8 Pillars Validation
+
+| Skill | Mod | Err | Conc | Meta | Zero | Ser | Build | Test | Score |
+|-------|-----|-----|------|------|------|-----|-------|------|-------|
+| lang-$1-dev | ✓ | ✓ | ✓ | ~ | ✓ | ✓ | ✓ | ✓ | 7.5/8 |
+| lang-$2-dev | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 8/8 |
+
+**Combined Score:** 15.5/16 (Excellent)
+**Gaps:** lang-$1-dev metaprogramming is partial
+**Mitigation:** Reference `patterns-metaprogramming-dev`
+**Decision:** Proceed ✓
+```
 
 ### Step 3: Research Language Pair
 
