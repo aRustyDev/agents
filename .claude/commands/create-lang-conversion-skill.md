@@ -137,6 +137,14 @@ Before creating a conversion skill, validate that both source and target languag
 | Build | `## Build`, `## Dependencies`, `Cargo`, `package.json` | Project migration |
 | Testing | `## Testing`, `#[test]`, `describe`, `unittest` | Test suite conversion |
 
+**Optional 9th Pillar (for REPL-centric languages):**
+
+| Pillar | Search Terms | Why Essential |
+|--------|-------------|---------------|
+| Dev Workflow | `## REPL`, `## Workflow`, `interactive`, `hot reload` | Development style translation |
+
+Include this pillar when either language is REPL-centric: Clojure, Elixir, Erlang, Lisp, Haskell (GHCi), Scala (Ammonite).
+
 #### Automated Validation
 
 Run this validation automatically when reading the lang-*-dev skills:
@@ -237,6 +245,33 @@ Before creating the skill, research the specific language pair using these struc
 - [ ] JSON/serialization libraries
 - [ ] Testing frameworks
 - [ ] Build tools
+
+#### 3.7 Paradigm Shifts (if applicable)
+- [ ] OOP → Functional: class hierarchies → data + functions, inheritance → composition
+- [ ] Imperative → Declarative: loops → recursion/map/fold, mutation → immutability
+- [ ] Dynamic → Static: duck typing → interfaces/traits, runtime checks → compile-time
+- [ ] Script → Compiled: REPL workflow → build cycle, hot reload → recompile
+
+#### 3.8 Transpilers & Interop Tools
+- [ ] Check for existing transpilers between the languages (e.g., Fable.Python, GopherJS)
+- [ ] Note FFI/interop capabilities (calling one language from the other)
+- [ ] Document bidirectional insights from transpiler implementations
+
+#### 3.9 Platform Ecosystem Differences
+Different runtime platforms have distinct conventions and capabilities:
+
+| Platform | Languages | Key Characteristics |
+|----------|-----------|---------------------|
+| .NET/CLR | C#, F#, VB.NET | Rich stdlib, NuGet, strong async |
+| JVM | Java, Kotlin, Scala, Clojure | Maven/Gradle, enterprise tooling |
+| BEAM/OTP | Erlang, Elixir | Actor model, hot reload, supervision |
+| Native | Rust, C, C++, Go | Direct memory, no GC (Rust/C), system-level |
+| Scripting | Python, Ruby, JavaScript | Dynamic, REPL-first, rapid prototyping |
+
+When converting across platforms:
+- [ ] Note stdlib equivalents (collections, IO, networking)
+- [ ] Consider runtime semantics (exceptions, threading, memory)
+- [ ] Document dependency ecosystem differences (package managers)
 
 #### When to Use WebSearch
 
@@ -356,6 +391,29 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 
 ---
 
+## Paradigm Translation (if applicable)
+
+Include this section when converting between different paradigms (OOP→FP, imperative→declarative, etc.)
+
+### Mental Model Shift: <Source Paradigm> → <Target Paradigm>
+
+| <Source> Concept | <Target> Approach | Key Insight |
+|------------------|-------------------|-------------|
+| Class with state | Record + module functions | Data and behavior separated |
+| Inheritance | Composition / Protocols | Favor interfaces over hierarchies |
+| Mutable loops | Recursion / fold / map | Transformation over mutation |
+| Side effects anywhere | Pure functions + IO boundary | Effects pushed to edges |
+
+### Concurrency Mental Model
+
+| <Source> Model | <Target> Model | Conceptual Translation |
+|----------------|----------------|------------------------|
+| Threads + locks | Actors / CSP | Shared state → message passing |
+| Callbacks | Streams / Channels | Inversion of control → data flow |
+| async/await | Process mailboxes | Promise → lightweight process |
+
+---
+
 ## Error Handling
 
 ### <Source> Error Model → <Target> Error Model
@@ -385,6 +443,30 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 1. **<Pitfall 1>**: Description and how to avoid
 2. **<Pitfall 2>**: Description and how to avoid
 ...
+
+---
+
+## Limitations (if proceeding with Yellow/Red pillar coverage)
+
+Include this section when creating a conversion skill despite incomplete lang-*-dev coverage.
+
+### Coverage Gaps
+
+| Pillar | Source Skill | Target Skill | Mitigation |
+|--------|--------------|--------------|------------|
+| <Pillar> | ✓/~/✗ | ✓/~/✗ | External research / pattern skill / documented gap |
+
+### Known Limitations
+
+1. **<Area>**: This skill has limited guidance on <topic> because lang-<x>-dev lacks coverage
+2. **<Area>**: Conversion patterns for <feature> may be incomplete
+
+### External Resources Used
+
+| Resource | What It Provided | Reliability |
+|----------|------------------|-------------|
+| Official docs | <topic> patterns | High |
+| Community guide | <topic> examples | Medium |
 
 ---
 
@@ -524,6 +606,16 @@ Run through this checklist before completing:
 - [ ] Error handling section covers full error model
 - [ ] Concurrency section addresses async patterns
 - [ ] Memory/Ownership included if languages differ
+- [ ] Paradigm Translation included if paradigms differ (OOP→FP, etc.)
+
+#### Type Mapping Validation Checklist
+- [ ] **Primitives**: All basic types covered (int, float, string, bool, char)
+- [ ] **Numerics**: Precision differences noted (i32 vs i64, overflow behavior)
+- [ ] **Nullability**: null/nil/None → Option/Maybe mappings clear
+- [ ] **Collections**: Array, List, Map, Set, Tuple equivalents
+- [ ] **Composites**: Struct, Class, Interface, Enum, Union mappings
+- [ ] **Generics**: Type parameter syntax and constraints
+- [ ] **Special types**: Never/Bottom, Unit/Void, Any/Dynamic
 
 #### Example Validation
 - [ ] Examples progress in complexity (simple → complex)
