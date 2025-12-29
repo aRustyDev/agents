@@ -1207,6 +1207,802 @@ T[] array = (T[]) Array.newInstance(componentType, size);
 
 ---
 
+## Module System
+
+Java uses packages for namespace organization and modules (JPMS, Java 9+) for stronger encapsulation.
+
+### Packages
+
+```java
+// Package declaration (must be first statement)
+package com.example.myapp.util;
+
+// Import statements
+import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.*;  // Wildcard import (all classes)
+import static java.lang.Math.PI;  // Static import
+import static java.util.Collections.*;  // Static wildcard
+
+public class StringUtils {
+    public static String capitalize(String s) {
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+}
+```
+
+### Package Naming Conventions
+
+```
+com.company.project.module.submodule
+
+Examples:
+com.example.myapp           # Application root
+com.example.myapp.model     # Domain models
+com.example.myapp.service   # Business logic
+com.example.myapp.controller # Web controllers
+com.example.myapp.repository # Data access
+com.example.myapp.util      # Utilities
+```
+
+### Access Modifiers
+
+| Modifier | Class | Package | Subclass | World |
+|----------|-------|---------|----------|-------|
+| `public` | ✓ | ✓ | ✓ | ✓ |
+| `protected` | ✓ | ✓ | ✓ | ✗ |
+| (default) | ✓ | ✓ | ✗ | ✗ |
+| `private` | ✓ | ✗ | ✗ | ✗ |
+
+### Java Modules (JPMS, Java 9+)
+
+```java
+// module-info.java (at source root)
+module com.example.myapp {
+    // Required modules
+    requires java.base;  // Implicit
+    requires java.sql;
+    requires transitive java.logging;  // Transitive dependency
+
+    // Exported packages (public API)
+    exports com.example.myapp.api;
+    exports com.example.myapp.model;
+
+    // Qualified exports (to specific modules)
+    exports com.example.myapp.internal to com.example.tests;
+
+    // Open for reflection
+    opens com.example.myapp.model to com.google.gson;
+
+    // Service provider
+    provides com.example.spi.Plugin
+        with com.example.myapp.MyPlugin;
+
+    // Service consumer
+    uses com.example.spi.Plugin;
+}
+```
+
+### Project Structure
+
+```
+myproject/
+├── src/
+│   └── main/
+│       ├── java/
+│       │   ├── module-info.java
+│       │   └── com/
+│       │       └── example/
+│       │           └── myapp/
+│       │               ├── Main.java
+│       │               ├── api/
+│       │               │   └── UserService.java
+│       │               └── model/
+│       │                   └── User.java
+│       └── resources/
+│           └── application.properties
+└── pom.xml (or build.gradle)
+```
+
+---
+
+## Concurrency
+
+Java provides multiple concurrency mechanisms from low-level threads to high-level abstractions.
+
+### Threads
+
+```java
+// Extending Thread
+class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("Running in thread");
+    }
+}
+
+// Implementing Runnable (preferred)
+class MyTask implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("Task running");
+    }
+}
+
+// Lambda (Java 8+)
+Thread thread = new Thread(() -> System.out.println("Lambda thread"));
+
+// Starting threads
+new MyThread().start();
+new Thread(new MyTask()).start();
+thread.start();
+
+// Waiting for completion
+thread.join();
+```
+
+### Synchronized
+
+```java
+public class Counter {
+    private int count = 0;
+
+    // Synchronized method
+    public synchronized void increment() {
+        count++;
+    }
+
+    public synchronized int getCount() {
+        return count;
+    }
+}
+
+// Synchronized block
+public class SafeList {
+    private final List<String> list = new ArrayList<>();
+    private final Object lock = new Object();
+
+    public void add(String item) {
+        synchronized (lock) {
+            list.add(item);
+        }
+    }
+}
+```
+
+### ExecutorService
+
+```java
+import java.util.concurrent.*;
+
+// Fixed thread pool
+ExecutorService executor = Executors.newFixedThreadPool(4);
+
+// Submit tasks
+executor.execute(() -> System.out.println("Simple task"));
+
+Future<String> future = executor.submit(() -> {
+    Thread.sleep(1000);
+    return "Result";
+});
+
+// Get result (blocks)
+String result = future.get();
+String resultWithTimeout = future.get(5, TimeUnit.SECONDS);
+
+// Shutdown
+executor.shutdown();
+executor.awaitTermination(60, TimeUnit.SECONDS);
+```
+
+### CompletableFuture (Java 8+)
+
+```java
+import java.util.concurrent.CompletableFuture;
+
+// Create async tasks
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    return fetchData();
+});
+
+// Chain operations
+CompletableFuture<Integer> result = future
+    .thenApply(data -> parse(data))
+    .thenApply(parsed -> process(parsed))
+    .exceptionally(ex -> handleError(ex));
+
+// Combine futures
+CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "World");
+
+CompletableFuture<String> combined = future1.thenCombine(future2,
+    (a, b) -> a + " " + b);
+
+// Wait for all
+CompletableFuture.allOf(future1, future2).join();
+
+// Wait for any
+CompletableFuture.anyOf(future1, future2).join();
+```
+
+### Concurrent Collections
+
+```java
+import java.util.concurrent.*;
+
+// Thread-safe collections
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+map.put("key", 1);
+map.computeIfAbsent("key", k -> expensiveComputation(k));
+
+CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+
+// Atomic types
+AtomicInteger counter = new AtomicInteger(0);
+counter.incrementAndGet();
+counter.compareAndSet(5, 10);
+```
+
+### Virtual Threads (Java 21+)
+
+```java
+// Virtual threads - lightweight, cheap to create
+Thread.startVirtualThread(() -> {
+    System.out.println("Virtual thread running");
+});
+
+// With executor
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    for (int i = 0; i < 10000; i++) {
+        executor.submit(() -> {
+            // Each task runs on a virtual thread
+            return fetchData();
+        });
+    }
+}
+```
+
+**See also:** `patterns-concurrency-dev` for cross-language concurrency patterns
+
+---
+
+## Metaprogramming
+
+Java uses annotations and reflection for metaprogramming.
+
+### Annotations
+
+```java
+// Built-in annotations
+@Override
+public String toString() { ... }
+
+@Deprecated
+public void oldMethod() { ... }
+
+@SuppressWarnings("unchecked")
+public List<T> getList() { ... }
+
+@FunctionalInterface
+interface Processor<T> {
+    T process(T input);
+}
+```
+
+### Custom Annotations
+
+```java
+import java.lang.annotation.*;
+
+// Runtime annotation
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Loggable {
+    String value() default "";
+    Level level() default Level.INFO;
+}
+
+// Compile-time annotation
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface Generated {
+    String date();
+    String author();
+}
+
+// Usage
+public class MyService {
+    @Loggable(level = Level.DEBUG)
+    public void doWork() {
+        // ...
+    }
+}
+```
+
+### Reflection
+
+```java
+import java.lang.reflect.*;
+
+// Get class information
+Class<?> clazz = User.class;
+Class<?> clazz2 = obj.getClass();
+Class<?> clazz3 = Class.forName("com.example.User");
+
+// Inspect fields
+for (Field field : clazz.getDeclaredFields()) {
+    System.out.println(field.getName() + ": " + field.getType());
+}
+
+// Inspect methods
+for (Method method : clazz.getDeclaredMethods()) {
+    System.out.println(method.getName());
+    Loggable annotation = method.getAnnotation(Loggable.class);
+    if (annotation != null) {
+        System.out.println("Loggable: " + annotation.value());
+    }
+}
+
+// Create instance
+Object instance = clazz.getDeclaredConstructor().newInstance();
+
+// Access private fields
+Field field = clazz.getDeclaredField("name");
+field.setAccessible(true);
+field.set(instance, "Alice");
+
+// Invoke methods
+Method method = clazz.getDeclaredMethod("greet", String.class);
+Object result = method.invoke(instance, "World");
+```
+
+### Annotation Processing
+
+```java
+// Annotation processor (runs at compile time)
+@SupportedAnnotationTypes("com.example.Generated")
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
+public class GeneratedProcessor extends AbstractProcessor {
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations,
+                          RoundEnvironment roundEnv) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Generated.class)) {
+            // Generate code
+        }
+        return true;
+    }
+}
+```
+
+**See also:** `patterns-metaprogramming-dev` for cross-language comparison
+
+---
+
+## Serialization
+
+Java supports multiple serialization frameworks, with Jackson being the most popular for JSON.
+
+### Jackson Basics
+
+```java
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+ObjectMapper mapper = new ObjectMapper();
+
+// Serialize
+User user = new User("Alice", 30);
+String json = mapper.writeValueAsString(user);
+
+// Pretty print
+String prettyJson = mapper.writerWithDefaultPrettyPrinter()
+    .writeValueAsString(user);
+
+// Deserialize
+User parsed = mapper.readValue(json, User.class);
+
+// Collections
+List<User> users = mapper.readValue(jsonArray,
+    new TypeReference<List<User>>() {});
+```
+
+### Jackson Annotations
+
+```java
+import com.fasterxml.jackson.annotation.*;
+
+public class User {
+    @JsonProperty("user_id")
+    private String id;
+
+    private String name;
+
+    @JsonIgnore
+    private String password;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDateTime createdAt;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String email;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+}
+
+// Ignore unknown properties
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Config { ... }
+
+// Polymorphic types
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Dog.class, name = "dog"),
+    @JsonSubTypes.Type(value = Cat.class, name = "cat")
+})
+public abstract class Animal { ... }
+```
+
+### Bean Validation (Jakarta Validation)
+
+```java
+import jakarta.validation.constraints.*;
+
+public class User {
+    @NotNull
+    @Size(min = 1, max = 100)
+    private String name;
+
+    @NotBlank
+    @Email
+    private String email;
+
+    @Min(0)
+    @Max(150)
+    private int age;
+
+    @Pattern(regexp = "^[A-Z]{2}\\d{6}$")
+    private String licenseNumber;
+
+    @NotEmpty
+    private List<@NotBlank String> roles;
+}
+
+// Validation
+ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+Validator validator = factory.getValidator();
+
+Set<ConstraintViolation<User>> violations = validator.validate(user);
+for (ConstraintViolation<User> v : violations) {
+    System.out.println(v.getPropertyPath() + ": " + v.getMessage());
+}
+```
+
+### Custom Jackson Serializer
+
+```java
+public class MoneySerializer extends JsonSerializer<Money> {
+    @Override
+    public void serialize(Money value, JsonGenerator gen,
+                         SerializerProvider provider) throws IOException {
+        gen.writeStartObject();
+        gen.writeNumberField("amount", value.getAmount());
+        gen.writeStringField("currency", value.getCurrency());
+        gen.writeEndObject();
+    }
+}
+
+// Usage
+@JsonSerialize(using = MoneySerializer.class)
+private Money price;
+```
+
+**See also:** `patterns-serialization-dev` for cross-language serialization patterns
+
+---
+
+## Build and Dependencies
+
+Java uses Maven or Gradle for build and dependency management.
+
+### Maven (pom.xml)
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>myproject</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+### Gradle (build.gradle.kts)
+
+```kotlin
+plugins {
+    java
+    application
+}
+
+group = "com.example"
+version = "1.0.0-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+}
+
+application {
+    mainClass.set("com.example.Main")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+```
+
+### Common Commands
+
+| Maven | Gradle | Purpose |
+|-------|--------|---------|
+| `mvn compile` | `gradle build` | Compile |
+| `mvn test` | `gradle test` | Run tests |
+| `mvn package` | `gradle jar` | Create JAR |
+| `mvn install` | `gradle publishToMavenLocal` | Install locally |
+| `mvn clean` | `gradle clean` | Clean build |
+| `mvn dependency:tree` | `gradle dependencies` | Show deps |
+
+### Dependency Scopes
+
+| Scope | Compile | Test | Runtime |
+|-------|---------|------|---------|
+| `compile` (default) | ✓ | ✓ | ✓ |
+| `provided` | ✓ | ✓ | ✗ |
+| `runtime` | ✗ | ✓ | ✓ |
+| `test` | ✗ | ✓ | ✗ |
+
+---
+
+## Testing
+
+Java uses JUnit for testing, commonly with Mockito for mocking.
+
+### JUnit 5 Basics
+
+```java
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CalculatorTest {
+    private Calculator calculator;
+
+    @BeforeEach
+    void setUp() {
+        calculator = new Calculator();
+    }
+
+    @Test
+    void shouldAddTwoNumbers() {
+        int result = calculator.add(2, 3);
+        assertEquals(5, result);
+    }
+
+    @Test
+    void shouldThrowOnDivisionByZero() {
+        assertThrows(ArithmeticException.class, () -> {
+            calculator.divide(10, 0);
+        });
+    }
+
+    @Test
+    @DisplayName("Addition is commutative")
+    void additionIsCommutative() {
+        assertEquals(
+            calculator.add(2, 3),
+            calculator.add(3, 2)
+        );
+    }
+}
+```
+
+### Assertions
+
+```java
+// Equality
+assertEquals(expected, actual);
+assertEquals(expected, actual, "Custom message");
+assertNotEquals(unexpected, actual);
+
+// Boolean
+assertTrue(condition);
+assertFalse(condition);
+
+// Null checks
+assertNull(value);
+assertNotNull(value);
+
+// Same instance
+assertSame(expected, actual);
+assertNotSame(unexpected, actual);
+
+// Arrays
+assertArrayEquals(expected, actual);
+
+// Exceptions
+assertThrows(IllegalArgumentException.class, () -> {
+    service.process(null);
+});
+
+// Timeout
+assertTimeout(Duration.ofSeconds(5), () -> {
+    slowOperation();
+});
+
+// Multiple assertions
+assertAll(
+    () -> assertEquals("Alice", user.getName()),
+    () -> assertEquals(30, user.getAge()),
+    () -> assertNotNull(user.getEmail())
+);
+```
+
+### Parameterized Tests
+
+```java
+@ParameterizedTest
+@ValueSource(ints = {1, 2, 3, 4, 5})
+void shouldBePositive(int number) {
+    assertTrue(number > 0);
+}
+
+@ParameterizedTest
+@CsvSource({
+    "1, 2, 3",
+    "10, 20, 30",
+    "-1, 1, 0"
+})
+void shouldAdd(int a, int b, int expected) {
+    assertEquals(expected, calculator.add(a, b));
+}
+
+@ParameterizedTest
+@MethodSource("numberProvider")
+void shouldBeEven(int number) {
+    assertEquals(0, number % 2);
+}
+
+static Stream<Integer> numberProvider() {
+    return Stream.of(2, 4, 6, 8);
+}
+```
+
+### Mockito
+
+```java
+import org.mockito.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+    @Mock
+    private UserRepository repository;
+
+    @InjectMocks
+    private UserService service;
+
+    @Test
+    void shouldFindUserById() {
+        // Given
+        User user = new User(1L, "Alice");
+        when(repository.findById(1L)).thenReturn(Optional.of(user));
+
+        // When
+        User result = service.getUser(1L);
+
+        // Then
+        assertEquals("Alice", result.getName());
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void shouldThrowWhenUserNotFound() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> {
+            service.getUser(999L);
+        });
+    }
+}
+```
+
+### Test Lifecycle
+
+```java
+class LifecycleTest {
+    @BeforeAll
+    static void setUpClass() {
+        // Run once before all tests
+    }
+
+    @AfterAll
+    static void tearDownClass() {
+        // Run once after all tests
+    }
+
+    @BeforeEach
+    void setUp() {
+        // Run before each test
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Run after each test
+    }
+
+    @Test
+    @Disabled("Not implemented yet")
+    void pendingTest() {
+        // Skipped
+    }
+}
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Threads, executors, async patterns
+- `patterns-serialization-dev` - Jackson, validation, annotations
+- `patterns-metaprogramming-dev` - Annotations, reflection, processors
+
+---
+
 ## References
 
 - [Java Documentation](https://docs.oracle.com/en/java/)
