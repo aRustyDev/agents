@@ -1032,6 +1032,764 @@ main =
 
 ---
 
+## Module System
+
+### Package vs Application vs Platform
+
+Roc has three distinct module types:
+
+```roc
+# Application - Entry point with platform dependency
+app [main] {
+    pf: platform "https://github.com/roc-lang/basic-cli/releases/download/0.10.0/vNe6s9hWzoTZtFmNkvEICPErI9ptji_ySjicO6CkucY.tar.br"
+}
+
+# Package - Reusable library
+package [List, Dict, Set] {
+    pf: platform "https://github.com/roc-lang/basic-cli/releases/download/0.10.0/vNe6s9hWzoTZtFmNkvEICPErI9ptji_ySjicO6CkucY.tar.br"
+}
+
+# Platform - Provides I/O capabilities (advanced)
+platform "my-platform"
+    requires {} { main : Task {} [] }
+    exposes [Stdout, File, Task]
+    packages {}
+    imports []
+    provides [mainForHost]
+```
+
+### Exposing and Importing
+
+```roc
+# Module declaration with exports
+interface MyModule
+    exposes [
+        User,           # Type
+        createUser,     # Function
+        updateUser,     # Function
+    ]
+    imports [
+        pf.Stdout,
+        pf.Task.{ Task },
+    ]
+
+# Define exports
+User : {
+    name : Str,
+    age : U32,
+}
+
+createUser : Str, U32 -> User
+createUser = \name, age -> { name, age }
+
+updateUser : User, U32 -> User
+updateUser = \user, newAge -> { user & age: newAge }
+```
+
+### Import Patterns
+
+```roc
+# Import from platform
+import pf.Stdout
+import pf.Task exposing [Task]
+
+# Import multiple from same module
+import pf.File exposing [readUtf8, writeUtf8]
+
+# Import with alias (not yet implemented, but planned)
+# import pf.Stdout as Out
+
+# Import from package
+import List
+import Dict exposing [Dict]
+import Set
+
+# Use imported items
+main : Task {} []
+main =
+    # Use qualified
+    List.map([1, 2, 3], \n -> n * 2)
+
+    # Use exposed directly
+    task = Task.ok({})
+```
+
+### Module Organization
+
+```
+my-app/
+├── main.roc           # Application entry point
+├── User.roc           # User module
+├── Post.roc           # Post module
+└── Utils/
+    ├── Strings.roc    # String utilities
+    └── Math.roc       # Math utilities
+```
+
+```roc
+# main.roc
+app [main] {
+    pf: platform "..."
+}
+
+import pf.Stdout
+import pf.Task exposing [Task]
+import User
+import Post
+
+main : Task {} []
+main =
+    user = User.create("Alice", 30)
+    post = Post.create(user, "Hello, World!")
+    Stdout.line!("Created post by \(User.getName(user))")
+
+# User.roc
+interface User
+    exposes [User, create, getName, getAge]
+    imports []
+
+User : {
+    name : Str,
+    age : U32,
+}
+
+create : Str, U32 -> User
+create = \name, age -> { name, age }
+
+getName : User -> Str
+getName = \user -> user.name
+
+getAge : User -> U32
+getAge = \user -> user.age
+```
+
+### Visibility and Encapsulation
+
+```roc
+# Only exposed items are public
+interface Counter
+    exposes [Counter, new, increment, getValue]
+    imports []
+
+# Opaque type - internal structure hidden
+Counter := { count : U32 }
+
+# Public API
+new : Counter
+new = @Counter({ count: 0 })
+
+increment : Counter -> Counter
+increment = \@Counter({ count }) ->
+    @Counter({ count: count + 1 })
+
+getValue : Counter -> U32
+getValue = \@Counter({ count }) -> count
+
+# Private helper (not exposed)
+internalHelper : U32 -> U32
+internalHelper = \n -> n * 2
+```
+
+### Package Structure
+
+```roc
+# Package with multiple modules
+package [
+    # Export types
+    User,
+    Post,
+    Comment,
+
+    # Export functions
+    createUser,
+    createPost,
+    addComment,
+] {
+    pf: platform "..."
+}
+
+import User
+import Post
+import Comment
+
+# Re-export from submodules
+User : User.User
+createUser : User.create
+
+Post : Post.Post
+createPost : Post.create
+
+Comment : Comment.Comment
+addComment : Comment.add
+```
+
+### Platform Interface
+
+Platforms define the interface between pure Roc code and host capabilities:
+
+```roc
+# Platform exposes capabilities
+platform "basic-cli"
+    requires {} { main : Task {} [] }
+    exposes [
+        Stdout,
+        Stderr,
+        File,
+        Path,
+        Env,
+        Arg,
+        Task,
+    ]
+    packages {}
+    imports []
+    provides [mainForHost]
+
+# Application imports from platform
+app [main] { pf: platform "..." }
+
+import pf.Stdout
+import pf.File
+import pf.Task exposing [Task]
+
+# Application provides the required main function
+main : Task {} []
+main =
+    content = File.readUtf8!("input.txt")
+    Stdout.line!(content)
+```
+
+### Dependency Management
+
+```roc
+# Applications depend on platforms
+app [main] {
+    pf: platform "https://github.com/roc-lang/basic-cli/releases/download/0.10.0/vNe6s9hWzoTZtFmNkvEICPErI9ptji_ySjicO6CkucY.tar.br"
+}
+
+# Packages depend on platforms (for types)
+package [myLib] {
+    pf: platform "..."
+}
+
+# Platform URLs point to packages
+# Format: https://host/path/to/archive.tar.br
+# Hash in URL ensures integrity
+```
+
+### Module Best Practices
+
+```roc
+# Interface - public API design
+interface Database
+    exposes [
+        # Types
+        Connection,
+        QueryResult,
+
+        # Core functions
+        connect,
+        disconnect,
+        query,
+
+        # Helpers
+        mapRows,
+    ]
+    imports [
+        pf.Task.{ Task },
+    ]
+
+# Clear separation of concerns
+Connection := { host : Str, port : U16 }  # Opaque
+QueryResult : { rows : List (Dict Str Str) }  # Transparent
+
+# Type-driven design
+connect : Str, U16 -> Task Connection [ConnectionFailed Str]
+disconnect : Connection -> Task {} []
+query : Connection, Str -> Task QueryResult [QueryFailed Str]
+```
+
+### Common Module Patterns
+
+```roc
+# 1. Builder pattern with module
+interface RequestBuilder
+    exposes [Request, new, withHeader, withBody, build]
+    imports []
+
+Request := {
+    url : Str,
+    headers : Dict Str Str,
+    body : [Some Str, None],
+}
+
+new : Str -> Request
+new = \url -> @Request({
+    url,
+    headers: Dict.empty({}),
+    body: None,
+})
+
+withHeader : Request, Str, Str -> Request
+withHeader = \@Request(req), key, value ->
+    @Request({ req & headers: Dict.insert(req.headers, key, value) })
+
+withBody : Request, Str -> Request
+withBody = \@Request(req), body ->
+    @Request({ req & body: Some(body) })
+
+# 2. Smart constructors
+interface Email
+    exposes [Email, fromStr, toString]
+    imports []
+
+Email := Str
+
+fromStr : Str -> Result Email [InvalidEmail]
+fromStr = \str ->
+    if Str.contains(str, "@") then
+        Ok(@Email(str))
+    else
+        Err(InvalidEmail)
+
+toString : Email -> Str
+toString = \@Email(str) -> str
+
+# 3. Namespace-style modules
+interface StringUtils
+    exposes [capitalize, reverse, isPalindrome]
+    imports []
+
+capitalize : Str -> Str
+capitalize = \str ->
+    when Str.toUtf8(str) is
+        [] -> ""
+        [first, .. as rest] ->
+            Str.fromUtf8([Str.toUpper(first)] |> List.concat(rest))
+
+reverse : Str -> Str
+reverse = \str ->
+    str
+    |> Str.toUtf8
+    |> List.reverse
+    |> Str.fromUtf8
+
+isPalindrome : Str -> Bool
+isPalindrome = \str ->
+    str == reverse(str)
+```
+
+---
+
+## Concurrency
+
+Roc's concurrency model is Task-based and platform-provided. Unlike languages with built-in threading, Roc delegates all concurrent execution to the platform layer. For cross-language comparison, see `patterns-concurrency-dev`.
+
+### Task-Based Concurrency
+
+```roc
+# Task represents an effect that may run concurrently
+# Type: Task ok err
+#   ok  - Success type
+#   err - Error type
+
+import pf.Task exposing [Task]
+import pf.Stdout
+import pf.File
+
+# Sequential execution
+main : Task {} []
+main =
+    # Each step waits for previous
+    content1 = File.readUtf8!("file1.txt")
+    content2 = File.readUtf8!("file2.txt")
+    Stdout.line!("Read both files sequentially")
+```
+
+### Platform-Provided Concurrency
+
+Platforms may provide concurrent execution primitives:
+
+```roc
+# Platform might expose concurrent operations
+import pf.Task exposing [Task, parallel]
+import pf.File
+
+# Hypothetical concurrent file reading
+readBothFiles : Task (Str, Str) [FileErr]
+readBothFiles =
+    # Platform handles concurrent execution
+    Task.parallel2(
+        File.readUtf8("file1.txt"),
+        File.readUtf8("file2.txt")
+    )
+
+# Pattern: Platform provides concurrency, app stays pure
+main : Task {} []
+main =
+    (content1, content2) = readBothFiles!
+    Stdout.line!("Read files concurrently via platform")
+```
+
+### No Built-In Threading
+
+```roc
+# Roc applications don't directly manage threads
+# All concurrency is platform capability
+
+# This is NOT possible in Roc:
+# - spawn_thread()
+# - async/await (no built-in)
+# - goroutines
+# - manual thread pools
+
+# Instead: Platform provides concurrent primitives
+# Application code remains pure and sequential
+```
+
+### Task Composition
+
+```roc
+# Tasks compose like other values
+import pf.Task exposing [Task]
+import pf.Http
+import pf.Stdout
+
+# Chain tasks
+fetchAndPrint : Str -> Task {} [HttpErr]
+fetchAndPrint = \url ->
+    response = Http.get!(url)
+    Stdout.line!(response.body)
+
+# Multiple independent tasks
+fetchMultiple : List Str -> Task (List Str) [HttpErr]
+fetchMultiple = \urls ->
+    # Platform may execute these concurrently
+    List.map(urls, \url ->
+        Http.get(url)
+        |> Task.map(\resp -> resp.body)
+    )
+    |> Task.sequence  # Platform-provided
+```
+
+### Error Handling in Concurrent Tasks
+
+```roc
+# Each Task carries its error type
+import pf.Task exposing [Task]
+
+# Task that may fail
+riskyOperation : Task Str [NetworkErr, ParseErr]
+riskyOperation =
+    data = fetchData!  # May fail with NetworkErr
+    parsed = parseData!(data)  # May fail with ParseErr
+    Task.ok(parsed)
+
+# Handle errors
+safeOperation : Task Str []
+safeOperation =
+    when riskyOperation is
+        Ok(result) -> Task.ok(result)
+        Err(NetworkErr) -> Task.ok("Network error occurred")
+        Err(ParseErr) -> Task.ok("Parse error occurred")
+```
+
+### Concurrency Patterns
+
+```roc
+# Pattern 1: Batch processing
+processBatch : List Item -> Task (List Result) [ProcessErr]
+processBatch = \items ->
+    # Platform may parallelize map
+    items
+    |> List.map(processItem)
+    |> Task.sequence
+
+# Pattern 2: Timeout
+withTimeout : Task a err, U64 -> Task a [Timeout, TaskErr err]
+withTimeout = \task, ms ->
+    # Platform provides timeout mechanism
+    Task.timeout(task, ms)
+
+# Pattern 3: Retry
+retry : Task a err, U32 -> Task a err
+retry = \task, attempts ->
+    when task is
+        Ok(result) -> Task.ok(result)
+        Err(e) if attempts > 0 -> retry(task, attempts - 1)
+        Err(e) -> Task.err(e)
+```
+
+### Platform Responsibilities
+
+Platforms handle:
+- Thread pool management
+- Work scheduling
+- Concurrent I/O
+- Synchronization primitives
+- Event loops
+
+Applications handle:
+- Pure data transformations
+- Task composition
+- Error handling logic
+- Business logic
+
+```roc
+# Clear separation
+┌─────────────────────────────┐
+│   Application (Pure Roc)    │
+│                              │
+│  • Task composition          │
+│  • Business logic            │
+│  • Data transformation       │
+└──────────────┬───────────────┘
+               │ Task interface
+┌──────────────▼───────────────┐
+│   Platform (Host + Roc API)  │
+│                              │
+│  • Thread management         │
+│  • Concurrent execution      │
+│  • I/O operations            │
+│  • Synchronization           │
+└──────────────────────────────┘
+```
+
+### Current State and Future
+
+```roc
+# As of 2025, Roc's concurrency is evolving
+# Current: Task-based, platform-specific
+# Expected: Standardized concurrent primitives in platform APIs
+
+# Watch for:
+# - Task.parallel, Task.race
+# - Structured concurrency helpers
+# - Standard async patterns
+
+# Note: This section reflects current design
+# May evolve as language matures
+```
+
+---
+
+## Metaprogramming
+
+Roc takes a minimalist approach to metaprogramming. Unlike languages with macro systems, Roc focuses on simplicity and relies on code generation tools outside the language. For cross-language comparison, see `patterns-metaprogramming-dev`.
+
+### No Built-In Macros
+
+```roc
+# Roc does NOT have:
+# - Macro systems (like Rust, Elixir)
+# - Decorators (like Python, TypeScript)
+# - Annotations (like Java)
+# - Template metaprogramming (like C++)
+# - Code generation directives
+
+# Philosophy: Keep the language simple
+# Metaprogramming happens outside the language
+```
+
+### Abilities as Alternative
+
+Abilities provide some metaprogramming-like features through automatic derivation:
+
+```roc
+# Automatic implementations
+User : {
+    name : Str,
+    age : U32,
+    role : [Admin, User, Guest],
+}
+
+# These are automatically derived:
+# - Eq (structural equality)
+# - Hash (for Dict keys)
+# - Inspect (debug representation)
+# - Encode/Decode (serialization)
+
+user1 = { name: "Alice", age: 30, role: Admin }
+user2 = { name: "Alice", age: 30, role: Admin }
+
+# Eq works automatically
+expect user1 == user2  # true
+
+# Inspect works automatically
+dbg(user1)  # Shows structure
+```
+
+### Code Generation Outside Roc
+
+```bash
+# External code generation tools
+# Example: Generate Roc from schema
+
+# schema.json → generate_roc.py → types.roc
+
+# types.roc (generated)
+# DO NOT EDIT - Generated from schema.json
+
+User : {
+    name : Str,
+    email : Str,
+    age : U32,
+}
+
+Post : {
+    title : Str,
+    content : Str,
+    author : User,
+}
+```
+
+### Opaque Types for Encapsulation
+
+```roc
+# Opaque types provide controlled abstraction
+interface UserId
+    exposes [UserId, fromU64, toU64, new]
+    imports []
+
+# Internal representation hidden
+UserId := U64
+
+# Smart constructors control creation
+new : -> UserId
+new = @UserId(generateId())
+
+fromU64 : U64 -> UserId
+fromU64 = \id -> @UserId(id)
+
+toU64 : UserId -> U64
+toU64 = \@UserId(id) -> id
+
+# Pattern unwrapping only in this module
+# External code can't access internal U64
+```
+
+### Type-Driven Development
+
+Instead of metaprogramming, Roc encourages type-driven design:
+
+```roc
+# Phantom types for state machines
+Request state : { url : Str, headers : Dict Str Str }
+
+# States tracked in type system
+[Unsent, Prepared, Sent]
+
+buildRequest : Str -> Request [Unsent]
+buildRequest = \url -> { url, headers: Dict.empty({}) }
+
+prepare : Request [Unsent] -> Request [Prepared]
+prepare = \req -> req  # Type changes, value stays same
+
+send : Request [Prepared] -> Task Response [HttpErr]
+send = \req -> Http.send(req)
+
+# Type system prevents:
+# send(buildRequest("..."))  # Error: can't send Unsent request
+```
+
+### Workarounds for Common Metaprogramming Needs
+
+```roc
+# 1. Instead of derive macros → Use abilities
+# Automatic: Eq, Hash, Inspect, Encode, Decode
+
+# 2. Instead of decorators → Use higher-order functions
+logged : (a -> b), Str -> (a -> b)
+logged = \fn, name ->
+    \arg ->
+        dbg("Calling \(name)")
+        result = fn(arg)
+        dbg("Result: \(Inspect.toStr(result))")
+        result
+
+myFunction : U32 -> U32
+myFunction = \x -> x + 1
+
+loggedFunction = logged(myFunction, "myFunction")
+
+# 3. Instead of code generation → External tools
+# Use build scripts, code generators, or platform-specific tools
+
+# 4. Instead of reflection → Static typing
+# Design APIs that don't need runtime inspection
+```
+
+### Build-Time Tools
+
+```bash
+# Roc supports external build-time generation
+
+# 1. Shell scripts
+#!/bin/bash
+# generate_types.sh
+python3 codegen.py schema.json > generated/types.roc
+
+# 2. Makefile
+generated/types.roc: schema.json codegen.py
+    python3 codegen.py schema.json > generated/types.roc
+
+# 3. Just tasks (recommended)
+generate:
+    python3 codegen.py schema.json > generated/types.roc
+
+# 4. Custom tools
+roc-codegen --input schema.json --output generated/types.roc
+```
+
+### Design Philosophy
+
+```
+Why no metaprogramming in Roc?
+
+Pros of current approach:
+✓ Simpler language to learn
+✓ Easier to understand code
+✓ No hidden complexity
+✓ Better tooling support
+✓ Faster compilation
+✓ Clear separation of concerns
+
+Cons:
+✗ More boilerplate for repetitive code
+✗ External tools needed for generation
+✗ Less flexibility than macro systems
+
+Trade-off: Simplicity over flexibility
+```
+
+### Future Considerations
+
+```roc
+# As of 2025, Roc may evolve to include:
+# - More powerful ability derivation
+# - Build hooks in the package system
+# - Standard code generation conventions
+
+# Watch for:
+# - Expanded automatic derivations
+# - Platform-provided build tooling
+# - Community code generation tools
+
+# Note: This reflects current design philosophy
+# May change as language matures and use cases emerge
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For language-agnostic patterns and cross-language translation guides, see:
+
+- `patterns-concurrency-dev` - Compare Roc's Task model with async/await, goroutines, and actors
+- `patterns-metaprogramming-dev` - Compare Roc's minimalist approach with macros, decorators, and codegen
+- `patterns-serialization-dev` - JSON, YAML encoding/decoding with Roc's Encode/Decode abilities
+
+---
+
 ## References
 
 - [Roc Tutorial](https://www.roc-lang.org/tutorial)
