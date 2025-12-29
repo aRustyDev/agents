@@ -1755,6 +1755,583 @@ var x: auto = SomeGenericFunction[i32]();
 9. **Use interfaces** to define contracts and enable polymorphism
 10. **Document safety assumptions** especially around C++ interop
 
+## Zero and Default Values
+
+### Uninitialized Variables
+
+```carbon
+// Variables must be initialized before use
+var x: i32;  // Declared but uninitialized
+// Print(x);  // Error: use of uninitialized variable
+
+x = 42;
+Print(x);  // OK: now initialized
+
+// Conditional initialization - all paths must initialize
+var y: i32;
+if (condition) {
+    y = 10;
+} else {
+    y = 20;
+}
+Print(y);  // OK: initialized in all paths
+```
+
+### Default/Zero Values by Type
+
+| Type | Zero Value | Initialization |
+|------|------------|----------------|
+| `i8, i16, i32, i64` | `0` | `var x: i32 = 0;` |
+| `u8, u16, u32, u64` | `0` | `var x: u32 = 0;` |
+| `f32, f64` | `0.0` | `var x: f64 = 0.0;` |
+| `bool` | `false` | `var x: bool = false;` |
+| `String` | `""` | `var x: String = "";` |
+| Array | Empty | `var x: [i32] = [];` |
+| Optional | `None` | `Optional.None` |
+| Pointer | null (unsafe) | Use Optional instead |
+
+### Struct/Class Initialization
+
+```carbon
+class Config {
+    var host: String;
+    var port: i32;
+    var debug: bool;
+}
+
+// All fields must be initialized
+var config: Config = Config{
+    .host = "localhost",
+    .port = 8080,
+    .debug = false
+};
+
+// Factory function for defaults
+class Config {
+    fn Default() -> Self {
+        return Config{
+            .host = "localhost",
+            .port = 8080,
+            .debug = false
+        };
+    }
+}
+
+var config: Config = Config.Default();
+```
+
+### Optional for Nullable Values
+
+```carbon
+// Carbon discourages null pointers
+// Use Optional instead
+fn FindUser(id: i32) -> Optional(User) {
+    if (UserExists(id)) {
+        return Optional.Some(GetUser(id));
+    }
+    return Optional.None;
+}
+
+// Handle optionals
+fn GetUsername(id: i32) -> String {
+    match (FindUser(id)) {
+        case Optional.Some(user) => {
+            return user.name;
+        }
+        case Optional.None => {
+            return "Unknown";
+        }
+    }
+}
+
+// Default value pattern
+fn GetOrDefault[T:! Type](opt: Optional(T), default: T) -> T {
+    return match (opt) {
+        case Optional.Some(value) => value,
+        case Optional.None => default,
+    };
+}
+```
+
+---
+
+## Concurrency
+
+Carbon's concurrency model is still under active design. The current focus is on memory safety and C++ interop before finalizing concurrency features.
+
+### Current Status (2025)
+
+```carbon
+// Note: Concurrency syntax is subject to change
+// This represents expected patterns based on design documents
+
+// Thread safety through ownership
+// Carbon aims to prevent data races at compile time
+// Similar to Rust's Send/Sync traits
+
+class ThreadSafeCounter {
+    var count: i32;
+
+    fn Increment[self: Self*] {
+        // Atomic or synchronized access (design pending)
+        self->count = self->count + 1;
+    }
+}
+```
+
+### Expected Concurrency Patterns
+
+```carbon
+// Async/await (expected in future versions)
+async fn FetchData(url: String) -> Result(Data, Error) {
+    var response: Response = await Http.Get(url);
+    return response.Body();
+}
+
+// Structured concurrency (expected)
+fn ProcessConcurrently(items: [Item]) -> [Result] {
+    return parallel for (item in items) {
+        ProcessItem(item)
+    };
+}
+```
+
+### C++ Interop for Concurrency
+
+```carbon
+// For now, use C++ threading via interop
+import Cpp library "thread";
+import Cpp library "mutex";
+
+fn UseCppThreading() {
+    var mutex: Cpp.std.mutex = Cpp.std.mutex();
+
+    // Lock guard pattern
+    var lock: Cpp.std.lock_guard(Cpp.std.mutex) =
+        Cpp.std.lock_guard(&mutex);
+
+    // Critical section
+    DoWork();
+}
+
+// Dispatch to thread pool
+fn RunInBackground(task: fn()) {
+    var thread: Cpp.std.thread = Cpp.std.thread(task);
+    thread.detach();
+}
+```
+
+### Safety Philosophy
+
+```carbon
+// Carbon's concurrency will emphasize:
+// 1. Compile-time data race prevention
+// 2. Ownership-based thread safety
+// 3. Explicit sharing markers
+// 4. Integration with memory safety model
+
+// Expected patterns:
+// - Values are "thread-local" by default
+// - Explicit markers for shared state
+// - Channels for communication (like Go/Rust)
+// - Actor model support (planned)
+```
+
+See `patterns-concurrency-dev` for cross-language concurrency patterns.
+
+---
+
+## Metaprogramming
+
+Carbon provides compile-time metaprogramming through generics and template generics, but does NOT support runtime reflection.
+
+### Checked Generics
+
+```carbon
+// Checked generics with interfaces
+interface Printable {
+    fn Print[self: Self]();
+}
+
+fn PrintAll[T:! Printable](items: [T]) {
+    for (var i: i32 = 0; i < items.size(); i = i + 1) {
+        items[i].Print();
+    }
+}
+
+// Errors caught at definition site
+fn BrokenGeneric[T:! Type](x: T) -> T {
+    // Error: Type doesn't guarantee '+' operator
+    // return x + x;
+}
+```
+
+### Template Generics
+
+```carbon
+// Template generics (like C++ templates)
+// Unchecked at definition, checked at instantiation
+fn TemplateAdd[template T:! Type](a: T, b: T) -> T {
+    return a + b;  // Works if T has + operator
+}
+
+// Usage - errors at call site if T doesn't support +
+var result: i32 = TemplateAdd(5, 10);      // OK
+// var bad: String = TemplateAdd("a", "b"); // Error at this line
+```
+
+### Compile-Time Constants
+
+```carbon
+// Compile-time values
+let PI: f64 = 3.14159265358979;
+let MAX_SIZE: i32 = 1024;
+
+// Generic with compile-time value
+class FixedArray[T:! Type, let N:! i32] {
+    var data: [T; N];
+
+    fn Size[self: Self]() -> i32 {
+        return N;  // Compile-time constant
+    }
+}
+
+var arr: FixedArray(i32, 10) = ...;
+```
+
+### Interface-Based Polymorphism
+
+```carbon
+// Define interface
+interface Serializable {
+    fn ToBytes[self: Self]() -> [u8];
+    fn FromBytes(bytes: [u8]) -> Result(Self, String);
+}
+
+// Implement for type
+class User {
+    var name: String;
+    var age: i32;
+}
+
+impl User as Serializable {
+    fn ToBytes[self: Self]() -> [u8] {
+        var result: [u8] = [];
+        // Serialization logic
+        return result;
+    }
+
+    fn FromBytes(bytes: [u8]) -> Result(Self, String) {
+        // Deserialization logic
+        return Result.Ok(User{.name = "Alice", .age = 30});
+    }
+}
+
+// Generic function using interface
+fn Clone[T:! Serializable](obj: T) -> Result(T, String) {
+    var bytes: [u8] = obj.ToBytes();
+    return T.FromBytes(bytes);
+}
+```
+
+### No Runtime Reflection
+
+```carbon
+// Carbon does NOT support runtime reflection like Java/C#
+// This is intentional for:
+// 1. Performance (no RTTI overhead)
+// 2. Safety (no dynamic type manipulation)
+// 3. Predictability (all types known at compile time)
+
+// Instead, use:
+// 1. Generics for type-safe polymorphism
+// 2. Interfaces for behavior abstraction
+// 3. Variants for tagged unions
+// 4. Pattern matching for type dispatch
+```
+
+See `patterns-metaprogramming-dev` for cross-language metaprogramming patterns.
+
+---
+
+## Serialization
+
+Carbon does not yet have a standard serialization library. The expected patterns follow Carbon's type safety philosophy.
+
+### Manual Serialization Pattern
+
+```carbon
+// Define serialization interface
+interface Serializable {
+    fn ToJson[self: Self]() -> String;
+}
+
+interface Deserializable {
+    fn FromJson(json: String) -> Result(Self, String);
+}
+
+// Implement for type
+class User {
+    var name: String;
+    var age: i32;
+    var email: Optional(String);
+}
+
+impl User as Serializable {
+    fn ToJson[self: Self]() -> String {
+        var json: String = "{";
+        json = json + "\"name\":\"" + self.name + "\",";
+        json = json + "\"age\":" + ToString(self.age);
+        match (self.email) {
+            case Optional.Some(e) => {
+                json = json + ",\"email\":\"" + e + "\"";
+            }
+            case Optional.None => {
+                // Omit null fields
+            }
+        }
+        json = json + "}";
+        return json;
+    }
+}
+```
+
+### C++ Interop for JSON
+
+```carbon
+// Use C++ JSON libraries via interop
+import Cpp library "nlohmann/json.hpp";
+
+fn ParseJson(input: String) -> Result(Cpp.nlohmann.json, String) {
+    // Use nlohmann::json via C++ interop
+    var json: Cpp.nlohmann.json = Cpp.nlohmann.json.parse(input);
+    return Result.Ok(json);
+}
+
+fn ToJsonString(data: Cpp.nlohmann.json) -> String {
+    return data.dump();
+}
+
+// Convert to Carbon types
+fn ParseUser(json: String) -> Result(User, String) {
+    var parsed: Cpp.nlohmann.json = Cpp.nlohmann.json.parse(json);
+    var user: User = User{
+        .name = parsed["name"].get[String](),
+        .age = parsed["age"].get[i32](),
+        .email = Optional.None
+    };
+    if (parsed.contains("email")) {
+        user.email = Optional.Some(parsed["email"].get[String]());
+    }
+    return Result.Ok(user);
+}
+```
+
+### Validation Pattern
+
+```carbon
+// Validate after deserialization
+class User {
+    var name: String;
+    var age: i32;
+
+    fn Validate[self: Self]() -> Result((), String) {
+        if (self.name.IsEmpty()) {
+            return Result.Err("Name cannot be empty");
+        }
+        if (self.age < 0 or self.age > 150) {
+            return Result.Err("Invalid age");
+        }
+        return Result.Ok(());
+    }
+}
+
+fn ParseAndValidateUser(json: String) -> Result(User, String) {
+    var user: User = ParseUser(json)?;
+    user.Validate()?;
+    return Result.Ok(user);
+}
+```
+
+See `patterns-serialization-dev` for cross-language serialization patterns.
+
+---
+
+## Testing
+
+Carbon uses Bazel for its build and test system. Testing patterns follow structured conventions.
+
+### Basic Test Structure
+
+```carbon
+// test_mylib.carbon
+package MyLib testing;
+
+import MyLib;
+import Testing;
+
+fn TestAdd() {
+    Testing.AssertEqual(MyLib.Add(2, 3), 5);
+}
+
+fn TestAddNegative() {
+    Testing.AssertEqual(MyLib.Add(-1, 1), 0);
+}
+
+fn TestAddZero() {
+    Testing.AssertEqual(MyLib.Add(0, 0), 0);
+}
+```
+
+### Bazel Test Configuration
+
+```python
+# BUILD file
+load("@rules_carbon//carbon:defs.bzl", "carbon_test")
+
+carbon_test(
+    name = "mylib_test",
+    srcs = ["test_mylib.carbon"],
+    deps = [
+        ":mylib",
+        "@carbon_testing//:testing",
+    ],
+)
+```
+
+### Assertion Patterns
+
+```carbon
+import Testing;
+
+fn TestAssertions() {
+    // Equality
+    Testing.AssertEqual(actual, expected);
+    Testing.AssertNotEqual(value1, value2);
+
+    // Boolean
+    Testing.AssertTrue(condition);
+    Testing.AssertFalse(condition);
+
+    // Optional
+    Testing.AssertSome(optional);
+    Testing.AssertNone(optional);
+
+    // Result
+    Testing.AssertOk(result);
+    Testing.AssertErr(result);
+
+    // Comparison
+    Testing.AssertGreaterThan(5, 3);
+    Testing.AssertLessThan(3, 5);
+}
+```
+
+### Testing with Optional and Result
+
+```carbon
+fn TestOptionalHandling() {
+    var result: Optional(i32) = FindValue(key);
+
+    match (result) {
+        case Optional.Some(value) => {
+            Testing.AssertEqual(value, expectedValue);
+        }
+        case Optional.None => {
+            Testing.Fail("Expected value but got None");
+        }
+    }
+}
+
+fn TestResultHandling() {
+    var result: Result(User, String) = ParseUser(validJson);
+
+    match (result) {
+        case Result.Ok(user) => {
+            Testing.AssertEqual(user.name, "Alice");
+        }
+        case Result.Err(error) => {
+            Testing.Fail("Unexpected error: " + error);
+        }
+    }
+}
+```
+
+### Test Organization
+
+```
+my_project/
+├── src/
+│   ├── BUILD
+│   ├── lib.carbon
+│   └── utils.carbon
+└── tests/
+    ├── BUILD
+    ├── test_lib.carbon
+    └── test_utils.carbon
+```
+
+### Mocking via Interfaces
+
+```carbon
+// Define interface for dependency
+interface Database {
+    fn Get[self: Self](key: String) -> Optional(String);
+    fn Set[self: Self*](key: String, value: String);
+}
+
+// Production implementation
+class RealDatabase {
+    // Real database connection
+}
+
+impl RealDatabase as Database {
+    fn Get[self: Self](key: String) -> Optional(String) {
+        // Real implementation
+    }
+    fn Set[self: Self*](key: String, value: String) {
+        // Real implementation
+    }
+}
+
+// Test mock
+class MockDatabase {
+    var data: Map(String, String);
+}
+
+impl MockDatabase as Database {
+    fn Get[self: Self](key: String) -> Optional(String) {
+        return self.data.Get(key);
+    }
+    fn Set[self: Self*](key: String, value: String) {
+        self.data.Set(key, value);
+    }
+}
+
+// Test using mock
+fn TestServiceWithMock() {
+    var mock: MockDatabase = MockDatabase{.data = Map()};
+    mock.Set("key", "value");
+
+    var service: Service(MockDatabase) = Service(&mock);
+    var result: String = service.Process("key");
+
+    Testing.AssertEqual(result, "processed: value");
+}
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Async patterns (when Carbon supports them)
+- `patterns-serialization-dev` - JSON, validation patterns
+- `patterns-metaprogramming-dev` - Generics, interface patterns
+
+---
+
 ## Resources
 
 ### Official Documentation
