@@ -589,6 +589,37 @@ Fill in the template with specific content for this language pair:
 | Medium | 20-40 | 2-3 | Show concept interactions |
 | Complex | 50-100 | 4+ | Real-world use case, production-ready |
 
+#### Example Quality Checklist
+
+Before finalizing examples, verify each one meets these criteria:
+
+- [ ] **Syntactically valid** - Source code compiles/runs without errors
+- [ ] **Target is idiomatic** - Not transliterated (avoid "Source code in Target syntax")
+- [ ] **Demonstrates pattern clearly** - Single focus per example (Simple), combined focus (Medium/Complex)
+- [ ] **Complexity matches level** - Don't overcomplicate Simple examples
+- [ ] **Comments explain "why"** - Not just "what" the code does
+- [ ] **Edge cases shown** - Null handling, error paths, empty collections where relevant
+
+#### Testing/Validation Guidance
+
+To verify conversion examples are correct:
+
+1. **Use language playgrounds** for quick validation:
+   - TypeScript: [TS Playground](https://www.typescriptlang.org/play)
+   - Python: [Python Tutor](https://pythontutor.com/) or REPL
+   - Rust: [Rust Playground](https://play.rust-lang.org/)
+   - Go: [Go Playground](https://go.dev/play/)
+   - Elixir: [Elixir Playground](https://playground.elixir-lang.org/)
+
+2. **For complex examples**, consider:
+   - Create minimal test files to verify both source and target compile
+   - Run equivalent inputs through both to verify same outputs
+   - Check error cases behave equivalently
+
+3. **Document behavioral differences**:
+   - If source and target have different semantics (e.g., overflow behavior), note this
+   - Include comments like `// Note: Python int is arbitrary precision, Rust i64 overflows`
+
 ### Step 7: Validate Skill
 
 Run through this checklist before completing:
