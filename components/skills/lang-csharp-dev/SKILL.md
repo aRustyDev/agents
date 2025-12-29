@@ -3546,6 +3546,701 @@ catch (Exception ex)
 }
 ```
 
+## 11. Metaprogramming
+
+C# provides multiple metaprogramming mechanisms: attributes for declarative metadata, reflection for runtime introspection, and source generators for compile-time code generation.
+
+### Attributes
+
+```csharp
+// Built-in attributes
+[Obsolete("Use NewMethod instead", error: false)]
+public void OldMethod() { }
+
+[Conditional("DEBUG")]
+public void DebugOnlyMethod() { }
+
+[Serializable]
+public class DataClass { }
+
+// Parameter attributes
+public void Process([Required] string input, [Range(1, 100)] int value) { }
+
+// Method attributes
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+public int FastMethod() => 42;
+
+// Assembly attributes (in AssemblyInfo.cs or project file)
+[assembly: InternalsVisibleTo("MyApp.Tests")]
+
+// Custom attribute definition
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+public class AuthorizeAttribute : Attribute
+{
+    public string[] Roles { get; set; } = Array.Empty<string>();
+    public string Policy { get; set; } = string.Empty;
+
+    public AuthorizeAttribute() { }
+    public AuthorizeAttribute(params string[] roles) => Roles = roles;
+}
+
+// Usage
+[Authorize("Admin", "Manager")]
+public class AdminController { }
+```
+
+### Reflection
+
+```csharp
+// Get type information
+Type type = typeof(User);
+Type runtimeType = user.GetType();
+
+// Get members
+PropertyInfo[] properties = type.GetProperties();
+MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+FieldInfo[] fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+
+// Get and set property values
+PropertyInfo nameProp = type.GetProperty("Name")!;
+string name = (string)nameProp.GetValue(user)!;
+nameProp.SetValue(user, "New Name");
+
+// Invoke methods dynamically
+MethodInfo method = type.GetMethod("ProcessData")!;
+object? result = method.Invoke(user, new object[] { "arg1", 42 });
+
+// Create instance dynamically
+object instance = Activator.CreateInstance(type)!;
+User typedInstance = (User)Activator.CreateInstance(typeof(User), "Name", 30)!;
+
+// Generic method invocation
+MethodInfo genericMethod = type.GetMethod("GenericMethod")!;
+MethodInfo constructed = genericMethod.MakeGenericMethod(typeof(string));
+constructed.Invoke(instance, null);
+
+// Read attributes
+var authorizeAttr = type.GetCustomAttribute<AuthorizeAttribute>();
+var allAuthorize = type.GetCustomAttributes<AuthorizeAttribute>();
+bool hasAttr = type.IsDefined(typeof(SerializableAttribute));
+```
+
+### Source Generators (Compile-time)
+
+```csharp
+// Source generator definition (in separate analyzer project)
+[Generator]
+public class AutoNotifyGenerator : IIncrementalGenerator
+{
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        // Find classes with [AutoNotify] attribute
+        var classDeclarations = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "AutoNotifyAttribute",
+                predicate: static (s, _) => s is ClassDeclarationSyntax,
+                transform: static (ctx, _) => GetClassInfo(ctx));
+
+        context.RegisterSourceOutput(classDeclarations, static (spc, source) =>
+        {
+            spc.AddSource($"{source.Name}.g.cs", GenerateCode(source));
+        });
+    }
+}
+
+// Usage in consuming project
+[AutoNotify]
+public partial class ViewModel
+{
+    private string _name = "";
+    private int _age;
+}
+
+// Generated code (automatic)
+public partial class ViewModel : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string Name
+    {
+        get => _name;
+        set { _name = value; OnPropertyChanged(); }
+    }
+
+    public int Age
+    {
+        get => _age;
+        set { _age = value; OnPropertyChanged(); }
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+```
+
+### Expression Trees
+
+```csharp
+// Build expressions programmatically
+ParameterExpression param = Expression.Parameter(typeof(User), "u");
+MemberExpression property = Expression.Property(param, "Age");
+ConstantExpression constant = Expression.Constant(18);
+BinaryExpression comparison = Expression.GreaterThan(property, constant);
+
+// Compile to delegate
+Expression<Func<User, bool>> lambda = Expression.Lambda<Func<User, bool>>(comparison, param);
+Func<User, bool> compiled = lambda.Compile();
+
+// Use like regular delegate
+bool isAdult = compiled(user);
+
+// Parse existing expressions
+Expression<Func<User, bool>> expr = u => u.Age > 18;
+var visitor = new CustomExpressionVisitor();
+visitor.Visit(expr);
+```
+
+### See Also
+
+- `patterns-metaprogramming-dev` - Cross-language metaprogramming patterns
+
+---
+
+## 12. Build and Dependencies
+
+.NET uses the SDK-style project system with `csproj` files, NuGet for package management, and MSBuild for building.
+
+### Project File (csproj)
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Output settings -->
+    <OutputType>Exe</OutputType>
+    <AssemblyName>MyApp</AssemblyName>
+    <RootNamespace>MyApp</RootNamespace>
+
+    <!-- Package metadata (for libraries) -->
+    <PackageId>MyCompany.MyLibrary</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Your Name</Authors>
+    <Description>A useful library</Description>
+    <PackageTags>utility;helper</PackageTags>
+    <RepositoryUrl>https://github.com/user/repo</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Project references -->
+  <ItemGroup>
+    <ProjectReference Include="..\MyLibrary\MyLibrary.csproj" />
+  </ItemGroup>
+
+  <!-- Conditional references -->
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
+```
+
+### dotnet CLI Commands
+
+```bash
+# Create projects
+dotnet new console -n MyApp           # Console app
+dotnet new classlib -n MyLib          # Class library
+dotnet new webapi -n MyApi            # Web API
+dotnet new sln -n MySolution          # Solution file
+dotnet sln add MyApp/MyApp.csproj     # Add project to solution
+
+# Package management
+dotnet add package Newtonsoft.Json    # Add package
+dotnet add package Serilog --version 3.1.1  # Specific version
+dotnet remove package Newtonsoft.Json # Remove package
+dotnet list package                   # List packages
+dotnet list package --outdated        # Check for updates
+dotnet restore                        # Restore packages
+
+# Build and run
+dotnet build                          # Build project
+dotnet build -c Release              # Release build
+dotnet run                            # Build and run
+dotnet run --project MyApp            # Run specific project
+dotnet watch run                      # Run with hot reload
+
+# Testing
+dotnet test                           # Run tests
+dotnet test --filter "Category=Unit" # Filter tests
+dotnet test --collect:"XPlat Code Coverage"  # With coverage
+
+# Publishing
+dotnet publish -c Release             # Publish for deployment
+dotnet publish -c Release -r win-x64 --self-contained  # Self-contained
+dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true  # Single file
+
+# NuGet publishing
+dotnet pack -c Release                # Create NuGet package
+dotnet nuget push MyLib.1.0.0.nupkg --api-key KEY --source https://api.nuget.org/v3/index.json
+```
+
+### NuGet Configuration (nuget.config)
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="private" value="https://pkgs.mycompany.com/v3/index.json" />
+  </packageSources>
+
+  <packageSourceCredentials>
+    <private>
+      <add key="Username" value="user" />
+      <add key="ClearTextPassword" value="password" />
+    </private>
+  </packageSourceCredentials>
+
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="private">
+      <package pattern="MyCompany.*" />
+    </packageSource>
+  </packageSourceMapping>
+</configuration>
+```
+
+### Directory.Build.props (Shared Settings)
+
+```xml
+<!-- Directory.Build.props - applies to all projects in directory tree -->
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Versioning -->
+    <Version>1.0.0</Version>
+    <Company>MyCompany</Company>
+    <Copyright>Copyright © 2024 MyCompany</Copyright>
+  </PropertyGroup>
+
+  <!-- Shared analyzers -->
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+```
+
+### Global.json (SDK Version)
+
+```json
+{
+  "sdk": {
+    "version": "8.0.100",
+    "rollForward": "latestMinor",
+    "allowPrerelease": false
+  }
+}
+```
+
+---
+
+## 13. Testing
+
+.NET has multiple testing frameworks. xUnit is the most popular, with NUnit and MSTest as alternatives. Moq and NSubstitute provide mocking, while FluentAssertions improves readability.
+
+### xUnit
+
+```csharp
+// xUnit test class (no attribute needed)
+public class CalculatorTests
+{
+    private readonly Calculator _calculator = new();
+
+    [Fact]
+    public void Add_TwoNumbers_ReturnsSum()
+    {
+        // Arrange
+        int a = 2, b = 3;
+
+        // Act
+        int result = _calculator.Add(a, b);
+
+        // Assert
+        Assert.Equal(5, result);
+    }
+
+    [Theory]
+    [InlineData(1, 1, 2)]
+    [InlineData(2, 3, 5)]
+    [InlineData(-1, 1, 0)]
+    public void Add_MultipleInputs_ReturnsCorrectSum(int a, int b, int expected)
+    {
+        Assert.Equal(expected, _calculator.Add(a, b));
+    }
+
+    [Theory]
+    [MemberData(nameof(TestData))]
+    public void Add_FromMemberData_Works(int a, int b, int expected)
+    {
+        Assert.Equal(expected, _calculator.Add(a, b));
+    }
+
+    public static IEnumerable<object[]> TestData =>
+        new List<object[]>
+        {
+            new object[] { 1, 1, 2 },
+            new object[] { 5, 5, 10 }
+        };
+
+    [Fact]
+    public void Divide_ByZero_ThrowsException()
+    {
+        Assert.Throws<DivideByZeroException>(() => _calculator.Divide(1, 0));
+    }
+
+    [Fact]
+    public async Task FetchData_ValidUrl_ReturnsData()
+    {
+        var result = await _calculator.FetchDataAsync("https://api.example.com");
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+}
+
+// Test fixtures (shared setup)
+public class DatabaseTests : IClassFixture<DatabaseFixture>
+{
+    private readonly DatabaseFixture _fixture;
+
+    public DatabaseTests(DatabaseFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
+    [Fact]
+    public void Query_ReturnsData()
+    {
+        var result = _fixture.Database.Query("SELECT 1");
+        Assert.NotNull(result);
+    }
+}
+
+public class DatabaseFixture : IDisposable
+{
+    public Database Database { get; }
+
+    public DatabaseFixture()
+    {
+        Database = new Database();
+        Database.Initialize();
+    }
+
+    public void Dispose() => Database.Dispose();
+}
+```
+
+### NUnit
+
+```csharp
+[TestFixture]
+public class CalculatorTests
+{
+    private Calculator _calculator = null!;
+
+    [SetUp]
+    public void Setup()
+    {
+        _calculator = new Calculator();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        // Cleanup
+    }
+
+    [Test]
+    public void Add_TwoNumbers_ReturnsSum()
+    {
+        Assert.That(_calculator.Add(2, 3), Is.EqualTo(5));
+    }
+
+    [TestCase(1, 1, ExpectedResult = 2)]
+    [TestCase(2, 3, ExpectedResult = 5)]
+    public int Add_ReturnsSum(int a, int b)
+    {
+        return _calculator.Add(a, b);
+    }
+
+    [Test]
+    public void Divide_ByZero_Throws()
+    {
+        Assert.Throws<DivideByZeroException>(() => _calculator.Divide(1, 0));
+    }
+
+    [Test]
+    [Category("Integration")]
+    [Ignore("Requires database")]
+    public void Integration_Test() { }
+}
+```
+
+### MSTest
+
+```csharp
+[TestClass]
+public class CalculatorTests
+{
+    private Calculator _calculator = null!;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _calculator = new Calculator();
+    }
+
+    [TestMethod]
+    public void Add_TwoNumbers_ReturnsSum()
+    {
+        Assert.AreEqual(5, _calculator.Add(2, 3));
+    }
+
+    [DataTestMethod]
+    [DataRow(1, 1, 2)]
+    [DataRow(2, 3, 5)]
+    public void Add_MultipleInputs(int a, int b, int expected)
+    {
+        Assert.AreEqual(expected, _calculator.Add(a, b));
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(DivideByZeroException))]
+    public void Divide_ByZero_Throws()
+    {
+        _calculator.Divide(1, 0);
+    }
+}
+```
+
+### Moq (Mocking)
+
+```csharp
+// Interface to mock
+public interface IUserRepository
+{
+    User? GetById(int id);
+    Task<User?> GetByIdAsync(int id);
+    void Save(User user);
+}
+
+// Test with Moq
+public class UserServiceTests
+{
+    private readonly Mock<IUserRepository> _mockRepo;
+    private readonly UserService _service;
+
+    public UserServiceTests()
+    {
+        _mockRepo = new Mock<IUserRepository>();
+        _service = new UserService(_mockRepo.Object);
+    }
+
+    [Fact]
+    public void GetUser_ValidId_ReturnsUser()
+    {
+        // Setup
+        var user = new User { Id = 1, Name = "John" };
+        _mockRepo.Setup(r => r.GetById(1)).Returns(user);
+
+        // Act
+        var result = _service.GetUser(1);
+
+        // Assert
+        Assert.Equal("John", result?.Name);
+        _mockRepo.Verify(r => r.GetById(1), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetUserAsync_ReturnsUser()
+    {
+        var user = new User { Id = 1, Name = "John" };
+        _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(user);
+
+        var result = await _service.GetUserAsync(1);
+
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public void SaveUser_CallsRepository()
+    {
+        var user = new User { Name = "John" };
+
+        _service.SaveUser(user);
+
+        _mockRepo.Verify(r => r.Save(It.Is<User>(u => u.Name == "John")), Times.Once);
+    }
+
+    [Fact]
+    public void GetUser_WhenNotFound_ReturnsNull()
+    {
+        _mockRepo.Setup(r => r.GetById(It.IsAny<int>())).Returns((User?)null);
+
+        var result = _service.GetUser(999);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SequencedReturns()
+    {
+        _mockRepo.SetupSequence(r => r.GetById(It.IsAny<int>()))
+            .Returns(new User { Name = "First" })
+            .Returns(new User { Name = "Second" })
+            .Throws<InvalidOperationException>();
+    }
+}
+```
+
+### FluentAssertions
+
+```csharp
+using FluentAssertions;
+
+[Fact]
+public void User_ShouldHaveCorrectProperties()
+{
+    var user = new User { Name = "John", Age = 30 };
+
+    user.Name.Should().Be("John");
+    user.Age.Should().BeGreaterThan(18).And.BeLessThan(100);
+    user.Email.Should().BeNullOrEmpty();
+}
+
+[Fact]
+public void Collection_Assertions()
+{
+    var numbers = new[] { 1, 2, 3, 4, 5 };
+
+    numbers.Should().HaveCount(5);
+    numbers.Should().Contain(3);
+    numbers.Should().BeInAscendingOrder();
+    numbers.Should().OnlyContain(n => n > 0);
+}
+
+[Fact]
+public void Exception_Assertions()
+{
+    Action act = () => throw new InvalidOperationException("Test error");
+
+    act.Should().Throw<InvalidOperationException>()
+       .WithMessage("*error*");
+}
+
+[Fact]
+public async Task Async_Assertions()
+{
+    Func<Task> act = async () => await FailingMethodAsync();
+
+    await act.Should().ThrowAsync<HttpRequestException>();
+}
+
+[Fact]
+public void Object_Comparison()
+{
+    var user1 = new User { Name = "John", Age = 30 };
+    var user2 = new User { Name = "John", Age = 30 };
+
+    user1.Should().BeEquivalentTo(user2);  // Deep comparison
+    user1.Should().BeEquivalentTo(user2, options =>
+        options.Excluding(u => u.CreatedAt));  // Exclude property
+}
+
+[Fact]
+public void Execution_Time()
+{
+    Action act = () => Thread.Sleep(100);
+
+    act.ExecutionTime().Should().BeLessThan(200.Milliseconds());
+}
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run with verbosity
+dotnet test --logger "console;verbosity=detailed"
+
+# Filter tests
+dotnet test --filter "FullyQualifiedName~CalculatorTests"
+dotnet test --filter "Category=Unit"
+dotnet test --filter "TestCategory!=Integration"
+
+# Code coverage
+dotnet test --collect:"XPlat Code Coverage"
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+# Generate report
+reportgenerator -reports:coverage.xml -targetdir:coveragereport
+```
+
+### Test Organization
+
+```
+MyApp.sln
+├── src/
+│   ├── MyApp/
+│   │   └── MyApp.csproj
+│   └── MyApp.Core/
+│       └── MyApp.Core.csproj
+└── tests/
+    ├── MyApp.Tests/              # Unit tests
+    │   └── MyApp.Tests.csproj
+    ├── MyApp.IntegrationTests/   # Integration tests
+    │   └── MyApp.IntegrationTests.csproj
+    └── MyApp.Tests.Common/       # Shared test utilities
+        └── MyApp.Tests.Common.csproj
+```
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Async/await, channels, threads
+- `patterns-serialization-dev` - JSON, validation, struct tags
+- `patterns-metaprogramming-dev` - Decorators, macros, annotations
+
+---
+
 ## Skill Routing
 
 ### When to Use This Skill
