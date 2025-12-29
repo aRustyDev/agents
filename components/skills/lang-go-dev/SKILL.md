@@ -1035,6 +1035,727 @@ mu.Unlock()
 
 ---
 
+## Module System
+
+Go uses a module system for dependency management and package organization.
+
+### Package Basics
+
+```go
+// Every .go file starts with package declaration
+package main    // Executable (has main function)
+package user    // Library package
+
+// Package names should be:
+// - lowercase, single word
+// - match the directory name
+// - not generic (utils, common, misc)
+```
+
+### Import Paths
+
+```go
+import (
+    // Standard library
+    "fmt"
+    "net/http"
+    "encoding/json"
+
+    // Third-party packages
+    "github.com/gorilla/mux"
+    "github.com/pkg/errors"
+
+    // Internal packages
+    "myproject/internal/config"
+    "myproject/pkg/utils"
+)
+
+// Aliased imports
+import (
+    "fmt"
+    myfmt "myproject/fmt"  // Avoid name collision
+)
+
+// Blank import (side effects only)
+import _ "github.com/lib/pq"  // Register database driver
+
+// Dot import (avoid in production)
+import . "fmt"  // Allows Println() instead of fmt.Println()
+```
+
+### Visibility
+
+```go
+// Uppercase = exported (public)
+// Lowercase = unexported (private)
+
+package user
+
+type User struct {       // Exported
+    Name  string        // Exported
+    email string        // Unexported (package-private)
+}
+
+func NewUser() *User {   // Exported
+    return &User{}
+}
+
+func validate() bool {   // Unexported
+    return true
+}
+```
+
+### Project Structure
+
+```
+myproject/
+├── go.mod              # Module definition
+├── go.sum              # Dependency checksums
+├── main.go             # Entry point (package main)
+├── cmd/                # Multiple executables
+│   ├── server/
+│   │   └── main.go
+│   └── cli/
+│       └── main.go
+├── pkg/                # Public library code
+│   └── utils/
+│       └── strings.go
+├── internal/           # Private packages (enforced by Go)
+│   └── database/
+│       └── conn.go
+└── api/                # API definitions (proto, OpenAPI)
+```
+
+### Internal Packages
+
+```go
+// Packages under 'internal/' are only importable by code
+// within the parent of 'internal/'
+
+// myproject/internal/database/conn.go
+// Can be imported by: myproject/...
+// Cannot be imported by: other projects
+
+// This is enforced by the Go compiler
+```
+
+---
+
+## Serialization
+
+Go uses struct tags for serialization configuration.
+
+### JSON Basics
+
+```go
+import "encoding/json"
+
+type User struct {
+    Name  string `json:"name"`
+    Email string `json:"email"`
+    Age   int    `json:"age"`
+}
+
+// Serialize (Marshal)
+user := User{Name: "Alice", Email: "alice@example.com", Age: 30}
+data, err := json.Marshal(user)
+// {"name":"Alice","email":"alice@example.com","age":30}
+
+// Pretty print
+data, err := json.MarshalIndent(user, "", "  ")
+
+// Deserialize (Unmarshal)
+var user User
+err := json.Unmarshal([]byte(jsonStr), &user)
+
+// Stream encoding/decoding
+encoder := json.NewEncoder(writer)
+encoder.Encode(user)
+
+decoder := json.NewDecoder(reader)
+decoder.Decode(&user)
+```
+
+### Struct Tags
+
+```go
+type Config struct {
+    // Rename field
+    Name string `json:"name"`
+
+    // Omit if empty/zero value
+    Email string `json:"email,omitempty"`
+
+    // Ignore field (never serialize)
+    Password string `json:"-"`
+
+    // String encoding for numbers
+    Count int `json:"count,string"`
+
+    // Multiple tags
+    CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+```
+
+### Optional Fields
+
+```go
+type User struct {
+    Name  string  `json:"name"`
+    Email *string `json:"email,omitempty"` // Pointer = nullable
+    Age   int     `json:"age,omitempty"`   // Omit if 0
+}
+
+// Check for null
+if user.Email != nil {
+    fmt.Println(*user.Email)
+}
+```
+
+### Custom Marshal/Unmarshal
+
+```go
+type Status int
+
+const (
+    StatusPending Status = iota
+    StatusActive
+    StatusDone
+)
+
+func (s Status) MarshalJSON() ([]byte, error) {
+    var str string
+    switch s {
+    case StatusPending:
+        str = "pending"
+    case StatusActive:
+        str = "active"
+    case StatusDone:
+        str = "done"
+    default:
+        return nil, fmt.Errorf("unknown status: %d", s)
+    }
+    return json.Marshal(str)
+}
+
+func (s *Status) UnmarshalJSON(data []byte) error {
+    var str string
+    if err := json.Unmarshal(data, &str); err != nil {
+        return err
+    }
+    switch str {
+    case "pending":
+        *s = StatusPending
+    case "active":
+        *s = StatusActive
+    case "done":
+        *s = StatusDone
+    default:
+        return fmt.Errorf("unknown status: %s", str)
+    }
+    return nil
+}
+```
+
+### Validation
+
+```go
+// Using go-playground/validator
+import "github.com/go-playground/validator/v10"
+
+type User struct {
+    Name  string `json:"name" validate:"required,min=1,max=100"`
+    Email string `json:"email" validate:"required,email"`
+    Age   int    `json:"age" validate:"gte=0,lte=150"`
+}
+
+var validate = validator.New()
+
+func (u *User) Validate() error {
+    return validate.Struct(u)
+}
+
+// Usage
+if err := user.Validate(); err != nil {
+    // Handle validation errors
+    for _, err := range err.(validator.ValidationErrors) {
+        fmt.Printf("%s: %s\n", err.Field(), err.Tag())
+    }
+}
+```
+
+### Other Formats
+
+```go
+// YAML: gopkg.in/yaml.v3
+import "gopkg.in/yaml.v3"
+data, err := yaml.Marshal(config)
+err = yaml.Unmarshal(data, &config)
+
+// TOML: github.com/BurntSushi/toml
+import "github.com/BurntSushi/toml"
+_, err := toml.DecodeFile("config.toml", &config)
+
+// XML: encoding/xml (standard library)
+import "encoding/xml"
+data, err := xml.Marshal(config)
+```
+
+**See also:** `patterns-serialization-dev` for cross-language serialization patterns
+
+---
+
+## Build and Dependencies
+
+Go uses Go Modules for dependency management.
+
+### go.mod
+
+```go
+// go mod init myproject
+module github.com/user/myproject
+
+go 1.21
+
+require (
+    github.com/gorilla/mux v1.8.0
+    github.com/pkg/errors v0.9.1
+)
+
+require (
+    // Indirect dependencies (automatically managed)
+    github.com/some/transitive v1.0.0 // indirect
+)
+
+// Replace directive (local development)
+replace github.com/original/pkg => ../local/pkg
+
+// Exclude problematic versions
+exclude github.com/broken/pkg v1.0.0
+```
+
+### Dependency Commands
+
+| Command | Purpose |
+|---------|---------|
+| `go mod init <module>` | Initialize new module |
+| `go mod tidy` | Add missing, remove unused deps |
+| `go mod download` | Download dependencies |
+| `go mod verify` | Verify dependency checksums |
+| `go mod why <pkg>` | Explain why package is needed |
+| `go mod graph` | Print dependency graph |
+| `go mod vendor` | Copy deps to vendor/ |
+
+### Adding Dependencies
+
+```bash
+# Add dependency (latest version)
+go get github.com/gorilla/mux
+
+# Add specific version
+go get github.com/gorilla/mux@v1.8.0
+
+# Add latest of major version
+go get github.com/gorilla/mux@v1
+
+# Add from branch
+go get github.com/gorilla/mux@main
+
+# Update dependency
+go get -u github.com/gorilla/mux
+
+# Update all dependencies
+go get -u ./...
+
+# Remove dependency
+go mod tidy  # After removing imports
+```
+
+### Build Commands
+
+| Command | Purpose |
+|---------|---------|
+| `go build` | Compile package |
+| `go build -o app` | Compile with output name |
+| `go build ./...` | Build all packages |
+| `go install` | Compile and install |
+| `go run main.go` | Compile and run |
+| `go clean` | Remove build artifacts |
+
+### Build Flags
+
+```bash
+# Cross-compilation
+GOOS=linux GOARCH=amd64 go build -o app-linux
+
+# Static binary (no CGO)
+CGO_ENABLED=0 go build -o app
+
+# Strip debug info (smaller binary)
+go build -ldflags="-s -w" -o app
+
+# Inject version info
+go build -ldflags="-X main.Version=1.0.0" -o app
+
+# Race detector
+go build -race -o app
+
+# Embed version
+var Version = "dev"  // Set by -ldflags
+```
+
+### Workspaces (Go 1.18+)
+
+```bash
+# For multi-module development
+go work init ./module1 ./module2
+
+# go.work file
+go 1.21
+
+use (
+    ./module1
+    ./module2
+)
+```
+
+### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `GOPATH` | Workspace path (legacy) |
+| `GOBIN` | Binary install location |
+| `GOPROXY` | Module proxy URL |
+| `GOPRIVATE` | Private module patterns |
+| `GONOPROXY` | Skip proxy for patterns |
+| `GONOSUMDB` | Skip checksum DB |
+
+```bash
+# Private repos
+go env -w GOPRIVATE=github.com/mycompany/*
+
+# Use default proxy with fallback
+go env -w GOPROXY=https://proxy.golang.org,direct
+```
+
+---
+
+## Testing
+
+Go has built-in testing support with the `testing` package.
+
+### Basic Tests
+
+```go
+// user_test.go (must end with _test.go)
+package user
+
+import "testing"
+
+func TestAdd(t *testing.T) {
+    result := Add(2, 3)
+    if result != 5 {
+        t.Errorf("Add(2, 3) = %d; want 5", result)
+    }
+}
+
+func TestAddNegative(t *testing.T) {
+    result := Add(-1, 1)
+    if result != 0 {
+        t.Errorf("Add(-1, 1) = %d; want 0", result)
+    }
+}
+```
+
+### Table-Driven Tests
+
+```go
+func TestAdd(t *testing.T) {
+    tests := []struct {
+        name     string
+        a, b     int
+        expected int
+    }{
+        {"positive numbers", 1, 2, 3},
+        {"negative numbers", -1, -2, -3},
+        {"zero", 0, 0, 0},
+        {"mixed", -1, 1, 0},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := Add(tt.a, tt.b)
+            if result != tt.expected {
+                t.Errorf("Add(%d, %d) = %d; want %d",
+                    tt.a, tt.b, result, tt.expected)
+            }
+        })
+    }
+}
+```
+
+### Test Helpers
+
+```go
+// Helper function
+func setupTestDatabase(t *testing.T) *Database {
+    t.Helper()  // Marks as helper (better error locations)
+    db, err := NewTestDatabase()
+    if err != nil {
+        t.Fatalf("setup failed: %v", err)
+    }
+    t.Cleanup(func() {  // Cleanup after test
+        db.Close()
+    })
+    return db
+}
+
+func TestUser(t *testing.T) {
+    db := setupTestDatabase(t)
+    // Test using db...
+}
+```
+
+### Subtests and Parallel
+
+```go
+func TestUser(t *testing.T) {
+    // Subtests
+    t.Run("Create", func(t *testing.T) {
+        t.Parallel()  // Run in parallel
+        // Test create...
+    })
+
+    t.Run("Update", func(t *testing.T) {
+        t.Parallel()
+        // Test update...
+    })
+}
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+go test ./...
+
+# Run specific package
+go test ./pkg/user
+
+# Run specific test
+go test -run TestAdd ./...
+
+# Run with verbose output
+go test -v ./...
+
+# Run with coverage
+go test -cover ./...
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+
+# Run with race detector
+go test -race ./...
+
+# Run benchmarks
+go test -bench=. ./...
+
+# Timeout
+go test -timeout 30s ./...
+
+# Skip long tests
+go test -short ./...
+```
+
+### Benchmarks
+
+```go
+func BenchmarkAdd(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        Add(1, 2)
+    }
+}
+
+func BenchmarkAddParallel(b *testing.B) {
+    b.RunParallel(func(pb *testing.PB) {
+        for pb.Next() {
+            Add(1, 2)
+        }
+    })
+}
+
+// With setup
+func BenchmarkProcess(b *testing.B) {
+    data := setupLargeData()
+    b.ResetTimer()  // Don't count setup time
+
+    for i := 0; i < b.N; i++ {
+        Process(data)
+    }
+}
+```
+
+### Mocking with Interfaces
+
+```go
+// Define interface for dependencies
+type UserStore interface {
+    GetUser(id int) (*User, error)
+    SaveUser(user *User) error
+}
+
+// Real implementation
+type PostgresStore struct { ... }
+
+// Mock implementation
+type MockStore struct {
+    users map[int]*User
+}
+
+func (m *MockStore) GetUser(id int) (*User, error) {
+    user, ok := m.users[id]
+    if !ok {
+        return nil, ErrNotFound
+    }
+    return user, nil
+}
+
+// Test with mock
+func TestService(t *testing.T) {
+    mock := &MockStore{
+        users: map[int]*User{
+            1: {ID: 1, Name: "Alice"},
+        },
+    }
+
+    service := NewUserService(mock)
+    user, err := service.GetUser(1)
+    // Assert...
+}
+```
+
+### Example Tests
+
+```go
+// Example tests appear in documentation
+func ExampleAdd() {
+    sum := Add(2, 3)
+    fmt.Println(sum)
+    // Output: 5
+}
+
+func ExampleUser_FullName() {
+    u := User{FirstName: "Alice", LastName: "Smith"}
+    fmt.Println(u.FullName())
+    // Output: Alice Smith
+}
+```
+
+### TestMain
+
+```go
+func TestMain(m *testing.M) {
+    // Setup before all tests
+    setup()
+
+    // Run tests
+    code := m.Run()
+
+    // Cleanup after all tests
+    teardown()
+
+    os.Exit(code)
+}
+```
+
+---
+
+## Metaprogramming
+
+Go has limited metaprogramming capabilities compared to languages with macros. The primary approach is code generation.
+
+### Code Generation
+
+```go
+//go:generate stringer -type=Status
+
+type Status int
+
+const (
+    StatusPending Status = iota
+    StatusActive
+    StatusDone
+)
+
+// Run: go generate ./...
+// Generates: status_string.go with String() method
+```
+
+### Common Generators
+
+| Tool | Purpose |
+|------|---------|
+| `stringer` | Generate String() for enums |
+| `mockgen` | Generate mock implementations |
+| `protoc` | Generate from Protocol Buffers |
+| `go-bindata` | Embed files in binary |
+| `sqlc` | Generate from SQL |
+| `ent` | Generate ORM code |
+
+### Build Tags
+
+```go
+// +build linux
+// +build !windows
+
+package mypackage
+
+// This file only compiles on Linux, not on Windows
+```
+
+```go
+//go:build linux && amd64
+
+package mypackage
+
+// Go 1.17+ syntax
+```
+
+### Reflection (Runtime)
+
+```go
+import "reflect"
+
+func PrintFields(v interface{}) {
+    t := reflect.TypeOf(v)
+    val := reflect.ValueOf(v)
+
+    for i := 0; i < t.NumField(); i++ {
+        field := t.Field(i)
+        value := val.Field(i)
+        tag := field.Tag.Get("json")
+
+        fmt.Printf("%s (%s): %v [json:%s]\n",
+            field.Name, field.Type, value.Interface(), tag)
+    }
+}
+
+// Use reflection sparingly - it's slow and unsafe
+```
+
+**See also:** `patterns-metaprogramming-dev` for cross-language comparison
+
+---
+
+## Cross-Cutting Patterns
+
+For cross-language comparison and translation patterns, see:
+
+- `patterns-concurrency-dev` - Goroutines, channels, select patterns
+- `patterns-serialization-dev` - JSON, struct tags, validation
+- `patterns-metaprogramming-dev` - Code generation, build tags
+
+---
+
 ## References
 
 - [Go Documentation](https://go.dev/doc/)
