@@ -1,31 +1,51 @@
 ---
 name: lang-rust-library-dev
-description: Rust-specific library development patterns. Use when creating Rust crates, designing public APIs with ownership semantics, configuring Cargo.toml, managing feature flags, publishing to crates.io, or writing rustdoc. Extends meta-library-dev with Rust tooling and idioms.
+description: Rust crate and library development patterns covering Cargo.toml for libraries, crate structure, module organization, rustdoc, publishing to crates.io, feature flags, semantic versioning, and API design. Use when creating a Rust library or crate, publishing to crates.io, documenting APIs with rustdoc, or managing library features and versions. This is the specialized skill for Rust library/crate development.
 ---
 
 # Rust Library Development
 
-Rust-specific patterns for library (crate) development. This skill extends `meta-library-dev` with Rust tooling, ownership idioms, and ecosystem practices.
+Specialized patterns for creating, maintaining, and publishing Rust libraries and crates. This skill focuses on library-specific concerns like API design, documentation, versioning, and distribution.
 
-## This Skill Extends
+## Overview
 
-- `meta-library-dev` - Foundational library patterns (API design, versioning, testing strategies)
+```
+┌──────────────────────────────────────────────────────────────┐
+│                Rust Skill Hierarchy                          │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│              ┌─────────────────────┐                         │
+│              │   lang-rust-dev     │                         │
+│              │   (foundation)      │                         │
+│              └──────────┬──────────┘                         │
+│                         │                                    │
+│     ┌───────────┬───────┼───────┬───────────┐               │
+│     │           │       │       │           │               │
+│     ▼           ▼       ▼       ▼           ▼               │
+│ ┌────────┐ ┌────────┐ ... ┌─────────────────────┐           │
+│ │  bin   │ │testing │     │lang-rust-library-dev│ ◄─ HERE   │
+│ │  -dev  │ │  -dev  │     │   (library focus)   │           │
+│ └────────┘ └────────┘     └─────────────────────┘           │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
 
-For general concepts like semantic versioning, module organization principles, and testing pyramids, see the meta-skill first.
+**This skill covers:**
+- Cargo.toml configuration for libraries
+- Crate structure and module organization
+- Public API design and stability
+- Documentation with rustdoc
+- Publishing to crates.io
+- Feature flags and conditional compilation
+- Semantic versioning (SemVer)
+- Dependency management for libraries
+- Examples, tests, and benches organization
 
-## This Skill Adds
-
-- **Rust tooling**: Cargo.toml, feature flags, workspaces, rustdoc
-- **Rust idioms**: Ownership in public APIs, borrowing patterns, trait design
-- **Rust ecosystem**: crates.io, docs.rs, MSRV policy, common dependencies
-
-## This Skill Does NOT Cover
-
-- General library patterns - see `meta-library-dev`
-- Error handling details - see `lang-rust-errors-dev`
-- Documentation patterns - see `lang-rust-docs-dev`
-- Cargo dependencies - see `lang-rust-cargo-dev`
-- CLI development - see `lang-rust-cli-dev`
+**This skill does NOT cover:**
+- Binary application development → `lang-rust-bin-dev`
+- Testing strategies → `lang-rust-testing-dev`
+- Async runtime patterns → `lang-rust-async-dev`
+- General Rust syntax → `lang-rust-dev`
 
 ---
 
@@ -33,657 +53,1156 @@ For general concepts like semantic versioning, module organization principles, a
 
 | Task | Command/Pattern |
 |------|-----------------|
-| New library crate | `cargo new --lib <name>` |
-| Build | `cargo build` |
-| Test | `cargo test` |
-| Doc | `cargo doc --no-deps --open` |
-| Publish (dry run) | `cargo publish --dry-run` |
-| Publish | `cargo publish` |
-| Check MSRV | `cargo msrv` (requires cargo-msrv) |
-| Lint | `cargo clippy -- -D warnings` |
-| Format | `cargo fmt` |
+| Create new library | `cargo new mylib --lib` |
+| Build library | `cargo build --release` |
+| Run library tests | `cargo test` |
+| Generate docs | `cargo doc --open` |
+| Check API docs | `cargo doc --no-deps --open` |
+| Publish to crates.io | `cargo publish` |
+| Feature flag | `#[cfg(feature = "my-feature")]` |
+| Public re-export | `pub use internal::Type;` |
+| Doc example | `/// # Examples` |
+| Hide from docs | `#[doc(hidden)]` |
 
 ---
 
-## Cargo.toml Structure
+## Skill Routing
 
-### Required Fields for Publishing
+Use this table to find the right specialized skill:
+
+| When you need to... | Use this skill |
+|---------------------|----------------|
+| Create and publish Rust libraries | This skill (`lang-rust-library-dev`) |
+| Build CLI or binary applications | `lang-rust-bin-dev` |
+| Set up testing, mocking, property tests | `lang-rust-testing-dev` |
+| Work with async/await, tokio, futures | `lang-rust-async-dev` |
+| Learn Rust syntax and fundamentals | `lang-rust-dev` |
+
+---
+
+## Cargo.toml for Libraries
+
+### Basic Library Configuration
 
 ```toml
 [package]
-name = "my-crate"
+name = "my-library"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.70"  # MSRV
-
-# Required for crates.io
+authors = ["Your Name <you@example.com>"]
 license = "MIT OR Apache-2.0"
-description = "A brief description of what this crate does"
-repository = "https://github.com/username/repo"
-
-# Recommended
-documentation = "https://docs.rs/my-crate"
+description = "A brief description of what this library does"
+documentation = "https://docs.rs/my-library"
+homepage = "https://github.com/user/my-library"
+repository = "https://github.com/user/my-library"
 readme = "README.md"
-keywords = ["keyword1", "keyword2"]  # Max 5
-categories = ["category"]  # From crates.io list
+keywords = ["keyword1", "keyword2", "keyword3"]
+categories = ["category1", "category2"]
+rust-version = "1.70.0"  # Minimum supported Rust version (MSRV)
 
 [lib]
-name = "my_crate"
-path = "src/lib.rs"
-```
+name = "my_library"  # Optional: overrides package name
+path = "src/lib.rs"  # Default path
+crate-type = ["lib"]  # Default for libraries
 
-### Metadata Best Practices
+[dependencies]
+# Regular dependencies
+serde = "1.0"
+# Optional dependencies (for features)
+tokio = { version = "1.0", optional = true }
 
-```toml
+[dev-dependencies]
+# Test-only dependencies
+criterion = "0.5"
+proptest = "1.0"
+
+[features]
+# Feature flags
+default = ["std"]
+std = []
+async = ["tokio", "tokio/rt-multi-thread"]
+serde = ["dep:serde", "serde/derive"]
+
 [package.metadata.docs.rs]
+# Documentation build configuration for docs.rs
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+```
 
-[badges]
-maintenance = { status = "actively-developed" }
+### Dependency Specifications
+
+```toml
+[dependencies]
+# Version requirements
+exact = "=1.2.3"           # Exact version
+caret = "^1.2.3"           # Compatible: >=1.2.3 <2.0.0 (default)
+tilde = "~1.2.3"           # Compatible: >=1.2.3 <1.3.0
+wildcard = "1.*"           # Any 1.x.x version
+range = ">=1.2, <1.5"      # Version range
+
+# Git dependencies
+my-git-dep = { git = "https://github.com/user/repo" }
+my-git-dep-tag = { git = "https://github.com/user/repo", tag = "v1.0" }
+my-git-dep-rev = { git = "https://github.com/user/repo", rev = "abc123" }
+
+# Path dependencies (local development)
+my-local-crate = { path = "../my-local-crate" }
+
+# Optional dependencies (enabled via features)
+optional-dep = { version = "1.0", optional = true }
+
+# Dependency features
+serde = { version = "1.0", features = ["derive"], default-features = false }
+```
+
+### Library Types
+
+```toml
+[lib]
+# Library output types
+crate-type = ["lib"]           # Rust library (default)
+# crate-type = ["dylib"]       # Dynamic library
+# crate-type = ["staticlib"]   # Static library
+# crate-type = ["cdylib"]      # C-compatible dynamic library
+# crate-type = ["rlib"]        # Rust library (explicit)
+
+# For FFI libraries
+# crate-type = ["cdylib", "rlib"]  # Both C-compatible and Rust library
+```
+
+---
+
+## Crate Structure
+
+### Standard Library Layout
+
+```
+my-library/
+├── Cargo.toml
+├── Cargo.lock          # Commit for binaries, gitignore for libraries
+├── README.md
+├── LICENSE-MIT
+├── LICENSE-APACHE
+├── CHANGELOG.md
+├── src/
+│   ├── lib.rs          # Library root
+│   ├── prelude.rs      # Common imports (optional)
+│   ├── error.rs        # Error types
+│   ├── config.rs       # Configuration
+│   ├── module1.rs      # Top-level module
+│   ├── module2/        # Module with submodules
+│   │   ├── mod.rs      # Module root
+│   │   ├── sub1.rs
+│   │   └── sub2.rs
+│   └── internal/       # Private internals
+│       ├── mod.rs
+│       └── helper.rs
+├── examples/           # Usage examples
+│   ├── basic.rs
+│   └── advanced.rs
+├── tests/              # Integration tests
+│   ├── integration_test.rs
+│   └── common/         # Test utilities
+│       └── mod.rs
+├── benches/            # Benchmarks
+│   └── benchmark.rs
+└── docs/               # Additional documentation
+    └── architecture.md
+```
+
+### lib.rs - Library Root
+
+```rust
+//! # My Library
+//!
+//! This is the top-level documentation for the library.
+//! It appears on the crate's main documentation page.
+//!
+//! ## Quick Start
+//!
+//! ```
+//! use my_library::Something;
+//!
+//! let thing = Something::new();
+//! ```
+
+// Deny warnings to catch issues early
+#![warn(missing_docs)]
+#![warn(missing_debug_implementations)]
+#![deny(unsafe_code)]  // If appropriate
+
+// Feature attributes
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+// Public modules
+pub mod config;
+pub mod error;
+
+// Private internal modules
+mod internal;
+
+// Re-exports for convenience
+pub use error::{Error, Result};
+pub use config::Config;
+
+// Prelude module (optional)
+pub mod prelude {
+    //! Common imports for users of this library
+    pub use crate::{Config, Error, Result};
+    pub use crate::something::Something;
+}
+```
+
+### Module Organization
+
+```rust
+// src/module1.rs - Flat module file
+//! Module documentation
+
+pub struct PublicStruct {
+    pub field: String,
+    private_field: u32,
+}
+
+impl PublicStruct {
+    /// Creates a new instance
+    pub fn new(field: String) -> Self {
+        Self {
+            field,
+            private_field: 0,
+        }
+    }
+}
+
+// Private helper
+fn internal_helper() -> u32 {
+    42
+}
+```
+
+```rust
+// src/module2/mod.rs - Module directory with submodules
+//! Module2 documentation
+
+mod sub1;
+mod sub2;
+
+// Re-export public items
+pub use sub1::PublicType1;
+pub use sub2::PublicType2;
+
+// Module-level items
+pub struct ModuleStruct;
+```
+
+---
+
+## Public API Design
+
+### Visibility and Re-exports
+
+```rust
+// src/lib.rs
+pub mod high_level {
+    //! High-level API
+
+    // Re-export from internal modules
+    pub use crate::internal::core::CoreType;
+    pub use crate::internal::utils::UtilType;
+}
+
+// Internal modules (not in public API)
+mod internal {
+    pub(crate) mod core {
+        // pub(crate) = visible within crate
+        pub struct CoreType;
+    }
+
+    pub(crate) mod utils {
+        pub struct UtilType;
+    }
+}
+
+// Users access via:
+// use my_library::high_level::{CoreType, UtilType};
+```
+
+### Prelude Pattern
+
+```rust
+// src/prelude.rs
+//! The prelude module re-exports commonly used items
+
+pub use crate::error::{Error, Result};
+pub use crate::config::Config;
+pub use crate::builder::Builder;
+pub use crate::traits::{MyTrait, AnotherTrait};
+
+// Users can import with:
+// use my_library::prelude::*;
+```
+
+### Builder Pattern
+
+```rust
+/// Configuration builder for `MyType`
+#[derive(Debug, Default)]
+pub struct MyTypeBuilder {
+    field1: Option<String>,
+    field2: Option<u32>,
+}
+
+impl MyTypeBuilder {
+    /// Creates a new builder
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets field1
+    pub fn field1(mut self, value: impl Into<String>) -> Self {
+        self.field1 = Some(value.into());
+        self
+    }
+
+    /// Sets field2
+    pub fn field2(mut self, value: u32) -> Self {
+        self.field2 = Some(value);
+        self
+    }
+
+    /// Builds the final type
+    pub fn build(self) -> Result<MyType, BuildError> {
+        Ok(MyType {
+            field1: self.field1.ok_or(BuildError::MissingField1)?,
+            field2: self.field2.unwrap_or(42),
+        })
+    }
+}
+
+/// The main type
+pub struct MyType {
+    field1: String,
+    field2: u32,
+}
+
+impl MyType {
+    /// Creates a builder for this type
+    pub fn builder() -> MyTypeBuilder {
+        MyTypeBuilder::new()
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildError {
+    #[error("field1 is required")]
+    MissingField1,
+}
+```
+
+### Type-State Pattern
+
+```rust
+use std::marker::PhantomData;
+use crate::error::Result;
+
+/// Type states
+pub struct Uninitialized;
+pub struct Initialized;
+
+/// Connection in different states
+pub struct Connection<State = Uninitialized> {
+    url: String,
+    _state: PhantomData<State>,
+}
+
+impl Connection<Uninitialized> {
+    /// Creates a new uninitialized connection
+    pub fn new(url: impl Into<String>) -> Self {
+        Self {
+            url: url.into(),
+            _state: PhantomData,
+        }
+    }
+
+    /// Initializes the connection
+    pub fn initialize(self) -> Result<Connection<Initialized>> {
+        // Perform initialization
+        Ok(Connection {
+            url: self.url,
+            _state: PhantomData,
+        })
+    }
+}
+
+impl Connection<Initialized> {
+    /// Send data (only available when initialized)
+    pub fn send(&self, data: &[u8]) -> Result<()> {
+        // Send implementation
+        Ok(())
+    }
+}
+```
+
+---
+
+## Documentation with Rustdoc
+
+### Documentation Comments
+
+```rust
+/// Single-line documentation
+///
+/// Multi-line documentation continues on subsequent lines.
+/// Use markdown for formatting.
+///
+/// # Examples
+///
+/// ```
+/// use my_library::MyType;
+///
+/// let instance = MyType::new("value");
+/// assert_eq!(instance.get(), "value");
+/// ```
+///
+/// # Errors
+///
+/// Returns `Err` when:
+/// - The input is empty
+/// - The value is invalid
+///
+/// # Panics
+///
+/// Panics if the internal state is corrupted.
+///
+/// # Safety
+///
+/// This function is unsafe because...
+///
+pub struct MyType {
+    value: String,
+}
+
+//! Inner doc comment for modules
+//! Documents the item that contains it (e.g., in lib.rs or mod.rs)
+
+/// Method documentation
+impl MyType {
+    /// Creates a new instance
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The initial value
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use my_library::MyType;
+    /// let instance = MyType::new("test");
+    /// ```
+    pub fn new(value: impl Into<String>) -> Self {
+        Self {
+            value: value.into(),
+        }
+    }
+
+    /// Gets the value
+    #[must_use]
+    pub fn get(&self) -> &str {
+        &self.value
+    }
+}
+```
+
+### Documentation Attributes
+
+```rust
+// Hide from documentation
+#[doc(hidden)]
+pub struct InternalType;
+
+// Add documentation link
+#[doc(alias = "alternative_name")]
+pub struct MyType;
+
+// Inline documentation from another item
+#[doc(inline)]
+pub use internal::PublicType;
+
+// Conditional documentation (for docs.rs)
+#[cfg_attr(docsrs, doc(cfg(feature = "async")))]
+#[cfg(feature = "async")]
+pub mod async_module {
+    // Async functionality
+}
+```
+
+### Code Examples in Docs
+
+```rust
+/// Example with hidden setup code
+///
+/// ```
+/// # use my_library::MyType;
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// let instance = MyType::new("value")?;
+/// assert_eq!(instance.get(), "value");
+/// # Ok(())
+/// # }
+/// ```
+pub fn example() {}
+
+/// No-run example (compiles but doesn't run)
+///
+/// ```no_run
+/// use my_library::connect;
+/// let conn = connect("localhost:8080");
+/// ```
+pub fn no_run_example() {}
+
+/// Ignore example (doesn't compile)
+///
+/// ```ignore
+/// // Pseudo-code
+/// let x = something_not_real();
+/// ```
+pub fn ignore_example() {}
+
+/// Example that should fail
+///
+/// ```should_panic
+/// use my_library::MyType;
+/// MyType::new("");  // Panics on empty string
+/// ```
+pub fn should_panic_example() {}
+
+/// Example with compile_fail
+///
+/// ```compile_fail
+/// use my_library::MyType;
+/// let x: i32 = MyType::new("test");  // Type error
+/// ```
+pub fn compile_fail_example() {}
+```
+
+### Module-Level Documentation
+
+```rust
+//! # Module Name
+//!
+//! This module provides...
+//!
+//! ## Overview
+//!
+//! Detailed description...
+//!
+//! ## Examples
+//!
+//! ```
+//! use my_library::module::Type;
+//! ```
+
+// Module contents
 ```
 
 ---
 
 ## Feature Flags
 
-### Design Principles
-
-1. **Default features should be minimal** - Enable broad compatibility
-2. **Additive only** - Features should never remove functionality
-3. **Document all features** - In Cargo.toml and README
-4. **Test all combinations** - CI should test feature matrix
-
-### Common Patterns
+### Defining Features
 
 ```toml
+# Cargo.toml
 [features]
-default = []
+# Default features (enabled automatically)
+default = ["std"]
 
-# Serialization (opt-in)
-serde = ["dep:serde", "dep:serde_json"]
+# Feature flag with no dependencies
+std = []
 
-# Async runtime support
-tokio = ["dep:tokio"]
-async-std = ["dep:async-std"]
+# Feature flag that enables optional dependencies
+async = ["tokio", "futures"]
 
-# Performance features
-simd = []
+# Feature that enables other features
+full = ["std", "async", "serde"]
 
-# Development/debugging
-tracing = ["dep:tracing"]
+# Feature that enables dependency features
+serde = ["dep:serde", "serde/derive"]
 
-# Full feature set for docs.rs
-full = ["serde", "tokio", "tracing"]
+[dependencies]
+tokio = { version = "1.0", optional = true }
+futures = { version = "0.3", optional = true }
+serde = { version = "1.0", optional = true }
 ```
 
-### Feature-Gated Code
+### Using Features in Code
 
 ```rust
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Serialize};
+// Conditional compilation based on feature
+#[cfg(feature = "async")]
+pub mod async_module {
+    use tokio::runtime::Runtime;
 
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Config {
-    pub name: String,
-    pub value: i32,
+    pub fn async_function() {
+        // Async implementation
+    }
+}
+
+#[cfg(not(feature = "std"))]
+use core::fmt;
+#[cfg(feature = "std")]
+use std::fmt;
+
+// Function available only with feature
+#[cfg(feature = "async")]
+pub async fn process_async(data: &[u8]) -> Result<()> {
+    // Implementation
+    Ok(())
+}
+
+// Different implementations based on features
+#[cfg(feature = "std")]
+pub fn allocate() -> Vec<u8> {
+    Vec::new()
+}
+
+#[cfg(not(feature = "std"))]
+pub fn allocate() -> heapless::Vec<u8, 256> {
+    heapless::Vec::new()
 }
 ```
 
 ### Feature Documentation
 
 ```rust
-//! # Feature Flags
-//!
-//! - `serde` - Enable serialization support
-//! - `tokio` - Enable async support with Tokio runtime
-//! - `tracing` - Enable tracing instrumentation
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+/// This type requires the `async` feature
+#[cfg(feature = "async")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async")))]
+pub struct AsyncType;
+
+/// This function requires either `feature1` or `feature2`
+#[cfg(any(feature = "feature1", feature = "feature2"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "feature1", feature = "feature2"))))]
+pub fn conditional_function() {}
 ```
 
 ---
 
-## Public API Design (Rust-Specific)
+## Semantic Versioning
 
-### Ownership Patterns
+### SemVer Rules
 
-**Prefer borrowing over ownership for inputs:**
+Format: `MAJOR.MINOR.PATCH`
+
+- **MAJOR**: Incompatible API changes
+- **MINOR**: Add functionality (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
+
+Pre-1.0.0: Different rules apply
+- `0.0.x`: Any change can break compatibility
+- `0.y.z`: MINOR acts like MAJOR, PATCH acts like MINOR
+
+### What Requires a Major Version Bump
+
 ```rust
-// Good: Borrows input
-pub fn process(data: &str) -> Result<Output, Error>
+// Breaking changes (require MAJOR bump):
 
-// Avoid: Takes ownership unnecessarily
-pub fn process(data: String) -> Result<Output, Error>
-```
+// 1. Removing public items
+pub struct OldType;  // Removed entirely
 
-**Use `impl Trait` for flexible inputs:**
-```rust
-// Good: Accepts &str, String, Cow<str>, etc.
-pub fn process(data: impl AsRef<str>) -> Result<Output, Error>
+// 2. Adding trait bounds to public types
+pub struct Generic<T>;  // Changed to:
+pub struct Generic<T: Clone>;
 
-// Good: Accepts any iterator
-pub fn from_iter(items: impl IntoIterator<Item = Item>) -> Self
-```
+// 3. Changing function signatures
+pub fn process(x: u32) {}  // Changed to:
+pub fn process(x: u64) {}
 
-**Return owned data when caller needs ownership:**
-```rust
-// Good: Caller gets owned data
-pub fn generate() -> String
-
-// Good: Zero-cost abstraction for optional allocation
-pub fn get_name(&self) -> Cow<'_, str>
-```
-
-### Type Design
-
-**Newtypes for type safety:**
-```rust
-/// User ID (cannot be confused with other integer IDs)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct UserId(u64);
-
-impl UserId {
-    pub fn new(id: u64) -> Self {
-        Self(id)
-    }
-
-    pub fn as_u64(self) -> u64 {
-        self.0
-    }
+// 4. Changing trait methods
+pub trait MyTrait {
+    fn method(&self);  // Changed to:
+    fn method(&self) -> i32;
 }
+
+// 5. Removing or renaming public fields
+pub struct Type {
+    pub field: String,  // Removed or renamed
+}
+
+// 6. Changing error types
+pub fn operation() -> Result<(), OldError> {}  // Changed to:
+pub fn operation() -> Result<(), NewError> {}
 ```
 
-**Builder pattern for complex construction:**
+### What is Compatible (MINOR version)
+
 ```rust
-#[derive(Debug, Clone)]
+// Compatible changes (MINOR bump):
+
+// 1. Adding new public items
+pub struct NewType;
+pub fn new_function() {}
+
+// 2. Adding trait implementations
+impl Clone for ExistingType {}
+
+// 3. Adding defaulted type parameters
+pub struct Type<T = DefaultType>;
+
+// 4. Adding private fields to structs (if not constructable)
+pub struct Type {
+    existing: String,
+    new_private: u32,  // OK if struct is #[non_exhaustive] or has no pub constructor
+}
+
+// 5. Making things more public
+pub(crate) fn internal() {}  // Changed to:
+pub fn internal() {}
+
+// 6. Relaxing trait bounds
+pub fn process<T: Clone + Send>(x: T) {}  // Changed to:
+pub fn process<T: Clone>(x: T) {}
+```
+
+### Preventing Breaking Changes
+
+```rust
+// Use #[non_exhaustive] to reserve right to add fields
+#[non_exhaustive]
 pub struct Config {
-    timeout: Duration,
-    retries: u32,
-    strict: bool,
+    pub field1: String,
+    pub field2: u32,
 }
 
-#[derive(Debug, Default)]
-pub struct ConfigBuilder {
-    timeout: Option<Duration>,
-    retries: Option<u32>,
-    strict: Option<bool>,
-}
-
-impl ConfigBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn timeout(mut self, timeout: Duration) -> Self {
-        self.timeout = Some(timeout);
-        self
-    }
-
-    pub fn retries(mut self, retries: u32) -> Self {
-        self.retries = Some(retries);
-        self
-    }
-
-    pub fn strict(mut self, strict: bool) -> Self {
-        self.strict = Some(strict);
-        self
-    }
-
-    pub fn build(self) -> Config {
-        Config {
-            timeout: self.timeout.unwrap_or(Duration::from_secs(30)),
-            retries: self.retries.unwrap_or(3),
-            strict: self.strict.unwrap_or(false),
-        }
+// Use builder pattern to avoid breaking changes
+impl Config {
+    pub fn builder() -> ConfigBuilder {
+        ConfigBuilder::default()
     }
 }
-```
 
-### Trait Design
-
-**Traits for extensibility:**
-```rust
-/// Trait for custom parsers
-pub trait Parser {
-    type Output;
-    type Error;
-
-    fn parse(&self, input: &str) -> Result<Self::Output, Self::Error>;
+// Use sealed trait pattern to prevent external implementations
+mod sealed {
+    pub trait Sealed {}
 }
 
-/// Provide a default implementation
-pub struct DefaultParser;
-
-impl Parser for DefaultParser {
-    type Output = Document;
-    type Error = ParseError;
-
-    fn parse(&self, input: &str) -> Result<Self::Output, Self::Error> {
-        // ...
-    }
-}
-```
-
-**Extension traits for foreign types:**
-```rust
-pub trait StringExt {
-    fn to_snake_case(&self) -> String;
-    fn to_camel_case(&self) -> String;
+pub trait MyTrait: sealed::Sealed {
+    // Methods
 }
 
-impl StringExt for str {
-    fn to_snake_case(&self) -> String {
-        // ...
-    }
-
-    fn to_camel_case(&self) -> String {
-        // ...
-    }
+impl sealed::Sealed for MyType {}
+impl MyTrait for MyType {
+    // Implementation
 }
-```
-
----
-
-## Module Organization
-
-### Standard Crate Structure
-
-```
-my-crate/
-├── Cargo.toml
-├── README.md
-├── LICENSE-MIT
-├── LICENSE-APACHE
-├── src/
-│   ├── lib.rs          # Public API, re-exports
-│   ├── error.rs        # Error types
-│   ├── types.rs        # Core types
-│   ├── parser.rs       # Parser implementation
-│   └── internal/       # Private modules
-│       └── mod.rs
-├── tests/              # Integration tests
-│   └── integration.rs
-├── examples/           # Usage examples
-│   └── basic.rs
-└── benches/            # Benchmarks
-    └── parsing.rs
-```
-
-### lib.rs Organization
-
-```rust
-//! # My Crate
-//!
-//! Brief description of the crate.
-//!
-//! ## Quick Start
-//!
-//! ```rust
-//! use my_crate::parse;
-//!
-//! let result = parse("input")?;
-//! # Ok::<(), my_crate::Error>(())
-//! ```
-
-// Re-export public API
-pub use self::error::{Error, Result};
-pub use self::parser::parse;
-pub use self::types::{Config, Document};
-
-// Public modules (if users need access)
-pub mod types;
-
-// Private modules
-mod error;
-mod parser;
-mod internal;
-
-// Feature-gated re-exports
-#[cfg(feature = "serde")]
-pub use self::types::SerializableDocument;
-```
-
-### Visibility Patterns
-
-```rust
-// Public - part of API
-pub fn public_function() {}
-
-// Crate-public - visible within crate only
-pub(crate) fn internal_function() {}
-
-// Module-public - visible to parent module
-pub(super) fn parent_visible() {}
-
-// Private - visible only in current module
-fn private_function() {}
-```
-
----
-
-## Testing Patterns
-
-### Unit Tests
-
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_valid_input() {
-        let result = parse("valid input").unwrap();
-        assert_eq!(result.value, "expected");
-    }
-
-    #[test]
-    fn parse_invalid_input() {
-        let result = parse("invalid");
-        assert!(matches!(result, Err(Error::InvalidSyntax { .. })));
-    }
-}
-```
-
-### Doc Tests
-
-```rust
-/// Parses the input string.
-///
-/// # Examples
-///
-/// ```
-/// use my_crate::parse;
-///
-/// let result = parse("hello")?;
-/// assert_eq!(result.len(), 5);
-/// # Ok::<(), my_crate::Error>(())
-/// ```
-///
-/// Error case:
-///
-/// ```
-/// use my_crate::parse;
-///
-/// let result = parse("");
-/// assert!(result.is_err());
-/// ```
-pub fn parse(input: &str) -> Result<Output, Error> {
-    // ...
-}
-```
-
-### Integration Tests
-
-```rust
-// tests/integration.rs
-use my_crate::{parse, Config};
-
-#[test]
-fn end_to_end_parsing() {
-    let config = Config::builder()
-        .strict(true)
-        .build();
-
-    let result = parse_with_config("input", &config).unwrap();
-    assert!(result.is_valid());
-}
-```
-
-### Property-Based Testing
-
-```rust
-use proptest::prelude::*;
-
-proptest! {
-    #[test]
-    fn parse_never_panics(s in "\\PC*") {
-        let _ = parse(&s);
-    }
-
-    #[test]
-    fn roundtrip(input in valid_input_strategy()) {
-        let parsed = parse(&input).unwrap();
-        let serialized = serialize(&parsed);
-        assert_eq!(input, serialized);
-    }
-}
-```
-
----
-
-## MSRV (Minimum Supported Rust Version)
-
-### Policy Guidelines
-
-| Crate Type | Recommended MSRV Policy |
-|------------|------------------------|
-| Widely-used utility | N-2 stable (conservative) |
-| Application-specific | Latest stable |
-| Async libraries | Match async runtime MSRV |
-
-### Configuration
-
-```toml
-# Cargo.toml
-[package]
-rust-version = "1.70"
-```
-
-### CI Verification
-
-```yaml
-# .github/workflows/ci.yml
-jobs:
-  msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.70  # MSRV
-      - run: cargo check --all-features
 ```
 
 ---
 
 ## Publishing to crates.io
 
-### Pre-publish Checklist
-
-- [ ] `cargo fmt --check` passes
-- [ ] `cargo clippy -- -D warnings` passes
-- [ ] `cargo test --all-features` passes
-- [ ] `cargo doc --no-deps --all-features` succeeds
-- [ ] Version bumped in Cargo.toml
-- [ ] CHANGELOG.md updated
-- [ ] README.md is current
-- [ ] All required Cargo.toml fields present
-- [ ] Correct license files included
-- [ ] `cargo publish --dry-run` succeeds
-
-### Publishing Commands
+### Pre-Publication Checklist
 
 ```bash
-# Verify everything is ready
-cargo publish --dry-run
+# 1. Verify package builds
+cargo build --release
 
-# Publish to crates.io
+# 2. Run all tests
+cargo test --all-features
+
+# 3. Check documentation
+cargo doc --no-deps --all-features --open
+
+# 4. Run clippy
+cargo clippy --all-features -- -D warnings
+
+# 5. Format code
+cargo fmt --check
+
+# 6. Verify package contents
+cargo package --list
+
+# 7. Do a dry-run publish
+cargo publish --dry-run
+```
+
+### Required Files
+
+```
+my-library/
+├── Cargo.toml       # Must have required metadata
+├── README.md        # Shown on crates.io
+├── LICENSE-MIT      # or LICENSE-APACHE or LICENSE
+├── CHANGELOG.md     # Version history (recommended)
+└── src/
+    └── lib.rs       # Library code
+```
+
+### Cargo.toml Metadata for Publishing
+
+```toml
+[package]
+name = "my-library"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <email@example.com>"]
+license = "MIT OR Apache-2.0"
+description = "A short description (max 256 chars)"
+documentation = "https://docs.rs/my-library"
+homepage = "https://github.com/user/my-library"
+repository = "https://github.com/user/my-library"
+readme = "README.md"
+keywords = ["cli", "tool", "utility"]  # Max 5, each max 20 chars
+categories = ["command-line-utilities"]  # From crates.io list
+exclude = [
+    "tests/fixtures/*",
+    ".github/*",
+    "*.png",
+]
+
+[badges]
+# CI badge
+github-actions = { repository = "user/repo", workflow = "CI" }
+```
+
+### Publishing Workflow
+
+```bash
+# 1. Create crates.io account and get API token
+# Visit https://crates.io/me
+
+# 2. Login to crates.io
+cargo login <your-api-token>
+
+# 3. Publish the crate
 cargo publish
 
-# For workspace members
-cargo publish -p my-crate
+# 4. Verify publication
+# Visit https://crates.io/crates/my-library
 ```
 
 ### Yanking Versions
 
 ```bash
-# Yank a bad version (prevents new installs)
-cargo yank --version 1.0.1
+# Yank a published version (prevents new projects from using it)
+cargo yank --version 0.1.0
 
-# Undo yank
-cargo yank --undo --version 1.0.1
+# Unyank a version
+cargo yank --vers 0.1.0 --undo
+```
+
+### Publishing Updates
+
+```bash
+# 1. Update version in Cargo.toml
+# 2. Update CHANGELOG.md
+# 3. Commit changes
+git add Cargo.toml CHANGELOG.md
+git commit -m "chore: bump version to 0.2.0"
+
+# 4. Tag release
+git tag -a v0.2.0 -m "Release v0.2.0"
+
+# 5. Publish
+cargo publish
+
+# 6. Push commits and tags
+git push origin main --tags
 ```
 
 ---
 
-## Common Dependencies
+## Examples and Tests
 
-### Serialization
-
-```toml
-[dependencies]
-serde = { version = "1", features = ["derive"], optional = true }
-serde_json = { version = "1", optional = true }
-```
-
-### Error Handling
-
-```toml
-[dependencies]
-thiserror = "1"  # For library error types
-# OR
-error-stack = "0.5"  # For rich error context
-```
-
-### Async
-
-```toml
-[dependencies]
-tokio = { version = "1", features = ["rt", "macros"], optional = true }
-async-trait = { version = "0.1", optional = true }
-futures = { version = "0.3", optional = true }
-```
-
-### Logging/Tracing
-
-```toml
-[dependencies]
-tracing = { version = "0.1", optional = true }
-log = { version = "0.4", optional = true }
-```
-
----
-
-## docs.rs Configuration
-
-### Enable All Features
-
-```toml
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
-```
-
-### Feature Badges in Docs
+### Examples Directory
 
 ```rust
-#![cfg_attr(docsrs, feature(doc_cfg))]
+// examples/basic.rs
+//! Basic usage example
 
-#[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub fn serialize<T: Serialize>(value: &T) -> String {
-    // ...
+use my_library::MyType;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Simple example showing basic usage
+    let instance = MyType::new("example")?;
+    println!("Created: {:?}", instance);
+
+    // Show key functionality
+    let result = instance.process()?;
+    println!("Result: {}", result);
+
+    Ok(())
 }
 ```
 
+```bash
+# Run examples
+cargo run --example basic
+cargo run --example advanced --features async
+```
+
+### Integration Tests
+
+```rust
+// tests/integration_test.rs
+use my_library::MyType;
+
+#[test]
+fn test_basic_usage() {
+    let instance = MyType::new("test").unwrap();
+    assert_eq!(instance.get(), "test");
+}
+
+#[test]
+#[cfg(feature = "async")]
+fn test_async_feature() {
+    // Test async functionality
+}
+```
+
+### Benchmarks
+
+```rust
+// benches/benchmark.rs
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use my_library::MyType;
+
+fn benchmark_operation(c: &mut Criterion) {
+    c.bench_function("my_operation", |b| {
+        let instance = MyType::new("bench");
+        b.iter(|| {
+            black_box(instance.process())
+        });
+    });
+}
+
+criterion_group!(benches, benchmark_operation);
+criterion_main!(benches);
+```
+
+```bash
+# Run benchmarks
+cargo bench
+```
+
 ---
 
-## Workspace Patterns
+## Error Handling
 
-### Multi-Crate Workspace
-
-```toml
-# Root Cargo.toml
-[workspace]
-resolver = "2"
-members = [
-    "crates/core",
-    "crates/derive",
-    "crates/utils",
-]
-
-[workspace.package]
-version = "0.1.0"
-edition = "2021"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/username/repo"
-
-[workspace.dependencies]
-serde = { version = "1", features = ["derive"] }
-tokio = { version = "1", features = ["rt-multi-thread"] }
-```
-
-### Workspace Member
-
-```toml
-# crates/core/Cargo.toml
-[package]
-name = "my-crate-core"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-
-[dependencies]
-serde = { workspace = true, optional = true }
-```
-
----
-
-## Anti-Patterns
-
-### 1. Exposing Internal Types
+### Library Error Types
 
 ```rust
-// Bad: Exposes implementation detail
-pub fn get_data() -> HashMap<String, Vec<InternalType>>
+use std::fmt;
 
-// Good: Return domain type
-pub fn get_data() -> DataCollection
-```
-
-### 2. Breaking Semver
-
-```rust
-// v1.0.0
-pub fn process(input: &str) -> Result<Output, Error>
-
-// v1.1.0 - WRONG! This is breaking
-pub fn process(input: &str, options: Options) -> Result<Output, Error>
-
-// v1.1.0 - Correct: Add new function
-pub fn process(input: &str) -> Result<Output, Error>
-pub fn process_with_options(input: &str, options: Options) -> Result<Output, Error>
-```
-
-### 3. Missing `#[must_use]`
-
-```rust
-// Bad: Easy to ignore error
-pub fn validate(input: &str) -> bool
-
-// Good: Compiler warns if ignored
-#[must_use = "validation result should be checked"]
-pub fn validate(input: &str) -> bool
-```
-
-### 4. Non-Exhaustive Enums
-
-```rust
-// Good: Allow adding variants without breaking
-#[non_exhaustive]
+/// Library error type
+#[derive(Debug)]
 pub enum Error {
-    NotFound,
-    InvalidInput,
-    // Future variants can be added
+    /// IO error occurred
+    Io(std::io::Error),
+    /// Invalid input
+    InvalidInput(String),
+    /// Configuration error
+    Config(ConfigError),
 }
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::Io(e) => write!(f, "IO error: {}", e),
+            Error::InvalidInput(msg) => write!(f, "Invalid input: {}", msg),
+            Error::Config(e) => write!(f, "Config error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Io(e) => Some(e),
+            Error::Config(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+// Conversions from other error types
+impl From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Self {
+        Error::Io(err)
+    }
+}
+
+impl From<ConfigError> for Error {
+    fn from(err: ConfigError) -> Self {
+        Error::Config(err)
+    }
+}
+
+/// Result type alias for convenience
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug)]
+pub struct ConfigError {
+    message: String,
+}
+
+impl fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl std::error::Error for ConfigError {}
 ```
+
+### Using thiserror
+
+```rust
+// Add to Cargo.toml:
+// thiserror = "1.0"
+
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+
+    #[error("Configuration error")]
+    Config(#[from] ConfigError),
+
+    #[error("Not found: {0}")]
+    NotFound(String),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+```
+
+---
+
+## Troubleshooting
+
+### Documentation Build Failures
+
+**Problem**: Broken doc links
+
+```rust
+// Error: unresolved link to `NonExistent`
+/// See [`NonExistent`] for details
+
+// Fix: Use correct paths
+/// See [`crate::actual::Type`] for details
+/// Or: See [Type](crate::actual::Type)
+```
+
+**Problem**: Doc tests fail
+
+```bash
+# Run doc tests to see failures
+cargo test --doc
+
+# Fix: Add necessary imports to doc examples
+/// ```
+/// # use my_library::MyType;  # Hidden line
+/// let x = MyType::new();
+/// ```
+```
+
+### Publishing Failures
+
+**Problem**: Version already published
+
+```bash
+# Error: crate version `0.1.0` is already uploaded
+# Fix: Bump version in Cargo.toml
+```
+
+**Problem**: Missing required fields
+
+```toml
+# Error: missing required field `description`
+# Fix: Add to Cargo.toml
+description = "A library that does X"
+license = "MIT OR Apache-2.0"
+```
+
+**Problem**: Package too large
+
+```toml
+# Error: package size exceeds 10 MB limit
+# Fix: Exclude unnecessary files
+exclude = [
+    "tests/fixtures/*.bin",
+    "docs/images/*.png",
+    ".github/",
+]
+```
+
+---
+
+## Best Practices
+
+### API Design
+
+1. **Prefer explicit over implicit**
+   - Clear function names
+   - Explicit error types
+   - Documented behavior
+
+2. **Use builders for complex construction**
+   - Many optional parameters → builder pattern
+   - Complex validation → builder with `build()` method
+
+3. **Provide type safety**
+   - Use type-state pattern where applicable
+   - Leverage the type system to prevent invalid states
+
+4. **Follow naming conventions**
+   - `new()` for constructors
+   - `with_*` for builders
+   - `into_*` for consuming conversions
+   - `as_*` for cheap references
+   - `to_*` for expensive conversions
+
+### Versioning
+
+1. **Follow SemVer strictly**
+2. **Maintain a CHANGELOG.md**
+3. **Use `#[non_exhaustive]` for extensible types**
+4. **Document MSRV (Minimum Supported Rust Version)**
+
+### Documentation
+
+1. **Document all public items**
+2. **Include examples in documentation**
+3. **Use doc tests to verify examples**
+4. **Add crate-level documentation in lib.rs**
+
+### Testing
+
+1. **Test public API in integration tests**
+2. **Provide examples for common use cases**
+3. **Use doc tests for simple examples**
+4. **Benchmark performance-critical code**
 
 ---
 
 ## References
 
-- `meta-library-dev` - Foundational library patterns
-- `lang-rust-errors-dev` - Error handling patterns
-- `lang-rust-docs-dev` - Documentation patterns
-- `lang-rust-cargo-dev` - Dependency management
-- [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/)
-- [crates.io](https://crates.io/)
-- [docs.rs](https://docs.rs/)
+- [The Cargo Book](https://doc.rust-lang.org/cargo/)
+- [API Guidelines](https://rust-lang.github.io/api-guidelines/)
+- [The Rustdoc Book](https://doc.rust-lang.org/rustdoc/)
+- [crates.io Publishing Guide](https://doc.rust-lang.org/cargo/reference/publishing.html)
+- [Semantic Versioning](https://semver.org/)
+
+---
+
+## See Also
+
+- `lang-rust-dev` - Rust fundamentals and syntax
+- `lang-rust-bin-dev` - Binary application development
+- `lang-rust-testing-dev` - Testing strategies
