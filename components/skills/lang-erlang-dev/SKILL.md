@@ -1210,6 +1210,761 @@ nested_fixture_test_() ->
 
 ---
 
+## Serialization
+
+### JSON with jiffy
+
+```erlang
+% Using jiffy (fast NIF-based JSON library)
+% Add to rebar.config: {deps, [{jiffy, "1.1.1"}]}
+
+% Encode to JSON
+encode_user(User) ->
+    jiffy:encode(#{
+        <<"name">> => maps:get(name, User),
+        <<"age">> => maps:get(age, User),
+        <<"email">> => maps:get(email, User)
+    }).
+
+% Decode from JSON
+decode_user(JsonBinary) ->
+    case jiffy:decode(JsonBinary, [return_maps]) of
+        #{<<"name">> := Name, <<"age">> := Age, <<"email">> := Email} ->
+            {ok, #{name => Name, age => Age, email => Email}};
+        _ ->
+            {error, invalid_format}
+    end.
+
+% Pretty printing
+pretty_json(Term) ->
+    jiffy:encode(Term, [pretty]).
+
+% Handling JSON arrays
+decode_users(JsonBinary) ->
+    case jiffy:decode(JsonBinary, [return_maps]) of
+        Users when is_list(Users) ->
+            {ok, [decode_user_map(U) || U <- Users]};
+        _ ->
+            {error, expected_array}
+    end.
+```
+
+### JSON with jsx
+
+```erlang
+% Using jsx (pure Erlang JSON library)
+% Add to rebar.config: {deps, [{jsx, "3.1.0"}]}
+
+% Encode to JSON
+encode_event(Event) ->
+    jsx:encode([
+        {<<"type">>, maps:get(type, Event)},
+        {<<"timestamp">>, maps:get(timestamp, Event)},
+        {<<"data">>, maps:get(data, Event)}
+    ]).
+
+% Decode from JSON
+decode_event(JsonBinary) ->
+    try jsx:decode(JsonBinary, [return_maps]) of
+        Map when is_map(Map) ->
+            {ok, Map};
+        _ ->
+            {error, invalid_json}
+    catch
+        error:badarg ->
+            {error, parse_error}
+    end.
+
+% Streaming JSON (for large files)
+parse_json_stream(Binary) ->
+    jsx:decode(Binary, [stream, return_maps]).
+```
+
+### Erlang Term Format (ETF)
+
+```erlang
+% Native binary serialization (fastest for Erlang-to-Erlang)
+
+% Serialize term to binary
+serialize(Term) ->
+    term_to_binary(Term).
+
+% Serialize with compression
+serialize_compressed(Term) ->
+    term_to_binary(Term, [compressed]).
+
+% Deserialize binary to term
+deserialize(Binary) ->
+    binary_to_term(Binary).
+
+% Safe deserialization (prevents atom table exhaustion)
+safe_deserialize(Binary) ->
+    binary_to_term(Binary, [safe]).
+
+% File storage example
+save_state(Filename, State) ->
+    Binary = term_to_binary(State, [compressed]),
+    file:write_file(Filename, Binary).
+
+load_state(Filename) ->
+    case file:read_file(Filename) of
+        {ok, Binary} ->
+            {ok, binary_to_term(Binary, [safe])};
+        Error ->
+            Error
+    end.
+```
+
+### Protocol Buffers with gpb
+
+```erlang
+% Using gpb (Google Protocol Buffers for Erlang)
+% Add to rebar.config: {deps, [{gpb, "4.19.0"}]}
+
+% Define .proto file: user.proto
+% message User {
+%   string name = 1;
+%   int32 age = 2;
+%   string email = 3;
+% }
+
+% After compilation, use generated module
+encode_user_proto(Name, Age, Email) ->
+    user_pb:encode_msg(#{
+        name => Name,
+        age => Age,
+        email => Email
+    }, 'User').
+
+decode_user_proto(Binary) ->
+    user_pb:decode_msg(Binary, 'User').
+
+% Rebar3 plugin configuration
+% {plugins, [rebar3_gpb_plugin]}.
+% {gpb_opts, [
+%     {i, "proto"},
+%     {o_erl, "src"},
+%     {o_hrl, "include"},
+%     {module_name_suffix, "_pb"}
+% ]}.
+```
+
+### MessagePack with msgpack
+
+```erlang
+% Using msgpack-erlang (compact binary format)
+% Add to rebar.config: {deps, [{msgpack, "0.7.0"}]}
+
+% Pack data
+pack_data(Data) ->
+    msgpack:pack(Data).
+
+% Unpack data
+unpack_data(Binary) ->
+    case msgpack:unpack(Binary) of
+        {ok, Term} -> {ok, Term};
+        {error, Reason} -> {error, Reason}
+    end.
+
+% Options for map handling
+pack_with_options(Data) ->
+    msgpack:pack(Data, [{map_format, map}]).  % Use maps instead of proplists
+```
+
+---
+
+## Build and Dependencies
+
+### Rebar3 Basics
+
+```erlang
+% rebar.config - Main configuration file
+
+{erl_opts, [
+    debug_info,
+    {parse_transform, lager_transform},
+    warnings_as_errors
+]}.
+
+{deps, [
+    {cowboy, "2.10.0"},
+    {jsx, "3.1.0"},
+    {lager, "3.9.2"},
+    % Git dependency
+    {custom_lib, {git, "https://github.com/user/custom_lib.git", {tag, "v1.0.0"}}},
+    % Hex dependency with specific version
+    {hackney, "1.18.1"}
+]}.
+
+{shell, [
+    {apps, [my_app]}
+]}.
+
+% Profiles for different environments
+{profiles, [
+    {test, [
+        {deps, [
+            {meck, "0.9.2"},
+            {proper, "1.4.0"}
+        ]},
+        {erl_opts, [nowarn_export_all]}
+    ]},
+    {prod, [
+        {relx, [
+            {dev_mode, false},
+            {include_erts, true}
+        ]}
+    ]}
+]}.
+```
+
+### Common Rebar3 Commands
+
+```bash
+# Create new project
+rebar3 new app my_app
+rebar3 new lib my_lib
+rebar3 new release my_release
+
+# Compile
+rebar3 compile
+
+# Run tests
+rebar3 eunit
+rebar3 ct
+rebar3 proper  # If using PropEr
+
+# Start shell with application
+rebar3 shell
+
+# Build release
+rebar3 release
+rebar3 as prod release  # Production release
+
+# Dependency management
+rebar3 deps
+rebar3 tree  # Show dependency tree
+rebar3 upgrade  # Upgrade dependencies
+rebar3 lock  # Update lock file
+
+# Dialyzer (static analysis)
+rebar3 dialyzer
+
+# Documentation
+rebar3 edoc
+
+# Clean
+rebar3 clean
+rebar3 clean --all  # Including dependencies
+```
+
+### Hex Package Management
+
+```erlang
+% Publishing to Hex.pm
+
+% In rebar.config, add metadata:
+{hex, [
+    {doc, #{provider => ex_doc}}
+]}.
+
+{project_plugins, [rebar3_hex]}.
+
+% Package metadata in src/my_app.app.src
+{application, my_app, [
+    {description, "My awesome Erlang application"},
+    {vsn, "1.0.0"},
+    {registered, []},
+    {mod, {my_app, []}},
+    {applications, [kernel, stdlib, cowboy]},
+    {env, []},
+    {licenses, ["Apache-2.0"]},
+    {links, [{"GitHub", "https://github.com/user/my_app"}]}
+]}.
+```
+
+```bash
+# Hex commands
+rebar3 hex user register  # Register account
+rebar3 hex user auth      # Authenticate
+rebar3 hex publish        # Publish package
+rebar3 hex retire my_app 1.0.0 --reason security  # Retire version
+rebar3 hex search cowboy  # Search packages
+rebar3 hex info cowboy    # Package info
+```
+
+### Release Management with Relx
+
+```erlang
+% Release configuration in rebar.config
+
+{relx, [
+    {release, {my_app, "1.0.0"}, [
+        my_app,
+        sasl,
+        runtime_tools
+    ]},
+
+    {mode, dev},  % dev | minimal | prod
+
+    % System configuration
+    {sys_config, "./config/sys.config"},
+    {vm_args, "./config/vm.args"},
+
+    % Extended start script
+    {extended_start_script, true},
+
+    % Overlay for additional files
+    {overlay, [
+        {mkdir, "log"},
+        {mkdir, "data"},
+        {copy, "priv/static", "priv/static"},
+        {template, "config/app.config.template", "releases/{{release_version}}/app.config"}
+    ]}
+]}.
+
+% Production profile
+{profiles, [
+    {prod, [
+        {relx, [
+            {mode, prod},
+            {dev_mode, false},
+            {include_erts, true},
+            {include_src, false}
+        ]}
+    ]}
+]}.
+```
+
+```bash
+# Release commands
+rebar3 release           # Build release
+rebar3 tar               # Create tarball
+rebar3 as prod release   # Production release
+rebar3 as prod tar       # Production tarball
+
+# Running release
+_build/default/rel/my_app/bin/my_app console  # Interactive
+_build/default/rel/my_app/bin/my_app daemon   # Background
+_build/default/rel/my_app/bin/my_app stop     # Stop
+_build/default/rel/my_app/bin/my_app remote_console  # Attach to running
+```
+
+### Application Configuration
+
+```erlang
+% config/sys.config
+[
+    {my_app, [
+        {port, 8080},
+        {pool_size, 10},
+        {database, [
+            {host, "localhost"},
+            {port, 5432},
+            {name, "my_db"}
+        ]}
+    ]},
+    {lager, [
+        {handlers, [
+            {lager_console_backend, [{level, info}]},
+            {lager_file_backend, [{file, "log/error.log"}, {level, error}]}
+        ]}
+    ]}
+].
+
+% config/vm.args
+-name my_app@127.0.0.1
+-setcookie my_secret_cookie
++K true
++A 64
+-env ERL_MAX_PORTS 65536
+-env ERL_FULLSWEEP_AFTER 10
+
+% Accessing configuration in code
+get_config() ->
+    Port = application:get_env(my_app, port, 8080),
+    PoolSize = application:get_env(my_app, pool_size, 5),
+    {Port, PoolSize}.
+```
+
+---
+
+## Metaprogramming
+
+### Parse Transforms
+
+```erlang
+% Parse transforms modify AST at compile time
+% my_transform.erl
+
+-module(my_transform).
+-export([parse_transform/2]).
+
+parse_transform(Forms, _Options) ->
+    [transform_form(Form) || Form <- Forms].
+
+transform_form({function, Line, Name, Arity, Clauses}) ->
+    % Transform function definitions
+    NewClauses = [transform_clause(C) || C <- Clauses],
+    {function, Line, Name, Arity, NewClauses};
+transform_form(Form) ->
+    Form.
+
+transform_clause({clause, Line, Patterns, Guards, Body}) ->
+    % Add logging to every function
+    LogCall = {call, Line,
+        {remote, Line, {atom, Line, io}, {atom, Line, format}},
+        [{string, Line, "Entering function~n"}, {nil, Line}]
+    },
+    {clause, Line, Patterns, Guards, [LogCall | Body]}.
+
+% Using the transform
+% In module that uses it:
+-compile({parse_transform, my_transform}).
+```
+
+### Compile-Time Code Generation
+
+```erlang
+% Generate code based on configuration
+-module(codegen_transform).
+-export([parse_transform/2]).
+
+parse_transform(Forms, Options) ->
+    Config = proplists:get_value(config, Options, []),
+    inject_config_functions(Forms, Config).
+
+inject_config_functions(Forms, Config) ->
+    ConfigFuns = [generate_getter(Key, Value) || {Key, Value} <- Config],
+    % Insert before final form (usually eof)
+    insert_before_eof(Forms, ConfigFuns).
+
+generate_getter(Key, Value) ->
+    {function, 1, Key, 0, [
+        {clause, 1, [], [], [erl_parse:abstract(Value)]}
+    ]}.
+
+insert_before_eof([{eof, Line}], Funs) ->
+    Funs ++ [{eof, Line}];
+insert_before_eof([H|T], Funs) ->
+    [H | insert_before_eof(T, Funs)].
+```
+
+### Macro Definitions
+
+```erlang
+% Macros defined with -define
+
+% Simple value macro
+-define(MAX_RETRIES, 3).
+-define(TIMEOUT, 5000).
+
+% Macro with arguments
+-define(LOG(Msg), io:format("[~p] ~s~n", [?MODULE, Msg])).
+-define(LOG(Fmt, Args), io:format("[~p] " ++ Fmt ++ "~n", [?MODULE | Args])).
+
+% Multi-line macro
+-define(WITH_RETRY(Expr),
+    (fun Loop(0) -> {error, max_retries};
+         Loop(N) ->
+            case Expr of
+                {error, _} ->
+                    timer:sleep(100),
+                    Loop(N - 1);
+                Result ->
+                    Result
+            end
+    end)(?MAX_RETRIES)
+).
+
+% Conditional compilation
+-ifdef(TEST).
+-define(DEBUG(Msg), io:format("DEBUG: ~p~n", [Msg])).
+-else.
+-define(DEBUG(Msg), ok).
+-endif.
+
+% Predefined macros
+example() ->
+    io:format("Module: ~p~n", [?MODULE]),
+    io:format("Function: ~p~n", [?FUNCTION_NAME]),
+    io:format("Arity: ~p~n", [?FUNCTION_ARITY]),
+    io:format("Line: ~p~n", [?LINE]),
+    io:format("File: ~s~n", [?FILE]).
+
+% Using macros
+process_with_retry(Data) ->
+    ?WITH_RETRY(external_service:call(Data)).
+```
+
+### Record Introspection
+
+```erlang
+% Record information at compile time
+-record(user, {id, name, email, created_at}).
+
+% Record field introspection
+get_user_fields() ->
+    record_info(fields, user).  % Returns [id, name, email, created_at]
+
+get_user_size() ->
+    record_info(size, user).    % Returns 5 (1 + number of fields)
+
+% Dynamic record access (at compile time)
+get_field(#user{} = User, Field) ->
+    element(field_index(Field), User).
+
+field_index(id) -> #user.id;
+field_index(name) -> #user.name;
+field_index(email) -> #user.email;
+field_index(created_at) -> #user.created_at.
+```
+
+### Behaviors as Metaprogramming
+
+```erlang
+% Define custom behavior
+-module(my_handler).
+
+% Behavior callback specifications
+-callback init(Args :: term()) -> {ok, State :: term()} | {error, Reason :: term()}.
+-callback handle(Request :: term(), State :: term()) ->
+    {reply, Response :: term(), NewState :: term()}.
+-callback terminate(State :: term()) -> ok.
+
+% Optional callbacks
+-optional_callbacks([terminate/1]).
+
+% Implementation module
+-module(my_impl).
+-behaviour(my_handler).
+
+-export([init/1, handle/2, terminate/1]).
+
+init(Args) ->
+    {ok, #{args => Args}}.
+
+handle(Request, State) ->
+    Response = process(Request),
+    {reply, Response, State}.
+
+terminate(_State) ->
+    ok.
+
+% Behavior verification at compile time happens automatically
+% Missing required callbacks cause compilation warnings
+```
+
+---
+
+## Zero and Default Values
+
+### Default Value Patterns
+
+```erlang
+% Erlang has no null - uses atoms like 'undefined' or tagged tuples
+
+% Pattern 1: undefined atom (common convention)
+-record(config, {
+    host = "localhost" :: string(),
+    port = 8080 :: integer(),
+    timeout = undefined :: integer() | undefined,
+    ssl = false :: boolean()
+}).
+
+get_timeout(#config{timeout = undefined}) ->
+    5000;  % Default when undefined
+get_timeout(#config{timeout = Timeout}) ->
+    Timeout.
+
+% Pattern 2: Option with default
+get_opt(Key, Options, Default) ->
+    case proplists:get_value(Key, Options) of
+        undefined -> Default;
+        Value -> Value
+    end.
+
+% Same for maps
+get_map_opt(Key, Map, Default) ->
+    maps:get(Key, Map, Default).  % Built-in default support
+
+% Pattern 3: Maybe pattern (explicit optionality)
+-type maybe(T) :: {just, T} | nothing.
+
+find_user(Id, Users) ->
+    case lists:keyfind(Id, 1, Users) of
+        {Id, User} -> {just, User};
+        false -> nothing
+    end.
+
+handle_user(Id, Users) ->
+    case find_user(Id, Users) of
+        {just, User} -> process_user(User);
+        nothing -> {error, not_found}
+    end.
+```
+
+### Default Function Arguments
+
+```erlang
+% Erlang doesn't have default arguments - use multiple clauses or options
+
+% Pattern 1: Multiple function clauses
+connect(Host) ->
+    connect(Host, 5432).
+
+connect(Host, Port) ->
+    connect(Host, Port, []).
+
+connect(Host, Port, Options) ->
+    Timeout = proplists:get_value(timeout, Options, 5000),
+    Pool = proplists:get_value(pool_size, Options, 10),
+    do_connect(Host, Port, Timeout, Pool).
+
+% Pattern 2: Options proplist/map
+start_server(Options) ->
+    Host = maps:get(host, Options, "0.0.0.0"),
+    Port = maps:get(port, Options, 8080),
+    Workers = maps:get(workers, Options, erlang:system_info(schedulers)),
+    do_start(Host, Port, Workers).
+
+% Usage
+start_server(#{port => 9000}).  % Uses defaults for host and workers
+
+% Pattern 3: Record with defaults
+-record(request_opts, {
+    method = get :: atom(),
+    headers = [] :: [{string(), string()}],
+    body = <<>> :: binary(),
+    timeout = 30000 :: integer()
+}).
+
+http_request(Url) ->
+    http_request(Url, #request_opts{}).
+
+http_request(Url, Opts) when is_record(Opts, request_opts) ->
+    #request_opts{
+        method = Method,
+        headers = Headers,
+        body = Body,
+        timeout = Timeout
+    } = Opts,
+    do_request(Url, Method, Headers, Body, Timeout).
+```
+
+### Handling Missing Values
+
+```erlang
+% Safe access patterns
+
+% Maps - use maps:get/3 for default
+safe_get_name(User) ->
+    maps:get(name, User, <<"Anonymous">>).
+
+% Maps - use maps:find/2 for explicit handling
+handle_email(User) ->
+    case maps:find(email, User) of
+        {ok, Email} -> send_notification(Email);
+        error -> skip_notification
+    end.
+
+% Proplist - use proplists:get_value/3
+get_setting(Key, Settings) ->
+    proplists:get_value(Key, Settings, default_value(Key)).
+
+% ETS - handle missing keys
+ets_get_or_default(Table, Key, Default) ->
+    case ets:lookup(Table, Key) of
+        [{Key, Value}] -> Value;
+        [] -> Default
+    end.
+
+% Pattern: with_default combinator
+with_default(Fun, Default) ->
+    try Fun() of
+        Result -> Result
+    catch
+        _:_ -> Default
+    end.
+
+% Usage
+Value = with_default(fun() -> expensive_computation() end, cached_value).
+```
+
+### Initialization Patterns
+
+```erlang
+% GenServer initialization with defaults
+
+-record(state, {
+    counter = 0 :: integer(),
+    cache = #{} :: map(),
+    config :: map()  % Required, no default
+}).
+
+init(Args) ->
+    Config = maps:get(config, Args),  % Required
+    InitialCounter = maps:get(initial_counter, Args, 0),
+    CacheSize = maps:get(cache_size, Args, 1000),
+
+    State = #state{
+        counter = InitialCounter,
+        cache = init_cache(CacheSize),
+        config = Config
+    },
+    {ok, State}.
+
+% Application environment defaults
+get_app_config(Key, Default) ->
+    application:get_env(my_app, Key, Default).
+
+init_from_env() ->
+    Port = get_app_config(port, 8080),
+    Host = get_app_config(host, "localhost"),
+    Workers = get_app_config(workers, erlang:system_info(schedulers) * 2),
+    {Port, Host, Workers}.
+```
+
+### Empty/Zero Values by Type
+
+```erlang
+% Canonical empty/zero values for each type
+
+% Numbers
+zero_integer() -> 0.
+zero_float() -> 0.0.
+
+% Strings/Binaries
+empty_string() -> "".
+empty_binary() -> <<>>.
+
+% Collections
+empty_list() -> [].
+empty_map() -> #{}.
+empty_tuple() -> {}.
+
+% Custom initialization helper
+default_value(integer) -> 0;
+default_value(float) -> 0.0;
+default_value(string) -> "";
+default_value(binary) -> <<>>;
+default_value(list) -> [];
+default_value(map) -> #{};
+default_value(boolean) -> false;
+default_value(atom) -> undefined;
+default_value({list, _Type}) -> [];
+default_value({map, _KeyType, _ValueType}) -> #{}.
+
+% Initialize record fields with type-based defaults
+init_record_field(Type, ProvidedValue) ->
+    case ProvidedValue of
+        undefined -> default_value(Type);
+        Value -> Value
+    end.
+```
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:
