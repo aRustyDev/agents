@@ -2341,6 +2341,1351 @@ class IOServiceSpec extends AsyncIOSpec with Matchers {
 
 ---
 
+## Error Handling
+
+Scala provides multiple error handling strategies, from basic Option/Either to advanced effect system error channels. Choose the right abstraction based on your needs.
+
+### Error Handling Strategies
+
+**Comparison of error handling approaches:**
+
+| Strategy | Use Case | Error Info | Composable | Stack Safe |
+|----------|----------|------------|------------|------------|
+| `Option[A]` | Absence vs presence | No context | Yes | Yes |
+| `Either[E, A]` | Typed errors | Custom error type | Yes | Yes |
+| `Try[A]` | Exception catching | Throwable | Yes | No |
+| `Cats EitherT` | Stacked Either/Future | Custom error type | Yes | Yes |
+| `Cats IO` | Effect errors | Throwable | Yes | Yes |
+| `ZIO[R, E, A]` | Effect with typed errors | Custom error type | Yes | Yes |
+| Scala 3 boundary/break | Early return | Value-based | Limited | Yes |
+
+### Option - Handling Absence
+
+**Basic Option patterns:**
+
+```scala
+// Creating Options
+val some: Option[Int] = Some(42)
+val none: Option[Int] = None
+val fromNullable: Option[String] = Option(nullableValue)
+
+// Transforming Options
+val doubled = some.map(_ * 2)              // Some(84)
+val filtered = some.filter(_ > 50)         // None
+val flatMapped = some.flatMap(x => Some(x + 1))  // Some(43)
+
+// Extracting values
+val value = some.getOrElse(0)              // 42
+val orElse = none.orElse(Some(0))          // Some(0)
+
+// Pattern matching
+def describe(opt: Option[Int]): String = opt match {
+  case Some(value) if value > 0 => s"Positive: $value"
+  case Some(value) => s"Non-positive: $value"
+  case None => "No value"
+}
+
+// For-comprehension
+val result = for {
+  a <- Some(1)
+  b <- Some(2)
+  c <- Some(3)
+} yield a + b + c  // Some(6)
+
+// Short-circuits on None
+val shortCircuit = for {
+  a <- Some(1)
+  b <- None  // Stops here
+  c <- Some(3)
+} yield a + b + c  // None
+```
+
+**Advanced Option patterns:**
+
+```scala
+// Folding Options
+val folded = some.fold(0)(_ * 2)           // 42 * 2 = 84
+val foldedNone = none.fold(0)(_ * 2)       // 0
+
+// Collecting from Lists
+val list = List(Some(1), None, Some(3), None, Some(5))
+val collected = list.flatten               // List(1, 3, 5)
+
+// Traversing Lists to Option
+def safeDivide(a: Int, b: Int): Option[Int] =
+  if (b == 0) None else Some(a / b)
+
+val divisions = List(10, 20, 30).traverse(safeDivide(_, 5))  // Some(List(2, 4, 6))
+val failed = List(10, 20, 30).traverse(safeDivide(_, 0))     // None
+
+// Converting to Either
+val asEither: Either[String, Int] = some.toRight("No value")
+val asLeft: Either[Int, String] = none.toLeft("Default")
+```
+
+### Either - Typed Error Handling
+
+**Either basics (right-biased in Scala 2.12+):**
+
+```scala
+// Creating Either values
+val success: Either[String, Int] = Right(42)
+val failure: Either[String, Int] = Left("Error occurred")
+
+// Transforming Right values
+val doubled = success.map(_ * 2)           // Right(84)
+val chained = success.flatMap(x => Right(x + 1))  // Right(43)
+
+// Pattern matching
+def handle[E, A](either: Either[E, A]): String = either match {
+  case Right(value) => s"Success: $value"
+  case Left(error) => s"Error: $error"
+}
+
+// For-comprehension (short-circuits on Left)
+def divide(a: Int, b: Int): Either[String, Int] =
+  if (b == 0) Left("Division by zero") else Right(a / b)
+
+val computation = for {
+  a <- divide(10, 2)   // Right(5)
+  b <- divide(a, 5)    // Right(1)
+  c <- divide(b, 1)    // Right(1)
+} yield c              // Right(1)
+
+val failed = for {
+  a <- divide(10, 2)   // Right(5)
+  b <- divide(a, 0)    // Left - stops here
+  c <- divide(b, 1)    // Never executed
+} yield c              // Left("Division by zero")
+```
+
+**Advanced Either patterns:**
+
+```scala
+// Custom error types
+sealed trait AppError
+case class ValidationError(message: String) extends AppError
+case class DatabaseError(cause: Throwable) extends AppError
+case class NotFoundError(id: String) extends AppError
+
+def findUser(id: String): Either[AppError, User] = {
+  if (id.isEmpty) Left(ValidationError("ID cannot be empty"))
+  else if (id == "999") Left(NotFoundError(id))
+  else Right(User(id, "Name"))
+}
+
+// Accumulating errors (requires Cats)
+import cats.implicits._
+
+def validateName(name: String): Either[String, String] =
+  if (name.nonEmpty) Right(name) else Left("Name is empty")
+
+def validateAge(age: Int): Either[String, Int] =
+  if (age >= 0) Right(age) else Left("Age is negative")
+
+// Sequential validation (stops at first error)
+val user = for {
+  name <- validateName("")     // Stops here
+  age <- validateAge(-5)
+} yield User(name, age)        // Left("Name is empty")
+
+// Parallel validation (with Validated)
+import cats.data.Validated
+import cats.data.ValidatedNec  // NonEmptyChain
+
+def validateNameV(name: String): ValidatedNec[String, String] =
+  if (name.nonEmpty) Validated.validNec(name) else Validated.invalidNec("Name is empty")
+
+def validateAgeV(age: Int): ValidatedNec[String, Int] =
+  if (age >= 0) Validated.validNec(age) else Validated.invalidNec("Age is negative")
+
+val validated = (validateNameV(""), validateAgeV(-5)).mapN(User.apply)
+// Invalid(NonEmptyChain("Name is empty", "Age is negative"))
+
+// Converting to Either
+validated.toEither  // Left(NonEmptyChain("Name is empty", "Age is negative"))
+```
+
+**Either combinators:**
+
+```scala
+// Recovering from Left
+val recovered = failure.recover {
+  case "specific error" => 0
+}
+
+val recoveredWith = failure.recoverWith {
+  case "error" => Right(0)
+}
+
+// Folding
+val folded = success.fold(
+  error => s"Failed: $error",
+  value => s"Success: $value"
+)
+
+// Swapping sides
+val swapped = success.swap  // Left(42)
+
+// BiMap - transform both sides
+val bimapped = success.bimap(
+  error => s"Error: $error",
+  value => value * 2
+)
+
+// Filtering to Option
+val filtered = success.filterOrElse(_ > 50, "Too small")  // Left("Too small")
+```
+
+### Try - Exception Handling
+
+**Try basics:**
+
+```scala
+import scala.util.{Try, Success, Failure}
+
+// Creating Try
+val tryValue = Try("123".toInt)            // Success(123)
+val tryFailed = Try("abc".toInt)           // Failure(NumberFormatException)
+
+// Pattern matching
+tryValue match {
+  case Success(value) => println(s"Parsed: $value")
+  case Failure(exception) => println(s"Failed: ${exception.getMessage}")
+}
+
+// Transforming Success
+val doubled = tryValue.map(_ * 2)          // Success(246)
+
+// Chaining operations
+val chained = tryValue.flatMap { value =>
+  Try(value / 10)
+}
+
+// For-comprehension
+val computation = for {
+  a <- Try("10".toInt)
+  b <- Try("5".toInt)
+  c <- Try(a / b)
+} yield c  // Success(2)
+
+// Short-circuits on Failure
+val failed = for {
+  a <- Try("10".toInt)
+  b <- Try("abc".toInt)  // Failure - stops here
+  c <- Try(a / b)
+} yield c  // Failure(NumberFormatException)
+```
+
+**Try recovery patterns:**
+
+```scala
+// Recover with default value
+val recovered = tryFailed.recover {
+  case _: NumberFormatException => 0
+}
+
+// Recover with another Try
+val recoveredWith = tryFailed.recoverWith {
+  case _: NumberFormatException => Try("456".toInt)
+}
+
+// Fallback to another Try
+val fallback = tryFailed.orElse(Try("456".toInt))
+
+// Converting to Option and Either
+val asOption = tryValue.toOption           // Some(123)
+val asEither = tryValue.toEither           // Right(123)
+
+// Filtering
+val filtered = tryValue.filter(_ > 100)    // Success(123)
+val failedFilter = tryValue.filter(_ > 200)  // Failure(NoSuchElementException)
+
+// Folding
+val folded = tryValue.fold(
+  exception => s"Error: ${exception.getMessage}",
+  value => s"Success: $value"
+)
+```
+
+### Cats Effect Error Handling
+
+**IO error handling:**
+
+```scala
+import cats.effect._
+
+// Creating IO that might fail
+val io: IO[Int] = IO.raiseError(new Exception("Failed"))
+val successful: IO[Int] = IO.pure(42)
+
+// Handling errors
+val handled = io.handleError { error =>
+  println(s"Error: ${error.getMessage}")
+  0
+}
+
+val handledWith = io.handleErrorWith { error =>
+  IO.pure(0)
+}
+
+// Recovering from specific errors
+val recovered = io.recover {
+  case _: IllegalArgumentException => 0
+}
+
+val recoveredWith = io.recoverWith {
+  case _: IllegalArgumentException => IO.pure(0)
+}
+
+// Attempt - convert to Either
+val attempt: IO[Either[Throwable, Int]] = io.attempt
+
+val processed = attempt.flatMap {
+  case Right(value) => IO.println(s"Success: $value")
+  case Left(error) => IO.println(s"Error: ${error.getMessage}")
+}
+
+// Redeem - handle both success and failure
+val redeemed = io.redeem(
+  error => s"Failed: ${error.getMessage}",
+  value => s"Success: $value"
+)
+
+// RedeemWith - effectful version
+val redeemedWith = io.redeemWith(
+  error => IO.pure(s"Failed: ${error.getMessage}"),
+  value => IO.pure(s"Success: $value")
+)
+
+// Timeout
+val withTimeout = io.timeout(5.seconds)
+
+// Retry
+val retried = io.handleErrorWith { error =>
+  IO.sleep(1.second) >> io  // Retry after delay
+}
+
+// Retry with exponential backoff (requires cats-retry)
+import retry._
+
+val policy = RetryPolicies.exponentialBackoff[IO](1.second)
+val retriedWithPolicy = retryingOnAllErrors[Int](policy, onError = (_, _) => IO.unit)(io)
+```
+
+**MonadError type class:**
+
+```scala
+import cats.MonadError
+import cats.syntax.all._
+
+def safeDivide[F[_]](a: Int, b: Int)(implicit F: MonadError[F, Throwable]): F[Int] = {
+  if (b == 0) F.raiseError(new ArithmeticException("Division by zero"))
+  else F.pure(a / b)
+}
+
+// Works with any F[_] that has MonadError instance
+val ioResult: IO[Int] = safeDivide[IO](10, 2)
+val eitherResult: Either[Throwable, Int] = safeDivide[Either[Throwable, *]](10, 2)
+
+// Generic error handling
+def handleDivision[F[_]: MonadError[*[_], Throwable]](a: Int, b: Int): F[String] = {
+  safeDivide[F](a, b)
+    .map(result => s"Result: $result")
+    .handleError(error => s"Error: ${error.getMessage}")
+}
+```
+
+### ZIO Error Channel
+
+**ZIO typed errors:**
+
+```scala
+import zio._
+
+// ZIO[R, E, A] - R=environment, E=error type, A=success type
+sealed trait AppError
+case class ValidationError(message: String) extends AppError
+case class DatabaseError(cause: Throwable) extends AppError
+
+// Creating ZIO with typed errors
+val success: ZIO[Any, AppError, Int] = ZIO.succeed(42)
+val failure: ZIO[Any, AppError, Int] = ZIO.fail(ValidationError("Invalid input"))
+
+// Handling errors
+val handled = failure.catchAll { error =>
+  error match {
+    case ValidationError(msg) => ZIO.succeed(0)
+    case DatabaseError(cause) => ZIO.succeed(-1)
+  }
+}
+
+// Catching specific error types
+val catchSome = failure.catchSome {
+  case ValidationError(msg) => ZIO.succeed(0)
+}
+
+// Converting to Either
+val either: ZIO[Any, Nothing, Either[AppError, Int]] = success.either
+
+// Fold - handle both success and failure
+val folded = success.fold(
+  error => s"Error: $error",
+  value => s"Success: $value"
+)
+
+// FoldZIO - effectful version
+val foldedZIO = success.foldZIO(
+  error => ZIO.succeed(s"Error: $error"),
+  value => ZIO.succeed(s"Success: $value")
+)
+
+// Mapping errors
+val mappedError = failure.mapError {
+  case ValidationError(msg) => DatabaseError(new Exception(msg))
+  case other => other
+}
+
+// Retrying
+val retried = failure.retry(Schedule.recurs(3))
+
+// Retry with backoff
+val retriedWithBackoff = failure.retry(
+  Schedule.exponential(1.second) && Schedule.recurs(5)
+)
+
+// Timeout
+val withTimeout = success.timeout(5.seconds)
+```
+
+**Error accumulation with ZIO:**
+
+```scala
+import zio._
+import zio.prelude.Validation
+
+def validateName(name: String): IO[String, String] =
+  if (name.nonEmpty) ZIO.succeed(name) else ZIO.fail("Name is empty")
+
+def validateAge(age: Int): IO[String, Int] =
+  if (age >= 0) ZIO.succeed(age) else ZIO.fail("Age is negative")
+
+// Sequential validation (fails fast)
+val sequential = for {
+  name <- validateName("")     // Fails here
+  age <- validateAge(-5)       // Not executed
+} yield User(name, age)
+
+// Parallel validation (accumulates errors)
+val parallel = ZIO.validatePar(
+  validateName(""),
+  validateAge(-5)
+)(User.apply)  // Fails with both errors
+
+// Using Validation
+val validated = Validation.validateWith(
+  Validation.fromEither(validateName("").either),
+  Validation.fromEither(validateAge(-5).either)
+)(User.apply)
+```
+
+### For-Comprehension Error Propagation
+
+**Short-circuiting behavior:**
+
+```scala
+// Option - short-circuits on None
+val optionChain = for {
+  a <- Some(1)
+  b <- Some(2)
+  c <- None        // Stops here
+  d <- Some(4)     // Never executed
+} yield a + b + c + d  // None
+
+// Either - short-circuits on Left
+def divide(a: Int, b: Int): Either[String, Int] =
+  if (b == 0) Left("Division by zero") else Right(a / b)
+
+val eitherChain = for {
+  a <- divide(10, 2)   // Right(5)
+  b <- divide(a, 0)    // Left - stops here
+  c <- divide(10, 2)   // Never executed
+} yield c              // Left("Division by zero")
+
+// Try - short-circuits on Failure
+val tryChain = for {
+  a <- Try("10".toInt)
+  b <- Try("abc".toInt)  // Failure - stops here
+  c <- Try("5".toInt)    // Never executed
+} yield a + b + c         // Failure(NumberFormatException)
+```
+
+**Mixing error types in for-comprehensions:**
+
+```scala
+// Converting between types
+val mixed = for {
+  a <- Some(10)
+  b <- Right(5).toOption  // Convert Either to Option
+  c <- Try(a / b).toOption  // Convert Try to Option
+} yield c  // Some(2)
+
+// Using EitherT to stack Either and Future
+import cats.data.EitherT
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+def findUser(id: Int): Future[Either[String, User]] = ???
+def findPosts(userId: Int): Future[Either[String, List[Post]]] = ???
+
+val result = for {
+  user <- EitherT(findUser(123))
+  posts <- EitherT(findPosts(user.id))
+} yield (user, posts)
+
+val unwrapped: Future[Either[String, (User, List[Post])]] = result.value
+```
+
+### Scala 3 Boundary and Break
+
+**Early return with boundary/break:**
+
+```scala
+import scala.util.boundary, boundary.break
+
+// Early return from computation
+def findFirst[A](list: List[A])(predicate: A => Boolean): Option[A] = {
+  boundary {
+    for (elem <- list) {
+      if (predicate(elem)) break(Some(elem))
+    }
+    None
+  }
+}
+
+findFirst(List(1, 2, 3, 4, 5))(_ > 3)  // Some(4)
+
+// Labeled boundaries
+def processData(data: List[Int]): Either[String, Int] = {
+  boundary[Either[String, Int]] {
+    var sum = 0
+    for (value <- data) {
+      if (value < 0) break(Left("Negative value found"))
+      sum += value
+    }
+    Right(sum)
+  }
+}
+
+processData(List(1, 2, -3, 4))  // Left("Negative value found")
+
+// Nested boundaries
+def nestedSearch(matrix: List[List[Int]]): Option[Int] = {
+  boundary {
+    for (row <- matrix) {
+      boundary {
+        for (elem <- row) {
+          if (elem > 10) break(break(Some(elem)))  // Break both boundaries
+        }
+      }
+    }
+    None
+  }
+}
+
+nestedSearch(List(List(1, 2), List(3, 15)))  // Some(15)
+```
+
+**Comparison with traditional approaches:**
+
+```scala
+// Traditional approach with recursion
+def findFirstRecursive[A](list: List[A])(predicate: A => Boolean): Option[A] = {
+  list match {
+    case Nil => None
+    case head :: tail =>
+      if (predicate(head)) Some(head)
+      else findFirstRecursive(tail)(predicate)
+  }
+}
+
+// Traditional approach with fold
+def findFirstFold[A](list: List[A])(predicate: A => Boolean): Option[A] = {
+  list.foldLeft[Option[A]](None) { (acc, elem) =>
+    acc.orElse(if (predicate(elem)) Some(elem) else None)
+  }
+}
+
+// Boundary/break is more imperative and familiar
+// Use when converting Java code or for performance-critical loops
+```
+
+### Error Handling Best Practices
+
+**Choosing the right abstraction:**
+
+```scala
+// Use Option for simple absence/presence
+def findUser(id: Int): Option[User] = ???
+
+// Use Either for typed errors
+def validateUser(user: User): Either[ValidationError, User] = ???
+
+// Use Try when catching exceptions
+def parseJson(json: String): Try[JsonObject] = Try(Json.parse(json))
+
+// Use IO/ZIO for effectful computations
+def saveToDatabase(user: User): IO[User] = ???
+
+// Use boundary/break for imperative-style early returns
+def processLargeDataset(data: List[Data]): Result = {
+  boundary {
+    // Complex imperative logic with early returns
+  }
+}
+```
+
+**Error composition:**
+
+```scala
+// Combining multiple error-prone operations
+def registerUser(data: UserData): Either[AppError, User] = {
+  for {
+    validated <- validateUserData(data)
+    hashed <- hashPassword(validated.password)
+    user <- createUser(validated.copy(password = hashed))
+    _ <- sendWelcomeEmail(user)
+  } yield user
+}
+
+// Parallel execution with error accumulation
+import cats.implicits._
+
+def validateUserParallel(data: UserData): ValidatedNec[ValidationError, User] = {
+  (
+    validateName(data.name),
+    validateEmail(data.email),
+    validateAge(data.age)
+  ).mapN(User.apply)
+}
+```
+
+---
+
+## Metaprogramming
+
+Scala provides powerful metaprogramming capabilities, evolving from Scala 2's macro system to Scala 3's safer and more principled approach with inline, transparent inline, and the new macro system.
+
+### Metaprogramming Evolution
+
+**Scala 2 vs Scala 3 metaprogramming:**
+
+| Feature | Scala 2 | Scala 3 |
+|---------|---------|---------|
+| **Macros** | def macros (blackbox/whitebox) | inline + quoted code |
+| **Compile-time** | Limited | Rich compile-time operations |
+| **Type-level** | Shapeless library | Built-in match types, unions |
+| **Derivation** | Manual implicit derivation | `derives` keyword |
+| **Safety** | Hygiene issues possible | Hygienic by default |
+| **Complexity** | High learning curve | More principled |
+
+### Scala 2 Macros (Legacy)
+
+**Def macros (avoid in new code):**
+
+```scala
+// Scala 2 blackbox macro example
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+
+object DebugMacros {
+  def debug(value: Any): Unit = macro debugImpl
+
+  def debugImpl(c: Context)(value: c.Expr[Any]): c.Expr[Unit] = {
+    import c.universe._
+
+    val valueTree = value.tree
+    val valueString = show(valueTree)
+
+    reify {
+      println(s"$valueString = ${value.splice}")
+    }
+  }
+}
+
+// Usage
+val x = 42
+DebugMacros.debug(x + 10)  // Prints: "x + 10 = 52"
+
+// Whitebox macro - can refine return type
+def mkArray[T](elements: T*): Array[T] = macro mkArrayImpl[T]
+
+def mkArrayImpl[T: c.WeakTypeTag](c: Context)(elements: c.Expr[T]*): c.Expr[Array[T]] = {
+  import c.universe._
+
+  c.Expr[Array[T]](
+    q"Array(..${elements.map(_.tree)})"
+  )
+}
+```
+
+**Macro bundles (Scala 2):**
+
+```scala
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
+
+trait JsonMacros {
+  val c: blackbox.Context
+  import c.universe._
+
+  def encodeImpl[T: c.WeakTypeTag]: c.Expr[JsonEncoder[T]] = {
+    val tpe = weakTypeOf[T]
+
+    val fields = tpe.decls.collect {
+      case m: MethodSymbol if m.isCaseAccessor =>
+        val name = m.name.toString
+        val returnType = m.returnType
+        q"($name, encode(value.$m))"
+    }
+
+    c.Expr[JsonEncoder[T]](q"""
+      new JsonEncoder[$tpe] {
+        def encode(value: $tpe): Json = Json.obj(..$fields)
+      }
+    """)
+  }
+}
+
+object JsonEncoder {
+  def derived[T]: JsonEncoder[T] = macro JsonMacrosImpl.encodeImpl[T]
+}
+
+class JsonMacrosImpl(val c: blackbox.Context) extends JsonMacros
+```
+
+### Scala 3 Inline
+
+**Inline definitions:**
+
+```scala
+// Simple inline method
+inline def square(x: Int): Int = x * x
+
+// Compiler inlines the code at call site:
+val result = square(5)  // Becomes: val result = 5 * 5
+
+// Inline parameters
+inline def repeat(inline n: Int)(body: => Unit): Unit = {
+  if (n > 0) {
+    body
+    repeat(n - 1)(body)
+  }
+}
+
+repeat(3)(println("Hello"))
+// Expands to:
+// println("Hello")
+// println("Hello")
+// println("Hello")
+
+// Inline values
+inline val DEBUG = true
+
+inline def log(msg: String): Unit = {
+  if (DEBUG) println(s"[DEBUG] $msg")
+  // If DEBUG is false, entire if-statement is eliminated
+}
+```
+
+**Inline match (type-based specialization):**
+
+```scala
+inline def process[T](value: T): String = inline value match {
+  case _: String => s"String: $value"
+  case _: Int => s"Int: $value"
+  case _: Boolean => s"Boolean: $value"
+  case _ => s"Other: $value"
+}
+
+// Specialized at compile time
+process("hello")  // String: hello
+process(42)       // Int: 42
+
+// Inline match on types
+inline def defaultValue[T]: T = inline erasedValue[T] match {
+  case _: Int => 0.asInstanceOf[T]
+  case _: String => "".asInstanceOf[T]
+  case _: Boolean => false.asInstanceOf[T]
+  case _ => null.asInstanceOf[T]
+}
+```
+
+**Compile-time operations:**
+
+```scala
+import scala.compiletime._
+
+// Compile-time error
+inline def requirePositive(inline x: Int): Int = {
+  inline if (x <= 0) {
+    error("Value must be positive")
+  }
+  x
+}
+
+val good = requirePositive(5)     // OK
+// val bad = requirePositive(-1)  // Compile error: Value must be positive
+
+// Compile-time assertions
+inline def assertType[T, U](value: T): Unit = {
+  inline if (!constValue[T =:= U]) {
+    error("Type mismatch")
+  }
+}
+
+// Summon implicits
+inline def summonAll[T <: Tuple]: List[Any] = inline erasedValue[T] match {
+  case _: EmptyTuple => Nil
+  case _: (t *: ts) => summonInline[t] :: summonAll[ts]
+}
+```
+
+### Transparent Inline
+
+**Transparent inline for type refinement:**
+
+```scala
+// Regular inline - return type is fixed
+inline def choose(inline b: Boolean, x: Int, y: String): Any =
+  if (b) x else y
+
+val result1 = choose(true, 42, "hello")  // Type: Any
+
+// Transparent inline - return type is refined
+transparent inline def chooseT(inline b: Boolean, x: Int, y: String) =
+  if (b) x else y
+
+val result2 = chooseT(true, 42, "hello")   // Type: Int
+val result3 = chooseT(false, 42, "hello")  // Type: String
+
+// Generic transparent inline
+transparent inline def transformOrKeep[T](inline transform: Boolean, value: T) =
+  inline if (transform) {
+    value.toString
+  } else {
+    value
+  }
+
+val a = transformOrKeep(true, 42)   // Type: String
+val b = transformOrKeep(false, 42)  // Type: Int
+```
+
+**Type-level computations:**
+
+```scala
+// Transparent inline for type-level arithmetic
+transparent inline def toIntSingleton(inline x: Int): x.type = x
+
+val five = toIntSingleton(5)  // Type: 5
+
+// Tuple operations
+transparent inline def head[T <: Tuple](t: T): Any = inline t match {
+  case t: (h *: tail) => t.head
+}
+
+val tuple = (1, "hello", true)
+val h = head(tuple)  // Type: Int (refined!)
+
+// Dependent types via transparent inline
+trait Size[N <: Int]
+
+transparent inline def sizedArray[N <: Int](inline n: N): Array[Int] = {
+  new Array[Int](n)
+}
+```
+
+### Scala 3 Macros
+
+**Quote and splice:**
+
+```scala
+import scala.quoted._
+
+// Simple macro
+inline def debug(inline expr: Any): Unit = ${debugImpl('expr)}
+
+def debugImpl(expr: Expr[Any])(using Quotes): Expr[Unit] = {
+  import quotes.reflect._
+
+  val exprString = expr.show
+  '{
+    println(s"$exprString = ${$expr}")
+  }
+}
+
+// Usage
+val x = 42
+debug(x + 10)  // Prints: "x.+(10) = 52"
+
+// Macro with type parameter
+inline def createInstance[T]: T = ${createInstanceImpl[T]}
+
+def createInstanceImpl[T: Type](using Quotes): Expr[T] = {
+  import quotes.reflect._
+
+  val tpe = TypeRepr.of[T]
+  tpe.classSymbol match {
+    case Some(cls) =>
+      // Generate code to construct instance
+      New(Inferred(tpe)).select(cls.primaryConstructor).appliedToNone.asExprOf[T]
+    case None =>
+      report.errorAndAbort(s"Cannot create instance of ${tpe.show}")
+  }
+}
+```
+
+**Pattern matching on code:**
+
+```scala
+import scala.quoted._
+
+inline def optimize(inline expr: Int): Int = ${optimizeImpl('expr)}
+
+def optimizeImpl(expr: Expr[Int])(using Quotes): Expr[Int] = {
+  expr match {
+    // Optimize x + 0 to x
+    case '{($x: Int) + 0} => x
+
+    // Optimize x * 1 to x
+    case '{($x: Int) * 1} => x
+
+    // Optimize x * 0 to 0
+    case '{($x: Int) * 0} => '{0}
+
+    // No optimization
+    case _ => expr
+  }
+}
+
+val x = 5
+val a = optimize(x + 0)  // Optimized to: x
+val b = optimize(x * 1)  // Optimized to: x
+val c = optimize(x * 0)  // Optimized to: 0
+```
+
+**Generating code:**
+
+```scala
+import scala.quoted._
+
+// Generate a method that sums N integers
+inline def sumN(inline n: Int): (Int*) => Int = ${sumNImpl('n)}
+
+def sumNImpl(n: Expr[Int])(using Quotes): Expr[(Int*) => Int] = {
+  import quotes.reflect._
+
+  n.value match {
+    case Some(count) =>
+      val params = (1 to count).map(i => s"x$i").toList
+
+      // Generate: (x1, x2, ..., xN) => x1 + x2 + ... + xN
+      '{
+        (args: Seq[Int]) => args.sum
+      }
+
+    case None =>
+      report.errorAndAbort("n must be a constant")
+  }
+}
+
+val sum3 = sumN(3)
+sum3(1, 2, 3)  // 6
+```
+
+### Type-Level Programming
+
+**Match types:**
+
+```scala
+// Type-level pattern matching
+type Elem[X] = X match {
+  case String => Char
+  case Array[t] => t
+  case Iterable[t] => t
+  case AnyVal => X
+}
+
+val charElem: Elem[String] = 'a'
+val intElem: Elem[Array[Int]] = 42
+val stringElem: Elem[List[String]] = "hello"
+
+// Recursive match types
+type LeafElem[X] = X match {
+  case String => Char
+  case Array[t] => LeafElem[t]
+  case Iterable[t] => LeafElem[t]
+  case AnyVal => X
+}
+
+val deepElem: LeafElem[List[Array[String]]] = 'x'  // Char
+```
+
+**Union and intersection types:**
+
+```scala
+// Union types
+def process(value: Int | String): String = value match {
+  case i: Int => s"Int: $i"
+  case s: String => s"String: $s"
+}
+
+process(42)       // "Int: 42"
+process("hello")  // "String: hello"
+
+// Intersection types
+trait Readable {
+  def read(): String
+}
+
+trait Writable {
+  def write(data: String): Unit
+}
+
+def copy(source: Readable, dest: Writable): Unit = {
+  dest.write(source.read())
+}
+
+// Require both traits
+def processFile(file: Readable & Writable): Unit = {
+  val data = file.read()
+  file.write(data.toUpperCase)
+}
+```
+
+**Dependent types:**
+
+```scala
+// Path-dependent types
+trait Container {
+  type Element
+  def add(e: Element): Unit
+  def get(): Element
+}
+
+def transfer(from: Container, to: Container { type Element = from.Element }): Unit = {
+  to.add(from.get())
+}
+
+// Dependent function types
+trait Entry {
+  type Key
+  def key: Key
+}
+
+// Function that returns type dependent on input
+val extractKey: (e: Entry) => e.Key = (e: Entry) => e.key
+
+case class StringEntry(key: String) extends Entry {
+  type Key = String
+}
+
+val entry = StringEntry("test")
+val key: String = extractKey(entry)  // Type refined to String
+```
+
+**Type-level arithmetic:**
+
+```scala
+// Church numerals (compile-time numbers)
+sealed trait Nat
+case object Zero extends Nat
+case class Succ[N <: Nat](n: N) extends Nat
+
+type _0 = Zero.type
+type _1 = Succ[_0]
+type _2 = Succ[_1]
+type _3 = Succ[_2]
+
+// Type-level addition
+type Add[N <: Nat, M <: Nat] <: Nat = N match {
+  case Zero.type => M
+  case Succ[n] => Succ[Add[n, M]]
+}
+
+val three: Add[_1, _2] = Succ(Succ(Succ(Zero)))
+
+// Sized collections
+case class Vec[N <: Nat, A](values: List[A]) {
+  def append[M <: Nat](other: Vec[M, A]): Vec[Add[N, M], A] =
+    Vec(values ++ other.values)
+}
+
+val vec1 = Vec[_2, Int](List(1, 2))
+val vec2 = Vec[_3, Int](List(3, 4, 5))
+val vec5: Vec[Add[_2, _3], Int] = vec1.append(vec2)  // Type: Vec[_5, Int]
+```
+
+### Derivation with Derives
+
+**Automatic type class derivation:**
+
+```scala
+// Define derivable type class
+trait Show[T] {
+  def show(value: T): String
+}
+
+object Show {
+  // Primitive instances
+  given Show[Int] = (value: Int) => value.toString
+  given Show[String] = (value: String) => s"\"$value\""
+  given Show[Boolean] = (value: Boolean) => value.toString
+
+  // Derive for case classes
+  import scala.deriving._
+
+  inline def derived[T](using m: Mirror.Of[T]): Show[T] = {
+    inline m match {
+      case p: Mirror.ProductOf[T] => productShow(p)
+      case s: Mirror.SumOf[T] => sumShow(s)
+    }
+  }
+
+  private def productShow[T](p: Mirror.ProductOf[T]): Show[T] = {
+    new Show[T] {
+      def show(value: T): String = {
+        val values = value.asInstanceOf[Product].productIterator.toList
+        val labels = constValueTuple[p.MirroredElemLabels].toList
+        val fields = labels.zip(values).map { case (label, value) =>
+          s"$label = $value"
+        }
+        s"${constValue[p.MirroredLabel]}(${fields.mkString(", ")})"
+      }
+    }
+  }
+
+  private def sumShow[T](s: Mirror.SumOf[T]): Show[T] = {
+    new Show[T] {
+      def show(value: T): String = value.toString
+    }
+  }
+}
+
+// Use derives keyword
+case class Person(name: String, age: Int) derives Show
+
+val person = Person("Alice", 30)
+summon[Show[Person]].show(person)  // "Person(name = Alice, age = 30)"
+
+// Multiple derivations
+enum Color derives Show, Eq, Ordering {
+  case Red, Green, Blue
+}
+
+// Generic derivation
+case class Box[T](value: T) derives Show
+
+given [T: Show]: Show[Box[T]] = Show.derived
+```
+
+**Common derivable type classes:**
+
+```scala
+// Eq - equality
+trait Eq[T] {
+  def eqv(x: T, y: T): Boolean
+}
+
+case class User(id: Int, name: String) derives Eq
+
+val user1 = User(1, "Alice")
+val user2 = User(1, "Alice")
+summon[Eq[User]].eqv(user1, user2)  // true
+
+// Ordering
+case class Score(value: Int) derives Ordering
+
+val scores = List(Score(10), Score(5), Score(20))
+scores.sorted  // List(Score(5), Score(10), Score(20))
+
+// Encoder/Decoder (JSON libraries)
+import io.circe.Codec
+
+case class Event(id: String, timestamp: Long) derives Codec
+// Automatically derives JSON encoder and decoder
+```
+
+### Compile-Time Operations
+
+**Compile-time values:**
+
+```scala
+import scala.compiletime._
+
+// Extract constant values
+inline val SIZE = 100
+transparent inline def arraySize: Int = constValue[SIZE.type]
+
+val size: 100 = arraySize  // Type refined to literal 100
+
+// Const operations
+transparent inline def add(inline a: Int, inline b: Int): Int = {
+  inline val result = constValue[a.type] + constValue[b.type]
+  result
+}
+
+val sum: 5 = add(2, 3)  // Type refined to 5
+
+// Error reporting
+inline def assertPositive(inline x: Int): Int = {
+  inline if (constValue[x.type] <= 0) {
+    error("Value must be positive at compile time")
+  }
+  x
+}
+
+val good = assertPositive(5)     // OK
+// val bad = assertPositive(-1)  // Compile error
+```
+
+**Tuple operations:**
+
+```scala
+import scala.compiletime.ops.int._
+
+// Type-level size
+type Size[T <: Tuple] = T match {
+  case EmptyTuple => 0
+  case _ *: tail => S[Size[tail]]
+}
+
+val size: Size[(Int, String, Boolean)] = 3  // Type: 3
+
+// Type-level concat
+type Concat[A <: Tuple, B <: Tuple] <: Tuple = A match {
+  case EmptyTuple => B
+  case h *: t => h *: Concat[t, B]
+}
+
+val concat: Concat[(Int, String), (Boolean, Double)] = (1, "hi", true, 3.14)
+
+// Type-level reverse
+type Reverse[T <: Tuple] <: Tuple = T match {
+  case EmptyTuple => EmptyTuple
+  case h *: t => Concat[Reverse[t], h *: EmptyTuple]
+}
+
+val reversed: Reverse[(Int, String, Boolean)] = (true, "hi", 1)
+```
+
+**Code generation:**
+
+```scala
+import scala.quoted._
+
+// Generate boilerplate code
+inline def generateGetters[T]: Unit = ${generateGettersImpl[T]}
+
+def generateGettersImpl[T: Type](using Quotes): Expr[Unit] = {
+  import quotes.reflect._
+
+  val tpe = TypeRepr.of[T]
+  val fields = tpe.typeSymbol.caseFields
+
+  fields.foreach { field =>
+    println(s"def get${field.name.capitalize}(): ${field.termRef.widenTermRefByName.show}")
+  }
+
+  '{}
+}
+
+case class User(name: String, age: Int, email: String)
+
+generateGetters[User]
+// Prints at compile time:
+// def getName(): String
+// def getAge(): Int
+// def getEmail(): String
+```
+
+**Compile-time reflection:**
+
+```scala
+import scala.quoted._
+
+inline def inspectType[T]: Unit = ${inspectTypeImpl[T]}
+
+def inspectTypeImpl[T: Type](using Quotes): Expr[Unit] = {
+  import quotes.reflect._
+
+  val tpe = TypeRepr.of[T]
+
+  println(s"Type: ${tpe.show}")
+  println(s"Base classes: ${tpe.baseClasses.map(_.name)}")
+  println(s"Members: ${tpe.typeSymbol.declaredMethods.map(_.name)}")
+
+  tpe.typeSymbol.caseFields.foreach { field =>
+    println(s"Field: ${field.name}: ${field.termRef.widenTermRefByName.show}")
+  }
+
+  '{}
+}
+
+case class Person(name: String, age: Int)
+inspectType[Person]
+// Compile-time output:
+// Type: Person
+// Base classes: List(Person, Product, Serializable, Equals, Object, Any)
+// Members: List(name, age, copy, productElementNames, ...)
+// Field: name: String
+// Field: age: Int
+```
+
+### Metaprogramming Best Practices
+
+**When to use metaprogramming:**
+
+```scala
+// Good use cases:
+// 1. Eliminating boilerplate
+case class User(name: String, age: Int) derives JsonCodec
+
+// 2. Performance optimization
+inline def fastSum(xs: Array[Int]): Int = {
+  var sum = 0
+  var i = 0
+  while (i < xs.length) {
+    sum += xs(i)
+    i += 1
+  }
+  sum
+}
+
+// 3. Type-safe APIs
+val query = sql"SELECT * FROM users WHERE id = $userId"  // Compile-time SQL checking
+
+// 4. Configuration validation
+inline val config = validateConfig("config.json")  // Compile-time validation
+
+// Bad use cases:
+// - Obscuring simple code
+// - When runtime reflection would suffice
+// - Overly complex type-level programming
+```
+
+**Comparison with other languages:**
+
+| Feature | Scala 3 | Rust | Haskell | C++ |
+|---------|---------|------|---------|-----|
+| Macros | Quote/splice | Procedural/declarative | Template Haskell | Preprocessor |
+| Inline | inline keyword | inline attribute | INLINE pragma | inline keyword |
+| Type-level | Match types, unions | Traits, associated types | Type families | Template metaprogramming |
+| Derivation | derives keyword | derive macros | deriving clause | Not built-in |
+| Safety | Hygienic | Hygienic | Hygienic | Not hygienic |
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:
