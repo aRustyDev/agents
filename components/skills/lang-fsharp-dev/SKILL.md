@@ -615,12 +615,222 @@ type PersonService() =
 
 ---
 
-## Common Idioms
+## Module System
+
+F# uses modules and namespaces to organize code. Modules are similar to static classes in C# but are more flexible and support nested modules, functions, and values.
+
+### Namespaces
+
+```fsharp
+// File: Domain/User.fs
+namespace MyApp.Domain
+
+type User = {
+    Id: int
+    Name: string
+    Email: string
+}
+
+// Can have multiple types in same namespace
+type UserRepository() =
+    member _.GetUser(id: int) : User option =
+        None
+```
+
+### Modules
+
+```fsharp
+// Top-level module (one per file)
+module MyApp.Utils
+
+let add x y = x + y
+let multiply x y = x * y
+
+// Using from another file
+open MyApp.Utils
+let result = add 5 10
+```
+
+### Nested Modules
+
+```fsharp
+module MyApp.Math
+
+// Nested module
+module Arithmetic =
+    let add x y = x + y
+    let subtract x y = x - y
+
+module Geometry =
+    let area radius = System.Math.PI * radius * radius
+    let circumference radius = 2.0 * System.Math.PI * radius
+
+// Usage
+open MyApp.Math
+let sum = Arithmetic.add 5 10
+let circle = Geometry.area 5.0
+```
+
+### Module Attributes
+
+```fsharp
+// AutoOpen: automatically opens when parent is opened
+[<AutoOpen>]
+module Helpers =
+    let inline tap f x = f x; x
+    let inline tee f x = f x |> ignore; x
+
+// RequireQualifiedAccess: must use module name
+[<RequireQualifiedAccess>]
+module Config =
+    let apiKey = "secret-key"
+    let timeout = 30
+
+// Usage:
+// Can't do: open Config
+// Must do: Config.apiKey
+```
+
+### Open Declarations
+
+```fsharp
+// Open entire namespace
+open System.Collections.Generic
+
+// Open specific module
+open MyApp.Domain
+
+// Open with alias
+open System.Collections.Generic
+open SCG = System.Collections.Generic
+let dict = SCG.Dictionary<string, int>()
+
+// Open type (type extensions available)
+open type System.Math
+let result = PI * 2.0  // Instead of Math.PI
+```
+
+### Signature Files (.fsi)
+
+Signature files define the public API of a module, hiding implementation details.
+
+```fsharp
+// File: Domain.fsi (signature)
+module MyApp.Domain
+
+type User = {
+    Id: int
+    Name: string
+}
+
+val createUser: string -> User
+val validateUser: User -> Result<User, string>
+// Internal functions not exposed
+
+// File: Domain.fs (implementation)
+module MyApp.Domain
+
+type User = {
+    Id: int
+    Name: string
+}
+
+// Public functions (in signature)
+let createUser name = { Id = 0; Name = name }
+let validateUser user =
+    if user.Name.Length > 0 then Ok user
+    else Error "Invalid name"
+
+// Private helper (not in signature)
+let private generateId() = System.Random().Next()
+```
+
+### Module Organization Patterns
+
+```fsharp
+// File-per-type pattern
+// User.fs
+namespace MyApp.Domain
+
+type User = {
+    Id: int
+    Name: string
+}
+
+module User =
+    let create name = { Id = 0; Name = name }
+    let setName name user = { user with Name = name }
+
+// Module-per-concept pattern
+module MyApp.UserManagement
+
+type User = { Id: int; Name: string }
+type Role = Admin | User | Guest
+
+let createUser name = { Id = 0; Name = name }
+let assignRole user role = (user, role)
+```
+
+---
+
+## Error Handling
+
+F# provides powerful error handling through Option and Result types, enabling railway-oriented programming patterns that make error flows explicit and composable.
+
+### Option Type
+
+```fsharp
+// Option represents optional values
+type Option<'T> =
+    | Some of 'T
+    | None
+
+// Returning Option from functions
+let tryDivide x y =
+    if y = 0 then None
+    else Some (x / y)
+
+// Pattern matching
+match tryDivide 10 2 with
+| Some result -> printfn $"Result: {result}"
+| None -> printfn "Cannot divide by zero"
+
+// Option module functions
+let doubled = Option.map (fun x -> x * 2) (Some 5)  // Some 10
+let getOrDefault = Option.defaultValue 0 None  // 0
+```
+
+### Result Type
+
+```fsharp
+// Result represents success or failure with error details
+type Result<'T, 'TError> =
+    | Ok of 'T
+    | Error of 'TError
+
+// Basic usage
+let divide x y =
+    if y = 0 then
+        Error "Division by zero"
+    else
+        Ok (x / y)
+
+// Pattern matching
+match divide 10 2 with
+| Ok result -> printfn $"Success: {result}"
+| Error msg -> printfn $"Error: {msg}"
+
+// Result module functions
+let doubled = Result.map (fun x -> x * 2) (Ok 5)  // Ok 10
+let chained = Ok 10 |> Result.bind (fun x -> divide x 2)  // Ok 5
+```
 
 ### Railway-Oriented Programming
 
+Railway-oriented programming treats successful and error paths as parallel railway tracks, making composition natural.
+
 ```fsharp
-// Chain operations that can fail
+// Validation functions that can fail
 let validateName name =
     if String.IsNullOrWhiteSpace(name) then
         Error "Name cannot be empty"
@@ -631,15 +841,614 @@ let validateAge age =
     if age >= 0 && age <= 120 then
         Ok age
     else
-        Error "Invalid age"
+        Error "Age must be between 0 and 120"
 
-let createPerson name age =
+let validateEmail email =
+    if email.Contains("@") then
+        Ok email
+    else
+        Error "Invalid email format"
+
+// Composition with Result computation expression
+let createPerson name age email =
     result {
         let! validName = validateName name
         let! validAge = validateAge age
-        return { FirstName = validName; LastName = ""; Age = validAge }
+        let! validEmail = validateEmail email
+        return {
+            FirstName = validName
+            LastName = ""
+            Age = validAge
+        }
+    }
+
+// Usage
+match createPerson "Alice" 30 "alice@example.com" with
+| Ok person -> printfn $"Created: {person.FirstName}"
+| Error msg -> printfn $"Validation failed: {msg}"
+```
+
+### Custom Error Types
+
+```fsharp
+// Domain-specific errors
+type ValidationError =
+    | InvalidEmail of string
+    | InvalidAge of int
+    | InvalidName of string
+
+type PaymentError =
+    | InsufficientFunds of decimal
+    | CardExpired of System.DateTime
+    | NetworkError of string
+
+// Using custom errors
+let validateEmail email : Result<string, ValidationError> =
+    if email.Contains("@") then
+        Ok email
+    else
+        Error (InvalidEmail email)
+
+// Combining different error types
+type AppError =
+    | Validation of ValidationError
+    | Payment of PaymentError
+
+let processPayment email amount =
+    result {
+        let! validEmail =
+            validateEmail email
+            |> Result.mapError Validation
+        return "Payment successful"
     }
 ```
+
+### Applicative Validation
+
+Collect all errors instead of stopping at first failure.
+
+```fsharp
+// Validation that accumulates errors
+type Validation<'T> = Result<'T, string list>
+
+let validatePersonApplicative name age email : Validation<Person> =
+    let nameResult =
+        if String.IsNullOrWhiteSpace(name) then
+            Error ["Name cannot be empty"]
+        else
+            Ok name
+
+    let ageResult =
+        if age >= 0 && age <= 120 then
+            Ok age
+        else
+            Error ["Age must be between 0 and 120"]
+
+    let emailResult =
+        if email.Contains("@") then
+            Ok email
+        else
+            Error ["Invalid email format"]
+
+    // Combine all results
+    match nameResult, ageResult, emailResult with
+    | Ok n, Ok a, Ok e ->
+        Ok { FirstName = n; LastName = ""; Age = a }
+    | _ ->
+        // Collect all errors
+        [nameResult; ageResult; emailResult]
+        |> List.choose (function Error errs -> Some errs | Ok _ -> None)
+        |> List.concat
+        |> Error
+```
+
+---
+
+## Concurrency
+
+F# provides first-class support for asynchronous and concurrent programming through async workflows, Task integration, and the MailboxProcessor (agent) model.
+
+### Async Workflows
+
+```fsharp
+// Basic async computation
+let fetchData url = async {
+    printfn $"Fetching {url}..."
+    do! Async.Sleep 1000  // Async sleep
+    return $"Data from {url}"
+}
+
+// Run async computation
+let data = fetchData "https://api.example.com" |> Async.RunSynchronously
+
+// Parallel composition
+let processParallel urls = async {
+    let! results =
+        urls
+        |> List.map fetchData
+        |> Async.Parallel
+    return results |> Array.toList
+}
+```
+
+### Error Handling in Async
+
+```fsharp
+// Async with Result
+let safeFetchData url = async {
+    try
+        let! data = fetchData url
+        return Ok data
+    with
+    | ex -> return Error ex.Message
+}
+
+// Catching specific exceptions
+let fetchWithRetry url maxRetries = async {
+    let rec loop retriesLeft =
+        async {
+            try
+                let! data = fetchData url
+                return Ok data
+            with
+            | :? System.Net.WebException when retriesLeft > 0 ->
+                do! Async.Sleep 1000
+                return! loop (retriesLeft - 1)
+            | ex ->
+                return Error $"Failed after {maxRetries} retries: {ex.Message}"
+        }
+    return! loop maxRetries
+}
+```
+
+### Task Integration
+
+```fsharp
+// Interop with .NET Task
+open System.Threading.Tasks
+
+// Task computation expression (F# 6+)
+let fetchDataTask url = task {
+    printfn $"Fetching {url}..."
+    do! Task.Delay 1000
+    return $"Data from {url}"
+}
+
+// Convert between Async and Task
+let asyncToTask = fetchData "url" |> Async.StartAsTask
+let taskToAsync = fetchDataTask "url" |> Async.AwaitTask
+```
+
+### MailboxProcessor (Agents)
+
+The MailboxProcessor provides a message-based concurrency model, similar to Erlang's actors.
+
+```fsharp
+// Simple counter agent
+type CounterMessage =
+    | Increment
+    | Decrement
+    | Get of AsyncReplyChannel<int>
+
+let counterAgent = MailboxProcessor.Start(fun inbox ->
+    let rec loop count = async {
+        let! msg = inbox.Receive()
+        match msg with
+        | Increment ->
+            return! loop (count + 1)
+        | Decrement ->
+            return! loop (count - 1)
+        | Get replyChannel ->
+            replyChannel.Reply(count)
+            return! loop count
+    }
+    loop 0)
+
+// Using the agent
+counterAgent.Post Increment
+counterAgent.Post Increment
+let count = counterAgent.PostAndReply(fun reply -> Get reply)  // 2
+```
+
+### Agent Patterns
+
+```fsharp
+// Request-reply pattern
+type CacheMessage<'K, 'V> =
+    | Get of key: 'K * AsyncReplyChannel<'V option>
+    | Set of key: 'K * value: 'V
+    | Clear
+
+let createCache<'K, 'V when 'K: comparison>() =
+    MailboxProcessor.Start(fun inbox ->
+        let rec loop (cache: Map<'K, 'V>) = async {
+            let! msg = inbox.Receive()
+            match msg with
+            | Get (key, replyChannel) ->
+                replyChannel.Reply(Map.tryFind key cache)
+                return! loop cache
+            | Set (key, value) ->
+                return! loop (Map.add key value cache)
+            | Clear ->
+                return! loop Map.empty
+        }
+        loop Map.empty)
+
+// Usage
+let cache = createCache<string, int>()
+cache.Post (Set ("key1", 42))
+let value = cache.PostAndReply(fun reply -> Get ("key1", reply))  // Some 42
+```
+
+### CancellationToken Support
+
+```fsharp
+open System.Threading
+
+// Async with cancellation
+let longRunningTask = async {
+    for i in 1..100 do
+        printfn $"Step {i}"
+        do! Async.Sleep 100
+    return "Completed"
+}
+
+// Create cancellation token
+let cts = new CancellationTokenSource()
+
+// Start with cancellation
+Async.Start(longRunningTask, cts.Token)
+
+// Cancel after 500ms
+Thread.Sleep 500
+cts.Cancel()
+```
+
+### Parallel Processing
+
+```fsharp
+// Parallel map (CPU-bound)
+let numbers = [1..1000000]
+let results = numbers |> Array.ofList |> Array.Parallel.map (fun x -> x * x)
+
+// Parallel for
+open System.Threading.Tasks
+
+Parallel.For(0, 100, fun i ->
+    printfn $"Iteration {i}"
+) |> ignore
+```
+
+---
+
+## Metaprogramming
+
+F# provides powerful metaprogramming capabilities through type providers, quotations, computation expressions, and active patterns.
+
+### Type Providers
+
+Type providers generate types at compile-time based on external data sources, providing type-safe access to structured data.
+
+```fsharp
+// CSV Type Provider
+open FSharp.Data
+
+type Stocks = CsvProvider<"sample.csv">
+let data = Stocks.Load("data.csv")
+
+for row in data.Rows do
+    printfn $"{row.Date}: ${row.Close}"
+
+// JSON Type Provider
+type Weather = JsonProvider<"""
+{
+    "city": "Seattle",
+    "temperature": 72,
+    "conditions": ["partly cloudy", "windy"]
+}
+""">
+
+let weather = Weather.Load("weather.json")
+printfn $"{weather.City}: {weather.Temperature}°F"
+```
+
+### Quotations
+
+Quotations represent F# code as abstract syntax trees (AST) for manipulation and analysis.
+
+```fsharp
+open Microsoft.FSharp.Quotations
+
+// Code quotations
+let expr = <@ 1 + 2 @>  // Typed quotation
+let rawExpr = <@@ 1 + 2 @@>  // Untyped quotation
+
+// Examining quotations
+let rec printExpr expr =
+    match expr with
+    | Patterns.Value(v, _) -> printfn $"Value: {v}"
+    | Patterns.Call(_, mi, args) ->
+        printfn $"Call: {mi.Name}"
+        args |> List.iter printExpr
+    | Patterns.Lambda(var, body) ->
+        printfn $"Lambda: {var.Name}"
+        printExpr body
+    | _ -> printfn "Other pattern"
+```
+
+### Quotation Patterns
+
+```fsharp
+open Microsoft.FSharp.Quotations.Patterns
+open Microsoft.FSharp.Quotations.DerivedPatterns
+
+// Pattern matching on quotations
+let rec evaluate expr =
+    match expr with
+    | Value(v, t) when t = typeof<int> ->
+        v :?> int
+    | Call(None, mi, [left; right]) when mi.Name = "op_Addition" ->
+        evaluate left + evaluate right
+    | Call(None, mi, [left; right]) when mi.Name = "op_Multiply" ->
+        evaluate left * evaluate right
+    | _ -> failwith "Unsupported expression"
+
+// Usage
+let result = evaluate <@ 2 + 3 * 4 @>  // 14
+```
+
+### Computation Expressions
+
+Computation expressions provide syntactic sugar for monadic operations.
+
+```fsharp
+// Custom computation expression builder
+type MaybeBuilder() =
+    member _.Bind(x, f) = Option.bind f x
+    member _.Return(x) = Some x
+    member _.ReturnFrom(x) = x
+    member _.Zero() = None
+    member _.Delay(f) = f
+    member _.Run(f) = f()
+
+let maybe = MaybeBuilder()
+
+// Usage
+let result = maybe {
+    let! x = Some 5
+    let! y = Some 10
+    return x + y
+}  // Some 15
+```
+
+### Advanced Active Patterns
+
+```fsharp
+// Parameterized active patterns
+let (|DivisibleBy|_|) divisor n =
+    if n % divisor = 0 then Some () else None
+
+match 15 with
+| DivisibleBy 3 -> "Divisible by 3"
+| DivisibleBy 5 -> "Divisible by 5"
+| _ -> "Not divisible"
+
+// Multi-case with computation
+let (|Small|Medium|Large|Huge|) value =
+    if value < 10 then Small
+    elif value < 100 then Medium value
+    elif value < 1000 then Large value
+    else Huge value
+
+match 150 with
+| Small -> "small"
+| Medium x -> $"medium: {x}"
+| Large x -> $"large: {x}"
+| Huge -> "huge"
+```
+
+### Reflection
+
+```fsharp
+open System.Reflection
+
+// Get type information
+let t = typeof<Person>
+printfn $"Type: {t.Name}"
+printfn $"Properties: {t.GetProperties().Length}"
+
+// Create instance dynamically
+let createInstance (t: System.Type) =
+    System.Activator.CreateInstance(t)
+
+// Invoke method
+let invokeMethod obj methodName args =
+    let t = obj.GetType()
+    let mi = t.GetMethod(methodName)
+    mi.Invoke(obj, args)
+```
+
+---
+
+## Zero/Default Values
+
+F# handles default and zero values differently than C#, with a strong emphasis on explicit handling through Option types rather than null references.
+
+### Option.None vs Null
+
+```fsharp
+// Preferred: Use Option for optional values
+type Person = {
+    Name: string
+    Email: string option  // Explicitly optional
+    Age: int
+}
+
+let person = {
+    Name = "Alice"
+    Email = None  // Explicit absence
+    Age = 30
+}
+
+// Pattern matching makes absence explicit
+match person.Email with
+| Some email -> printfn $"Email: {email}"
+| None -> printfn "No email provided"
+```
+
+### Default Values in Records
+
+```fsharp
+// Records don't have default constructors
+type Config = {
+    Host: string
+    Port: int
+    EnableLogging: bool
+}
+
+// Create default config explicitly
+let defaultConfig = {
+    Host = "localhost"
+    Port = 8080
+    EnableLogging = false
+}
+
+// Smart constructor pattern for defaults
+module Config =
+    let create() = {
+        Host = "localhost"
+        Port = 8080
+        EnableLogging = false
+    }
+
+    let withHost host config = { config with Host = host }
+    let withPort port config = { config with Port = port }
+
+// Usage with fluent API
+let config =
+    Config.create()
+    |> Config.withHost "api.example.com"
+    |> Config.withPort 443
+```
+
+### Unchecked.defaultof<'T>
+
+```fsharp
+// Get CLR default value for a type
+let defaultInt = Unchecked.defaultof<int>      // 0
+let defaultBool = Unchecked.defaultof<bool>    // false
+let defaultString = Unchecked.defaultof<string>  // null
+let defaultOption = Unchecked.defaultof<int option>  // None
+
+// Useful for interop with .NET APIs
+type MyClass() =
+    let mutable value: string = Unchecked.defaultof<string>
+
+    member _.Value
+        with get() = value
+        and set(v) = value <- v
+```
+
+### Null Handling for Interop
+
+```fsharp
+// Checking for null from .NET
+let safeToUpper (s: string) =
+    if isNull s then
+        None
+    else
+        Some (s.ToUpper())
+
+// Option.ofObj: convert null to None
+let fromNullable (s: string) =
+    Option.ofObj s
+
+let result = fromNullable null  // None
+let result2 = fromNullable "test"  // Some "test"
+
+// Option.toObj: convert None to null
+let toNullable opt =
+    Option.toObj opt
+
+let nullable = toNullable None  // null
+let nullable2 = toNullable (Some "test")  // "test"
+```
+
+### Array and Collection Defaults
+
+```fsharp
+// Empty collections
+let emptyList = []
+let emptyArray = [||]
+let emptySeq = Seq.empty
+let emptyMap = Map.empty
+let emptySet = Set.empty
+
+// Arrays initialized with default values
+let zeros = Array.zeroCreate<int> 10  // [|0; 0; 0; ...|]
+let defaults = Array.create 5 "default"  // [|"default"; "default"; ...|]
+
+// Using init for custom defaults
+let squares = Array.init 5 (fun i -> i * i)  // [|0; 1; 4; 9; 16|]
+```
+
+### Nullable<'T> for Value Types
+
+```fsharp
+open System
+
+// Interop with .NET Nullable
+let nullableInt: Nullable<int> = Nullable()  // No value
+let nullableInt2: Nullable<int> = Nullable(42)  // Has value
+
+// Check for value
+if nullableInt.HasValue then
+    printfn $"Value: {nullableInt.Value}"
+else
+    printfn "No value"
+
+// Convert to/from Option
+let fromNullable (n: Nullable<'T>) : 'T option =
+    if n.HasValue then Some n.Value else None
+
+let toNullable (opt: 'T option) : Nullable<'T> =
+    match opt with
+    | Some v -> Nullable(v)
+    | None -> Nullable()
+```
+
+### Best Practices
+
+```fsharp
+// Do: Use Option for optional values
+type User = {
+    Name: string
+    Email: string option  // Explicit
+    Age: int
+}
+
+// Don't: Use null for optional values
+type BadUser = {
+    Name: string
+    Email: string  // Could be null - unclear
+    Age: int
+}
+
+// Do: Provide explicit default functions
+module User =
+    let create name = {
+        Name = name
+        Email = None
+        Age = 0
+    }
+
+// Don't: Rely on Unchecked.defaultof unless necessary
+let badDefault = Unchecked.defaultof<User>  // Null, not a valid User
+```
+
+---
+
+## Common Idioms
 
 ### Dependency Injection (Reader Pattern)
 
