@@ -380,6 +380,9 @@ result = sum(x.value for x in items if x.active)
 | Python | Exceptions | `Exception` hierarchy | `raise` / `try-except` |
 | Go | Error returns | `error` interface | Multiple return values |
 | Rust | Result type | `Result<T, E>` | `?` operator |
+| Erlang | Pattern matching | `{ok, Value}` / `{error, Reason}` | Return tuples |
+| Elixir | Pattern matching | `{:ok, value}` / `{:error, reason}` | Return tuples, `with` |
+| Haskell | Maybe/Either | `Maybe a`, `Either e a` | Monadic bind (`>>=`) |
 
 ### Exception → Result Type
 
@@ -456,6 +459,55 @@ enum AppError {
 }
 ```
 
+### "Let It Crash" Philosophy (BEAM Languages)
+
+Erlang/Elixir use a fundamentally different error philosophy: processes are isolated and supervised, so letting them crash and restart is often the correct approach.
+
+| Traditional Approach | "Let It Crash" Approach |
+|---------------------|------------------------|
+| Catch and handle every error | Handle expected errors, let unexpected ones crash |
+| Error recovery in-process | Supervisor restarts clean process |
+| Complex error handling code | Simple code, complex supervision tree |
+| State corruption possible | Fresh state on restart |
+
+```erlang
+%% Erlang: Supervisor tree
+-module(my_sup).
+-behaviour(supervisor).
+
+init([]) ->
+    ChildSpecs = [
+        #{id => worker1,
+          start => {worker, start_link, []},
+          restart => permanent,
+          shutdown => 5000}
+    ],
+    {ok, {{one_for_one, 5, 10}, ChildSpecs}}.
+```
+
+```elixir
+# Elixir: Supervision tree
+defmodule MySupervisor do
+  use Supervisor
+
+  def start_link(init_arg) do
+    Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
+
+  @impl true
+  def init(_init_arg) do
+    children = [
+      {Worker, []}
+    ]
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+end
+```
+
+**When converting TO Erlang/Elixir**: Consider moving error handling from catch-all blocks to supervision strategies.
+
+**When converting FROM Erlang/Elixir**: Translate supervision patterns to explicit error handling, retry logic, and state recovery.
+
 ---
 
 ## Concurrency Model Translation
@@ -470,6 +522,9 @@ enum AppError {
 | Python | `async/await`, asyncio | Threading, multiprocessing | Queue |
 | Go | Goroutines | Built-in | `chan` (first-class) |
 | Rust | `async/await`, Futures | std::thread | mpsc, crossbeam |
+| Erlang | Processes (lightweight) | BEAM scheduler | Mailboxes (first-class) |
+| Elixir | Tasks, GenServer | BEAM scheduler | Mailboxes, Agent |
+| Clojure | core.async, Agents | JVM threads | CSP channels |
 
 ### Promise/Future Translation
 
@@ -509,6 +564,76 @@ func fetchUser(id string) <-chan UserResult {
     }()
     return ch
 }
+```
+
+```erlang
+%% Erlang: spawned process with message passing
+fetch_user(Id) ->
+    Self = self(),
+    spawn(fun() ->
+        case httpc:request(get, {"http://api/users/" ++ Id, []}, [], []) of
+            {ok, {{_, 200, _}, _, Body}} ->
+                Self ! {user, jsx:decode(Body)};
+            {error, Reason} ->
+                Self ! {error, Reason}
+        end
+    end),
+    receive
+        {user, User} -> {ok, User};
+        {error, Reason} -> {error, Reason}
+    after 5000 ->
+        {error, timeout}
+    end.
+```
+
+```elixir
+# Elixir: Task-based async
+def fetch_user(id) do
+  Task.async(fn ->
+    case HTTPoison.get("http://api/users/#{id}") do
+      {:ok, %{status_code: 200, body: body}} ->
+        {:ok, Jason.decode!(body)}
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end)
+  |> Task.await(5000)
+end
+```
+
+### Process-Based Concurrency (BEAM Languages)
+
+For Erlang/Elixir, concurrency is based on lightweight processes with message passing:
+
+```erlang
+%% Erlang: GenServer pattern (simplified)
+-module(user_cache).
+-behaviour(gen_server).
+
+init([]) -> {ok, #{}}.
+
+handle_call({get, Id}, _From, State) ->
+    {reply, maps:get(Id, State, undefined), State};
+handle_call({put, Id, User}, _From, State) ->
+    {reply, ok, maps:put(Id, User, State)}.
+```
+
+```elixir
+# Elixir: GenServer
+defmodule UserCache do
+  use GenServer
+
+  def start_link(_), do: GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+  def get(id), do: GenServer.call(__MODULE__, {:get, id})
+  def put(id, user), do: GenServer.call(__MODULE__, {:put, id, user})
+
+  @impl true
+  def init(_), do: {:ok, %{}}
+
+  @impl true
+  def handle_call({:get, id}, _from, state), do: {:reply, Map.get(state, id), state}
+  def handle_call({:put, id, user}, _from, state), do: {:reply, :ok, Map.put(state, id, user)}
+end
 ```
 
 ### Parallel Execution
@@ -614,6 +739,90 @@ When converting GC → Ownership:
    ├─ YES → Return owned value or 'static
    └─ NO → Return borrowed reference
 ```
+
+---
+
+## Paradigm Translation Strategies
+
+When converting between different programming paradigms, patterns don't translate directly.
+
+### OOP → Functional Translation
+
+| OOP Concept | Functional Approach | Key Insight |
+|-------------|---------------------|-------------|
+| Class with fields | Record/struct + module functions | Data and behavior separated |
+| Inheritance hierarchy | Composition / Type classes / Protocols | Favor capabilities over hierarchies |
+| Mutable object state | Immutable data + transformation functions | New version instead of mutation |
+| Method chaining | Function pipelines | `obj.a().b()` → `b(a(obj))` or `obj \|> a \|> b` |
+| Interface | Protocol / Type class / Trait | Behavior contract |
+| Private methods | Module-private functions | Visibility at module level |
+
+### Immutability Patterns
+
+| Mutable Pattern | Immutable Pattern | Example Languages |
+|-----------------|-------------------|-------------------|
+| `obj.field = value` | `{...obj, field: value}` | JS, Clojure, Elixir |
+| `list.push(x)` | `[x \| list]` or `cons(x, list)` | Erlang, Elixir, Haskell |
+| `dict[key] = value` | `Map.put(dict, key, value)` | Elixir, Clojure |
+| Accumulator variables | `fold`/`reduce` with initial value | All functional |
+| In-place sort | Return sorted copy | All functional |
+
+```python
+# Python: Mutable (imperative)
+def process_users(users):
+    result = []
+    for user in users:
+        if user.active:
+            user.score += 10  # Mutation!
+            result.append(user)
+    return result
+```
+
+```elixir
+# Elixir: Immutable (functional)
+def process_users(users) do
+  users
+  |> Enum.filter(& &1.active)
+  |> Enum.map(& %{&1 | score: &1.score + 10})  # New map, not mutation
+end
+```
+
+### State Management Across Paradigms
+
+| OOP Approach | Functional Equivalent |
+|--------------|----------------------|
+| Singleton | Module with state (GenServer, Agent) |
+| Observer pattern | Event streams, pub/sub |
+| Factory pattern | Constructor functions, protocols |
+| Repository | Pure functions + effect boundary |
+
+---
+
+## Platform Ecosystem Translation
+
+When converting between different runtime platforms, consider these ecosystem differences:
+
+### Platform Comparison
+
+| Platform | Languages | Runtime | Package Manager | Key Strengths |
+|----------|-----------|---------|-----------------|---------------|
+| .NET/CLR | C#, F#, VB | Managed, JIT | NuGet | Enterprise, LINQ, async |
+| JVM | Java, Kotlin, Scala, Clojure | Managed, JIT | Maven, Gradle | Ecosystem, stability |
+| BEAM/OTP | Erlang, Elixir | Lightweight processes | Hex, Rebar3 | Fault tolerance, concurrency |
+| Native | Rust, Go, C, C++ | Direct compilation | Cargo, go mod | Performance, control |
+| Scripting | Python, Ruby, JS | Interpreted/JIT | pip, gem, npm | Rapid development |
+
+### Standard Library Mapping
+
+When converting, find equivalent stdlib functions:
+
+| Capability | .NET | JVM | Python | Rust | Erlang/Elixir |
+|------------|------|-----|--------|------|---------------|
+| HTTP Client | HttpClient | java.net.http | requests | reqwest | httpc, HTTPoison |
+| JSON | System.Text.Json | Jackson, Gson | json | serde_json | jsx, Jason |
+| Date/Time | DateTime | java.time | datetime | chrono | calendar, Timex |
+| Regex | System.Text.RegularExpressions | java.util.regex | re | regex | re |
+| Collections | System.Collections.Generic | java.util | builtins | std::collections | maps, lists, Enum |
 
 ---
 
@@ -1118,6 +1327,52 @@ fn benchmark_conversion(c: &mut Criterion) {
 criterion_group!(benches, benchmark_conversion);
 criterion_main!(benches);
 ```
+
+---
+
+## Common Gotchas by Language Family
+
+Different language families share common conversion challenges:
+
+### OOP → Functional Conversions
+
+| OOP Pattern | Functional Challenge | Solution |
+|-------------|---------------------|----------|
+| `this` reference | No implicit self | Pass data explicitly or use closures |
+| Class state | No mutable state | Use immutable records + new versions |
+| Method overriding | No inheritance | Use higher-order functions, protocols |
+| Constructor logic | No side effects | Separate creation from initialization |
+| Private fields | No object encapsulation | Module-level privacy |
+
+### Dynamic → Static Typing Conversions
+
+| Dynamic Pattern | Static Challenge | Solution |
+|-----------------|------------------|----------|
+| Duck typing | Must know types | Define explicit interfaces/traits |
+| `any`/`dynamic` | No escape hatch | Use enums or generics |
+| Runtime type checks | Compile-time types | Pattern matching, type guards |
+| Mixed collections | Homogeneous types | Use sum types (enums) |
+| Monkey patching | No runtime extension | Design for extensibility upfront |
+
+### GC → Ownership Conversions
+
+| GC Pattern | Ownership Challenge | Solution |
+|------------|---------------------|----------|
+| Shared references | Borrow checker | Decide owner, clone if needed |
+| Circular references | Compile error | Use weak refs, Rc/Arc |
+| Global state | Lifetime issues | Dependency injection, Arc<Mutex<T>> |
+| Late initialization | Non-null requirement | Option<T>, lazy_static |
+| Object graphs | Complex lifetimes | Use indices instead of references |
+
+### Scripting → Compiled Conversions
+
+| Script Pattern | Compiled Challenge | Solution |
+|----------------|-------------------|----------|
+| REPL workflow | Build cycle | Fast compiler, watch mode |
+| Dynamic imports | Static dependencies | Module system, feature flags |
+| Hot reload | Recompile required | Fast incremental builds |
+| Runtime eval | No eval | Interpreter embedding, macros |
+| Loose structure | Strict project layout | Follow language conventions |
 
 ---
 
