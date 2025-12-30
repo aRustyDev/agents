@@ -106,14 +106,19 @@ Read these skills to understand patterns and gather examples:
    - Idiom translation approaches
    - Testing strategies
 
-2. **Existing conversion skills** (for reference):
+2. **Existing conversion skills** (required - read at least 1):
    - Search for `convert-*` skills in `components/skills/`
-   - Use these as examples for structure and depth
+   - **Read one complete skill** (e.g., `convert-typescript-rust/SKILL.md` lines 1-300) to understand:
+     - Expected depth for type mapping tables
+     - "Why this translation" explanation style
+     - Example complexity progression
    - Borrow patterns that apply to your language pair
 
 3. **Language skills** (if available):
    - `lang-$1-dev` - Source language patterns
    - `lang-$2-dev` - Target language patterns
+
+**Before proceeding**: Confirm you have read at least one complete conversion skill as a reference.
 
 ### Step 2.5: Validate 8 Pillars Coverage (Automated)
 
@@ -131,6 +136,14 @@ Before creating a conversion skill, validate that both source and target languag
 | Serialization | `## Serialization`, `JSON`, `serde`, `marshal` | Data structure translation |
 | Build | `## Build`, `## Dependencies`, `Cargo`, `package.json` | Project migration |
 | Testing | `## Testing`, `#[test]`, `describe`, `unittest` | Test suite conversion |
+
+**Optional 9th Pillar (for REPL-centric languages):**
+
+| Pillar | Search Terms | Why Essential |
+|--------|-------------|---------------|
+| Dev Workflow | `## REPL`, `## Workflow`, `interactive`, `hot reload` | Development style translation |
+
+Include this pillar when either language is REPL-centric: Clojure, Elixir, Erlang, Lisp, Haskell (GHCi), Scala (Ammonite).
 
 #### Automated Validation
 
@@ -195,16 +208,83 @@ Count section headers matching pillars:
 
 ### Step 3: Research Language Pair
 
-Before creating the skill, research the specific language pair:
+Before creating the skill, research the specific language pair using these structured checklists:
 
-1. **Type system differences**: How do types map between languages?
-2. **Error handling**: Exceptions vs Result types vs error returns
-3. **Concurrency models**: async/await, goroutines, threads, etc.
-4. **Memory models**: GC vs ownership vs manual
-5. **Idiomatic patterns**: What's "the way" in each language?
-6. **Ecosystem**: Common library equivalents between languages
+#### 3.1 Type System Differences
+- [ ] Read primitive types sections in both lang skills
+- [ ] Create draft mapping table for primitives
+- [ ] Identify types without direct equivalents
+- [ ] Note numeric precision differences (32-bit vs 64-bit, overflow behavior)
 
-Use WebSearch if needed to find authoritative conversion guides.
+#### 3.2 Error Handling
+- [ ] Identify error model in source (Exceptions? Result types? Error returns?)
+- [ ] Identify error model in target
+- [ ] Map error propagation patterns (try/catch → ?, throw → return Err)
+- [ ] Note any "no runtime errors" guarantees (like Elm)
+
+#### 3.3 Concurrency Models
+- [ ] Identify async model in source (async/await, callbacks, actors?)
+- [ ] Identify async model in target
+- [ ] Map concurrency primitives (Promise → Future, Channel → mpsc)
+- [ ] Note architectural differences (managed runtime vs explicit)
+
+#### 3.4 Memory Models
+- [ ] Source memory model: GC / ownership / manual / managed
+- [ ] Target memory model
+- [ ] If different, plan ownership translation strategy
+- [ ] Note lifetime considerations if applicable
+
+#### 3.5 Idiomatic Patterns
+- [ ] What's considered "the way" in source language?
+- [ ] What's considered "the way" in target language?
+- [ ] Identify patterns that should NOT be directly translated
+- [ ] Note paradigm shifts (OOP → FP, imperative → declarative)
+
+#### 3.6 Ecosystem Equivalents
+- [ ] Common HTTP libraries
+- [ ] JSON/serialization libraries
+- [ ] Testing frameworks
+- [ ] Build tools
+
+#### 3.7 Paradigm Shifts (if applicable)
+- [ ] OOP → Functional: class hierarchies → data + functions, inheritance → composition
+- [ ] Imperative → Declarative: loops → recursion/map/fold, mutation → immutability
+- [ ] Dynamic → Static: duck typing → interfaces/traits, runtime checks → compile-time
+- [ ] Script → Compiled: REPL workflow → build cycle, hot reload → recompile
+
+#### 3.8 Transpilers & Interop Tools
+- [ ] Check for existing transpilers between the languages (e.g., Fable.Python, GopherJS)
+- [ ] Note FFI/interop capabilities (calling one language from the other)
+- [ ] Document bidirectional insights from transpiler implementations
+
+#### 3.9 Platform Ecosystem Differences
+Different runtime platforms have distinct conventions and capabilities:
+
+| Platform | Languages | Key Characteristics |
+|----------|-----------|---------------------|
+| .NET/CLR | C#, F#, VB.NET | Rich stdlib, NuGet, strong async |
+| JVM | Java, Kotlin, Scala, Clojure | Maven/Gradle, enterprise tooling |
+| BEAM/OTP | Erlang, Elixir | Actor model, hot reload, supervision |
+| Native | Rust, C, C++, Go | Direct memory, no GC (Rust/C), system-level |
+| Scripting | Python, Ruby, JavaScript | Dynamic, REPL-first, rapid prototyping |
+
+When converting across platforms:
+- [ ] Note stdlib equivalents (collections, IO, networking)
+- [ ] Consider runtime semantics (exceptions, threading, memory)
+- [ ] Document dependency ecosystem differences (package managers)
+
+#### When to Use WebSearch
+
+Use WebSearch when:
+- Lang skills lack coverage for a pillar
+- Looking for real-world migration guides
+- Finding common pitfalls others have encountered
+
+**Example queries:**
+- `"<Source> to <Target> migration patterns 2024"` - General migration guides
+- `"<Source> <pattern> equivalent in <Target>"` - Specific pattern translations
+- `"Common mistakes converting <Source> to <Target>"` - Pitfalls research
+- `"<Source> vs <Target> error handling"` - Error model comparison
 
 ### Step 4: Create Skill Directory
 
@@ -311,6 +391,29 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 
 ---
 
+## Paradigm Translation (if applicable)
+
+Include this section when converting between different paradigms (OOP→FP, imperative→declarative, etc.)
+
+### Mental Model Shift: <Source Paradigm> → <Target Paradigm>
+
+| <Source> Concept | <Target> Approach | Key Insight |
+|------------------|-------------------|-------------|
+| Class with state | Record + module functions | Data and behavior separated |
+| Inheritance | Composition / Protocols | Favor interfaces over hierarchies |
+| Mutable loops | Recursion / fold / map | Transformation over mutation |
+| Side effects anywhere | Pure functions + IO boundary | Effects pushed to edges |
+
+### Concurrency Mental Model
+
+| <Source> Model | <Target> Model | Conceptual Translation |
+|----------------|----------------|------------------------|
+| Threads + locks | Actors / CSP | Shared state → message passing |
+| Callbacks | Streams / Channels | Inversion of control → data flow |
+| async/await | Process mailboxes | Promise → lightweight process |
+
+---
+
 ## Error Handling
 
 ### <Source> Error Model → <Target> Error Model
@@ -340,6 +443,30 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 1. **<Pitfall 1>**: Description and how to avoid
 2. **<Pitfall 2>**: Description and how to avoid
 ...
+
+---
+
+## Limitations (if proceeding with Yellow/Red pillar coverage)
+
+Include this section when creating a conversion skill despite incomplete lang-*-dev coverage.
+
+### Coverage Gaps
+
+| Pillar | Source Skill | Target Skill | Mitigation |
+|--------|--------------|--------------|------------|
+| <Pillar> | ✓/~/✗ | ✓/~/✗ | External research / pattern skill / documented gap |
+
+### Known Limitations
+
+1. **<Area>**: This skill has limited guidance on <topic> because lang-<x>-dev lacks coverage
+2. **<Area>**: Conversion patterns for <feature> may be incomplete
+
+### External Resources Used
+
+| Resource | What It Provided | Reliability |
+|----------|------------------|-------------|
+| Official docs | <topic> patterns | High |
+| Community guide | <topic> examples | Medium |
 
 ---
 
@@ -421,12 +548,38 @@ Fill in the template with specific content for this language pair:
 | Primitive Types | All primitives | Include edge cases (infinity, NaN) |
 | Collection Types | 5+ types | Array, Map, Set, Tuple equivalents |
 | Composite Types | 3+ types | Struct, Class, Interface mappings |
-| Idiom Translations | 5-10 patterns | Common patterns with "why" explanations |
+| Idiom Translations | See priority list below | Common patterns with "why" explanations |
 | Error Handling | Complete section | Full error model translation |
 | Concurrency | Complete section | Async/threading translation |
 | Memory/Ownership | If applicable | Include if languages differ (GC vs ownership) |
 | Examples | 3+ (simple, medium, complex) | Progressive complexity |
 | Pitfalls | 5+ pitfalls | Language-pair specific mistakes |
+
+#### Idiom Translation Priority
+
+**Required patterns (must include):**
+1. Null/optional handling (null → Option, Maybe → nil, etc.)
+2. Collection operations (map, filter, reduce equivalents)
+3. Error propagation (try/catch → Result, throws → Either)
+4. Async/await patterns (if either language has async)
+
+**Language-specific patterns (include 2-6 based on relevance):**
+- Type alias/newtype definitions
+- Pattern matching
+- Generics/type parameters
+- Interface/trait implementations
+- Resource cleanup (using/defer/Drop)
+- Builder patterns
+- Iteration patterns
+
+#### Quality Guidance: Good vs Great
+
+| Aspect | Good | Great |
+|--------|------|-------|
+| Type mapping | `String → &str` | `String → &str for borrowed, String for owned; use Cow<str> when ownership varies` |
+| Why explanation | "Use Result in Rust" | "Use Result because Rust has no exceptions; the ? operator propagates errors like try/catch but at compile time" |
+| Example code | Syntactically correct | Syntactically correct + follows target language conventions (naming, formatting, idioms) |
+| Pitfall | "Don't forget to handle errors" | "TypeScript's `undefined` vs Rust's `Option`: TS allows property access on undefined (runtime error), Rust requires explicit unwrap (compile error)" |
 
 #### Example Complexity Guide
 
@@ -435,6 +588,37 @@ Fill in the template with specific content for this language pair:
 | Simple | 5-15 | 1 | Demonstrate single type/idiom translation |
 | Medium | 20-40 | 2-3 | Show concept interactions |
 | Complex | 50-100 | 4+ | Real-world use case, production-ready |
+
+#### Example Quality Checklist
+
+Before finalizing examples, verify each one meets these criteria:
+
+- [ ] **Syntactically valid** - Source code compiles/runs without errors
+- [ ] **Target is idiomatic** - Not transliterated (avoid "Source code in Target syntax")
+- [ ] **Demonstrates pattern clearly** - Single focus per example (Simple), combined focus (Medium/Complex)
+- [ ] **Complexity matches level** - Don't overcomplicate Simple examples
+- [ ] **Comments explain "why"** - Not just "what" the code does
+- [ ] **Edge cases shown** - Null handling, error paths, empty collections where relevant
+
+#### Testing/Validation Guidance
+
+To verify conversion examples are correct:
+
+1. **Use language playgrounds** for quick validation:
+   - TypeScript: [TS Playground](https://www.typescriptlang.org/play)
+   - Python: [Python Tutor](https://pythontutor.com/) or REPL
+   - Rust: [Rust Playground](https://play.rust-lang.org/)
+   - Go: [Go Playground](https://go.dev/play/)
+   - Elixir: [Elixir Playground](https://playground.elixir-lang.org/)
+
+2. **For complex examples**, consider:
+   - Create minimal test files to verify both source and target compile
+   - Run equivalent inputs through both to verify same outputs
+   - Check error cases behave equivalently
+
+3. **Document behavioral differences**:
+   - If source and target have different semantics (e.g., overflow behavior), note this
+   - Include comments like `// Note: Python int is arbitrary precision, Rust i64 overflows`
 
 ### Step 7: Validate Skill
 
@@ -453,6 +637,16 @@ Run through this checklist before completing:
 - [ ] Error handling section covers full error model
 - [ ] Concurrency section addresses async patterns
 - [ ] Memory/Ownership included if languages differ
+- [ ] Paradigm Translation included if paradigms differ (OOP→FP, etc.)
+
+#### Type Mapping Validation Checklist
+- [ ] **Primitives**: All basic types covered (int, float, string, bool, char)
+- [ ] **Numerics**: Precision differences noted (i32 vs i64, overflow behavior)
+- [ ] **Nullability**: null/nil/None → Option/Maybe mappings clear
+- [ ] **Collections**: Array, List, Map, Set, Tuple equivalents
+- [ ] **Composites**: Struct, Class, Interface, Enum, Union mappings
+- [ ] **Generics**: Type parameter syntax and constraints
+- [ ] **Special types**: Never/Bottom, Unit/Void, Any/Dynamic
 
 #### Example Validation
 - [ ] Examples progress in complexity (simple → complex)
