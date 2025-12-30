@@ -884,6 +884,295 @@ When converting GC → Ownership:
 
 ---
 
+## Evaluation Strategy Translation
+
+### Lazy vs Eager Evaluation
+
+Different languages use different evaluation strategies. Understanding this is critical for correct conversions.
+
+| Language | Default Strategy | Lazy Support | Eager Support |
+|----------|------------------|--------------|---------------|
+| Haskell | Lazy | Built-in | `seq`, `deepseq`, bang patterns |
+| Scala | Eager | `lazy val`, by-name params, `LazyList` | Default |
+| Clojure | Eager | Lazy seqs, `delay`/`force` | Default |
+| Erlang | Eager | Manual thunks | Default |
+| Elixir | Eager | Streams, lazy enums | Default |
+| F# | Eager | `Lazy<T>`, `seq { }` | Default |
+| Rust | Eager | Iterators (lazy), `Lazy<T>` | Default |
+| Python | Eager | Generators, itertools | Default |
+| JavaScript | Eager | Generators | Default |
+
+### Lazy → Eager Conversion Patterns
+
+When converting from a lazy language (Haskell) to eager languages:
+
+```haskell
+-- Haskell: Lazy by default
+-- This infinite list is fine - only evaluated as needed
+fibs :: [Integer]
+fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+take 10 fibs  -- Only computes first 10
+```
+
+```python
+# Python: Must explicitly use generators for laziness
+def fibs():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+from itertools import islice
+list(islice(fibs(), 10))  # Take first 10
+```
+
+```rust
+// Rust: Iterators are lazy, but collections are eager
+fn fibs() -> impl Iterator<Item = u64> {
+    let mut state = (0, 1);
+    std::iter::from_fn(move || {
+        let next = state.0;
+        state = (state.1, state.0 + state.1);
+        Some(next)
+    })
+}
+
+fibs().take(10).collect::<Vec<_>>()
+```
+
+```erlang
+%% Erlang: Manual thunks for laziness
+fib_stream() ->
+    fib_stream(0, 1).
+
+fib_stream(A, B) ->
+    fun() -> {A, fib_stream(B, A + B)} end.
+
+take(0, _Stream) -> [];
+take(N, Stream) ->
+    {Value, Next} = Stream(),
+    [Value | take(N - 1, Next)].
+```
+
+### Eager → Lazy Conversion Patterns
+
+When converting to a lazy language (Haskell):
+
+```python
+# Python: Eager - computes all before filtering
+def process(items):
+    result = []
+    for item in items:
+        transformed = expensive_transform(item)
+        if is_valid(transformed):
+            result.append(transformed)
+    return result[:10]  # Only needed first 10!
+```
+
+```haskell
+-- Haskell: Lazy - only transforms what's needed
+process :: [Item] -> [Item]
+process items =
+    take 10 $ filter isValid $ map expensiveTransform items
+-- Only transforms until 10 valid items found
+```
+
+### Key Gotchas
+
+| Issue | Lazy Language Behavior | Eager Language Behavior |
+|-------|------------------------|------------------------|
+| Infinite data | Works fine | Stack overflow / hang |
+| Side effects in map | Deferred (surprising!) | Immediate |
+| Memory usage | Can have space leaks | Predictable |
+| Debugging | Non-obvious evaluation order | Sequential |
+| Performance | Thunk overhead | Direct computation |
+
+**Converting Lazy → Eager:**
+1. Replace infinite structures with generators/iterators
+2. Ensure side effects are in IO/effect monads
+3. Watch for space leaks becoming eager memory usage
+4. Add explicit limits (`take`, `limit`) before consuming
+
+**Converting Eager → Lazy:**
+1. Remove explicit iteration limits (laziness handles it)
+2. Be careful with side effects - they'll be deferred
+3. Use `seq`/strict annotations for performance-critical paths
+4. Consider space leaks with retained references
+
+---
+
+## Type System Translation
+
+### Static → Dynamic Typing
+
+When converting from statically-typed languages to dynamically-typed:
+
+| Static Pattern | Dynamic Approach | Mitigation for Safety |
+|----------------|------------------|----------------------|
+| Compile-time type errors | Runtime errors | Add runtime validation |
+| Type annotations | Optional/ignored | Use type hints (Python), JSDoc |
+| Generic constraints | Duck typing | Document expected interface |
+| Pattern matching exhaustiveness | Runtime failures | Add catch-all cases |
+| Nullability tracking | All refs nullable | Defensive null checks |
+
+```typescript
+// TypeScript: Static types catch errors at compile time
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+function processUser(user: User): string {
+    return `${user.name} <${user.email}>`;
+}
+
+// Compile error: Argument of type 'string' is not assignable
+// processUser("not a user")
+```
+
+```python
+# Python: Runtime typing with optional hints
+from dataclasses import dataclass
+from typing import Protocol
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: str
+
+def process_user(user: User) -> str:
+    # Type hints help but don't prevent runtime errors
+    return f"{user.name} <{user.email}>"
+
+# No compile error - fails at runtime
+# process_user("not a user")  # AttributeError
+
+# Add runtime validation for safety
+def process_user_safe(user: User) -> str:
+    if not isinstance(user, User):
+        raise TypeError(f"Expected User, got {type(user)}")
+    return f"{user.name} <{user.email}>"
+```
+
+### Dynamic → Static Typing
+
+When converting from dynamically-typed to statically-typed:
+
+| Dynamic Pattern | Static Challenge | Solution |
+|-----------------|------------------|----------|
+| Dict with mixed types | Need concrete type | Define struct/interface |
+| Duck typing | Must declare interface | Create trait/interface |
+| Runtime type switching | Need sum type | Use enum/union |
+| Optional fields | All fields required | Use Option<T>/Maybe |
+| Any/unknown data | No escape hatch | Use generics or enums |
+
+```python
+# Python: Dynamic, flexible structure
+def process_event(event):
+    event_type = event.get("type")
+    if event_type == "click":
+        return f"Clicked at {event['x']}, {event['y']}"
+    elif event_type == "keypress":
+        return f"Pressed key {event['key']}"
+    else:
+        return f"Unknown event: {event}"
+```
+
+```rust
+// Rust: Must define all variants explicitly
+#[derive(Debug)]
+enum Event {
+    Click { x: i32, y: i32 },
+    Keypress { key: char },
+    Unknown { raw: String },
+}
+
+fn process_event(event: Event) -> String {
+    match event {
+        Event::Click { x, y } => format!("Clicked at {}, {}", x, y),
+        Event::Keypress { key } => format!("Pressed key {}", key),
+        Event::Unknown { raw } => format!("Unknown event: {}", raw),
+    }
+}
+```
+
+### Gradual Typing Strategies
+
+For languages with optional typing (Python, TypeScript):
+
+```python
+# Python: Gradual migration to types
+
+# Phase 1: No types (original)
+def fetch_users(filters):
+    results = db.query(filters)
+    return [transform(r) for r in results]
+
+# Phase 2: Return type only
+def fetch_users(filters) -> list[User]:
+    results = db.query(filters)
+    return [transform(r) for r in results]
+
+# Phase 3: Full typing
+def fetch_users(filters: UserFilters) -> list[User]:
+    results: list[DbRow] = db.query(filters)
+    return [transform(r) for r in results]
+
+# Phase 4: Runtime validation (strict mode)
+from pydantic import BaseModel
+
+class UserFilters(BaseModel):
+    active: bool = True
+    role: str | None = None
+
+def fetch_users(filters: UserFilters) -> list[User]:
+    # Pydantic validates at runtime
+    ...
+```
+
+### Type Inference vs Annotation
+
+| Language | Inference Level | Annotation Requirement |
+|----------|-----------------|----------------------|
+| Haskell | Very strong | Rarely needed (signatures recommended) |
+| Rust | Strong | Type annotations at function boundaries |
+| TypeScript | Moderate | Recommended at boundaries |
+| Go | Minimal | Required at function signatures |
+| Python | None (runtime) | Optional (mypy uses them) |
+
+```haskell
+-- Haskell: Compiler infers everything
+-- But signatures are good practice
+map f [] = []
+map f (x:xs) = f x : map f xs
+-- Inferred: map :: (a -> b) -> [a] -> [b]
+```
+
+```rust
+// Rust: Local inference, explicit at boundaries
+fn transform(items: Vec<i32>) -> Vec<i32> {
+    items.iter()           // Inferred: Iter<&i32>
+         .map(|x| x * 2)   // Inferred: Map<..., closure>
+         .collect()        // Needs turbofish OR return type
+}
+```
+
+```go
+// Go: Minimal inference, mostly explicit
+func transform(items []int) []int {
+    result := make([]int, len(items))  // := infers type
+    for i, v := range items {
+        result[i] = v * 2
+    }
+    return result
+}
+```
+
+---
+
 ## Paradigm Translation Strategies
 
 When converting between different programming paradigms, patterns don't translate directly.
