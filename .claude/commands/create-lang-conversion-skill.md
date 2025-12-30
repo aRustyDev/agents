@@ -17,10 +17,12 @@ Create a new one-way language conversion skill (`convert-<source>-<target>`) tha
 | Step | Action | Purpose |
 |------|--------|---------|
 | 0 | Check existing | Avoid duplicate skills |
+| 0.5 | Check reverse skill | Reference `convert-$2-$1` for bidirectional insights |
 | 1 | Validate args | Ensure valid language names |
 | 2 | Read foundations | Understand meta-skill patterns |
 | 2.5 | Validate 8 Pillars | Ensure lang skills have coverage |
 | 3 | Research pair | Gather language-specific mappings |
+| 3.5 | Assess difficulty | Rate language pair complexity |
 | 4 | Create directory | Set up skill location |
 | 5 | Generate SKILL.md | Create from template |
 | 6 | Populate content | Fill in language-specific details |
@@ -97,6 +99,59 @@ gh pr list --search "convert-$1-$2" --state all
 
    **Recommendation:** [Update / Skip / Review]
    ```
+
+---
+
+### Step 0.5: Check for Reverse Skill
+
+Check if a skill for the reverse direction (`convert-$2-$1`) already exists:
+
+```bash
+# Check if reverse skill exists
+ls components/skills/convert-$2-$1/
+
+# Search for reverse skill PRs
+gh pr list --search "convert-$2-$1" --state all
+```
+
+**Why check the reverse skill:**
+- Bidirectional insights improve both skills
+- Shared pitfalls and edge cases
+- Consistent terminology and examples
+- Cross-referencing opportunities
+
+**If reverse skill EXISTS:**
+
+1. **Read it for context** - Note patterns that apply in both directions
+2. **Reference shared challenges** - Type mappings often have bidirectional insights
+3. **Document cross-references** - Add "See Also" links in both skills
+4. **Identify asymmetries** - Some patterns only matter in one direction
+
+```markdown
+## Reverse Skill Found
+
+| Field | Value |
+|-------|-------|
+| Reverse Skill | `convert-$2-$1` |
+| Location | `components/skills/convert-$2-$1/SKILL.md` |
+| Key Insights | [List patterns that apply bidirectionally] |
+
+**Action**: Reference in "See Also" section, share pitfalls documentation
+```
+
+**If reverse skill DOES NOT exist:**
+
+1. **Note it as future work** - Add to "See Also" as `convert-$2-$1 (not yet available)`
+2. **Consider creating an issue** - If the reverse direction is commonly needed
+3. **Document one-way patterns** - Some translations are inherently one-directional
+
+```markdown
+## Reverse Skill Status
+
+No `convert-$2-$1` skill exists. Consider:
+- [ ] Create issue for reverse skill if commonly needed
+- [ ] Document one-way patterns in this skill's pitfalls section
+```
 
 ---
 
@@ -349,6 +404,61 @@ Use WebSearch when:
 - `"<Source> <pattern> equivalent in <Target>"` - Specific pattern translations
 - `"Common mistakes converting <Source> to <Target>"` - Pitfalls research
 - `"<Source> vs <Target> error handling"` - Error model comparison
+
+### Step 3.5: Assess Language Pair Difficulty
+
+Rate the complexity of the language pair conversion to set expectations and guide depth of documentation.
+
+#### Difficulty Rating Matrix
+
+| Factor | Easy (+0) | Medium (+1) | Hard (+2) |
+|--------|-----------|-------------|-----------|
+| **Type System** | Same (static→static, dynamic→dynamic) | Mixed (static↔dynamic) | Opposite + complex (HKTs, dependent types) |
+| **Paradigm** | Same (OOP→OOP, FP→FP) | Related (OOP→hybrid) | Opposite (OOP→pure FP) |
+| **Memory Model** | Same (GC→GC) | Different (GC→ref counting) | Opposite (GC→ownership) |
+| **Concurrency** | Same model | Related (async→async) | Different (threads→actors) |
+| **Ecosystem** | Same platform | Related (JVM→JVM) | Different platform |
+
+#### Scoring
+
+| Total Score | Difficulty | Expected Skill Size | Focus Areas |
+|-------------|------------|---------------------|-------------|
+| 0-2 | Easy | 200-400 lines | Idiom differences, library mapping |
+| 3-5 | Medium | 400-800 lines | Type translation, paradigm shifts |
+| 6-8 | Hard | 800-1500 lines | All sections, extensive examples |
+| 9-10 | Expert | 1500+ lines | Deep architectural guidance, migration strategies |
+
+#### Example Ratings
+
+| Pair | Type | Paradigm | Memory | Concurrency | Platform | Total | Difficulty |
+|------|------|----------|--------|-------------|----------|-------|------------|
+| TypeScript→Python | +1 | +0 | +0 | +0 | +0 | 1 | Easy |
+| Python→Rust | +1 | +1 | +2 | +1 | +1 | 6 | Hard |
+| Clojure→Elixir | +0 | +0 | +0 | +1 | +1 | 2 | Easy |
+| TypeScript→Rust | +1 | +1 | +2 | +1 | +1 | 6 | Hard |
+| Haskell→Rust | +1 | +1 | +2 | +1 | +1 | 6 | Hard |
+| Java→Kotlin | +0 | +0 | +0 | +0 | +0 | 0 | Easy |
+| Python→Haskell | +2 | +2 | +0 | +1 | +1 | 6 | Hard |
+
+#### Report Format
+
+```markdown
+## Difficulty Assessment
+
+| Factor | Score | Rationale |
+|--------|-------|-----------|
+| Type System | +X | [e.g., "Dynamic → Static requires type annotation"] |
+| Paradigm | +X | [e.g., "OOP → FP requires mental model shift"] |
+| Memory | +X | [e.g., "GC → Ownership requires lifetime understanding"] |
+| Concurrency | +X | [e.g., "Promises → Actors"] |
+| Platform | +X | [e.g., "Node → BEAM"] |
+| **Total** | **X** | **[Easy/Medium/Hard/Expert]** |
+
+**Implications:**
+- Expected skill size: X lines
+- Key focus areas: [List 2-3 main challenges]
+- Recommended examples: [Number based on difficulty]
+```
 
 ### Step 4: Create Skill Directory
 
