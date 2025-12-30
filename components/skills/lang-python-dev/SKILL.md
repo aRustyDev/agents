@@ -1614,6 +1614,523 @@ print(settings.api_key)
 
 ---
 
+## Zero and Default Values
+
+Python's handling of None, default arguments, and empty values requires careful attention to avoid common pitfalls.
+
+### None vs Empty Collections
+
+```python
+# None represents absence of value
+value: str | None = None  # No value assigned
+
+# Empty collections are valid values (not None)
+empty_list: list[str] = []      # Empty but exists
+empty_dict: dict[str, int] = {} # Empty but exists
+empty_str: str = ""             # Empty but exists
+
+# Check for None vs empty
+if value is None:           # Check for None specifically
+    print("No value")
+elif not value:             # Falsy check (empty string, 0, etc.)
+    print("Empty or falsy")
+
+# Common pattern: treat None and empty differently
+def process(items: list[str] | None) -> list[str]:
+    if items is None:
+        return []  # No input provided
+    if not items:
+        return ["default"]  # Empty list provided
+    return items
+```
+
+### Default Argument Pitfalls
+
+```python
+# ❌ DANGEROUS: Mutable default argument
+def add_item(item: str, items: list[str] = []) -> list[str]:
+    items.append(item)  # Shared across all calls!
+    return items
+
+add_item("a")  # ['a']
+add_item("b")  # ['a', 'b'] - NOT ['b']!
+
+# ✓ CORRECT: Use None as sentinel
+def add_item(item: str, items: list[str] | None = None) -> list[str]:
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+
+add_item("a")  # ['a']
+add_item("b")  # ['b'] - Correct!
+
+# ✓ ALTERNATIVE: Use default_factory with dataclass
+from dataclasses import dataclass, field
+
+@dataclass
+class Container:
+    items: list[str] = field(default_factory=list)
+    config: dict[str, str] = field(default_factory=dict)
+```
+
+### Sentinel Values
+
+```python
+# When None is a valid value, use a sentinel
+_MISSING = object()
+
+def get_config(key: str, default=_MISSING):
+    value = config_store.get(key)
+    if value is not None:
+        return value
+    if default is not _MISSING:
+        return default
+    raise KeyError(f"Config key '{key}' not found")
+
+# Usage
+get_config("timeout", default=30)  # Returns 30 if not found
+get_config("timeout", default=None)  # Returns None if not found (None is valid)
+get_config("timeout")  # Raises KeyError if not found
+
+# Type-safe sentinel with typing
+from typing import TypeVar, overload
+
+T = TypeVar('T')
+_UNSET: object = object()
+
+@overload
+def get_value(key: str) -> str: ...  # Raises if missing
+
+@overload
+def get_value(key: str, default: T) -> str | T: ...  # Returns default if missing
+
+def get_value(key: str, default: object = _UNSET) -> str:
+    if key in store:
+        return store[key]
+    if default is not _UNSET:
+        return default
+    raise KeyError(key)
+```
+
+### Optional vs Union with None
+
+```python
+from typing import Optional
+
+# These are equivalent
+name: Optional[str] = None
+name: str | None = None  # Python 3.10+ preferred
+
+# Optional does NOT mean "optional parameter"
+def greet(
+    name: str,                    # Required
+    title: str | None = None,     # Optional with None default
+    suffix: str = "",             # Optional with empty string default
+) -> str:
+    result = name
+    if title:
+        result = f"{title} {result}"
+    if suffix:
+        result = f"{result} {suffix}"
+    return result
+
+# Common mistake: Optional parameter without default
+def bad_func(value: str | None) -> str:  # Required but can be None
+    ...
+
+bad_func(None)  # Valid - must pass explicitly
+bad_func()      # Error - argument required
+```
+
+### Truthiness and Falsy Values
+
+```python
+# Python falsy values
+False           # bool
+None            # NoneType
+0, 0.0, 0j      # numeric zeros
+"", '', """"""  # empty strings
+[], (), {}      # empty collections
+set()           # empty set
+
+# Explicit checks vs truthiness
+data = {"count": 0}
+
+# ❌ Bug: 0 is falsy
+if not data.get("count"):
+    data["count"] = 1  # Overwrites valid 0!
+
+# ✓ Correct: Check for None explicitly
+if data.get("count") is None:
+    data["count"] = 1  # Only sets if missing
+
+# ✓ Alternative: Use default
+count = data.get("count", 0)  # Returns 0 if missing
+```
+
+### Default Values in Dataclasses and Pydantic
+
+```python
+from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
+
+# Dataclass defaults
+@dataclass
+class Config:
+    # Simple defaults
+    timeout: int = 30
+    debug: bool = False
+
+    # Mutable defaults require field()
+    tags: list[str] = field(default_factory=list)
+    settings: dict[str, str] = field(default_factory=dict)
+
+    # Computed defaults
+    created_at: datetime = field(default_factory=datetime.now)
+
+# Pydantic defaults
+class UserConfig(BaseModel):
+    # Simple defaults
+    timeout: int = 30
+    debug: bool = False
+
+    # Mutable defaults (Pydantic handles this correctly)
+    tags: list[str] = []
+    settings: dict[str, str] = {}
+
+    # Factory defaults
+    id: str = Field(default_factory=lambda: str(uuid4()))
+
+    # Validated defaults
+    port: int = Field(default=8080, ge=1, le=65535)
+```
+
+### None Coalescing Patterns
+
+```python
+# Python doesn't have ?? operator, use these patterns:
+
+# or operator (for falsy, not just None)
+name = user_name or "Anonymous"  # ⚠️ Empty string becomes "Anonymous"
+
+# Ternary for None-specific
+name = user_name if user_name is not None else "Anonymous"
+
+# Walrus operator (Python 3.8+)
+if (result := get_value()) is not None:
+    process(result)
+
+# getattr with default
+value = getattr(obj, "attr", "default")
+
+# dict.get with default
+value = config.get("key", "default")
+
+# Common helper function
+def coalesce(*args):
+    """Return first non-None argument."""
+    for arg in args:
+        if arg is not None:
+            return arg
+    return None
+
+result = coalesce(primary, secondary, "fallback")
+```
+
+---
+
+## Serialization
+
+Python provides multiple approaches for serialization, from built-in JSON to type-safe Pydantic models.
+
+### JSON Serialization
+
+```python
+import json
+from typing import Any
+from datetime import datetime, date
+from dataclasses import dataclass, asdict
+
+# Basic JSON
+data = {"name": "Alice", "age": 30}
+json_str = json.dumps(data)                    # To string
+json_bytes = json.dumps(data).encode('utf-8')  # To bytes
+parsed = json.loads(json_str)                  # From string
+
+# Pretty printing
+formatted = json.dumps(data, indent=2, sort_keys=True)
+
+# File I/O
+with open("data.json", "w") as f:
+    json.dump(data, f, indent=2)
+
+with open("data.json", "r") as f:
+    loaded = json.load(f)
+```
+
+### Custom JSON Encoders
+
+```python
+from json import JSONEncoder
+from datetime import datetime, date
+from decimal import Decimal
+from uuid import UUID
+from enum import Enum
+from dataclasses import dataclass, asdict, is_dataclass
+
+class CustomEncoder(JSONEncoder):
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        if isinstance(obj, date):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return str(obj)
+        if isinstance(obj, UUID):
+            return str(obj)
+        if isinstance(obj, Enum):
+            return obj.value
+        if is_dataclass(obj):
+            return asdict(obj)
+        if hasattr(obj, "__dict__"):
+            return obj.__dict__
+        return super().default(obj)
+
+# Usage
+data = {
+    "created": datetime.now(),
+    "amount": Decimal("99.99"),
+    "id": UUID("12345678-1234-5678-1234-567812345678"),
+}
+json_str = json.dumps(data, cls=CustomEncoder)
+
+# Function-based encoder
+def json_serializer(obj: Any) -> Any:
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+json.dumps(data, default=json_serializer)
+```
+
+### Pydantic Models (Recommended)
+
+```python
+from pydantic import BaseModel, Field, field_validator, field_serializer
+from datetime import datetime
+from typing import Optional
+from enum import Enum
+
+class Status(str, Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+
+class User(BaseModel):
+    id: int
+    name: str = Field(min_length=1, max_length=100)
+    email: Optional[str] = Field(default=None, pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$')
+    status: Status = Status.PENDING
+    created_at: datetime = Field(default_factory=datetime.now)
+
+    @field_validator('name')
+    @classmethod
+    def name_must_not_be_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError('name cannot be empty or whitespace')
+        return v.strip()
+
+    @field_serializer('created_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat()
+
+# Parsing from dict/JSON
+user = User(id=1, name="Alice")
+user = User.model_validate({"id": 1, "name": "Alice"})
+user = User.model_validate_json('{"id": 1, "name": "Alice"}')
+
+# Serialization
+user_dict = user.model_dump()                          # To dict
+user_dict = user.model_dump(exclude_none=True)         # Exclude None values
+user_dict = user.model_dump(exclude={"created_at"})    # Exclude fields
+user_json = user.model_dump_json()                     # To JSON string
+user_json = user.model_dump_json(indent=2)             # Pretty JSON
+
+# Schema generation
+schema = User.model_json_schema()  # JSON Schema dict
+```
+
+### Pydantic Settings
+
+```python
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="APP_",
+        case_sensitive=False,
+    )
+
+    database_url: str
+    api_key: str = Field(alias="SECRET_KEY")
+    debug: bool = False
+    max_connections: int = 10
+
+# Loads from environment variables: APP_DATABASE_URL, SECRET_KEY, etc.
+settings = Settings()
+```
+
+### Dataclasses with Serialization
+
+```python
+from dataclasses import dataclass, asdict, field
+from typing import Optional
+from datetime import datetime
+
+@dataclass
+class User:
+    id: int
+    name: str
+    email: Optional[str] = None
+    created_at: datetime = field(default_factory=datetime.now)
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    def to_json(self) -> str:
+        return json.dumps(asdict(self), default=str)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "User":
+        if "created_at" in data and isinstance(data["created_at"], str):
+            data["created_at"] = datetime.fromisoformat(data["created_at"])
+        return cls(**data)
+
+# With dacite for complex parsing
+from dacite import from_dict, Config
+
+user = from_dict(
+    User,
+    data,
+    config=Config(
+        cast=[datetime],
+        strict=True,
+    )
+)
+```
+
+### Binary Serialization
+
+```python
+import pickle
+import struct
+from typing import Any
+
+# Pickle (Python-specific, not secure for untrusted data)
+data = {"key": "value", "numbers": [1, 2, 3]}
+pickled = pickle.dumps(data)
+restored = pickle.loads(pickled)
+
+# File I/O
+with open("data.pkl", "wb") as f:
+    pickle.dump(data, f)
+
+with open("data.pkl", "rb") as f:
+    loaded = pickle.load(f)
+
+# ⚠️ Security warning: Never unpickle untrusted data
+
+# MessagePack (cross-language, faster than JSON)
+import msgpack
+
+packed = msgpack.packb({"key": "value"})
+unpacked = msgpack.unpackb(packed)
+
+# Struct (for binary protocols)
+# Pack: int, float, 10-char string
+packed = struct.pack("if10s", 42, 3.14, b"hello")
+unpacked = struct.unpack("if10s", packed)
+```
+
+### YAML and TOML
+
+```python
+# YAML
+import yaml
+
+data = {"name": "config", "settings": {"debug": True}}
+yaml_str = yaml.dump(data, default_flow_style=False)
+parsed = yaml.safe_load(yaml_str)
+
+# TOML (Python 3.11+ has tomllib built-in)
+import tomllib  # Read-only, built-in
+
+with open("config.toml", "rb") as f:
+    config = tomllib.load(f)
+
+# For writing TOML, use tomli-w
+import tomli_w
+
+with open("config.toml", "wb") as f:
+    tomli_w.dump(data, f)
+```
+
+### Validation Patterns
+
+```python
+from pydantic import BaseModel, field_validator, model_validator
+from typing import Self
+
+class CreateUserRequest(BaseModel):
+    username: str
+    password: str
+    confirm_password: str
+
+    @field_validator('username')
+    @classmethod
+    def username_alphanumeric(cls, v: str) -> str:
+        if not v.isalnum():
+            raise ValueError('must be alphanumeric')
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('must be at least 8 characters')
+        if not any(c.isupper() for c in v):
+            raise ValueError('must contain uppercase letter')
+        return v
+
+    @model_validator(mode='after')
+    def passwords_match(self) -> Self:
+        if self.password != self.confirm_password:
+            raise ValueError('passwords do not match')
+        return self
+
+# Usage
+try:
+    request = CreateUserRequest(
+        username="alice123",
+        password="SecurePass123",
+        confirm_password="SecurePass123",
+    )
+except ValidationError as e:
+    print(e.errors())
+```
+
+### See Also
+
+- `patterns-serialization-dev` - Cross-language serialization patterns and comparisons
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:

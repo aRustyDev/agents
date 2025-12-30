@@ -1421,6 +1421,260 @@ proptest! {
 
 ---
 
+## Metaprogramming
+
+Rust provides powerful metaprogramming through macros. There are two main types: declarative macros (`macro_rules!`) and procedural macros (derive, attribute, and function-like).
+
+### Declarative Macros (macro_rules!)
+
+```rust
+// Simple macro
+macro_rules! say_hello {
+    () => {
+        println!("Hello!");
+    };
+}
+
+say_hello!();  // Prints: Hello!
+
+// Macro with arguments
+macro_rules! create_function {
+    ($name:ident) => {
+        fn $name() {
+            println!("Called {:?}", stringify!($name));
+        }
+    };
+}
+
+create_function!(foo);
+foo();  // Prints: Called "foo"
+
+// Macro with expression repetition
+macro_rules! vec_of_strings {
+    ($($x:expr),* $(,)?) => {
+        vec![$($x.to_string()),*]
+    };
+}
+
+let v = vec_of_strings!["a", "b", "c"];
+```
+
+### Fragment Specifiers
+
+| Specifier | Matches | Example |
+|-----------|---------|---------|
+| `$x:ident` | Identifier | `foo`, `MyStruct` |
+| `$x:expr` | Expression | `1 + 2`, `foo()` |
+| `$x:ty` | Type | `i32`, `Vec<String>` |
+| `$x:pat` | Pattern | `Some(x)`, `_` |
+| `$x:stmt` | Statement | `let x = 1;` |
+| `$x:block` | Block | `{ ... }` |
+| `$x:item` | Item | `fn foo() {}` |
+| `$x:path` | Path | `std::io::Error` |
+| `$x:tt` | Token tree | Any single token |
+| `$x:literal` | Literal | `"hello"`, `42` |
+
+### Macro Patterns
+
+```rust
+// Multiple match arms
+macro_rules! calculate {
+    // Single value
+    ($e:expr) => { $e };
+    // Two values with operator
+    ($left:expr, $op:tt, $right:expr) => {
+        $left $op $right
+    };
+}
+
+let a = calculate!(5);        // 5
+let b = calculate!(5, +, 3);  // 8
+
+// Recursive macro for variadic arguments
+macro_rules! sum {
+    ($x:expr) => { $x };
+    ($x:expr, $($rest:expr),+) => {
+        $x + sum!($($rest),+)
+    };
+}
+
+let total = sum!(1, 2, 3, 4);  // 10
+```
+
+### Derive Macros
+
+Derive macros generate trait implementations automatically.
+
+```rust
+// Using built-in derives
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+struct User {
+    name: String,
+    age: u32,
+}
+
+// Using third-party derives
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
+struct Config {
+    host: String,
+    port: u16,
+}
+```
+
+### Creating Custom Derive Macros
+
+```rust
+// In a proc-macro crate (Cargo.toml: proc-macro = true)
+use proc_macro::TokenStream;
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
+
+#[proc_macro_derive(MyTrait)]
+pub fn derive_my_trait(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let name = input.ident;
+
+    let expanded = quote! {
+        impl MyTrait for #name {
+            fn describe(&self) -> String {
+                format!("This is a {}", stringify!(#name))
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+// Usage
+#[derive(MyTrait)]
+struct MyStruct;
+```
+
+### Derive Macro with Attributes
+
+```rust
+// Macro definition
+#[proc_macro_derive(Builder, attributes(builder))]
+pub fn derive_builder(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    // Parse #[builder(...)] attributes
+    // Generate builder pattern implementation
+    // ...
+}
+
+// Usage
+#[derive(Builder)]
+struct Command {
+    #[builder(default = "false")]
+    verbose: bool,
+
+    #[builder(each = "arg")]
+    args: Vec<String>,
+}
+```
+
+### Attribute Macros
+
+```rust
+// Macro definition (in proc-macro crate)
+#[proc_macro_attribute]
+pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr = parse_macro_input!(attr as LitStr);
+    let item = parse_macro_input!(item as ItemFn);
+    let fn_name = &item.sig.ident;
+
+    let expanded = quote! {
+        #item
+
+        inventory::submit! {
+            Route {
+                path: #attr,
+                handler: #fn_name,
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+// Usage
+#[route("/api/users")]
+fn get_users() -> Response {
+    // ...
+}
+```
+
+### Function-like Procedural Macros
+
+```rust
+// Macro definition
+#[proc_macro]
+pub fn sql(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as LitStr);
+    let query = input.value();
+
+    // Validate SQL at compile time
+    // Generate typed query code
+    let expanded = quote! {
+        Query::new(#query)
+    };
+
+    TokenStream::from(expanded)
+}
+
+// Usage
+let query = sql!("SELECT * FROM users WHERE id = $1");
+```
+
+### Common Proc-Macro Crates
+
+| Crate | Purpose | Example |
+|-------|---------|---------|
+| `syn` | Parse Rust code | `parse_macro_input!` |
+| `quote` | Generate Rust code | `quote! { ... }` |
+| `proc-macro2` | TokenStream utilities | Span manipulation |
+| `darling` | Derive macro helpers | Attribute parsing |
+
+### Macro Hygiene
+
+```rust
+macro_rules! using_x {
+    ($e:expr) => {
+        {
+            let x = 42;  // This x is hygienic
+            $e           // $e refers to caller's x
+        }
+    };
+}
+
+let x = 10;
+let result = using_x!(x + 1);  // Uses caller's x=10, not macro's x=42
+assert_eq!(result, 11);
+```
+
+### Debug Macros
+
+```rust
+// Print macro expansion
+// Run: cargo expand
+// Or: cargo expand --lib path::to::module
+
+// Compile-time debugging
+macro_rules! debug_macro {
+    ($($arg:tt)*) => {
+        compile_error!(concat!("Debug: ", stringify!($($arg)*)));
+    };
+}
+```
+
+### See Also
+
+- `patterns-metaprogramming-dev` - Cross-language macro/decorator patterns
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:
