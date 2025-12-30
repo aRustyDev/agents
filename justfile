@@ -524,6 +524,149 @@ validate-all-skills:
     echo ""
     echo "Results: $PASSED/$TOTAL passed, $FAILED failed"
 
+# Validate pillar coverage in a lang-*-dev skill
+[group('skills')]
+validate-pillars skill:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    SKILL_NAME="{{ skill }}"
+    SKILL_FILE="{{ justfile_directory() }}/components/skills/$SKILL_NAME/SKILL.md"
+
+    if [ ! -f "$SKILL_FILE" ]; then
+        echo "❌ Skill not found: $SKILL_NAME"
+        exit 1
+    fi
+
+    echo "Validating pillars for $SKILL_NAME..."
+    echo ""
+
+    PILLARS=0
+
+    # Module System
+    if grep -qiE "^## Module|import.*export|namespace|package structure" "$SKILL_FILE"; then
+        echo "✓ Module System"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Module System"
+    fi
+
+    # Error Handling
+    if grep -qiE "^## Error|Result|Option|Exception" "$SKILL_FILE"; then
+        echo "✓ Error Handling"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Error Handling"
+    fi
+
+    # Concurrency
+    if grep -qiE "^## Concur|async|thread|actor|channel|goroutine|process" "$SKILL_FILE"; then
+        echo "✓ Concurrency"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Concurrency"
+    fi
+
+    # Metaprogramming
+    if grep -qiE "^## Meta|macro|decorator|reflection|annotation|code.*gen" "$SKILL_FILE"; then
+        echo "✓ Metaprogramming"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Metaprogramming"
+    fi
+
+    # Zero/Default Values
+    if grep -qiE "^## Zero|^## Default|null|nil|None|Option|nullable" "$SKILL_FILE"; then
+        echo "✓ Zero/Default Values"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Zero/Default Values"
+    fi
+
+    # Serialization
+    if grep -qiE "^## Serial|JSON|serde|codec|Encode|Decode|marshal" "$SKILL_FILE"; then
+        echo "✓ Serialization"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Serialization"
+    fi
+
+    # Build System
+    if grep -qiE "^## Build|^## Dep|package.*manager|cargo|npm|pip|maven|gradle" "$SKILL_FILE"; then
+        echo "✓ Build/Dependencies"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Build/Dependencies"
+    fi
+
+    # Testing
+    if grep -qiE "^## Test|unit test|property.*test|test.*framework" "$SKILL_FILE"; then
+        echo "✓ Testing"
+        PILLARS=$((PILLARS + 1))
+    else
+        echo "✗ Testing"
+    fi
+
+    echo ""
+    echo "Coverage: $PILLARS/8 pillars"
+
+    if [ $PILLARS -eq 8 ]; then
+        echo "✅ Full coverage - ready for conversion skills"
+    elif [ $PILLARS -ge 6 ]; then
+        echo "⚠️  Acceptable coverage (6+/8) - minor gaps exist"
+    else
+        echo "❌ Below recommended coverage - address gaps before creating conversion skills"
+        exit 1
+    fi
+
+# Validate all lang-*-dev skills for pillar coverage
+[group('skills')]
+validate-all-lang-skills:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    TOTAL=0
+    FULL=0
+    ACCEPTABLE=0
+    GAPS=0
+
+    echo "Validating all lang-*-dev skills..."
+    echo "=================================="
+    echo ""
+
+    for d in "{{ justfile_directory() }}"/components/skills/lang-*-dev/; do
+        [ -d "$d" ] || continue
+        name=$(basename "$d")
+
+        TOTAL=$((TOTAL + 1))
+        echo "[$TOTAL] $name"
+        echo "---"
+
+        # Run validation and capture exit code
+        if just validate-pillars "$name" 2>&1 | tail -n +2; then
+            if grep -q "8/8" <<< "$(just validate-pillars "$name" 2>&1)"; then
+                FULL=$((FULL + 1))
+            else
+                ACCEPTABLE=$((ACCEPTABLE + 1))
+            fi
+        else
+            GAPS=$((GAPS + 1))
+        fi
+
+        echo ""
+    done
+
+    echo "=================================="
+    echo "Summary: $TOTAL skills validated"
+    echo "  ✅ Full coverage (8/8): $FULL"
+    echo "  ⚠️  Acceptable (6-7/8): $ACCEPTABLE"
+    echo "  ❌ Gaps (<6/8): $GAPS"
+
+    if [ $GAPS -gt 0 ]; then
+        echo ""
+        echo "Run 'just validate-pillars <skill-name>' for details on specific gaps"
+    fi
+
 # Import external skill and normalize to naming convention
 [group('skills')]
 import-and-normalize repo skill target:
