@@ -35,8 +35,27 @@ For concrete, language-pair-specific examples, see these skills:
 | `convert-typescript-golang` | TypeScript → Go (OOP → simplicity, Promise → goroutine) |
 | `convert-golang-rust` | Go → Rust (GC → ownership, interface → trait) |
 | `convert-python-rust` | Python → Rust (dynamic → static, GC → ownership) |
+| `convert-python-fsharp` | Python → F# (dynamic → static, OOP → functional) |
+| `convert-python-erlang` | Python → Erlang (single-threaded → BEAM actors) |
+| `convert-python-clojure` | Python → Clojure (imperative → functional, OOP → data-oriented) |
+| `convert-clojure-roc` | Clojure → Roc (JVM → native, dynamic → static) |
+| `convert-clojure-elixir` | Clojure → Elixir (JVM → BEAM, STM → actors) |
+| `convert-clojure-haskell` | Clojure → Haskell (dynamic → static, practical → pure) |
 
 **Note:** This list may not be complete. Search `components/skills/convert-*` for all available conversion skills.
+
+### Skill Categories
+
+| Category | Examples | Key Challenges |
+|----------|----------|----------------|
+| **Static → Static** | TypeScript→Go, Rust→Go | Type system mapping, idiom differences |
+| **Dynamic → Static** | Python→Rust, Clojure→Haskell | Add types, handle runtime flexibility |
+| **Static → Dynamic** | TypeScript→Python, Go→Elixir | Remove type annotations, embrace flexibility |
+| **Dynamic → Dynamic** | Python→Clojure, Clojure→Elixir | Paradigm and runtime differences |
+| **OOP → Functional** | Java→Clojure, Python→Haskell | Replace classes with data+functions |
+| **Functional → Functional** | Clojure→Elixir, Haskell→Scala | FP dialect differences (see section below) |
+| **GC → Ownership** | Any→Rust | Add explicit lifetimes and borrowing |
+| **Platform Migration** | JVM→BEAM, JVM→Native | Runtime semantics, library ecosystem |
 
 When this meta-skill shows illustrative examples below, they demonstrate patterns conceptually. For production-ready, comprehensive examples with full context, refer to the specific `convert-X-Y` skills.
 
@@ -668,6 +687,129 @@ wg.Wait()
 
 ---
 
+## Dev Workflow & REPL Translation (9th Pillar)
+
+When converting between languages with different development workflows—especially REPL-centric languages—developers need guidance on maintaining rapid feedback loops.
+
+### Why This Matters
+
+REPL-centric languages (Clojure, Elixir, Haskell, Lisp) enable a fundamentally different development style:
+- Incremental, exploratory development
+- Immediate feedback on code changes
+- Hot code reloading in production (BEAM)
+- Interactive debugging and data inspection
+
+When converting FROM these languages, developers lose familiar workflows. When converting TO them, developers gain powerful new capabilities.
+
+### REPL-Centric Languages
+
+| Language | REPL/Workflow | Key Features |
+|----------|---------------|--------------|
+| Clojure | `clj`, CIDER, Calva | Send forms to REPL, hot reload, REPL-driven design |
+| Elixir | `iex`, IEx.pry | Interactive shell, hot code loading, remote debugging |
+| Erlang | `erl`, observer | Shell, hot code loading, runtime introspection |
+| Haskell | `ghci` | Type checking, expression evaluation, :reload |
+| Lisp/Scheme | Various | SLIME/Sly, image-based development |
+| F# | FSI, Ionide | Scripts, notebooks, interactive exploration |
+
+### Workflow Translation Patterns
+
+#### REPL → Compiled Language
+
+When converting FROM REPL-centric TO compiled:
+
+| REPL Workflow | Compiled Equivalent | Tools |
+|---------------|---------------------|-------|
+| Send expression to REPL | Run tests / scratch files | cargo watch, go run |
+| Hot reload function | Recompile + restart | Fast incremental builds |
+| Interactive debugging | Debugger breakpoints | lldb, delve, gdb |
+| Data inspection at runtime | Logging, tracing | tracing crate, log package |
+| REPL-driven design | Test-driven design | Property-based tests |
+
+```clojure
+;; Clojure: REPL-driven development
+(defn process-user [user]
+  (-> user
+      (update :name str/upper-case)
+      (assoc :processed-at (java.time.Instant/now))))
+
+;; Evaluate in REPL:
+(process-user {:name "alice"})
+;; => {:name "ALICE", :processed-at #inst "2024-..."}
+```
+
+```rust
+// Rust: Test-driven equivalent
+fn process_user(mut user: User) -> User {
+    user.name = user.name.to_uppercase();
+    user.processed_at = Some(Utc::now());
+    user
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_process_user() {
+        let user = User { name: "alice".into(), processed_at: None };
+        let result = process_user(user);
+        assert_eq!(result.name, "ALICE");
+        assert!(result.processed_at.is_some());
+    }
+}
+// Run with: cargo watch -x test
+```
+
+#### Compiled → REPL Language
+
+When converting FROM compiled TO REPL-centric:
+
+| Compiled Workflow | REPL Enhancement | Benefit |
+|-------------------|------------------|---------|
+| Write test, compile, run | Evaluate expression directly | Instant feedback |
+| Step debugger | Data inspection in REPL | Richer exploration |
+| Print-based debugging | Live value inspection | No recompile needed |
+| Full rebuild on change | Reload single function | Sub-second iteration |
+
+### Hot Code Loading (BEAM Languages)
+
+Erlang/Elixir support hot code loading in production—no restart required:
+
+```elixir
+# Elixir: Hot code reload
+defmodule Counter do
+  use GenServer
+
+  # Old version running in production
+  def handle_call(:get, _from, count) do
+    {:reply, count, count}
+  end
+
+  # Deploy new version - running processes upgrade automatically
+  def handle_call(:get, _from, count) do
+    {:reply, {:count, count, :version, 2}, count}
+  end
+end
+```
+
+When converting FROM Elixir/Erlang, document that:
+- Hot reload won't be available (requires restart)
+- Blue-green deployments or rolling updates replace hot loading
+- Feature flags can simulate gradual rollout
+
+### Development Tool Mapping
+
+| Capability | Clojure | Elixir | Haskell | Rust | Go |
+|------------|---------|--------|---------|------|-----|
+| REPL | clj/CIDER | iex | ghci | evcxr (limited) | gore (limited) |
+| Watch mode | shadow-cljs | mix test --watch | ghcid | cargo watch | air |
+| Hot reload | Built-in | Built-in | :reload | No | No |
+| Interactive debug | CIDER debugger | IEx.pry | GHCi :break | lldb | delve |
+| Notebooks | Clerk | Livebook | IHaskell | Rust Jupyter | - |
+
+---
+
 ## Memory & Ownership Translation
 
 > **Note:** For detailed ownership patterns when converting from GC languages, see `convert-typescript-rust`, `convert-python-rust`, or `convert-golang-rust`.
@@ -795,6 +937,87 @@ end
 | Observer pattern | Event streams, pub/sub |
 | Factory pattern | Constructor functions, protocols |
 | Repository | Pure functions + effect boundary |
+
+### Functional → Functional Translation
+
+Converting between functional languages requires careful attention to dialect differences. Don't assume similar paradigms mean simple translation.
+
+#### Key Differences Between Functional Languages
+
+| Aspect | Clojure | Elixir | Haskell | Scala | F# | Erlang |
+|--------|---------|--------|---------|-------|-----|--------|
+| **Typing** | Dynamic | Dynamic | Static (HM) | Static (hybrid) | Static (HM) | Dynamic |
+| **Laziness** | Lazy seqs | Strict | Lazy default | Strict | Strict | Strict |
+| **Purity** | Practical | Practical | Pure (IO) | Hybrid | Practical | Practical |
+| **Macros** | Yes | Yes | Template Haskell | Limited | No | No |
+| **Concurrency** | STM + core.async | Actors (BEAM) | STM, async | Akka | Async | Actors (BEAM) |
+| **Pattern match** | Limited | Full | Full | Full | Full | Full |
+| **Records** | Maps | Structs | Records/data | Case classes | Records | Records |
+
+#### Laziness Translation
+
+```haskell
+-- Haskell: Lazy by default
+naturals = [0..]  -- Infinite list, evaluated on demand
+
+take 5 naturals   -- [0,1,2,3,4]
+```
+
+```clojure
+;; Clojure: Explicit lazy sequences
+(def naturals (range))  ; Lazy sequence
+
+(take 5 naturals)  ; (0 1 2 3 4)
+```
+
+```elixir
+# Elixir: Strict, use Stream for laziness
+naturals = Stream.iterate(0, &(&1 + 1))
+
+Enum.take(naturals, 5)  # [0, 1, 2, 3, 4]
+```
+
+**Translation Notes:**
+- Haskell → Elixir: Default becomes `Stream`, not `Enum`
+- Elixir → Haskell: Most `Enum` becomes strict evaluation
+- Clojure → Elixir: Lazy sequences become `Stream` operations
+
+#### Purity and Effects
+
+```haskell
+-- Haskell: Effects in IO monad
+readConfig :: FilePath -> IO Config
+readConfig path = do
+  content <- readFile path
+  pure (parseConfig content)
+```
+
+```clojure
+;; Clojure: Effects are implicit
+(defn read-config [path]
+  (-> path slurp parse-config))
+```
+
+```elixir
+# Elixir: Effects are implicit
+def read_config(path) do
+  path |> File.read!() |> parse_config()
+end
+```
+
+**Translation Notes:**
+- Haskell → Practical FP: Drop IO wrapper, effects become implicit
+- Practical FP → Haskell: Wrap effectful code in IO, separate pure/impure
+
+#### Concurrency Model Translation (Functional Languages)
+
+| From | To | Translation Strategy |
+|------|-----|---------------------|
+| Clojure STM | Elixir Agent | `ref` → `Agent`, `alter` → `Agent.update` |
+| Clojure core.async | Elixir GenServer | Channels → GenServer calls, go blocks → Task |
+| Haskell STM | Clojure STM | Similar concepts, different syntax |
+| Elixir GenServer | Clojure component | GenServer → Stuart Sierra's component |
+| Erlang processes | Clojure core.async | Mailbox → channel, receive → alts! |
 
 ---
 
