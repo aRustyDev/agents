@@ -1002,6 +1002,232 @@ process items =
 
 ---
 
+## Metaprogramming Translation
+
+Metaprogramming capabilities vary significantly across languages. Understanding these differences is critical for correct conversions.
+
+### Metaprogramming Model Comparison
+
+| Language | Decorators | Macros | Reflection | Code Gen | Annotations |
+|----------|------------|--------|------------|----------|-------------|
+| Python | `@decorator` | No | `inspect`, `__dict__` | `ast` | No |
+| TypeScript | `@decorator` (experimental) | No | Limited runtime | Via build | `@decorator` |
+| Rust | `#[attr]` | `macro_rules!`, proc macros | No | Proc macros | `#[derive()]` |
+| Go | No | No | `reflect` package | `go generate` | Struct tags |
+| Elixir | No | `defmacro` (hygienic) | Runtime introspection | Macros | Module attrs |
+| Clojure | No | `defmacro` (reader macros) | Full (JVM) | Macros | Metadata |
+| Haskell | No | Template Haskell | Limited | TH, generics | Pragmas |
+| Java | `@annotation` | No | Full runtime | Annotation processors | `@annotation` |
+| Scala | `@annotation` | `macro` (deprecated), inline | Full (JVM) | Macros | `@annotation` |
+
+### Decorator → Attribute Translation
+
+```typescript
+// TypeScript: Decorators (class/method/property)
+@Controller('/users')
+class UserController {
+  @Get('/:id')
+  @Authenticate
+  async getUser(@Param('id') id: string): Promise<User> {
+    return this.userService.find(id);
+  }
+}
+```
+
+```rust
+// Rust: Attributes + Proc Macros
+#[controller("/users")]
+impl UserController {
+    #[get("/:id")]
+    #[authenticate]
+    async fn get_user(&self, id: Path<String>) -> Result<User, Error> {
+        self.user_service.find(&id).await
+    }
+}
+```
+
+```python
+# Python: Decorators (first-class functions)
+@controller('/users')
+class UserController:
+    @get('/:id')
+    @authenticate
+    async def get_user(self, id: str) -> User:
+        return await self.user_service.find(id)
+```
+
+```go
+// Go: No decorators - use struct tags + code generation
+type UserController struct{}
+
+// go:generate annotations or struct tags for metadata
+type GetUserRequest struct {
+    ID string `path:"id" validate:"required"`
+}
+
+func (c *UserController) GetUser(ctx context.Context, req GetUserRequest) (*User, error) {
+    return c.userService.Find(ctx, req.ID)
+}
+```
+
+### Macro Translation Strategies
+
+| Source Pattern | Target Strategy | Example |
+|----------------|-----------------|---------|
+| Compile-time code gen (macros) | Proc macros (Rust), codegen (Go) | Clojure macro → Rust proc macro |
+| Runtime metaprogramming | Reflection or abandon | Python `setattr` → explicit mapping |
+| Hygienic macros | Hygienic equivalents | Elixir `defmacro` → Rust `macro_rules!` |
+| Reader macros | No equivalent | Clojure reader macros → explicit syntax |
+| Template metaprogramming | Generics or traits | C++ templates → Rust generics |
+
+```clojure
+;; Clojure: Macro for compile-time transformation
+(defmacro unless [pred & body]
+  `(if (not ~pred)
+     (do ~@body)))
+
+(unless (empty? items)
+  (process items))
+```
+
+```rust
+// Rust: Declarative macro equivalent
+macro_rules! unless {
+    ($pred:expr, $body:block) => {
+        if !$pred $body
+    };
+}
+
+unless!(items.is_empty(), {
+    process(&items);
+});
+```
+
+```elixir
+# Elixir: Hygienic macro
+defmacro unless(pred, do: body) do
+  quote do
+    if !unquote(pred), do: unquote(body)
+  end
+end
+
+unless Enum.empty?(items) do
+  process(items)
+end
+```
+
+### Mixin and Trait Composition
+
+```typescript
+// TypeScript: Mixin pattern
+type Constructor<T = {}> = new (...args: any[]) => T;
+
+function Timestamped<TBase extends Constructor>(Base: TBase) {
+  return class extends Base {
+    createdAt = new Date();
+    updatedAt = new Date();
+  };
+}
+
+class User extends Timestamped(BaseModel) {
+  name: string;
+}
+```
+
+```rust
+// Rust: Trait + derive macro
+#[derive(Timestamped)]
+struct User {
+    name: String,
+    // createdAt and updatedAt added by derive macro
+}
+
+// Or explicit trait implementation
+trait Timestamped {
+    fn created_at(&self) -> DateTime<Utc>;
+    fn updated_at(&self) -> DateTime<Utc>;
+}
+```
+
+```python
+# Python: Multiple inheritance (mixin classes)
+class TimestampedMixin:
+    created_at: datetime
+    updated_at: datetime
+
+class User(TimestampedMixin, BaseModel):
+    name: str
+```
+
+### Dependency Injection Patterns
+
+| Language | DI Approach | Example |
+|----------|-------------|---------|
+| TypeScript | Class decorators + reflection | `@Injectable()`, Angular/NestJS |
+| Python | Decorators + containers | `@inject`, dependency-injector |
+| Rust | Trait objects + constructors | Manual DI, no runtime reflection |
+| Go | Interface + constructors | Wire (codegen), manual DI |
+| Java/Kotlin | Annotations + reflection | Spring `@Autowired`, Dagger |
+| Elixir | Module behaviours + config | No DI framework (functional approach) |
+
+```typescript
+// TypeScript: Decorator-based DI (NestJS style)
+@Injectable()
+class UserService {
+  constructor(
+    @Inject('DATABASE') private db: Database,
+    private logger: Logger,
+  ) {}
+}
+```
+
+```rust
+// Rust: Constructor injection (no runtime DI)
+struct UserService {
+    db: Arc<dyn Database>,
+    logger: Arc<dyn Logger>,
+}
+
+impl UserService {
+    fn new(db: Arc<dyn Database>, logger: Arc<dyn Logger>) -> Self {
+        Self { db, logger }
+    }
+}
+```
+
+```go
+// Go: Interface-based DI
+type UserService struct {
+    db     Database  // interface type
+    logger Logger    // interface type
+}
+
+func NewUserService(db Database, logger Logger) *UserService {
+    return &UserService{db: db, logger: logger}
+}
+```
+
+### Reflection Capability Translation
+
+| Capability | Python | TypeScript | Rust | Go |
+|------------|--------|------------|------|-----|
+| Get field names | `dir()`, `__dict__` | `Object.keys()` | Derive macro | `reflect.TypeOf()` |
+| Get field values | `getattr()` | Direct access | No | `reflect.ValueOf()` |
+| Set field values | `setattr()` | Direct access | No | `reflect.Set()` (limited) |
+| Call by name | `getattr(obj, name)()` | `obj[name]()` | No | `reflect.Method()` |
+| Create instance | `type(name, bases, dict)` | `new Constructor()` | No | `reflect.New()` |
+
+**When converting FROM reflection-heavy code:**
+1. Identify what reflection achieves (serialization, DI, ORM)
+2. Use compile-time alternatives (macros, codegen, generics)
+3. Accept that some dynamic patterns cannot translate directly
+
+**When converting TO reflection-capable languages:**
+1. Consider if reflection is the idiomatic solution
+2. Prefer static approaches when possible for type safety
+
+---
+
 ## Type System Translation
 
 ### Static → Dynamic Typing
@@ -1310,6 +1536,290 @@ end
 
 ---
 
+## Language-Specific Advanced Patterns
+
+Some languages have advanced type system features that require careful translation. This section covers patterns that don't fit general categories.
+
+### TypeScript Advanced Patterns
+
+TypeScript has several advanced type system features that require specific translation strategies.
+
+#### Type Guards → Pattern Matching
+
+```typescript
+// TypeScript: User-defined type guard
+interface Dog { bark(): void; }
+interface Cat { meow(): void; }
+type Pet = Dog | Cat;
+
+function isDog(pet: Pet): pet is Dog {
+  return 'bark' in pet;
+}
+
+function speak(pet: Pet) {
+  if (isDog(pet)) {
+    pet.bark();  // TypeScript knows pet is Dog
+  } else {
+    pet.meow();  // TypeScript knows pet is Cat
+  }
+}
+```
+
+```rust
+// Rust: Enum with pattern matching
+enum Pet {
+    Dog(Dog),
+    Cat(Cat),
+}
+
+fn speak(pet: &Pet) {
+    match pet {
+        Pet::Dog(dog) => dog.bark(),
+        Pet::Cat(cat) => cat.meow(),
+    }
+}
+```
+
+```python
+# Python: isinstance checks (runtime)
+from typing import Union
+
+def speak(pet: Union[Dog, Cat]) -> None:
+    if isinstance(pet, Dog):
+        pet.bark()
+    else:
+        pet.meow()
+```
+
+#### Conditional Types → Generics/Specialization
+
+```typescript
+// TypeScript: Conditional type
+type Flatten<T> = T extends Array<infer U> ? U : T;
+
+type A = Flatten<string[]>;  // string
+type B = Flatten<number>;    // number
+```
+
+```rust
+// Rust: No direct equivalent - use trait specialization or separate types
+// Approach 1: Trait with associated type
+trait Flatten {
+    type Output;
+}
+
+impl<T> Flatten for Vec<T> {
+    type Output = T;
+}
+
+impl Flatten for i32 {
+    type Output = i32;
+}
+
+// Approach 2: Just use the unwrapped type directly
+fn process_vec<T>(items: Vec<T>) -> T { ... }
+fn process_item<T>(item: T) -> T { ... }
+```
+
+```haskell
+-- Haskell: Type families
+type family Flatten a where
+  Flatten [a] = a
+  Flatten a = a
+```
+
+#### Mapped Types → Derive Macros / Manual Implementation
+
+```typescript
+// TypeScript: Mapped type
+type Partial<T> = { [K in keyof T]?: T[K] };
+type Readonly<T> = { readonly [K in keyof T]: T[K] };
+
+interface User {
+  name: string;
+  age: number;
+}
+
+type PartialUser = Partial<User>;  // { name?: string; age?: number; }
+```
+
+```rust
+// Rust: Derive macro for builder pattern (or manual)
+// No automatic mapped types - use macros or define explicitly
+#[derive(Default)]
+struct UserBuilder {
+    name: Option<String>,
+    age: Option<u32>,
+}
+
+// For readonly: Rust structs are immutable by default
+struct User {
+    name: String,  // Already "readonly" unless &mut
+    age: u32,
+}
+```
+
+```python
+# Python: TypedDict with total=False, or dataclass
+from typing import TypedDict
+
+class PartialUser(TypedDict, total=False):
+    name: str
+    age: int
+
+# Or use dataclass with Optional fields
+@dataclass
+class PartialUser:
+    name: Optional[str] = None
+    age: Optional[int] = None
+```
+
+#### Template Literal Types → String Validation
+
+```typescript
+// TypeScript: Template literal type
+type EventName = `on${Capitalize<string>}`;
+type ValidEvent = `on${'Click' | 'Hover' | 'Focus'}`;
+
+function on(event: ValidEvent, handler: () => void) { ... }
+on('onClick', () => {});    // OK
+on('onClack', () => {});    // Error
+```
+
+```rust
+// Rust: No equivalent - use enums or newtypes
+#[derive(Debug, Clone, Copy)]
+enum Event {
+    Click,
+    Hover,
+    Focus,
+}
+
+fn on(event: Event, handler: impl Fn()) { ... }
+
+// Or use const generics for compile-time string validation (nightly)
+// Generally: Accept the loss of this compile-time check
+```
+
+#### Branded/Opaque Types → Newtypes
+
+```typescript
+// TypeScript: Branded type for type safety
+type UserId = string & { readonly __brand: unique symbol };
+type OrderId = string & { readonly __brand: unique symbol };
+
+function createUserId(id: string): UserId {
+  return id as UserId;
+}
+
+function getUser(id: UserId) { ... }  // Won't accept OrderId
+```
+
+```rust
+// Rust: Newtype pattern
+struct UserId(String);
+struct OrderId(String);
+
+impl UserId {
+    fn new(id: String) -> Self { Self(id) }
+}
+
+fn get_user(id: &UserId) { ... }  // Won't accept OrderId
+```
+
+```python
+# Python: NewType (type-checker only) or class wrapper
+from typing import NewType
+
+UserId = NewType('UserId', str)
+OrderId = NewType('OrderId', str)
+
+def get_user(id: UserId) -> User: ...
+```
+
+### Higher-Kinded Types (HKTs)
+
+Some languages support higher-kinded types (types that take type constructors as parameters).
+
+| Language | HKT Support | Alternative |
+|----------|-------------|-------------|
+| Haskell | Full (`Functor`, `Monad`) | N/A |
+| Scala | Full (with kind-projector) | N/A |
+| Rust | No (use GATs or traits) | Associated types, GATs |
+| TypeScript | No | Mapped types, generics |
+| Go | No | Code generation |
+
+```haskell
+-- Haskell: Higher-kinded type (Functor)
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+
+instance Functor [] where
+  fmap = map
+
+instance Functor Maybe where
+  fmap _ Nothing = Nothing
+  fmap f (Just x) = Just (f x)
+```
+
+```rust
+// Rust: No HKTs - use trait per container
+// GATs (Generic Associated Types) provide some capabilities
+trait Mappable {
+    type Item;
+    type Output<U>;
+
+    fn map<U, F: FnMut(Self::Item) -> U>(self, f: F) -> Self::Output<U>;
+}
+
+impl<T> Mappable for Vec<T> {
+    type Item = T;
+    type Output<U> = Vec<U>;
+
+    fn map<U, F: FnMut(T) -> U>(self, f: F) -> Vec<U> {
+        self.into_iter().map(f).collect()
+    }
+}
+```
+
+### Type Class Translation
+
+| Source (Haskell/Scala) | Rust | Go | TypeScript |
+|------------------------|------|-----|------------|
+| `Eq` | `PartialEq`, `Eq` | Comparable interface | N/A (built-in) |
+| `Ord` | `PartialOrd`, `Ord` | `sort.Interface` | N/A (compareFn) |
+| `Show` | `Display`, `Debug` | `Stringer` | `toString()` |
+| `Functor` | Per-type `map()` | Per-type methods | Array.map, etc. |
+| `Monad` | `?` operator, Iterator | Error returns | Promise.then |
+
+```scala
+// Scala: Type class pattern
+trait Show[A] {
+  def show(a: A): String
+}
+
+implicit val intShow: Show[Int] = (a: Int) => a.toString
+
+def print[A: Show](a: A): Unit = println(implicitly[Show[A]].show(a))
+```
+
+```rust
+// Rust: Trait (similar to type class)
+trait Show {
+    fn show(&self) -> String;
+}
+
+impl Show for i32 {
+    fn show(&self) -> String { self.to_string() }
+}
+
+fn print<T: Show>(a: &T) {
+    println!("{}", a.show());
+}
+```
+
+---
+
 ## Platform Ecosystem Translation
 
 When converting between different runtime platforms, consider these ecosystem differences:
@@ -1335,6 +1845,238 @@ When converting, find equivalent stdlib functions:
 | Date/Time | DateTime | java.time | datetime | chrono | calendar, Timex |
 | Regex | System.Text.RegularExpressions | java.util.regex | re | regex | re |
 | Collections | System.Collections.Generic | java.util | builtins | std::collections | maps, lists, Enum |
+
+---
+
+## Serialization Patterns Translation
+
+Serialization is a core pillar for data-centric applications. Translation patterns vary significantly across languages.
+
+### Serialization Library Mapping
+
+| Language | JSON | Validation | Schema Gen | Binary |
+|----------|------|------------|------------|--------|
+| TypeScript | built-in, `class-transformer` | Zod, Joi, Yup | TypeBox, Zod | protobuf, msgpack |
+| Python | `json` stdlib, Pydantic | Pydantic, marshmallow | Pydantic, dataclasses | protobuf, msgpack |
+| Rust | serde_json | validator crate | schemars | serde + bincode, rmp |
+| Go | `encoding/json` | validator, ozzo | go-jsonschema | protobuf, gob |
+| Elixir | Jason, Poison | Ecto changesets | - | :erlang.term_to_binary |
+| Clojure | cheshire, jsonista | spec, malli | spec | nippy, transit |
+| Haskell | aeson | - | - | binary, cereal |
+
+### Attribute/Annotation Translation
+
+```typescript
+// TypeScript: class-transformer decorators
+class User {
+  @Expose()
+  id: string;
+
+  @Expose({ name: 'full_name' })
+  fullName: string;
+
+  @Type(() => Date)
+  @Transform(({ value }) => new Date(value))
+  createdAt: Date;
+
+  @Exclude()
+  password: string;
+}
+```
+
+```rust
+// Rust: serde attributes
+#[derive(Serialize, Deserialize)]
+struct User {
+    id: String,
+
+    #[serde(rename = "full_name")]
+    full_name: String,
+
+    #[serde(with = "chrono::serde::ts_seconds")]
+    created_at: DateTime<Utc>,
+
+    #[serde(skip)]
+    password: String,
+}
+```
+
+```python
+# Python: Pydantic with field configuration
+from pydantic import BaseModel, Field
+from datetime import datetime
+
+class User(BaseModel):
+    id: str
+    full_name: str = Field(alias="fullName")
+    created_at: datetime
+    password: str = Field(exclude=True)
+
+    class Config:
+        populate_by_name = True
+```
+
+```go
+// Go: struct tags
+type User struct {
+    ID        string    `json:"id"`
+    FullName  string    `json:"full_name"`
+    CreatedAt time.Time `json:"created_at"`
+    Password  string    `json:"-"`  // excluded
+}
+```
+
+### Validation Pattern Translation
+
+```typescript
+// TypeScript: Zod schema
+const UserSchema = z.object({
+  email: z.string().email(),
+  age: z.number().min(0).max(150),
+  role: z.enum(['admin', 'user', 'guest']),
+});
+
+type User = z.infer<typeof UserSchema>;
+```
+
+```rust
+// Rust: validator crate
+use validator::Validate;
+
+#[derive(Validate, Deserialize)]
+struct User {
+    #[validate(email)]
+    email: String,
+
+    #[validate(range(min = 0, max = 150))]
+    age: u8,
+
+    role: Role,  // Use enum for allowed values
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum Role {
+    Admin,
+    User,
+    Guest,
+}
+```
+
+```python
+# Python: Pydantic validation
+from pydantic import BaseModel, EmailStr, Field
+from enum import Enum
+
+class Role(str, Enum):
+    admin = "admin"
+    user = "user"
+    guest = "guest"
+
+class User(BaseModel):
+    email: EmailStr
+    age: int = Field(ge=0, le=150)
+    role: Role
+```
+
+### Custom Serializer Translation
+
+```typescript
+// TypeScript: Custom transformer
+class DateTransformer implements ValueTransformer {
+  to(value: Date): string {
+    return value.toISOString();
+  }
+  from(value: string): Date {
+    return new Date(value);
+  }
+}
+```
+
+```rust
+// Rust: Custom serde serializer
+mod iso_date {
+    use chrono::{DateTime, Utc};
+    use serde::{self, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(date: &DateTime<Utc>, s: S) -> Result<S::Ok, S::Error>
+    where S: Serializer {
+        s.serialize_str(&date.to_rfc3339())
+    }
+
+    pub fn deserialize<'de, D>(d: D) -> Result<DateTime<Utc>, D::Error>
+    where D: Deserializer<'de> {
+        let s = String::deserialize(d)?;
+        DateTime::parse_from_rfc3339(&s)
+            .map(|dt| dt.with_timezone(&Utc))
+            .map_err(serde::de::Error::custom)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Event {
+    #[serde(with = "iso_date")]
+    timestamp: DateTime<Utc>,
+}
+```
+
+### Nested Object Handling
+
+| Source Pattern | Target Pattern | Consideration |
+|----------------|----------------|---------------|
+| Nested classes | Nested structs | Flatten or keep hierarchy |
+| Optional fields | `Option<T>` / `None` | Explicit nullability |
+| Default values | `#[serde(default)]` / `Field(default=...)` | Library-specific |
+| Polymorphic types | Enum with `#[serde(tag = "type")]` | Tagged unions |
+
+```typescript
+// TypeScript: Discriminated union
+type Shape =
+  | { type: 'circle'; radius: number }
+  | { type: 'rectangle'; width: number; height: number };
+```
+
+```rust
+// Rust: Tagged enum (serde)
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+enum Shape {
+    Circle { radius: f64 },
+    Rectangle { width: f64, height: f64 },
+}
+```
+
+### Migration Strategy Patterns
+
+When converting codebases, serialization changes require careful migration:
+
+| Strategy | When to Use | Risk Level |
+|----------|-------------|------------|
+| Dual-write | New field added, old readers exist | Low |
+| Schema versioning | Breaking changes needed | Medium |
+| Envelope pattern | Mixed versions in same system | Medium |
+| Big-bang migration | All readers/writers updated together | High |
+
+```rust
+// Rust: Versioned schema pattern
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "version")]
+enum UserRecord {
+    #[serde(rename = "1")]
+    V1(UserV1),
+    #[serde(rename = "2")]
+    V2(UserV2),
+}
+
+impl UserRecord {
+    fn to_latest(self) -> UserV2 {
+        match self {
+            UserRecord::V1(v1) => v1.migrate(),
+            UserRecord::V2(v2) => v2,
+        }
+    }
+}
+```
 
 ---
 
