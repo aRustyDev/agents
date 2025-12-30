@@ -32,6 +32,24 @@ Create a new one-way language conversion skill (`convert-<source>-<target>`) tha
 **Modes:**
 - **Create** (default) - New skill from scratch
 - **Update** - Improve existing skill (use `--update` or detect existing)
+- **Quick Start** - For experienced users who know the patterns well
+
+### Quick Start Mode (Experienced Users)
+
+If you've created multiple conversion skills and are familiar with the 8-pillar validation, APTV workflow, and skill structure:
+
+1. **Validate pillars quickly** - Check both lang skills for 8/8 coverage
+2. **Skip deep research** - Use existing patterns from similar language pairs
+3. **Focus on differentiators** - What makes THIS pair unique?
+4. **Reference existing skills** - Borrow heavily from similar conversions
+
+**Similar language pair detection:**
+| New Pair | Reference Pairs | Why Similar |
+|----------|-----------------|-------------|
+| clojure→X | python→X, elixir→X | Dynamic, functional |
+| X→rust | X→go, typescript→rust | Static typing, ownership concepts |
+| erlang→X | elixir→X | BEAM platform, same patterns |
+| scala→X | kotlin→X, clojure→X | JVM, functional hybrid |
 
 ## Prerequisites
 
@@ -143,7 +161,20 @@ Before creating a conversion skill, validate that both source and target languag
 |--------|-------------|---------------|
 | Dev Workflow | `## REPL`, `## Workflow`, `interactive`, `hot reload` | Development style translation |
 
-Include this pillar when either language is REPL-centric: Clojure, Elixir, Erlang, Lisp, Haskell (GHCi), Scala (Ammonite).
+Include this pillar when **either** source OR target language is REPL-centric:
+
+| Language | REPL Type | Include 9th Pillar? |
+|----------|-----------|---------------------|
+| Clojure | Core development workflow | **Always** |
+| Elixir | IEx, LiveView hot reload | **Always** |
+| Erlang | Erl shell, hot code loading | **Always** |
+| Haskell | GHCi for prototyping | **Yes** |
+| Lisp/Scheme | REPL-first development | **Always** |
+| Scala | Ammonite, sbt console | Yes (optional) |
+| Python | IPython, Jupyter | Yes (optional) |
+| F# | FSI (F# Interactive) | Yes (optional) |
+
+**Why this matters:** When converting FROM a REPL-centric language (e.g., Clojure→Rust), developers lose their REPL workflow. The skill should document how to achieve similar rapid feedback loops in the target (e.g., cargo watch, rust-analyzer). When converting TO a REPL-centric language, developers gain new workflows they should leverage.
 
 #### Automated Validation
 
@@ -189,6 +220,22 @@ Count section headers matching pillars:
 - `patterns-concurrency-dev` → Concurrency gaps
 - `patterns-serialization-dev` → Serialization gaps
 - `patterns-metaprogramming-dev` → Metaprogramming gaps
+
+**Pillar Gap Mitigation Examples:**
+
+| Gap Scenario | Mitigation Strategy | Example |
+|--------------|---------------------|---------|
+| Source lacks Metaprogramming | Research source language decorators/macros | Python→Rust: Research `@decorator` → `#[derive()]` mapping |
+| Target lacks Concurrency docs | Reference pattern skill + web search | TypeScript→Go: Use `patterns-concurrency-dev` for goroutine patterns |
+| Both lack Serialization | Create mappings from official docs | Clojure→Elixir: Map `clojure.data.json` → `Jason` from library docs |
+| Source has partial Error section | Supplement with language reference | Haskell→Rust: Expand `Maybe`/`Either` → `Option`/`Result` from Haskell wiki |
+
+**Concrete mitigation workflow:**
+1. Identify specific gap (e.g., "lang-clojure-dev has no Metaprogramming section")
+2. Document what's missing ("macro hygiene, reader macros, syntax-quote")
+3. Find authoritative source (Clojure.org docs, "Clojure for the Brave and True")
+4. Create skill content with attribution in Limitations section
+5. Track as improvement issue for lang-*-dev skill
 
 #### Report Format
 
@@ -251,6 +298,23 @@ Before creating the skill, research the specific language pair using these struc
 - [ ] Imperative → Declarative: loops → recursion/map/fold, mutation → immutability
 - [ ] Dynamic → Static: duck typing → interfaces/traits, runtime checks → compile-time
 - [ ] Script → Compiled: REPL workflow → build cycle, hot reload → recompile
+- [ ] **Functional → Functional**: Different FP dialects have distinct idioms (see below)
+
+**Functional→Functional Translation (e.g., Clojure→Elixir, Haskell→Scala):**
+
+Even between functional languages, significant translation is needed:
+
+| Aspect | Variations | Example Pairs |
+|--------|-----------|---------------|
+| Type system | Dynamic vs Static, HM vs dependent | Clojure (dynamic) → Haskell (static HM) |
+| Immutability | Enforced vs Conventional | Clojure (enforced) → Scala (conventional) |
+| Laziness | Lazy vs Strict | Haskell (lazy) → Elixir (strict) |
+| Concurrency | Actor vs STM vs CSP | Elixir (actors) → Clojure (STM + core.async) |
+| Macro system | Hygienic vs Unhygienic | Scheme (hygienic) → Clojure (limited hygiene) |
+| Pattern matching | Exhaustive vs Partial | Haskell (exhaustive) → Elixir (partial ok) |
+| Effects | Pure vs Practical | Haskell (IO monad) → Elixir (side effects anywhere) |
+
+Don't assume functional→functional is simple—document the FP dialect differences.
 
 #### 3.8 Transpilers & Interop Tools
 - [ ] Check for existing transpilers between the languages (e.g., Fable.Python, GopherJS)
