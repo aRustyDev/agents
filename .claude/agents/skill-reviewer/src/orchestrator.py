@@ -4,8 +4,8 @@ import subprocess
 import json
 import time
 import re
+from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from .models import (
     AgentSession,
@@ -15,17 +15,17 @@ from .models import (
     Stage
 )
 from .config import PipelineConfig, load_config
-from .worktree import create_worktree, remove_worktree, get_worktree_status
-from .github_ops import (
-    update_issue_labels,
-    add_issue_comment,
-    create_pull_request,
-    get_issue_details
-)
+from .pipeline import DeterministicPipeline, PipelineContext
+from .worktree import get_worktree_status
 
 
 class Orchestrator:
-    """Orchestrates the skill review pipeline using specialized sub-agents."""
+    """Orchestrates the skill review pipeline using specialized sub-agents.
+
+    Architecture:
+    - Deterministic operations (GitHub, worktree, PR) use DeterministicPipeline
+    - LLM operations (validation, analysis, fixing) use sub-agents via claude CLI
+    """
 
     def __init__(self, agent_dir: Path, config: PipelineConfig | None = None):
         self.agent_dir = agent_dir
@@ -38,6 +38,9 @@ class Orchestrator:
 
         self.config = config or load_config(self.data_dir / "config.json")
         self.repo_path = self._find_repo_root()
+
+        # Deterministic pipeline for GitHub/git operations
+        self.pipeline = DeterministicPipeline(self.config, self.repo_path)
 
     def _find_repo_root(self) -> Path:
         """Find the git repository root."""
@@ -176,6 +179,17 @@ class Orchestrator:
 
         return None
 
+    def _create_pipeline_context(self, session: AgentSession) -> PipelineContext:
+        """Create a PipelineContext from an AgentSession."""
+        return PipelineContext(
+            session_id=session.session_id,
+            issue_number=session.issue_number,
+            skill_path=session.skill_path,
+            repo_owner=self.config.repo_owner,
+            repo_name=self.config.repo_name,
+            project_number=self.config.project_number,
+        )
+
     def run_pipeline(
         self,
         session: AgentSession,
@@ -191,25 +205,23 @@ class Orchestrator:
             Updated session
         """
         all_stages = [
-            Stage.GITHUB_UPDATE_START,
-            Stage.VALIDATION,
-            Stage.COMPLEXITY_ASSESSMENT,
-            Stage.ANALYSIS,
-            Stage.FIXING,
-            Stage.PR_CREATION,
-            Stage.GITHUB_UPDATE_END,
+            Stage.SETUP,              # Deterministic: worktree, estimate, status update
+            Stage.VALIDATION,         # LLM: validator sub-agent
+            Stage.COMPLEXITY_ASSESSMENT,  # LLM: complexity-assessor sub-agent
+            Stage.ANALYSIS,           # LLM: analyzer sub-agent
+            Stage.FIXING,             # LLM: fixer sub-agent
+            Stage.TEARDOWN,           # Deterministic: commit, push, PR, status update
         ]
 
         stages_to_run = stages or all_stages
 
-        try:
-            # Setup worktree
-            if session.worktree_path is None:
-                self._setup_worktree(session)
+        # Create pipeline context
+        ctx = self._create_pipeline_context(session)
 
+        try:
             for stage in stages_to_run:
-                if stage == Stage.GITHUB_UPDATE_START:
-                    self._run_github_start(session)
+                if stage == Stage.SETUP:
+                    self._run_setup(session, ctx)
                 elif stage == Stage.VALIDATION:
                     self._run_validation(session)
                 elif stage == Stage.COMPLEXITY_ASSESSMENT:
@@ -218,10 +230,8 @@ class Orchestrator:
                     self._run_analysis(session)
                 elif stage == Stage.FIXING:
                     self._run_fixing(session)
-                elif stage == Stage.PR_CREATION:
-                    self._run_pr_creation(session)
-                elif stage == Stage.GITHUB_UPDATE_END:
-                    self._run_github_end(session)
+                elif stage == Stage.TEARDOWN:
+                    self._run_teardown(session, ctx)
 
                 # Save after each stage
                 session.save(self.sessions_dir)
@@ -241,39 +251,26 @@ class Orchestrator:
 
         return session
 
-    def _setup_worktree(self, session: AgentSession):
-        """Create worktree for the session."""
-        skill_name = Path(session.skill_path).name
-        branch_name = f"feat/fix-{skill_name}-{session.issue_number}"
+    def _run_setup(self, session: AgentSession, ctx: PipelineContext):
+        """Run deterministic setup (worktree, status update, token estimate)."""
+        session.update_stage(Stage.SETUP)
 
-        worktree = create_worktree(
-            repo_path=self.repo_path,
-            worktree_base=Path(self.config.worktree_base),
-            branch_name=branch_name,
-            base_branch=self.config.base_branch
-        )
+        # Run deterministic setup
+        success = self.pipeline.setup(ctx)
 
-        session.worktree_path = str(worktree.path)
-        session.branch_name = branch_name
+        if not success:
+            for error in ctx.errors or []:
+                session.add_error(error)
+            session.update_stage(Stage.FAILED)
+            return
 
-    def _run_github_start(self, session: AgentSession):
-        """Update GitHub issue to in-progress."""
-        session.update_stage(Stage.GITHUB_UPDATE_START)
+        # Update session with context info
+        if ctx.worktree:
+            session.worktree_path = str(ctx.worktree.path)
+            session.branch_name = ctx.branch_name
 
-        result = self.run_subagent(
-            "github-updater",
-            f"""Set issue #{session.issue_number} to 'in-progress':
-1. Add label '{self.config.in_progress_label}'
-2. Add comment indicating review has started with session ID {session.session_id}
-""",
-            session,
-            working_dir=self.repo_path
-        )
-
-        session.add_result(result)
-
-        if not result.success:
-            session.add_error(f"Failed to update GitHub: {result.error}")
+        if ctx.token_estimate:
+            session.estimated_cost_usd = ctx.token_estimate.cost_mixed
 
     def _run_validation(self, session: AgentSession):
         """Run skill validation."""
@@ -363,51 +360,58 @@ Stage changes but don't commit yet.
             if status["clean"]:
                 session.add_error("No changes were made by fixer")
 
-    def _run_pr_creation(self, session: AgentSession):
-        """Create PR with changes."""
-        session.update_stage(Stage.PR_CREATION)
+    def _run_teardown(self, session: AgentSession, ctx: PipelineContext):
+        """Run deterministic teardown (commit, push, PR, status update)."""
+        session.update_stage(Stage.TEARDOWN)
 
+        # Sync context with session
+        if session.worktree_path:
+            from .worktree import WorktreeInfo
+            ctx.worktree = WorktreeInfo(
+                path=Path(session.worktree_path),
+                branch=session.branch_name or ""
+            )
+            ctx.branch_name = session.branch_name
+
+        # Gather results for PR/commit
+        results = {
+            "description": "improve skill documentation",
+            "summary": ["Addressed skill review feedback"],
+            "added": [],
+            "changed": [],
+            "fixed": [],
+        }
+
+        # Extract from fixer results if available
         fixer_result = session.results.get("fixer", {})
+        if fixer_result.get("parsed"):
+            parsed = fixer_result["parsed"]
+            results["files_modified"] = len(parsed.get("files_modified", []))
+            results["lines_added"] = sum(
+                c.get("lines_added", 0)
+                for c in parsed.get("changes_summary", [])
+            )
+            for change in parsed.get("changes_summary", []):
+                if change.get("action") == "created":
+                    results["added"].append(change.get("description", "New file"))
+                elif change.get("action") == "modified":
+                    results["changed"].append(change.get("description", "Updated file"))
 
-        result = self.run_subagent(
-            "pr-creator",
-            f"""Create PR for skill improvements.
+        # Run deterministic teardown
+        success = self.pipeline.teardown(ctx, results, success=True)
 
-Changes made:
-{json.dumps(fixer_result, indent=2)}
+        if not success:
+            for error in ctx.errors or []:
+                session.add_error(error)
 
-Issue to link: #{session.issue_number}
-Branch: {session.branch_name}
-""",
-            session
-        )
-
-        session.add_result(result)
-
-    def _run_github_end(self, session: AgentSession):
-        """Update GitHub issue to in-review."""
-        session.update_stage(Stage.GITHUB_UPDATE_END)
-
-        pr_result = session.results.get("pr-creator", {})
-        pr_url = pr_result.get("parsed", {}).get("pr_url", "")
-
-        result = self.run_subagent(
-            "github-updater",
-            f"""Update issue #{session.issue_number}:
-1. Remove label '{self.config.in_progress_label}'
-2. Add label '{self.config.in_review_label}'
-3. Add comment with PR link: {pr_url}
-4. Add summary of changes made
-""",
-            session,
-            working_dir=self.repo_path
-        )
-
-        session.add_result(result)
+        # Update session with PR info
+        if ctx.pr_url:
+            session.pr_url = ctx.pr_url
 
     def cleanup_session(self, session: AgentSession):
         """Clean up resources after session completes."""
         if session.worktree_path:
+            from .worktree import remove_worktree
             remove_worktree(
                 self.repo_path,
                 Path(session.worktree_path)
