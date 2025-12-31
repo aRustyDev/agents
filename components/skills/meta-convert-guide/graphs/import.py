@@ -3,22 +3,36 @@
 Import difficulty.json into KuzuDB.
 
 Usage:
-    python import.py [--db <path>] [--reset]
+    python import.py [--db <path>] [--reset] [--namespace <name>]
 
 Options:
-    --db <path>   Path to KuzuDB database directory (default: ./difficulty.kuzu)
-    --reset       Drop and recreate tables before importing
+    --db <path>        Path to KuzuDB database directory
+    --reset            Drop and recreate tables before importing
+    --namespace <name> Namespace for global DB (default: derived from skill name)
+
+Environment:
+    KUZU_GLOBAL_DB    Path to global KuzuDB instance. If set and --db is not
+                      specified, uses $KUZU_GLOBAL_DB/<namespace>/ as the
+                      database path.
 
 Requirements:
     pip install kuzu
 
-Example:
+Examples:
+    # Local database (default)
     python import.py --reset
+
+    # Explicit path
     python import.py --db /tmp/difficulty.kuzu
+
+    # Global database (uses $KUZU_GLOBAL_DB/meta_convert_guide/)
+    export KUZU_GLOBAL_DB=~/.kuzu
+    python import.py --reset
 """
 
 import argparse
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -27,6 +41,28 @@ try:
 except ImportError:
     print("Error: kuzu not installed. Run: pip install kuzu")
     exit(1)
+
+
+# Default namespace derived from skill directory name
+DEFAULT_NAMESPACE = "meta_convert_guide"
+
+
+def get_db_path(args) -> tuple[Path, str]:
+    """
+    Determine database path from args or environment.
+
+    Returns:
+        Tuple of (database_path, mode) where mode is 'explicit', 'global', or 'local'
+    """
+    if args.db:
+        return args.db, "explicit"
+
+    global_db = os.environ.get("KUZU_GLOBAL_DB")
+    if global_db:
+        namespace = args.namespace or DEFAULT_NAMESPACE
+        return Path(global_db) / namespace, "global"
+
+    return Path(__file__).parent / "difficulty.kuzu", "local"
 
 
 def load_json(json_path: Path) -> dict:
@@ -201,19 +237,46 @@ def reset_database(db_path: Path) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Import difficulty.json into KuzuDB")
+    parser = argparse.ArgumentParser(
+        description="Import difficulty.json into KuzuDB",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Environment Variables:
+  KUZU_GLOBAL_DB    Path to global KuzuDB instance. When set, databases are
+                    stored as subdirectories: $KUZU_GLOBAL_DB/<namespace>/
+
+Examples:
+  # Local database (in ./difficulty.kuzu)
+  python import.py --reset
+
+  # Global database (in $KUZU_GLOBAL_DB/meta_convert_guide/)
+  export KUZU_GLOBAL_DB=~/.kuzu
+  python import.py --reset
+
+  # Custom namespace
+  python import.py --namespace my_project --reset
+""",
+    )
     parser.add_argument(
         "--db",
         type=Path,
-        default=Path(__file__).parent / "difficulty.kuzu",
-        help="Path to KuzuDB database directory",
+        help="Path to KuzuDB database directory (overrides KUZU_GLOBAL_DB)",
     )
     parser.add_argument(
         "--reset",
         action="store_true",
         help="Drop and recreate tables before importing",
     )
+    parser.add_argument(
+        "--namespace",
+        type=str,
+        default=DEFAULT_NAMESPACE,
+        help=f"Namespace for global DB (default: {DEFAULT_NAMESPACE})",
+    )
     args = parser.parse_args()
+
+    # Determine database path
+    db_path, mode = get_db_path(args)
 
     # Paths
     script_dir = Path(__file__).parent
@@ -228,13 +291,25 @@ def main():
         print(f"Error: {schema_path} not found")
         exit(1)
 
+    # Show mode
+    mode_desc = {
+        "explicit": "explicit path",
+        "global": f"global ($KUZU_GLOBAL_DB/{args.namespace}/)",
+        "local": "local (project directory)",
+    }
+    print(f"Database mode: {mode_desc[mode]}")
+
     # Reset database if requested
     if args.reset:
-        reset_database(args.db)
+        reset_database(db_path)
+
+    # Ensure parent directory exists for global mode
+    if mode == "global":
+        db_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Connect to KuzuDB
-    print(f"Connecting to KuzuDB at {args.db}...")
-    db = kuzu.Database(str(args.db))
+    print(f"Connecting to KuzuDB at {db_path}...")
+    db = kuzu.Database(str(db_path))
     conn = kuzu.Connection(db)
 
     # Load JSON data
@@ -260,7 +335,9 @@ def main():
     print(f"\nImport complete!")
     print(f"  Nodes: {node_count}")
     print(f"  Relationships: {rel_count}")
-    print(f"  Database: {args.db}")
+    print(f"  Database: {db_path}")
+    if mode == "global":
+        print(f"  Namespace: {args.namespace}")
 
 
 if __name__ == "__main__":

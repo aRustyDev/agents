@@ -20,7 +20,7 @@ graphs/
 # Install KuzuDB
 pip install kuzu
 
-# Import data
+# Import data (local database)
 python import.py --reset
 
 # Query the database
@@ -37,6 +37,37 @@ while result.has_next():
     print(result.get_next())
 "
 ```
+
+## Database Modes
+
+The import script supports three database modes:
+
+| Mode | When Used | Database Path |
+|------|-----------|---------------|
+| **Local** | Default (no env var set) | `./difficulty.kuzu` |
+| **Global** | `$KUZU_GLOBAL_DB` is set | `$KUZU_GLOBAL_DB/meta_convert_guide/` |
+| **Explicit** | `--db` flag provided | User-specified path |
+
+### Using Global Database
+
+Set the `KUZU_GLOBAL_DB` environment variable to use a shared database location:
+
+```bash
+# Set global database path
+export KUZU_GLOBAL_DB=~/.kuzu
+
+# Import (creates ~/.kuzu/meta_convert_guide/)
+python import.py --reset
+
+# Use custom namespace
+python import.py --namespace my_project --reset
+```
+
+### Priority Order
+
+1. `--db` flag (explicit path)
+2. `$KUZU_GLOBAL_DB` environment variable (global mode)
+3. `./difficulty.kuzu` (local mode)
 
 ## Data Model
 
