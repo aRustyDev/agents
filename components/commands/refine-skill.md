@@ -29,82 +29,23 @@ Use TodoWrite to track issues found.
 
 #### 2.1 Token Budget (Critical)
 
-| Status     | Condition                   |
-| ---------- | --------------------------- |
-| ✅ Pass    | SKILL.md body < 500 lines   |
-| ⚠️ Warning | SKILL.md body 500-800 lines |
-| ❌ Fail    | SKILL.md body > 800 lines   |
+> **See:** [meta-skill-validation-dev/checklists/structure.md](../skills/meta-skill-validation-dev/checklists/structure.md) for thresholds and progressive disclosure patterns.
 
-If over budget, identify content to split using progressive disclosure.
+If over budget (> 500 lines), identify content to split using progressive disclosure.
 
 #### 2.2 Description Quality
 
-Check frontmatter `description`:
-
-| Status     | Condition                                         |
-| ---------- | ------------------------------------------------- |
-| ✅ Pass    | Clear trigger words, action-oriented, < 200 chars |
-| ⚠️ Warning | Vague or missing trigger conditions               |
-| ❌ Fail    | No description or > 300 chars                     |
+> **See:** [meta-skill-validation-dev/checklists/frontmatter.md](../skills/meta-skill-validation-dev/checklists/frontmatter.md) for description requirements, trigger words, and voice guidelines.
 
 #### 2.3 Progressive Disclosure Patterns
 
-Check if skill uses appropriate patterns:
+> **See:** [meta-skill-validation-dev/checklists/structure.md](../skills/meta-skill-validation-dev/checklists/structure.md) for patterns and directory structure expectations.
 
-**Pattern 1: High-level guide with references**
+#### 2.4 Content Quality Checklist
 
-```
-SKILL.md → reference/details.md
-```
+> **See:** [meta-skill-validation-dev/checklists/quality.md](../skills/meta-skill-validation-dev/checklists/quality.md) for content quality criteria including templates, examples, terminology, and portability checks.
 
-**Pattern 2: Domain-specific organization**
-
-```
-SKILL.md
-├── examples/
-├── reference/
-└── tables/
-```
-
-**Pattern 3: Conditional details**
-
-```markdown
-> **See also:** [detailed-guide.md](./detailed-guide.md)
-```
-
-#### 2.4 Directory Structure
-
-Expected structure for well-organized skills:
-
-```
-<skill-name>/
-├── SKILL.md              # Main instructions (< 500 lines)
-├── FORMS.md              # Templates, checklists (optional)
-├── examples/             # Usage examples (optional)
-│   └── *.md
-├── reference/            # Deep-dive documentation (optional)
-│   └── *.md
-├── tables/               # Lookup tables (optional)
-│   └── *.md
-└── scripts/              # Utility scripts (optional)
-    └── *.py|*.sh
-```
-
-#### 2.5 Content Quality Checklist
-
-| Criterion                  | Check                                                    |
-| -------------------------- | -------------------------------------------------------- |
-| **Templates**              | Provides output format templates if needed               |
-| **Examples**               | Includes input/output pairs for quality-dependent tasks  |
-| **Workflows**              | Uses clear step-by-step workflows for complex tasks      |
-| **Terminology**            | Uses consistent terminology throughout                   |
-| **No time-sensitive info** | Avoids dates, version numbers that expire                |
-| **No Windows paths**       | Uses forward slashes only                                |
-| **Tool references**        | Doesn't assume tools are installed                       |
-| **MCP references**         | Uses `mcp__server__tool` format if referencing MCP tools |
-| **Not too many options**   | Doesn't offer excessive choices                          |
-
-#### 2.6 Script Quality (if applicable)
+#### 2.5 Script Quality (if applicable)
 
 If `scripts/` exists, check:
 
@@ -236,154 +177,26 @@ If `--create-issues` flag is specified, create issues for each finding.
 2. Get remote URL: `git remote get-url origin`
 3. Parse owner/repo from URL
 
-#### 6.2 Issue Categorization
+#### 6.2 Issue Templates and Creation
 
-| Finding Severity | Issue Type | Labels |
-|------------------|------------|--------|
-| Critical | `fix` | `bug`, `skills`, `priority:high` |
-| Warning | `enhance` | `enhancement`, `skills` |
-| Suggestion | `docs` | `documentation`, `skills`, `good first issue` |
+> **See:** [meta-skill-validation-dev/templates/issue-templates.md](../skills/meta-skill-validation-dev/templates/issue-templates.md) for:
+> - Issue categorization (Critical/Warning/Suggestion)
+> - Issue body templates
+> - Title format conventions
+> - Batch vs individual issue strategy
+> - Umbrella issue template for 7+ findings
 
-#### 6.3 Issue Templates
-
-**Critical Issue (Bug):**
-
-```markdown
-## Summary
-
-The skill `<skill-name>` has a critical issue that must be fixed.
-
-## Issue
-
-**Type:** <issue-type>
-**File:** `<file-path>`
-**Line(s):** <line-numbers if applicable>
-
-<detailed description of the issue>
-
-## Suggested Fix
-
-<specific, actionable fix>
-
-## Acceptance Criteria
-
-- [ ] Issue is resolved
-- [ ] Skill passes `/refine-skill --check-only`
-
-## Context
-
-- Skill path: `<skill-path>`
-- Detected by: `/refine-skill`
-- Best practice reference: [Skills Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
-```
-
-**Enhancement Issue (Warning):**
-
-```markdown
-## Summary
-
-Improvement opportunity for skill `<skill-name>`.
-
-## Current State
-
-<description of current state>
-
-## Proposed Improvement
-
-<specific improvement>
-
-## Benefits
-
-- <benefit 1>
-- <benefit 2>
-
-## Implementation Notes
-
-<any relevant implementation details>
-
-## Context
-
-- Skill path: `<skill-path>`
-- Detected by: `/refine-skill`
-```
-
-**Documentation Issue (Suggestion):**
-
-```markdown
-## Summary
-
-Documentation improvement for skill `<skill-name>`.
-
-## Suggestion
-
-<description of suggestion>
-
-## Rationale
-
-<why this would be helpful>
-
-## Context
-
-- Skill path: `<skill-path>`
-- Detected by: `/refine-skill`
-```
-
-#### 6.4 Create Issues
-
-Use `mcp__github__issue_write` or `gh` CLI to create issues:
+**Create issues using:**
 
 ```bash
-# Using gh CLI
 gh issue create \
   --repo <owner>/<repo> \
   --title "<type>(skills): <skill-name> <brief-description>" \
   --body "<issue-body>" \
-  --label "<labels>"
+  --label "skills,<severity-label>"
 ```
 
-**Title format:**
-- Critical: `fix(skills): <skill-name> <issue-summary>`
-- Warning: `enhance(skills): <skill-name> <improvement-summary>`
-- Suggestion: `docs(skills): <skill-name> <suggestion-summary>`
-
-#### 6.5 Batch vs Individual Issues
-
-| Findings Count | Strategy |
-|----------------|----------|
-| 1-3 findings | Create individual issues |
-| 4-6 findings | Create individual issues, link with parent |
-| 7+ findings | Create umbrella issue with checklist, individual for critical only |
-
-**Umbrella Issue Template (7+ findings):**
-
-```markdown
-## Summary
-
-Skill `<skill-name>` requires refinement to meet best practices.
-
-## Findings
-
-### Critical (must fix)
-- [ ] #<issue-num> - <summary>
-
-### Warnings (should fix)
-- [ ] <description>
-- [ ] <description>
-
-### Suggestions (nice to have)
-- [ ] <description>
-- [ ] <description>
-
-## Analysis Report
-
-<embed full analysis report from Phase 3>
-
-## Related
-
-- Best practices: [Skills Best Practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
-```
-
-#### 6.6 Report Created Issues
+#### 6.3 Report Created Issues
 
 After creating issues, report:
 
@@ -428,27 +241,11 @@ done
 
 ## Quality Checklist Reference
 
-### Core Quality
-
-- [ ] Description clearly states when to use
-- [ ] Under 500 lines in SKILL.md
-- [ ] Uses progressive disclosure for deep content
-- [ ] Consistent terminology
-- [ ] No time-sensitive information
-- [ ] No Windows-style paths
-
-### Code and Scripts (if applicable)
-
-- [ ] Scripts solve problems, don't punt
-- [ ] Dependencies are documented
-- [ ] Creates verifiable intermediate outputs
-- [ ] Runtime environment specified
-
-### Testing
-
-- [ ] Examples demonstrate expected behavior
-- [ ] Edge cases documented
-- [ ] Evaluation criteria defined
+> **See:** [meta-skill-validation-dev](../skills/meta-skill-validation-dev/) for complete checklists:
+> - [checklists/frontmatter.md](../skills/meta-skill-validation-dev/checklists/frontmatter.md) - Name and description
+> - [checklists/structure.md](../skills/meta-skill-validation-dev/checklists/structure.md) - Token budget, progressive disclosure
+> - [checklists/quality.md](../skills/meta-skill-validation-dev/checklists/quality.md) - Content quality
+> - [checklists/8-pillars.md](../skills/meta-skill-validation-dev/checklists/8-pillars.md) - Pillar coverage (lang/convert skills)
 
 ## Notes
 
@@ -464,3 +261,11 @@ done
 - Labels (`skills`, `bug`, `enhancement`, `documentation`) are created if they don't exist
 - Use `--check-only --create-issues` to track without making local changes
 - Umbrella issues link related findings for easier project management
+
+## References
+
+| Resource | Purpose |
+|----------|---------|
+| [meta-skill-validation-dev](../skills/meta-skill-validation-dev/) | Shared validation checklists and issue templates |
+| [meta-skill-authoring-dev](../skills/meta-skill-authoring-dev/) | Guidance for creating new skills |
+| [Skills Best Practices](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) | Official Claude Code documentation |
