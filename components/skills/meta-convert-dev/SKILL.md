@@ -64,6 +64,42 @@ For concrete, language-pair-specific examples, see these skills:
 
 When creating a new conversion skill, refer to the specific `convert-X-Y` skills for production-ready examples.
 
+### Platform Ecosystem Considerations
+
+When converting between languages on different platforms (JVM, BEAM, .NET, Native), consider:
+
+| Platform | Key Characteristics |
+|----------|---------------------|
+| **JVM** | Bytecode, JIT, GC, thread-based concurrency, rich stdlib |
+| **BEAM** | Lightweight processes, preemptive scheduling, fault tolerance, hot reload |
+| **.NET** | Similar to JVM, async/await primitives, strong Windows integration |
+| **Native** | Direct compilation, manual/ownership memory, no runtime overhead |
+| **Scripting** | Interpreted/JIT, dynamic typing, GIL (Python) |
+
+**See:** [Platform Ecosystem Reference](references/platform-ecosystem.md) for detailed runtime characteristics, stdlib mapping strategies, transpiler options, and FFI considerations.
+
+### Paradigm Translation Patterns
+
+Cross-paradigm conversions require mental model shifts:
+
+| Source → Target | Key Transformation |
+|-----------------|-------------------|
+| **OOP → FP** | Classes → data + functions, mutation → immutable updates |
+| **Imperative → Declarative** | Loops → higher-order functions, statements → expressions |
+| **Dynamic → Static** | Add type annotations, handle runtime flexibility statically |
+| **Mutable-first → Immutable-first** | State threading, persistent data structures |
+
+**See:** [Paradigm Translation Reference](references/paradigm-translation.md) for detailed patterns and examples.
+
+### Additional Reference Materials
+
+| Topic | Reference File |
+|-------|---------------|
+| **Numeric edge cases** | [references/numeric-edge-cases.md](references/numeric-edge-cases.md) - Overflow handling, division semantics, float precision |
+| **Stdlib mapping** | [references/stdlib-mapping.md](references/stdlib-mapping.md) - Finding equivalent functions across languages |
+| **Build systems** | [references/build-system-mapping.md](references/build-system-mapping.md) - Package managers and project structure |
+| **Module systems** | [references/module-system-comparison.md](references/module-system-comparison.md) - Import/export patterns |
+
 ---
 
 ## Conversion Skill Naming Convention
@@ -930,6 +966,18 @@ Convert <Source> code to idiomatic <Target>. This skill extends `meta-convert-de
 ---
 
 ## References
+
+### Reference Materials (in `references/` directory)
+
+- [platform-ecosystem.md](references/platform-ecosystem.md) - Platform families, runtime characteristics, FFI, stdlib mapping
+- [paradigm-translation.md](references/paradigm-translation.md) - OOP↔FP, imperative↔declarative, type system shifts
+- [numeric-edge-cases.md](references/numeric-edge-cases.md) - Overflow, division semantics, float precision, arbitrary precision
+- [stdlib-mapping.md](references/stdlib-mapping.md) - Common stdlib function equivalents across languages
+- [build-system-mapping.md](references/build-system-mapping.md) - Package managers and build tools
+- [migration-strategies.md](references/migration-strategies.md) - Migration approaches and strategies
+- [module-system-comparison.md](references/module-system-comparison.md) - Import/export and visibility patterns
+- [naming-conventions.md](references/naming-conventions.md) - Naming conventions across languages
+- [performance-considerations.md](references/performance-considerations.md) - Performance patterns and considerations
 
 ### Conversion Methodology
 
