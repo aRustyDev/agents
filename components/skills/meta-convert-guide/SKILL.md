@@ -28,6 +28,7 @@ Comprehensive patterns and strategies for converting code between programming la
 
 | File                                                                           | Content                            |
 | ------------------------------------------------------------------------------ | ---------------------------------- |
+| [reference/difficulty-matrix.md](./reference/difficulty-matrix.md)             | Conversion difficulty ratings      |
 | [reference/type-system-mapping.md](./reference/type-system-mapping.md)         | Primitives, composites, generics   |
 | [reference/error-handling.md](./reference/error-handling.md)                   | Error models, let-it-crash         |
 | [reference/concurrency.md](./reference/concurrency.md)                         | Async models, channels, goroutines |

@@ -1,8 +1,8 @@
-# 8 Pillars Checklist
+# 8+1 Pillars Checklist
 
 Coverage validation for `lang-*-dev` and `convert-*-*` skills.
 
-## The 8 Pillars
+## The 8 Core Pillars
 
 | Pillar | Purpose | Detection Patterns |
 |--------|---------|-------------------|
@@ -14,6 +14,30 @@ Coverage validation for `lang-*-dev` and `convert-*-*` skills.
 | **Serialization** | Data encoding/decoding, marshaling | `JSON`, `serde`, `marshal`, `encode`, `decode`, `parse` |
 | **Build** | Package management, build systems | `Cargo`, `npm`, `pip`, `mix`, `make`, `package.json`, `deps` |
 | **Testing** | Test framework, assertions, mocking | `test`, `describe`, `it`, `assert`, `expect`, `mock`, `#[test]` |
+
+## The 9th Pillar (Optional)
+
+| Pillar | Purpose | Detection Patterns |
+|--------|---------|-------------------|
+| **Dev Workflow & REPL** | Interactive development, hot reload | `REPL`, `iex`, `ghci`, `clj`, `hot reload`, `interactive`, `workflow` |
+
+### When to Include the 9th Pillar
+
+Include when **either** source OR target language is REPL-centric:
+
+| Language | REPL Type | Include 9th? |
+|----------|-----------|--------------|
+| Clojure | REPL-first development | **Always** |
+| Elixir | IEx, hot code loading | **Always** |
+| Erlang | erl shell, hot loading | **Always** |
+| Haskell | GHCi | **Always** |
+| F# | FSI (F# Interactive) | **Always** |
+| Lisp/Scheme | REPL-first | **Always** |
+| Python | REPL, IPython, Jupyter | Often |
+| Rust | evcxr (limited) | When FROM REPL |
+| Go | gore (limited) | When FROM REPL |
+
+> **Full reference:** [meta-convert-guide/reference/dev-workflow-repl.md](../../meta-convert-guide/reference/dev-workflow-repl.md)
 
 ## Scoring Rubric
 
@@ -56,12 +80,23 @@ No mention of error handling patterns.
 
 ## Coverage Thresholds
 
+### For 8 Pillars (non-REPL languages)
+
 | Score | Status | Interpretation |
 |-------|--------|----------------|
 | 8/8 | Excellent | Complete coverage |
 | 6-7.5/8 | Good | Acceptable, minor gaps |
 | 4-5.5/8 | Needs Work | Should improve |
 | < 4/8 | Incomplete | Critical gaps |
+
+### For 9 Pillars (REPL-centric languages)
+
+| Score | Status | Interpretation |
+|-------|--------|----------------|
+| 9/9 | Excellent | Complete coverage |
+| 7-8.5/9 | Good | Acceptable, minor gaps |
+| 5-6.5/9 | Needs Work | Should improve |
+| < 5/9 | Incomplete | Critical gaps |
 
 ## Pillar Details
 
@@ -145,6 +180,35 @@ No mention of error handling patterns.
 - Test organization
 - Mocking/fixtures
 
+### Dev Workflow & REPL (9th Pillar)
+
+**Search terms:** `REPL`, `iex`, `ghci`, `clj`, `fsi`, `interactive`, `hot reload`, `workflow`, `live`
+
+**Expected content:**
+- REPL usage patterns
+- Hot code reloading (if applicable)
+- Interactive debugging
+- Development tool mapping (REPL → compiled equivalents)
+- Editor/IDE integration for REPL
+
+**When required:** Include for conversions involving Clojure, Elixir, Erlang, Haskell, F#, Lisp, or other REPL-centric languages.
+
+**Example section:**
+```markdown
+## Dev Workflow & REPL
+
+### Clojure REPL → Rust Development
+
+| Clojure Workflow | Rust Equivalent |
+|------------------|-----------------|
+| Send to REPL | `cargo watch -x test` |
+| Hot reload | Recompile (fast with incremental) |
+| Data inspection | `dbg!()` macro, logging |
+| REPL-driven design | Test-driven design |
+
+> **See:** [meta-convert-guide/reference/dev-workflow-repl.md](../../meta-convert-guide/reference/dev-workflow-repl.md)
+```
+
 ## Validation Automation
 
 ```bash
@@ -166,6 +230,8 @@ just validate-pillars lang-rust-dev
 
 ## Validation Checklist
 
+### Standard (8 Pillars)
+
 ```markdown
 ## 8 Pillars Validation
 
@@ -185,6 +251,31 @@ just validate-pillars lang-rust-dev
 - [ ] Score >= 6/8 (acceptable)
 - [ ] All pillars at least mentioned (0.5+)
 - [ ] Critical pillars full (Module, Error, Build)
+```
+
+### Extended (9 Pillars - for REPL-centric languages)
+
+```markdown
+## 9 Pillars Validation
+
+| Pillar | Score | Notes |
+|--------|-------|-------|
+| Module | _/1.0 | |
+| Error | _/1.0 | |
+| Concurrency | _/1.0 | |
+| Metaprogramming | _/1.0 | |
+| Zero/Default | _/1.0 | |
+| Serialization | _/1.0 | |
+| Build | _/1.0 | |
+| Testing | _/1.0 | |
+| Dev Workflow | _/1.0 | REPL patterns, hot reload |
+| **Total** | **_/9** | |
+
+### Status
+- [ ] Score >= 7/9 (acceptable)
+- [ ] All pillars at least mentioned (0.5+)
+- [ ] Critical pillars full (Module, Error, Build)
+- [ ] Dev Workflow addresses REPL → target or source → REPL transition
 ```
 
 ## Gap Mitigation

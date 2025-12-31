@@ -171,7 +171,7 @@ When creating a new `convert-X-Y` skill:
 - **Check for existing skill**: Search `components/skills/convert-*`
 - **Check for reverse skill**: If creating `convert-A-B`, check if `convert-B-A` exists
 - **Identify category**: Static→Dynamic, GC→Ownership, etc.
-- **Estimate difficulty**: Based on paradigm and type system differences
+- **Estimate difficulty**: See [difficulty-matrix.md](../meta-convert-guide/reference/difficulty-matrix.md) for pre-calculated ratings
 
 ### 2. Gather Language Knowledge
 
