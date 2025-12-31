@@ -51,17 +51,29 @@ def get_db_path(args) -> tuple[Path, str]:
     """
     Determine database path from args or environment.
 
+    Priority order:
+    1. --db flag (explicit)
+    2. KUZU_DB env var (explicit)
+    3. KUZU_GLOBAL_DB + KUZU_NAMESPACE env vars (global)
+    4. ./difficulty.kuzu (local)
+
     Returns:
         Tuple of (database_path, mode) where mode is 'explicit', 'global', or 'local'
     """
+    # CLI flag takes highest priority
     if args.db:
         return args.db, "explicit"
 
-    global_db = os.environ.get("KUZU_GLOBAL_DB")
-    if global_db:
-        namespace = args.namespace or DEFAULT_NAMESPACE
+    # KUZU_DB env var for explicit path
+    if kuzu_db := os.environ.get("KUZU_DB"):
+        return Path(kuzu_db), "explicit"
+
+    # KUZU_GLOBAL_DB for global database with namespace
+    if global_db := os.environ.get("KUZU_GLOBAL_DB"):
+        namespace = args.namespace or os.environ.get("KUZU_NAMESPACE", DEFAULT_NAMESPACE)
         return Path(global_db) / namespace, "global"
 
+    # Default to local
     return Path(__file__).parent / "difficulty.kuzu", "local"
 
 

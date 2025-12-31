@@ -20,53 +20,66 @@ graphs/
 # Install KuzuDB
 pip install kuzu
 
-# Import data (local database)
-python import.py --reset
+# Using justfile recipes (recommended)
+just -f graphs/kuzu.just kuzu-reset    # Import with fresh database
+just -f graphs/kuzu.just kuzu-status   # Check database status
+just -f graphs/kuzu.just kuzu-config   # Show configuration
 
-# Query the database
-python -c "
-import kuzu
-db = kuzu.Database('./difficulty.kuzu')
-conn = kuzu.Connection(db)
-result = conn.execute('''
-    MATCH (s:Language)-[t:TYPE_DIFF]->(e:Language)
-    RETURN s.name, e.name, t.score
-    LIMIT 5
-''')
-while result.has_next():
-    print(result.get_next())
-"
+# Or using Python directly
+python import.py --reset
+```
+
+### Example Queries via Justfile
+
+```bash
+# Find easy conversions
+just -f graphs/kuzu.just kuzu-easy-conversions
+
+# Find hard conversions
+just -f graphs/kuzu.just kuzu-hard-conversions
+
+# Get details for a specific conversion
+just -f graphs/kuzu.just kuzu-conversion Python Rust
+
+# Run ad-hoc query
+just -f graphs/kuzu.just kuzu-query "MATCH (l:Language) RETURN l.name LIMIT 5"
 ```
 
 ## Database Modes
 
-The import script supports three database modes:
+The import script and justfile recipes support three database modes:
 
 | Mode | When Used | Database Path |
 |------|-----------|---------------|
 | **Local** | Default (no env var set) | `./difficulty.kuzu` |
-| **Global** | `$KUZU_GLOBAL_DB` is set | `$KUZU_GLOBAL_DB/meta_convert_guide/` |
-| **Explicit** | `--db` flag provided | User-specified path |
+| **Global** | `$KUZU_GLOBAL_DB` is set | `$KUZU_GLOBAL_DB/$KUZU_NAMESPACE/` |
+| **Explicit** | `$KUZU_DB` or `--db` flag | User-specified path |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `KUZU_DB` | Explicit database path (highest priority) |
+| `KUZU_GLOBAL_DB` | Global database root directory |
+| `KUZU_NAMESPACE` | Namespace for isolation (default: `meta_convert_guide`) |
 
 ### Using Global Database
-
-Set the `KUZU_GLOBAL_DB` environment variable to use a shared database location:
 
 ```bash
 # Set global database path
 export KUZU_GLOBAL_DB=~/.kuzu
 
 # Import (creates ~/.kuzu/meta_convert_guide/)
-python import.py --reset
+just -f graphs/kuzu.just kuzu-reset
 
 # Use custom namespace
-python import.py --namespace my_project --reset
+KUZU_NAMESPACE=my_project just -f graphs/kuzu.just kuzu-reset
 ```
 
 ### Priority Order
 
-1. `--db` flag (explicit path)
-2. `$KUZU_GLOBAL_DB` environment variable (global mode)
+1. `KUZU_DB` or `--db` flag (explicit path)
+2. `KUZU_GLOBAL_DB` + `KUZU_NAMESPACE` (global mode)
 3. `./difficulty.kuzu` (local mode)
 
 ## Data Model
