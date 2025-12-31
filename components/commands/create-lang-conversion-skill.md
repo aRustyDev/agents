@@ -746,7 +746,7 @@ Fill in the template with specific content for this language pair:
 
 | Section | Minimum | Quality Bar |
 |---------|---------|-------------|
-| Quick Reference | 10 entries | Most common type mappings |
+| Quick Reference | 10 entries | Most common type mappings (see example below) |
 | Primitive Types | All primitives | Include edge cases (infinity, NaN) |
 | Collection Types | 5+ types | Array, Map, Set, Tuple equivalents |
 | Composite Types | 3+ types | Struct, Class, Interface mappings |
@@ -756,6 +756,34 @@ Fill in the template with specific content for this language pair:
 | Memory/Ownership | If applicable | Include if languages differ (GC vs ownership) |
 | Examples | 3+ (simple, medium, complex) | Progressive complexity |
 | Pitfalls | 5+ pitfalls | Language-pair specific mistakes |
+
+**Quick Reference Example (TypeScript → Rust):**
+
+| TypeScript | Rust | Notes |
+|------------|------|-------|
+| `string` | `String` / `&str` | `String` for owned, `&str` for borrowed |
+| `number` | `i32` / `f64` | Choose based on usage (integer vs float) |
+| `boolean` | `bool` | Direct mapping |
+| `null \| undefined` | `Option<T>` | Use `None` for absence |
+| `T[]` | `Vec<T>` | Dynamic array equivalent |
+| `Map<K,V>` | `HashMap<K,V>` | Import from `std::collections` |
+| `interface` | `trait` / `struct` | Trait for behavior, struct for data |
+| `class` | `struct` + `impl` | Separate data from methods |
+| `Promise<T>` | `Future<Output=T>` | Requires async runtime |
+| `try/catch` | `Result<T,E>` + `?` | Compile-time error handling |
+
+This example shows 10 high-value mappings that cover the most common translation needs.
+
+#### Organizing Large Type Mapping Tables
+
+When type mappings exceed 20 entries, organize for scanability:
+
+1. **Group by category**: Primitives → Collections → Composites → Special types
+2. **Alphabetize within groups**: Easier to find specific types
+3. **Use subsections**: Split into `### Primitive Types`, `### Collection Types`, etc.
+4. **Highlight gotchas**: Bold or add ⚠️ for non-obvious translations
+
+**Anti-pattern**: One giant table with 50+ rows sorted arbitrarily.
 
 #### Idiom Translation Priority
 
@@ -773,6 +801,145 @@ Fill in the template with specific content for this language pair:
 - Resource cleanup (using/defer/Drop)
 - Builder patterns
 - Iteration patterns
+
+#### Handling Features With No Equivalent
+
+When source language has a feature with no direct target equivalent:
+
+| Strategy | When to Use | Example |
+|----------|-------------|---------|
+| **Explain the gap** | Feature is truly missing | Python decorators → Go (no equivalent; use code generation or manual wrapping) |
+| **Suggest workaround** | Alternative achieves similar outcome | TypeScript `enum` → Go (use `const` + `iota` pattern) |
+| **Recommend library** | Third-party fills the gap | Python list comprehensions → Java (use Streams or Guava) |
+| **Document limitation** | No good solution exists | Ruby blocks → C (callbacks require explicit function pointers) |
+
+**Template for no-equivalent patterns:**
+
+```markdown
+### Pattern: <Source Feature> (No Direct Equivalent)
+
+**<Source>:**
+\`\`\`<source-lang>
+// Source code using the feature
+\`\`\`
+
+**<Target> - Closest Approximation:**
+\`\`\`<target-lang>
+// Best available approach
+\`\`\`
+
+**Why no direct equivalent:**
+- [Explanation of language design differences]
+
+**Workaround limitations:**
+- [What the workaround doesn't provide]
+```
+
+#### Choosing Between Multiple Idiomatic Approaches
+
+When the target language has multiple valid translations:
+
+1. **Document all viable options** with trade-offs
+2. **Recommend a default** for most cases
+3. **Explain when to choose alternatives**
+
+**Example (TypeScript `interface` → Rust):**
+
+| Approach | When to Use |
+|----------|-------------|
+| `trait` | Defining shared behavior across types |
+| `struct` | Defining data shape only |
+| `struct` + `impl` | Data shape with associated methods |
+
+**Template for multiple approaches:**
+
+```markdown
+### Pattern: <Source Pattern>
+
+**Option A: <First Approach>** (Recommended for most cases)
+\`\`\`<target-lang>
+// Implementation
+\`\`\`
+When to use: [Criteria]
+
+**Option B: <Alternative Approach>**
+\`\`\`<target-lang>
+// Implementation
+\`\`\`
+When to use: [Criteria]
+
+**Decision guide:**
+- Use A when: [condition]
+- Use B when: [condition]
+```
+
+#### Common Pattern Template Snippets
+
+Reusable templates for frequently needed patterns:
+
+**Constructor/Factory Functions:**
+```markdown
+### Pattern: Constructor Function
+
+**<Source>:**
+\`\`\`<source-lang>
+class User {
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+}
+\`\`\`
+
+**<Target>:**
+\`\`\`<target-lang>
+// Target equivalent (struct + new function, builder, etc.)
+\`\`\`
+
+**Why this translation:**
+- [Reason for the pattern choice]
+```
+
+**Resource Cleanup:**
+```markdown
+### Pattern: Resource Management
+
+**<Source>:** `try-finally` / `using` / `with`
+**<Target>:** `Drop` trait / `defer` / context manager equivalent
+
+[Include ownership/lifetime considerations if applicable]
+```
+
+**Singleton/Module Pattern:**
+```markdown
+### Pattern: Module-Level State
+
+**<Source>:** Static class / module singleton
+**<Target>:** `lazy_static!` / `once_cell` / module-level `const`
+
+[Note thread-safety implications]
+```
+
+#### When to Use Code Comments vs Separate Explanation
+
+| Situation | Use Comments | Use "Why" Section |
+|-----------|--------------|-------------------|
+| Non-obvious syntax | Yes - inline | No |
+| Conceptual difference | Light comment | Yes - detailed |
+| Performance implication | Brief note | Yes - with rationale |
+| Gotcha/pitfall | Warning comment | Yes - with example |
+| Standard idiom | No (self-evident) | Brief note if notable |
+
+**Good comment pattern:**
+```rust
+// Note: Rust requires explicit Option unwrap; TS would allow direct access
+let name = user.name.unwrap_or_default();
+```
+
+**When to move explanation out of code:**
+- Explanation exceeds 2 lines
+- Requires comparison to source language
+- Documents a design decision, not just syntax
 
 #### Quality Guidance: Good vs Great
 
@@ -801,6 +968,66 @@ Before finalizing examples, verify each one meets these criteria:
 - [ ] **Complexity matches level** - Don't overcomplicate Simple examples
 - [ ] **Comments explain "why"** - Not just "what" the code does
 - [ ] **Edge cases shown** - Null handling, error paths, empty collections where relevant
+
+#### Example Organization (For Large Skills)
+
+When skills grow beyond 800 lines or have 5+ examples:
+
+**File Structure Options:**
+
+```
+convert-source-target/
+├── SKILL.md              # Core content, inline simple/medium examples
+├── examples/
+│   ├── 01-simple.md      # Or inline if < 20 lines each
+│   ├── 02-medium.md
+│   └── 03-complex-api-client.md  # Named by use case
+└── gotchas/
+    └── common-mistakes.md  # Extract if > 10 pitfalls
+```
+
+**When to extract examples to separate files:**
+- Example exceeds 50 lines (complex examples often do)
+- Multiple variations of the same pattern
+- Examples need their own context/setup code
+
+**Naming conventions:**
+- Number prefix for ordering: `01-`, `02-`, `03-`
+- Descriptive suffix: `-api-client`, `-error-handling`, `-async-patterns`
+
+**Keep inline when:**
+- Simple/medium examples under 30 lines
+- Pattern is central to understanding the skill
+- Extraction would hurt discoverability
+
+#### Balancing Comprehensiveness vs Maintainability
+
+Skills should be complete enough to be useful but not so large they become unmaintainable.
+
+**Size guidelines by difficulty:**
+
+| Difficulty | Target Lines | Max Lines | When to Split |
+|------------|--------------|-----------|---------------|
+| Easy | 200-400 | 500 | Rarely needed |
+| Medium | 400-800 | 1000 | Extract complex examples |
+| Hard | 800-1200 | 1500 | Use progressive disclosure |
+| Expert | 1200+ | 2000 | Split into focused sub-skills |
+
+**Signs a skill is too comprehensive:**
+- More than 80% of content is rarely used
+- Examples cover edge cases that aren't practically common
+- Type mappings include every possible type (not just common ones)
+
+**Signs a skill is too sparse:**
+- Users frequently need to search elsewhere for answers
+- Common patterns are missing
+- "See also" links are doing the heavy lifting
+
+**Maintainability checklist:**
+- [ ] Each section can be updated independently
+- [ ] Examples can be validated without reading entire skill
+- [ ] New patterns can be added without restructuring
+- [ ] Outdated content can be identified and removed
 
 #### Testing/Validation Guidance
 
