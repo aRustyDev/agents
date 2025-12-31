@@ -1001,6 +1001,40 @@ let fetchWithRetry url maxRetries = async {
 }
 ```
 
+### Async.StartChild (Child Workflows)
+
+```fsharp
+// Start child async within parent workflow
+let parentWorkflow = async {
+    // Start child but don't wait yet
+    let! childComputation = Async.StartChild(async {
+        do! Async.Sleep 1000
+        return 42
+    })
+
+    // Do other work while child runs
+    printfn "Parent doing other work..."
+    do! Async.Sleep 500
+
+    // Now wait for child result
+    let! result = childComputation
+    return result * 2
+}
+
+// With timeout for child
+let parentWithTimeout = async {
+    let! childComputation =
+        Async.StartChild(longRunningAsync, millisecondsTimeout = 5000)
+
+    try
+        let! result = childComputation
+        return Ok result
+    with
+    | :? System.TimeoutException ->
+        return Error "Child computation timed out"
+}
+```
+
 ### Task Integration
 
 ```fsharp
@@ -1017,6 +1051,36 @@ let fetchDataTask url = task {
 // Convert between Async and Task
 let asyncToTask = fetchData "url" |> Async.StartAsTask
 let taskToAsync = fetchDataTask "url" |> Async.AwaitTask
+```
+
+### Task vs Async Comparison
+
+| Aspect | Async | Task |
+|--------|-------|------|
+| **Execution** | Cold (doesn't start until run) | Hot (starts immediately) |
+| **Composition** | Easy with `async {}` | F# 6+ `task {}` builder |
+| **Cancellation** | Built-in via CancellationToken | Via CancellationToken |
+| **Exception handling** | Wrapped in Async | Direct exceptions |
+| **.NET interop** | Convert with `Async.StartAsTask` | Native .NET |
+| **Performance** | Slight overhead | Better for .NET interop |
+| **Use when** | F#-centric code, composition | C# interop, ASP.NET Core |
+
+```fsharp
+// Prefer Async for F# composition
+let processDataAsync inputs = async {
+    let! results =
+        inputs
+        |> List.map processItemAsync
+        |> Async.Parallel
+    return Array.toList results
+}
+
+// Prefer Task for ASP.NET Core controllers
+let handleRequest (ctx: HttpContext) = task {
+    let! data = ctx.Request.ReadFromJsonAsync<InputData>()
+    let result = processData data
+    return! ctx.Response.WriteAsJsonAsync(result)
+}
 ```
 
 ### MailboxProcessor (Agents)
@@ -1104,6 +1168,59 @@ Thread.Sleep 500
 cts.Cancel()
 ```
 
+### Timeout Patterns
+
+```fsharp
+open System
+open System.Threading
+
+// Timeout with CancellationTokenSource
+let withTimeout milliseconds computation = async {
+    use cts = new CancellationTokenSource(milliseconds)
+    try
+        let! result = Async.StartChild(computation, millisecondsTimeout = milliseconds)
+        let! value = result
+        return Ok value
+    with
+    | :? TimeoutException -> return Error "Operation timed out"
+    | :? OperationCanceledException -> return Error "Operation cancelled"
+}
+
+// Using Async.RunSynchronously with timeout
+let resultWithTimeout =
+    try
+        fetchData "url" |> Async.RunSynchronously |> Some
+    with
+    | :? TimeoutException -> None
+
+// Task timeout with Task.WhenAny
+let withTaskTimeout (timeout: TimeSpan) (task: Task<'T>) = task {
+    use cts = new CancellationTokenSource()
+    let delayTask = Task.Delay(timeout, cts.Token)
+    let! completedTask = Task.WhenAny(task, delayTask)
+    if completedTask = (task :> Task) then
+        cts.Cancel()
+        return Ok (task.Result)
+    else
+        return Error "Task timed out"
+}
+
+// Combine cancellation and timeout
+let fetchWithCancellationAndTimeout url (parentToken: CancellationToken) = async {
+    use cts = CancellationTokenSource.CreateLinkedTokenSource(parentToken)
+    cts.CancelAfter(5000)  // 5 second timeout
+
+    try
+        let! result = fetchData url
+        return Ok result
+    with
+    | :? OperationCanceledException when parentToken.IsCancellationRequested ->
+        return Error "Parent cancelled"
+    | :? OperationCanceledException ->
+        return Error "Timed out"
+}
+```
+
 ### Parallel Processing
 
 ```fsharp
@@ -1117,6 +1234,42 @@ open System.Threading.Tasks
 Parallel.For(0, 100, fun i ->
     printfn $"Iteration {i}"
 ) |> ignore
+```
+
+### Concurrency Model Comparison
+
+| Model | Use Case | Characteristics |
+|-------|----------|-----------------|
+| **Async** | I/O-bound operations | Cooperative, composable, cold start |
+| **Task** | .NET interop, hot operations | Eager, integrates with C# |
+| **MailboxProcessor** | Stateful agents, actors | Message-passing, thread-safe state |
+| **Array.Parallel** | CPU-bound data parallelism | Fork-join, automatic partitioning |
+| **Parallel.For** | Fine-grained CPU parallelism | Loop-level parallelism |
+| **Channels** | Producer-consumer | Bounded/unbounded queues |
+
+```fsharp
+// Choosing the right model
+let ioWorkload urls =
+    // Use Async for I/O-bound work
+    urls
+    |> List.map fetchAsync
+    |> Async.Parallel
+    |> Async.RunSynchronously
+
+let cpuWorkload data =
+    // Use Array.Parallel for CPU-bound work
+    data
+    |> Array.Parallel.map expensiveComputation
+
+let statefulProcessor () =
+    // Use MailboxProcessor for mutable state
+    MailboxProcessor.Start(fun inbox ->
+        let rec loop state = async {
+            let! msg = inbox.Receive()
+            let newState = processMessage state msg
+            return! loop newState
+        }
+        loop initialState)
 ```
 
 ---

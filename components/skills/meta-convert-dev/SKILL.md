@@ -971,6 +971,7 @@ Convert <Source> code to idiomatic <Target>. This skill extends `meta-convert-de
 
 - [platform-ecosystem.md](references/platform-ecosystem.md) - Platform families, runtime characteristics, FFI, stdlib mapping
 - [paradigm-translation.md](references/paradigm-translation.md) - OOP↔FP, imperative↔declarative, type system shifts
+- [ownership-translation.md](references/ownership-translation.md) - GC↔ownership, borrowing patterns, lifetime translation
 - [numeric-edge-cases.md](references/numeric-edge-cases.md) - Overflow, division semantics, float precision, arbitrary precision
 - [stdlib-mapping.md](references/stdlib-mapping.md) - Common stdlib function equivalents across languages
 - [build-system-mapping.md](references/build-system-mapping.md) - Package managers and build tools

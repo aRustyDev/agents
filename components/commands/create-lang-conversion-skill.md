@@ -41,10 +41,22 @@ Create a new one-way language conversion skill (`convert-<source>-<target>`) tha
 
 If you've created multiple conversion skills and are familiar with the 8-pillar validation, APTV workflow, and skill structure:
 
-1. **Validate pillars quickly** - Check both lang skills for 8/8 coverage
-2. **Skip deep research** - Use existing patterns from similar language pairs
-3. **Focus on differentiators** - What makes THIS pair unique?
-4. **Reference existing skills** - Borrow heavily from similar conversions
+1. **Validate pillars quickly** (Step 2.5) - Check both lang skills for 8/8 coverage
+2. **Check reverse skill** (Step 0.5) - Use Bidirectional Pattern Checklist if exists
+3. **Assess difficulty** (Step 3.5) - Use difficulty matrix for expected effort
+4. **Detect pattern families** (Step 3.10) - Find reusable patterns from similar pairs
+5. **Skip deep research** - Use existing patterns from similar language pairs
+6. **Focus on differentiators** - What makes THIS pair unique?
+7. **Validate bidirectionally** (Step 7) - Run Bidirectional Consistency Validation
+
+**Quick Start Checklist:**
+
+- [ ] Steps 0, 0.5: Check existing & reverse skills
+- [ ] Step 2.5: 8 Pillars validation (both skills ≥6/8)
+- [ ] Step 3.5: Difficulty assessment (know expected size)
+- [ ] Step 3.10: Pattern family identification
+- [ ] Steps 4-6: Create and populate skill
+- [ ] Step 7: Full validation including bidirectional consistency
 
 **Similar language pair detection:**
 | New Pair | Reference Pairs | Why Similar |
@@ -132,6 +144,19 @@ gh pr list --search "convert-$2-$1" --state all
 2. **Reference shared challenges** - Type mappings often have bidirectional insights
 3. **Document cross-references** - Add "See Also" links in both skills
 4. **Identify asymmetries** - Some patterns only matter in one direction
+5. **Complete the Bidirectional Pattern Cross-Reference Checklist**
+
+#### Bidirectional Pattern Cross-Reference Checklist
+
+When a reverse skill exists, verify pattern consistency:
+
+- [ ] Type mappings are inverse of reverse skill (where applicable)
+- [ ] Shared error handling patterns documented in both
+- [ ] Concurrency model translations are consistent
+- [ ] Memory/ownership considerations mirror each other
+- [ ] Platform ecosystem differences noted in both directions
+- [ ] Idiom translations that work bidirectionally are documented in both
+- [ ] One-way patterns are clearly marked (e.g., "No direct reverse translation")
 
 ```markdown
 ## Reverse Skill Found
@@ -474,6 +499,48 @@ Rate the complexity of the language pair conversion to set expectations and guid
 - Key focus areas: [List 2-3 main challenges]
 - Recommended examples: [Number based on difficulty]
 ```
+
+### Step 3.10: Cross-Language Pattern Detection
+
+Identify patterns that share characteristics across language pairs. This helps reuse existing documentation and ensures consistency.
+
+#### Pattern Families
+
+| Pattern Family | Languages | Shared Characteristics |
+|----------------|-----------|------------------------|
+| **BEAM Family** | Erlang, Elixir | Actors, supervision, hot reload |
+| **JVM Family** | Java, Kotlin, Scala, Clojure | Bytecode, classloaders, interop |
+| **ML Family** | Haskell, OCaml, F#, Elm, Roc | ADTs, pattern matching, strong typing |
+| **.NET Family** | C#, F#, VB.NET | CLR, async/await, LINQ patterns |
+| **Lisp Family** | Clojure, Common Lisp, Scheme, Racket | S-expressions, macros, REPL |
+| **Systems Family** | Rust, C, C++ | Manual memory, zero-cost abstractions |
+| **Scripting Family** | Python, Ruby, JavaScript | Dynamic typing, duck typing, GC |
+
+#### Cross-Reference Existing Skills
+
+When creating a skill, check if related conversions already exist:
+
+```bash
+# Find skills involving source language
+ls components/skills/convert-$1-*/
+ls components/skills/convert-*-$1/
+
+# Find skills involving target language
+ls components/skills/convert-$2-*/
+ls components/skills/convert-*-$2/
+```
+
+**Reuse patterns from:**
+
+| New Skill | Reuse From | What to Borrow |
+|-----------|------------|----------------|
+| `convert-elixir-X` | `convert-erlang-X` | BEAM patterns, OTP supervision |
+| `convert-X-rust` | `convert-go-rust` | GC→ownership, error handling |
+| `convert-scala-X` | `convert-kotlin-X` | JVM idioms, null handling |
+| `convert-haskell-X` | `convert-fsharp-X` | ML type patterns, ADTs |
+| `convert-clojure-X` | `convert-elixir-X` | Functional patterns, immutability |
+
+---
 
 ### Step 4: Create Skill Directory
 
@@ -1090,6 +1157,35 @@ Run through this checklist before completing:
 - [ ] Links to `lang-$2-dev` if it exists
 - [ ] Mentions reverse skill `convert-$2-$1` in "Does NOT Cover"
 - [ ] Lists related `convert-X-Y` skills in "See Also"
+
+#### Bidirectional Consistency Validation
+
+If a reverse skill (`convert-$2-$1`) exists, verify bidirectional consistency:
+
+| Check | Status | Notes |
+|-------|--------|-------|
+| Type mappings are inverse | ☐ | e.g., `String→&str` ↔ `&str→String` |
+| Shared pitfalls documented in both | ☐ | Common gotchas apply both ways |
+| Platform considerations consistent | ☐ | Same platform diff noted in both |
+| One-way patterns marked clearly | ☐ | Some patterns only work in one direction |
+| Cross-references link to each other | ☐ | Both skills link to each other |
+
+**One-Way Pattern Examples:**
+
+| Pattern | Direction | Why One-Way |
+|---------|-----------|-------------|
+| GC→Ownership | Any→Rust | Must add lifetime annotations, no reverse automatic |
+| Dynamic→Static | Python→TypeScript | Type inference possible but not automatic reverse |
+| Macro→Function | Rust→Go | Macros have no Go equivalent |
+| Actor→Thread | Erlang→Java | Actor patterns don't map back cleanly |
+
+When documenting one-way patterns:
+```markdown
+<!-- In Pitfalls section -->
+> **One-Way Pattern**: This translation from [source] to [target]
+> does not have a clean reverse. See `convert-$2-$1` for the
+> reverse approach, which uses [different strategy].
+```
 
 ### Step 8: Suggest Cross-References
 
