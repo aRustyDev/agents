@@ -59,16 +59,56 @@ kuzu-status:
 # Optional Recipes
 # -----------------------------------------------------------------------------
 
-# Run an ad-hoc Cypher query
+# Run Cypher query (string or file)
+# Usage: just kuzu-query "MATCH (n) RETURN n"
+#        just kuzu-query -f queries.cypher
+#        just kuzu-query --file queries.cypher
 [group('kuzu')]
-kuzu-query query:
+kuzu-query *args:
     #!/usr/bin/env python3
     import kuzu
+    import sys
+    from pathlib import Path
+
+    args = "{{args}}".split()
+    if not args:
+        print("Usage: just kuzu-query <query>")
+        print("       just kuzu-query -f <file>")
+        print("       just kuzu-query --file <file>")
+        sys.exit(1)
+
+    # Check for file flag
+    if args[0] in ("-f", "--file"):
+        if len(args) < 2:
+            print("Error: -f/--file requires a filename")
+            sys.exit(1)
+        file_path = Path(args[1])
+        if not file_path.exists():
+            print(f"Error: File not found: {file_path}")
+            sys.exit(1)
+        query = file_path.read_text()
+    else:
+        query = " ".join(args)
+
     db = kuzu.Database("{{_kuzu_path}}")
     conn = kuzu.Connection(db)
-    result = conn.execute("""{{query}}""")
-    while result.has_next():
-        print(result.get_next())
+
+    # Split by semicolons for multiple statements
+    statements = [s.strip() for s in query.split(';') if s.strip()]
+
+    for stmt in statements:
+        # Skip comment-only statements
+        lines = [l for l in stmt.split('\n') if l.strip() and not l.strip().startswith('//')]
+        if not lines:
+            continue
+
+        clean_stmt = '\n'.join(lines)
+        try:
+            result = conn.execute(clean_stmt)
+            while result.has_next():
+                print(result.get_next())
+        except Exception as e:
+            print(f"Error: {e}")
 
 # Open interactive Python shell with database connection
 [group('kuzu')]

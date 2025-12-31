@@ -44,6 +44,7 @@ Projects using this pattern **must** implement these justfile recipes:
 | Recipe | Description | Example |
 |--------|-------------|---------|
 | `kuzu-query <cypher>` | Run ad-hoc Cypher query | `just kuzu-query "MATCH (n) RETURN n LIMIT 5"` |
+| `kuzu-query -f <file>` | Run Cypher from file | `just kuzu-query -f queries.cypher` |
 | `kuzu-shell` | Open interactive Cypher shell | `just kuzu-shell` |
 | `kuzu-export` | Export data back to JSON | `just kuzu-export` |
 
@@ -143,16 +144,30 @@ kuzu-status:
 # Optional Recipes
 # -----------------------------------------------------------------------------
 
-# Run an ad-hoc Cypher query
+# Run Cypher query (string or file)
+# Usage: just kuzu-query "MATCH (n) RETURN n"
+#        just kuzu-query -f queries.cypher
 [group('kuzu')]
-kuzu-query query:
+kuzu-query *args:
     #!/usr/bin/env python3
-    import kuzu
+    import kuzu, sys
+    from pathlib import Path
+    args = "{{args}}".split()
+    if not args:
+        print("Usage: just kuzu-query <query> | -f <file>")
+        sys.exit(1)
+    if args[0] in ("-f", "--file"):
+        query = Path(args[1]).read_text()
+    else:
+        query = " ".join(args)
     db = kuzu.Database("{{_kuzu_path}}")
     conn = kuzu.Connection(db)
-    result = conn.execute("""{{query}}""")
-    while result.has_next():
-        print(result.get_next())
+    for stmt in [s.strip() for s in query.split(';') if s.strip()]:
+        lines = [l for l in stmt.split('\n') if l.strip() and not l.strip().startswith('//')]
+        if lines:
+            result = conn.execute('\n'.join(lines))
+            while result.has_next():
+                print(result.get_next())
 
 # Open interactive Python shell with database connection
 [group('kuzu')]
