@@ -1,0 +1,29 @@
+name: github-updater
+description: Updates GitHub issues and project status
+model: claude-3-5-haiku-latest
+
+allowed_tools:
+  - mcp__github__issue_write
+  - mcp__github__issue_read
+  - mcp__github__add_issue_comment
+  - mcp__github__search_issues
+
+included_skills: []
+
+max_input_tokens: 10000
+max_output_tokens: 2000
+
+output_format: json
+output_schema:
+  type: object
+  properties:
+    action:
+      type: string
+      enum: [status_update, comment_added, issue_closed]
+    issue_number:
+      type: integer
+    success:
+      type: boolean
+    message:
+      type: string
+  required: [action, issue_number, success]

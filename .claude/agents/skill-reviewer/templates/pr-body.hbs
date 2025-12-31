@@ -1,0 +1,51 @@
+## Summary
+
+{{#each summary}}
+- {{this}}
+{{/each}}
+
+## Changes
+
+{{#if added}}
+### Added
+{{#each added}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if changed}}
+### Changed
+{{#each changed}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if fixed}}
+### Fixed
+{{#each fixed}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+## Linked Issues
+
+{{#each issues}}
+Closes #{{this}}
+{{/each}}
+
+## Validation
+
+- [ ] Token budget: SKILL.md < 500 lines
+- [ ] Pillar coverage improved
+- [ ] Cross-references valid
+- [ ] Examples are idiomatic
+
+## Test Plan
+
+- [ ] Run `/validate-lang-conversion-skill`
+- [ ] Verify examples compile/run
+- [ ] Check cross-reference links
+
+---
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

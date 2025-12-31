@@ -1,0 +1,48 @@
+query GetProjectItems($projectId: ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      items(first: 100) {
+        nodes {
+          id
+          content {
+            ... on Issue {
+              id
+              number
+              title
+              repository {
+                name
+                owner {
+                  login
+                }
+              }
+              assignees(first: 10) {
+                nodes {
+                  login
+                }
+              }
+              labels(first: 20) {
+                nodes {
+                  name
+                }
+              }
+              createdAt
+              updatedAt
+            }
+          }
+          fieldValues(first: 20) {
+            nodes {
+              ... on ProjectV2ItemFieldSingleSelectValue {
+                name
+                field {
+                  ... on ProjectV2SingleSelectField {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
