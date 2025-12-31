@@ -1,0 +1,66 @@
+name: validator
+description: Validates skill structure and pillar coverage
+model: claude-3-5-haiku-latest
+
+allowed_tools:
+  - Read
+  - Glob
+  - Grep
+
+included_skills:
+  - meta-convert-dev
+  - meta-convert-guide
+
+max_input_tokens: 50000
+max_output_tokens: 5000
+
+output_format: json
+output_schema:
+  type: object
+  properties:
+    skill_path:
+      type: string
+    skill_type:
+      type: string
+      enum: [lang-dev, convert, meta, other]
+    token_count:
+      type: integer
+    token_budget_status:
+      type: string
+      enum: [pass, warning, fail]
+    pillar_coverage:
+      type: object
+      properties:
+        module_system:
+          type: boolean
+        error_handling:
+          type: boolean
+        concurrency:
+          type: boolean
+        metaprogramming:
+          type: boolean
+        zero_default:
+          type: boolean
+        serialization:
+          type: boolean
+        build_tooling:
+          type: boolean
+        testing:
+          type: boolean
+    pillars_present:
+      type: integer
+    pillars_total:
+      type: integer
+    missing_pillars:
+      type: array
+      items:
+        type: string
+    structure_issues:
+      type: array
+      items:
+        type: string
+    recommendations:
+      type: array
+      items:
+        type: string
+  required: [skill_path, pillar_coverage, pillars_present, pillars_total]

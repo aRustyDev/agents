@@ -1,0 +1,52 @@
+## Analysis Plan
+
+**Skill**: `{{skill_path}}`
+**Complexity**: {{complexity}}
+**Recommended Model**: {{recommended_model}}
+
+### Summary
+{{summary}}
+
+### Gaps Identified
+
+{{#each gaps}}
+#### {{pillar}} ({{severity}})
+
+{{description}}
+
+**Suggested Content:**
+{{suggested_content}}
+
+---
+{{/each}}
+
+### Improvement Plan
+
+| # | Type | Location | Est. Lines |
+|---|------|----------|------------|
+{{#each improvements}}
+| {{@index}} | {{type}} | {{location}} | +{{estimated_lines}} |
+{{/each}}
+
+**Total estimated additions**: +{{total_estimated_additions}} lines
+
+### New Reference Files Needed
+
+{{#each references_needed}}
+#### `{{path}}`
+
+**Purpose**: {{purpose}}
+
+**Content Outline**:
+{{content_outline}}
+
+---
+{{/each}}
+
+### Estimated Token Impact
+
+| Metric | Current | After |
+|--------|---------|-------|
+| SKILL.md lines | {{current_lines}} | ~{{projected_lines}} |
+| Reference lines | {{current_ref_lines}} | ~{{projected_ref_lines}} |
+| Total tokens | {{current_tokens}} | ~{{projected_tokens}} |

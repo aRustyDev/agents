@@ -1,0 +1,36 @@
+## Skill Review Complete ✅
+
+**Session**: `{{session_id}}`
+**Duration**: {{duration}}
+
+### Results
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Pillar Coverage | {{pillars_before}}/8 | {{pillars_after}}/8 |
+| SKILL.md Lines | {{lines_before}} | {{lines_after}} |
+
+### Changes
+- Files modified: {{files_modified}}
+- Lines added: +{{lines_added}}
+- Lines removed: -{{lines_removed}}
+
+### Pull Request
+{{pr_url}}
+
+### Token Usage
+
+| Stage | Input | Output |
+|-------|-------|--------|
+{{#each stages}}
+| {{name}} | {{input}} | {{output}} |
+{{/each}}
+| **Total** | **{{actual_input}}** | **{{actual_output}}** |
+
+### Cost
+**Actual**: ${{actual_cost}}
+**Estimated**: ${{estimated_cost}}
+**Difference**: {{cost_difference}}
+
+---
+*Review completed at {{completed_at}}*
