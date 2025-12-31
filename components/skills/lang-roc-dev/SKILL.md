@@ -599,6 +599,409 @@ result = divide(10, 2)
 
 ---
 
+## Zero and Default Values
+
+Roc takes a distinctive approach to null/nil/undefined: it doesn't have them. Instead, Roc uses explicit tag unions to represent the presence or absence of values.
+
+### No Null or Nil
+
+```roc
+# Roc does NOT have:
+# - null (like Java, JavaScript)
+# - nil (like Ruby, Go)
+# - None (like Python's None)
+# - undefined (like JavaScript)
+
+# Instead, absence is always explicit via tag unions
+```
+
+### Optional Values with Tag Unions
+
+```roc
+# The idiomatic way to represent optional values
+MaybeUser : [Some User, None]
+
+findUser : U64 -> [Some User, None]
+findUser = \id ->
+    # ... search logic
+    if found then
+        Some(user)
+    else
+        None
+
+# Using the result
+when findUser(1) is
+    Some(user) -> "Found: \(user.name)"
+    None -> "Not found"
+```
+
+### Semantic Tag Names
+
+Unlike a generic `Maybe` type, Roc encourages descriptive tag names:
+
+```roc
+# More descriptive than Maybe:
+artist : [Loading, Loaded Artist]           # Still loading vs loaded
+email : [Unspecified, Specified Str]        # Never provided vs provided
+result : [Pending, Completed Data, Failed]  # State machine
+
+# Each tells you WHY the value might be absent
+```
+
+### Zero Values for Built-in Types
+
+```roc
+# Empty/zero values for collections
+emptyList : List a
+emptyList = []
+
+emptyDict : Dict k v
+emptyDict = Dict.empty({})
+
+emptySet : Set a
+emptySet = Set.empty({})
+
+emptyStr : Str
+emptyStr = ""
+
+# Numbers default to 0 when type is known
+zero : I64
+zero = 0
+```
+
+### Default Values in Records
+
+Roc supports default values for record fields using the `??` syntax:
+
+```roc
+# Function with default field values
+table : { height : U64, width : U64, title ?? Str, description ?? Str } -> Table
+table = \{ height, width, title ?? "oak", description ?? "a wooden table" } ->
+    # title defaults to "oak" if not provided
+    # description defaults to "a wooden table" if not provided
+    buildTable(height, width, title, description)
+
+# Calling with defaults
+table({ height: 100, width: 50 })  # uses default title and description
+table({ height: 100, width: 50, title: "maple" })  # overrides title only
+```
+
+### Initialization Patterns
+
+```roc
+# Builder pattern for complex initialization
+Config : {
+    host : Str,
+    port : U16,
+    timeout : U64,
+    retries : U8,
+}
+
+defaultConfig : Config
+defaultConfig = {
+    host: "localhost",
+    port: 8080,
+    timeout: 30000,
+    retries: 3,
+}
+
+# Create config with overrides
+myConfig = { defaultConfig & host: "api.example.com", port: 443 }
+```
+
+### Safe Access Patterns
+
+```roc
+# List access returns Result (never crashes)
+when List.get(myList, 0) is
+    Ok(first) -> "First element: \(first)"
+    Err(OutOfBounds) -> "List was empty"
+
+# Dict access returns Result
+when Dict.get(myDict, "key") is
+    Ok(value) -> value
+    Err(KeyNotFound) -> defaultValue
+
+# With default fallback
+value = Dict.get(myDict, "key") |> Result.withDefault("default")
+```
+
+---
+
+## Serialization
+
+Roc provides serialization through the `Encoding` and `Decoding` abilities, which work with format-specific encoders/decoders like JSON.
+
+### Encoding (Serialization)
+
+```roc
+# Basic JSON encoding
+import json.Json
+
+fruitBasket : List (Str, U32)
+fruitBasket = [
+    ("Apples", 10),
+    ("Bananas", 12),
+    ("Oranges", 5),
+]
+
+# Encode to bytes
+bytes : List U8
+bytes = Encode.toBytes(fruitBasket, Json.utf8)
+# Result: [["Apples",10],["Bananas",12],["Oranges",5]]
+```
+
+### Decoding (Deserialization)
+
+```roc
+import json.Json
+
+bytes : List U8
+bytes = "[10, 20, 30]" |> Str.toUtf8
+
+# Decode from bytes
+result : Result (List U32) _
+result = Decode.fromBytes(bytes, Json.utf8)
+
+when result is
+    Ok(numbers) -> "Got: \(Inspect.toStr(numbers))"
+    Err(_) -> "Failed to decode"
+```
+
+### Records and Tags
+
+```roc
+# Records automatically derive Encoding/Decoding
+User : {
+    name : Str,
+    age : U32,
+    role : [Admin, User, Guest],
+}
+
+user : User
+user = { name: "Alice", age: 30, role: Admin }
+
+# Encode record to JSON
+jsonBytes = Encode.toBytes(user, Json.utf8)
+# {"name":"Alice","age":30,"role":"Admin"}
+
+# Decode back to record
+decoded : Result User _
+decoded = Decode.fromBytes(jsonBytes, Json.utf8)
+```
+
+### Partial Decoding
+
+```roc
+# Decode with validation
+parseUser : List U8 -> Result User [InvalidJson, MissingField Str]
+parseUser = \bytes ->
+    when Decode.fromBytes(bytes, Json.utf8) is
+        Ok(user) -> Ok(user)
+        Err(_) -> Err(InvalidJson)
+```
+
+### Custom Encoding for Opaque Types
+
+```roc
+# Opaque types need explicit ability derivation
+Email := Str implements [Encoding, Decoding]
+
+# Or custom implementation
+UserId := U64 implements [
+    Encoding { toEncoder: userIdEncoder },
+    Decoding { decoder: userIdDecoder },
+]
+
+userIdEncoder : UserId -> Encoder fmt where fmt implements EncoderFormatting
+userIdEncoder = \@UserId(id) ->
+    Encode.u64(id)
+
+userIdDecoder : Decoder UserId fmt where fmt implements DecoderFormatting
+userIdDecoder =
+    Decode.u64 |> Decode.map(@UserId)
+```
+
+### Encoding Ability Definition
+
+```roc
+# From Encode.roc
+Encoding implements
+    toEncoder : val -> Encoder fmt
+        where val implements Encoding, fmt implements EncoderFormatting
+
+# From Decode.roc
+Decoding implements
+    decoder : Decoder val fmt
+        where val implements Decoding, fmt implements DecoderFormatting
+```
+
+### Limitations
+
+```roc
+# Note: Dict encoding/decoding has limited support
+# See https://github.com/roc-lang/roc/issues/5294
+
+# Functions cannot be encoded (they don't implement Encoding)
+# This won't work:
+# myFunc = \x -> x + 1
+# Encode.toBytes(myFunc, Json.utf8)  # Error!
+```
+
+---
+
+## Build System
+
+Roc's build system uses the `roc` CLI and a platform-based architecture. Understanding this is essential for project setup and development workflow.
+
+### CLI Commands
+
+```bash
+# Run application directly (compiles and runs)
+roc main.roc
+
+# Build optimized executable
+roc build main.roc
+roc build main.roc --optimize  # maximum optimization
+
+# Development mode (faster compilation, includes dbg output)
+roc dev main.roc
+
+# Run tests (executes all top-level expect expressions)
+roc test main.roc
+
+# Start REPL
+roc repl
+
+# Format code
+roc format main.roc
+roc format .  # format all .roc files
+
+# Check types without building
+roc check main.roc
+
+# Generate documentation
+roc docs package/*.roc
+```
+
+### Application Structure
+
+```roc
+# main.roc - Application header
+app [main!] {
+    pf: platform "https://github.com/roc-lang/basic-cli/releases/download/0.20.0/X73hGh05nNTkDHU06FHC0YfFaQB1pimX7gncRcao5mU.tar.br"
+}
+
+import pf.Stdout
+
+main! = |_args|
+    Stdout.line!("Hello, World!")
+```
+
+### Platform URLs
+
+```roc
+# Platform URL format
+# https://host/path/HASH.tar.br
+#                  ^^^^
+#                  BLAKE3 hash for integrity verification
+
+# Common platforms
+pf: platform "https://github.com/roc-lang/basic-cli/..."      # CLI apps
+pf: platform "https://github.com/roc-lang/basic-webserver/..." # Web servers
+
+# Local platform (for development)
+pf: platform "../my-platform/main.roc"
+```
+
+### Package Structure
+
+```roc
+# package/main.roc - Package header
+package [
+    MyModule,
+    AnotherModule,
+] {
+    json: "https://github.com/lukewilliamboswell/roc-json/..."
+}
+```
+
+### Multi-Module Projects
+
+```
+my-app/
+├── main.roc           # Application entry point
+├── User.roc           # User module
+├── Database.roc       # Database module
+└── Utils/
+    ├── Strings.roc    # String utilities
+    └── Math.roc       # Math utilities
+```
+
+```roc
+# main.roc
+app [main!] { pf: platform "..." }
+
+import pf.Stdout
+import User
+import Database
+import Utils.Strings
+
+main! = |_args|
+    user = User.create("Alice", 30)
+    Stdout.line!(User.getName(user))
+```
+
+### Building for Different Targets
+
+```bash
+# Default: native executable
+roc build main.roc
+
+# WebAssembly (when platform supports it)
+roc build --target wasm32 main.roc
+
+# Specific output name
+roc build main.roc --output myapp
+```
+
+### Package Management
+
+```roc
+# Packages are specified by URL with hash
+app [main!] {
+    pf: platform "...",
+    json: "https://github.com/lukewilliamboswell/roc-json/releases/download/0.10.0/KbIfTNbxShRX1A1FgXei1SpO5Jn8sgP6HP6PXbi-xyA.tar.br",
+}
+
+# Packages are cached locally after first download
+# Cache location: ~/.cache/roc (Unix) or %APPDATA%\Roc (Windows)
+```
+
+### Build Distribution
+
+```bash
+# Create distributable package
+roc build --bundle .tar.br package/main.roc
+
+# The output includes the BLAKE3 hash for the URL
+```
+
+### Common Build Issues
+
+```bash
+# Clear cache if experiencing issues
+rm -rf ~/.cache/roc
+
+# Verify platform/package integrity
+# (automatic - hash mismatch will fail with error)
+
+# Check for type errors without full build
+roc check main.roc
+```
+
+---
+
 ## Type System Fundamentals
 
 ### Type Inference
