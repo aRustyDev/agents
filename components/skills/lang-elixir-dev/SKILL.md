@@ -1533,6 +1533,596 @@ end
 
 ---
 
+## Metaprogramming
+
+Elixir provides powerful metaprogramming capabilities through macros, which operate on the Abstract Syntax Tree (AST) at compile time.
+
+### Quote and Unquote
+
+```elixir
+# quote turns code into AST representation
+quote do
+  1 + 2
+end
+# {:+, [context: Elixir, imports: [{1, Kernel}, {2, Kernel}]], [1, 2]}
+
+# unquote injects values into quoted expressions
+defmodule Example do
+  x = 10
+  quoted = quote do
+    unquote(x) + 5
+  end
+  # {+, _, [10, 5]}
+end
+
+# unquote_splicing for lists
+args = [1, 2, 3]
+quote do
+  sum(unquote_splicing(args))
+end
+# {:sum, [], [1, 2, 3]}
+```
+
+### Defining Macros
+
+```elixir
+defmodule MyMacros do
+  # Basic macro
+  defmacro say(expression) do
+    quote do
+      IO.puts(unquote(expression))
+    end
+  end
+
+  # Macro with variable hygiene
+  defmacro double(x) do
+    quote do
+      result = unquote(x)
+      result * 2
+    end
+  end
+
+  # Debugging macro - shows expression and result
+  defmacro debug(expression) do
+    quote bind_quoted: [expr: expression] do
+      IO.inspect(expr, label: unquote(Macro.to_string(expression)))
+    end
+  end
+end
+
+# Usage
+require MyMacros
+MyMacros.say("Hello!")
+MyMacros.debug(1 + 2)  # 1 + 2: 3
+```
+
+### The __using__ Macro
+
+```elixir
+defmodule MyBehaviour do
+  # __using__ is called when `use MyBehaviour` is invoked
+  defmacro __using__(opts) do
+    quote do
+      import MyBehaviour
+      @behaviour MyBehaviour
+
+      # Inject default implementations
+      def default_name, do: unquote(opts[:name] || "Unknown")
+
+      # Allow override
+      defoverridable default_name: 0
+    end
+  end
+
+  @callback required_callback() :: term()
+end
+
+# Usage
+defmodule MyModule do
+  use MyBehaviour, name: "Custom"
+end
+```
+
+### AST Manipulation
+
+```elixir
+# Traverse and transform AST
+defmodule ASTHelper do
+  def transform(ast) do
+    Macro.prewalk(ast, fn
+      {:+, meta, [left, right]} ->
+        {:-, meta, [left, right]}  # Replace + with -
+      node ->
+        node
+    end)
+  end
+
+  # Expand macros in AST
+  def expand_all(ast, env) do
+    Macro.expand(ast, env)
+  end
+
+  # Convert AST to string
+  def to_string(ast) do
+    Macro.to_string(ast)
+  end
+end
+
+# Inspect AST structure
+quote do: if(true, do: 1, else: 2)
+|> Macro.to_string()
+# "if(true, do: 1, else: 2)"
+```
+
+### Compile-Time Code Generation
+
+```elixir
+defmodule Router do
+  # Generate functions at compile time from data
+  @routes [
+    {:get, "/", :index},
+    {:get, "/users", :users},
+    {:post, "/users", :create_user}
+  ]
+
+  for {method, path, handler} <- @routes do
+    def route(unquote(method), unquote(path)) do
+      apply(__MODULE__, unquote(handler), [])
+    end
+  end
+
+  def index, do: "Home page"
+  def users, do: "List users"
+  def create_user, do: "Create user"
+end
+
+# Also useful: Module.register_attribute/3 for accumulating data
+defmodule PluginHost do
+  Module.register_attribute(__MODULE__, :plugins, accumulate: true)
+
+  @plugins :auth
+  @plugins :logging
+  @plugins :caching
+
+  def plugins, do: @plugins  # [:caching, :logging, :auth]
+end
+```
+
+---
+
+## Serialization
+
+Elixir uses Jason (or Poison) for JSON serialization and Protocol-based encoding for custom types.
+
+### Jason (Recommended)
+
+```elixir
+# Add to mix.exs: {:jason, "~> 1.4"}
+
+# Encoding
+Jason.encode!(%{name: "Alice", age: 30})
+# "{\"name\":\"Alice\",\"age\":30}"
+
+# Decoding
+Jason.decode!("{\"name\":\"Alice\",\"age\":30}")
+# %{"name" => "Alice", "age" => 30}
+
+# With atom keys
+Jason.decode!("{\"name\":\"Alice\"}", keys: :atoms)
+# %{name: "Alice"}
+
+# Pretty printing
+Jason.encode!(%{user: %{name: "Alice"}}, pretty: true)
+```
+
+### Implementing Jason.Encoder Protocol
+
+```elixir
+defmodule User do
+  @derive {Jason.Encoder, only: [:id, :name, :email]}
+  defstruct [:id, :name, :email, :password_hash]
+end
+
+# Custom encoder implementation
+defmodule Money do
+  defstruct [:amount, :currency]
+end
+
+defimpl Jason.Encoder, for: Money do
+  def encode(%Money{amount: amount, currency: currency}, opts) do
+    Jason.Encode.string("#{currency} #{amount}", opts)
+  end
+end
+
+# Usage
+Jason.encode!(%Money{amount: 100, currency: "USD"})
+# "\"USD 100\""
+```
+
+### Poison (Alternative)
+
+```elixir
+# Add to mix.exs: {:poison, "~> 5.0"}
+
+Poison.encode!(%{name: "Alice"})
+Poison.decode!("{\"name\":\"Alice\"}")
+
+# Implementing Poison.Encoder
+defimpl Poison.Encoder, for: DateTime do
+  def encode(datetime, options) do
+    Poison.Encoder.BitString.encode(DateTime.to_iso8601(datetime), options)
+  end
+end
+```
+
+### Ecto Changesets for Validation
+
+```elixir
+defmodule User do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "users" do
+    field :name, :string
+    field :email, :string
+    field :age, :integer
+    timestamps()
+  end
+
+  def changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name, :email, :age])
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
+    |> validate_number(:age, greater_than: 0)
+  end
+end
+
+# Validate incoming JSON
+params = Jason.decode!(json_string)
+changeset = User.changeset(%User{}, params)
+
+if changeset.valid? do
+  {:ok, Ecto.Changeset.apply_changes(changeset)}
+else
+  {:error, changeset.errors}
+end
+```
+
+### Term Serialization
+
+```elixir
+# Erlang Term Format (binary)
+binary = :erlang.term_to_binary(%{key: "value", list: [1, 2, 3]})
+:erlang.binary_to_term(binary)
+
+# External Term Format (for distributed systems)
+binary = :erlang.term_to_binary(data, [:compressed])
+
+# Safe deserialization (atoms must exist)
+:erlang.binary_to_term(binary, [:safe])
+```
+
+---
+
+## REPL and Development Workflow
+
+IEx (Interactive Elixir) is central to Elixir development, providing a powerful REPL with debugging, introspection, and hot code reloading.
+
+### Starting IEx
+
+```bash
+# Basic IEx
+iex
+
+# With Mix project loaded
+iex -S mix
+
+# With Phoenix server
+iex -S mix phx.server
+
+# With custom configuration
+iex --dot-iex path/to/.iex.exs -S mix
+```
+
+### IEx Helpers
+
+```elixir
+# In IEx session:
+
+# Help and documentation
+h Enum.map/2           # Function docs
+h Enum                 # Module docs
+t Enum.t()             # Type specs
+
+# Code inspection
+i [1, 2, 3]            # Inspect value
+i Enum                 # Inspect module
+
+# Compilation
+c "path/to/file.ex"    # Compile file
+r MyModule             # Recompile module
+recompile()            # Recompile project
+
+# Value history
+v()                    # Last result
+v(1)                   # First result
+v(-1)                  # Previous result
+
+# Shell commands
+pwd()                  # Current directory
+ls()                   # List files
+cd("path")             # Change directory
+```
+
+### IEx.pry for Debugging
+
+```elixir
+defmodule MyModule do
+  def process(data) do
+    transformed = transform(data)
+
+    # Insert breakpoint
+    require IEx; IEx.pry()
+
+    finalize(transformed)
+  end
+end
+
+# When code hits pry:
+# - Inspect local variables: transformed, data
+# - Call functions: transform(other_data)
+# - Continue: respawn() or Ctrl+C twice
+```
+
+### Hot Code Reloading
+
+```elixir
+# Recompile and reload module in IEx
+recompile()
+
+# Reload specific module
+r MyModule
+
+# For Phoenix - automatic in dev mode
+# Code changes trigger recompilation on next request
+
+# In production (Distillery/Release)
+# Use hot code upgrades via :code.load_file/1
+:code.purge(MyModule)
+:code.load_file(MyModule)
+```
+
+### Observer for System Inspection
+
+```elixir
+# Start Observer (GUI)
+:observer.start()
+
+# Observer shows:
+# - System overview (memory, CPU, processes)
+# - Process list with message queues
+# - Application supervision trees
+# - ETS tables
+# - Port info
+
+# For remote nodes
+Node.connect(:"app@hostname")
+:observer.start()
+# Then select remote node in Nodes menu
+```
+
+### .iex.exs Configuration
+
+```elixir
+# In ~/.iex.exs or project .iex.exs
+
+# Custom aliases
+alias MyApp.{Repo, User, Account}
+
+# Import helpers
+import Ecto.Query
+
+# Custom helpers
+defmodule H do
+  def reload do
+    IEx.Helpers.recompile()
+    IO.puts("Reloaded!")
+  end
+
+  def user(id), do: Repo.get(User, id)
+end
+
+# Configure IEx
+IEx.configure(
+  colors: [enabled: true],
+  history_size: 100,
+  inspect: [limit: :infinity]
+)
+```
+
+### Runtime Debugging
+
+```elixir
+# Trace function calls
+:dbg.tracer()
+:dbg.p(:all, :c)
+:dbg.tp(MyModule, :my_function, :x)
+# Now calls to MyModule.my_function will be traced
+
+# Stop tracing
+:dbg.stop()
+
+# Using :recon for production debugging
+# Add {:recon, "~> 2.5"} to mix.exs
+:recon.proc_count(:memory, 10)      # Top 10 by memory
+:recon.proc_count(:message_queue_len, 10)  # Top 10 by queue
+:recon.bin_leak(5)                  # Binary memory leaks
+```
+
+---
+
+## Zero and Default Values
+
+Elixir handles absence of values through nil and pattern matching, with explicit default handling patterns.
+
+### Nil Handling
+
+```elixir
+# nil is a valid value (not an error)
+user = nil
+is_nil(user)  # true
+
+# Nil-safe access with pattern matching
+case get_user(id) do
+  nil -> {:error, :not_found}
+  user -> {:ok, user}
+end
+
+# Nil coalescing with ||
+name = user_name || "Anonymous"
+
+# Access with default
+Map.get(map, :key, "default")
+Keyword.get(opts, :timeout, 5000)
+
+# Nil-safe navigation (no ?. operator, use pattern matching)
+defp get_city(user) do
+  case user do
+    %{address: %{city: city}} -> city
+    _ -> nil
+  end
+end
+
+# Or with get_in
+get_in(user, [:address, :city])
+```
+
+### Default Function Arguments
+
+```elixir
+defmodule Config do
+  # Default arguments
+  def connect(host, port \\ 80, opts \\ []) do
+    timeout = Keyword.get(opts, :timeout, 5000)
+    ssl = Keyword.get(opts, :ssl, false)
+    {host, port, timeout, ssl}
+  end
+end
+
+# Multiple clauses with defaults
+Config.connect("localhost")           # port=80, opts=[]
+Config.connect("localhost", 443)      # opts=[]
+Config.connect("localhost", 443, ssl: true)
+```
+
+### Struct Defaults
+
+```elixir
+defmodule User do
+  # All fields with defaults
+  defstruct name: "Unknown",
+            email: nil,
+            role: :user,
+            active: true,
+            metadata: %{}
+
+  # Enforce required fields
+  @enforce_keys [:email]
+  defstruct [:email, name: "Unknown", role: :user]
+end
+
+# Creating with defaults
+%User{email: "test@example.com"}
+# %User{email: "test@example.com", name: "Unknown", role: :user}
+
+# Pattern match with defaults
+def greet(%User{name: name}) do
+  "Hello, #{name}!"
+end
+```
+
+### Default Values in Maps
+
+```elixir
+# Access with default
+map = %{a: 1, b: 2}
+Map.get(map, :c, 0)  # 0
+
+# Update with default
+Map.update(map, :c, 0, &(&1 + 1))  # %{a: 1, b: 2, c: 0}
+
+# get_and_update with default
+Map.get_and_update(map, :c, fn
+  nil -> {nil, 0}
+  val -> {val, val + 1}
+end)
+
+# Merge with defaults
+defaults = %{timeout: 5000, retries: 3}
+config = %{timeout: 10000}
+Map.merge(defaults, config)
+# %{timeout: 10000, retries: 3}
+```
+
+### With Construct for Nil Propagation
+
+```elixir
+# Chain operations that may return nil
+def process_order(order_id) do
+  with {:ok, order} <- fetch_order(order_id),
+       {:ok, user} <- fetch_user(order.user_id),
+       {:ok, payment} <- process_payment(user, order) do
+    {:ok, %{order: order, user: user, payment: payment}}
+  else
+    nil -> {:error, :not_found}
+    {:error, reason} -> {:error, reason}
+  end
+end
+
+# Helper for nil-returning functions
+defp fetch_order(id) do
+  case Repo.get(Order, id) do
+    nil -> {:error, :order_not_found}
+    order -> {:ok, order}
+  end
+end
+```
+
+### Default Behaviours
+
+```elixir
+defmodule Cache do
+  @callback get(key :: term()) :: {:ok, term()} | :error
+  @callback put(key :: term(), value :: term()) :: :ok
+
+  # Optional callback with default
+  @callback ttl() :: integer()
+  @optional_callbacks ttl: 0
+
+  defmacro __using__(_opts) do
+    quote do
+      @behaviour Cache
+
+      # Default implementation
+      def ttl, do: 3600
+
+      defoverridable ttl: 0
+    end
+  end
+end
+
+defmodule MyCache do
+  use Cache
+
+  def get(key), do: # ...
+  def put(key, value), do: # ...
+  # ttl/0 uses default of 3600
+end
+```
+
+---
+
 ## Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:
