@@ -16,6 +16,7 @@ Follow these steps to create a complete, working Homebrew formula.
    - Check if pre-built binaries are available (prefer building from source)
 
 2. **Calculate SHA256** for the source tarball:
+
    ```bash
    curl -sL <tarball-url> | shasum -a 256
    ```
@@ -73,6 +74,7 @@ end
 ### Phase 3: Validate
 
 1. **Copy to Homebrew tap location**:
+
    ```bash
    mkdir -p /usr/local/Homebrew/Library/Taps/arustydev/homebrew-tap/Formula/<letter>/
    cp Formula/<letter>/<name>.rb /usr/local/Homebrew/Library/Taps/arustydev/homebrew-tap/Formula/<letter>/
@@ -80,23 +82,29 @@ end
    ```
 
 2. **Run audit**:
+
    ```bash
    brew audit --new --formula arustydev/tap/<name>
    ```
+
    Fix any issues reported.
 
 3. **Run CI syntax check locally** (IMPORTANT - catches issues `brew audit` misses):
+
    ```bash
    brew test-bot --only-tap-syntax
    ```
+
    This runs `brew style` (rubocop) against the entire tap - same as CI.
 
 4. **Test installation**:
+
    ```bash
    brew install --build-from-source arustydev/tap/<name>
    ```
 
 5. **Run formula tests**:
+
    ```bash
    brew test arustydev/tap/<name>
    ```
@@ -109,11 +117,13 @@ end
 ### Phase 4: Git Workflow
 
 1. **Create feature branch**:
+
    ```bash
    git checkout -b feat/add-<name>-formula main
    ```
 
 2. **Stage and commit**:
+
    ```bash
    git add Formula/<letter>/<name>.rb
    git commit -m "feat(formula): add <name> formula
@@ -133,15 +143,18 @@ end
 ### Language-Specific Notes
 
 #### Go Projects
+
 - Build with: `system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/<binary>"`
 - If main.go is in root: `system "go", "build", *std_go_args(ldflags: "-s -w")`
 - `-s -w` strips debug info for smaller binary
 
 #### Rust Projects
+
 - Build with: `system "cargo", "install", *std_cargo_args`
 - May need: `depends_on "rust" => :build`
 
 #### Pre-built Binaries (avoid if possible)
+
 - Use `on_macos do` and `on_linux do` blocks for platform-specific URLs
 - Use `Hardware::CPU.intel?` / `Hardware::CPU.arm?` for architecture detection
 
@@ -154,6 +167,7 @@ to lint ALL files in the tap repository, not just `.rb` files.
 This means exclusions in the tap's config file have NO effect on CI.
 
 Common CI failures:
+
 - **Markdown files with Ruby code blocks** - rubocop-md lints code fenced as `ruby`
   - **Solution:** Use `text` instead of `ruby` for code fence language in docs
 - **Line length > 118 chars** in test blocks - Split long assertions into multiple lines
