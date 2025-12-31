@@ -1,6 +1,6 @@
 ---
 name: lang-swift-library-dev
-description: Swift-specific library and package development patterns. Use when creating Swift packages, designing public APIs with Swift Package Manager, configuring Package.swift, managing dependencies, building frameworks, publishing libraries, writing DocC documentation, or XCTest. Extends meta-library-dev with Swift tooling and idioms.
+description: Swift package development with SPM. Use for Package.swift, public APIs, DocC, XCTest, XCFrameworks, and library publishing. Extends meta-library-dev.
 ---
 
 # Swift Library Development
@@ -11,20 +11,11 @@ Swift-specific patterns for library and package development. This skill extends 
 
 - `meta-library-dev` - Foundational library patterns (API design, versioning, testing strategies)
 
-For general concepts like semantic versioning, module organization principles, and testing pyramids, see the meta-skill first.
-
 ## This Skill Adds
 
 - **Swift tooling**: Package.swift, SPM workflows, DocC documentation, XCTest
-- **Swift idioms**: Protocol-oriented design, value types in public APIs, availability annotations
-- **Swift ecosystem**: Platform support, binary frameworks, XCFrameworks, dependency management
-
-## This Skill Does NOT Cover
-
-- General library patterns - see `meta-library-dev`
-- iOS/macOS app development - see `lang-swift-dev`
-- SwiftUI specifics - see `lang-swift-dev`
-- UIKit development - see `lang-swift-dev`
+- **Swift idioms**: Protocol-oriented design, value types, availability annotations
+- **Swift ecosystem**: Platform support, XCFrameworks, dependency management
 
 ---
 
@@ -35,10 +26,8 @@ For general concepts like semantic versioning, module organization principles, a
 | New library package | `swift package init --type library` |
 | Build | `swift build` |
 | Test | `swift test` |
-| Generate Xcode project | `swift package generate-xcodeproj` |
 | Build docs | `swift package generate-documentation` |
 | Resolve dependencies | `swift package resolve` |
-| Update dependencies | `swift package update` |
 | Archive XCFramework | `xcodebuild -create-xcframework` |
 
 ---
@@ -61,26 +50,17 @@ let package = Package(
         .visionOS(.v1)
     ],
     products: [
-        .library(
-            name: "MyLibrary",
-            targets: ["MyLibrary"]
-        ),
+        .library(name: "MyLibrary", targets: ["MyLibrary"]),
     ],
     dependencies: [
-        // External dependencies
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
     ],
     targets: [
         .target(
             name: "MyLibrary",
-            dependencies: [
-                .product(name: "Logging", package: "swift-log"),
-            ]
+            dependencies: [.product(name: "Logging", package: "swift-log")]
         ),
-        .testTarget(
-            name: "MyLibraryTests",
-            dependencies: ["MyLibrary"]
-        ),
+        .testTarget(name: "MyLibraryTests", dependencies: ["MyLibrary"]),
     ]
 )
 ```
@@ -93,86 +73,23 @@ import PackageDescription
 
 let package = Package(
     name: "MyPackage",
-    platforms: [
-        .iOS(.v16),
-        .macOS(.v13)
-    ],
+    platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
-        // Core library
-        .library(
-            name: "MyPackage",
-            targets: ["MyPackage"]
-        ),
-        // Optional testing utilities
-        .library(
-            name: "MyPackageTestSupport",
-            targets: ["MyPackageTestSupport"]
-        ),
-        // CLI tool
-        .executable(
-            name: "my-tool",
-            targets: ["MyPackageCLI"]
-        ),
+        .library(name: "MyPackage", targets: ["MyPackage"]),
+        .library(name: "MyPackageTestSupport", targets: ["MyPackageTestSupport"]),
+        .executable(name: "my-tool", targets: ["MyPackageCLI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
     ],
     targets: [
-        // Main library target
-        .target(
-            name: "MyPackage",
-            dependencies: [],
-            resources: [
-                .process("Resources")
-            ]
-        ),
-
-        // Testing utilities (for package consumers)
-        .target(
-            name: "MyPackageTestSupport",
-            dependencies: ["MyPackage"]
-        ),
-
-        // CLI tool target
+        .target(name: "MyPackage", resources: [.process("Resources")]),
+        .target(name: "MyPackageTestSupport", dependencies: ["MyPackage"]),
         .executableTarget(
             name: "MyPackageCLI",
-            dependencies: [
-                "MyPackage",
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]
+            dependencies: ["MyPackage", .product(name: "ArgumentParser", package: "swift-argument-parser")]
         ),
-
-        // Tests
-        .testTarget(
-            name: "MyPackageTests",
-            dependencies: [
-                "MyPackage",
-                "MyPackageTestSupport",
-            ]
-        ),
-    ]
-)
-```
-
-### Package with Plugins
-
-```swift
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "MyPackage",
-    products: [
-        .library(name: "MyPackage", targets: ["MyPackage"]),
-        .plugin(name: "MyPlugin", targets: ["MyPlugin"]),
-    ],
-    targets: [
-        .target(name: "MyPackage"),
-        .plugin(
-            name: "MyPlugin",
-            capability: .buildTool(),
-            dependencies: []
-        ),
+        .testTarget(name: "MyPackageTests", dependencies: ["MyPackage", "MyPackageTestSupport"]),
     ]
 )
 ```
@@ -181,53 +98,27 @@ let package = Package(
 
 ## Public API Design (Swift-Specific)
 
-### Access Control Best Practices
+### Access Control
 
 ```swift
-// Public - part of API
-public func publicFunction() {}
-public struct PublicType {}
-
-// Internal - default, not exposed
-func internalFunction() {}
-struct InternalType {}
-
-// Private - visible only in current file
-private func privateFunction() {}
-
-// Fileprivate - visible to all code in same file
-fileprivate func filePrivateFunction() {}
-
-// Open - can be subclassed/overridden outside module
-open class OpenBaseClass {}
+public func publicFunction() {}      // Part of API
+func internalFunction() {}           // Default, not exposed
+private func privateFunction() {}    // Same declaration only
+fileprivate func filePrivate() {}    // Same file only
+open class OpenBaseClass {}          // Subclassable outside module
 ```
 
-### Protocol-Oriented API Design
+### Protocol-Oriented API
 
 ```swift
-/// Core protocol for data sources
 public protocol DataSource {
     associatedtype Item
-
     func fetch() async throws -> [Item]
 }
 
-/// Provide default implementation
 public extension DataSource {
     func fetchFirst() async throws -> Item? {
         try await fetch().first
-    }
-}
-
-/// Concrete implementation
-public struct APIDataSource: DataSource {
-    public typealias Item = User
-
-    public init() {}
-
-    public func fetch() async throws -> [User] {
-        // Implementation
-        []
     }
 }
 ```
@@ -235,62 +126,19 @@ public struct APIDataSource: DataSource {
 ### Value Type APIs
 
 ```swift
-/// Value type with copy-on-write semantics
 public struct Configuration {
     public var timeout: TimeInterval
     public var retryCount: Int
-    public var isVerbose: Bool
 
-    public init(
-        timeout: TimeInterval = 30,
-        retryCount: Int = 3,
-        isVerbose: Bool = false
-    ) {
+    public init(timeout: TimeInterval = 30, retryCount: Int = 3) {
         self.timeout = timeout
         self.retryCount = retryCount
-        self.isVerbose = isVerbose
     }
-}
 
-/// Builder pattern for complex configuration
-public extension Configuration {
-    func withTimeout(_ timeout: TimeInterval) -> Configuration {
+    public func withTimeout(_ timeout: TimeInterval) -> Configuration {
         var copy = self
         copy.timeout = timeout
         return copy
-    }
-
-    func withRetryCount(_ count: Int) -> Configuration {
-        var copy = self
-        copy.retryCount = count
-        return copy
-    }
-}
-```
-
-### Async/Await API Patterns
-
-```swift
-/// Async function with proper error handling
-public func fetchUser(id: String) async throws -> User {
-    let url = URL(string: "https://api.example.com/users/\(id)")!
-    let (data, _) = try await URLSession.shared.data(from: url)
-    return try JSONDecoder().decode(User.self, from: data)
-}
-
-/// AsyncSequence for streaming data
-public struct UserStream: AsyncSequence {
-    public typealias Element = User
-
-    public func makeAsyncIterator() -> AsyncIterator {
-        AsyncIterator()
-    }
-
-    public struct AsyncIterator: AsyncIteratorProtocol {
-        public mutating func next() async throws -> User? {
-            // Implementation
-            nil
-        }
     }
 }
 ```
@@ -298,23 +146,12 @@ public struct UserStream: AsyncSequence {
 ### Availability Annotations
 
 ```swift
-/// Mark API availability
 @available(iOS 16.0, macOS 13.0, *)
-public func modernFeature() {
-    // Uses iOS 16+ APIs
-}
+public func modernFeature() {}
 
-/// Deprecate old APIs
 @available(*, deprecated, renamed: "newFunction")
-public func oldFunction() {
-    newFunction()
-}
+public func oldFunction() { newFunction() }
 
-/// Mark as obsoleted
-@available(*, obsoleted: 2.0, message: "Use newAPI instead")
-public func veryOldFunction() {}
-
-/// Platform-specific API
 #if os(iOS)
 @available(iOS 16.0, *)
 public func iOSOnlyFeature() {}
@@ -323,86 +160,210 @@ public func iOSOnlyFeature() {}
 
 ---
 
-## Module Organization
+## Error Handling
 
-### Standard Package Structure
-
-```
-MyPackage/
-├── Package.swift
-├── README.md
-├── LICENSE
-├── Sources/
-│   ├── MyPackage/
-│   │   ├── MyPackage.swift      # Main public API
-│   │   ├── Models/
-│   │   │   ├── User.swift
-│   │   │   └── Configuration.swift
-│   │   ├── Services/
-│   │   │   └── NetworkService.swift
-│   │   ├── Internal/            # Private implementation
-│   │   │   └── Utilities.swift
-│   │   └── Resources/
-│   │       └── Assets.xcassets
-│   └── MyPackageTestSupport/    # Testing utilities
-│       └── Mocks.swift
-├── Tests/
-│   └── MyPackageTests/
-│       ├── ModelTests.swift
-│       └── ServiceTests.swift
-└── Examples/                    # Example projects
-    └── BasicExample/
-        ├── Package.swift
-        └── Sources/
-```
-
-### Main Module File
+### Custom Error Types
 
 ```swift
-// Sources/MyPackage/MyPackage.swift
+public enum MyLibraryError: Error, LocalizedError {
+    case invalidInput(String)
+    case networkError(underlying: Error)
+    case notFound(id: String)
 
-/// # MyPackage
-///
-/// A brief description of what this package does.
-///
-/// ## Overview
-///
-/// MyPackage provides a clean API for...
-///
-/// ## Usage
-///
-/// ```swift
-/// let config = Configuration()
-/// let service = MyService(configuration: config)
-/// let result = try await service.fetch()
-/// ```
+    public var errorDescription: String? {
+        switch self {
+        case .invalidInput(let reason): return "Invalid input: \(reason)"
+        case .networkError(let error): return "Network error: \(error.localizedDescription)"
+        case .notFound(let id): return "Resource not found: \(id)"
+        }
+    }
+}
+```
 
-// Re-export public types
-@_exported import struct Foundation.URL
-@_exported import struct Foundation.Data
+### Throwing Functions
 
-// Make internal types public
-public typealias CompletionHandler = (Result<Data, Error>) -> Void
+```swift
+public func process(_ input: String) throws -> Result {
+    guard !input.isEmpty else {
+        throw MyLibraryError.invalidInput("Input cannot be empty")
+    }
+    return Result(value: input)
+}
+```
 
-/// Main entry point for the library
-public struct MyPackage {
-    public static let version = "1.0.0"
+### Result Type for Callbacks
 
-    public init() {}
+```swift
+public func fetch(completion: @escaping (Swift.Result<Data, MyLibraryError>) -> Void) {
+    // For legacy callback APIs
+}
+```
 
-    public func process(_ input: String) async throws -> Result {
-        // Implementation
-        Result(value: input)
+---
+
+## Serialization (Codable)
+
+### Basic Codable Conformance
+
+```swift
+public struct User: Codable, Sendable {
+    public let id: String
+    public let name: String
+    public let createdAt: Date
+
+    public init(id: String, name: String, createdAt: Date = .now) {
+        self.id = id
+        self.name = name
+        self.createdAt = createdAt
+    }
+}
+```
+
+### Custom Coding Keys
+
+```swift
+public struct APIResponse: Codable {
+    public let userId: String
+    public let userName: String
+
+    private enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case userName = "user_name"
+    }
+}
+```
+
+### Encoder/Decoder Configuration
+
+```swift
+public extension JSONDecoder {
+    static var myLibrary: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
 }
 
-/// Result type
-public struct Result {
-    public let value: String
-
-    public init(value: String) {
-        self.value = value
+public extension JSONEncoder {
+    static var myLibrary: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return encoder
     }
+}
+```
+
+---
+
+## Zero/Default Values
+
+### Default Parameter Values
+
+```swift
+public struct NetworkClient {
+    public let baseURL: URL
+    public let timeout: TimeInterval
+    public let retryPolicy: RetryPolicy
+
+    public init(
+        baseURL: URL,
+        timeout: TimeInterval = 30.0,
+        retryPolicy: RetryPolicy = .default
+    ) {
+        self.baseURL = baseURL
+        self.timeout = timeout
+        self.retryPolicy = retryPolicy
+    }
+}
+
+public struct RetryPolicy {
+    public let maxRetries: Int
+    public let delay: TimeInterval
+
+    public static let `default` = RetryPolicy(maxRetries: 3, delay: 1.0)
+    public static let aggressive = RetryPolicy(maxRetries: 5, delay: 0.5)
+    public static let none = RetryPolicy(maxRetries: 0, delay: 0)
+}
+```
+
+### ExpressibleBy Protocols
+
+```swift
+public struct Timeout: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+    public let seconds: TimeInterval
+
+    public init(integerLiteral value: Int) {
+        self.seconds = TimeInterval(value)
+    }
+
+    public init(floatLiteral value: Double) {
+        self.seconds = value
+    }
+}
+
+// Usage: let timeout: Timeout = 30
+```
+
+---
+
+## Metaprogramming
+
+### Property Wrappers
+
+```swift
+@propertyWrapper
+public struct Clamped<Value: Comparable> {
+    private var value: Value
+    private let range: ClosedRange<Value>
+
+    public var wrappedValue: Value {
+        get { value }
+        set { value = min(max(newValue, range.lowerBound), range.upperBound) }
+    }
+
+    public init(wrappedValue: Value, _ range: ClosedRange<Value>) {
+        self.range = range
+        self.value = min(max(wrappedValue, range.lowerBound), range.upperBound)
+    }
+}
+
+// Usage
+public struct Volume {
+    @Clamped(0...100) public var level: Int = 50
+}
+```
+
+### Result Builders
+
+```swift
+@resultBuilder
+public struct ArrayBuilder<Element> {
+    public static func buildBlock(_ components: Element...) -> [Element] {
+        components
+    }
+
+    public static func buildOptional(_ component: [Element]?) -> [Element] {
+        component ?? []
+    }
+
+    public static func buildEither(first: [Element]) -> [Element] { first }
+    public static func buildEither(second: [Element]) -> [Element] { second }
+}
+```
+
+### Swift Macros (5.9+)
+
+```swift
+// Using macros from dependencies
+import Observation
+
+@Observable
+public final class ViewModel {
+    public var title: String = ""
+    public var items: [Item] = []
 }
 ```
 
@@ -420,13 +381,7 @@ final class MyPackageTests: XCTestCase {
     var service: MyService!
 
     override func setUp() async throws {
-        try await super.setUp()
         service = MyService()
-    }
-
-    override func tearDown() async throws {
-        service = nil
-        try await super.tearDown()
     }
 
     func testBasicFunctionality() throws {
@@ -443,7 +398,7 @@ final class MyPackageTests: XCTestCase {
         do {
             _ = try await service.fetchWithInvalidInput("")
             XCTFail("Should throw error")
-        } catch MyError.invalidInput {
+        } catch MyLibraryError.invalidInput {
             // Expected
         } catch {
             XCTFail("Wrong error type: \(error)")
@@ -452,41 +407,10 @@ final class MyPackageTests: XCTestCase {
 }
 ```
 
-### Performance Testing
-
-```swift
-func testPerformance() {
-    measure {
-        for _ in 0..<1000 {
-            _ = service.process("test")
-        }
-    }
-}
-
-func testAsyncPerformance() async throws {
-    await measureAsync {
-        for _ in 0..<100 {
-            _ = try? await service.fetchData()
-        }
-    }
-}
-
-@available(iOS 16.0, macOS 13.0, *)
-func measureAsync(_ block: @escaping () async -> Void) async {
-    let start = Date()
-    await block()
-    let duration = Date().timeIntervalSince(start)
-    print("Duration: \(duration)s")
-}
-```
-
 ### Test Support Package
 
 ```swift
 // Sources/MyPackageTestSupport/Mocks.swift
-import MyPackage
-
-/// Mock implementation for testing
 public final class MockDataSource: DataSource {
     public var mockItems: [Item] = []
     public var shouldThrowError = false
@@ -494,139 +418,34 @@ public final class MockDataSource: DataSource {
     public init() {}
 
     public func fetch() async throws -> [Item] {
-        if shouldThrowError {
-            throw MockError.forcedError
-        }
+        if shouldThrowError { throw MockError.forced }
         return mockItems
     }
-}
-
-public enum MockError: Error {
-    case forcedError
 }
 ```
 
 ---
 
-## DocC Documentation
-
-### Catalog Structure
+## Module Organization
 
 ```
-Sources/MyPackage/
-└── MyPackage.docc/
-    ├── MyPackage.md              # Root article
-    ├── GettingStarted.md         # Tutorial
-    ├── Resources/
-    │   └── diagram.png
-    └── Tutorials/
-        └── BuildingYourFirstApp.tutorial
-```
-
-### Root Documentation Article
-
-```markdown
-# ``MyPackage``
-
-A comprehensive library for data processing.
-
-## Overview
-
-MyPackage provides a modern, async-first API for processing data from various sources.
-
-## Topics
-
-### Essentials
-
-- ``MyPackage/MyPackage``
-- ``Configuration``
-- ``DataSource``
-
-### Data Models
-
-- ``User``
-- ``Result``
-
-### Services
-
-- ``NetworkService``
-- ``CacheService``
-
-### Error Handling
-
-- ``MyError``
-```
-
-### Symbol Documentation
-
-```swift
-/// Fetches user data from the remote API.
-///
-/// This function performs an asynchronous network request to retrieve user information.
-///
-/// - Parameter id: The unique identifier for the user
-/// - Returns: A `User` object containing the user's data
-/// - Throws: `MyError.notFound` if the user doesn't exist
-///          `MyError.networkError` if the network request fails
-///
-/// ## Example
-///
-/// ```swift
-/// let user = try await fetchUser(id: "user123")
-/// print(user.name)
-/// ```
-///
-/// - Important: Requires an active network connection
-/// - Note: Results are not cached by default
-/// - Warning: Rate limiting may apply for frequent requests
-///
-/// ## See Also
-///
-/// - ``fetchUsers(ids:)``
-/// - ``UserCache``
-public func fetchUser(id: String) async throws -> User {
-    // Implementation
-    User(id: id, name: "Test")
-}
-```
-
-### Tutorial Syntax
-
-```markdown
-@Tutorial(time: 20) {
-    @Intro(title: "Building Your First App") {
-        Learn how to integrate MyPackage into your application.
-
-        @Image(source: "hero-image.png", alt: "App screenshot")
-    }
-
-    @Section(title: "Setup") {
-        @ContentAndMedia {
-            Install and configure MyPackage.
-        }
-
-        @Steps {
-            @Step {
-                Add the package dependency.
-
-                @Code(name: "Package.swift", file: "01-add-dependency.swift")
-            }
-
-            @Step {
-                Import the module.
-
-                @Code(name: "ContentView.swift", file: "02-import.swift")
-            }
-        }
-    }
-}
+MyPackage/
+├── Package.swift
+├── README.md
+├── Sources/
+│   ├── MyPackage/
+│   │   ├── MyPackage.swift      # Main public API
+│   │   ├── Models/
+│   │   ├── Services/
+│   │   └── Internal/            # Private implementation
+│   └── MyPackageTestSupport/
+└── Tests/
+    └── MyPackageTests/
 ```
 
 ---
 
 ## Platform Support
-
-### Platform-Specific Code
 
 ```swift
 #if os(iOS) || os(tvOS) || os(watchOS)
@@ -649,133 +468,33 @@ public extension Configuration {
 #endif
 ```
 
-### Feature Detection
-
-```swift
-#if swift(>=5.9)
-public func modernFeature() {
-    // Use Swift 5.9+ features
-}
-#else
-public func modernFeature() {
-    fatalError("Requires Swift 5.9 or later")
-}
-#endif
-
-#if compiler(>=5.9)
-// Compiler-specific features
-#endif
-```
-
----
-
-## Binary Frameworks & XCFrameworks
-
-### Creating XCFramework
-
-```bash
-# Build for iOS device
-xcodebuild archive \
-  -scheme MyPackage \
-  -destination "generic/platform=iOS" \
-  -archivePath ./build/ios \
-  SKIP_INSTALL=NO \
-  BUILD_LIBRARY_FOR_DISTRIBUTION=YES
-
-# Build for iOS simulator
-xcodebuild archive \
-  -scheme MyPackage \
-  -destination "generic/platform=iOS Simulator" \
-  -archivePath ./build/ios-sim \
-  SKIP_INSTALL=NO \
-  BUILD_LIBRARY_FOR_DISTRIBUTION=YES
-
-# Build for macOS
-xcodebuild archive \
-  -scheme MyPackage \
-  -destination "generic/platform=macOS" \
-  -archivePath ./build/macos \
-  SKIP_INSTALL=NO \
-  BUILD_LIBRARY_FOR_DISTRIBUTION=YES
-
-# Create XCFramework
-xcodebuild -create-xcframework \
-  -framework ./build/ios.xcarchive/Products/Library/Frameworks/MyPackage.framework \
-  -framework ./build/ios-sim.xcarchive/Products/Library/Frameworks/MyPackage.framework \
-  -framework ./build/macos.xcarchive/Products/Library/Frameworks/MyPackage.framework \
-  -output ./MyPackage.xcframework
-```
-
-### Distributing Binary Framework
-
-```swift
-// Package.swift with binary target
-let package = Package(
-    name: "MyPackage",
-    products: [
-        .library(name: "MyPackage", targets: ["MyPackage"]),
-    ],
-    targets: [
-        .binaryTarget(
-            name: "MyPackage",
-            url: "https://github.com/user/repo/releases/download/1.0.0/MyPackage.xcframework.zip",
-            checksum: "abc123..."
-        ),
-    ]
-)
-```
-
 ---
 
 ## Dependency Management
 
-### Version Requirements
-
 ```swift
 dependencies: [
-    // Exact version
-    .package(url: "https://github.com/user/repo.git", exact: "1.0.0"),
-
-    // Version range
-    .package(url: "https://github.com/user/repo.git", from: "1.0.0"),
-    .package(url: "https://github.com/user/repo.git", "1.0.0"..<"2.0.0"),
-
-    // Branch
-    .package(url: "https://github.com/user/repo.git", branch: "main"),
-
-    // Commit
-    .package(url: "https://github.com/user/repo.git", revision: "abc123"),
-
-    // Local path (for development)
-    .package(path: "../LocalPackage"),
+    .package(url: "https://github.com/user/repo.git", from: "1.0.0"),  // Semantic version
+    .package(url: "https://github.com/user/repo.git", exact: "1.0.0"), // Exact
+    .package(url: "https://github.com/user/repo.git", branch: "main"), // Branch
+    .package(path: "../LocalPackage"),                                  // Local dev
 ]
-```
-
-### Conditional Dependencies
-
-```swift
-var dependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
-]
-
-#if os(Linux)
-dependencies.append(
-    .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.0.0")
-)
-#endif
-
-let package = Package(
-    name: "MyPackage",
-    dependencies: dependencies,
-    // ...
-)
 ```
 
 ---
 
-## Publishing Best Practices
+## Anti-Patterns
 
-### Pre-publish Checklist
+| Anti-Pattern | Problem | Solution |
+|--------------|---------|----------|
+| Exposing `[String: Any]` | Loses type safety | Return domain types |
+| Classes for value types | Unexpected sharing | Use structs |
+| Force unwrapping in API | Crashes consumer apps | Use `throws` or optionals |
+| Missing `@available` | Breaks older platforms | Annotate new APIs |
+
+---
+
+## Publishing Checklist
 
 - [ ] All tests pass (`swift test`)
 - [ ] Documentation builds (`swift package generate-documentation`)
@@ -784,207 +503,23 @@ let package = Package(
 - [ ] LICENSE file included
 - [ ] Version tagged in git
 - [ ] CHANGELOG.md updated
-- [ ] All platforms tested
-- [ ] Example projects work
-- [ ] API is stable and well-designed
-
-### Versioning Strategy
-
-| Change Type | Version Bump | Example |
-|-------------|--------------|---------|
-| Breaking API change | Major | 1.0.0 → 2.0.0 |
-| New feature (backward compatible) | Minor | 1.0.0 → 1.1.0 |
-| Bug fix | Patch | 1.0.0 → 1.0.1 |
-
-### README Template
-
-```markdown
-# MyPackage
-
-Brief description of the package.
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Requirements
-
-- iOS 16.0+ / macOS 13.0+
-- Swift 5.9+
-
-## Installation
-
-### Swift Package Manager
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/user/MyPackage.git", from: "1.0.0")
-]
-```
-
-## Usage
-
-```swift
-import MyPackage
-
-let config = Configuration()
-let result = try await MyPackage().process("input")
-```
-
-## Documentation
-
-Full documentation available at [https://user.github.io/MyPackage](https://user.github.io/MyPackage)
-
-## License
-
-MIT License
-```
-
----
-
-## Common Dependencies
-
-### Logging
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
-]
-
-// Usage
-import Logging
-
-let logger = Logger(label: "com.example.mypackage")
-logger.info("Processing started")
-```
-
-### Async/Concurrency
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "1.0.0"),
-]
-
-// Provides AsyncSequence utilities
-```
-
-### Argument Parsing (for CLIs)
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
-]
-```
-
-### Testing
-
-```swift
-dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.15.0"),
-]
-```
-
----
-
-## Anti-Patterns
-
-### 1. Exposing Implementation Details
-
-```swift
-// Bad: Exposes Foundation types unnecessarily
-public func getData() -> [String: Any]
-
-// Good: Return domain type
-public func getData() -> Configuration
-```
-
-### 2. Using Classes When Structs Suffice
-
-```swift
-// Bad: Unnecessary reference type
-public class Configuration {
-    public var timeout: Int
-}
-
-// Good: Value type with value semantics
-public struct Configuration {
-    public var timeout: Int
-}
-```
-
-### 3. Force Unwrapping in Public APIs
-
-```swift
-// Bad: Can crash consumer's app
-public func process(_ input: String) -> User {
-    return try! JSONDecoder().decode(User.self, from: data)
-}
-
-// Good: Proper error handling
-public func process(_ input: String) throws -> User {
-    return try JSONDecoder().decode(User.self, from: data)
-}
-```
-
-### 4. Missing @available Annotations
-
-```swift
-// Bad: Breaks on older platforms
-public func modernAPI() {
-    // Uses iOS 17 APIs
-}
-
-// Good: Properly marked
-@available(iOS 17.0, macOS 14.0, *)
-public func modernAPI() {
-    // Uses iOS 17 APIs
-}
-```
-
----
-
-## Troubleshooting
-
-### Package Resolution Issues
-
-**Problem:** `error: package at '...' is using Swift tools version but package is at '...'`
-
-**Solution:** Update `swift-tools-version` in Package.swift header
-
-```swift
-// swift-tools-version: 5.9
-```
-
-### Missing Module Errors
-
-**Problem:** `error: no such module 'MyPackage'`
-
-**Solution:** Ensure target dependencies are correctly specified
-
-```swift
-.testTarget(
-    name: "MyPackageTests",
-    dependencies: ["MyPackage"]  // Add module dependency
-)
-```
-
-### Xcode Build Issues
-
-**Problem:** Xcode can't find package
-
-**Solution:**
-1. Delete derived data
-2. `File > Packages > Reset Package Caches`
-3. `swift package resolve`
 
 ---
 
 ## References
 
+### In This Skill
+
+- [DocC Documentation Guide](references/docc-documentation.md)
+- [Binary Frameworks & XCFrameworks](references/binary-frameworks.md)
+- [Dependencies & Troubleshooting](references/dependencies-troubleshooting.md)
+
+### Related Skills
+
 - `meta-library-dev` - Foundational library patterns
 - `lang-swift-dev` - Swift language fundamentals
+
+### External
+
 - [Swift Package Manager Documentation](https://www.swift.org/package-manager/)
-- [DocC Documentation](https://www.swift.org/documentation/docc/)
 - [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/)
