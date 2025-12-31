@@ -21,7 +21,7 @@ Framework for validating Claude Code skills against best practices. This skill p
 | [checklists/frontmatter.md](./checklists/frontmatter.md) | Name, description, required fields |
 | [checklists/structure.md](./checklists/structure.md) | Token budget, progressive disclosure |
 | [checklists/quality.md](./checklists/quality.md) | Content quality checks |
-| [checklists/8-pillars.md](./checklists/8-pillars.md) | Pillar coverage for lang/convert skills |
+| [checklists/8-pillars.md](./checklists/8-pillars.md) | 8+1 Pillar coverage for lang/convert skills |
 | [templates/issue-templates.md](./templates/issue-templates.md) | GitHub issue body templates |
 
 ## Validation Levels
@@ -84,6 +84,7 @@ Adds:
 | SKILL.md lines | > 800 | 500-800 | < 500 |
 | Description length | > 300 chars | vague/missing | < 200, trigger words |
 | 8 Pillars score | < 4/8 | 4-5.5/8 | >= 6/8 |
+| 9 Pillars score | < 5/9 | 5-6.5/9 | >= 7/9 |
 | Type mappings | < 5 | 5-14 | >= 15 |
 | Pitfalls listed | 0-2 | 3-4 | >= 5 |
 
