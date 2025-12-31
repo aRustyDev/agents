@@ -67,8 +67,17 @@ def main():
         print(f"\nSession {result.session_id}: {result.stage.value}")
 
     elif args.batch:
+        # Use config defaults if not specified
+        labels = args.label if args.label else None
+        max_parallel = args.max_parallel or config.max_parallel
+
         results = batch_review(
-            orchestrator, args.label, args.max_parallel, stages, args.verbose
+            orchestrator,
+            labels,
+            args.assignee,
+            max_parallel,
+            stages,
+            args.verbose,
         )
         print(f"\nCompleted {len(results)} reviews")
         total_cost = sum(r.estimated_cost_usd for r in results)

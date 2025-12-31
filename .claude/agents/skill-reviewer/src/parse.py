@@ -1,7 +1,20 @@
 import argparse
+import subprocess
 import sys
 
-from models import Stage
+from .models import Stage
+
+
+def get_current_user() -> str | None:
+    """Get the current GitHub username."""
+    result = subprocess.run(
+        ["gh", "api", "user", "--jq", ".login"],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode == 0:
+        return result.stdout.strip()
+    return None
 
 
 def parse_args():
@@ -26,7 +39,12 @@ def parse_args():
         "--label",
         action="append",
         default=[],
-        help="Labels to filter issues (batch mode)",
+        help="Labels to filter issues (batch mode). Uses config.review_labels if not specified.",
+    )
+    parser.add_argument(
+        "--assignee",
+        default="@me",
+        help="Filter by assignee. Use '@me' for current user, or a username. Default: @me",
     )
     parser.add_argument("--stages", help="Comma-separated list of stages to run")
     parser.add_argument("--only", help="Run only a specific sub-agent (for testing)")
@@ -36,8 +54,8 @@ def parse_args():
     parser.add_argument(
         "--max-parallel",
         type=int,
-        default=3,
-        help="Maximum parallel reviews (batch mode)",
+        default=None,
+        help="Maximum parallel reviews (batch mode). Uses config.max_parallel if not specified.",
     )
     parser.add_argument(
         "--cleanup", action="store_true", help="Clean up worktree after completion"
@@ -45,7 +63,13 @@ def parse_args():
     parser.add_argument("--config", help="Path to config file")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    # Resolve @me to actual username
+    if args.assignee == "@me":
+        args.assignee = get_current_user()
+
+    return args
 
 
 def parse_stages(stages_str: str | None) -> list[Stage] | None:
@@ -54,13 +78,13 @@ def parse_stages(stages_str: str | None) -> list[Stage] | None:
         return None
 
     stage_map = {
-        "github_start": Stage.GITHUB_UPDATE_START,
+        "setup": Stage.SETUP,
         "validation": Stage.VALIDATION,
         "complexity": Stage.COMPLEXITY_ASSESSMENT,
+        "complexity_assessment": Stage.COMPLEXITY_ASSESSMENT,
         "analysis": Stage.ANALYSIS,
         "fixing": Stage.FIXING,
-        "pr": Stage.PR_CREATION,
-        "github_end": Stage.GITHUB_UPDATE_END,
+        "teardown": Stage.TEARDOWN,
     }
 
     stages = []
