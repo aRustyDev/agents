@@ -797,6 +797,231 @@ val inner1 = new outer1.Inner
 
 ---
 
+## Module System
+
+Scala uses packages and objects to organize code. The module system provides flexible import mechanisms, visibility modifiers, and companion objects for namespace management.
+
+### Packages
+
+```scala
+// Package declaration
+package com.example.myapp
+
+// Or nested (less common)
+package com.example {
+  package myapp {
+    class MyClass
+  }
+}
+
+// Package objects - shared utilities for a package
+// File: com/example/package.scala
+package object example {
+  type UserId = Long
+  val DefaultTimeout = 30.seconds
+
+  def log(message: String): Unit = println(s"[LOG] $message")
+}
+
+// Usage - available to all code in com.example
+package com.example.myapp
+
+class Service {
+  val id: UserId = 123L  // From package object
+  log("Service created")  // From package object
+}
+```
+
+### Import Patterns
+
+```scala
+// Basic import
+import java.time.LocalDate
+
+// Import all members
+import java.time._
+
+// Import multiple specific members
+import java.time.{LocalDate, LocalTime, ZonedDateTime}
+
+// Rename on import (avoid conflicts)
+import java.util.{List => JList}
+import scala.collection.immutable.List
+
+// Exclude on import
+import java.util.{Date => _, _}  // Import all except Date
+
+// Import object members
+object Utils {
+  def helper(): Unit = ???
+}
+import Utils.helper
+
+// Import with alias (Scala 3)
+import java.time.LocalDate as Date
+
+// Import given instances (Scala 3)
+import MyCodecs.given
+import MyCodecs.{given JsonEncoder[_]}
+```
+
+### Visibility Modifiers
+
+```scala
+class Example {
+  private val privateField = 1      // This class only
+  protected val protectedField = 2  // This class and subclasses
+
+  private[this] val instanceOnly = 3      // This instance only
+  private[Example] val sameAsPrivate = 4  // This class (same as private)
+  private[myapp] val packagePrivate = 5   // Package-visible
+  protected[myapp] val packageProtected = 6
+
+  val publicField = 7  // Public (default)
+}
+
+// Package-private class
+private[myapp] class InternalHelper
+
+// Sealed for ADTs (visible in same file)
+sealed trait Result
+case class Success(value: Int) extends Result
+case class Failure(error: String) extends Result
+```
+
+### Companion Objects
+
+```scala
+// Class and companion object share private access
+class User private (val name: String, val age: Int)
+
+object User {
+  // Factory method
+  def apply(name: String, age: Int): User = new User(name, age)
+
+  // Smart constructor with validation
+  def create(name: String, age: Int): Either[String, User] = {
+    if (name.isEmpty) Left("Name cannot be empty")
+    else if (age < 0) Left("Age cannot be negative")
+    else Right(new User(name, age))
+  }
+
+  // Extractor for pattern matching
+  def unapply(user: User): Option[(String, Int)] =
+    Some((user.name, user.age))
+
+  // Constants
+  val Anonymous: User = new User("Anonymous", 0)
+}
+
+// Usage
+val user = User("Alice", 30)  // Uses apply
+val result = User.create("Bob", 25)
+
+user match {
+  case User(name, age) => println(s"$name is $age")  // Uses unapply
+}
+```
+
+### Module Patterns
+
+```scala
+// Object as module
+object StringUtils {
+  def capitalize(s: String): String = s.capitalize
+  def reverse(s: String): String = s.reverse
+
+  // Nested module
+  object Validators {
+    def isEmail(s: String): Boolean = s.contains("@")
+    def isNotEmpty(s: String): Boolean = s.nonEmpty
+  }
+}
+
+// Usage
+import StringUtils._
+import StringUtils.Validators._
+
+capitalize("hello")
+isEmail("test@example.com")
+```
+
+### Scala 3 Exports
+
+```scala
+// Export delegates to another object
+class UserRepository {
+  def findById(id: Int): Option[User] = ???
+  def save(user: User): Unit = ???
+  def delete(id: Int): Unit = ???
+}
+
+class UserService(repo: UserRepository) {
+  // Export selected members
+  export repo.{findById, save}
+
+  // Export all members
+  // export repo._
+
+  // Export with rename
+  export repo.{delete as removeUser}
+
+  def businessLogic(): Unit = {
+    // Uses repo internally
+  }
+}
+
+// Clients can call userService.findById directly
+val service = new UserService(new UserRepository)
+service.findById(123)  // Delegated to repo
+```
+
+### File Organization
+
+```
+// Typical project structure
+src/main/scala/
+├── com/example/myapp/
+│   ├── Main.scala           // Entry point
+│   ├── domain/
+│   │   ├── User.scala       // User case class + companion
+│   │   ├── Order.scala      // Order case class + companion
+│   │   └── package.scala    // Package object with shared types
+│   ├── service/
+│   │   ├── UserService.scala
+│   │   └── OrderService.scala
+│   ├── repository/
+│   │   ├── UserRepository.scala
+│   │   └── OrderRepository.scala
+│   └── util/
+│       └── StringUtils.scala
+
+// One public class/trait/object per file (convention)
+// File name should match primary type name
+```
+
+### Import Best Practices
+
+```scala
+// Standard ordering convention
+import java.time._                     // 1. Java stdlib
+import scala.concurrent._              // 2. Scala stdlib
+import cats.effect._                   // 3. Third-party libraries
+import com.example.myapp.domain._      // 4. Project imports
+
+// Avoid wildcard imports for large namespaces
+import java.util._  // Avoid - pollutes namespace
+
+// Prefer explicit imports
+import java.util.{List, Map, Optional}  // Better
+
+// Exception: well-known small namespaces
+import cats.syntax.all._  // OK - common in FP code
+import scala.concurrent.ExecutionContext.Implicits.global  // OK - well-known
+```
+
+---
+
 ## Common Patterns
 
 ### Builder Pattern
@@ -3683,6 +3908,397 @@ inline val config = validateConfig("config.json")  // Compile-time validation
 | Type-level | Match types, unions | Traits, associated types | Type families | Template metaprogramming |
 | Derivation | derives keyword | derive macros | deriving clause | Not built-in |
 | Safety | Hygienic | Hygienic | Hygienic | Not hygienic |
+
+---
+
+## Serialization
+
+Scala has excellent serialization support with multiple libraries for JSON, XML, and binary formats. This section covers common serialization patterns and library choices.
+
+### Library Comparison
+
+| Library | Style | Performance | Type Safety | Derivation |
+|---------|-------|-------------|-------------|------------|
+| **circe** | FP-first | Good | Excellent | Semi-auto/auto |
+| **upickle** | Simple | Excellent | Good | Automatic |
+| **play-json** | Familiar | Good | Good | Macro-based |
+| **jsoniter-scala** | Performance | Best | Good | Compile-time |
+| **zio-json** | ZIO ecosystem | Excellent | Excellent | Derives |
+
+### Circe (Most Popular)
+
+```scala
+import io.circe._
+import io.circe.generic.semiauto._
+import io.circe.syntax._
+import io.circe.parser._
+
+// Case class
+case class User(name: String, age: Int, email: Option[String])
+
+// Semi-automatic derivation (recommended)
+object User {
+  implicit val encoder: Encoder[User] = deriveEncoder[User]
+  implicit val decoder: Decoder[User] = deriveDecoder[User]
+}
+
+// Or combined codec
+object User {
+  implicit val codec: Codec[User] = deriveCodec[User]
+}
+
+// Encoding
+val user = User("Alice", 30, Some("alice@example.com"))
+val json: Json = user.asJson
+val jsonString: String = user.asJson.noSpaces
+// {"name":"Alice","age":30,"email":"alice@example.com"}
+
+// Decoding
+val parsed: Either[Error, User] = decode[User](jsonString)
+parsed match {
+  case Right(user) => println(s"Got user: $user")
+  case Left(error) => println(s"Parse error: $error")
+}
+
+// Custom field names
+case class ApiResponse(
+  @JsonKey("user_id") userId: Long,
+  @JsonKey("created_at") createdAt: String
+)
+```
+
+### Circe with ADTs
+
+```scala
+import io.circe._
+import io.circe.generic.semiauto._
+
+// Sealed trait hierarchy
+sealed trait PaymentMethod
+case class CreditCard(number: String, expiry: String) extends PaymentMethod
+case class BankTransfer(iban: String) extends PaymentMethod
+case object Cash extends PaymentMethod
+
+object PaymentMethod {
+  implicit val encoder: Encoder[PaymentMethod] = deriveEncoder[PaymentMethod]
+  implicit val decoder: Decoder[PaymentMethod] = deriveDecoder[PaymentMethod]
+}
+
+// Custom discriminator
+import io.circe.generic.extras.semiauto._
+import io.circe.generic.extras.Configuration
+
+implicit val config: Configuration = Configuration.default
+  .withDiscriminator("type")
+  .withSnakeCaseMemberNames
+
+// Result: {"type":"CreditCard","number":"1234","expiry":"12/25"}
+```
+
+### Upickle (Simple & Fast)
+
+```scala
+import upickle.default._
+
+// Automatic derivation for case classes
+case class User(name: String, age: Int, email: Option[String])
+object User {
+  implicit val rw: ReadWriter[User] = macroRW[User]
+}
+
+// Or inline
+implicit val userRW: ReadWriter[User] = macroRW
+
+// Encoding
+val user = User("Alice", 30, Some("alice@example.com"))
+val json: String = write(user)
+val prettyJson: String = write(user, indent = 2)
+
+// Decoding
+val parsed: User = read[User](json)
+
+// Handle errors
+val result: Either[Throwable, User] = scala.util.Try(read[User](json)).toEither
+
+// Custom field names
+case class ApiUser(
+  @key("user_name") userName: String,
+  @key("user_age") userAge: Int
+)
+object ApiUser {
+  implicit val rw: ReadWriter[ApiUser] = macroRW
+}
+```
+
+### Play JSON
+
+```scala
+import play.api.libs.json._
+
+// Case class with companion
+case class User(name: String, age: Int, email: Option[String])
+
+object User {
+  // Automatic format
+  implicit val format: Format[User] = Json.format[User]
+
+  // Or separate reads/writes
+  implicit val reads: Reads[User] = Json.reads[User]
+  implicit val writes: Writes[User] = Json.writes[User]
+}
+
+// Encoding
+val user = User("Alice", 30, Some("alice@example.com"))
+val json: JsValue = Json.toJson(user)
+val jsonString: String = Json.stringify(json)
+
+// Decoding
+val parsed: JsResult[User] = Json.parse(jsonString).validate[User]
+parsed match {
+  case JsSuccess(user, _) => println(s"Got user: $user")
+  case JsError(errors) => println(s"Errors: $errors")
+}
+
+// Custom format
+implicit val customFormat: Format[User] = (
+  (__ \ "user_name").format[String] and
+  (__ \ "user_age").format[Int] and
+  (__ \ "email_address").formatNullable[String]
+)(User.apply, unlift(User.unapply))
+```
+
+### Jsoniter-Scala (High Performance)
+
+```scala
+import com.github.plokhotnyuk.jsoniter_scala.core._
+import com.github.plokhotnyuk.jsoniter_scala.macros._
+
+case class User(name: String, age: Int, email: Option[String])
+
+// Compile-time codec generation
+implicit val codec: JsonValueCodec[User] = JsonCodecMaker.make
+
+// Encoding
+val user = User("Alice", 30, Some("alice@example.com"))
+val bytes: Array[Byte] = writeToArray(user)
+val json: String = writeToString(user)
+
+// Decoding
+val parsed: User = readFromString[User](json)
+val fromBytes: User = readFromArray[User](bytes)
+
+// Configuration
+implicit val customCodec: JsonValueCodec[User] = JsonCodecMaker.make(
+  CodecMakerConfig
+    .withFieldNameMapper(JsonCodecMaker.EnforcePascalCase)
+    .withDiscriminatorFieldName(Some("type"))
+)
+```
+
+### ZIO JSON
+
+```scala
+import zio.json._
+
+case class User(name: String, age: Int, email: Option[String])
+
+object User {
+  implicit val encoder: JsonEncoder[User] = DeriveJsonEncoder.gen[User]
+  implicit val decoder: JsonDecoder[User] = DeriveJsonDecoder.gen[User]
+
+  // Or combined
+  implicit val codec: JsonCodec[User] = DeriveJsonCodec.gen[User]
+}
+
+// Encoding
+val user = User("Alice", 30, Some("alice@example.com"))
+val json: String = user.toJson
+val prettyJson: String = user.toJsonPretty
+
+// Decoding
+val parsed: Either[String, User] = json.fromJson[User]
+
+// With custom field names
+case class ApiUser(
+  @jsonField("user_name") userName: String,
+  @jsonField("user_age") userAge: Int
+)
+```
+
+### Validation Patterns
+
+```scala
+import io.circe._
+import io.circe.generic.semiauto._
+
+// Custom decoder with validation
+case class Email private (value: String)
+
+object Email {
+  def apply(value: String): Either[String, Email] =
+    if (value.contains("@")) Right(new Email(value))
+    else Left("Invalid email format")
+
+  implicit val decoder: Decoder[Email] = Decoder.decodeString.emap(apply)
+  implicit val encoder: Encoder[Email] = Encoder.encodeString.contramap(_.value)
+}
+
+// Refined types integration
+import eu.timepit.refined._
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.string._
+
+type ValidEmail = String Refined MatchesRegex["^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$"]
+
+case class User(
+  name: String,
+  email: ValidEmail,
+  age: Int
+)
+
+// Accumulating validation with cats
+import cats.data.ValidatedNec
+import cats.syntax.all._
+
+def validateUser(json: Json): ValidatedNec[String, User] = {
+  (
+    validateName(json),
+    validateEmail(json),
+    validateAge(json)
+  ).mapN(User.apply)
+}
+```
+
+### XML Serialization
+
+```scala
+import scala.xml._
+
+case class User(name: String, age: Int)
+
+// Manual XML generation
+def toXml(user: User): Elem =
+  <user>
+    <name>{user.name}</name>
+    <age>{user.age}</age>
+  </user>
+
+// Manual XML parsing
+def fromXml(xml: Elem): User = User(
+  name = (xml \ "name").text,
+  age = (xml \ "age").text.toInt
+)
+
+// With scala-xml
+val xml = <users>
+  <user id="1">
+    <name>Alice</name>
+    <age>30</age>
+  </user>
+</users>
+
+val users = (xml \ "user").map { node =>
+  User((node \ "name").text, (node \ "age").text.toInt)
+}
+```
+
+### Binary Formats
+
+```scala
+// Protocol Buffers with ScalaPB
+// build.sbt: libraryDependencies += "com.thesamet.scalapb" %% "scalapb-runtime" % "..."
+
+// user.proto
+// message User {
+//   string name = 1;
+//   int32 age = 2;
+// }
+
+// Generated code usage
+import myapp.proto.user.User
+
+val user = User(name = "Alice", age = 30)
+val bytes: Array[Byte] = user.toByteArray
+val parsed: User = User.parseFrom(bytes)
+
+// Avro with avro4s
+import com.sksamuel.avro4s._
+
+case class User(name: String, age: Int)
+
+val schema = AvroSchema[User]
+val record = RecordFormat[User].to(User("Alice", 30))
+val bytes = AvroOutputStream.binary[User].to(outputStream).write(user).close()
+
+// MessagePack with msgpack4s
+import org.msgpack.core._
+
+// Custom binary protocol
+trait BinaryCodec[A] {
+  def encode(a: A): Array[Byte]
+  def decode(bytes: Array[Byte]): A
+}
+```
+
+### Streaming JSON
+
+```scala
+import io.circe.fs2._
+import fs2.Stream
+import cats.effect.IO
+
+// Stream JSON array
+val jsonStream: Stream[IO, Byte] = ???
+
+val users: Stream[IO, User] = jsonStream
+  .through(byteStreamParser)
+  .through(decoder[IO, User])
+
+// Process large files
+import java.nio.file.Paths
+import fs2.io.file.Files
+
+Files[IO]
+  .readAll(Paths.get("users.json"))
+  .through(byteStreamParser)
+  .through(decoder[IO, User])
+  .evalMap(user => IO(println(user)))
+  .compile
+  .drain
+```
+
+### Best Practices
+
+```scala
+// 1. Use semi-automatic derivation for control
+object User {
+  implicit val codec: Codec[User] = deriveCodec[User]  // Explicit
+}
+
+// 2. Define codecs in companion objects
+case class User(name: String, age: Int)
+object User {
+  implicit val codec: Codec[User] = deriveCodec
+}
+
+// 3. Use Either for parsing results
+def parseUser(json: String): Either[Error, User] = decode[User](json)
+
+// 4. Validate on deserialization
+implicit val emailDecoder: Decoder[Email] =
+  Decoder.decodeString.emap(Email.apply)
+
+// 5. Use consistent naming conventions
+implicit val config: Configuration = Configuration.default
+  .withSnakeCaseMemberNames
+
+// 6. Handle optional fields explicitly
+case class Config(
+  required: String,
+  optional: Option[String] = None,
+  withDefault: Int = 42
+)
+```
 
 ---
 
