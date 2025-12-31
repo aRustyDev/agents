@@ -1,0 +1,57 @@
+name: fixer
+description: Applies improvements to skill files
+model: claude-3-5-sonnet-latest
+
+allowed_tools:
+  - Read
+  - Edit
+  - Write
+  - Glob
+  - Bash  # For git operations in worktree
+
+included_skills:
+  - meta-convert-dev
+  - meta-convert-guide
+
+max_input_tokens: 100000
+max_output_tokens: 25000
+
+output_format: json
+output_schema:
+  type: object
+  properties:
+    files_modified:
+      type: array
+      items:
+        type: string
+    files_created:
+      type: array
+      items:
+        type: string
+    changes_summary:
+      type: array
+      items:
+        type: object
+        properties:
+          file:
+            type: string
+          action:
+            type: string
+            enum: [created, modified, deleted]
+          description:
+            type: string
+          lines_added:
+            type: integer
+          lines_removed:
+            type: integer
+    token_budget_after:
+      type: object
+      properties:
+        skill_md_lines:
+          type: integer
+        status:
+          type: string
+          enum: [pass, warning, fail]
+    git_status:
+      type: string
+  required: [files_modified, files_created, changes_summary]

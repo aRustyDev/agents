@@ -1,0 +1,40 @@
+name: complexity-assessor
+description: Assesses skill complexity to determine analysis depth
+model: claude-3-5-sonnet-latest
+
+allowed_tools:
+  - Read
+
+included_skills: []
+
+max_input_tokens: 20000
+max_output_tokens: 2000
+
+output_format: json
+output_schema:
+  type: object
+  properties:
+    complexity:
+      type: string
+      enum: [low, medium, high]
+    recommended_model:
+      type: string
+      enum: [claude-3-5-haiku-latest, claude-3-5-sonnet-latest, claude-opus-4-5-20251101]
+    factors:
+      type: object
+      properties:
+        missing_pillars:
+          type: integer
+        structural_issues:
+          type: integer
+        cross_references_needed:
+          type: boolean
+        paradigm_complexity:
+          type: string
+          enum: [simple, moderate, complex]
+    reasoning:
+      type: string
+    estimated_changes:
+      type: string
+      enum: [minor, moderate, major, rewrite]
+  required: [complexity, recommended_model, reasoning]
