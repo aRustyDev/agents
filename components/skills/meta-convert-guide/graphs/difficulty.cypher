@@ -4,12 +4,18 @@
 // Single source of truth for language pair conversion difficulty ratings.
 //
 // Graph Structure:
-//   (Language)-[:CONVERTS_TO {scores...}]->(Language)
-//   (Language)-[:RUNS_ON]->(Platform)
-//   (Language)-[:HAS_TYPE_SYSTEM]->(TypeSystem)
-//   (Language)-[:HAS_PARADIGM]->(Paradigm)
-//   (Language)-[:HAS_MEMORY_MODEL]->(MemoryModel)
-//   (Language)-[:HAS_CONCURRENCY_MODEL]->(ConcurrencyModel)
+//   Score Relationships (direct):
+//     (Language)-[:TYPE_DIFF {score: n}]->(Language)
+//     (Language)-[:PARADIGM_DIFF {score: n}]->(Language)
+//     (Language)-[:MEMORY_DIFF {score: n}]->(Language)
+//     (Language)-[:CONCURRENCY_DIFF {score: n}]->(Language)
+//     (Language)-[:PLATFORM_DIFF {score: n}]->(Language)
+//
+//   Challenge Mini-Hub:
+//     (Language)-[:FACES]->(Challenge)-[:FOR]->(Language)
+//
+//   Language Characteristics:
+//     (Language)-[:RUNS_ON]->(Platform)
 //
 // Usage:
 //   cat difficulty.cypher | cypher-shell -u neo4j -p password
@@ -27,8 +33,10 @@ CREATE CONSTRAINT type_system_name IF NOT EXISTS FOR (t:TypeSystem) REQUIRE t.na
 CREATE CONSTRAINT paradigm_name IF NOT EXISTS FOR (p:Paradigm) REQUIRE p.name IS UNIQUE;
 CREATE CONSTRAINT memory_model_name IF NOT EXISTS FOR (m:MemoryModel) REQUIRE m.name IS UNIQUE;
 CREATE CONSTRAINT concurrency_model_name IF NOT EXISTS FOR (c:ConcurrencyModel) REQUIRE c.name IS UNIQUE;
+CREATE CONSTRAINT challenge_id IF NOT EXISTS FOR (c:Challenge) REQUIRE c.id IS UNIQUE;
 
 CREATE INDEX language_family IF NOT EXISTS FOR (l:Language) ON (l.family);
+CREATE INDEX challenge_category IF NOT EXISTS FOR (c:Challenge) ON (c.category);
 
 // ----------------------------------------------------------------------------
 // DIFFICULTY LEVELS
@@ -315,524 +323,1113 @@ MATCH (l:Language), (p:Platform) WHERE l.platform = p.name
 CREATE (l)-[:RUNS_ON]->(p);
 
 // ----------------------------------------------------------------------------
-// CONVERSION RELATIONSHIPS - Functional Language Family
+// HELPER: Create conversion scores and challenges
 // ----------------------------------------------------------------------------
+//
+// This section creates:
+//   1. Five direct score relationships per conversion pair
+//   2. Challenge nodes connected via FACES/FOR relationships
+//
+// Score relationships: TYPE_DIFF, PARADIGM_DIFF, MEMORY_DIFF, CONCURRENCY_DIFF, PLATFORM_DIFF
+// Challenge pattern: (src)-[:FACES]->(Challenge)-[:FOR]->(tgt)
 
-// Clojure conversions
+// ============================================================================
+// CLOJURE CONVERSIONS
+// ============================================================================
+
+// Clojure -> Elixir (Total: 4, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'STM to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'clojure-elixir-1', text: 'Platform migration (JVM to BEAM)', category: 'Platform'}),
+       (ch2:Challenge {id: 'clojure-elixir-2', text: 'STM to Actors concurrency model', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> Elm (Total: 5, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Pure FP shift']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'clojure-elm-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'clojure-elm-2', text: 'Shift to pure functional paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> Erlang (Total: 4, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'STM to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'clojure-erlang-1', text: 'Platform migration (JVM to BEAM)', category: 'Platform'}),
+       (ch2:Challenge {id: 'clojure-erlang-2', text: 'STM to Actors concurrency model', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> F# (Total: 4, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Dynamic to static', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'clojure-fsharp-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'clojure-fsharp-2', text: 'Platform migration (JVM to .NET)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> Haskell (Total: 5, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'clojure-haskell-1', text: 'Dynamic to static typing with HM inference', category: 'Type'}),
+       (ch2:Challenge {id: 'clojure-haskell-2', text: 'Practical FP to pure FP', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> Roc (Total: 5, Medium)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Effects system']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'clojure-roc-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'clojure-roc-2', text: 'Effects system adaptation', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Clojure -> Scala (Total: 1, Easy)
 MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 0,
-  totalScore: 1, level: 'Easy', challenges: ['Same platform (JVM)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Clojure'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'clojure-scala-1', text: 'Same JVM platform simplifies migration', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Elixir conversions
+// ============================================================================
+// ELIXIR CONVERSIONS
+// ============================================================================
+
+// Elixir -> Clojure (Total: 4, Medium)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'Actors to STM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'elixir-clojure-1', text: 'Platform migration (BEAM to JVM)', category: 'Platform'}),
+       (ch2:Challenge {id: 'elixir-clojure-2', text: 'Actors to STM concurrency model', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elixir -> Elm (Total: 5, Medium)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'elixir-elm-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'elixir-elm-2', text: 'Platform migration (BEAM to JS)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elixir -> Erlang (Total: 0, Easy)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 0,
-  totalScore: 0, level: 'Easy', challenges: ['Same platform (BEAM)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'elixir-erlang-1', text: 'Same BEAM platform - mostly syntactic', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Elixir -> F# (Total: 4, Medium)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'Actors to Async']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'elixir-fsharp-1', text: 'Platform migration (BEAM to .NET)', category: 'Platform'}),
+       (ch2:Challenge {id: 'elixir-fsharp-2', text: 'Actors to Async concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elixir -> Haskell (Total: 5, Medium)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'elixir-haskell-1', text: 'Dynamic to static typing with HM', category: 'Type'}),
+       (ch2:Challenge {id: 'elixir-haskell-2', text: 'Practical FP to pure FP', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elixir -> Roc (Total: 6, Hard)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Actors to Effects', 'BEAM to Native']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'elixir-roc-1', text: 'Actors to Effects system', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'elixir-roc-2', text: 'BEAM to Native platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elixir -> Scala (Total: 4, Medium)
 MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'BEAM to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elixir'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'elixir-scala-1', text: 'Platform migration (BEAM to JVM)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Erlang conversions
+// ============================================================================
+// ERLANG CONVERSIONS
+// ============================================================================
+
+// Erlang -> Clojure (Total: 4, Medium)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Actors to STM', 'BEAM to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'erlang-clojure-1', text: 'Actors to STM concurrency model', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'erlang-clojure-2', text: 'BEAM to JVM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Erlang -> Elixir (Total: 0, Easy)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 0,
-  totalScore: 0, level: 'Easy', challenges: ['Same platform (BEAM)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'erlang-elixir-1', text: 'Same BEAM platform - mostly syntactic', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Erlang -> Elm (Total: 5, Medium)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'erlang-elm-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'erlang-elm-2', text: 'Platform migration (BEAM to JS)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Erlang -> F# (Total: 4, Medium)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Platform migration', 'Actors to Async']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'erlang-fsharp-1', text: 'Platform migration (BEAM to .NET)', category: 'Platform'}),
+       (ch2:Challenge {id: 'erlang-fsharp-2', text: 'Actors to Async concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Erlang -> Haskell (Total: 5, Medium)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static', 'Pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'erlang-haskell-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'erlang-haskell-2', text: 'Practical FP to pure FP', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Erlang -> Roc (Total: 6, Hard)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Actors to Effects', 'BEAM to Native']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'erlang-roc-1', text: 'Actors to Effects system', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'erlang-roc-2', text: 'BEAM to Native platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Erlang -> Scala (Total: 4, Medium)
 MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['BEAM to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Erlang'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'erlang-scala-1', text: 'BEAM to JVM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Elm conversions
+// ============================================================================
+// ELM CONVERSIONS
+// ============================================================================
+
+// Elm -> Clojure (Total: 5, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'elm-clojure-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'elm-clojure-2', text: 'Platform migration (JS to JVM)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elm -> Elixir (Total: 5, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'TEA to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'elm-elixir-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'elm-elixir-2', text: 'TEA to Actors concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elm -> Erlang (Total: 5, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'elm-erlang-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'elm-erlang-2', text: 'Platform migration (JS to BEAM)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elm -> F# (Total: 3, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'elm-fsharp-1', text: 'Platform migration (JS to .NET)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Elm -> Haskell (Total: 3, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration', 'Similar pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'elm-haskell-1', text: 'Platform migration (JS to Native)', category: 'Platform'}),
+       (ch2:Challenge {id: 'elm-haskell-2', text: 'Similar pure FP - mostly syntactic', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Elm -> Roc (Total: 2, Easy)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 2,
-  totalScore: 2, level: 'Easy', challenges: ['Both pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'elm-roc-1', text: 'Both pure FP - very similar concepts', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Elm -> Scala (Total: 4, Medium)
 MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Pure to multi-paradigm']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Elm'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'elm-scala-1', text: 'Pure to multi-paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// F# conversions
+// ============================================================================
+// F# CONVERSIONS
+// ============================================================================
+
+// F# -> Clojure (Total: 4, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Static to dynamic', '.NET to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'fsharp-clojure-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'fsharp-clojure-2', text: '.NET to JVM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// F# -> Elixir (Total: 4, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Async to Actors', '.NET to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'fsharp-elixir-1', text: 'Async to Actors concurrency', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'fsharp-elixir-2', text: '.NET to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// F# -> Elm (Total: 3, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'fsharp-elm-1', text: 'Platform migration (.NET to JS)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// F# -> Erlang (Total: 4, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Static to dynamic', '.NET to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'fsharp-erlang-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'fsharp-erlang-2', text: '.NET to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// F# -> Haskell (Total: 3, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'fsharp-haskell-1', text: 'Platform migration (.NET to Native)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// F# -> Roc (Total: 3, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Async to Effects']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'fsharp-roc-1', text: 'Async to Effects system', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// F# -> Scala (Total: 3, Medium)
 MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['.NET to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'F#'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'fsharp-scala-1', text: '.NET to JVM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Haskell conversions
+// ============================================================================
+// HASKELL CONVERSIONS
+// ============================================================================
+
+// Haskell -> Clojure (Total: 5, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'Pure to practical FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'haskell-clojure-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'haskell-clojure-2', text: 'Pure to practical FP', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Haskell -> Elixir (Total: 5, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'STM to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'haskell-elixir-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'haskell-elixir-2', text: 'STM to Actors concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Haskell -> Elm (Total: 3, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'haskell-elm-1', text: 'Platform migration (Native to JS)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Haskell -> Erlang (Total: 5, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'STM to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'haskell-erlang-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'haskell-erlang-2', text: 'STM to Actors concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Haskell -> F# (Total: 3, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'haskell-fsharp-1', text: 'Platform migration (Native to .NET)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Haskell -> Roc (Total: 1, Easy)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 0,
-  totalScore: 1, level: 'Easy', challenges: ['Similar pure FP', 'STM to Effects']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'haskell-roc-1', text: 'Similar pure FP - STM to Effects', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Haskell -> Scala (Total: 4, Medium)
 MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Pure to multi-paradigm']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Haskell'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'haskell-scala-1', text: 'Pure to multi-paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Roc conversions
+// ============================================================================
+// ROC CONVERSIONS
+// ============================================================================
+
+// Roc -> Clojure (Total: 5, Medium)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Static to dynamic', 'Effects to STM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'roc-clojure-1', text: 'Static to dynamic typing', category: 'Type'}),
+       (ch2:Challenge {id: 'roc-clojure-2', text: 'Effects to STM concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Roc -> Elixir (Total: 6, Hard)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Effects to Actors', 'Native to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'roc-elixir-1', text: 'Effects to Actors concurrency', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'roc-elixir-2', text: 'Native to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Roc -> Elm (Total: 2, Easy)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 2,
-  totalScore: 2, level: 'Easy', challenges: ['Both pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'roc-elm-1', text: 'Both pure FP - very similar concepts', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Roc -> Erlang (Total: 6, Hard)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Effects to Actors', 'Native to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'roc-erlang-1', text: 'Effects to Actors concurrency', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'roc-erlang-2', text: 'Native to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Roc -> F# (Total: 3, Medium)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['Effects to Async']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'roc-fsharp-1', text: 'Effects to Async concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Roc -> Haskell (Total: 1, Easy)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 0,
-  totalScore: 1, level: 'Easy', challenges: ['Similar pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'roc-haskell-1', text: 'Similar pure FP concepts', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Roc -> Scala (Total: 4, Medium)
 MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Pure to multi-paradigm']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Roc'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'roc-scala-1', text: 'Pure to multi-paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// Scala conversions
+// ============================================================================
+// SCALA CONVERSIONS
+// ============================================================================
+
+// Scala -> Clojure (Total: 1, Easy)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 0,
-  totalScore: 1, level: 'Easy', challenges: ['Same platform (JVM)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'scala-clojure-1', text: 'Same JVM platform simplifies migration', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> Elixir (Total: 4, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['JVM to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'scala-elixir-1', text: 'JVM to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> Elm (Total: 4, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'scala-elm-1', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> Erlang (Total: 4, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['JVM to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'scala-erlang-1', text: 'JVM to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> F# (Total: 3, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 3, level: 'Medium', challenges: ['JVM to .NET']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'scala-fsharp-1', text: 'JVM to .NET platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> Haskell (Total: 4, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'scala-haskell-1', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Scala -> Roc (Total: 4, Medium)
 MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Scala'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'scala-roc-1', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// ----------------------------------------------------------------------------
-// CONVERSION RELATIONSHIPS - Python
-// ----------------------------------------------------------------------------
+// ============================================================================
+// PYTHON CONVERSIONS
+// ============================================================================
 
+// Python -> Clojure (Total: 4, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Clojure'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Multi to functional', 'Interpreted to JVM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Clojure'})
+CREATE (ch1:Challenge {id: 'python-clojure-1', text: 'Multi to functional paradigm', category: 'Paradigm'}),
+       (ch2:Challenge {id: 'python-clojure-2', text: 'Interpreted to JVM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Elixir (Total: 5, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Elixir'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Asyncio to Actors', 'Interpreted to BEAM']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Elixir'})
+CREATE (ch1:Challenge {id: 'python-elixir-1', text: 'Asyncio to Actors concurrency', category: 'Concurrency'}),
+       (ch2:Challenge {id: 'python-elixir-2', text: 'Interpreted to BEAM platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Elm (Total: 6, Hard)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Elm'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 2, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Dynamic to static', 'Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 2}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Elm'})
+CREATE (ch1:Challenge {id: 'python-elm-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'python-elm-2', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Erlang (Total: 5, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Erlang'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 2, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Asyncio to Actors']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 2}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Erlang'})
+CREATE (ch1:Challenge {id: 'python-erlang-1', text: 'Asyncio to Actors concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Python -> F# (Total: 5, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'F#'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'F#'})
+CREATE (ch1:Challenge {id: 'python-fsharp-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Python -> Go (Total: 4, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Go'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 0, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Dynamic to static']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Go'})
+CREATE (ch1:Challenge {id: 'python-go-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Python -> Haskell (Total: 6, Hard)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Haskell'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 2, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Dynamic to static', 'Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 2}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Haskell'})
+CREATE (ch1:Challenge {id: 'python-haskell-1', text: 'Dynamic to static typing with HM', category: 'Type'}),
+       (ch2:Challenge {id: 'python-haskell-2', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Roc (Total: 6, Hard)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Roc'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 2, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['Dynamic to static', 'Multi to pure FP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 2}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Roc'})
+CREATE (ch1:Challenge {id: 'python-roc-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (ch2:Challenge {id: 'python-roc-2', text: 'Multi to pure FP paradigm', category: 'Paradigm'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Rust (Total: 7, Hard)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 2, concurrencyScore: 1, platformScore: 2,
-  totalScore: 7, level: 'Hard', challenges: ['GC to Ownership', 'Dynamic to static']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'python-rust-1', text: 'GC to Ownership memory model', category: 'Memory'}),
+       (ch2:Challenge {id: 'python-rust-2', text: 'Dynamic to static typing', category: 'Type'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Python -> Scala (Total: 5, Medium)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Scala'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 1, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 5, level: 'Medium', challenges: ['Dynamic to static']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 1}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'Scala'})
+CREATE (ch1:Challenge {id: 'python-scala-1', text: 'Dynamic to static typing', category: 'Type'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Python -> TypeScript (Total: 1, Easy)
 MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'TypeScript'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 1,
-  totalScore: 1, level: 'Easy', challenges: ['Similar multi-paradigm']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 1}]->(tgt);
+MATCH (src:Language {name: 'Python'}), (tgt:Language {name: 'TypeScript'})
+CREATE (ch1:Challenge {id: 'python-typescript-1', text: 'Similar multi-paradigm - mostly platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// ----------------------------------------------------------------------------
-// CONVERSION RELATIONSHIPS - TypeScript
-// ----------------------------------------------------------------------------
+// ============================================================================
+// TYPESCRIPT CONVERSIONS
+// ============================================================================
 
+// TypeScript -> Go (Total: 4, Medium)
 MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Go'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 0, concurrencyScore: 1, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['Promises to CSP']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Go'})
+CREATE (ch1:Challenge {id: 'typescript-go-1', text: 'Promises to CSP concurrency', category: 'Concurrency'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// TypeScript -> Python (Total: 1, Easy)
 MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Python'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 1,
-  totalScore: 1, level: 'Easy', challenges: ['Similar multi-paradigm']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 1}]->(tgt);
+MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Python'})
+CREATE (ch1:Challenge {id: 'typescript-python-1', text: 'Similar multi-paradigm - mostly platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// TypeScript -> Rust (Total: 6, Hard)
 MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 2, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['GC to Ownership', 'Platform migration']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'TypeScript'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'typescript-rust-1', text: 'GC to Ownership memory model', category: 'Memory'}),
+       (ch2:Challenge {id: 'typescript-rust-2', text: 'Platform migration (JS to Native)', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
-// ----------------------------------------------------------------------------
-// CONVERSION RELATIONSHIPS - Systems Languages
-// ----------------------------------------------------------------------------
+// ============================================================================
+// SYSTEMS LANGUAGE CONVERSIONS
+// ============================================================================
 
+// C -> C++ (Total: 0, Easy)
 MATCH (src:Language {name: 'C'}), (tgt:Language {name: 'C++'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 0,
-  totalScore: 0, level: 'Easy', challenges: ['Same family']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'C'}), (tgt:Language {name: 'C++'})
+CREATE (ch1:Challenge {id: 'c-cpp-1', text: 'Same language family', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// C -> Rust (Total: 3, Medium)
 MATCH (src:Language {name: 'C'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 1, concurrencyScore: 1, platformScore: 0,
-  totalScore: 3, level: 'Medium', challenges: ['Manual to Ownership']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 1}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'C'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'c-rust-1', text: 'Manual to Ownership memory model', category: 'Memory'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// C++ -> Rust (Total: 1, Easy)
 MATCH (src:Language {name: 'C++'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 1, concurrencyScore: 0, platformScore: 0,
-  totalScore: 1, level: 'Easy', challenges: ['Similar memory models (RAII)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 1}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'C++'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'cpp-rust-1', text: 'Similar RAII memory models', category: 'Memory'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Go -> Rust (Total: 3, Medium)
 MATCH (src:Language {name: 'Go'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 2, concurrencyScore: 1, platformScore: 0,
-  totalScore: 3, level: 'Medium', challenges: ['GC to Ownership']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Go'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'go-rust-1', text: 'GC to Ownership memory model', category: 'Memory'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Java -> C (Total: 6, Hard)
 MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'C'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 2, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['GC to Manual', 'JVM to Native']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'C'})
+CREATE (ch1:Challenge {id: 'java-c-1', text: 'GC to Manual memory management', category: 'Memory'}),
+       (ch2:Challenge {id: 'java-c-2', text: 'JVM to Native platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
+// Java -> C++ (Total: 4, Medium)
 MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'C++'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 2, concurrencyScore: 0, platformScore: 2,
-  totalScore: 4, level: 'Medium', challenges: ['GC to Manual/RAII']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'C++'})
+CREATE (ch1:Challenge {id: 'java-cpp-1', text: 'GC to Manual/RAII memory', category: 'Memory'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
+// Java -> Rust (Total: 6, Hard)
 MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'Rust'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 1, memoryScore: 2, concurrencyScore: 1, platformScore: 2,
-  totalScore: 6, level: 'Hard', challenges: ['GC to Ownership', 'JVM to Native']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 1}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 2}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 1}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 2}]->(tgt);
+MATCH (src:Language {name: 'Java'}), (tgt:Language {name: 'Rust'})
+CREATE (ch1:Challenge {id: 'java-rust-1', text: 'GC to Ownership memory model', category: 'Memory'}),
+       (ch2:Challenge {id: 'java-rust-2', text: 'JVM to Native platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt),
+       (src)-[:FACES]->(ch2)-[:FOR]->(tgt);
 
-// ----------------------------------------------------------------------------
-// CONVERSION RELATIONSHIPS - Platform-Specific
-// ----------------------------------------------------------------------------
+// ============================================================================
+// PLATFORM-SPECIFIC CONVERSIONS
+// ============================================================================
 
+// Objective-C -> Swift (Total: 0, Easy)
 MATCH (src:Language {name: 'Objective-C'}), (tgt:Language {name: 'Swift'})
-CREATE (src)-[:CONVERTS_TO {
-  typeScore: 0, paradigmScore: 0, memoryScore: 0, concurrencyScore: 0, platformScore: 0,
-  totalScore: 0, level: 'Easy', challenges: ['Same platform (Apple)']
-}]->(tgt);
+CREATE (src)-[:TYPE_DIFF {score: 0}]->(tgt),
+       (src)-[:PARADIGM_DIFF {score: 0}]->(tgt),
+       (src)-[:MEMORY_DIFF {score: 0}]->(tgt),
+       (src)-[:CONCURRENCY_DIFF {score: 0}]->(tgt),
+       (src)-[:PLATFORM_DIFF {score: 0}]->(tgt);
+MATCH (src:Language {name: 'Objective-C'}), (tgt:Language {name: 'Swift'})
+CREATE (ch1:Challenge {id: 'objc-swift-1', text: 'Same Apple platform', category: 'Platform'}),
+       (src)-[:FACES]->(ch1)-[:FOR]->(tgt);
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // USEFUL QUERIES
-// ----------------------------------------------------------------------------
+// ============================================================================
 
-// Find all Easy conversions
-// MATCH (src:Language)-[c:CONVERTS_TO {level: 'Easy'}]->(tgt:Language)
-// RETURN src.name AS source, tgt.name AS target, c.totalScore AS score
-// ORDER BY c.totalScore;
+// Get totalScore and level for a specific pair
+// MATCH (src:Language {name: 'Python'})-[r]->(tgt:Language {name: 'Rust'})
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, sum(r.score) AS totalScore
+// RETURN
+//   src.name AS source,
+//   tgt.name AS target,
+//   totalScore,
+//   CASE
+//     WHEN totalScore <= 2 THEN 'Easy'
+//     WHEN totalScore <= 5 THEN 'Medium'
+//     WHEN totalScore <= 8 THEN 'Hard'
+//     ELSE 'Expert'
+//   END AS level;
 
-// Find all Hard conversions
-// MATCH (src:Language)-[c:CONVERTS_TO]->(tgt:Language)
-// WHERE c.totalScore >= 6
-// RETURN src.name AS source, tgt.name AS target, c.totalScore AS score, c.challenges
-// ORDER BY c.totalScore DESC;
+// Get full breakdown with individual scores
+// MATCH (src:Language {name: 'Python'})-[r]->(tgt:Language {name: 'Rust'})
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, type(r) AS factor, r.score AS score
+// ORDER BY factor
+// WITH src, tgt, collect({factor: factor, score: score}) AS scores, sum(score) AS totalScore
+// RETURN
+//   src.name AS source,
+//   tgt.name AS target,
+//   scores,
+//   totalScore,
+//   CASE
+//     WHEN totalScore <= 2 THEN 'Easy'
+//     WHEN totalScore <= 5 THEN 'Medium'
+//     WHEN totalScore <= 8 THEN 'Hard'
+//     ELSE 'Expert'
+//   END AS level;
+
+// Get all conversions sorted by difficulty
+// MATCH (src:Language)-[r]->(tgt:Language)
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, sum(r.score) AS totalScore
+// RETURN
+//   src.name AS source,
+//   tgt.name AS target,
+//   totalScore,
+//   CASE
+//     WHEN totalScore <= 2 THEN 'Easy'
+//     WHEN totalScore <= 5 THEN 'Medium'
+//     WHEN totalScore <= 8 THEN 'Hard'
+//     ELSE 'Expert'
+//   END AS level
+// ORDER BY totalScore DESC, source, target;
+
+// Find challenges for a conversion pair
+// MATCH (src:Language {name: 'Python'})-[:FACES]->(ch:Challenge)-[:FOR]->(tgt:Language {name: 'Rust'})
+// RETURN ch.text AS challenge, ch.category AS category
+// ORDER BY ch.category;
+
+// Find all Hard conversions with their challenges
+// MATCH (src:Language)-[r]->(tgt:Language)
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, sum(r.score) AS totalScore
+// WHERE totalScore >= 6 AND totalScore <= 8
+// OPTIONAL MATCH (src)-[:FACES]->(ch:Challenge)-[:FOR]->(tgt)
+// WITH src, tgt, totalScore, collect(ch.text) AS challenges
+// RETURN
+//   src.name AS source,
+//   tgt.name AS target,
+//   totalScore,
+//   challenges
+// ORDER BY totalScore DESC;
+
+// Find conversions by challenge category
+// MATCH (src:Language)-[:FACES]->(ch:Challenge {category: 'Memory'})-[:FOR]->(tgt:Language)
+// RETURN src.name AS source, tgt.name AS target, ch.text AS challenge;
+
+// Aggregate difficulty statistics
+// MATCH (src:Language)-[r]->(tgt:Language)
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, sum(r.score) AS totalScore
+// WITH CASE
+//   WHEN totalScore <= 2 THEN 'Easy'
+//   WHEN totalScore <= 5 THEN 'Medium'
+//   WHEN totalScore <= 8 THEN 'Hard'
+//   ELSE 'Expert'
+// END AS level
+// RETURN level AS difficulty, count(*) AS count
+// ORDER BY CASE level
+//   WHEN 'Easy' THEN 1
+//   WHEN 'Medium' THEN 2
+//   WHEN 'Hard' THEN 3
+//   WHEN 'Expert' THEN 4
+// END;
 
 // Find conversion path between two languages
-// MATCH path = shortestPath((src:Language {name: 'Python'})-[:CONVERTS_TO*]->(tgt:Language {name: 'Rust'}))
+// MATCH path = shortestPath((src:Language {name: 'Python'})-[:TYPE_DIFF|PARADIGM_DIFF|MEMORY_DIFF|CONCURRENCY_DIFF|PLATFORM_DIFF*]->(tgt:Language {name: 'Rust'}))
 // RETURN path;
 
 // Find all conversions from a language, sorted by difficulty
-// MATCH (src:Language {name: 'Python'})-[c:CONVERTS_TO]->(tgt:Language)
-// RETURN tgt.name AS target, c.totalScore AS score, c.level, c.challenges
-// ORDER BY c.totalScore;
+// MATCH (src:Language {name: 'Python'})-[r]->(tgt:Language)
+// WHERE type(r) IN ['TYPE_DIFF', 'PARADIGM_DIFF', 'MEMORY_DIFF', 'CONCURRENCY_DIFF', 'PLATFORM_DIFF']
+// WITH src, tgt, sum(r.score) AS totalScore
+// OPTIONAL MATCH (src)-[:FACES]->(ch:Challenge)-[:FOR]->(tgt)
+// WITH src, tgt, totalScore, collect(ch.text) AS challenges
+// RETURN
+//   tgt.name AS target,
+//   totalScore,
+//   CASE
+//     WHEN totalScore <= 2 THEN 'Easy'
+//     WHEN totalScore <= 5 THEN 'Medium'
+//     WHEN totalScore <= 8 THEN 'Hard'
+//     ELSE 'Expert'
+//   END AS level,
+//   challenges
+// ORDER BY totalScore;
 
 // Find languages by platform
 // MATCH (l:Language)-[:RUNS_ON]->(p:Platform {name: 'JVM'})
@@ -841,13 +1438,3 @@ CREATE (src)-[:CONVERTS_TO {
 // Find REPL-centric languages
 // MATCH (l:Language) WHERE l.replCentric = true
 // RETURN l.name, l.platform;
-
-// Aggregate difficulty statistics
-// MATCH ()-[c:CONVERTS_TO]->()
-// RETURN c.level AS difficulty, count(*) AS count
-// ORDER BY CASE c.level
-//   WHEN 'Easy' THEN 1
-//   WHEN 'Medium' THEN 2
-//   WHEN 'Hard' THEN 3
-//   WHEN 'Expert' THEN 4
-// END;
