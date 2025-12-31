@@ -1,2 +1,9 @@
 dist/
 .DS_Store
+
+# MCP swarm/flow state directories
+.claude-flow/
+.swarm/
+
+# Temporary files
+temp.md
