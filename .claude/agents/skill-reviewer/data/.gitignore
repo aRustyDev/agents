@@ -1,0 +1,5 @@
+# Ignore session data (contains runtime state)
+sessions/
+
+# Keep config.json
+!config.json

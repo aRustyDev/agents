@@ -1,0 +1,37 @@
+{{type}}({{scope}}): {{description}}
+
+{{#if added}}
+### Added
+{{#each added}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if changed}}
+### Changed
+{{#each changed}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if fixed}}
+### Fixed
+{{#each fixed}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if removed}}
+### Removed
+{{#each removed}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if closes}}
+Closes #{{closes}}
+{{/if}}
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

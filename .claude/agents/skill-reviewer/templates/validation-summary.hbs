@@ -1,0 +1,48 @@
+## Validation Results
+
+**Skill**: `{{skill_path}}`
+**Type**: {{skill_type}}
+
+### Token Budget
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| Lines | {{token_count}} | {{token_budget_status}} |
+| Limit | 500 | - |
+
+{{#if (eq token_budget_status "pass")}}
+✅ Token budget OK
+{{else if (eq token_budget_status "warning")}}
+⚠️ Token budget warning (500-800 lines)
+{{else}}
+❌ Token budget exceeded (> 800 lines)
+{{/if}}
+
+### Pillar Coverage ({{pillars_present}}/{{pillars_total}})
+
+| Pillar | Present | Notes |
+|--------|---------|-------|
+{{#each pillars}}
+| {{name}} | {{#if present}}✅{{else}}❌{{/if}} | {{notes}} |
+{{/each}}
+
+{{#if missing_pillars}}
+### Missing Pillars
+{{#each missing_pillars}}
+- **{{this}}**: Needs coverage
+{{/each}}
+{{/if}}
+
+{{#if structure_issues}}
+### Structure Issues
+{{#each structure_issues}}
+- {{this}}
+{{/each}}
+{{/if}}
+
+{{#if recommendations}}
+### Recommendations
+{{#each recommendations}}
+1. {{this}}
+{{/each}}
+{{/if}}

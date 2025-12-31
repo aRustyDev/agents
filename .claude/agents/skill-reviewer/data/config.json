@@ -1,0 +1,21 @@
+{
+  "repo_owner": "aRustyDev",
+  "repo_name": "ai",
+  "base_branch": "main",
+  "project_number": 24,
+  "backlog_status": "Backlog",
+  "in_progress_status": "In Progress",
+  "in_review_status": "In Review",
+  "done_status": "Done",
+  "worktree_base": "/private/tmp/worktrees",
+  "max_parallel": 3,
+  "dry_run": false,
+  "model_overrides": {},
+  "review_labels": ["review", "skills"],
+  "in_progress_label": "status:in-progress",
+  "in_review_label": "status:in-review",
+  "max_tokens_per_skill": 200000,
+  "max_cost_per_skill": 5.0,
+  "max_total_cost": 500.0,
+  "assignee": null
+}
