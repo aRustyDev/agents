@@ -1,0 +1,137 @@
+# Skill Reviewer Agent - Justfile
+# Run: just -f .claude/agents/skill-reviewer/justfile <recipe>
+
+set shell := ["bash", "-cu"]
+
+# Default recipe: show help
+default:
+    @just -f {{justfile()}} --list
+
+# Agent directory (relative to repo root)
+agent_dir := ".claude/agents/skill-reviewer"
+
+# Progress file for tracking
+progress_file := ".claude/agents/skill-reviewer/data/progress.json"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Single Issue Review
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Review a single skill by issue number
+review issue skill:
+    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}}
+
+# Review a single skill (dry run - no GitHub changes)
+review-dry issue skill:
+    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} --dry-run
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Batch Review
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Process all backlog issues with 'skills' label (1 at a time)
+batch:
+    python {{agent_dir}}/main.py --batch --label skills
+
+# Process backlog issues with parallelism
+batch-parallel n="3":
+    python {{agent_dir}}/main.py --batch --label skills --max-parallel {{n}}
+
+# Batch review (dry run)
+batch-dry:
+    python {{agent_dir}}/main.py --batch --label skills --dry-run
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Session Management
+# ─────────────────────────────────────────────────────────────────────────────
+
+# List all sessions
+sessions:
+    python {{agent_dir}}/main.py --list-sessions
+
+# Resume an interrupted session
+resume session_id:
+    python {{agent_dir}}/main.py --resume {{session_id}}
+
+# Show session details
+session-info session_id:
+    cat {{agent_dir}}/data/sessions/{{session_id}}/session.json | jq .
+
+# Clean up a completed session's worktree
+cleanup session_id:
+    python {{agent_dir}}/main.py --resume {{session_id}} --cleanup
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Progress Tracking
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Show current progress (watch this in a separate terminal)
+progress:
+    @if [ -f {{progress_file}} ]; then \
+        cat {{progress_file}} | jq .; \
+    else \
+        echo "No progress file found. Run 'just batch' to start."; \
+    fi
+
+# Watch progress in real-time
+watch-progress:
+    watch -n 2 "cat {{progress_file}} 2>/dev/null | jq . || echo 'Waiting for progress...'"
+
+# Show backlog count
+backlog-count:
+    @gh api graphql -f query='query { \
+        user(login: "aRustyDev") { \
+            projectV2(number: 24) { \
+                items(first: 100) { \
+                    nodes { \
+                        fieldValues(first: 10) { \
+                            nodes { \
+                                ... on ProjectV2ItemFieldSingleSelectValue { name } \
+                            } \
+                        } \
+                    } \
+                } \
+            } \
+        } \
+    }' --jq '[.data.user.projectV2.items.nodes[] | select(.fieldValues.nodes[].name == "Backlog")] | length'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Estimation
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Estimate cost for reviewing a skill
+estimate skill:
+    python -c "from {{agent_dir}}/src.tokens import estimate_tokens; \
+        e = estimate_tokens('{{skill}}'); \
+        print(f'Tokens: {e.estimated_total_tokens:,}'); \
+        print(f'Cost (mixed): ${e.cost_mixed:.4f}')"
+
+# Estimate cost for all backlog issues
+estimate-batch:
+    @echo "TODO: Implement batch estimation"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Debugging
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Run only validation stage
+validate issue skill:
+    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} \
+        --stages validation --dry-run
+
+# Run validation + complexity assessment
+assess issue skill:
+    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} \
+        --stages validation,complexity_assessment --dry-run
+
+# Show config
+config:
+    cat {{agent_dir}}/data/config.json | jq .
+
+# List available sub-agents
+subagents:
+    @for d in {{agent_dir}}/subagents/*/; do \
+        name=$(basename "$$d"); \
+        model=$(yq '.model' "$$d/config.yml"); \
+        echo "$$name ($$model)"; \
+    done

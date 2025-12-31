@@ -29,13 +29,12 @@ class Model(Enum):
 class Stage(Enum):
     """Pipeline stages."""
     INIT = "init"
-    GITHUB_UPDATE_START = "github_update_start"
-    VALIDATION = "validation"
-    COMPLEXITY_ASSESSMENT = "complexity_assessment"
-    ANALYSIS = "analysis"
-    FIXING = "fixing"
-    PR_CREATION = "pr_creation"
-    GITHUB_UPDATE_END = "github_update_end"
+    SETUP = "setup"                        # Deterministic: worktree, status, estimate
+    VALIDATION = "validation"              # LLM: validator sub-agent
+    COMPLEXITY_ASSESSMENT = "complexity_assessment"  # LLM: complexity-assessor
+    ANALYSIS = "analysis"                  # LLM: analyzer sub-agent
+    FIXING = "fixing"                      # LLM: fixer sub-agent
+    TEARDOWN = "teardown"                  # Deterministic: commit, push, PR, status
     COMPLETE = "complete"
     FAILED = "failed"
 
