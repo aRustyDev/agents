@@ -439,36 +439,20 @@ Use WebSearch when:
 
 Rate the complexity of the language pair conversion to set expectations and guide depth of documentation.
 
-#### Difficulty Rating Matrix
+> **See:** [meta-convert-guide/reference/difficulty-matrix.md](../skills/meta-convert-guide/reference/difficulty-matrix.md) for:
+> - Complete rating framework (5 factors, 0-2 points each)
+> - Pre-calculated difficulty for all 78 conversion pairs
+> - Language characteristics table
+> - Summary by difficulty level
 
-| Factor           | Easy (+0)                             | Medium (+1)                 | Hard (+2)                                  |
-| ---------------- | ------------------------------------- | --------------------------- | ------------------------------------------ |
-| **Type System**  | Same (static→static, dynamic→dynamic) | Mixed (static↔dynamic)     | Opposite + complex (HKTs, dependent types) |
-| **Paradigm**     | Same (OOP→OOP, FP→FP)                 | Related (OOP→hybrid)        | Opposite (OOP→pure FP)                     |
-| **Memory Model** | Same (GC→GC)                          | Different (GC→ref counting) | Opposite (GC→ownership)                    |
-| **Concurrency**  | Same model                            | Related (async→async)       | Different (threads→actors)                 |
-| **Ecosystem**    | Same platform                         | Related (JVM→JVM)           | Different platform                         |
+#### Quick Reference
 
-#### Scoring
-
-| Total Score | Difficulty | Expected Skill Size | Focus Areas                                       |
-| ----------- | ---------- | ------------------- | ------------------------------------------------- |
-| 0-2         | Easy       | 200-400 lines       | Idiom differences, library mapping                |
-| 3-5         | Medium     | 400-800 lines       | Type translation, paradigm shifts                 |
-| 6-8         | Hard       | 800-1500 lines      | All sections, extensive examples                  |
-| 9-10        | Expert     | 1500+ lines         | Deep architectural guidance, migration strategies |
-
-#### Example Ratings
-
-| Pair              | Type | Paradigm | Memory | Concurrency | Platform | Total | Difficulty |
-| ----------------- | ---- | -------- | ------ | ----------- | -------- | ----- | ---------- |
-| TypeScript→Python | +1   | +0       | +0     | +0          | +0       | 1     | Easy       |
-| Python→Rust       | +1   | +1       | +2     | +1          | +1       | 6     | Hard       |
-| Clojure→Elixir    | +0   | +0       | +0     | +1          | +1       | 2     | Easy       |
-| TypeScript→Rust   | +1   | +1       | +2     | +1          | +1       | 6     | Hard       |
-| Haskell→Rust      | +1   | +1       | +2     | +1          | +1       | 6     | Hard       |
-| Java→Kotlin       | +0   | +0       | +0     | +0          | +0       | 0     | Easy       |
-| Python→Haskell    | +2   | +2       | +0     | +1          | +1       | 6     | Hard       |
+| Total Score | Difficulty | Expected Skill Size |
+|-------------|------------|---------------------|
+| 0-2 | Easy | 200-400 lines |
+| 3-5 | Medium | 400-800 lines |
+| 6-8 | Hard | 800-1200 lines |
+| 9-10 | Expert | 1200+ lines |
 
 #### Report Format
 
