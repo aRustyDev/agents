@@ -5,6 +5,17 @@ description: Foundational Kotlin patterns covering null safety, coroutines, data
 
 # Kotlin Development Fundamentals
 
+## Overview
+
+Kotlin is a modern, statically typed language targeting JVM, JavaScript, and native platforms. It emphasizes:
+
+- **Null safety** at the type system level (nullable `T?` vs non-nullable `T`)
+- **Concise syntax** with data classes, smart casts, and type inference
+- **Coroutines** for structured asynchronous programming
+- **Full Java interoperability** for gradual migration
+
+**When to use this skill**: Writing Kotlin applications, Android development, migrating from Java, or learning Kotlin idioms.
+
 ## Skill Hierarchy
 
 ```
@@ -39,11 +50,117 @@ Route to specialized skills when:
 
 ---
 
-## 1. Null Safety
+## Module System
+
+Kotlin organizes code into packages and provides visibility modifiers to control access.
+
+### 1.1 Package Declarations
+
+```kotlin
+// Package declaration at file top
+package com.example.myapp.utils
+
+// Package-level functions (not in a class)
+fun helper(): String = "I'm package-level"
+
+// Package-level properties
+val VERSION = "1.0.0"
+```
+
+### 1.2 Imports
+
+```kotlin
+// Single import
+import com.example.myapp.User
+
+// Wildcard import (all public members)
+import com.example.myapp.utils.*
+
+// Aliased import (resolve naming conflicts)
+import com.example.myapp.User as AppUser
+import org.external.User as ExternalUser
+
+// Import extension functions
+import com.example.extensions.formatCurrency
+
+// Import enum entries
+import com.example.Status.ACTIVE
+import com.example.Status.INACTIVE
+```
+
+### 1.3 Visibility Modifiers
+
+```kotlin
+// public (default) - visible everywhere
+class PublicClass
+
+// internal - visible within the same module
+internal class ModuleClass
+
+// private - visible within the file (top-level) or class
+private class FilePrivateClass
+
+class Example {
+    public val publicProp = 1      // Visible everywhere
+    internal val internalProp = 2   // Same module
+    protected val protectedProp = 3 // Subclasses only
+    private val privateProp = 4     // This class only
+}
+```
+
+### 1.4 Object Declarations (Singletons)
+
+```kotlin
+// Singleton object
+object Logger {
+    fun log(message: String) = println(message)
+}
+
+// Usage
+Logger.log("Hello")
+
+// Companion object (static-like members)
+class Factory {
+    companion object {
+        fun create(): Factory = Factory()
+        const val TAG = "Factory"
+    }
+}
+
+// Usage
+val instance = Factory.create()
+val tag = Factory.TAG
+```
+
+### 1.5 File Organization
+
+```kotlin
+// Filename: UserRepository.kt
+package com.example.repository
+
+// Multiple classes per file allowed (unlike Java)
+data class User(val id: Int, val name: String)
+data class UserDto(val id: Int, val displayName: String)
+
+// Extension functions in same file
+fun User.toDto() = UserDto(id, name)
+
+// Top-level functions
+fun findUserById(id: Int): User? = null
+```
+
+**Best Practices**:
+- One primary class per file, named after the class
+- Group related extension functions with their target type
+- Use `internal` for module-private APIs in libraries
+
+---
+
+## 2. Null Safety
 
 Kotlin's type system distinguishes between nullable and non-nullable types, eliminating most null pointer exceptions at compile time.
 
-### 1.1 Nullable Types
+### 2.1 Nullable Types
 
 ```kotlin
 // Non-nullable type (default)
@@ -60,7 +177,7 @@ fun greet(name: String?) {
 }
 ```
 
-### 1.2 Safe Call Operator (?.)
+### 2.2 Safe Call Operator (?.)
 
 ```kotlin
 val length: Int? = nullableName?.length
@@ -80,7 +197,7 @@ data class Address(val city: String?)
 val city: String? = person?.address?.city
 ```
 
-### 1.3 Elvis Operator (?:)
+### 2.3 Elvis Operator (?:)
 
 ```kotlin
 // Provide default value for null
@@ -99,7 +216,7 @@ val nonNullName = nullableName ?: throw IllegalArgumentException("Name required"
 val displayName = person?.name?.trim() ?: "Anonymous"
 ```
 
-### 1.4 Not-Null Assertion (!!)
+### 2.4 Not-Null Assertion (!!)
 
 ```kotlin
 // Force unwrap - throws NPE if null
@@ -118,7 +235,7 @@ val config: Config = loadConfig()
 
 **Warning**: Avoid `!!` in production code. Use proper null handling instead.
 
-### 1.5 Safe Casts (as?)
+### 2.5 Safe Casts (as?)
 
 ```kotlin
 // Safe cast returns null if cast fails
@@ -135,7 +252,7 @@ when (value) {
 }
 ```
 
-### 1.6 Null Safety Patterns
+### 2.6 Null Safety Patterns
 
 ```kotlin
 // Pattern 1: Early return with elvis
@@ -167,7 +284,7 @@ val firstNonNull: String? = names.firstOrNull { it != null }
 
 ---
 
-## 2. Data Classes
+## 3. Data Classes
 
 Data classes provide automatic implementation of `equals()`, `hashCode()`, `toString()`, and `copy()`.
 
@@ -285,7 +402,7 @@ println(userMap[alice])  // admin
 
 ---
 
-## 3. Sealed Classes and Interfaces
+## 4. Sealed Classes and Interfaces
 
 Sealed classes represent restricted hierarchies where all subclasses are known at compile time.
 
@@ -419,7 +536,7 @@ val result = validateEmail("test@example.com")
 
 ---
 
-## 4. Extension Functions
+## 5. Extension Functions
 
 Extension functions add new functions to existing classes without modifying their source code.
 
@@ -551,7 +668,7 @@ val list = mutableListOf(1, 2, 3)
 
 ---
 
-## 5. Scope Functions
+## 6. Scope Functions
 
 Scope functions execute a block of code within the context of an object.
 
@@ -749,7 +866,7 @@ val config = loadConfig()
 
 ---
 
-## 6. Collections and Sequences
+## 7. Collections and Sequences
 
 Kotlin provides rich collection APIs with eager (collections) and lazy (sequences) evaluation.
 
@@ -966,7 +1083,7 @@ val subtract = set1 subtract set2  // [1]
 
 ---
 
-## 7. Higher-Order Functions and Lambdas
+## 8. Higher-Order Functions and Lambdas
 
 Functions that take functions as parameters or return functions.
 
@@ -1167,7 +1284,7 @@ val fibonacci = memoize<Int, Long> { n ->
 
 ---
 
-## 8. Coroutines Basics
+## 9. Coroutines Basics
 
 Kotlin coroutines provide asynchronous programming support with sequential-looking code.
 
@@ -1416,7 +1533,7 @@ suspend fun processInParallel(
 
 ---
 
-## 9. Kotlin Idioms
+## 10. Kotlin Idioms
 
 Idiomatic Kotlin patterns that make code more concise and expressive.
 
@@ -1703,7 +1820,7 @@ fun setClickListener(handler: ClickHandler) {
 
 ---
 
-## 10. Java Interoperability
+## 11. Java Interoperability
 
 Kotlin provides seamless interop with Java code.
 
@@ -1839,7 +1956,7 @@ val javaSet: java.util.Set<Int> = kotlinSet.toSet()
 
 ---
 
-## 11. Best Practices
+## 12. Best Practices
 
 ### 11.1 Prefer Immutability
 
@@ -1966,7 +2083,7 @@ fun Any.doSomething() { }  // Too broad, avoid
 
 ---
 
-## 12. Common Patterns
+## 13. Common Patterns
 
 ### 12.1 Builder Pattern
 
@@ -2132,7 +2249,7 @@ when (val result = validateUser(name, email, age)) {
 
 ---
 
-## 13. Troubleshooting
+## 14. Troubleshooting
 
 ### 13.1 NullPointerException
 
@@ -2243,7 +2360,7 @@ data class User(val name: String) {
 
 ---
 
-## 13. Testing
+## 15. Testing
 
 Kotlin's testing ecosystem provides powerful frameworks with idiomatic DSL support, extension functions, and coroutine testing utilities.
 
@@ -2962,7 +3079,7 @@ fun `should run only in CI`() {
 
 ---
 
-## 14. Cross-Cutting Patterns
+## 16. Cross-Cutting Patterns
 
 For cross-language comparison and translation patterns, see:
 
@@ -2973,7 +3090,7 @@ For cross-language comparison and translation patterns, see:
 
 ---
 
-## Further Resources
+## 17. Further Resources
 
 ### Specialized Skills
 - **lang-kotlin-coroutines-eng**: Advanced Flow, channels, structured concurrency
