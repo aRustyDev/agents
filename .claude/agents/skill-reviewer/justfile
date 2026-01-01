@@ -139,3 +139,16 @@ subagents:
         model=$(yq '.model' "$$d/config.yml"); \
         echo "$$name ($$model)"; \
     done
+
+# Show content-based Agent/SubAgent UUIDs (for HTTP header tracking)
+show-uuids:
+    @python3 -c "from pathlib import Path; \
+        import sys; sys.path.insert(0, '{{agent_dir}}'); \
+        from src.headers import generate_agent_uuid, generate_subagent_uuid; \
+        agent_dir = Path('{{agent_dir}}'); \
+        print(f'Agent UUID: {generate_agent_uuid(agent_dir)}'); \
+        print(); \
+        print('SubAgent UUIDs:'); \
+        for d in sorted((agent_dir / 'subagents').iterdir()): \
+            if d.is_dir(): \
+                print(f'  {d.name}: {generate_subagent_uuid(d)}')"

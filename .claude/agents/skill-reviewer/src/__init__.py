@@ -35,6 +35,14 @@ from .graphql import (
     execute_raw_query,
     list_queries,
 )
+from .headers import (
+    AgentHeaders,
+    generate_agent_uuid,
+    generate_subagent_uuid,
+    create_agent_headers,
+    create_subagent_headers,
+    hash_directory,
+)
 
 __all__ = [
     # Models
@@ -74,4 +82,11 @@ __all__ = [
     "execute_query",
     "execute_raw_query",
     "list_queries",
+    # Headers
+    "AgentHeaders",
+    "generate_agent_uuid",
+    "generate_subagent_uuid",
+    "create_agent_headers",
+    "create_subagent_headers",
+    "hash_directory",
 ]

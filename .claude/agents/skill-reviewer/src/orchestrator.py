@@ -2,6 +2,7 @@
 
 import subprocess
 import json
+import os
 import time
 import re
 from datetime import datetime
@@ -15,6 +16,7 @@ from .models import (
     Stage
 )
 from .config import PipelineConfig, load_config
+from .headers import create_subagent_headers
 from .pipeline import DeterministicPipeline, PipelineContext
 from .worktree import get_worktree_status
 
@@ -113,6 +115,10 @@ class Orchestrator:
             else self.repo_path
         )
 
+        # Create headers for sub-agent tracking (content-based UUIDs)
+        headers = create_subagent_headers(self.agent_dir, name)
+        env = headers.get_env()
+
         # Execute
         start_time = time.time()
 
@@ -120,6 +126,7 @@ class Orchestrator:
             result = subprocess.run(
                 cmd,
                 cwd=cwd,
+                env=env,
                 capture_output=True,
                 text=True,
                 timeout=600  # 10 minute timeout
@@ -138,6 +145,7 @@ class Orchestrator:
                 output=output,
                 exit_code=result.returncode,
                 duration_seconds=duration,
+                subagent_id=headers.subagent_id,
                 parsed_output=parsed,
                 error=error
             )

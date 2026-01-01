@@ -77,6 +77,7 @@ class SubagentResult:
     output: str
     exit_code: int
     duration_seconds: float
+    subagent_id: str | None = None  # UUIDv4 for tracking
     input_tokens: int = 0  # If tracking available
     output_tokens: int = 0
     parsed_output: dict | None = None
@@ -128,6 +129,7 @@ class AgentSession:
             "output": result.output,
             "parsed": result.parsed_output,
             "model": result.model.value if result.model else None,
+            "subagent_id": result.subagent_id,
             "duration": result.duration_seconds,
             "success": result.success,
         }
