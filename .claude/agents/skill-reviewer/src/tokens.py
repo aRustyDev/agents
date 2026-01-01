@@ -41,7 +41,6 @@ class TokenEstimate:
 # Pricing per million tokens (input, output)
 MODEL_PRICING = {
     Model.HAIKU_35: (0.25, 1.25),
-    Model.SONNET_35: (3.0, 15.0),
     Model.SONNET_4: (3.0, 15.0),
     Model.OPUS_45: (15.0, 75.0),
 }
@@ -187,7 +186,7 @@ def estimate_tokens(skill_path: Path) -> TokenEstimate:
     cost_haiku = calc_cost(Model.HAIKU_35, total_input, total_output)
 
     # All Sonnet
-    cost_sonnet = calc_cost(Model.SONNET_35, total_input, total_output)
+    cost_sonnet = calc_cost(Model.SONNET_4, total_input, total_output)
 
     # All Opus
     cost_opus = calc_cost(Model.OPUS_45, total_input, total_output)
@@ -207,7 +206,7 @@ def estimate_tokens(skill_path: Path) -> TokenEstimate:
 
     cost_mixed = (
         calc_cost(Model.HAIKU_35, haiku_input, haiku_output) +
-        calc_cost(Model.SONNET_35, sonnet_input, sonnet_output) +
+        calc_cost(Model.SONNET_4, sonnet_input, sonnet_output) +
         calc_cost(Model.OPUS_45, opus_input, opus_output)
     )
 

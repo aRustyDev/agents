@@ -20,9 +20,9 @@ progress_file := ".claude/agents/skill-reviewer/data/progress.json"
 # Review a single skill by issue number (skill extracted from title if not specified)
 review issue skill="":
     @if [ -n "{{skill}}" ]; then \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}}; \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --verbose; \
     else \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}}; \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --verbose; \
     fi
 
 # Review a single skill (dry run - no GitHub changes)

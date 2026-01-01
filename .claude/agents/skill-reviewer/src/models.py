@@ -10,8 +10,7 @@ import json
 
 class Model(Enum):
     """Available Claude models."""
-    HAIKU_35 = "claude-3-5-haiku-latest"
-    SONNET_35 = "claude-3-5-sonnet-latest"
+    HAIKU_35 = "claude-3-5-haiku-20241022"
     SONNET_4 = "claude-sonnet-4-20250514"
     OPUS_45 = "claude-opus-4-5-20251101"
 
@@ -65,7 +64,7 @@ class SubagentConfig:
         if override:
             return override
         if self.model == "dynamic":
-            return Model.SONNET_35  # Default for dynamic
+            return Model.SONNET_4  # Default for dynamic
         return Model.from_string(self.model)
 
 
@@ -146,7 +145,6 @@ class AgentSession:
         # Pricing per million tokens
         pricing = {
             Model.HAIKU_35: (0.25, 1.25),
-            Model.SONNET_35: (3.0, 15.0),
             Model.SONNET_4: (3.0, 15.0),
             Model.OPUS_45: (15.0, 75.0),
         }

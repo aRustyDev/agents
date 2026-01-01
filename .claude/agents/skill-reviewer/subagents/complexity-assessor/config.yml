@@ -1,6 +1,6 @@
 name: complexity-assessor
 description: Assesses skill complexity to determine analysis depth
-model: claude-3-5-sonnet-latest
+model: claude-sonnet-4-20250514
 
 allowed_tools:
   - Read
@@ -19,7 +19,7 @@ output_schema:
       enum: [low, medium, high]
     recommended_model:
       type: string
-      enum: [claude-3-5-haiku-latest, claude-3-5-sonnet-latest, claude-opus-4-5-20251101]
+      enum: [claude-3-5-haiku-20241022, claude-sonnet-4-20250514, claude-opus-4-5-20251101]
     factors:
       type: object
       properties:

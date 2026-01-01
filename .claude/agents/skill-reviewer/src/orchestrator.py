@@ -320,14 +320,14 @@ Validation output:
         # Determine model from complexity assessment
         complexity_result = session.results.get("complexity-assessor", {})
         parsed = complexity_result.get("parsed", {})
-        recommended_model_str = parsed.get("recommended_model", "claude-3-5-sonnet-latest")
+        recommended_model_str = parsed.get("recommended_model", "claude-sonnet-4-20250514")
 
         model_map = {
-            "claude-3-5-haiku-latest": Model.HAIKU_35,
-            "claude-3-5-sonnet-latest": Model.SONNET_35,
+            "claude-3-5-haiku-20241022": Model.HAIKU_35,
+            "claude-sonnet-4-20250514": Model.SONNET_4,
             "claude-opus-4-5-20251101": Model.OPUS_45,
         }
-        model = model_map.get(recommended_model_str, Model.SONNET_35)
+        model = model_map.get(recommended_model_str, Model.SONNET_4)
 
         result = self.run_subagent(
             "analyzer",

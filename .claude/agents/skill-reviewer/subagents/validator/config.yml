@@ -1,6 +1,6 @@
 name: validator
 description: Validates skill structure and pillar coverage
-model: claude-3-5-haiku-latest
+model: claude-3-5-haiku-20241022
 
 allowed_tools:
   - Read

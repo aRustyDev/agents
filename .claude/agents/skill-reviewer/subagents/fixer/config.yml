@@ -1,6 +1,6 @@
 name: fixer
 description: Applies improvements to skill files
-model: claude-3-5-sonnet-latest
+model: claude-sonnet-4-20250514
 
 allowed_tools:
   - Read
