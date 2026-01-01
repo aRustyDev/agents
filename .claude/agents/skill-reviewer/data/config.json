@@ -11,7 +11,7 @@
   "max_parallel": 3,
   "dry_run": false,
   "model_overrides": {},
-  "review_labels": ["review", "skills"],
+  "review_labels": ["refinement", "skills"],
   "in_progress_label": "status:in-progress",
   "in_review_label": "status:in-review",
   "max_tokens_per_skill": 200000,
