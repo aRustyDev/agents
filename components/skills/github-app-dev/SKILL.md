@@ -58,7 +58,99 @@ GitHub Apps are first-class integrations that act on their own behalf (unlike OA
 |----------|----------|-------------|
 | Repository | contents, pull_requests, issues | Most apps |
 | Organization | members, teams | Org-level automation |
-| Account | email, profile | User-facing features |
+
+See [references/permissions.md](references/permissions.md) for complete permission matrix.
+
+## Decision Tree: Framework Selection
+
+Choose the right approach based on your requirements:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  GitHub App Framework Selection              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Need simple webhook handling? ────► YES ──► Use Probot     │
+│         │                                    - Faster dev  │
+│         │                                    - Less setup  │
+│         │                                    - Good docs   │
+│         │                                                  │
+│         NO                                                  │
+│         │                                                  │
+│         ▼                                                  │
+│  Need custom deployment? ──────► YES ──► Raw Octokit       │
+│         │                                    - Full control│
+│         │                                    - CF Workers  │
+│         │                                    - Custom auth │
+│         │                                                  │
+│         NO                                                  │
+│         │                                                  │
+│         ▼                                                  │
+│  Start with Probot, migrate later if needed                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Framework Comparison
+
+| Criterion | Probot | Raw Octokit | Recommendation |
+|-----------|--------|-------------|---------------|
+| **Development Speed** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Start with Probot |
+| **Deployment Flexibility** | ⭐⭐ | ⭐⭐⭐⭐⭐ | Complex hosting = Octokit |
+| **Learning Curve** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Begin with Probot |
+| **Performance** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | High-traffic = Octokit |
+| **Cloudflare Workers** | ❌ | ✅ | Edge deployment = Octokit |
+
+## Error Handling & Rate Limiting
+
+### Essential Error Patterns
+
+```typescript
+// Basic error handling with retries
+async function safeGitHubCall<T>(call: () => Promise<T>): Promise<T | null> {
+  try {
+    return await call();
+  } catch (error: any) {
+    // Handle rate limits
+    if (error.status === 403 && error.response?.headers['x-ratelimit-remaining'] === '0') {
+      const resetTime = parseInt(error.response.headers['x-ratelimit-reset']) * 1000;
+      const waitTime = resetTime - Date.now();
+      if (waitTime > 0 && waitTime < 60000) {
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return call(); // Retry once
+      }
+    }
+
+    // Log error and return null for graceful degradation
+    console.error('GitHub API call failed:', error.message);
+    return null;
+  }
+}
+```
+
+See [references/error-handling.md](references/error-handling.md) for comprehensive error handling patterns including circuit breakers, adaptive throttling, and monitoring.
+
+**Key error handling:**
+- **403 (Rate Limited)**: Wait for reset time
+- **5xx (Server Errors)**: Retry with backoff
+- **401/403**: Check credentials/permissions
+- **400/404**: Fix request or verify resource exists
+
+### Rate Limit Management
+
+Monitor and respect GitHub's rate limits:
+
+```typescript
+// Basic rate limit check
+const { data } = await octokit.rateLimit.get();
+console.log(`Rate limit: ${data.resources.core.remaining}/${data.resources.core.limit}`);
+
+if (data.resources.core.remaining < 100) {
+  console.warn('⚠️ Approaching rate limit');
+}
+```
+
+See [references/error-handling.md](references/error-handling.md) for advanced rate limit management patterns.
 
 ## Workflow: Create a New GitHub App
 
@@ -245,15 +337,8 @@ export default (app: Probot) => {
 };
 ```
 
-**When to use Probot:**
-- Simple bots with straightforward logic
-- Quick prototypes
-- When you don't need custom hosting
-
-**When to use raw Octokit:**
-- Complex apps with custom requirements
-- Cloudflare Workers deployment
-- Fine-grained control over auth and routing
+**Use Probot for:** Simple bots, prototypes, standard hosting
+**Use raw Octokit for:** Complex apps, Cloudflare Workers, custom control
 
 ## Hosting Options
 
@@ -347,15 +432,9 @@ webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
 
 ### Webhook Events
 
-| Event | When Fired |
-|-------|------------|
-| `pull_request.opened` | PR created |
-| `pull_request.synchronize` | New commits pushed |
-| `pull_request.closed` | PR merged or closed |
-| `pull_request_review.submitted` | Review submitted |
-| `issues.opened` | Issue created |
-| `issue_comment.created` | Comment added |
-| `check_run.completed` | CI check finished |
+**Common events:** `pull_request.opened`, `issues.opened`, `issue_comment.created`, `check_run.completed`
+
+See [references/webhooks.md](references/webhooks.md) for complete event reference.
 
 ### Octokit Methods
 
@@ -390,29 +469,20 @@ octokit.repos.getContent({ owner, repo, path, ref });
 
 ## Troubleshooting
 
-### "Bad credentials" error
+**Common issues:**
+- **Bad credentials**: Check private key format (PEM), APP_ID, token expiry
+- **Webhook not received**: Verify URL accessibility, secret, event subscriptions
+- **Permission denied**: Check app permissions, installation scope
 
-- Check private key format (must be PEM)
-- Verify APP_ID matches your app
-- Ensure installation token is not expired (1 hour limit)
-
-### Webhook not received
-
-- Check webhook URL is accessible
-- Verify webhook secret matches
-- Check event subscriptions in app settings
-- Use smee.io for local development
-
-### Permission denied
-
-- Verify app has required permissions
-- Check installation is on correct repo
-- Ensure permission was added before installation
+See [references/error-handling.md](references/error-handling.md) for detailed troubleshooting.
 
 ## See Also
 
+- [examples/README.md](examples/README.md) - Complete starter projects and runnable code samples
+- [references/testing.md](references/testing.md) - Comprehensive testing strategies and patterns
+- [references/error-handling.md](references/error-handling.md) - Advanced error handling and rate limit management
 - [references/webhooks.md](references/webhooks.md) - Complete webhook event reference
-- [references/permissions.md](references/permissions.md) - Permission matrix
+- [references/permissions.md](references/permissions.md) - Permission matrix and runtime validation
 - [references/octokit.md](references/octokit.md) - Octokit SDK patterns
 - `cloudflare-workers` skill - Detailed CF Workers patterns
 - `github-actions` skill - Building custom Actions (different from Apps)
