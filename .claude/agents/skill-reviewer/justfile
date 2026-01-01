@@ -19,11 +19,11 @@ progress_file := ".claude/agents/skill-reviewer/data/progress.json"
 
 # Review a single skill by issue number
 review issue skill:
-    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}}
+    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}}
 
 # Review a single skill (dry run - no GitHub changes)
 review-dry issue skill:
-    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} --dry-run
+    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --dry-run
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Batch Review
@@ -31,19 +31,19 @@ review-dry issue skill:
 
 # Process all backlog issues with 'review'+'skills' labels, assigned to you (sequential)
 batch:
-    python {{agent_dir}}/main.py --batch
+    python "{{ justfile_directory() }}/main.py" --batch
 
 # Process backlog issues with parallelism
 batch-parallel n="3":
-    python {{agent_dir}}/main.py --batch --max-parallel {{n}}
+    python "{{ justfile_directory() }}/main.py" --batch --max-parallel {{n}}
 
 # Batch review (dry run)
 batch-dry:
-    python {{agent_dir}}/main.py --batch --dry-run
+    python "{{ justfile_directory() }}/main.py" --batch --dry-run
 
 # Batch review for any assignee (not just you)
 batch-all:
-    python {{agent_dir}}/main.py --batch --assignee ""
+    python "{{ justfile_directory() }}/main.py" --batch --assignee ""
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Session Management
@@ -51,19 +51,19 @@ batch-all:
 
 # List all sessions
 sessions:
-    python {{agent_dir}}/main.py --list-sessions
+    python "{{ justfile_directory() }}/main.py" --list-sessions
 
 # Resume an interrupted session
 resume session_id:
-    python {{agent_dir}}/main.py --resume {{session_id}}
+    python "{{ justfile_directory() }}/main.py" --resume "{{session_id}}"
 
 # Show session details
 session-info session_id:
-    cat {{agent_dir}}/data/sessions/{{session_id}}/session.json | jq .
+    cat "{{ justfile_directory() }}/data/sessions/{{session_id}}/session.json" | jq .
 
 # Clean up a completed session's worktree
 cleanup session_id:
-    python {{agent_dir}}/main.py --resume {{session_id}} --cleanup
+    python "{{ justfile_directory() }}/main.py" --resume "{{session_id}}" --cleanup
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Progress Tracking
@@ -72,7 +72,7 @@ cleanup session_id:
 # Show current progress (watch this in a separate terminal)
 progress:
     @if [ -f {{progress_file}} ]; then \
-        cat {{progress_file}} | jq .; \
+        cat "{{progress_file}}" | jq .; \
     else \
         echo "No progress file found. Run 'just batch' to start."; \
     fi
@@ -105,7 +105,7 @@ backlog-count:
 
 # Estimate cost for reviewing a skill
 estimate skill:
-    python -c "from {{agent_dir}}/src.tokens import estimate_tokens; \
+    python -c "from {{ justfile_directory() }}/src.tokens import estimate_tokens; \
         e = estimate_tokens('{{skill}}'); \
         print(f'Tokens: {e.estimated_total_tokens:,}'); \
         print(f'Cost (mixed): ${e.cost_mixed:.4f}')"
@@ -120,21 +120,21 @@ estimate-batch:
 
 # Run only validation stage
 validate issue skill:
-    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} \
+    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
         --stages validation --dry-run
 
 # Run validation + complexity assessment
 assess issue skill:
-    python {{agent_dir}}/main.py --issue {{issue}} --skill {{skill}} \
+    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
         --stages validation,complexity_assessment --dry-run
 
 # Show config
 config:
-    cat {{agent_dir}}/data/config.json | jq .
+    cat {{ justfile_directory() }}/data/config.json | jq .
 
 # List available sub-agents
 subagents:
-    @for d in {{agent_dir}}/subagents/*/; do \
+    @for d in {{ justfile_directory() }}/subagents/*/; do \
         name=$(basename "$$d"); \
         model=$(yq '.model' "$$d/config.yml"); \
         echo "$$name ($$model)"; \
@@ -143,9 +143,9 @@ subagents:
 # Show content-based Agent/SubAgent UUIDs (for HTTP header tracking)
 show-uuids:
     @python3 -c "from pathlib import Path; \
-        import sys; sys.path.insert(0, '{{agent_dir}}'); \
+        import sys; sys.path.insert(0, '{{ justfile_directory() }}'); \
         from src.headers import generate_agent_uuid, generate_subagent_uuid; \
-        agent_dir = Path('{{agent_dir}}'); \
+        agent_dir = Path('{{ justfile_directory() }}'); \
         print(f'Agent UUID: {generate_agent_uuid(agent_dir)}'); \
         print(); \
         print('SubAgent UUIDs:'); \
