@@ -1,7 +1,8 @@
 """Custom HTTP headers for agent and sub-agent tracking.
 
-Sets ANTHROPIC_CUSTOM_HEADERS for Claude API calls and provides
-headers for other HTTP requests.
+Sets headers for:
+- ANTHROPIC_CUSTOM_HEADERS: Claude API calls (format: "Key: value, Key2: value2")
+- OTEL_EXPORTER_OTLP_HEADERS: OpenTelemetry export (format: "key=value,key2=value2")
 
 Header format:
 - Agent: <uuid>           # All requests (hash of agent code)
@@ -88,6 +89,15 @@ class AgentHeaders:
             return f"Agent: {self.agent_id}, SubAgent: {self.subagent_id}"
         return f"Agent: {self.agent_id}"
 
+    def to_otel_header(self) -> str:
+        """Format for OTEL_EXPORTER_OTLP_HEADERS env var.
+
+        Format: "key=value,key2=value2"
+        """
+        if self.subagent_id:
+            return f"Agent={self.agent_id},SubAgent={self.subagent_id}"
+        return f"Agent={self.agent_id}"
+
     def to_dict(self) -> dict[str, str]:
         """Convert to header dictionary for HTTP requests."""
         headers = {"Agent": self.agent_id}
@@ -95,10 +105,25 @@ class AgentHeaders:
             headers["SubAgent"] = self.subagent_id
         return headers
 
-    def get_env(self) -> dict[str, str]:
-        """Get environment variables with ANTHROPIC_CUSTOM_HEADERS set."""
+    def get_env(self, include_otel: bool = True) -> dict[str, str]:
+        """Get environment variables with tracking headers set.
+
+        Args:
+            include_otel: If True, also set OTEL_EXPORTER_OTLP_HEADERS
+
+        Returns:
+            Environment dict with headers set
+        """
         env = os.environ.copy()
         env["ANTHROPIC_CUSTOM_HEADERS"] = self.to_anthropic_header()
+        if include_otel:
+            # Merge with existing OTEL headers if present
+            existing_otel = env.get("OTEL_EXPORTER_OTLP_HEADERS", "")
+            otel_headers = self.to_otel_header()
+            if existing_otel:
+                env["OTEL_EXPORTER_OTLP_HEADERS"] = f"{existing_otel},{otel_headers}"
+            else:
+                env["OTEL_EXPORTER_OTLP_HEADERS"] = otel_headers
         return env
 
 
