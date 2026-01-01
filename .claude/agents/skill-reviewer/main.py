@@ -5,21 +5,23 @@ Skill Reviewer Agent - Main Entry Point
 Orchestrates the review of Claude Code skills using specialized sub-agents.
 
 Usage:
-    # Review a single skill
-    python main.py --skill components/skills/lang-rust-dev --issue 123
+    # Review a single skill by issue number (extracts skill from title)
+    python main.py --issue 123
+
+    # Review a single skill with explicit path
+    python main.py --issue 123 --skill components/skills/lang-rust-dev
 
     # Resume an interrupted session
     python main.py --resume abc123
 
     # Dry run (no GitHub changes)
-    python main.py --skill components/skills/lang-rust-dev --issue 123 --dry-run
+    python main.py --issue 123 --dry-run
 
     # Batch review from GitHub issues
-    python main.py --batch --label review --label skills
+    python main.py --batch --label refinement --label skills
 
     # Run specific stages only
-    python main.py --skill components/skills/lang-rust-dev --issue 123 \
-        --stages validation,analysis
+    python main.py --issue 123 --stages validation,analysis
 """
 
 import sys
@@ -32,7 +34,7 @@ from src.config import load_config
 from src.models import Stage
 from src.orchestrator import Orchestrator
 from src.parse import parse_args, parse_stages
-from src.review import batch_review, review_single_skill
+from src.review import batch_review, review_single_skill, get_skill_path_from_issue
 from src.session import list_sessions, resume_session
 
 
@@ -83,13 +85,32 @@ def main():
         total_cost = sum(r.estimated_cost_usd for r in results)
         print(f"Total estimated cost: ${total_cost:.2f}")
 
-    elif args.skill:
+    elif args.issue or args.skill:
+        # Single skill review mode
         if not args.issue:
-            print("Error: --issue is required when using --skill", file=sys.stderr)
+            print("Error: --issue is required", file=sys.stderr)
             sys.exit(1)
 
+        # Get skill path - either from args or extract from issue title
+        skill_path = args.skill
+        if not skill_path:
+            skill_path = get_skill_path_from_issue(
+                config.repo_owner,
+                config.repo_name,
+                args.issue
+            )
+            if not skill_path:
+                print(
+                    f"Error: Could not extract skill path from issue #{args.issue}. "
+                    "Use --skill to specify explicitly.",
+                    file=sys.stderr
+                )
+                sys.exit(1)
+            if args.verbose:
+                print(f"Extracted skill path: {skill_path}")
+
         result = review_single_skill(
-            orchestrator, args.skill, args.issue, stages, args.verbose
+            orchestrator, skill_path, args.issue, stages, args.verbose
         )
 
         if args.cleanup and result.stage == Stage.COMPLETE:
@@ -100,7 +121,7 @@ def main():
         sys.exit(0 if result.stage == Stage.COMPLETE else 1)
 
     else:
-        print("Error: Specify --skill, --resume, --batch, or --list-sessions")
+        print("Error: Specify --issue, --resume, --batch, or --list-sessions")
         sys.exit(1)
 
 

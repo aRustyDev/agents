@@ -1,5 +1,7 @@
 """Review functions for skill reviewer agent."""
 
+import re
+import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .github_projects import get_project_id, find_backlog_issues
@@ -7,6 +9,63 @@ from .models import AgentSession, Stage
 from .orchestrator import Orchestrator
 from .session import generate_session_id
 from .progress import ProgressTracker
+
+
+def extract_skill_path(title: str) -> str | None:
+    """Extract skill path from issue title.
+
+    Supports multiple formats:
+    - "[skill-name] description"
+    - "refine(skills): skill-name - description"
+    - "review(skills): skill-name"
+    - "refine(skills): skill-name"
+
+    Returns:
+        Skill path like "components/skills/skill-name" or None
+    """
+    # Format: [skill-name] description
+    if title.startswith("[") and "]" in title:
+        skill_name = title[1:title.index("]")]
+        return f"components/skills/{skill_name}"
+
+    # Format: refine(skills): skill-name or review(skills): skill-name
+    match = re.match(r"(?:refine|review)\(skills\):\s*([a-z0-9-]+)", title)
+    if match:
+        skill_name = match.group(1)
+        return f"components/skills/{skill_name}"
+
+    return None
+
+
+def get_skill_path_from_issue(
+    owner: str,
+    repo: str,
+    issue_number: int
+) -> str | None:
+    """Fetch issue title and extract skill path.
+
+    Args:
+        owner: Repository owner
+        repo: Repository name
+        issue_number: Issue number
+
+    Returns:
+        Skill path or None if extraction fails
+    """
+    result = subprocess.run(
+        ["gh", "issue", "view", str(issue_number),
+         "--repo", f"{owner}/{repo}",
+         "--json", "title",
+         "--jq", ".title"],
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        return None
+
+    title = result.stdout.strip()
+    return extract_skill_path(title)
 
 
 def batch_review(
@@ -66,17 +125,6 @@ def batch_review(
     )
 
     results = []
-
-    # Extract skill paths from issue titles (assume format: "[skill-name] description")
-    def extract_skill_path(title: str) -> str | None:
-        """Extract skill path from issue title.
-
-        Expects format like: "[lang-rust-dev] Missing Module System section"
-        """
-        if title.startswith("[") and "]" in title:
-            skill_name = title[1:title.index("]")]
-            return f"components/skills/{skill_name}"
-        return None
 
     # Run reviews with limited concurrency
     with ThreadPoolExecutor(max_workers=max_parallel) as executor:

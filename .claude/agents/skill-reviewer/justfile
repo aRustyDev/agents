@@ -17,13 +17,21 @@ progress_file := ".claude/agents/skill-reviewer/data/progress.json"
 # Single Issue Review
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Review a single skill by issue number
-review issue skill:
-    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}}
+# Review a single skill by issue number (skill extracted from title if not specified)
+review issue skill="":
+    @if [ -n "{{skill}}" ]; then \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}}; \
+    else \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}}; \
+    fi
 
 # Review a single skill (dry run - no GitHub changes)
-review-dry issue skill:
-    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --dry-run
+review-dry issue skill="":
+    @if [ -n "{{skill}}" ]; then \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --dry-run; \
+    else \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --dry-run; \
+    fi
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Batch Review
@@ -119,14 +127,24 @@ estimate-batch:
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Run only validation stage
-validate issue skill:
-    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
-        --stages validation --dry-run
+validate issue skill="":
+    @if [ -n "{{skill}}" ]; then \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
+            --stages validation --dry-run; \
+    else \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} \
+            --stages validation --dry-run; \
+    fi
 
 # Run validation + complexity assessment
-assess issue skill:
-    python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
-        --stages validation,complexity_assessment --dry-run
+assess issue skill="":
+    @if [ -n "{{skill}}" ]; then \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
+            --stages validation,complexity_assessment --dry-run; \
+    else \
+        python "{{ justfile_directory() }}/main.py" --issue {{issue}} \
+            --stages validation,complexity_assessment --dry-run; \
+    fi
 
 # Show config
 config:
