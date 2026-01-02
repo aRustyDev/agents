@@ -5,25 +5,28 @@ description: GitHub App development guide for building custom integrations. Use 
 
 # GitHub App Development
 
-Build custom GitHub Apps for automation, integrations, and workflow management.
+Build custom GitHub Apps for automation, integrations, and workflow management using best practices for scalable, maintainable applications.
 
-## Overview
+## Getting Started
 
-GitHub Apps are first-class integrations that act on their own behalf (unlike OAuth apps which act as users). They receive granular permissions, subscribe to webhooks, and can be installed on specific repositories.
+GitHub Apps are first-class integrations that act on their own behalf, providing granular permissions and webhook subscriptions for specific repositories.
+
+**Quick wins:**
+- [Create your first app in 15 minutes](examples/README.md#quick-start)
+- [Deploy to Cloudflare Workers](examples/cloudflare-workers-minimal.ts)
+- [Use Probot for rapid development](examples/probot-simple.ts)
 
 **This skill covers:**
-- App registration and configuration
-- Authentication (JWT, installation tokens, user tokens)
-- Webhook handling and event processing
-- Octokit SDK usage
-- Probot framework (simplified development)
-- Deployment options (Cloudflare Workers preferred)
+- App registration and authentication
+- Webhook handling and API integration
+- Best practices and anti-patterns
+- Deployment strategies
+- Security and error handling
 
 **This skill does NOT cover:**
-- GitHub Actions workflow YAML (see `github-actions-ci` skill)
-- Developing custom GitHub Actions (see `github-actions` skill)
-- OAuth apps for "Sign in with GitHub"
-- Installing/configuring existing apps
+- GitHub Actions development (see `github-actions` skill)
+- OAuth apps for user authentication
+- App marketplace strategy
 
 ## Quick Reference
 
@@ -34,23 +37,38 @@ GitHub Apps are first-class integrations that act on their own behalf (unlike OA
 | GitHub App | Itself or user | Automation, integrations, bots |
 | OAuth App | User only | "Sign in with GitHub", user-facing tools |
 
-### Authentication Flow
+### Authentication
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    GitHub App Auth Flow                      │
-├─────────────────────────────────────────────────────────────┤
-│  1. Generate JWT (signed with private key)                  │
-│     └─► Authenticates the App itself                        │
-│                                                             │
-│  2. Exchange JWT for Installation Token                     │
-│     └─► Scoped to specific installation                     │
-│     └─► Used for API calls                                  │
-│                                                             │
-│  3. (Optional) User Access Token                            │
-│     └─► OAuth flow for user-delegated actions               │
-└─────────────────────────────────────────────────────────────┘
-```
+GitHub Apps use a three-tier authentication model:
+
+1. **JWT tokens** - Authenticate the app itself (signed with your private key)
+2. **Installation tokens** - Scoped access to specific repositories (exchanged from JWT)
+3. **User tokens** - Optional user-delegated permissions (OAuth flow)
+
+Most apps only need installation tokens. See [examples/auth-patterns.ts](examples/auth-patterns.ts) for implementation details.
+
+### Advanced Authentication Patterns
+
+**Token lifecycle management:**
+- JWT tokens expire after 10 minutes (generate fresh ones)
+- Installation tokens expire after 1 hour (cache and refresh)
+- User tokens can be long-lived (store securely with refresh tokens)
+
+**Multi-installation handling:**
+- Apps can be installed on multiple organizations
+- Each installation has separate permissions and repository access
+- Use installation ID to scope operations correctly
+
+**Authentication error handling:**
+- **401 Unauthorized**: Invalid or expired token
+- **403 Forbidden**: Insufficient permissions or rate limited
+- **404 Not Found**: Resource doesn't exist OR insufficient permissions
+
+**Security best practices:**
+- Rotate private keys annually
+- Use short-lived tokens where possible
+- Implement token refresh with backoff
+- Log authentication failures for security monitoring
 
 ### Permission Categories
 
@@ -61,45 +79,37 @@ GitHub Apps are first-class integrations that act on their own behalf (unlike OA
 
 See [references/permissions.md](references/permissions.md) for complete permission matrix.
 
-## Decision Tree: Framework Selection
+## Best Practices
 
-Choose the right approach based on your requirements:
+### Framework Selection
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                  GitHub App Framework Selection              │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  Need simple webhook handling? ────► YES ──► Use Probot     │
-│         │                                    - Faster dev  │
-│         │                                    - Less setup  │
-│         │                                    - Good docs   │
-│         │                                                  │
-│         NO                                                  │
-│         │                                                  │
-│         ▼                                                  │
-│  Need custom deployment? ──────► YES ──► Raw Octokit       │
-│         │                                    - Full control│
-│         │                                    - CF Workers  │
-│         │                                    - Custom auth │
-│         │                                                  │
-│         NO                                                  │
-│         │                                                  │
-│         ▼                                                  │
-│  Start with Probot, migrate later if needed                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+**Start with Probot** for rapid development, migrate to raw Octokit for custom deployments:
 
-### Framework Comparison
+| Use Case | Recommended Approach |
+|----------|---------------------|
+| **Learning/Prototyping** | Probot framework |
+| **Standard hosting** | Probot framework |
+| **Cloudflare Workers** | Raw Octokit + Hono |
+| **High-performance** | Raw Octokit |
+| **Complex authentication** | Raw Octokit |
 
-| Criterion | Probot | Raw Octokit | Recommendation |
-|-----------|--------|-------------|---------------|
-| **Development Speed** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Start with Probot |
-| **Deployment Flexibility** | ⭐⭐ | ⭐⭐⭐⭐⭐ | Complex hosting = Octokit |
-| **Learning Curve** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Begin with Probot |
-| **Performance** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | High-traffic = Octokit |
-| **Cloudflare Workers** | ❌ | ✅ | Edge deployment = Octokit |
+### Anti-patterns
+
+❌ **Don't:**
+- Request excessive permissions ("just in case")
+- Process webhooks synchronously without timeouts
+- Store secrets in environment variables only
+- Skip webhook signature verification
+- Ignore rate limits
+
+✅ **Do:**
+- Follow principle of least privilege
+- Implement graceful error handling
+- Use proper secret management
+- Verify webhook authenticity
+- Monitor API usage patterns
+
+See [examples/best-practices.md](examples/best-practices.md) for detailed patterns and implementations.
 
 ## Error Handling & Rate Limiting
 
@@ -152,817 +162,350 @@ if (data.resources.core.remaining < 100) {
 
 See [references/error-handling.md](references/error-handling.md) for advanced rate limit management patterns.
 
-## OpenTelemetry Integration
+## Observability
 
-Add distributed tracing to your GitHub App for better observability and debugging.
+### OpenTelemetry Integration
 
-### Setup OpenTelemetry
+Add distributed tracing for better debugging and performance monitoring.
 
-```typescript
-// src/tracing.ts
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-otlp-http";
+**Key trace targets for GitHub Apps:**
 
-export function initializeTracing() {
-  const traceExporter = new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318/v1/traces",
-  });
+- `webhook.{event_type}` - Track webhook processing time and errors
+- `github.api.{operation}` - Monitor API call performance and rate limits
+- `auth.installation_token` - Track authentication overhead
+- `app.business_logic` - Measure your app's core functionality
 
-  const sdk = new NodeSDK({
-    traceExporter,
-    instrumentations: [getNodeAutoInstrumentations()],
-  });
+See [references/observability.md](references/observability.md) for comprehensive OpenTelemetry setup, progressive development strategies, and monitoring best practices.
 
-  sdk.start();
-  console.log("OpenTelemetry tracing initialized");
-}
-```
+## Architecture & Design Patterns
 
-### Common GitHub App Traces
+### App Architecture Decisions
 
-```typescript
-// src/webhooks.ts with tracing
-import { trace, context, SpanStatusCode } from "@opentelemetry/api";
-import { Webhooks } from "@octokit/webhooks";
+**Framework-based approach (recommended for most apps):**
+- **Probot**: Convention-over-configuration, rapid development
+- **Hono + Octokit**: Lightweight, edge-deployable, full control
 
-const tracer = trace.getTracer("github-app");
+**Custom approach (for specific requirements):**
+- Raw Express/Fastify + Octokit
+- Serverless functions with custom routing
 
-export function createWebhooks(secret: string): Webhooks {
-  const webhooks = new Webhooks({ secret });
+See [references/probot.md](references/probot.md) for detailed framework comparison.
 
-  webhooks.on("pull_request.opened", async ({ payload }) => {
-    const span = tracer.startSpan("webhook.pull_request.opened", {
-      attributes: {
-        "github.event": "pull_request.opened",
-        "github.repository": payload.repository.full_name,
-        "github.pr.number": payload.pull_request.number,
-        "github.pr.author": payload.pull_request.user.login,
-      },
-    });
+### Design Pattern Anti-patterns
 
-    try {
-      // Your webhook logic here
-      console.log(`Processing PR #${payload.pull_request.number}`);
+❌ **Anti-patterns:**
+- Monolithic webhook handlers (handle all events in one function)
+- Storing state in memory (apps should be stateless)
+- Synchronous processing of heavy operations
+- Direct database access from webhook handlers
 
-      // Example: Add trace for API calls
-      await context.with(trace.setSpan(context.active(), span), async () => {
-        const apiSpan = tracer.startSpan("github.api.add_labels");
-        try {
-          // Simulate API call
-          await new Promise(resolve => setTimeout(resolve, 100));
-          apiSpan.setStatus({ code: SpanStatusCode.OK });
-        } catch (error) {
-          apiSpan.recordException(error as Error);
-          apiSpan.setStatus({ code: SpanStatusCode.ERROR });
-          throw error;
-        } finally {
-          apiSpan.end();
-        }
-      });
+✅ **Best practices:**
+- Event-driven architecture with dedicated handlers
+- Queue heavy operations (use background jobs)
+- Idempotent operations (handle duplicate webhooks)
+- Clean separation between GitHub API and business logic
 
-      span.setStatus({ code: SpanStatusCode.OK });
-    } catch (error) {
-      span.recordException(error as Error);
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: (error as Error).message,
-      });
-      throw error;
-    } finally {
-      span.end();
-    }
-  });
+### Scalability Patterns
 
-  return webhooks;
-}
-```
+**Small apps (< 100 repos):** Single instance with in-memory rate limiting
+**Medium apps (100-1000 repos):** Load balancer + shared cache (Redis)
+**Large apps (1000+ repos):** Event streaming + worker queues + distributed tracing
 
-### Trace Trigger Configuration
+See [references/hosting/](references/hosting/) for platform-specific scaling strategies.
 
-Set up a constant trace trigger for testing and debugging:
+## Testing Strategies
 
-```typescript
-// src/tracing-trigger.ts
-import { trace } from "@opentelemetry/api";
+### Test Pyramid for GitHub Apps
 
-const tracer = trace.getTracer("github-app-trigger");
+**Unit Tests (70%)**: Test business logic and utility functions
+**Integration Tests (20%)**: Test webhook processing with mocked GitHub API
+**End-to-End Tests (10%)**: Test full flow with test repositories
 
-// Triggered trace for debugging - can be called via webhook or timer
-export async function triggerTestTrace() {
-  const span = tracer.startSpan("debug.test_trace", {
-    attributes: {
-      "test.trigger": "manual",
-      "test.timestamp": Date.now(),
-    },
-  });
+### Essential Test Scenarios
 
-  try {
-    // Simulate some work
-    span.addEvent("Starting test operations");
+**Authentication edge cases:**
+- Expired installation tokens
+- App uninstalled during operation
+- Permission changes mid-operation
 
-    await new Promise(resolve => setTimeout(resolve, 200));
-    span.addEvent("Simulated API call completed");
+**Webhook reliability:**
+- Duplicate delivery handling
+- Malformed payload processing
+- Signature verification failures
 
-    await new Promise(resolve => setTimeout(resolve, 100));
-    span.addEvent("Simulated database operation completed");
+**Rate limiting behavior:**
+- Graceful degradation under limits
+- Retry logic validation
+- Secondary rate limit handling
 
-    span.setStatus({ code: SpanStatusCode.OK });
-  } catch (error) {
-    span.recordException(error as Error);
-    span.setStatus({ code: SpanStatusCode.ERROR });
-  } finally {
-    span.end();
-  }
-}
+See [references/testing.md](references/testing.md) for complete testing setup and patterns.
 
-// Add to your webhook handler or create a separate endpoint
-// app.post("/debug/trace", async (c) => {
-//   await triggerTestTrace();
-//   return c.json({ message: "Test trace triggered" });
-// });
-```
+## Production Deployment
+
+### Deployment Checklist
+
+**Security:**
+- [ ] Webhook signature verification enabled
+- [ ] Private key stored in secure vault
+- [ ] Minimum required permissions configured
+- [ ] Input validation on all webhook payloads
+
+**Reliability:**
+- [ ] Health checks implemented
+- [ ] Error monitoring configured
+- [ ] Rate limit monitoring in place
+- [ ] Graceful shutdown handling
+
+**Performance:**
+- [ ] Response times < 10s (GitHub timeout)
+- [ ] Database connection pooling
+- [ ] Background job processing for heavy operations
+- [ ] Caching strategy implemented
 
 ### Environment Configuration
 
+**Required environment variables:**
 ```bash
-# .env or Cloudflare Workers secrets
-OTEL_EXPORTER_OTLP_ENDPOINT="https://api.honeycomb.io/v1/traces"
-OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=YOUR_API_KEY"
-OTEL_SERVICE_NAME="my-github-app"
-OTEL_SERVICE_VERSION="1.0.0"
+GITHUB_APP_ID=123456                    # Your app's ID
+GITHUB_PRIVATE_KEY="-----BEGIN..."     # App's private key (base64 encoded)
+GITHUB_WEBHOOK_SECRET=your_secret_here  # Webhook verification secret
 ```
 
-For Cloudflare Workers, adapt the tracing setup:
-
-```typescript
-// For Cloudflare Workers - simplified tracing
-import { trace, context } from "@opentelemetry/api";
-
-// Note: Full OpenTelemetry SDK may not work in Workers
-// Use fetch-based custom exporter or compatible service
-export class SimpleTraceExporter {
-  async export(endpoint: string, headers: Record<string, string>, spans: any[]) {
-    await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      body: JSON.stringify(spans),
-    });
-  }
-}
-```
-
-## Workflow: Create a New GitHub App
-
-### Step 1: Register the App
-
-1. Go to **Settings → Developer settings → GitHub Apps → New GitHub App**
-2. Configure:
-   - **Name**: Unique identifier (e.g., `myorg-pr-bot`)
-   - **Homepage URL**: Your app's landing page
-   - **Webhook URL**: Where GitHub sends events (use smee.io for local dev)
-   - **Webhook Secret**: Random string for signature verification
-   - **Permissions**: Request minimum necessary
-   - **Events**: Subscribe only to needed webhooks
-
-3. After creation:
-   - Note the **App ID**
-   - Generate and download **Private Key** (.pem file)
-   - Note the **Client ID** and **Client Secret** (if using OAuth)
-
-### GitHub App Configuration Settings
-
-After creating your app, you can configure these settings in **Settings → Developer settings → GitHub Apps → [Your App]**:
-
-#### Basic Information
-- **Display Name**: Public name shown to users during installation
-- **Description**: What your app does (shown in marketplace and installation)
-- **Homepage URL**: Link to your app's documentation or website
-- **User Authorization Callback URL**: OAuth redirect URL (if using user tokens)
-- **Setup URL**: Optional post-installation configuration page
-- **Webhook URL**: Endpoint for receiving events
-- **Webhook Secret**: Secret for verifying webhook authenticity
-
-#### Installation Settings
-- **Public**: Anyone can install your app
-- **Only on this account**: Restrict to your personal/organization account
-- **Request user authorization (OAuth) during installation**: Enable OAuth flow
-- **Expire user authorization tokens**: Automatically expire user tokens
-- **Refresh user authorization tokens**: Allow token refresh
-- **Device flow enabled**: Support device authorization flow
-- **Post installation URL**: Redirect users after installation
-
-#### Marketplace Settings (for public apps)
-- **Primary Category**: App category for discovery
-- **Listed in GitHub Marketplace**: Make app discoverable
-- **Pricing**: Free, flat rate, or per-unit pricing
-- **Screenshots**: Up to 5 images showing your app
-
-#### Advanced Settings
-- **Transfer ownership**: Move app to different account
-- **Danger Zone**: Delete app or make private
-
-#### Example Configuration for PR Bot
-
-```yaml
-# Recommended settings for a typical PR automation bot
-Display Name: "PR Assistant Bot"
-Description: "Automated PR labeling, reviewer assignment, and code quality checks"
-Homepage URL: "https://mycompany.com/pr-assistant"
-User Authorization Callback URL: "https://mycompany.com/auth/callback"
-Setup URL: "https://mycompany.com/setup"
-Webhook URL: "https://api.mycompany.com/webhooks/github"
-
-Installation:
-  - Public: true (if sharing with community)
-  - Request OAuth: false (unless need user-specific actions)
-  - Post installation URL: "https://mycompany.com/setup/complete"
-
-Permissions:
-  Repository:
-    - Contents: Read (for file analysis)
-    - Issues: Write (for labeling)
-    - Pull requests: Write (for reviews/comments)
-    - Metadata: Read (for repository info)
-
-  Organization:
-    - Members: Read (for reviewer assignment)
-
-Events:
-  - Pull request
-  - Pull request review
-  - Issue comment
-```
-
-### Step 2: Set Up Development Environment
-
-Create project structure:
-
-```
-my-github-app/
-├── src/
-│   ├── index.ts          # Entry point
-│   ├── webhooks.ts       # Webhook handlers
-│   ├── github.ts         # GitHub API client
-│   └── auth.ts           # Authentication helpers
-├── wrangler.toml         # Cloudflare Workers config
-├── package.json
-└── .dev.vars             # Local secrets (gitignored)
-```
-
-Install dependencies:
-
+**Optional configuration:**
 ```bash
-npm install @octokit/rest @octokit/auth-app @octokit/webhooks
-npm install -D wrangler typescript @types/node
+NODE_ENV=production                     # Runtime environment
+LOG_LEVEL=info                         # Logging verbosity
+DATABASE_URL=postgresql://...          # If using database
+REDIS_URL=redis://...                  # If using cache
 ```
 
-### Step 3: Implement Authentication
+See [references/hosting/](references/hosting/) for platform-specific deployment guides.
 
+## Performance Optimization
+
+### Response Time Optimization
+
+**Critical path optimizations:**
+- Webhook acknowledgment within 30 seconds
+- Async processing for non-critical operations
+- Connection pooling and keep-alive
+- Efficient API call batching
+
+**Common bottlenecks:**
+- Synchronous GitHub API calls
+- Database queries in webhook handlers
+- Large payload processing
+- External service dependencies
+
+### Memory and Resource Management
+
+**Memory optimization:**
+- Stream large payloads instead of loading into memory
+- Implement proper garbage collection for long-running processes
+- Monitor heap usage and set appropriate limits
+
+**CPU optimization:**
+- Use worker threads for CPU-intensive tasks
+- Implement request queuing under high load
+- Profile and optimize hot code paths
+
+See [references/observability.md](references/observability.md) for performance monitoring setup.
+
+## Monitoring & Alerting
+
+### Essential Metrics
+
+**Application health:**
+- Response time distribution (p50, p95, p99)
+- Error rate by endpoint and error type
+- Request volume patterns
+- Memory and CPU utilization
+
+**GitHub API integration:**
+- Rate limit usage (remaining/total)
+- API error rates by operation type
+- Authentication failure rates
+- Webhook delivery success rate
+
+**Business metrics:**
+- Number of installations
+- Active repositories
+- Feature usage patterns
+- User engagement metrics
+
+### Alerting Strategy
+
+**Critical alerts (page immediately):**
+- App completely down (health check failures)
+- Error rate > 10% for 5 minutes
+- Rate limit exhausted
+- Authentication failures > 5% for 10 minutes
+
+**Warning alerts (notify via email/Slack):**
+- Response time p95 > 5 seconds
+- Error rate > 5% for 15 minutes
+- Rate limit usage > 80%
+- Webhook signature verification failures
+
+**Info alerts (dashboard only):**
+- New installations/uninstalls
+- Feature usage patterns
+- Performance trends
+
+### Monitoring Implementation
+
+**Basic setup (any hosting platform):**
 ```typescript
-// src/auth.ts
-import { createAppAuth } from "@octokit/auth-app";
-import { Octokit } from "@octokit/rest";
-
-export function createAppOctokit(env: Env): Octokit {
-  return new Octokit({
-    authStrategy: createAppAuth,
-    auth: {
-      appId: env.GITHUB_APP_ID,
-      privateKey: env.GITHUB_PRIVATE_KEY,
-    },
-  });
-}
-
-export async function createInstallationOctokit(
-  env: Env,
-  installationId: number
-): Promise<Octokit> {
-  const appOctokit = createAppOctokit(env);
-
-  const { token } = await appOctokit.auth({
-    type: "installation",
-    installationId,
-  }) as { token: string };
-
-  return new Octokit({ auth: token });
-}
-```
-
-### Step 4: Handle Webhooks
-
-```typescript
-// src/webhooks.ts
-import { Webhooks } from "@octokit/webhooks";
-
-export function createWebhooks(secret: string): Webhooks {
-  const webhooks = new Webhooks({ secret });
-
-  webhooks.on("pull_request.opened", async ({ payload }) => {
-    console.log(`PR #${payload.pull_request.number} opened`);
-    // Handle event...
-  });
-
-  webhooks.on("issues.opened", async ({ payload }) => {
-    console.log(`Issue #${payload.issue.number} opened`);
-    // Handle event...
-  });
-
-  return webhooks;
-}
-```
-
-### Step 5: Create Entry Point
-
-```typescript
-// src/index.ts (Cloudflare Workers)
-import { Hono } from "hono";
-import { createWebhooks } from "./webhooks";
-import { createInstallationOctokit } from "./auth";
-
-type Bindings = {
-  GITHUB_APP_ID: string;
-  GITHUB_PRIVATE_KEY: string;
-  GITHUB_WEBHOOK_SECRET: string;
-};
-
-const app = new Hono<{ Bindings: Bindings }>();
-
-app.post("/webhook", async (c) => {
-  const webhooks = createWebhooks(c.env.GITHUB_WEBHOOK_SECRET);
-
-  const signature = c.req.header("x-hub-signature-256") || "";
-  const body = await c.req.text();
-
-  try {
-    await webhooks.verifyAndReceive({
-      id: c.req.header("x-github-delivery") || "",
-      name: c.req.header("x-github-event") as any,
-      signature,
-      payload: body,
-    });
-    return c.text("OK");
-  } catch (error) {
-    return c.text("Unauthorized", 401);
-  }
+// Health check endpoint
+app.get('/health', (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    github_rate_limit: await checkRateLimit()
+  };
+  res.json(health);
 });
-
-export default app;
 ```
 
-### Step 6: Deploy
+**Advanced monitoring:**
+- Structured logging with correlation IDs
+- Distributed tracing for request flows
+- Custom metrics for business logic
+- Integration with monitoring platforms
 
-**Local Development:**
+See [references/observability.md](references/observability.md) for complete monitoring setup with OpenTelemetry, Datadog, and other monitoring solutions.
 
-```bash
-# Start smee.io proxy
-npx smee -u https://smee.io/YOUR_CHANNEL -t http://localhost:8787/webhook
+## Implementation Guides
 
-# Start worker
-wrangler dev
-```
+### Quick Setup (15 minutes)
 
-**Production (Cloudflare Workers):**
+1. **Register app** - GitHub Settings → Developer settings → GitHub Apps
+2. **Choose framework** - Probot for rapid development, raw Octokit for Workers
+3. **Deploy** - Start with examples, customize for your needs
 
-```bash
-# Set secrets
-wrangler secret put GITHUB_APP_ID
-wrangler secret put GITHUB_PRIVATE_KEY
-wrangler secret put GITHUB_WEBHOOK_SECRET
+See [examples/README.md](examples/README.md) for step-by-step setup guides.
 
-# Deploy
-wrangler deploy
-```
+### Development Workflow
 
-Update the app's webhook URL to your worker URL.
+**Phase 1: Setup** (5 minutes)
+- Register app in GitHub
+- Configure basic permissions and webhook URL
+- Download private key
 
-## Probot Framework
+**Phase 2: Development** (varies)
+- Clone starter template from examples/
+- Implement webhook handlers for your use case
+- Test locally with smee.io proxy
 
-For simpler apps, Probot handles auth and webhook routing automatically.
+**Phase 3: Deployment** (5 minutes)
+- Set secrets in your hosting platform
+- Deploy and update webhook URL
+- Install on test repositories
 
-```typescript
-// app.ts
-import { Probot } from "probot";
-
-export default (app: Probot) => {
-  app.on("pull_request.opened", async (context) => {
-    const comment = context.issue({
-      body: "Thanks for the PR!",
-    });
-    await context.octokit.issues.createComment(comment);
-  });
-
-  app.on("issues.opened", async (context) => {
-    const label = context.issue({
-      labels: ["triage"],
-    });
-    await context.octokit.issues.addLabels(label);
-  });
-};
-```
-
-**Use Probot for:** Simple bots, prototypes, standard hosting
-**Use raw Octokit for:** Complex apps, Cloudflare Workers, custom control
-
-## Hosting Options
-
-| Platform | Pros | Cons |
-|----------|------|------|
-| **Cloudflare Workers** | Edge deployment, cheap, fast | Limited runtime APIs |
-| **Vercel/Netlify** | Easy deployment, serverless | Cold starts |
-| **AWS Lambda** | Flexible, scalable | More setup |
-| **Self-hosted** | Full control | Maintenance overhead |
-
-### Cloudflare Workers (Preferred)
-
-See `cloudflare-workers` skill for detailed patterns.
-
-```toml
-# wrangler.toml
-name = "my-github-app"
-main = "src/index.ts"
-compatibility_date = "2024-01-01"
-
-[vars]
-GITHUB_APP_ID = "123456"
-```
+See [examples/setup-guide.md](examples/setup-guide.md) for detailed instructions.
 
 ## Common Patterns
 
-### Repository Custom Properties for Configuration
+### Repository Configuration-Based Logic
 
-Use repository or organization custom properties to apply different logic based on repository metadata:
+Use repository custom properties to apply different behavior based on repository metadata:
 
 ```typescript
-// Check repository custom properties for configuration
+// Example: Language-specific PR handling
 async function getRepoConfig(octokit: Octokit, owner: string, repo: string) {
-  try {
-    const { data: repoProperties } = await octokit.request(
-      "GET /repos/{owner}/{repo}/custom-properties",
-      { owner, repo }
-    );
+  const { data: repoProperties } = await octokit.request(
+    "GET /repos/{owner}/{repo}/custom-properties",
+    { owner, repo }
+  );
 
-    return repoProperties.reduce((config, prop) => {
-      config[prop.property_name] = prop.value;
-      return config;
-    }, {} as Record<string, string>);
-  } catch (error) {
-    // Fallback if custom properties not available
-    return {};
-  }
+  return repoProperties.reduce((config, prop) => ({
+    ...config,
+    [prop.property_name]: prop.value
+  }), {});
 }
-
-// Apply language-specific logic based on custom properties
-webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
-  const config = await getRepoConfig(
-    octokit,
-    payload.repository.owner.login,
-    payload.repository.name
-  );
-
-  const language = config.language || "unknown";
-  const labels: string[] = [];
-
-  // Apply language-specific configuration
-  switch (language) {
-    case "rust":
-      labels.push("rust", "performance-critical");
-      // Require clippy checks
-      await octokit.checks.create({
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        head_sha: payload.pull_request.head.sha,
-        name: "Rust Clippy Required",
-        status: "queued",
-        output: {
-          title: "Clippy check required for Rust projects",
-          summary: "Please ensure clippy passes before merging",
-        },
-      });
-      break;
-
-    case "javascript":
-      labels.push("javascript", "needs-testing");
-      // Require Jest tests
-      break;
-
-    case "python":
-      labels.push("python", "type-checking");
-      // Require mypy validation
-      break;
-
-    default:
-      labels.push("needs-review");
-  }
-
-  if (labels.length > 0) {
-    await octokit.issues.addLabels({
-      owner: payload.repository.owner.login,
-      repo: payload.repository.name,
-      issue_number: payload.pull_request.number,
-      labels,
-    });
-  }
-});
 ```
 
-### Auto-label PRs
+**Common patterns:**
+- **Auto-labeling** - Label PRs based on conventional commit titles
+- **Reviewer assignment** - Route to team members based on file paths
+- **Quality gates** - Enforce checks based on repository settings
+- **Welcome automation** - Greet first-time contributors
 
-```typescript
-webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
-  const { title, number } = payload.pull_request;
-  const labels: string[] = [];
+See [examples/patterns/](examples/patterns/) for complete implementations of these patterns.
 
-  if (title.startsWith("feat")) labels.push("enhancement");
-  if (title.startsWith("fix")) labels.push("bug");
-  if (title.startsWith("docs")) labels.push("documentation");
+### Hosting Platforms
 
-  if (labels.length > 0) {
-    await octokit.issues.addLabels({
-      owner: payload.repository.owner.login,
-      repo: payload.repository.name,
-      issue_number: number,
-      labels,
-    });
-  }
-});
-```
+| Platform | Best For | Trade-offs |
+|----------|----------|------------|
+| **Cloudflare Workers** | Edge deployment, low latency | Limited runtime APIs |
+| **Probot on Glitch/Railway** | Quick prototypes | Limited customization |
+| **AWS Lambda/Vercel** | Scalable production apps | More complex setup |
 
-### Auto-assign Reviewers
-
-```typescript
-webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
-  const reviewers = getReviewersForPath(payload.pull_request.changed_files);
-
-  await octokit.pulls.requestReviewers({
-    owner: payload.repository.owner.login,
-    repo: payload.repository.name,
-    pull_number: payload.pull_request.number,
-    reviewers,
-  });
-});
-```
-
-### Enforce PR Checks
-
-```typescript
-webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
-  // Validate title format
-  const valid = /^(feat|fix|docs|chore)(\(.+\))?: .+/.test(
-    payload.pull_request.title
-  );
-
-  await octokit.checks.create({
-    owner: payload.repository.owner.login,
-    repo: payload.repository.name,
-    head_sha: payload.pull_request.head.sha,
-    name: "Title Validation",
-    status: "completed",
-    conclusion: valid ? "success" : "failure",
-    output: {
-      title: valid ? "Title is valid" : "Title format invalid",
-      summary: valid
-        ? "PR title follows conventional commit format"
-        : "Expected: feat|fix|docs|chore(scope): description",
-    },
-  });
-});
-```
+See [references/hosting/](references/hosting/) for platform-specific deployment guides.
 
 ## API Reference
 
-### Webhook Events
+### Key Octokit Methods
 
-**Common events:** `pull_request.opened`, `issues.opened`, `issue_comment.created`, `check_run.completed`
-
-See [references/webhooks.md](references/webhooks.md) for complete event reference.
-
-### Octokit Methods
-
+**Most commonly used:**
 ```typescript
 // Pull Requests
 octokit.pulls.get({ owner, repo, pull_number });
-octokit.pulls.listFiles({ owner, repo, pull_number });
 octokit.pulls.createReview({ owner, repo, pull_number, event, body });
-octokit.pulls.merge({ owner, repo, pull_number, merge_method });
 
-// Issues
+// Issues & Comments
 octokit.issues.createComment({ owner, repo, issue_number, body });
 octokit.issues.addLabels({ owner, repo, issue_number, labels });
 
 // Checks
 octokit.checks.create({ owner, repo, head_sha, name, status, conclusion });
-octokit.checks.update({ owner, repo, check_run_id, status, conclusion });
-
-// Contents
-octokit.repos.getContent({ owner, repo, path, ref });
 ```
 
-## Security Checklist
+See [references/octokit.md](references/octokit.md) for complete API reference.
 
-- [ ] Verify webhook signatures before processing
-- [ ] Request minimum necessary permissions
-- [ ] Store private key securely (secrets manager)
-- [ ] Never log tokens or private keys
-- [ ] Rate limit incoming requests
-- [ ] Validate all input from payloads
-- [ ] Use HTTPS for all communication
+### Webhook Events
 
-## Troubleshooting
+**Most common events:**
+- `pull_request.opened` - New PR created
+- `issues.opened` - New issue created
+- `issue_comment.created` - Comment added
+- `check_run.completed` - CI check finished
 
-**Common issues:**
-- **Bad credentials**: Check private key format (PEM), APP_ID, token expiry
-- **Webhook not received**: Verify URL accessibility, secret, event subscriptions
-- **Permission denied**: Check app permissions, installation scope
+See [references/webhooks.md](references/webhooks.md) for complete event reference.
 
-See [references/error-handling.md](references/error-handling.md) for detailed troubleshooting.
+## Security & Operations
 
-## Documentation Strategy
+### Security Checklist
 
-Different contexts require different types of documentation for your GitHub App. Plan your documentation approach based on your audience and distribution method.
+✅ **Essential security measures:**
+- Verify webhook signatures before processing
+- Request minimum necessary permissions
+- Store private key securely (use secrets manager)
+- Validate all webhook payload input
+- Use HTTPS for all communication
 
-### Documentation Types
+### Common Issues
 
-#### 1. Marketplace Listing Documentation
-**Purpose**: Help users discover and understand your app's value proposition
-**Audience**: Potential users browsing the GitHub Marketplace
-**Content Focus**:
-- Clear value proposition and use cases
-- Feature highlights with screenshots
-- Installation and setup instructions
-- Pricing and support information
+**Authentication problems:**
+- Check private key format (PEM) and app ID
+- Verify token hasn't expired
+- Confirm app is installed on target repository
 
-```markdown
-# Example: PR Assistant Bot - Marketplace Description
+**Webhook delivery issues:**
+- Verify webhook URL is accessible
+- Check webhook secret matches
+- Confirm app subscribes to necessary events
 
-## Automate Your Pull Request Workflow
-
-Save hours of manual work with intelligent PR labeling, automated reviewer
-assignment, and code quality checks.
-
-### Key Features
-- 🏷️ **Smart Labeling**: Automatically label PRs based on files changed
-- 👥 **Reviewer Assignment**: Route PRs to the right team members
-- ✅ **Quality Gates**: Enforce coding standards and best practices
-- 📊 **Analytics**: Track PR metrics and team performance
-
-### Setup in 2 Minutes
-1. Install the app from the marketplace
-2. Configure your team settings
-3. Watch the automation begin!
-
-**Pricing**: Free for public repos, $5/month per private repo
-```
-
-#### 2. Code Comments and Documentation
-**Purpose**: Help developers understand, maintain, and extend your app
-**Audience**: Your development team and contributors
-**Content Focus**:
-- API documentation and type definitions
-- Architectural decisions and trade-offs
-- Code comments for complex business logic
-- Development setup and testing procedures
-
-```typescript
-/**
- * Assigns reviewers to a pull request based on CODEOWNERS file
- * and team availability from GitHub's REST API.
- *
- * @param octokit - Authenticated GitHub client
- * @param payload - Pull request webhook payload
- * @param maxReviewers - Maximum number of reviewers to assign (default: 3)
- *
- * @returns Promise<string[]> - Array of assigned reviewer usernames
- *
- * @example
- * ```typescript
- * const reviewers = await assignReviewers(octokit, prPayload, 2);
- * console.log(`Assigned reviewers: ${reviewers.join(', ')}`);
- * ```
- */
-async function assignReviewers(
-  octokit: Octokit,
-  payload: PullRequestEvent,
-  maxReviewers = 3
-): Promise<string[]> {
-  // Implementation details...
-}
-```
-
-#### 3. Installation Configuration Pages
-**Purpose**: Guide users through app setup and customization
-**Audience**: Users who have installed your app
-**Content Focus**:
-- Step-by-step configuration instructions
-- Interactive setup forms and validation
-- Troubleshooting common issues
-- Feature toggles and customization options
-
-```html
-<!-- Example: Post-Installation Setup Page -->
-<!DOCTYPE html>
-<html>
-<head>
-  <title>PR Assistant Setup</title>
-</head>
-<body>
-  <h1>Welcome to PR Assistant!</h1>
-
-  <div class="setup-wizard">
-    <h2>Step 1: Configure Team Settings</h2>
-    <p>Choose which teams should be notified for different types of PRs:</p>
-
-    <form id="team-config">
-      <label>
-        Frontend Changes (*.tsx, *.css):
-        <select name="frontend-team">
-          <option value="">Select team...</option>
-          <option value="frontend">Frontend Team</option>
-          <option value="design">Design Team</option>
-        </select>
-      </label>
-
-      <label>
-        Backend Changes (*.py, *.go):
-        <select name="backend-team">
-          <option value="">Select team...</option>
-          <option value="backend">Backend Team</option>
-          <option value="platform">Platform Team</option>
-        </select>
-      </label>
-
-      <button type="submit">Save Configuration</button>
-    </form>
-  </div>
-
-  <div class="help-section">
-    <h3>Need Help?</h3>
-    <ul>
-      <li><a href="/docs/troubleshooting">Troubleshooting Guide</a></li>
-      <li><a href="mailto:support@example.com">Contact Support</a></li>
-    </ul>
-  </div>
-</body>
-</html>
-```
-
-### Documentation Best Practices
-
-#### For Marketplace Listings
-- **Lead with benefits**, not features
-- Use **screenshots and GIFs** to demonstrate functionality
-- Include **clear pricing** information
-- Provide **support contact** information
-- Test your description with potential users
-
-#### For Code Documentation
-- Document **why**, not just what
-- Include **runnable examples** in comments
-- Use **TypeScript types** for API clarity
-- Document **error conditions** and recovery strategies
-- Keep documentation **close to code** (avoid separate wikis)
-
-#### For Installation Pages
-- Use **progressive disclosure** (show complexity gradually)
-- Provide **sensible defaults** for all settings
-- Include **validation feedback** on forms
-- Offer **quick start** and **advanced** configuration paths
-- Test with users unfamiliar with your app
-
-### Documentation Maintenance
-
-```typescript
-// Example: Automated documentation checks
-export const docChecks = {
-  // Ensure all public methods have JSDoc comments
-  validateJSDoc: true,
-
-  // Check that README examples still work
-  validateExamples: true,
-
-  // Ensure setup URLs are still accessible
-  validateLinks: true,
-
-  // Check that marketplace description matches current features
-  validateFeatureSync: true,
-};
-```
-
-#### Common Documentation Anti-patterns
-- **Outdated screenshots** showing old UI
-- **Broken links** to setup or support resources
-- **Missing error messages** in troubleshooting guides
-- **Developer jargon** in user-facing documentation
-- **Installation steps** that only work on specific systems
+See [references/error-handling.md](references/error-handling.md) for detailed troubleshooting guides.
 
 ## See Also
 
 - [examples/README.md](examples/README.md) - Complete starter projects and runnable code samples
 - [references/testing.md](references/testing.md) - Comprehensive testing strategies and patterns
 - [references/error-handling.md](references/error-handling.md) - Advanced error handling and rate limit management
+- [references/observability.md](references/observability.md) - OpenTelemetry setup and monitoring best practices
 - [references/webhooks.md](references/webhooks.md) - Complete webhook event reference
 - [references/permissions.md](references/permissions.md) - Permission matrix and runtime validation
 - [references/octokit.md](references/octokit.md) - Octokit SDK patterns

@@ -1,0 +1,329 @@
+# GitHub App Configuration Examples
+#
+# Common configuration patterns for GitHub Apps.
+# Use these as templates for your app registration.
+
+# =============================================================================
+# PR Automation Bot Configuration
+# =============================================================================
+pr-automation-bot:
+  # Basic Information
+  display_name: "PR Assistant Bot"
+  description: "Automated PR labeling, reviewer assignment, and code quality checks"
+  homepage_url: "https://mycompany.com/pr-assistant"
+
+  # Webhook Configuration
+  webhook_url: "https://api.mycompany.com/webhooks/github"
+  webhook_secret: "generate-random-secret-here"
+
+  # Installation Settings
+  public: true  # Allow installation by any organization
+  request_oauth: false  # Don't need user authorization for this bot
+
+  # Repository Permissions
+  permissions:
+    contents: read        # Read file contents for analysis
+    issues: write        # Add/remove labels, create comments
+    pull_requests: write # Review PRs, request reviewers
+    metadata: read       # Read repository metadata
+
+  # Organization Permissions (optional)
+  organization_permissions:
+    members: read        # Read team/member info for reviewer assignment
+
+  # Webhook Events
+  events:
+    - pull_request      # PR opened, closed, synchronized
+    - pull_request_review
+    - issue_comment
+    - issues
+
+# =============================================================================
+# Code Quality Enforcement Bot
+# =============================================================================
+quality-gate-bot:
+  display_name: "Quality Gate Bot"
+  description: "Enforces coding standards and quality checks before merge"
+  homepage_url: "https://docs.mycompany.com/quality-gate"
+
+  # Requires more permissions for quality enforcement
+  permissions:
+    actions: read        # Read CI/CD status
+    checks: write        # Create check runs
+    contents: read       # Read files for analysis
+    pull_requests: write # Block/unblock merging
+    statuses: write      # Set commit status
+
+  events:
+    - pull_request
+    - check_run
+    - status
+    - push
+
+# =============================================================================
+# Security Scanner Bot
+# =============================================================================
+security-scanner-bot:
+  display_name: "Security Scanner"
+  description: "Automated security scanning for vulnerabilities and secrets"
+  homepage_url: "https://security.mycompany.com"
+
+  # Security-focused permissions
+  permissions:
+    contents: read           # Scan file contents
+    security_events: write   # Create security advisories
+    vulnerability_alerts: read  # Read vulnerability info
+    pull_requests: write     # Comment on security issues
+
+  events:
+    - push
+    - pull_request
+    - create  # New branches/tags
+
+# =============================================================================
+# Issue Triage Bot
+# =============================================================================
+issue-triage-bot:
+  display_name: "Issue Triage Assistant"
+  description: "Automatically triages and routes issues to appropriate teams"
+  homepage_url: "https://support.mycompany.com/triage"
+
+  permissions:
+    issues: write        # Label, assign, close issues
+    metadata: read       # Read repository info
+
+  organization_permissions:
+    members: read        # Route to team members
+
+  events:
+    - issues
+    - issue_comment
+
+# =============================================================================
+# Release Management Bot
+# =============================================================================
+release-bot:
+  display_name: "Release Manager"
+  description: "Automates release workflows and changelog generation"
+  homepage_url: "https://releases.mycompany.com"
+
+  permissions:
+    contents: write      # Create releases, tags
+    issues: write        # Close issues in releases
+    pull_requests: read  # Generate changelogs from PRs
+    metadata: read
+
+  events:
+    - push               # Trigger on main branch
+    - pull_request       # Track merged PRs
+    - release
+
+# =============================================================================
+# Documentation Sync Bot
+# =============================================================================
+docs-sync-bot:
+  display_name: "Documentation Sync"
+  description: "Keeps documentation in sync across repositories"
+  homepage_url: "https://docs.mycompany.com"
+
+  permissions:
+    contents: write      # Update documentation files
+    pull_requests: write # Create PRs for doc updates
+    metadata: read
+
+  events:
+    - push               # Sync when docs change
+    - repository         # Setup new repos
+
+# =============================================================================
+# Dependency Management Bot
+# =============================================================================
+dependency-bot:
+  display_name: "Dependency Manager"
+  description: "Manages dependency updates and security patches"
+  homepage_url: "https://deps.mycompany.com"
+
+  permissions:
+    contents: write          # Update package files
+    pull_requests: write     # Create update PRs
+    security_events: read    # Read security advisories
+    vulnerability_alerts: read
+
+  events:
+    - push
+    - schedule           # Periodic dependency checks
+
+# =============================================================================
+# Multi-Repository Sync Bot
+# =============================================================================
+multi-repo-sync-bot:
+  display_name: "Multi-Repo Sync"
+  description: "Keeps configuration and policies synchronized across repositories"
+  homepage_url: "https://sync.mycompany.com"
+
+  permissions:
+    contents: write      # Update config files
+    administration: read # Read repository settings
+    pull_requests: write # Create sync PRs
+
+  events:
+    - push
+    - repository
+
+# =============================================================================
+# Community Management Bot
+# =============================================================================
+community-bot:
+  display_name: "Community Assistant"
+  description: "Welcomes contributors and manages community interactions"
+  homepage_url: "https://community.mycompany.com"
+
+  permissions:
+    issues: write        # Welcome new contributors
+    pull_requests: write # Thank contributors
+    metadata: read
+
+  events:
+    - issues
+    - pull_request
+    - star               # Thank stargazers
+    - fork
+
+# =============================================================================
+# License Compliance Bot
+# =============================================================================
+license-compliance-bot:
+  display_name: "License Compliance Checker"
+  description: "Ensures license compatibility and compliance"
+  homepage_url: "https://legal.mycompany.com/licenses"
+
+  permissions:
+    contents: read       # Read dependency files
+    pull_requests: write # Block non-compliant changes
+    checks: write        # Create compliance checks
+
+  events:
+    - pull_request
+    - push
+
+# =============================================================================
+# Performance Monitoring Bot
+# =============================================================================
+performance-bot:
+  display_name: "Performance Monitor"
+  description: "Monitors application performance and alerts on regressions"
+  homepage_url: "https://perf.mycompany.com"
+
+  permissions:
+    checks: write        # Performance check results
+    pull_requests: write # Performance reports
+    contents: read       # Analyze code changes
+
+  events:
+    - pull_request
+    - deployment_status
+
+# =============================================================================
+# Common Permission Patterns
+# =============================================================================
+permission-patterns:
+  # Read-only bot (monitoring, reporting)
+  readonly:
+    contents: read
+    issues: read
+    pull_requests: read
+    metadata: read
+
+  # Comment-only bot (notifications, updates)
+  comment-only:
+    issues: write        # For commenting
+    pull_requests: write # For commenting
+    metadata: read
+
+  # Quality enforcement bot
+  quality-gate:
+    contents: read
+    checks: write        # Block/allow merging
+    pull_requests: write
+    statuses: write
+
+  # Full automation bot
+  full-automation:
+    contents: write      # Modify files
+    issues: write        # Manage issues
+    pull_requests: write # Manage PRs
+    metadata: read
+
+# =============================================================================
+# Event Subscription Patterns
+# =============================================================================
+event-patterns:
+  # PR workflow automation
+  pr-automation:
+    - pull_request
+    - pull_request_review
+    - pull_request_review_comment
+
+  # Issue management
+  issue-management:
+    - issues
+    - issue_comment
+
+  # CI/CD integration
+  ci-cd:
+    - push
+    - pull_request
+    - check_run
+    - check_suite
+    - deployment_status
+
+  # Repository management
+  repo-management:
+    - push
+    - create
+    - delete
+    - repository
+    - member
+    - team
+
+# =============================================================================
+# Security Considerations
+# =============================================================================
+security-guidelines:
+  # Principle of least privilege
+  permissions:
+    - "Request only the minimum permissions needed"
+    - "Avoid organization-level permissions unless necessary"
+    - "Never request 'administration' permission unless absolutely required"
+
+  # Webhook security
+  webhook:
+    - "Always use webhook secrets"
+    - "Use HTTPS endpoints only"
+    - "Verify signatures before processing"
+    - "Validate all input from webhook payloads"
+
+  # Secret management
+  secrets:
+    - "Store private keys in secure secret management systems"
+    - "Rotate credentials regularly"
+    - "Never log or expose tokens"
+    - "Use environment-specific credentials"
+
+# =============================================================================
+# Testing Configuration
+# =============================================================================
+testing-app:
+  display_name: "Test Bot (DEV)"
+  description: "Development testing for GitHub App"
+
+  # Restrict to specific account during development
+  public: false
+
+  # Minimal permissions for testing
+  permissions:
+    metadata: read
+    issues: write
+
+  # Use ngrok or smee.io for local testing
+  webhook_url: "https://smee.io/test-channel"
