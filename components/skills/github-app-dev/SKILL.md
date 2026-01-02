@@ -152,6 +152,169 @@ if (data.resources.core.remaining < 100) {
 
 See [references/error-handling.md](references/error-handling.md) for advanced rate limit management patterns.
 
+## OpenTelemetry Integration
+
+Add distributed tracing to your GitHub App for better observability and debugging.
+
+### Setup OpenTelemetry
+
+```typescript
+// src/tracing.ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-otlp-http";
+
+export function initializeTracing() {
+  const traceExporter = new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318/v1/traces",
+  });
+
+  const sdk = new NodeSDK({
+    traceExporter,
+    instrumentations: [getNodeAutoInstrumentations()],
+  });
+
+  sdk.start();
+  console.log("OpenTelemetry tracing initialized");
+}
+```
+
+### Common GitHub App Traces
+
+```typescript
+// src/webhooks.ts with tracing
+import { trace, context, SpanStatusCode } from "@opentelemetry/api";
+import { Webhooks } from "@octokit/webhooks";
+
+const tracer = trace.getTracer("github-app");
+
+export function createWebhooks(secret: string): Webhooks {
+  const webhooks = new Webhooks({ secret });
+
+  webhooks.on("pull_request.opened", async ({ payload }) => {
+    const span = tracer.startSpan("webhook.pull_request.opened", {
+      attributes: {
+        "github.event": "pull_request.opened",
+        "github.repository": payload.repository.full_name,
+        "github.pr.number": payload.pull_request.number,
+        "github.pr.author": payload.pull_request.user.login,
+      },
+    });
+
+    try {
+      // Your webhook logic here
+      console.log(`Processing PR #${payload.pull_request.number}`);
+
+      // Example: Add trace for API calls
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        const apiSpan = tracer.startSpan("github.api.add_labels");
+        try {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 100));
+          apiSpan.setStatus({ code: SpanStatusCode.OK });
+        } catch (error) {
+          apiSpan.recordException(error as Error);
+          apiSpan.setStatus({ code: SpanStatusCode.ERROR });
+          throw error;
+        } finally {
+          apiSpan.end();
+        }
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: (error as Error).message,
+      });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+
+  return webhooks;
+}
+```
+
+### Trace Trigger Configuration
+
+Set up a constant trace trigger for testing and debugging:
+
+```typescript
+// src/tracing-trigger.ts
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("github-app-trigger");
+
+// Triggered trace for debugging - can be called via webhook or timer
+export async function triggerTestTrace() {
+  const span = tracer.startSpan("debug.test_trace", {
+    attributes: {
+      "test.trigger": "manual",
+      "test.timestamp": Date.now(),
+    },
+  });
+
+  try {
+    // Simulate some work
+    span.addEvent("Starting test operations");
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+    span.addEvent("Simulated API call completed");
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+    span.addEvent("Simulated database operation completed");
+
+    span.setStatus({ code: SpanStatusCode.OK });
+  } catch (error) {
+    span.recordException(error as Error);
+    span.setStatus({ code: SpanStatusCode.ERROR });
+  } finally {
+    span.end();
+  }
+}
+
+// Add to your webhook handler or create a separate endpoint
+// app.post("/debug/trace", async (c) => {
+//   await triggerTestTrace();
+//   return c.json({ message: "Test trace triggered" });
+// });
+```
+
+### Environment Configuration
+
+```bash
+# .env or Cloudflare Workers secrets
+OTEL_EXPORTER_OTLP_ENDPOINT="https://api.honeycomb.io/v1/traces"
+OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=YOUR_API_KEY"
+OTEL_SERVICE_NAME="my-github-app"
+OTEL_SERVICE_VERSION="1.0.0"
+```
+
+For Cloudflare Workers, adapt the tracing setup:
+
+```typescript
+// For Cloudflare Workers - simplified tracing
+import { trace, context } from "@opentelemetry/api";
+
+// Note: Full OpenTelemetry SDK may not work in Workers
+// Use fetch-based custom exporter or compatible service
+export class SimpleTraceExporter {
+  async export(endpoint: string, headers: Record<string, string>, spans: any[]) {
+    await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      body: JSON.stringify(spans),
+    });
+  }
+}
+```
+
 ## Workflow: Create a New GitHub App
 
 ### Step 1: Register the App
@@ -169,6 +332,70 @@ See [references/error-handling.md](references/error-handling.md) for advanced ra
    - Note the **App ID**
    - Generate and download **Private Key** (.pem file)
    - Note the **Client ID** and **Client Secret** (if using OAuth)
+
+### GitHub App Configuration Settings
+
+After creating your app, you can configure these settings in **Settings → Developer settings → GitHub Apps → [Your App]**:
+
+#### Basic Information
+- **Display Name**: Public name shown to users during installation
+- **Description**: What your app does (shown in marketplace and installation)
+- **Homepage URL**: Link to your app's documentation or website
+- **User Authorization Callback URL**: OAuth redirect URL (if using user tokens)
+- **Setup URL**: Optional post-installation configuration page
+- **Webhook URL**: Endpoint for receiving events
+- **Webhook Secret**: Secret for verifying webhook authenticity
+
+#### Installation Settings
+- **Public**: Anyone can install your app
+- **Only on this account**: Restrict to your personal/organization account
+- **Request user authorization (OAuth) during installation**: Enable OAuth flow
+- **Expire user authorization tokens**: Automatically expire user tokens
+- **Refresh user authorization tokens**: Allow token refresh
+- **Device flow enabled**: Support device authorization flow
+- **Post installation URL**: Redirect users after installation
+
+#### Marketplace Settings (for public apps)
+- **Primary Category**: App category for discovery
+- **Listed in GitHub Marketplace**: Make app discoverable
+- **Pricing**: Free, flat rate, or per-unit pricing
+- **Screenshots**: Up to 5 images showing your app
+
+#### Advanced Settings
+- **Transfer ownership**: Move app to different account
+- **Danger Zone**: Delete app or make private
+
+#### Example Configuration for PR Bot
+
+```yaml
+# Recommended settings for a typical PR automation bot
+Display Name: "PR Assistant Bot"
+Description: "Automated PR labeling, reviewer assignment, and code quality checks"
+Homepage URL: "https://mycompany.com/pr-assistant"
+User Authorization Callback URL: "https://mycompany.com/auth/callback"
+Setup URL: "https://mycompany.com/setup"
+Webhook URL: "https://api.mycompany.com/webhooks/github"
+
+Installation:
+  - Public: true (if sharing with community)
+  - Request OAuth: false (unless need user-specific actions)
+  - Post installation URL: "https://mycompany.com/setup/complete"
+
+Permissions:
+  Repository:
+    - Contents: Read (for file analysis)
+    - Issues: Write (for labeling)
+    - Pull requests: Write (for reviews/comments)
+    - Metadata: Read (for repository info)
+
+  Organization:
+    - Members: Read (for reviewer assignment)
+
+Events:
+  - Pull request
+  - Pull request review
+  - Issue comment
+```
 
 ### Step 2: Set Up Development Environment
 
@@ -365,6 +592,83 @@ GITHUB_APP_ID = "123456"
 
 ## Common Patterns
 
+### Repository Custom Properties for Configuration
+
+Use repository or organization custom properties to apply different logic based on repository metadata:
+
+```typescript
+// Check repository custom properties for configuration
+async function getRepoConfig(octokit: Octokit, owner: string, repo: string) {
+  try {
+    const { data: repoProperties } = await octokit.request(
+      "GET /repos/{owner}/{repo}/custom-properties",
+      { owner, repo }
+    );
+
+    return repoProperties.reduce((config, prop) => {
+      config[prop.property_name] = prop.value;
+      return config;
+    }, {} as Record<string, string>);
+  } catch (error) {
+    // Fallback if custom properties not available
+    return {};
+  }
+}
+
+// Apply language-specific logic based on custom properties
+webhooks.on("pull_request.opened", async ({ payload, octokit }) => {
+  const config = await getRepoConfig(
+    octokit,
+    payload.repository.owner.login,
+    payload.repository.name
+  );
+
+  const language = config.language || "unknown";
+  const labels: string[] = [];
+
+  // Apply language-specific configuration
+  switch (language) {
+    case "rust":
+      labels.push("rust", "performance-critical");
+      // Require clippy checks
+      await octokit.checks.create({
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        head_sha: payload.pull_request.head.sha,
+        name: "Rust Clippy Required",
+        status: "queued",
+        output: {
+          title: "Clippy check required for Rust projects",
+          summary: "Please ensure clippy passes before merging",
+        },
+      });
+      break;
+
+    case "javascript":
+      labels.push("javascript", "needs-testing");
+      // Require Jest tests
+      break;
+
+    case "python":
+      labels.push("python", "type-checking");
+      // Require mypy validation
+      break;
+
+    default:
+      labels.push("needs-review");
+  }
+
+  if (labels.length > 0) {
+    await octokit.issues.addLabels({
+      owner: payload.repository.owner.login,
+      repo: payload.repository.name,
+      issue_number: payload.pull_request.number,
+      labels,
+    });
+  }
+});
+```
+
 ### Auto-label PRs
 
 ```typescript
@@ -475,6 +779,184 @@ octokit.repos.getContent({ owner, repo, path, ref });
 - **Permission denied**: Check app permissions, installation scope
 
 See [references/error-handling.md](references/error-handling.md) for detailed troubleshooting.
+
+## Documentation Strategy
+
+Different contexts require different types of documentation for your GitHub App. Plan your documentation approach based on your audience and distribution method.
+
+### Documentation Types
+
+#### 1. Marketplace Listing Documentation
+**Purpose**: Help users discover and understand your app's value proposition
+**Audience**: Potential users browsing the GitHub Marketplace
+**Content Focus**:
+- Clear value proposition and use cases
+- Feature highlights with screenshots
+- Installation and setup instructions
+- Pricing and support information
+
+```markdown
+# Example: PR Assistant Bot - Marketplace Description
+
+## Automate Your Pull Request Workflow
+
+Save hours of manual work with intelligent PR labeling, automated reviewer
+assignment, and code quality checks.
+
+### Key Features
+- 🏷️ **Smart Labeling**: Automatically label PRs based on files changed
+- 👥 **Reviewer Assignment**: Route PRs to the right team members
+- ✅ **Quality Gates**: Enforce coding standards and best practices
+- 📊 **Analytics**: Track PR metrics and team performance
+
+### Setup in 2 Minutes
+1. Install the app from the marketplace
+2. Configure your team settings
+3. Watch the automation begin!
+
+**Pricing**: Free for public repos, $5/month per private repo
+```
+
+#### 2. Code Comments and Documentation
+**Purpose**: Help developers understand, maintain, and extend your app
+**Audience**: Your development team and contributors
+**Content Focus**:
+- API documentation and type definitions
+- Architectural decisions and trade-offs
+- Code comments for complex business logic
+- Development setup and testing procedures
+
+```typescript
+/**
+ * Assigns reviewers to a pull request based on CODEOWNERS file
+ * and team availability from GitHub's REST API.
+ *
+ * @param octokit - Authenticated GitHub client
+ * @param payload - Pull request webhook payload
+ * @param maxReviewers - Maximum number of reviewers to assign (default: 3)
+ *
+ * @returns Promise<string[]> - Array of assigned reviewer usernames
+ *
+ * @example
+ * ```typescript
+ * const reviewers = await assignReviewers(octokit, prPayload, 2);
+ * console.log(`Assigned reviewers: ${reviewers.join(', ')}`);
+ * ```
+ */
+async function assignReviewers(
+  octokit: Octokit,
+  payload: PullRequestEvent,
+  maxReviewers = 3
+): Promise<string[]> {
+  // Implementation details...
+}
+```
+
+#### 3. Installation Configuration Pages
+**Purpose**: Guide users through app setup and customization
+**Audience**: Users who have installed your app
+**Content Focus**:
+- Step-by-step configuration instructions
+- Interactive setup forms and validation
+- Troubleshooting common issues
+- Feature toggles and customization options
+
+```html
+<!-- Example: Post-Installation Setup Page -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PR Assistant Setup</title>
+</head>
+<body>
+  <h1>Welcome to PR Assistant!</h1>
+
+  <div class="setup-wizard">
+    <h2>Step 1: Configure Team Settings</h2>
+    <p>Choose which teams should be notified for different types of PRs:</p>
+
+    <form id="team-config">
+      <label>
+        Frontend Changes (*.tsx, *.css):
+        <select name="frontend-team">
+          <option value="">Select team...</option>
+          <option value="frontend">Frontend Team</option>
+          <option value="design">Design Team</option>
+        </select>
+      </label>
+
+      <label>
+        Backend Changes (*.py, *.go):
+        <select name="backend-team">
+          <option value="">Select team...</option>
+          <option value="backend">Backend Team</option>
+          <option value="platform">Platform Team</option>
+        </select>
+      </label>
+
+      <button type="submit">Save Configuration</button>
+    </form>
+  </div>
+
+  <div class="help-section">
+    <h3>Need Help?</h3>
+    <ul>
+      <li><a href="/docs/troubleshooting">Troubleshooting Guide</a></li>
+      <li><a href="mailto:support@example.com">Contact Support</a></li>
+    </ul>
+  </div>
+</body>
+</html>
+```
+
+### Documentation Best Practices
+
+#### For Marketplace Listings
+- **Lead with benefits**, not features
+- Use **screenshots and GIFs** to demonstrate functionality
+- Include **clear pricing** information
+- Provide **support contact** information
+- Test your description with potential users
+
+#### For Code Documentation
+- Document **why**, not just what
+- Include **runnable examples** in comments
+- Use **TypeScript types** for API clarity
+- Document **error conditions** and recovery strategies
+- Keep documentation **close to code** (avoid separate wikis)
+
+#### For Installation Pages
+- Use **progressive disclosure** (show complexity gradually)
+- Provide **sensible defaults** for all settings
+- Include **validation feedback** on forms
+- Offer **quick start** and **advanced** configuration paths
+- Test with users unfamiliar with your app
+
+### Documentation Maintenance
+
+```typescript
+// Example: Automated documentation checks
+export const docChecks = {
+  // Ensure all public methods have JSDoc comments
+  validateJSDoc: true,
+
+  // Check that README examples still work
+  validateExamples: true,
+
+  // Ensure setup URLs are still accessible
+  validateLinks: true,
+
+  // Check that marketplace description matches current features
+  validateFeatureSync: true,
+};
+```
+
+#### Common Documentation Anti-patterns
+- **Outdated screenshots** showing old UI
+- **Broken links** to setup or support resources
+- **Missing error messages** in troubleshooting guides
+- **Developer jargon** in user-facing documentation
+- **Installation steps** that only work on specific systems
 
 ## See Also
 
