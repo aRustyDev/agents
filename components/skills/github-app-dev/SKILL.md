@@ -47,28 +47,15 @@ GitHub Apps use a three-tier authentication model:
 
 Most apps only need installation tokens. See [examples/auth-patterns.ts](examples/auth-patterns.ts) for implementation details.
 
-### Advanced Authentication Patterns
+### Authentication Best Practices
 
-**Token lifecycle management:**
-- JWT tokens expire after 10 minutes (generate fresh ones)
-- Installation tokens expire after 1 hour (cache and refresh)
-- User tokens can be long-lived (store securely with refresh tokens)
+**Essential security patterns:**
+- Generate fresh JWT tokens (expire in 10 minutes)
+- Cache and refresh installation tokens (expire in 1 hour)
+- Scope operations to specific installations
+- Handle 401/403 errors gracefully
 
-**Multi-installation handling:**
-- Apps can be installed on multiple organizations
-- Each installation has separate permissions and repository access
-- Use installation ID to scope operations correctly
-
-**Authentication error handling:**
-- **401 Unauthorized**: Invalid or expired token
-- **403 Forbidden**: Insufficient permissions or rate limited
-- **404 Not Found**: Resource doesn't exist OR insufficient permissions
-
-**Security best practices:**
-- Rotate private keys annually
-- Use short-lived tokens where possible
-- Implement token refresh with backoff
-- Log authentication failures for security monitoring
+See [references/authentication.md](references/authentication.md) for advanced patterns and [examples/auth-patterns.ts](examples/auth-patterns.ts) for implementation examples.
 
 ### Permission Categories
 
@@ -79,303 +66,257 @@ Most apps only need installation tokens. See [examples/auth-patterns.ts](example
 
 See [references/permissions.md](references/permissions.md) for complete permission matrix.
 
-## Best Practices
+## Example Use Cases & Configurations
 
-### Framework Selection
+### Common App Types with Ready-to-Use Configs
 
-**Start with Probot** for rapid development, migrate to raw Octokit for custom deployments:
+**🚀 PR Automation Bot**
+*Auto-label PRs, assign reviewers, enforce quality gates*
+- **Config**: [app-configuration.yaml#pr-automation-bot](examples/app-configuration.yaml#L9)
+- **Implementation**: [patterns/auto-labeling.ts](examples/patterns/auto-labeling.ts) + [patterns/reviewer-assignment.ts](examples/patterns/reviewer-assignment.ts)
+- **Permissions needed**: `contents:read`, `pull_requests:write`, `issues:write`
 
-| Use Case | Recommended Approach |
-|----------|---------------------|
-| **Learning/Prototyping** | Probot framework |
-| **Standard hosting** | Probot framework |
-| **Cloudflare Workers** | Raw Octokit + Hono |
-| **High-performance** | Raw Octokit |
-| **Complex authentication** | Raw Octokit |
+**🔒 Security Scanner**
+*Scan for secrets, vulnerabilities, license compliance*
+- **Config**: [app-configuration.yaml#security-scanner-bot](examples/app-configuration.yaml#L66)
+- **Implementation**: [webhook-security.ts](examples/webhook-security.ts)
+- **Permissions needed**: `contents:read`, `security_events:write`, `vulnerability_alerts:read`
 
-### Anti-patterns
+**📋 Issue Triage Assistant**
+*Route issues to teams, auto-label by content*
+- **Config**: [app-configuration.yaml#issue-triage-bot](examples/app-configuration.yaml#L86)
+- **Implementation**: [production-app.ts](examples/production-app.ts)
+- **Permissions needed**: `issues:write`, `metadata:read`
 
-❌ **Don't:**
-- Request excessive permissions ("just in case")
-- Process webhooks synchronously without timeouts
-- Store secrets in environment variables only
-- Skip webhook signature verification
-- Ignore rate limits
+**🚢 Release Manager**
+*Generate changelogs, manage releases, close issues*
+- **Config**: [app-configuration.yaml#release-bot](examples/app-configuration.yaml#L105)
+- **Implementation**: [production-app.ts](examples/production-app.ts)
+- **Permissions needed**: `contents:write`, `issues:write`, `pull_requests:read`
 
-✅ **Do:**
-- Follow principle of least privilege
-- Implement graceful error handling
-- Use proper secret management
-- Verify webhook authenticity
-- Monitor API usage patterns
+### Framework-Specific Examples
 
-See [examples/best-practices.md](examples/best-practices.md) for detailed patterns and implementations.
+**⚡ Cloudflare Workers (Edge-First)**
+*Best for: Low latency, global deployment, simple logic*
+```typescript
+// Minimal viable app in <100 lines
+export default { async fetch(request, env) { ... } }
+```
+- **Example**: [cloudflare-workers-minimal.ts](examples/cloudflare-workers-minimal.ts)
+- **Deploy guide**: [deployment/cloudflare-workers.md](examples/deployment/cloudflare-workers.md)
+
+**🤖 Probot Framework (Rapid Development)**
+*Best for: Prototyping, complex logic, multiple integrations*
+```typescript
+export = (app) => {
+  app.on('pull_request.opened', async (context) => { ... })
+}
+```
+- **Example**: [probot-simple.ts](examples/probot-simple.ts)
+- **Setup guide**: [setup-guide.md](examples/setup-guide.md)
+
+**☁️ Serverless Functions (Auto-scaling)**
+*Best for: Variable load, complex processing, existing infrastructure*
+- **AWS Lambda**: [deployment/aws-lambda.md](examples/deployment/aws-lambda.md)
+- **Vercel**: [deployment/vercel.md](examples/deployment/vercel.md)
+
+### Configuration Examples
+
+✅ **Best practice examples:**
+- **Minimal permissions**: [app-configuration.yaml#permission-patterns](examples/app-configuration.yaml#L229)
+- **Complete event coverage**: [app-configuration.yaml#event-patterns](examples/app-configuration.yaml#L260)
+- **Security checklist**: [best-practices.md](examples/best-practices.md)
+
+## Best Practices & Anti-patterns
+
+### Essential Best Practices
+
+**🔒 Security First**
+- **Verify all webhook signatures** - Never process unverified webhooks
+- **Request minimal permissions** - Use principle of least privilege
+- **Secure secret management** - Use dedicated secret managers, not env vars
+- **Validate all inputs** - Sanitize webhook payloads and user data
+
+**⚡ Performance & Reliability**
+- **Acknowledge webhooks quickly** - Respond within 30 seconds, process async
+- **Implement circuit breakers** - Graceful degradation when GitHub API is slow
+- **Cache installation tokens** - Refresh before expiry, batch API calls
+- **Monitor rate limits proactively** - Check remaining quota before operations
+
+**🏗️ Architecture & Maintainability**
+- **Separate concerns** - Dedicated modules for auth, webhooks, services
+- **Make operations idempotent** - Handle duplicate webhook deliveries gracefully
+- **Use structured logging** - Include context (repo, PR number, installation)
+- **Test with realistic payloads** - Use actual GitHub webhook examples
+
+See [examples/best-practices.md](examples/best-practices.md) for comprehensive implementation examples and security checklists.
+
+### Common Anti-patterns to Avoid
+
+**❌ Security Anti-patterns**
+- **Skipping signature verification** - "Just for development" becomes production
+  ```typescript
+  // DON'T: Skip verification
+  app.post('/webhook', (req, res) => {
+    // Process without verifying req.headers['x-hub-signature-256']
+  })
+  ```
+- **Over-privileged permissions** - Requesting `admin` when `read` suffices
+  ```yaml
+  # DON'T: Request excessive permissions
+  permissions:
+    administration: write  # Dangerous! Almost never needed
+    contents: write        # Do you really need to modify files?
+  ```
+- **Logging sensitive data** - Tokens in error messages or debug logs
+- **Hardcoded secrets** - Credentials in source code or config files
+
+**❌ Performance Anti-patterns**
+- **Synchronous webhook processing** - Blocking responses while making API calls
+- **Unbounded API requests** - Making 100+ calls without rate limit checks
+- **Memory leaks in long-running apps** - Not cleaning up event listeners
+- **Missing error boundaries** - One failed operation breaks entire workflow
+
+**❌ Integration Anti-patterns**
+- **Polling instead of webhooks** - Inefficient API usage patterns
+- **Not handling app uninstalls** - Continuing to process events after removal
+- **Ignoring GitHub API deprecations** - Using outdated endpoints or parameters
+- **Assuming webhook order** - Events may arrive out of sequence
+- **Under-configured webhooks** - Missing critical events for your use case
+  ```yaml
+  # DON'T: Miss critical events for PR bot
+  events: [issues]  # Forgot pull_request events!
+  ```
+
+### Framework Selection Guidelines
+
+| Scale | Complexity | Recommended Approach | When to Use |
+|-------|------------|---------------------|-------------|
+| **Small** (< 100 repos) | Simple automation | **Probot** | Learning, prototyping, simple bots |
+| **Medium** (100-1000 repos) | Custom logic | **Hono + Octokit** | Production apps, edge deployment |
+| **Large** (1000+ repos) | Enterprise features | **Custom framework** | Event streaming, multi-tenant |
+
+See [references/implementation-patterns.md](references/implementation-patterns.md) for detailed architecture guidance and [references/anti-patterns.md](references/anti-patterns.md) for comprehensive anti-pattern examples and recovery strategies.
 
 ## Error Handling & Rate Limiting
 
-### Essential Error Patterns
+### Quick Error Response Guide
 
-```typescript
-// Basic error handling with retries
-async function safeGitHubCall<T>(call: () => Promise<T>): Promise<T | null> {
-  try {
-    return await call();
-  } catch (error: any) {
-    // Handle rate limits
-    if (error.status === 403 && error.response?.headers['x-ratelimit-remaining'] === '0') {
-      const resetTime = parseInt(error.response.headers['x-ratelimit-reset']) * 1000;
-      const waitTime = resetTime - Date.now();
-      if (waitTime > 0 && waitTime < 60000) {
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        return call(); // Retry once
-      }
-    }
+**Key error handling patterns:**
+- **403 (Rate Limited)**: Wait for reset time, implement backoff
+- **5xx (Server Errors)**: Retry with exponential backoff
+- **401/403**: Check credentials/permissions, refresh tokens
+- **400/404**: Validate request parameters, verify resource exists
 
-    // Log error and return null for graceful degradation
-    console.error('GitHub API call failed:', error.message);
-    return null;
-  }
-}
-```
+### Rate Limit Essentials
 
-See [references/error-handling.md](references/error-handling.md) for comprehensive error handling patterns including circuit breakers, adaptive throttling, and monitoring.
+**Key principles:**
+- Monitor usage before hitting limits
+- Implement graceful degradation strategies
+- Use exponential backoff for retries
 
-**Key error handling:**
-- **403 (Rate Limited)**: Wait for reset time
-- **5xx (Server Errors)**: Retry with backoff
-- **401/403**: Check credentials/permissions
-- **400/404**: Fix request or verify resource exists
+See [examples/webhook-security.ts](examples/webhook-security.ts) for rate limit monitoring implementation and [references/error-handling.md](references/error-handling.md) for comprehensive patterns.
 
-### Rate Limit Management
+## Observability & Monitoring
 
-Monitor and respect GitHub's rate limits:
+### Essential Monitoring Targets
 
-```typescript
-// Basic rate limit check
-const { data } = await octokit.rateLimit.get();
-console.log(`Rate limit: ${data.resources.core.remaining}/${data.resources.core.limit}`);
+**Application health:** Response times, error rates, resource usage
+**GitHub API integration:** Rate limits, authentication failures, API errors
+**Business metrics:** Installations, active repositories, feature usage
 
-if (data.resources.core.remaining < 100) {
-  console.warn('⚠️ Approaching rate limit');
-}
-```
+### Quick OpenTelemetry Setup
 
-See [references/error-handling.md](references/error-handling.md) for advanced rate limit management patterns.
+Key trace targets for GitHub Apps:
+- `webhook.{event_type}` - Processing time and errors
+- `github.api.{operation}` - API performance and rate limits
+- `auth.installation_token` - Authentication overhead
 
-## Observability
+See [references/observability.md](references/observability.md) for complete OpenTelemetry setup, alerting strategies, health checks, and dashboard configurations.
 
-### OpenTelemetry Integration
+## Architecture & Patterns
 
-Add distributed tracing for better debugging and performance monitoring.
+### Framework Decision Matrix
 
-**Key trace targets for GitHub Apps:**
+| Scale | Framework | Architecture |
+|-------|-----------|-------------|
+| **Small (< 100 repos)** | Probot | Single instance, simple |
+| **Medium (100-1000 repos)** | Probot or Hono | Load balanced, cached |
+| **Large (1000+ repos)** | Custom Octokit | Event streaming, queues |
 
-- `webhook.{event_type}` - Track webhook processing time and errors
-- `github.api.{operation}` - Monitor API call performance and rate limits
-- `auth.installation_token` - Track authentication overhead
-- `app.business_logic` - Measure your app's core functionality
+### Core Design Principles
 
-See [references/observability.md](references/observability.md) for comprehensive OpenTelemetry setup, progressive development strategies, and monitoring best practices.
+**✅ Essential patterns:**
+- Event-driven architecture with dedicated handlers
+- Stateless operations (no in-memory state)
+- Background processing for heavy operations
+- Idempotent webhook handling
 
-## Architecture & Design Patterns
-
-### App Architecture Decisions
-
-**Framework-based approach (recommended for most apps):**
-- **Probot**: Convention-over-configuration, rapid development
-- **Hono + Octokit**: Lightweight, edge-deployable, full control
-
-**Custom approach (for specific requirements):**
-- Raw Express/Fastify + Octokit
-- Serverless functions with custom routing
-
-See [references/probot.md](references/probot.md) for detailed framework comparison.
-
-### Design Pattern Anti-patterns
-
-❌ **Anti-patterns:**
-- Monolithic webhook handlers (handle all events in one function)
-- Storing state in memory (apps should be stateless)
+**❌ Avoid these anti-patterns:**
+- Monolithic webhook handlers processing all events
 - Synchronous processing of heavy operations
 - Direct database access from webhook handlers
 
-✅ **Best practices:**
-- Event-driven architecture with dedicated handlers
-- Queue heavy operations (use background jobs)
-- Idempotent operations (handle duplicate webhooks)
-- Clean separation between GitHub API and business logic
+See [references/probot.md](references/probot.md) for framework comparisons and [references/hosting/](references/hosting/) for platform-specific patterns.
 
-### Scalability Patterns
+## Testing & Quality
 
-**Small apps (< 100 repos):** Single instance with in-memory rate limiting
-**Medium apps (100-1000 repos):** Load balancer + shared cache (Redis)
-**Large apps (1000+ repos):** Event streaming + worker queues + distributed tracing
+### Test Strategy Overview
 
-See [references/hosting/](references/hosting/) for platform-specific scaling strategies.
+Follow the **70/20/10 test pyramid:**
+- **70% Unit Tests** - Business logic and utilities
+- **20% Integration Tests** - Webhook processing with mocked API
+- **10% End-to-End Tests** - Full flow with test repositories
 
-## Testing Strategies
+### Critical Test Scenarios
 
-### Test Pyramid for GitHub Apps
+**Authentication:** Token expiration, app uninstalls, permission changes
+**Webhooks:** Duplicate delivery, signature verification, malformed payloads
+**Rate limits:** Graceful degradation, retry logic, secondary limits
 
-**Unit Tests (70%)**: Test business logic and utility functions
-**Integration Tests (20%)**: Test webhook processing with mocked GitHub API
-**End-to-End Tests (10%)**: Test full flow with test repositories
-
-### Essential Test Scenarios
-
-**Authentication edge cases:**
-- Expired installation tokens
-- App uninstalled during operation
-- Permission changes mid-operation
-
-**Webhook reliability:**
-- Duplicate delivery handling
-- Malformed payload processing
-- Signature verification failures
-
-**Rate limiting behavior:**
-- Graceful degradation under limits
-- Retry logic validation
-- Secondary rate limit handling
-
-See [references/testing.md](references/testing.md) for complete testing setup and patterns.
+See [references/testing.md](references/testing.md) for complete testing frameworks, patterns, and automation strategies.
 
 ## Production Deployment
 
-### Deployment Checklist
+### Pre-deploy Checklist
 
-**Security:**
-- [ ] Webhook signature verification enabled
-- [ ] Private key stored in secure vault
-- [ ] Minimum required permissions configured
-- [ ] Input validation on all webhook payloads
+**Security essentials:**
+- Webhook signature verification enabled
+- Private key in secure vault (not env vars)
+- Minimum required permissions only
 
-**Reliability:**
-- [ ] Health checks implemented
-- [ ] Error monitoring configured
-- [ ] Rate limit monitoring in place
-- [ ] Graceful shutdown handling
+**Reliability essentials:**
+- Health checks responding
+- Error monitoring configured
+- Response times < 10s (GitHub timeout)
 
-**Performance:**
-- [ ] Response times < 10s (GitHub timeout)
-- [ ] Database connection pooling
-- [ ] Background job processing for heavy operations
-- [ ] Caching strategy implemented
-
-### Environment Configuration
+### Configuration
 
 **Required environment variables:**
-```bash
-GITHUB_APP_ID=123456                    # Your app's ID
-GITHUB_PRIVATE_KEY="-----BEGIN..."     # App's private key (base64 encoded)
-GITHUB_WEBHOOK_SECRET=your_secret_here  # Webhook verification secret
-```
+- `GITHUB_APP_ID` - Your app's unique identifier
+- `GITHUB_PRIVATE_KEY` - App authentication key
+- `GITHUB_WEBHOOK_SECRET` - Webhook signature verification
 
-**Optional configuration:**
-```bash
-NODE_ENV=production                     # Runtime environment
-LOG_LEVEL=info                         # Logging verbosity
-DATABASE_URL=postgresql://...          # If using database
-REDIS_URL=redis://...                  # If using cache
-```
+See [references/hosting/](references/hosting/) for platform-specific deployment guides and [examples/deployment/](examples/deployment/) for complete configuration examples.
 
-See [references/hosting/](references/hosting/) for platform-specific deployment guides.
+## Performance & Optimization
 
-## Performance Optimization
+### Critical Performance Targets
 
-### Response Time Optimization
+**Response times:** Acknowledge webhooks within 30 seconds
+**Async processing:** Queue non-critical operations
+**Resource management:** Stream large payloads, monitor memory
 
-**Critical path optimizations:**
-- Webhook acknowledgment within 30 seconds
-- Async processing for non-critical operations
-- Connection pooling and keep-alive
-- Efficient API call batching
+### Common Bottlenecks
 
-**Common bottlenecks:**
-- Synchronous GitHub API calls
-- Database queries in webhook handlers
-- Large payload processing
-- External service dependencies
+**Avoid these performance killers:**
+- Synchronous GitHub API calls in webhook handlers
+- Database queries blocking webhook responses
+- Loading large payloads into memory
+- CPU-intensive tasks blocking the main thread
 
-### Memory and Resource Management
+See [references/observability.md](references/observability.md) for detailed performance monitoring and optimization strategies.
 
-**Memory optimization:**
-- Stream large payloads instead of loading into memory
-- Implement proper garbage collection for long-running processes
-- Monitor heap usage and set appropriate limits
-
-**CPU optimization:**
-- Use worker threads for CPU-intensive tasks
-- Implement request queuing under high load
-- Profile and optimize hot code paths
-
-See [references/observability.md](references/observability.md) for performance monitoring setup.
-
-## Monitoring & Alerting
-
-### Essential Metrics
-
-**Application health:**
-- Response time distribution (p50, p95, p99)
-- Error rate by endpoint and error type
-- Request volume patterns
-- Memory and CPU utilization
-
-**GitHub API integration:**
-- Rate limit usage (remaining/total)
-- API error rates by operation type
-- Authentication failure rates
-- Webhook delivery success rate
-
-**Business metrics:**
-- Number of installations
-- Active repositories
-- Feature usage patterns
-- User engagement metrics
-
-### Alerting Strategy
-
-**Critical alerts (page immediately):**
-- App completely down (health check failures)
-- Error rate > 10% for 5 minutes
-- Rate limit exhausted
-- Authentication failures > 5% for 10 minutes
-
-**Warning alerts (notify via email/Slack):**
-- Response time p95 > 5 seconds
-- Error rate > 5% for 15 minutes
-- Rate limit usage > 80%
-- Webhook signature verification failures
-
-**Info alerts (dashboard only):**
-- New installations/uninstalls
-- Feature usage patterns
-- Performance trends
-
-### Monitoring Implementation
-
-**Basic setup (any hosting platform):**
-```typescript
-// Health check endpoint
-app.get('/health', (req, res) => {
-  const health = {
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    github_rate_limit: await checkRateLimit()
-  };
-  res.json(health);
-});
-```
-
-**Advanced monitoring:**
-- Structured logging with correlation IDs
-- Distributed tracing for request flows
-- Custom metrics for business logic
-- Integration with monitoring platforms
-
-See [references/observability.md](references/observability.md) for complete monitoring setup with OpenTelemetry, Datadog, and other monitoring solutions.
 
 ## Implementation Guides
 
@@ -389,81 +330,58 @@ See [examples/README.md](examples/README.md) for step-by-step setup guides.
 
 ### Development Workflow
 
-**Phase 1: Setup** (5 minutes)
-- Register app in GitHub
-- Configure basic permissions and webhook URL
-- Download private key
+**Three-phase approach:**
+1. **Setup** - Register app, configure permissions, download key
+2. **Development** - Clone templates, implement handlers, test locally
+3. **Deployment** - Configure secrets, deploy, install on repos
 
-**Phase 2: Development** (varies)
-- Clone starter template from examples/
-- Implement webhook handlers for your use case
-- Test locally with smee.io proxy
+See [examples/setup-guide.md](examples/setup-guide.md) for detailed step-by-step instructions.
 
-**Phase 3: Deployment** (5 minutes)
-- Set secrets in your hosting platform
-- Deploy and update webhook URL
-- Install on test repositories
+### Advanced Configuration Examples
 
-See [examples/setup-guide.md](examples/setup-guide.md) for detailed instructions.
+**🏢 Enterprise Apps** - Multi-tenant, organization-scoped with SAML/SSO integration
+**🔄 Multi-Repository Orchestration** - Coordinate changes across multiple repositories
+**📊 Analytics & Reporting** - Read-only apps that collect metrics without making changes
 
-## Common Patterns
+See [references/advanced-configuration.md](references/advanced-configuration.md) for complete enterprise patterns, deployment scenarios by scale, and configuration examples.
 
-### Repository Configuration-Based Logic
+### Integration Examples
 
-Use repository custom properties to apply different behavior based on repository metadata:
+Connect GitHub Apps with external systems using proven integration patterns:
 
-```typescript
-// Example: Language-specific PR handling
-async function getRepoConfig(octokit: Octokit, owner: string, repo: string) {
-  const { data: repoProperties } = await octokit.request(
-    "GET /repos/{owner}/{repo}/custom-properties",
-    { owner, repo }
-  );
+**🔗 External API Integration** - Slack, Jira, CI/CD systems
+**📝 Custom Workflow Automation** - Repository-specific business logic
+**🔐 Security Integration** - Automated security scanning and policies
 
-  return repoProperties.reduce((config, prop) => ({
-    ...config,
-    [prop.property_name]: prop.value
-  }), {});
-}
-```
+See [references/integration-patterns.md](references/integration-patterns.md) for implementation details, authentication patterns, and resilience strategies.
 
-**Common patterns:**
-- **Auto-labeling** - Label PRs based on conventional commit titles
-- **Reviewer assignment** - Route to team members based on file paths
-- **Quality gates** - Enforce checks based on repository settings
-- **Welcome automation** - Greet first-time contributors
+## Common Implementation Patterns
 
-See [examples/patterns/](examples/patterns/) for complete implementations of these patterns.
+### Essential App Patterns
+
+**Auto-labeling** - Label PRs based on conventional commit titles
+**Reviewer assignment** - Route to team members based on file paths
+**Quality gates** - Enforce checks based on repository settings
+**Welcome automation** - Greet first-time contributors
+**Configuration-based logic** - Use repository properties for behavior
+
+See [references/implementation-patterns.md](references/implementation-patterns.md) for complete code examples, event processing patterns, and state management strategies.
 
 ### Hosting Platforms
 
-| Platform | Best For | Trade-offs |
-|----------|----------|------------|
-| **Cloudflare Workers** | Edge deployment, low latency | Limited runtime APIs |
-| **Probot on Glitch/Railway** | Quick prototypes | Limited customization |
-| **AWS Lambda/Vercel** | Scalable production apps | More complex setup |
-
-See [references/hosting/](references/hosting/) for platform-specific deployment guides.
+Choose the right platform based on your scale and requirements. See [references/hosting/](references/hosting/) for detailed deployment guides and platform comparisons.
 
 ## API Reference
 
-### Key Octokit Methods
+### Core Operations
 
-**Most commonly used:**
-```typescript
-// Pull Requests
-octokit.pulls.get({ owner, repo, pull_number });
-octokit.pulls.createReview({ owner, repo, pull_number, event, body });
+**Essential API categories:**
+- **Pull Requests** - Reviews, comments, status updates
+- **Issues & Comments** - Create, label, assign, respond
+- **Checks & Status** - CI integration, status reporting
+- **Repository** - Files, branches, webhooks, settings
 
-// Issues & Comments
-octokit.issues.createComment({ owner, repo, issue_number, body });
-octokit.issues.addLabels({ owner, repo, issue_number, labels });
-
-// Checks
-octokit.checks.create({ owner, repo, head_sha, name, status, conclusion });
-```
-
-See [references/octokit.md](references/octokit.md) for complete API reference.
+See [references/octokit.md](references/octokit.md) for complete API reference and [examples/production-app.ts](examples/production-app.ts) for real-world usage patterns.
 
 ### Webhook Events
 
@@ -503,6 +421,8 @@ See [references/error-handling.md](references/error-handling.md) for detailed tr
 ## See Also
 
 - [examples/README.md](examples/README.md) - Complete starter projects and runnable code samples
+- [examples/best-practices.md](examples/best-practices.md) - Comprehensive implementation examples and security checklists
+- [references/anti-patterns.md](references/anti-patterns.md) - Common mistakes and recovery strategies
 - [references/testing.md](references/testing.md) - Comprehensive testing strategies and patterns
 - [references/error-handling.md](references/error-handling.md) - Advanced error handling and rate limit management
 - [references/observability.md](references/observability.md) - OpenTelemetry setup and monitoring best practices
