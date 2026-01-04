@@ -7,7 +7,7 @@ Comprehensive reference for memory model translation, especially GC → Ownershi
 ## Memory Model Comparison
 
 | Language   | Memory Model              | Cleanup              | Ownership          |
-|------------|---------------------------|----------------------|--------------------|
+| ---------- | ------------------------- | -------------------- | ------------------ |
 | TypeScript | GC (V8)                   | Automatic            | Shared references  |
 | Python     | GC (ref counting + cycle) | Automatic            | Shared references  |
 | Go         | GC (concurrent)           | Automatic            | Shared references  |
@@ -21,13 +21,13 @@ Comprehensive reference for memory model translation, especially GC → Ownershi
 
 ### Key Differences
 
-| GC Languages | Ownership Languages |
-|--------------|---------------------|
-| Allocate freely | Consider ownership at creation |
-| Share references anywhere | One owner, many borrows |
-| Cleanup "sometime later" | Cleanup when owner goes out of scope |
-| Circular refs OK (with cycle detection) | Circular refs need Rc/Arc |
-| Simple mental model | More planning required |
+| GC Languages                            | Ownership Languages                  |
+| --------------------------------------- | ------------------------------------ |
+| Allocate freely                         | Consider ownership at creation       |
+| Share references anywhere               | One owner, many borrows              |
+| Cleanup "sometime later"                | Cleanup when owner goes out of scope |
+| Circular refs OK (with cycle detection) | Circular refs need Rc/Arc            |
+| Simple mental model                     | More planning required               |
 
 ### Ownership Decision Tree
 
@@ -58,7 +58,7 @@ START: Is this data shared across components?
 ## Borrowing Pattern Reference
 
 | Source Pattern      | Rust Pattern              | When to Use                                       |
-|---------------------|---------------------------|---------------------------------------------------|
+| ------------------- | ------------------------- | ------------------------------------------------- |
 | Pass by reference   | `&T`                      | Read-only access, no mutation needed              |
 | Mutable reference   | `&mut T`                  | Single mutator, temporary access                  |
 | Shared ownership    | `Rc<T>` / `Arc<T>`        | Multiple owners, single-threaded / multi-threaded |
@@ -135,13 +135,13 @@ START: Is the data expensive to clone?
 
 ### When to Clone
 
-| Situation | Clone? | Alternative |
-|-----------|--------|-------------|
-| Storing in collection | Often yes | Arc for large data |
-| Passing to thread | Yes (or Arc) | - |
-| Returning to caller | Usually yes | Return reference with lifetime |
-| Internal computation | Usually no | Borrow |
-| Small Copy types | Implicit | - |
+| Situation             | Clone?       | Alternative                    |
+| --------------------- | ------------ | ------------------------------ |
+| Storing in collection | Often yes    | Arc for large data             |
+| Passing to thread     | Yes (or Arc) | -                              |
+| Returning to caller   | Usually yes  | Return reference with lifetime |
+| Internal computation  | Usually no   | Borrow                         |
+| Small Copy types      | Implicit     | -                              |
 
 ---
 
@@ -155,11 +155,11 @@ class Cache {
   private data: Map<string, User> = new Map();
 
   get(id: string): User | undefined {
-    return this.data.get(id);  // Returns reference
+    return this.data.get(id); // Returns reference
   }
 
   set(id: string, user: User): void {
-    this.data.set(id, user);  // Stores reference
+    this.data.set(id, user); // Stores reference
   }
 }
 ```
@@ -193,14 +193,14 @@ impl Cache {
 
 ## Smart Pointers
 
-| Pointer | Thread-Safe | Use Case |
-|---------|-------------|----------|
-| `Box<T>` | N/A (single owner) | Heap allocation, recursive types |
-| `Rc<T>` | No | Multiple owners, single thread |
-| `Arc<T>` | Yes | Multiple owners, multi-thread |
-| `RefCell<T>` | No | Interior mutability, single thread |
-| `Mutex<T>` | Yes | Interior mutability, multi-thread |
-| `RwLock<T>` | Yes | Read-heavy interior mutability |
+| Pointer      | Thread-Safe        | Use Case                           |
+| ------------ | ------------------ | ---------------------------------- |
+| `Box<T>`     | N/A (single owner) | Heap allocation, recursive types   |
+| `Rc<T>`      | No                 | Multiple owners, single thread     |
+| `Arc<T>`     | Yes                | Multiple owners, multi-thread      |
+| `RefCell<T>` | No                 | Interior mutability, single thread |
+| `Mutex<T>`   | Yes                | Interior mutability, multi-thread  |
+| `RwLock<T>`  | Yes                | Read-heavy interior mutability     |
 
 ### Common Combinations
 
@@ -230,7 +230,7 @@ async function withFile(path: string, fn: (file: File) => void) {
   try {
     await fn(file);
   } finally {
-    await file.close();  // Must remember to close
+    await file.close(); // Must remember to close
   }
 }
 ```
@@ -307,11 +307,11 @@ let data = Arc::new(config);
 
 ## Performance Implications
 
-| Pattern | Cost | When to Use |
-|---------|------|-------------|
-| Move | Free | Default for owned values |
-| Borrow (&T) | Free | Read access |
-| Mutable borrow (&mut T) | Free | Exclusive write access |
-| Clone | O(n) | When you need independent copy |
-| Rc/Arc clone | O(1) | Shared ownership |
-| Mutex lock | Synchronization cost | Shared mutable access |
+| Pattern                 | Cost                 | When to Use                    |
+| ----------------------- | -------------------- | ------------------------------ |
+| Move                    | Free                 | Default for owned values       |
+| Borrow (&T)             | Free                 | Read access                    |
+| Mutable borrow (&mut T) | Free                 | Exclusive write access         |
+| Clone                   | O(n)                 | When you need independent copy |
+| Rc/Arc clone            | O(1)                 | Shared ownership               |
+| Mutex lock              | Synchronization cost | Shared mutable access          |
