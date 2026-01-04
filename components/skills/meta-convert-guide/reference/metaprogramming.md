@@ -7,7 +7,7 @@ Comprehensive reference for metaprogramming capabilities across languages.
 ## Capability Comparison
 
 | Language   | Decorators                  | Macros                       | Reflection            | Code Gen              |
-|------------|-----------------------------|------------------------------|-----------------------|-----------------------|
+| ---------- | --------------------------- | ---------------------------- | --------------------- | --------------------- |
 | Python     | `@decorator`                | No                           | `inspect`, `__dict__` | `ast`                 |
 | TypeScript | `@decorator` (experimental) | No                           | Limited runtime       | Via build             |
 | Rust       | `#[attr]`                   | `macro_rules!`, proc macros  | No                    | Proc macros           |
@@ -24,12 +24,12 @@ Comprehensive reference for metaprogramming capabilities across languages.
 
 ### Basic Translation
 
-| Python/TS Pattern | Rust Pattern | Go Pattern |
-|-------------------|--------------|------------|
-| `@decorator` | `#[attribute]` | Struct tags + codegen |
-| `@decorator(args)` | `#[attribute(args)]` | Struct tags |
-| Class decorator | Derive macro | Type definition |
-| Method decorator | Proc macro | Manual wrapper |
+| Python/TS Pattern  | Rust Pattern         | Go Pattern            |
+| ------------------ | -------------------- | --------------------- |
+| `@decorator`       | `#[attribute]`       | Struct tags + codegen |
+| `@decorator(args)` | `#[attribute(args)]` | Struct tags           |
+| Class decorator    | Derive macro         | Type definition       |
+| Method decorator   | Proc macro           | Manual wrapper        |
 
 ### Route Decorator Example
 
@@ -91,14 +91,14 @@ r.GET("/users/:id", authMiddleware(), ctrl.GetUser)
 
 ### Macro Type Comparison
 
-| Type | Language | Capabilities |
-|------|----------|--------------|
-| Text substitution | C | Simple replacement |
-| Declarative | Rust `macro_rules!` | Pattern matching |
-| Procedural | Rust proc macros | AST manipulation |
-| Hygienic | Elixir, Rust | No accidental capture |
-| Reader | Clojure | Syntax extension |
-| Template | Haskell TH | Compile-time codegen |
+| Type              | Language            | Capabilities          |
+| ----------------- | ------------------- | --------------------- |
+| Text substitution | C                   | Simple replacement    |
+| Declarative       | Rust `macro_rules!` | Pattern matching      |
+| Procedural        | Rust proc macros    | AST manipulation      |
+| Hygienic          | Elixir, Rust        | No accidental capture |
+| Reader            | Clojure             | Syntax extension      |
+| Template          | Haskell TH          | Compile-time codegen  |
 
 ### Declarative Macro Example
 
@@ -132,7 +132,7 @@ end
 ## Reflection Capabilities
 
 | Capability       | Python                    | TypeScript          | Rust         | Go                        |
-|------------------|---------------------------|---------------------|--------------|---------------------------|
+| ---------------- | ------------------------- | ------------------- | ------------ | ------------------------- |
 | Get field names  | `dir()`, `__dict__`       | `Object.keys()`     | Derive macro | `reflect.TypeOf()`        |
 | Get field values | `getattr()`               | Direct access       | No           | `reflect.ValueOf()`       |
 | Set field values | `setattr()`               | Direct access       | No           | `reflect.Set()` (limited) |
@@ -141,20 +141,20 @@ end
 
 ### Translation Strategies
 
-| Reflection Use Case | Static Language Alternative |
-|---------------------|----------------------------|
-| Serialization | Derive macros, codegen |
-| Dependency injection | Constructor injection |
-| ORM mapping | Compile-time macros |
-| Dynamic dispatch | Trait objects, enums |
-| Configuration | Builder pattern |
+| Reflection Use Case  | Static Language Alternative |
+| -------------------- | --------------------------- |
+| Serialization        | Derive macros, codegen      |
+| Dependency injection | Constructor injection       |
+| ORM mapping          | Compile-time macros         |
+| Dynamic dispatch     | Trait objects, enums        |
+| Configuration        | Builder pattern             |
 
 ---
 
 ## Dependency Injection Patterns
 
 | Language    | DI Approach                   | Example                               |
-|-------------|-------------------------------|---------------------------------------|
+| ----------- | ----------------------------- | ------------------------------------- |
 | TypeScript  | Class decorators + reflection | `@Injectable()`, Angular/NestJS       |
 | Python      | Decorators + containers       | `@inject`, dependency-injector        |
 | Rust        | Trait objects + constructors  | Manual DI, no runtime reflection      |
@@ -202,12 +202,12 @@ fn create_services() -> UserService {
 
 ### Build-Time vs Runtime
 
-| Approach | Languages | When |
-|----------|-----------|------|
-| Compile-time macros | Rust, Elixir, Clojure | Compilation |
-| Annotation processors | Java, Kotlin | Compilation |
-| go generate | Go | Before compilation |
-| Runtime reflection | Python, JS, Java | Runtime |
+| Approach              | Languages             | When               |
+| --------------------- | --------------------- | ------------------ |
+| Compile-time macros   | Rust, Elixir, Clojure | Compilation        |
+| Annotation processors | Java, Kotlin          | Compilation        |
+| go generate           | Go                    | Before compilation |
+| Runtime reflection    | Python, JS, Java      | Runtime            |
 
 ### Go Generate Pattern
 
@@ -238,14 +238,14 @@ struct User {
 
 ## Mixin / Trait Composition
 
-| Language | Pattern | Example |
-|----------|---------|---------|
-| Python | Multiple inheritance | `class C(A, B)` |
-| Ruby | Module include | `include ModuleName` |
-| TypeScript | Mixin function | `class extends Mixin(Base)` |
-| Rust | Multiple impl | `impl TraitA for T`, `impl TraitB for T` |
-| Go | Embedding | `type C struct { A; B }` |
-| Scala | Trait mixing | `class C extends A with B` |
+| Language   | Pattern              | Example                                  |
+| ---------- | -------------------- | ---------------------------------------- |
+| Python     | Multiple inheritance | `class C(A, B)`                          |
+| Ruby       | Module include       | `include ModuleName`                     |
+| TypeScript | Mixin function       | `class extends Mixin(Base)`              |
+| Rust       | Multiple impl        | `impl TraitA for T`, `impl TraitB for T` |
+| Go         | Embedding            | `type C struct { A; B }`                 |
+| Scala      | Trait mixing         | `class C extends A with B`               |
 
 ### Translation Example
 

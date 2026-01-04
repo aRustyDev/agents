@@ -7,6 +7,7 @@ import time
 import re
 from datetime import datetime
 from pathlib import Path
+from typing import Callable
 
 from .models import (
     AgentSession,
@@ -103,6 +104,7 @@ class Orchestrator:
             "claude",
             "--model", model.value,
             "--print",
+            "--output-format", "json",  # Get token usage in response
             "-p", full_prompt,
         ]
 
@@ -133,19 +135,47 @@ class Orchestrator:
             )
 
             duration = time.time() - start_time
-            output = result.stdout
+            raw_output = result.stdout
             error = result.stderr if result.returncode != 0 else None
 
-            # Try to parse JSON output
-            parsed = self._extract_json(output)
+            # Parse JSON response from claude CLI
+            input_tokens = 0
+            output_tokens = 0
+            actual_cost = 0.0
+            text_output = raw_output
+            parsed = None
+
+            try:
+                response = json.loads(raw_output)
+                # Extract text result from JSON response
+                text_output = response.get("result", "")
+
+                # Extract token usage
+                usage = response.get("usage", {})
+                input_tokens = (
+                    usage.get("input_tokens", 0) +
+                    usage.get("cache_creation_input_tokens", 0) +
+                    usage.get("cache_read_input_tokens", 0)
+                )
+                output_tokens = usage.get("output_tokens", 0)
+                actual_cost = response.get("total_cost_usd", 0.0)
+
+                # Try to extract structured JSON from the result text
+                parsed = self._extract_json(text_output)
+
+            except json.JSONDecodeError:
+                # Fallback: output wasn't JSON, use as-is
+                parsed = self._extract_json(raw_output)
 
             return SubagentResult(
                 name=name,
                 model=model,
-                output=output,
+                output=text_output,
                 exit_code=result.returncode,
                 duration_seconds=duration,
                 subagent_id=headers.subagent_id,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
                 parsed_output=parsed,
                 error=error
             )
@@ -201,13 +231,17 @@ class Orchestrator:
     def run_pipeline(
         self,
         session: AgentSession,
-        stages: list[Stage] | None = None
+        stages: list[Stage] | None = None,
+        progress_callback: Callable | None = None,
+        force_recreate: bool = False,
     ) -> AgentSession:
         """Run the full review pipeline.
 
         Args:
             session: Session to run pipeline for
             stages: Optional subset of stages to run
+            progress_callback: Optional callback(stage, message) for progress updates
+            force_recreate: If True, delete existing branch before creating
 
         Returns:
             Updated session
@@ -222,14 +256,21 @@ class Orchestrator:
         ]
 
         stages_to_run = stages or all_stages
+        total_stages = len(stages_to_run)
+
+        def emit_progress(stage: Stage, message: str, step: int = 0):
+            if progress_callback:
+                progress_callback(stage, message, step, total_stages)
 
         # Create pipeline context
         ctx = self._create_pipeline_context(session)
 
         try:
-            for stage in stages_to_run:
+            for i, stage in enumerate(stages_to_run, 1):
+                emit_progress(stage, f"Starting {stage.value}...", i)
+
                 if stage == Stage.SETUP:
-                    self._run_setup(session, ctx)
+                    self._run_setup(session, ctx, force_recreate)
                 elif stage == Stage.VALIDATION:
                     self._run_validation(session)
                 elif stage == Stage.COMPLEXITY_ASSESSMENT:
@@ -241,6 +282,12 @@ class Orchestrator:
                 elif stage == Stage.TEARDOWN:
                     self._run_teardown(session, ctx)
 
+                # Emit completion for this stage
+                if session.stage == Stage.FAILED:
+                    emit_progress(stage, f"Failed at {stage.value}", i)
+                else:
+                    emit_progress(stage, f"Completed {stage.value}", i)
+
                 # Save after each stage
                 session.save(self.sessions_dir)
 
@@ -251,20 +298,27 @@ class Orchestrator:
             if session.stage != Stage.FAILED:
                 session.update_stage(Stage.COMPLETE)
                 session.save(self.sessions_dir)
+                emit_progress(Stage.COMPLETE, "Pipeline complete", total_stages)
 
         except Exception as e:
             session.add_error(f"Pipeline failed: {e}")
             session.update_stage(Stage.FAILED)
             session.save(self.sessions_dir)
+            emit_progress(Stage.FAILED, f"Pipeline error: {e}", 0)
 
         return session
 
-    def _run_setup(self, session: AgentSession, ctx: PipelineContext):
+    def _run_setup(
+        self,
+        session: AgentSession,
+        ctx: PipelineContext,
+        force_recreate: bool = False
+    ):
         """Run deterministic setup (worktree, status update, token estimate)."""
         session.update_stage(Stage.SETUP)
 
         # Run deterministic setup
-        success = self.pipeline.setup(ctx)
+        success = self.pipeline.setup(ctx, force_recreate=force_recreate)
 
         if not success:
             for error in ctx.errors or []:
@@ -411,6 +465,7 @@ Stage changes but don't commit yet.
         if not success:
             for error in ctx.errors or []:
                 session.add_error(error)
+            session.update_stage(Stage.FAILED)
 
         # Update session with PR info
         if ctx.pr_url:

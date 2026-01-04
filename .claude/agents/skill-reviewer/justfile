@@ -10,6 +10,9 @@ default:
 # Agent directory (relative to repo root)
 agent_dir := ".claude/agents/skill-reviewer"
 
+# Use uv for dependency management
+python := "uv run python"
+
 # Progress file for tracking
 progress_file := ".claude/agents/skill-reviewer/data/progress.json"
 
@@ -20,17 +23,25 @@ progress_file := ".claude/agents/skill-reviewer/data/progress.json"
 # Review a single skill by issue number (skill extracted from title if not specified)
 review issue skill="":
     @if [ -n "{{skill}}" ]; then \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --verbose; \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --skill {{skill}} --verbose; \
     else \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --verbose; \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --verbose; \
+    fi
+
+# Review with --force (delete existing branch if it exists)
+review-force issue skill="":
+    @if [ -n "{{skill}}" ]; then \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --skill {{skill}} --verbose --force; \
+    else \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --verbose --force; \
     fi
 
 # Review a single skill (dry run - no GitHub changes)
 review-dry issue skill="":
     @if [ -n "{{skill}}" ]; then \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} --dry-run; \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --skill {{skill}} --dry-run; \
     else \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --dry-run; \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --dry-run; \
     fi
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -39,19 +50,19 @@ review-dry issue skill="":
 
 # Process all backlog issues with 'review'+'skills' labels, assigned to you (sequential)
 batch:
-    python "{{ justfile_directory() }}/main.py" --batch
+    cd "{{ justfile_directory() }}" && {{python}} main.py --batch
 
 # Process backlog issues with parallelism
 batch-parallel n="3":
-    python "{{ justfile_directory() }}/main.py" --batch --max-parallel {{n}}
+    cd "{{ justfile_directory() }}" && {{python}} main.py --batch --max-parallel {{n}}
 
 # Batch review (dry run)
 batch-dry:
-    python "{{ justfile_directory() }}/main.py" --batch --dry-run
+    cd "{{ justfile_directory() }}" && {{python}} main.py --batch --dry-run
 
 # Batch review for any assignee (not just you)
 batch-all:
-    python "{{ justfile_directory() }}/main.py" --batch --assignee ""
+    cd "{{ justfile_directory() }}" && {{python}} main.py --batch --assignee ""
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Session Management
@@ -59,19 +70,87 @@ batch-all:
 
 # List all sessions
 sessions:
-    python "{{ justfile_directory() }}/main.py" --list-sessions
+    cd "{{ justfile_directory() }}" && {{python}} main.py --list-sessions
 
 # Resume an interrupted session
 resume session_id:
-    python "{{ justfile_directory() }}/main.py" --resume "{{session_id}}"
+    cd "{{ justfile_directory() }}" && {{python}} main.py --resume "{{session_id}}"
 
 # Show session details
 session-info session_id:
     cat "{{ justfile_directory() }}/data/sessions/{{session_id}}/session.json" | jq .
 
-# Clean up a completed session's worktree
-cleanup session_id:
-    python "{{ justfile_directory() }}/main.py" --resume "{{session_id}}" --cleanup
+# ─────────────────────────────────────────────────────────────────────────────
+# Worktree Management
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTE: Worktrees are intentionally preserved after review completion.
+# This allows skill-pr-addresser to iterate on PR feedback without recreating.
+# Use these recipes to manually clean up after PRs are merged.
+
+# List all active worktrees for this project
+worktrees:
+    @echo "Active worktrees:"
+    @git worktree list --porcelain | grep "^worktree " | cut -d' ' -f2- | while read wt; do \
+        if [[ "$$wt" == *"/worktrees/"* ]]; then \
+            branch=$$(git -C "$$wt" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"); \
+            status=$$(git -C "$$wt" status --porcelain 2>/dev/null | wc -l | tr -d ' '); \
+            echo "  $$wt"; \
+            echo "    branch: $$branch"; \
+            echo "    uncommitted: $$status files"; \
+        fi \
+    done
+
+# Clean up a specific session's worktree
+clean-worktree session_id:
+    @session_file="{{ justfile_directory() }}/data/sessions/{{session_id}}/session.json"; \
+    if [ ! -f "$$session_file" ]; then \
+        echo "Session {{session_id}} not found"; \
+        exit 1; \
+    fi; \
+    worktree_path=$$(jq -r '.worktree_path // empty' "$$session_file"); \
+    if [ -z "$$worktree_path" ]; then \
+        echo "No worktree path in session"; \
+        exit 1; \
+    fi; \
+    if [ -d "$$worktree_path" ]; then \
+        echo "Removing worktree: $$worktree_path"; \
+        git worktree remove --force "$$worktree_path" 2>/dev/null || rm -rf "$$worktree_path"; \
+        git worktree prune; \
+        echo "Done."; \
+    else \
+        echo "Worktree already removed: $$worktree_path"; \
+    fi
+
+# Clean up old worktrees (older than N days, default 7)
+clean-worktrees days="7":
+    @echo "Cleaning worktrees older than {{days}} days..."
+    @cutoff=$$(date -v-{{days}}d +%s 2>/dev/null || date -d "{{days}} days ago" +%s); \
+    git worktree list --porcelain | grep "^worktree " | cut -d' ' -f2- | while read wt; do \
+        if [[ "$$wt" == *"/worktrees/"* ]]; then \
+            if [ -d "$$wt" ]; then \
+                mtime=$$(stat -f %m "$$wt" 2>/dev/null || stat -c %Y "$$wt"); \
+                if [ "$$mtime" -lt "$$cutoff" ]; then \
+                    echo "Removing: $$wt (last modified: $$(date -r $$mtime 2>/dev/null || date -d @$$mtime))"; \
+                    git worktree remove --force "$$wt" 2>/dev/null || rm -rf "$$wt"; \
+                fi \
+            fi \
+        fi \
+    done; \
+    git worktree prune; \
+    echo "Done."
+
+# Clean ALL worktrees (use with caution!)
+clean-all-worktrees:
+    @echo "This will remove ALL worktrees. Are you sure? (Ctrl+C to cancel)"
+    @read -p "Press Enter to continue..."
+    @git worktree list --porcelain | grep "^worktree " | cut -d' ' -f2- | while read wt; do \
+        if [[ "$$wt" == *"/worktrees/"* ]]; then \
+            echo "Removing: $$wt"; \
+            git worktree remove --force "$$wt" 2>/dev/null || rm -rf "$$wt"; \
+        fi \
+    done; \
+    git worktree prune; \
+    echo "Done."
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Progress Tracking
@@ -129,20 +208,20 @@ estimate-batch:
 # Run only validation stage
 validate issue skill="":
     @if [ -n "{{skill}}" ]; then \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --skill {{skill}} \
             --stages validation --dry-run; \
     else \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} \
             --stages validation --dry-run; \
     fi
 
 # Run validation + complexity assessment
 assess issue skill="":
     @if [ -n "{{skill}}" ]; then \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} --skill {{skill}} \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} --skill {{skill}} \
             --stages validation,complexity_assessment --dry-run; \
     else \
-        python "{{ justfile_directory() }}/main.py" --issue {{issue}} \
+        cd "{{ justfile_directory() }}" && {{python}} main.py --issue {{issue}} \
             --stages validation,complexity_assessment --dry-run; \
     fi
 
