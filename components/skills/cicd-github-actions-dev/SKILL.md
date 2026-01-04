@@ -85,6 +85,8 @@ npm ci && npm test
 <linter> --config <config-file> <files>
 ```
 
+See [debugging reference](references/debugging.md) for advanced troubleshooting techniques and failure patterns.
+
 ## Common CI Patterns
 
 ### Matrix Builds
@@ -104,6 +106,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 ```
+
+For comprehensive language-specific examples, see [language examples reference](references/language-examples.md).
 
 ### Conditional Steps
 
@@ -247,6 +251,212 @@ jobs:
         run: echo $STEP_VAR
 ```
 
+## Advanced Workflow Permissions
+
+### Permission Scopes
+
+GitHub Actions workflows can specify granular permissions to follow the principle of least privilege.
+
+#### Default Permissions
+
+By default, workflows have broad permissions. Explicitly define minimal permissions:
+
+```yaml
+permissions:
+  contents: read  # Default: read repository contents
+```
+
+#### Common Permission Patterns
+
+| Permission | Access Level | Use Case |
+|------------|-------------|----------|
+| `contents: read` | Read repository files | Standard checkout, read configs |
+| `contents: write` | Modify repository files | Push changes, create commits |
+| `pull-requests: read` | Read PR metadata | Check PR status, labels |
+| `pull-requests: write` | Modify PRs | Add comments, labels, merge |
+| `issues: write` | Create/modify issues | Auto-create issues, add labels |
+| `checks: write` | Create check runs | Custom status checks |
+| `packages: write` | Publish packages | Docker registry, npm publish |
+| `deployments: write` | Create deployments | Environment deployments |
+
+#### Job-Level Permissions
+
+Override permissions per job:
+
+```yaml
+jobs:
+  lint:
+    permissions:
+      contents: read  # Only needs to read files
+    steps: [...]
+
+  deploy:
+    permissions:
+      contents: read
+      deployments: write
+      packages: write
+    steps: [...]
+```
+
+#### Step-Level Token Usage
+
+Pass tokens explicitly when needed:
+
+```yaml
+- name: Create PR comment
+  uses: actions/github-script@v7
+  with:
+    github-token: ${{ github.token }}
+    script: |
+      github.rest.issues.createComment({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        body: 'Build completed!'
+      })
+```
+
+### OIDC Authentication
+
+OpenID Connect provides secure, token-based authentication without storing long-lived secrets.
+
+#### AWS OIDC Setup
+
+**Step 1: Configure AWS IAM**
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:sub": "repo:owner/repo:ref:refs/heads/main"
+        }
+      }
+    }
+  ]
+}
+```
+
+**Step 2: Workflow Configuration**
+```yaml
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActions
+          role-session-name: GitHubActionsSession
+          aws-region: us-east-1
+
+      - name: Deploy to S3
+        run: aws s3 sync ./dist s3://my-bucket/
+```
+
+#### Azure OIDC Setup
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    steps:
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az webapp deployment source config-zip \
+              --resource-group myResourceGroup \
+              --name myWebApp \
+              --src deployment.zip
+```
+
+### Advanced Secrets Management
+
+#### Environment-Specific Secrets
+
+```yaml
+jobs:
+  deploy:
+    environment: production  # Requires environment approval
+    steps:
+      - name: Deploy
+        env:
+          API_KEY: ${{ secrets.PROD_API_KEY }}  # Environment-specific secret
+          DB_URL: ${{ secrets.PROD_DB_URL }}
+        run: |
+          deploy-script --api-key="$API_KEY" --db="$DB_URL"
+```
+
+#### Conditional Secret Usage
+
+```yaml
+- name: Deploy to staging
+  if: github.ref == 'refs/heads/develop'
+  env:
+    API_KEY: ${{ secrets.STAGING_API_KEY }}
+  run: deploy-staging
+
+- name: Deploy to production
+  if: github.ref == 'refs/heads/main'
+  env:
+    API_KEY: ${{ secrets.PROD_API_KEY }}
+  run: deploy-production
+```
+
+#### Secret Validation
+
+```yaml
+- name: Validate required secrets
+  run: |
+    if [ -z "${{ secrets.API_KEY }}" ]; then
+      echo "ERROR: API_KEY secret not configured"
+      exit 1
+    fi
+    if [ -z "${{ secrets.DB_PASSWORD }}" ]; then
+      echo "ERROR: DB_PASSWORD secret not configured"
+      exit 1
+    fi
+    echo "All required secrets are configured"
+```
+
+#### Multi-Secret Commands
+
+```yaml
+- name: Setup credentials
+  env:
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  run: |
+    # Configure multiple services
+    aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+    aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+    echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    echo "$DOCKER_PASSWORD" | docker login --username myuser --password-stdin
+```
+
+See [debugging reference](references/debugging.md) and [action selection guide](references/action-selection.md) for related topics.
+
 ## Performance Optimization
 
 ### Parallel Jobs
@@ -382,13 +592,11 @@ act -P ubuntu-latest=node:16-buster-slim
 - **Use `act`:** Rapid iteration, testing matrix logic, validating workflow syntax, testing secret handling
 - **Skip `act`:** OS-specific tests, actions requiring GitHub API, final validation before merge
 
-## Pre-commit Hooks for Workflows
+## Validation and Hooks
 
-Catch workflow errors before commit to reduce failed CI runs.
+### Pre-commit Hooks
 
-### actionlint Hook
-
-The most important hook - catches syntax errors, type mismatches, and common mistakes.
+Use actionlint and yamllint hooks to catch workflow errors before commit:
 
 ```yaml
 # .pre-commit-config.yaml
@@ -400,95 +608,11 @@ repos:
         files: ^\.github/workflows/
 ```
 
-### yamllint Hook
+### Claude Code Hooks
 
-Validates YAML structure and formatting.
-
-```yaml
-repos:
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        files: ^\.github/workflows/
-        args: [--config-file, .yamllint.yml]
-```
-
-Recommended `.yamllint.yml` for GitHub Actions:
-
-```yaml
-extends: default
-rules:
-  line-length:
-    max: 120
-  truthy:
-    check-keys: false  # Allows 'on:' without quotes
-  comments:
-    min-spaces-from-content: 1
-```
-
-### check-yaml Hook
-
-Basic YAML validity check.
-
-```yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: check-yaml
-        files: ^\.github/workflows/
-        args: [--unsafe]  # Required for GitHub Actions syntax
-```
-
-### Complete Pre-commit Config
-
-```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: check-yaml
-        files: ^\.github/workflows/
-        args: [--unsafe]
-
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        files: ^\.github/workflows/
-        args: [-c, .yamllint.yml]
-
-  - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.4
-    hooks:
-      - id: actionlint
-```
-
-### Manual Validation
-
-```bash
-# Run actionlint on all workflows
-actionlint
-
-# Run on specific file
-actionlint .github/workflows/ci.yml
-
-# With shellcheck integration (recommended)
-actionlint -shellcheck=$(which shellcheck)
-```
-
-## Claude Hooks for Workflow Development
-
-Configure Claude Code hooks to automatically validate workflows during development.
-
-### Post-Edit Hook: actionlint
-
-Run actionlint after editing workflow files.
+Configure Claude to automatically validate workflows:
 
 ```json
-// .claude/settings.json
 {
   "hooks": {
     "post_edit": [
@@ -502,31 +626,7 @@ Run actionlint after editing workflow files.
 }
 ```
 
-### Pre-Commit Hook: Full Validation
-
-Validate before committing workflow changes.
-
-```json
-{
-  "hooks": {
-    "pre_commit": [
-      {
-        "pattern": "^\\.github/workflows/.*\\.ya?ml$",
-        "command": "actionlint && yamllint .github/workflows/",
-        "description": "Validate GitHub Actions workflows"
-      }
-    ]
-  }
-}
-```
-
-### Suggested Claude Workflow
-
-1. Edit workflow file
-2. Hook runs actionlint automatically
-3. Fix any reported issues
-4. Commit triggers pre-commit hooks
-5. Push with confidence - first CI run more likely to pass
+For complete hook configuration and advanced patterns, see [validation hooks reference](references/validation-hooks.md).
 
 ## Reusable Actions and Workflows
 
@@ -538,6 +638,8 @@ Always prefer actions from `arustydev/gha` for consistency and control.
 1. `arustydev/gha` - First choice for all actions
 2. Third-party action - Temporary fallback with issue tracking
 3. Local development - When no suitable action exists
+
+For detailed action selection criteria and security guidelines, see [action selection reference](references/action-selection.md).
 
 ### Using arustydev/gha Actions
 
@@ -574,101 +676,13 @@ If a needed action exists from a third party but not in `arustydev/gha`:
 
 If no action (arustydev/gha or third-party) meets the need:
 
-1. **Create needs issue:**
-   ```bash
-   gh issue create --repo arustydev/gha \
-     --title "[ACTION] Need <action-name>" \
-     --body "## Use Case
-   <describe the need>
+1. Create tracking issue in arustydev/gha
+2. Develop locally using TypeScript/Node.js
+3. Test within the project workflow
+4. Submit PR to arustydev/gha when complete
+5. Update project to use centralized action
 
-   ## Proposed Solution
-   <high-level approach>
-
-   ## Initial Development
-   Will develop locally in: <project-name>"
-   ```
-
-2. **Develop locally in the project:**
-   ```
-   .github/
-   └── actions/
-       └── my-action/
-           ├── action.yml
-           ├── package.json
-           ├── tsconfig.json
-           └── src/
-               └── index.ts
-   ```
-
-3. **Use TypeScript/Node for development:**
-   ```yaml
-   # .github/actions/my-action/action.yml
-   name: My Action
-   description: Does something useful
-   inputs:
-     example:
-       description: Example input
-       required: true
-   runs:
-     using: node20
-     main: dist/index.js
-   ```
-
-   ```typescript
-   // .github/actions/my-action/src/index.ts
-   import * as core from '@actions/core';
-   import * as github from '@actions/github';
-
-   async function run(): Promise<void> {
-     try {
-       const example = core.getInput('example', { required: true });
-       core.info(`Processing: ${example}`);
-       // Action logic here
-     } catch (error) {
-       if (error instanceof Error) {
-         core.setFailed(error.message);
-       }
-     }
-   }
-
-   run();
-   ```
-
-4. **Reference locally during development:**
-   ```yaml
-   steps:
-     - uses: actions/checkout@v4
-     - uses: ./.github/actions/my-action
-       with:
-         example: value
-   ```
-
-5. **When functional, open PR to arustydev/gha:**
-   ```bash
-   # Copy action to gha repo
-   cp -r .github/actions/my-action ~/repos/gha/actions/
-
-   # Create PR
-   cd ~/repos/gha
-   git checkout -b feat/add-my-action
-   git add actions/my-action
-   git commit -m "feat(action): add my-action"
-   git push -u origin feat/add-my-action
-   gh pr create --title "feat(action): add my-action" \
-     --body "Closes #XX
-
-   Developed and tested in: <project-name>"
-   ```
-
-6. **After merge, update the original project:**
-   ```yaml
-   steps:
-     - uses: arustydev/gha/my-action@v1  # Now using centralized version
-       with:
-         example: value
-   ```
-
-   Remove the local `.github/actions/my-action/` directory.
+For complete local action development guide, see [local action development reference](references/local-action-development.md).
 
 ### Reusable Workflows
 
