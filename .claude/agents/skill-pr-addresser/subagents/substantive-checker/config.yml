@@ -1,0 +1,8 @@
+# Substantive checker sub-agent config
+# Uses Haiku since this is a simple classification task
+
+model: claude-3-5-haiku-20241022
+timeout: 60
+
+# No tools needed - pure text classification
+allowed_tools: []
