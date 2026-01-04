@@ -18,6 +18,7 @@ The LLM is only used for:
 - Applying fixes (generating content)
 """
 
+import re
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime
@@ -29,6 +30,8 @@ from .github_ops import (
     Issue,
     get_issue_details,
     add_issue_comment,
+    update_pr_from_issue,
+    mark_pr_ready,
 )
 from .github_projects import (
     get_project_id,
@@ -46,6 +49,7 @@ from .worktree import (
     remove_worktree,
     get_worktree_status,
     WorktreeInfo,
+    BranchExistsError,
 )
 
 
@@ -258,11 +262,16 @@ class DeterministicPipeline:
     # Worktree Management
     # =========================================================================
 
-    def create_worktree(self, ctx: PipelineContext) -> bool:
+    def create_worktree(
+        self,
+        ctx: PipelineContext,
+        force_recreate: bool = False
+    ) -> bool:
         """Create worktree for the review.
 
         Args:
             ctx: Pipeline context
+            force_recreate: If True, delete existing branch before creating
 
         Returns:
             True if successful
@@ -277,12 +286,23 @@ class DeterministicPipeline:
                 worktree_base=Path(self.config.worktree_base),
                 branch_name=branch_name,
                 base_branch=self.config.base_branch,
-                identifier=identifier
+                identifier=identifier,
+                force_recreate=force_recreate
             )
 
             ctx.worktree = worktree
             ctx.branch_name = branch_name
             return True
+
+        except BranchExistsError as e:
+            ctx.add_error(
+                f"Branch '{e.branch_name}' already exists" +
+                (" (pushed to remote)" if e.has_remote else "") +
+                ". Use --force to recreate, or manually delete with: " +
+                f"git branch -D {e.branch_name}" +
+                (f" && git push origin --delete {e.branch_name}" if e.has_remote else "")
+            )
+            return False
 
         except subprocess.CalledProcessError as e:
             ctx.add_error(f"Failed to create worktree: {e}")
@@ -514,6 +534,7 @@ class DeterministicPipeline:
         if f"#{ctx.issue_number}" not in body:
             body += f"\n\nCloses #{ctx.issue_number}"
 
+        # Create PR (gh pr create outputs the PR URL on success)
         result = subprocess.run(
             ["gh", "pr", "create",
              "--repo", f"{self.config.repo_owner}/{self.config.repo_name}",
@@ -521,8 +542,7 @@ class DeterministicPipeline:
              "--body", body,
              "--head", ctx.branch_name,
              "--base", self.config.base_branch,
-             "--draft",
-             "--json", "number,url"],
+             "--draft"],
             capture_output=True,
             text=True
         )
@@ -531,18 +551,24 @@ class DeterministicPipeline:
             ctx.add_error(f"Failed to create PR: {result.stderr}")
             return False
 
-        import json
-        data = json.loads(result.stdout)
-        ctx.pr_number = data["number"]
-        ctx.pr_url = data["url"]
-
-        return True
+        # Parse the URL from stdout (gh pr create prints the URL)
+        pr_url = result.stdout.strip()
+        if pr_url and "github.com" in pr_url:
+            ctx.pr_url = pr_url
+            # Extract PR number from URL (e.g., https://github.com/owner/repo/pull/123)
+            match = re.search(r'/pull/(\d+)', pr_url)
+            if match:
+                ctx.pr_number = int(match.group(1))
+            return True
+        else:
+            ctx.add_error(f"Unexpected PR creation output: {result.stdout}")
+            return False
 
     # =========================================================================
     # Full Deterministic Setup
     # =========================================================================
 
-    def setup(self, ctx: PipelineContext) -> bool:
+    def setup(self, ctx: PipelineContext, force_recreate: bool = False) -> bool:
         """Run all deterministic setup steps.
 
         This includes:
@@ -555,6 +581,7 @@ class DeterministicPipeline:
 
         Args:
             ctx: Pipeline context
+            force_recreate: If True, delete existing branch before creating
 
         Returns:
             True if all steps succeeded
@@ -579,7 +606,7 @@ class DeterministicPipeline:
             return False
 
         # 4. Create worktree
-        if not self.create_worktree(ctx):
+        if not self.create_worktree(ctx, force_recreate=force_recreate):
             return False
 
         # 5. Set issue to in-progress
@@ -608,7 +635,11 @@ class DeterministicPipeline:
         3. Create draft PR
         4. Set issue to in-review
         5. Post complete comment
-        6. Optionally cleanup worktree
+
+        NOTE: Worktrees are intentionally NOT cleaned up automatically.
+        They are preserved for skill-pr-addresser to iterate on PR feedback.
+        Use `just clean-worktree <session>` or `just clean-worktrees` to
+        manually clean up after PR is merged.
 
         Args:
             ctx: Pipeline context
@@ -619,6 +650,7 @@ class DeterministicPipeline:
             True if all steps succeeded
         """
         ctx.completed_at = datetime.utcnow()
+        teardown_success = True
 
         if not success:
             # Just post error comment and cleanup
@@ -644,13 +676,17 @@ class DeterministicPipeline:
         })
 
         if not self.config.dry_run:
-            self.commit_changes(ctx, commit_msg)
+            if not self.commit_changes(ctx, commit_msg):
+                ctx.add_error("Failed to commit changes")
+                teardown_success = False
 
-        # 2. Push branch
-        if not self.config.dry_run:
-            self.push_branch(ctx)
+        # 2. Push branch (only if commit succeeded)
+        if not self.config.dry_run and teardown_success:
+            if not self.push_branch(ctx):
+                ctx.add_error("Failed to push branch")
+                teardown_success = False
 
-        # 3. Create draft PR
+        # 3. Create draft PR (only if push succeeded)
         pr_body = render_inline("pr_body", {
             "summary": results.get("summary", ["Improved skill documentation"]),
             "added": results.get("added", []),
@@ -658,19 +694,46 @@ class DeterministicPipeline:
             "issues": [ctx.issue_number],
         })
 
-        if not self.config.dry_run:
-            self.create_draft_pr(
+        if not self.config.dry_run and teardown_success:
+            if not self.create_draft_pr(
                 ctx,
                 f"feat({Path(ctx.skill_path).name}): {results.get('description', 'improve documentation')}",
                 pr_body
-            )
+            ):
+                # PR creation failed - log error but continue to post comment
+                ctx.add_error("Failed to create PR")
+                teardown_success = False
 
-        # 4. Set issue to in-review
-        if not self.config.dry_run:
+        # 3b. Copy labels, milestone, and project from issue to PR
+        if not self.config.dry_run and ctx.pr_number and ctx.issue:
+            if not update_pr_from_issue(
+                self.config.repo_owner,
+                self.config.repo_name,
+                ctx.pr_number,
+                ctx.issue
+            ):
+                ctx.add_error("Failed to copy issue properties to PR")
+                # Non-fatal, continue
+
+        # 4. Set issue to in-review (only if PR created)
+        if not self.config.dry_run and ctx.pr_url:
             self.set_issue_in_review(ctx)
 
-        # 5. Post complete comment
+        # 5. Mark PR as ready for review (if teardown succeeded)
+        if not self.config.dry_run and ctx.pr_number and teardown_success:
+            if not mark_pr_ready(
+                self.config.repo_owner,
+                self.config.repo_name,
+                ctx.pr_number
+            ):
+                ctx.add_error("Failed to mark PR as ready")
+                # Non-fatal, continue
+
+        # 6. Post complete comment (always, with status)
         if not self.config.dry_run:
+            # Include errors in results if any
+            if ctx.errors:
+                results["teardown_errors"] = ctx.errors
             self.post_complete_comment(ctx, results)
 
-        return True
+        return teardown_success
