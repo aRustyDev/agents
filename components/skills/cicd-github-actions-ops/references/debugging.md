@@ -257,15 +257,177 @@ act -s GITHUB_TOKEN="$(gh auth token)"
 act pull_request -e event.json
 ```
 
+## Advanced Debugging Techniques
+
+### Workflow Performance Analysis
+
+```bash
+# Analyze slow-running workflows
+gh run list --limit 20 --json workflowName,startedAt,updatedAt,displayTitle | \
+    jq -r '.[] | [.workflowName, (.updatedAt | fromdateiso8601) - (.startedAt | fromdateiso8601), .displayTitle] | @tsv' | \
+    sort -nrk2 | head -10
+```
+
+### Job Dependency Analysis
+
+```bash
+# Visualize job dependencies in complex workflows
+grep -A 20 "needs:" .github/workflows/*.yml | \
+    grep -E "(needs:|name:)" | \
+    paste - - | \
+    column -t
+```
+
+### Matrix Job Failure Patterns
+
+```bash
+# Find which matrix combinations fail most often
+gh run list --status failure --limit 100 --json displayTitle | \
+    jq -r '.[].displayTitle' | \
+    grep -oE '\([^)]+\)' | \
+    sort | uniq -c | sort -nr
+```
+
+### Secret and Environment Variable Debug
+
+```yaml
+- name: Debug secrets (safely)
+  run: |
+    echo "Available secrets:"
+    env | grep -E '^[A-Z_]+=' | grep -v TOKEN | head -10
+    echo "Context info:"
+    echo "Repository: ${{ github.repository }}"
+    echo "Event: ${{ github.event_name }}"
+    echo "Actor: ${{ github.actor }}"
+    echo "Ref: ${{ github.ref }}"
+```
+
+### Artifact Analysis
+
+```bash
+# Download and analyze build artifacts
+gh run download <run-id>
+find . -name "*.log" -exec echo "=== {} ===" \; -exec head -50 {} \;
+```
+
+### Container/Docker Issues
+
+```yaml
+- name: Debug Docker environment
+  if: failure()
+  run: |
+    echo "=== Docker Info ==="
+    docker --version
+    docker system df
+    echo "=== Running Containers ==="
+    docker ps -a
+    echo "=== Images ==="
+    docker images
+    echo "=== Networks ==="
+    docker network ls
+```
+
+## Emergency Response Procedures
+
+### Mass Workflow Failures
+
+When multiple workflows fail simultaneously:
+
+```bash
+#!/bin/bash
+# mass-failure-triage.sh - Quick triage for widespread failures
+
+echo "=== Mass Failure Analysis ==="
+
+# Count failures by time
+gh run list --status failure --limit 50 --json createdAt | \
+    jq -r '.[].createdAt' | \
+    cut -dT -f1 | \
+    sort | uniq -c
+
+# Common error patterns
+echo "=== Common Error Patterns ==="
+for run in $(gh run list --status failure --limit 20 --json id -q '.[].id'); do
+    gh run view "$run" --log-failed 2>/dev/null | \
+        grep -E "(Error:|ERROR:|FAILED)" | \
+        head -5
+done | sort | uniq -c | sort -nr | head -10
+
+# Check GitHub Status
+echo "=== GitHub Status ==="
+curl -s https://www.githubstatus.com/api/v2/status.json | jq -r '.status.description'
+```
+
+### Rollback Strategy
+
+```bash
+# Quick rollback for broken workflow
+git log -1 --format="%H" -- .github/workflows/<workflow>.yml  # Get current commit
+git checkout HEAD~1 -- .github/workflows/<workflow>.yml       # Rollback one commit
+git add .github/workflows/<workflow>.yml
+git commit -m "fix(ci): rollback <workflow> to working state"
+```
+
+## Integration with Monitoring
+
+### Automated Failure Detection
+
+```yaml
+# .github/workflows/failure-monitor.yml
+name: Failure Monitor
+on:
+  workflow_run:
+    workflows: ["CI", "Tests", "Build"]
+    types: [completed]
+
+jobs:
+  notify-on-failure:
+    if: github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze failure
+        run: |
+          echo "Failed workflow: ${{ github.event.workflow_run.name }}"
+          echo "Run ID: ${{ github.event.workflow_run.id }}"
+
+          # Fetch failure details
+          gh run view ${{ github.event.workflow_run.id }} --log-failed | \
+            grep -E "(Error:|ERROR:)" | head -10
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create issue for repeated failures
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Logic to create issue if same workflow fails >3 times
+            // Include failure analysis and suggested fixes
+```
+
 ## Debugging Checklist
 
+### Pre-Debugging
+- [ ] Check GitHub Status page for service issues
+- [ ] Verify recent changes to workflow files
+- [ ] Check if failure is isolated or widespread
+
+### During Debugging
 - [ ] Read the full error message
 - [ ] Identify which step failed
 - [ ] Check if it's consistent or flaky
-- [ ] Check recent changes to workflow or code
 - [ ] Verify permissions are correct
 - [ ] Check for environment differences
-- [ ] Try reproducing locally
+- [ ] Try reproducing locally with act
+
+### Post-Debugging
+- [ ] Document the fix in commit message
+- [ ] Update workflow if needed to prevent recurrence
 - [ ] Check action versions and changelogs
-- [ ] Search for known issues in action repo
-- [ ] Add debug logging if needed
+- [ ] Create tracking issue if it's a recurring problem
+- [ ] Add monitoring if it's a critical workflow
+
+## Cross-References
+
+- [monitoring.md](monitoring.md) - Set up proactive monitoring to catch issues early
+- [security.md](security.md) - Security-related debugging (permissions, secrets)
+- [performance.md](performance.md) - Performance-related failures and optimization

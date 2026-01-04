@@ -41,17 +41,156 @@ Group repos by type and apply consistent fixes:
 
 ### Strategy 3: Fork Audit
 
-Special handling for forked repositories:
+Special handling for forked repositories requires checking for upstream-specific patterns:
 
 ```bash
 # List all forks
 gh repo list aRustyDev --fork --limit 100 --json name,parent -q '.[] | "\(.name) <- \(.parent.nameWithOwner)"'
 ```
 
-For each fork:
-1. Check for upstream-specific workflows
-2. Disable or adapt as needed
-3. Consider if fork is still needed
+## Fork-Specific Issues Detection
+
+### Phase 0: Fork Detection & Complexity Assessment
+
+Before reviewing any repository, check if it's a fork and assess complexity:
+
+```bash
+# Check if repo is a fork and get upstream info
+gh repo view --json isFork,parent -q '{fork: .isFork, parent: .parent.nameWithOwner}'
+
+# Count workflows and complexity
+echo "=== Workflow Complexity ==="
+ls -1 .github/workflows/*.yml 2>/dev/null | wc -l | xargs echo "Workflow count:"
+wc -l .github/workflows/*.yml 2>/dev/null | tail -1 | awk '{print "Total lines:", $1}'
+
+# Count action dependencies
+echo "=== Action Dependencies ==="
+grep -h "uses:" .github/workflows/*.yml 2>/dev/null | wc -l | xargs echo "Action references:"
+grep -h "uses:" .github/workflows/*.yml 2>/dev/null | grep -oE '[^/]+/[^@]+' | sort -u | wc -l | xargs echo "Unique actions:"
+```
+
+### Fork Pattern Detection
+
+**Identify upstream-specific patterns that commonly break in forks:**
+
+| Pattern | Detection Command | Common Issues |
+|---------|-------------------|---------------|
+| External deploy target | `grep -r "external_repository:" .github/workflows/` | Deploys to upstream's gh-pages |
+| Deploy keys | `grep -r "secrets.DEPLOY_KEY" .github/workflows/` | Secret doesn't exist in fork |
+| Hardcoded org | `grep -r "google/timesketch" .github/workflows/` | Wrong target org |
+| Upstream branches | `grep -r "branches: \[main\]" .github/workflows/` | Branch mismatch |
+| Upstream composite actions | `grep -rE "uses: <upstream>/.github/actions/" .github/workflows/` | Action path doesn't exist in fork |
+| Hardcoded Docker namespace | `grep -rE "docker.*<upstream-org>/" .github/workflows/` | Pushes to wrong Docker Hub namespace |
+| External registries | `grep -rE "hub\.infinyon\.cloud" .github/workflows/` | Upstream-specific package registry |
+| Upstream secrets | `grep -rE "secrets\.(ORG_|DOCKER_|SLACK_|AWS_)" .github/workflows/` | Organization secrets not available |
+
+**Comprehensive fork detection script:**
+```bash
+#!/bin/bash
+# fork-patterns.sh - Detect upstream-specific patterns
+
+echo "=== Fork Pattern Detection ==="
+
+# External repositories and deploy keys
+echo "--- Deploy Patterns ---"
+grep -rE "external_repository:|DEPLOY_KEY|\.github/actions/" .github/workflows/ 2>/dev/null || echo "None found"
+
+# Organization and service secrets
+echo "--- Secret Patterns ---"
+grep -rE "secrets\.(ORG_|DOCKER_|SLACK_|AWS_)" .github/workflows/ 2>/dev/null || echo "None found"
+
+# External services and registries
+echo "--- External Service Patterns ---"
+grep -rE "https?://[a-z-]+\.[a-z]+\.(cloud|io)/" .github/workflows/ 2>/dev/null | grep -v github || echo "None found"
+
+# Hardcoded organization references
+echo "--- Organization References ---"
+repo_parent=$(gh repo view --json parent -q '.parent.nameWithOwner' 2>/dev/null)
+if [ -n "$repo_parent" ]; then
+    parent_org=$(echo "$repo_parent" | cut -d'/' -f1)
+    echo "Searching for hardcoded references to upstream org: $parent_org"
+    grep -r "$parent_org" .github/workflows/ 2>/dev/null || echo "None found"
+fi
+```
+
+### Fork Handling Options
+
+For each detected pattern, choose appropriate handling:
+
+| Option | When to Use | Implementation |
+|--------|-------------|----------------|
+| **Disable** | Deploy workflows, upstream-specific CI | `mv .github/workflows/deploy.yml .github/workflows/deploy.yml.disabled` |
+| **Adapt** | Can be modified for your fork | Edit workflow to use your org/secrets |
+| **Remove** | Not needed in fork | `rm .github/workflows/upstream-specific.yml` |
+| **Keep** | Works as-is (rare) | No changes needed |
+
+**Quick disable script:**
+```bash
+#!/bin/bash
+# disable-upstream-workflows.sh - Disable problematic workflows
+
+# Disable deploy workflows (most common)
+for workflow in deploy publish release; do
+    for file in .github/workflows/${workflow}*.yml; do
+        if [ -f "$file" ]; then
+            echo "Disabling: $file"
+            mv "$file" "${file}.disabled"
+        fi
+    done
+done
+
+# Find and suggest other workflows to disable
+echo "=== Suggested Workflows to Review ==="
+grep -l "external_repository\|DEPLOY_KEY\|ORG_" .github/workflows/*.yml 2>/dev/null | \
+    while read file; do
+        echo "⚠️  Review: $file (contains upstream patterns)"
+    done
+```
+
+### Complexity Assessment
+
+**Complexity tiers guide decision making:**
+
+| Tier | Workflows | Lines | Approach |
+|------|-----------|-------|----------|
+| Simple | 1-5 | <500 | Fix all in one PR |
+| Medium | 6-10 | 500-1500 | Fix by priority, 1-2 PRs |
+| Complex | 11+ | 1500+ | Incremental fixes, multiple PRs |
+| Massive | 15+ | 3000+ | Consider disable-first strategy |
+
+**For High/Massive complexity in forks:**
+
+1. Start with disabling non-essential workflows (quick win)
+2. Focus on basic fixes (concurrency, path filters) for essential workflows
+3. Address failures incrementally
+4. Document known limitations that won't be fixed
+
+**Assessment script:**
+```bash
+#!/bin/bash
+# assess-complexity.sh - Determine review approach
+
+workflows=$(ls -1 .github/workflows/*.yml 2>/dev/null | wc -l)
+lines=$(wc -l .github/workflows/*.yml 2>/dev/null | tail -1 | awk '{print $1}' || echo 0)
+
+echo "Workflows: $workflows"
+echo "Total lines: $lines"
+
+if [ "$workflows" -le 5 ] && [ "$lines" -le 500 ]; then
+    echo "Complexity: SIMPLE - Fix all in one PR"
+elif [ "$workflows" -le 10 ] && [ "$lines" -le 1500 ]; then
+    echo "Complexity: MEDIUM - Fix by priority, 1-2 PRs"
+elif [ "$workflows" -le 15 ] && [ "$lines" -le 3000 ]; then
+    echo "Complexity: COMPLEX - Incremental fixes, multiple PRs"
+else
+    echo "Complexity: MASSIVE - Consider disable-first strategy"
+fi
+
+# Check if it's a fork
+if gh repo view --json isFork -q '.isFork' 2>/dev/null | grep -q true; then
+    echo "⚠️ FORK DETECTED - Apply fork-specific patterns first"
+fi
+```
 
 ## Batch Commands
 
