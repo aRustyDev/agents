@@ -209,6 +209,49 @@ def _review_with_tracking(
         raise
 
 
+def _create_progress_callback(verbose: bool):
+    """Create a progress callback for the pipeline.
+
+    Args:
+        verbose: If True, print detailed progress
+
+    Returns:
+        Callback function or None
+    """
+    if not verbose:
+        return None
+
+    import sys
+    from datetime import datetime
+
+    stage_start_times = {}
+
+    def callback(stage, message: str, step: int, total: int):
+        now = datetime.now()
+
+        # Track timing
+        if message.startswith("Starting"):
+            stage_start_times[stage] = now
+            elapsed = ""
+        elif message.startswith("Completed") and stage in stage_start_times:
+            delta = now - stage_start_times[stage]
+            elapsed = f" ({delta.total_seconds():.1f}s)"
+        else:
+            elapsed = ""
+
+        # Progress bar
+        progress = f"[{step}/{total}]" if total > 0 else ""
+
+        # Format output
+        timestamp = now.strftime("%H:%M:%S")
+        print(f"{timestamp} {progress} {message}{elapsed}", flush=True)
+
+        # Force flush for real-time output
+        sys.stdout.flush()
+
+    return callback
+
+
 def review_single_skill(
     orchestrator: Orchestrator,
     skill_path: str,
@@ -216,6 +259,7 @@ def review_single_skill(
     stages: list[Stage] | None = None,
     verbose: bool = False,
     session_id: str | None = None,
+    force_recreate: bool = False,
 ) -> AgentSession:
     """Review a single skill.
 
@@ -226,6 +270,7 @@ def review_single_skill(
         stages: Optional subset of stages to run
         verbose: Print verbose output
         session_id: Optional session ID (generated if not provided)
+        force_recreate: If True, delete existing branch before creating
 
     Returns:
         AgentSession with results
@@ -242,8 +287,14 @@ def review_single_skill(
         print(f"Starting session {session.session_id}")
         print(f"  Skill: {skill_path}")
         print(f"  Issue: #{issue_number}")
+        print()
 
-    result = orchestrator.run_pipeline(session, stages)
+    # Create progress callback
+    progress_callback = _create_progress_callback(verbose)
+
+    result = orchestrator.run_pipeline(
+        session, stages, progress_callback, force_recreate=force_recreate
+    )
 
     if verbose:
         print(f"\nSession {session.session_id} complete")

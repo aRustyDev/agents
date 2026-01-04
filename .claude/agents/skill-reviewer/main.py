@@ -110,7 +110,8 @@ def main():
                 print(f"Extracted skill path: {skill_path}")
 
         result = review_single_skill(
-            orchestrator, skill_path, args.issue, stages, args.verbose
+            orchestrator, skill_path, args.issue, stages, args.verbose,
+            force_recreate=args.force
         )
 
         if args.cleanup and result.stage == Stage.COMPLETE:
