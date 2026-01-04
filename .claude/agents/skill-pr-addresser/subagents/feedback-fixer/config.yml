@@ -1,0 +1,18 @@
+# Feedback Fixer Configuration
+#
+# Uses Sonnet for complex reasoning and code generation
+# Has file access tools to read and modify skill files
+
+model: claude-sonnet-4-20250514
+allowed_tools:
+  - Read
+  - Write
+  - Edit
+  - Bash  # Needed for git add
+  - Glob
+  - Grep
+timeout: 600  # 10 minutes - allow time for complex skill fixes
+max_turns: 25  # Limit agent turns to prevent infinite loops
+
+# Description for logging
+description: "Implements fixes for PR feedback in skill files"

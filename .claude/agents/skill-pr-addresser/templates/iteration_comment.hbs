@@ -1,0 +1,45 @@
+## Addressing Iteration {{iteration}}
+
+### Summary
+
+| Metric | Value |
+|--------|-------|
+| **Feedback items** | {{feedback_count}} |
+| **Addressed** | {{addressed_count}} |
+| **Skipped** | {{skipped_count}} |
+| **Success rate** | {{success_rate}} |
+
+{{#addressed}}
+### Addressed Items
+
+{{#addressed}}
+- **{{id}}**: {{action}}
+{{/addressed}}
+{{/addressed}}
+
+{{#skipped}}
+### Skipped Items
+
+{{#skipped}}
+- **{{id}}**: {{reason}}
+{{/skipped}}
+{{/skipped}}
+
+{{#commit_sha}}
+### Changes
+
+**Commit:** [`{{commit_short}}`](../commit/{{commit_sha}})
+
+**Files modified:**
+{{#files_modified}}
+- `{{.}}`
+{{/files_modified}}
+
+**Lines:** +{{lines_added}} / -{{lines_removed}}
+{{/commit_sha}}
+{{^commit_sha}}
+*No changes committed in this iteration*
+{{/commit_sha}}
+
+---
+<sub>Iteration {{iteration}} completed at {{timestamp}} | Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)</sub>

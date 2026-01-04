@@ -1,0 +1,12 @@
+# Feedback Analyzer Configuration
+#
+# Uses Haiku for fast, cost-effective analysis
+# No tools needed - pure text analysis
+
+model: claude-3-5-haiku-20241022
+allowed_tools: []
+timeout: 120
+max_turns: 5  # Text analysis should complete quickly
+
+# Description for logging
+description: "Analyzes PR feedback into structured actionable items"
