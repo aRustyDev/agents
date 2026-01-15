@@ -1,0 +1,218 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "npx -y ccstatusline@latest",
+    "padding": 0
+  },
+  "env": {
+    "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL": "grpc",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+    "OTEL_LOG_USER_PROMPTS": "1",
+    "OTEL_METRICS_EXPORTER": "otlp"
+  },
+  "model": "opus",
+  "alwaysThinkingEnabled": true,
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(yq:*)",
+      "Bash(curl:*)",
+      "Bash(jq:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(xargs:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(host:*)",
+      "Bash(nslookup:*)",
+
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pipx:*)",
+      "Bash(pyenv versions:*)",
+      "Bash(uv --version:*)",
+      "Bash(uv run:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv pip install:*)",
+
+      "Bash(cargo build:*)",
+      "Bash(cargo test:*)",
+
+      "Bash(node --version)",
+      "Bash(volta pin:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(volta install:*)",
+      "Bash(volta list:*)",
+
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git branch:*)",
+      "Bash(git sparse-checkout:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git mv:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git --version:*)",
+      "Bash(git worktree add:*)",
+      // -C /private/tmp/worktrees/*
+      // --work-tree
+      "Bash(git worktree:*)",
+      "Bash(git fetch:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git worktree list)",
+      "Bash(git reset:*)",
+      "Bash(git config:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+
+      "Bash(gh pr list:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr ready:*)",
+      "Bash(gh label create:*)",
+      "Bash(gh project list:*)",
+      "Bash(gh project field-list:*)",
+      "Bash(gh project item-add:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh milestone list:*)",
+      "Bash(gh api:*)",
+      "Bash(gh gist list:*)",
+      "Bash(gh gist view:*)",
+
+      "Bash(docker inspect:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker network inspect:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker network ls:*)",
+      "Bash(docker start:*)",
+
+      "Bash(just install:*)",
+      "Bash(just:*)",
+      "Bash(just validate-all-skills)",
+      "Bash(just list-claude:*)",
+      "Bash(just uninstall claude)",
+      "Bash(just sync-anthropic-skills:*)",
+      "Bash(just check-anthropic-updates:*)",
+      "Bash(just anthropic-version:*)",
+      "Bash(just list-external-skills:*)",
+      "Bash(just search-skills:*)",
+      "Bash(just list-registries:*)",
+      "Bash(just validate-all-lang-skills:*)",
+      "Bash(just validate-pillars:*)",
+      "Bash(just list-skills:*)",
+      "Bash(just validate-skill:*)",
+      "Bash(just import-skill:*)",
+
+      "WebSearch",
+
+      "WebFetch(domain:claude-plugins.dev)",
+      "WebFetch(domain:chatgpt.com)",
+      "WebFetch(domain:opensource.guide)",
+      "WebFetch(domain:semver.org)",
+      "WebFetch(domain:docs.cloud.google.com)",
+      "WebFetch(domain:docs.open-metadata.org)",
+      "WebFetch(domain:docs.builtoncement.com)",
+      "WebFetch(domain:www.pulsemcp.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:platers.github.io)",
+      "WebFetch(domain:mdelobelle.github.io)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:docs.claude.com)",
+
+      "mcp__github__add_issue_comment",
+      "mcp__github__search_issues",
+      "mcp__github__issue_write",
+      "mcp__github__issue_read",
+      "mcp__github__list_issues",
+
+      "mcp__github__get_commit",
+      "mcp__github__list_commits",
+
+      "mcp__github__create_pull_request",
+      "mcp__github__list_pull_requests",
+      "mcp__github__pull_request_read",
+
+      "mcp__github__create_repository",
+      "mcp__github__fork_repository",
+
+      "mcp__github__get_file_contents",
+      "mcp__github__create_or_update_file",
+
+      "mcp__github__create_branch",
+      "mcp__github__list_branches",
+
+      "mcp__github__search_code",
+      "mcp__github__search_repositories",
+      "mcp__github__search_pull_requests",
+
+      "mcp__github__get_me",
+
+      "mcp__memory__add_memory",
+
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+
+      "mcp__firecrawl__firecrawl_search",
+      "mcp__firecrawl__firecrawl_scrape",
+
+      "mcp__claude-flow__terminal_execute",
+
+      "SlashCommand(/create-skill:*)",
+      "SlashCommand(/create-lang-conversion-skill:*)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|TodoWrite",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tdd-guard"
+          }
+        ]
+      }
+    ],
+    "userpromptsubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tdd-guard"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tdd-guard"
+          }
+        ]
+      }
+    ]
+  }
+}
