@@ -66,8 +66,6 @@
       "Bash(git rev-parse:*)",
       "Bash(git --version:*)",
       "Bash(git worktree add:*)",
-      // -C /private/tmp/worktrees/*
-      // --work-tree
       "Bash(git worktree:*)",
       "Bash(git fetch:*)",
       "Bash(git cherry-pick:*)",
