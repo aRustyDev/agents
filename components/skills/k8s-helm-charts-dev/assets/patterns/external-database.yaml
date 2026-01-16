@@ -1,0 +1,220 @@
+# =============================================================================
+# External Database Configuration Pattern
+# =============================================================================
+# Use this pattern when chart connects to an EXISTING external database
+# rather than deploying a database as a subchart dependency.
+#
+# Supports: MySQL, PostgreSQL, MariaDB
+#
+# Usage:
+#   1. Copy the values section to your values.yaml
+#   2. Copy the helper templates to your _helpers.tpl
+#   3. Copy the environment variable section to your deployment.yaml
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# VALUES.YAML SECTION
+# -----------------------------------------------------------------------------
+# Copy this to your values.yaml under a 'database:' key
+
+database:
+  # -- Database type: mysql, postgres, or mariadb
+  type: mysql
+
+  # -- External database host (required)
+  host: ""
+
+  # -- Database port (3306 for MySQL/MariaDB, 5432 for PostgreSQL)
+  port: 3306
+
+  # -- Database name
+  name: "app_db"
+
+  # -- Database username
+  username: ""
+
+  # -- Database password (use existingSecret in production)
+  password: ""
+
+  # -- Use existing Kubernetes secret for database credentials
+  # If set, password field is ignored
+  existingSecret: ""
+
+  # -- Key in existing secret containing the password
+  existingSecretKey: "password"
+
+  # -- Additional JDBC connection parameters
+  # MySQL example: "useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+  # PostgreSQL example: "sslmode=require"
+  params: ""
+
+  # -- Connection pool settings (if supported by application)
+  pool:
+    # -- Minimum pool size
+    minSize: 5
+    # -- Maximum pool size
+    maxSize: 20
+    # -- Connection timeout in milliseconds
+    connectionTimeout: 30000
+
+# -----------------------------------------------------------------------------
+# HELPERS.TPL SECTION
+# -----------------------------------------------------------------------------
+# Copy these helper templates to your templates/_helpers.tpl
+
+# {{/*
+# Database JDBC URL
+# */}}
+# {{- define "<chart>.databaseUrl" -}}
+# {{- $params := "" }}
+# {{- if .Values.database.params }}
+# {{- $params = printf "?%s" .Values.database.params }}
+# {{- end }}
+# {{- if eq .Values.database.type "mysql" }}
+# {{- printf "jdbc:mysql://%s:%d/%s%s" .Values.database.host (int .Values.database.port) .Values.database.name $params }}
+# {{- else if eq .Values.database.type "mariadb" }}
+# {{- printf "jdbc:mariadb://%s:%d/%s%s" .Values.database.host (int .Values.database.port) .Values.database.name $params }}
+# {{- else if eq .Values.database.type "postgres" }}
+# {{- printf "jdbc:postgresql://%s:%d/%s%s" .Values.database.host (int .Values.database.port) .Values.database.name $params }}
+# {{- end }}
+# {{- end }}
+
+# {{/*
+# Database driver class name
+# */}}
+# {{- define "<chart>.databaseDriver" -}}
+# {{- if eq .Values.database.type "mysql" }}
+# {{- "com.mysql.cj.jdbc.Driver" }}
+# {{- else if eq .Values.database.type "mariadb" }}
+# {{- "org.mariadb.jdbc.Driver" }}
+# {{- else if eq .Values.database.type "postgres" }}
+# {{- "org.postgresql.Driver" }}
+# {{- end }}
+# {{- end }}
+
+# {{/*
+# Database dialect (for ORMs like Hibernate)
+# */}}
+# {{- define "<chart>.databaseDialect" -}}
+# {{- if eq .Values.database.type "mysql" }}
+# {{- "org.hibernate.dialect.MySQL8Dialect" }}
+# {{- else if eq .Values.database.type "mariadb" }}
+# {{- "org.hibernate.dialect.MariaDB103Dialect" }}
+# {{- else if eq .Values.database.type "postgres" }}
+# {{- "org.hibernate.dialect.PostgreSQL10Dialect" }}
+# {{- end }}
+# {{- end }}
+
+# -----------------------------------------------------------------------------
+# DEPLOYMENT.YAML ENVIRONMENT SECTION
+# -----------------------------------------------------------------------------
+# Copy this to your deployment.yaml container env section
+
+# env:
+#   # Database connection details
+#   - name: DB_TYPE
+#     value: {{ .Values.database.type | quote }}
+#   - name: DB_HOST
+#     value: {{ .Values.database.host | quote }}
+#   - name: DB_PORT
+#     value: {{ .Values.database.port | quote }}
+#   - name: DB_NAME
+#     value: {{ .Values.database.name | quote }}
+#   - name: DB_USER
+#     value: {{ .Values.database.username | quote }}
+#   - name: DB_PASSWORD
+#     {{- if .Values.database.existingSecret }}
+#     valueFrom:
+#       secretKeyRef:
+#         name: {{ .Values.database.existingSecret }}
+#         key: {{ .Values.database.existingSecretKey }}
+#     {{- else }}
+#     value: {{ .Values.database.password | quote }}
+#     {{- end }}
+#   # Optional: JDBC URL (if application uses single URL)
+#   - name: DB_URL
+#     value: {{ include "<chart>.databaseUrl" . | quote }}
+#   - name: DB_DRIVER
+#     value: {{ include "<chart>.databaseDriver" . | quote }}
+
+# -----------------------------------------------------------------------------
+# ALTERNATIVE: DATABASE_URL STYLE (Node.js, Rails, etc.)
+# -----------------------------------------------------------------------------
+# Some applications prefer a single connection URL
+
+# env:
+#   - name: DATABASE_URL
+#     {{- if .Values.database.existingSecret }}
+#     valueFrom:
+#       secretKeyRef:
+#         name: {{ .Values.database.existingSecret }}
+#         key: database-url
+#     {{- else }}
+#     {{- if eq .Values.database.type "postgres" }}
+#     value: "postgresql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+#     {{- else }}
+#     value: "mysql://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+#     {{- end }}
+#     {{- end }}
+
+# -----------------------------------------------------------------------------
+# NOTES.TXT SECTION
+# -----------------------------------------------------------------------------
+# Add database connection info to NOTES.txt
+
+# {{- if .Values.database.host }}
+# Database Configuration:
+#   Type: {{ .Values.database.type }}
+#   Host: {{ .Values.database.host }}:{{ .Values.database.port }}
+#   Database: {{ .Values.database.name }}
+#   User: {{ .Values.database.username }}
+# {{- else }}
+# WARNING: Database host is not configured!
+# Set database.host in your values to connect to your database.
+# {{- end }}
+
+# -----------------------------------------------------------------------------
+# COMMON PORTS REFERENCE
+# -----------------------------------------------------------------------------
+# | Database   | Default Port |
+# |------------|--------------|
+# | MySQL      | 3306         |
+# | PostgreSQL | 5432         |
+# | MariaDB    | 3306         |
+# | MongoDB    | 27017        |
+# | Cassandra  | 9042         |
+# | CockroachDB| 26257        |
+
+# -----------------------------------------------------------------------------
+# EXAMPLE VALUES FOR DIFFERENT SCENARIOS
+# -----------------------------------------------------------------------------
+
+# MySQL in same cluster:
+# database:
+#   type: mysql
+#   host: mysql.database.svc.cluster.local
+#   port: 3306
+#   name: myapp
+#   username: myapp
+#   existingSecret: myapp-db-credentials
+#   existingSecretKey: password
+
+# PostgreSQL with SSL:
+# database:
+#   type: postgres
+#   host: postgres.example.com
+#   port: 5432
+#   name: myapp
+#   username: myapp
+#   existingSecret: myapp-db-credentials
+#   params: "sslmode=require"
+
+# AWS RDS MySQL:
+# database:
+#   type: mysql
+#   host: myapp.xxxxx.us-east-1.rds.amazonaws.com
+#   port: 3306
+#   name: myapp
+#   username: admin
+#   existingSecret: rds-credentials
+#   params: "useSSL=true&requireSSL=true"
