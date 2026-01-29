@@ -33,6 +33,7 @@ When user confirms gap creation:
    ```
    Title: feat(skills): add <skill-name> skill
    Body: Identified during task: "<brief context>"
+   Labels: enhancement, skills
    ```
 
 2. **Add local todo** to track during session
@@ -49,10 +50,3 @@ Review skill effectiveness (see `meta-skill-gaps-dev` for methodology):
 - Should a derivative skill exist?
 
 Flag issues for later refinement rather than interrupting the user.
-
-## Invoke Methodology
-
-For detailed gap analysis or improvement workflows, invoke:
-```
-Load skill: meta-skill-gaps-dev
-```
