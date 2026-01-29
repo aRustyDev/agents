@@ -6,6 +6,8 @@ paths:
 
 # Justfile Conventions
 
+> **Skill**: Load `justfile-dev` for authoring, reviewing, planning, converting, or upgrading justfiles.
+
 ## Structure
 
 ```just
