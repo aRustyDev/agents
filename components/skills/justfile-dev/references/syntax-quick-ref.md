@@ -161,26 +161,6 @@ check := if arch() =~ "x86" { "x86" } else { "arm" }
 | `clean(p)` | Normalize path |
 | `path_exists(p)` | Check if path exists |
 
-## Shebang Recipes
-
-```just
-# Bash
-recipe:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "bash script"
-
-# Python
-recipe:
-    #!/usr/bin/env python3
-    print("python script")
-
-# Node
-recipe:
-    #!/usr/bin/env node
-    console.log("node script")
-```
-
 ## Modules
 
 ```just

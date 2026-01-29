@@ -166,6 +166,34 @@ Use when deciding what recipes a project needs.
 | Repo structure | flat | monorepo/workspace |
 | Shared recipes | none | CDN imports needed |
 
+### Convert
+
+When migrating from a Makefile to a justfile.
+
+**Steps:**
+
+1. Map targets to recipes (all recipes are phony — no `.PHONY` needed)
+2. Add `set shell := ["bash", "-cu"]` at top
+3. Add `default` recipe with `@just --list`
+4. Group recipes with `[group('name')]` and add section separators
+5. Add doc comments above each recipe
+6. Fix anti-patterns (see translations below)
+7. Add `[confirm]` to destructive recipes
+8. Validate: `just --list` shows grouped, documented recipes
+
+**Makefile → just Translations:**
+
+| Makefile | just |
+|----------|------|
+| `.PHONY: target` | Not needed (all recipes are phony) |
+| `target: dep1 dep2` | `recipe: dep1 dep2` (same syntax) |
+| `cd dir && cmd` | `[working-directory('dir')]` attribute |
+| `cmd1 && cmd2` | Separate lines in recipe body |
+| `$(VAR)` | `{{VAR}}` |
+| `@echo "msg"` | `@echo "msg"` (same) |
+| `export VAR=val` | `export VAR := "val"` at top |
+| `include file.mk` | `import "file.just"` |
+
 ### Update
 
 When upgrading an existing justfile.
@@ -262,5 +290,8 @@ Quick lookup — see `references/recipe-patterns.md` for full details.
 - `references/recipe-patterns.md` — recipe patterns by category and language
 - `references/module-system.md` — module system deep dive
 - `references/maturity-model.md` — maturity assessment details
-- `examples/` — complete example justfiles
-- `tables/` — lookup tables for groups and language recipes
+- `examples/rust-project.just` — complete Rust CLI/lib justfile
+- `examples/monorepo-root.just` — monorepo router pattern
+- `examples/arustydev.just` — aRustyDev conventions with gist templates
+- `tables/standard-groups.md` — group definitions and ordering
+- `tables/language-recipes.md` — Rust/Go/TS/Python recipe matrix
