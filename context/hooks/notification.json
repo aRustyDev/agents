@@ -1,0 +1,26 @@
+{
+  "Notification": [
+    {
+      "matcher": ".*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${WORKSPACE}/.claude/hooks/notify.sh input",
+          "description": "Plays sound when Claude needs user input"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": ".*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${WORKSPACE}/.claude/hooks/notify.sh complete",
+          "description": "Plays sound when Claude completes tasks"
+        }
+      ]
+    }
+  ]
+}

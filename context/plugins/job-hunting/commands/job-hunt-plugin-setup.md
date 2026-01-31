@@ -1,0 +1,13 @@
+
+- [ ] Plugin setup
+  - [ ] Create Sqlite db if not present
+  - [ ] Install requirements (`just`!!)
+- [ ] Configure Sqlite for protection
+- [ ] Determine Backup strategy
+- [ ] Determine if Obsidian should be included
+- [ ] Setup obsidian if used
+- [ ] Run pre-req tests
+- [ ] Have initial conversation w/ user to determine standard practices/agreements
+- [ ] Work with user to get access configuration setup (indeed, monster, linkedin, etc)
+- [ ] Work with user to determine where they are in the job-hunt
+- [ ] Git Version the directory

@@ -1,0 +1,28 @@
+- Capture JD for each role 
+    - Store parse data (jd.md || sqlite) 
+    - Create a /command to do this `/job-role-get-description`
+- Parse JD for each role 
+    - Store parse data (jd.json || sqlite) 
+    - Create a /command to do this `/job-role-parse-description`
+- Analyze the JD for each role, to determine what a "perfect fit" looks like
+    - Store parse data (analysis.json:ideal || perfect.json || sqlite) 
+    - Create a /command to do this `/job-role-define-perfect`
+- Review resume.md using analysis of 'perfect fit', determine the atomic semantic differences and GAPs that need to be addressed
+    - Store parse data (analysis.json:current || perfect.json || sqlite)
+    - Create a /command to do this `/job-role-analyze-fit`
+
+---
+
+- review current resume, create sqlite db representation
+    - create a /command to do this `/resume-extract-data`
+- have conversation with user to progressively discuss their background and other accomplishments in an exploratory fashion
+    - store results in zettelkasten format, use markdown
+    - create a /command to do this `/job-history-explore`
+- review zettelkasten formatted notes on professional / academic / career history, refine notes through deeper targeted interview styled conversation.
+    - update zettelkasten formatted notes as you go.
+    - goal is to end up with only permanent notes and literature notes
+    - create a /command to do this `/job-history-refine`
+- review (refined) zettelkasten formatted notes, extract resume bullets
+    - Store bullets in sqlite db
+    - create a /command to do this `/job-history-bullets`
+-
