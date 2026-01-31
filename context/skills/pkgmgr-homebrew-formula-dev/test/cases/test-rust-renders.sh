@@ -3,7 +3,7 @@ set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$SKILL_DIR"
 
-output=$(just javascript-recipe "$SKILL_DIR/test/data/rust-standard.json")
+output=$(just template-formula "$SKILL_DIR/test/data/rust-standard.json")
 
 errors=0
 for pattern in "class RustAnalyzer < Formula" "std_cargo_args" "depends_on \"rust\"" "uses_from_macos \"zlib\"" '"lsp"' '"jemalloc"'; do

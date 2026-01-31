@@ -6,7 +6,7 @@ cd "$SKILL_DIR"
 errors=0
 
 for file in "$SKILL_DIR"/test/data/invalid-*.json; do
-  if just javascript-recipe "$file" >/dev/null 2>&1; then
+  if just template-formula "$file" >/dev/null 2>&1; then
     echo "FAIL: expected $(basename "$file") to be rejected"
     errors=$((errors + 1))
   else
