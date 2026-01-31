@@ -22,7 +22,7 @@ This skill includes a **JSON Schema → Mustache template** pipeline for generat
 ### Workflow
 
 1. Create a JSON file conforming to `scripts/formula.schema.ts`
-2. Run `just javascript-recipe <path-to-json>` to validate and render
+2. Run `just template-formula <path-to-json>` to validate and render
 3. The pipeline validates with AJV, preprocesses (PascalCase, language dispatch, license rendering), then renders via Mustache
 
 ### Key Files
@@ -40,7 +40,7 @@ This skill includes a **JSON Schema → Mustache template** pipeline for generat
 
 ```bash
 # Render a formula from JSON
-just javascript-recipe path/to/formula.json
+just template-formula path/to/formula.json
 
 # Run all tests
 just test

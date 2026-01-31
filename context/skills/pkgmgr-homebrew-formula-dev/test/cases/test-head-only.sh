@@ -3,7 +3,7 @@ set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$SKILL_DIR"
 
-output=$(just javascript-recipe "$SKILL_DIR/test/data/head-only.json")
+output=$(just template-formula "$SKILL_DIR/test/data/head-only.json")
 
 errors=0
 

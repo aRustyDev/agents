@@ -3,7 +3,7 @@ set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$SKILL_DIR"
 
-output=$(just javascript-recipe "$SKILL_DIR/test/data/python-standard.json")
+output=$(just template-formula "$SKILL_DIR/test/data/python-standard.json")
 
 errors=0
 for pattern in "class MyPythonTool < Formula" "virtualenv_install_with_resources" 'resource "certifi"' 'resource "urllib3"'; do
