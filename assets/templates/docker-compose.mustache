@@ -1,0 +1,68 @@
+---
+services:
+  mongo:
+    image: mongo:latest
+    container_name: {{name}}-mongo
+    # Mongo requires its own TLS configuration via command args.
+    # Combined PEM file (cert + key) recommended.
+    command:
+      - "mongod"
+      - "--bind_ip_all"
+      - "--tlsMode"
+      - "requireTLS"
+      - "--tlsCertificateKeyFile"
+      - "/certs/mongo/server.pem"
+      - "--tlsCAFile"
+      - "/certs/ca/ca.pem"
+      - "--auth"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=op://Employee/mcp/mongo/user
+      - MONGO_INITDB_ROOT_PASSWORD=op://Employee/mcp/mongo/pass
+    restart: always
+    volumes:
+      - {{path}}/data/mcp/mongo:/data/db
+      - {{path}}/certs/mongo:/certs/mongo:ro
+      - {{path}}/certs/ca:/certs/ca:ro
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.mongo.rule=HostSNI(`mongo.{{name}}.localhost`)
+      - traefik.tcp.routers.mongo.entrypoints=mongo
+      - traefik.tcp.routers.mongo.tls.passthrough=true
+      - traefik.tcp.services.mongo.loadbalancer.server.port=27017
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--tls", "--tlsCAFile", "/certs/ca/ca.pem", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  postgres:
+    image: postgres:alpine
+    container_name: {{name}}-postgres
+    environment:
+      - POSTGRES_USER=op://Employee/mcp/postgres/user
+      - POSTGRES_PASSWORD=op://Employee/mcp/postgres/pass
+      - POSTGRES_DB={{name}}
+    restart: always
+    # Postgres loads server.key / server.crt if ssl=on in postgresql.conf
+    volumes:
+      - {{path}}/data/mcp/postgres:/var/lib/postgresql/data
+      - {{path}}/certs/postgres:/certs/postgres:ro
+      - {{path}}/scripts/bash/postgres:/docker-entrypoint-initdb.d:ro
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.postgres.rule=HostSNI(`pg.{{name}}.localhost`)
+      - traefik.tcp.routers.postgres.entrypoints=postgres
+      - traefik.tcp.routers.postgres.tls.passthrough=true
+      - traefik.tcp.services.postgres.loadbalancer.server.port=5432
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U op://Employee/mcp/postgres/user"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  internal:
+    external: false

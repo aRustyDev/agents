@@ -1,0 +1,210 @@
+# syntax=docker/dockerfile:1.7
+#
+# Hardened Packer/Just build image
+# - Supports: `just init`, `just build-all`, `just build <distro>`
+# - Includes pinned tooling: packer, awscli v2, mustache (built in golang-builder from golang:trixie), just, yq, jq (1.8.1), git, python3+pip, moreutils (sponge), bash, unzip, tar, gzip
+# - Dedicated golang-builder stage builds Go CLIs (currently mustache) isolated from main builder
+# - Multi-stage: builder (fetch/build + SBOM + licenses) -> golang-builder (Go tools) -> runtime (minimal)
+# - Uses lockfile: config/tools.lock.yaml (versions + checksums)
+# - Embeds SBOMs (Syft JSON, SPDX JSON, CycloneDX JSON) & license index
+# - Pre-initializes packer plugins (`packer init`) and enables packer debug logging by default
+# - Non-root runtime user: packer
+# - Excludes pyenv & aws-sso (system Python & standard AWS auth)
+# - Does NOT copy data/distros.yaml (should be mounted at runtime)
+#
+# OCI Labels (fill via CI; placeholders commented)
+# LABEL org.opencontainers.image.source=""
+# LABEL org.opencontainers.image.revision=""
+# LABEL org.opencontainers.image.created=""
+# LABEL org.opencontainers.image.description=""
+# LABEL org.opencontainers.image.licenses=""
+#
+# -------------------------------------------------------------------
+# Build Args (optional override; lockfile preferred)
+# -------------------------------------------------------------------
+{{#images}}
+ARG BUILDER_IMAGE="{{#builder}}{{name}}:{{tag}}{{/builder}}{{^builder}}{{default.name}}:{{default.tag}}{{/builder}}"
+ARG GOLANG_IMAGE="{{#golang}}{{name}}:{{tag}}{{/golang}}"
+ARG RUNTIME_BASE="{{#runtime}}{{name}}:{{tag}}{{/runtime}}{{^runtime}}{{default.name}}:{{default.tag}}{{/runtime}}"
+{{/images}}
+############################
+# Stage 1: base builder
+############################
+FROM ${BUILDER_IMAGE} AS base
+# Install base build tooling (builder only)
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+    ca-certificates curl wget git bash build-essential unzip tar gzip jq python3 python3-pip moreutils gnupg lsb-release xz-utils file; \
+    rm -rf /var/lib/apt/lists/*
+
+############################
+# Stage 1: builder
+############################
+FROM base AS builder
+# FROM ${BUILDER_IMAGE} AS builder
+WORKDIR /build
+
+# Copy lockfile + repo subset (for packer init later if desired; distros excluded)
+# Lockfile may be updated by an external 'just lock-update' recipe before build.
+COPY config/tools.lock.yaml config/tools.lock.yaml
+COPY justfile justfile
+COPY scripts/ scripts/
+COPY packer/ packer/
+COPY config/ config/
+COPY .templates/ .templates/
+COPY data/ data/
+COPY .ci/scripts/bash/ .ci/scripts/bash/
+
+ARG YQ_VERSION="{{tools.yq.version}}"
+ARG JQ_VERSION="{{tools.jq.version}}"
+ARG SYFT_VERSION="{{tools.syft.version}}"
+ARG TARGETARCH="amd64"  # or arm64
+
+# Export ARCH for helper install scripts (yq/jq/syft) in this stage
+ENV YQVER=${YQ_VERSION} JQVER=${JQ_VERSION} SYFTVER=${SYFT_VERSION} ARCH=${TARGETARCH}
+
+# Fail early if lockfile missing
+RUN set -eux; \
+    if [ ! -f config/tools.lock.yaml ]; then \
+    echo "ERROR: Missing lockfile config/tools.lock.yaml. Run 'just lock-update' first."; \
+    exit 1; \
+    fi
+
+# # Install base build tooling (builder only)
+# RUN set -eux; \
+#     apt-get update; \
+#     apt-get install -y --no-install-recommends \
+#     ca-certificates curl wget git bash build-essential unzip tar gzip jq python3 python3-pip moreutils gnupg lsb-release xz-utils file; \
+#     rm -rf /var/lib/apt/lists/*
+
+# Install yq (needed to parse lockfile) - architecture aware
+RUN bash .ci/scripts/bash/install-yq.sh
+
+# Extract versions & checksums from lockfile (store in /tmp/vars) via helper script
+RUN bash .ci/scripts/bash/set-version-vars.sh
+
+# Install jq (architecture aware)
+RUN bash .ci/scripts/bash/install-jq.sh
+
+# Install syft (for SBOM) - architecture aware
+RUN bash .ci/scripts/bash/install-syft.sh
+
+# Generate SBOMs (builder stage) via helper script
+RUN bash .ci/scripts/bash/generate-sbom.sh
+
+# Collect licenses via helper script
+RUN bash .ci/scripts/bash/collect-licenses.sh
+
+# Export binaries & artifacts for runtime stage
+RUN bash .ci/scripts/bash/stage-exports.sh
+
+############################
+# Stage 2: golang-builder
+############################
+FROM ${GOLANG_IMAGE} AS golang-builder
+WORKDIR /go-build
+# Copy lockfile only (used for resolving versions; Go toolchain already present)
+COPY config/tools.lock.yaml config/tools.lock.yaml
+COPY .ci/scripts/bash/ .ci/scripts/bash/
+
+ARG MUSTACHE_VERSION="{{tools.mustache.version}}"
+# Export ARCH for helper install scripts (yq/jq/syft) in this stage
+ENV MUSTACHEVER=${MUSTACHE_VERSION}
+
+# Build mustache (pinned) using pre-installed Go; export binary
+RUN bash .ci/scripts/bash/install-mustache.sh
+
+############################
+# Stage 3: runtime
+############################
+FROM ${RUNTIME_BASE} AS runtime
+WORKDIR /app
+# Provide TARGETARCH again in this stage so we can set ARCH for install scripts
+ARG TARGETARCH
+ENV ARCH=${TARGETARCH}
+
+# Copy install helper scripts
+COPY .ci/scripts/bash/ .ci/scripts/bash/
+
+# Minimal runtime packages + just (version pinned)
+ARG JUST_VERSION="{{tools.just.version}}"
+ARG CURL_VERSION="{{tools.curl.version}}"
+ARG WGET_VERSION="{{tools.wget.version}}"
+ARG GIT_VERSION="{{tools.git.version}}"
+ARG PYTHON_VERSION="{{tools.python.version}}"
+ARG UNZIP_VERSION="{{tools.unzip.version}}"
+ARG TAR_VERSION="{{tools.tar.version}}"
+ARG GZIP_VERSION="{{tools.gzip.version}}"
+ARG MOREUTILS_VERSION="{{tools.moreutils.version}}"
+ARG GPG_VERSION="{{tools.gpg.version}}"
+ARG BASH_VERSION="{{tools.bash.version}}"
+ARG AWSCLI_VERSION="{{tools.awscli.version}}"
+ARG PACKER_VERSION="{{tools.packer.version}}"
+ENV JUSTVER=${JUST_VERSION} CURLVER=${CURL_VERSION} WGETVER=${WGET_VERSION} GITVER=${GIT_VERSION} PYTHONVER=${PYTHON_VERSION} UNZIPVER=${UNZIP_VERSION} TARVER=${TAR_VERSION} GZIPVER=${GZIP_VERSION} MOREUTILSVER=${MOREUTILS_VERSION} GPGVER=${GPG_VERSION} BASHVER=${BASH_VERSION} AWSCLIVER=${AWSCLI_VERSION} PACKERVER=${PACKER_VERSION}
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+    ca-certificates lsb-release \
+    "python3=${PYTHON_VERSION}" \
+    python3-pip \
+    "just=${JUST_VERSION}" \
+    "curl=${CURL_VERSION}" \
+    "wget=${WGET_VERSION}" \
+    "git=${GIT_VERSION}" \
+    "unzip=${UNZIP_VERSION}" \
+    "tar=${TAR_VERSION}" \
+    "gzip=${GZIP_VERSION}" \
+    "moreutils=${MOREUTILS_VERSION}" \
+    "gpg=${GPG_VERSION}" \
+    "bash=${BASH_VERSION}"; \
+    rm -rf /var/lib/apt/lists/*; \
+    just --version
+
+# Install AWS CLI v2 (pinned, architecture aware; requires ARCH)
+RUN bash .ci/scripts/bash/install-awscli.sh
+
+# Install packer (pinned, architecture aware)
+RUN bash .ci/scripts/bash/install-packer.sh
+
+# Copy tool binaries from builder
+COPY --from=golang-builder /export/bin/mustache /usr/local/bin/mustache
+# just copied via apt install; no COPY from builder needed
+COPY --from=builder /export/bin/yq       /usr/local/bin/yq
+COPY --from=builder /export/bin/jq       /usr/local/bin/jq
+# Syft retained (remove if not needed at runtime)
+COPY --from=builder /export/bin/syft     /usr/local/bin/syft
+
+# Copy SBOM & licenses
+COPY --from=builder /export/sbom     /sbom
+COPY --from=builder /export/licenses /etc/licenses
+
+# Copy repository code (excluding distros.yaml intentionally if updated externally)
+COPY justfile justfile
+COPY scripts/ scripts/
+COPY packer/ packer/
+COPY config/ config/
+COPY .templates/ .templates/
+COPY data/ data/
+
+# Pre-create packer debug log & enable logging
+RUN set -eux; mkdir -p data; touch data/packer-debug.log
+ENV PACKER_LOG=1
+ENV PACKER_LOG_PATH=/app/data/packer-debug.log
+
+# Pre-initialize packer plugins
+RUN set -eux; packer init packer/
+
+# Restrictive entrypoint: only allow specific just recipes
+# Use external entrypoint script from CI scripts directory
+COPY .ci/scripts/bash/entrypoint.packer.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Create non-root user
+RUN set -eux; useradd -m -u 1000 -s /bin/bash packer; \
+    chown -R packer:packer /app /sbom /etc/licenses
+USER packer
+
+WORKDIR /app
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

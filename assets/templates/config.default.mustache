@@ -1,0 +1,32 @@
+kms:
+  id: 421059f9-4a9a-4c72-94ee-7dad435d1115 # c4p-accelerator/ebs/default-encryption/key
+ec2:
+  instance_type: t3.micro
+  ami:
+    distro: "AmazonLinux" # Run `just ls-distros` for valid options
+    features: []
+    eks: {}
+ssh:
+  user: ec2-user
+  port: 22
+  bastion:
+    agent: true
+    host: eng-bastion-1.devops.map.cisco
+    user: ""
+    # pub: "" # Required if agent==false: Path to public key file
+    # key: "" # Required if agent==false: Path to private key file
+aws:
+  profile: c4p-aws-ite-devops-admin
+  organization:
+    id: o-olmbzd62af
+  account:
+    id: "396913725940"
+    name: c4p-aws-ite-devops
+  region:
+    emulated: us-isob-east-1
+    standard: us-east-1
+vpc:
+  name: ite-devops
+tags:
+  project: "c4p-eks-ami"
+  environment: "dev"

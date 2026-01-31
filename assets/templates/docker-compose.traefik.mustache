@@ -1,0 +1,32 @@
+---
+services:
+  traefik:
+    image: "traefik"
+    container_name: traefik
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.mongo.address=:27017"
+      - "--entrypoints.postgres.address=:5432"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "27017:27017"
+      - "5432:5432"
+    volumes:
+      # Mount Docker socket so Traefik can discover services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # (Optional) Traefik config directory for static/dynamic config if needed later
+      - {{path}}/data/mcp/traefik:/etc/traefik
+      - {{path}}/data/certs:/letsencrypt
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

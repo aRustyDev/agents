@@ -1,0 +1,60 @@
+{
+  "context_servers": {
+    "ami_eks-ast-grep": {
+      "source": "custom",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "{{path}}:/data",
+        "mcp/ast-grep"
+      ]
+    },
+    "ami_eks-docker-memory": {
+      "source": "custom",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "{{path}}/data/mcp/memory:/data",
+        "mcp/memory"
+      ]
+    },
+    "ami_eks-docker-mongodb": {
+      "source": "custom",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "{{path}}/data/mcp/mongo:/data",
+        "mcp/mongodb"
+      ],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb://localhost:27017/{{name}}"
+      }
+    },
+    "ami_eks-task-orchestrator": {
+      "source": "custom",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "{{path}}:/data",
+        "ghcr.io/jpicklyk/task-orchestrator"
+      ]
+    },
+    "ami_eks-just": {
+      "source": "custom",
+      "command": "just-mcp",
+      "args": ["--watch-dir", "{{path}}","--watch-dir", "{{path}}/scripts/just"]
+    }
+  }
+}
