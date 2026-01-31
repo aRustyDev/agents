@@ -7,6 +7,35 @@ description: Develop custom Terraform and OpenTofu providers using the Plugin Fr
 
 Build production-quality Terraform and OpenTofu providers using the Plugin Framework. This skill covers the complete provider development lifecycle from design through testing and release.
 
+## Quick Start
+
+For newcomers to Terraform provider development:
+
+1. **Start with TDD**: Always write tests before implementation
+2. **Use Plugin Framework**: Modern replacement for SDKv2
+3. **Follow the structure**: Use the recommended directory layout
+4. **Test thoroughly**: Acceptance tests are crucial for reliability
+
+### 5-Minute Setup
+
+```bash
+# 1. Create provider structure
+mkdir terraform-provider-{name}
+cd terraform-provider-{name}
+
+# 2. Initialize Go module
+go mod init terraform-provider-{name}
+
+# 3. Add dependencies
+go get github.com/hashicorp/terraform-plugin-framework
+go get github.com/hashicorp/terraform-plugin-testing
+
+# 4. Create basic structure (see Provider Structure below)
+# 5. Write your first test (see Acceptance Testing)
+```
+
+See [Getting Started Guide](references/getting-started.md) for a complete walkthrough.
+
 ## Purpose
 
 Guide the development of custom Terraform providers following HashiCorp's best practices, with emphasis on Test-Driven Development (TDD), proper resource lifecycle management, and comprehensive acceptance testing.
@@ -331,20 +360,19 @@ func (r *ThingResource) ImportState(ctx context.Context, req resource.ImportStat
 
 ## Acceptance Testing
 
-### Test Setup
+Terraform providers require comprehensive acceptance testing to ensure reliability in production.
+
+| Test Pattern | Purpose | Reference |
+|-------------|---------|-----------|
+| Basic CRUD | Resource lifecycle testing | [Testing Patterns](references/testing-patterns.md#basic-crud) |
+| Import State | Verify import functionality | [Testing Patterns](references/testing-patterns.md#import-state) |
+| Plan Checks | Validate plan actions | [Testing Patterns](references/testing-patterns.md#plan-checks) |
+| State Checks | Modern assertion framework | [Testing Patterns](references/testing-patterns.md#state-checks) |
+| Drift Detection | Out-of-band change handling | [Testing Patterns](references/testing-patterns.md#drift-detection) |
+
+### Essential Test Setup
 
 ```go
-package provider
-
-import (
-    "os"
-    "testing"
-
-    "github.com/hashicorp/terraform-plugin-framework/providerserver"
-    "github.com/hashicorp/terraform-plugin-go/tfprotov6"
-    "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-)
-
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
     "example": providerserver.NewProtocol6WithError(New("test")()),
 }
@@ -356,7 +384,7 @@ func testAccPreCheck(t *testing.T) {
 }
 ```
 
-### Resource Test with State Checks
+### Basic Test Structure
 
 ```go
 func TestAccThingResource_basic(t *testing.T) {
@@ -364,142 +392,19 @@ func TestAccThingResource_basic(t *testing.T) {
         PreCheck:                 func() { testAccPreCheck(t) },
         ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
         Steps: []resource.TestStep{
-            // Create and Read
             {
                 Config: testAccThingResourceConfig("test-thing"),
                 Check: resource.ComposeAggregateTestCheckFunc(
                     resource.TestCheckResourceAttr("example_thing.test", "name", "test-thing"),
                     resource.TestCheckResourceAttrSet("example_thing.test", "id"),
-                    resource.TestCheckResourceAttrSet("example_thing.test", "status"),
-                ),
-            },
-            // ImportState
-            {
-                ResourceName:      "example_thing.test",
-                ImportState:       true,
-                ImportStateVerify: true,
-            },
-            // Update
-            {
-                Config: testAccThingResourceConfig("updated-thing"),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttr("example_thing.test", "name", "updated-thing"),
-                ),
-            },
-        },
-    })
-}
-
-func testAccThingResourceConfig(name string) string {
-    return fmt.Sprintf(`
-resource "example_thing" "test" {
-  name = %[1]q
-}
-`, name)
-}
-```
-
-### Plan Checks (terraform-plugin-testing v1.13.3+)
-
-```go
-import (
-    "github.com/hashicorp/terraform-plugin-testing/plancheck"
-)
-
-func TestAccThingResource_planChecks(t *testing.T) {
-    resource.Test(t, resource.TestCase{
-        PreCheck:                 func() { testAccPreCheck(t) },
-        ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-        Steps: []resource.TestStep{
-            {
-                Config: testAccThingResourceConfig("test"),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
-                    PreApply: []plancheck.PlanCheck{
-                        plancheck.ExpectResourceAction("example_thing.test", plancheck.ResourceActionCreate),
-                    },
-                },
-            },
-            {
-                Config: testAccThingResourceConfig("updated"),
-                ConfigPlanChecks: resource.ConfigPlanChecks{
-                    PreApply: []plancheck.PlanCheck{
-                        plancheck.ExpectResourceAction("example_thing.test", plancheck.ResourceActionUpdate),
-                    },
-                },
-            },
-        },
-    })
-}
-```
-
-### State Checks (Modern Assertion Framework)
-
-```go
-import (
-    "github.com/hashicorp/terraform-plugin-testing/statecheck"
-    "github.com/hashicorp/terraform-plugin-testing/compare"
-)
-
-func TestAccThingResource_stateChecks(t *testing.T) {
-    resource.Test(t, resource.TestCase{
-        PreCheck:                 func() { testAccPreCheck(t) },
-        ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-        Steps: []resource.TestStep{
-            {
-                Config: testAccThingResourceConfig("test"),
-                ConfigStateChecks: []statecheck.StateCheck{
-                    statecheck.ExpectKnownValue(
-                        "example_thing.test",
-                        tfjsonpath.New("name"),
-                        knownvalue.StringExact("test"),
-                    ),
-                    statecheck.ExpectKnownValue(
-                        "example_thing.test",
-                        tfjsonpath.New("id"),
-                        knownvalue.NotNull(),
-                    ),
-                },
-            },
-        },
-    })
-}
-```
-
-### Drift Detection
-
-```go
-func TestAccThingResource_drift(t *testing.T) {
-    var thingID string
-
-    resource.Test(t, resource.TestCase{
-        PreCheck:                 func() { testAccPreCheck(t) },
-        ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-        Steps: []resource.TestStep{
-            {
-                Config: testAccThingResourceConfig("original"),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrWith("example_thing.test", "id", func(value string) error {
-                        thingID = value
-                        return nil
-                    }),
-                ),
-            },
-            {
-                PreConfig: func() {
-                    // Simulate drift by modifying resource outside Terraform
-                    client := getTestClient()
-                    client.UpdateThing(context.Background(), thingID, "drifted", "")
-                },
-                Config: testAccThingResourceConfig("original"),
-                Check: resource.ComposeAggregateTestCheckFunc(
-                    // Verify Terraform corrected the drift
-                    resource.TestCheckResourceAttr("example_thing.test", "name", "original"),
                 ),
             },
         },
     })
 }
 ```
+
+See [Testing Patterns Reference](references/testing-patterns.md) for advanced patterns, plan checks, state checks, and drift detection examples.
 
 ## Best Practices
 
