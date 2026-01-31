@@ -1,7 +1,0 @@
-{
-  "name": "trpc/trpc-api-best-practices-rules",
-  "description": "Best practices for tRPC API development",
-  "version": "0.0.1",
-  "author": "tRPC Team",
-  "tags": ["trpc", "api", "typescript", "rpc", "backend"]
-}

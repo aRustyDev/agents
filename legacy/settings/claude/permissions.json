@@ -1,5 +1,0 @@
-{
-  "permissions": {
-    "allow": ["Bash(gh gist view:*)", "Bash(do)", "Bash(echo:*)", "Bash(done)"]
-  }
-}

@@ -1,2 +1,0 @@
-# prompts
-Prompt snippets

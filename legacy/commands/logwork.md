@@ -1,2 +1,0 @@
-using the contents of the files at `.changelog/commit/`, create a high level description of the work. Then format that description as a JIRA Issue and put that description into `.changelog/commit/jira.md`
-using the contents of the files at `.changelog/commit/`, create a high level description of the work. Then format that description as a GitLab Issue and put that description into `.changelog/commit/gitlab.md`

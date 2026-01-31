@@ -1,9 +1,0 @@
-{
-  "agent_servers": {
-    "your_agent": {
-      "command": "path_to_executable",
-      "args": [],
-      "env": {}
-    }
-  }
-}
