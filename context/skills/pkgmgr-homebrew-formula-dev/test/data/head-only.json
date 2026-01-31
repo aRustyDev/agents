@@ -1,0 +1,25 @@
+{
+  "formulas": [
+    {
+      "name": "bleeding-edge",
+      "desc": "A tool that only builds from HEAD",
+      "homepage": "https://github.com/example/bleeding-edge",
+      "license": "GPL-3.0-only",
+      "language": "go",
+      "head": {
+        "url": "https://github.com/example/bleeding-edge.git",
+        "branch": "main"
+      },
+      "dependencies": [
+        { "name": "go", "type": ":build" }
+      ],
+      "install": {
+        "ldflags": "-s -w"
+      },
+      "test": {
+        "command": "system bin/\"bleeding-edge\", \"--help\"",
+        "expected_output": "bleeding-edge"
+      }
+    }
+  ]
+}

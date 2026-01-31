@@ -1,0 +1,170 @@
+{{#formulas}}
+class {{class_name}} < Formula
+  desc "{{desc}}"
+  homepage "{{homepage}}"
+{{#url}}
+  url "{{url}}"
+{{/url}}
+{{#sha256}}
+  sha256 "{{sha256}}"
+{{/sha256}}
+{{#version}}
+  version "{{version}}"
+{{/version}}
+  license {{license_rendered}}
+{{#revision}}
+  revision {{revision}}
+{{/revision}}
+{{#head}}
+  head "{{url}}"{{#branch}}, branch: "{{branch}}"{{/branch}}
+{{/head}}
+{{#bottle}}
+
+  bottle do
+{{#cellar}}
+    cellar {{cellar}}
+{{/cellar}}
+{{#sha256}}
+{{#arm64_sonoma}}
+    sha256 arm64_sonoma: "{{arm64_sonoma}}"
+{{/arm64_sonoma}}
+{{#ventura}}
+    sha256 ventura: "{{ventura}}"
+{{/ventura}}
+{{/sha256}}
+{{#rebuild}}
+    rebuild {{rebuild}}
+{{/rebuild}}
+  end
+{{/bottle}}
+{{#livecheck}}
+
+  livecheck do
+    url {{url}}
+    strategy {{strategy}}
+{{#regex}}
+    regex {{regex}}
+{{/regex}}
+  end
+{{/livecheck}}
+{{#dependencies}}
+
+  depends_on "{{name}}"{{#type}} => {{type}}{{/type}}
+{{/dependencies}}
+{{#uses_from_macos}}
+  uses_from_macos "{{name}}"{{#since}}, since: {{since}}{{/since}}
+{{/uses_from_macos}}
+{{#resources}}
+
+  resource "{{name}}" do
+    url "{{url}}"
+    sha256 "{{sha256}}"
+  end
+{{/resources}}
+{{#conflicts_with}}
+  conflicts_with "{{name}}"{{#because}}, because: "{{because}}"{{/because}}
+{{/conflicts_with}}
+{{#keg_only}}
+  keg_only {{keg_only}}
+{{/keg_only}}
+{{#skip_clean}}
+  skip_clean "{{.}}"
+{{/skip_clean}}
+{{#patches}}
+
+  patch do
+{{#url}}
+    url "{{url}}"
+    sha256 "{{sha256}}"
+{{/url}}
+  end
+{{/patches}}
+
+  def install
+{{#is_go}}
+{{> langs/go}}
+{{/is_go}}
+{{#is_rust}}
+{{> langs/rust}}
+{{/is_rust}}
+{{#is_python}}
+{{> langs/python}}
+{{/is_python}}
+{{#is_zig}}
+{{> langs/zig}}
+{{/is_zig}}
+{{#is_cmake}}
+{{> langs/cmake}}
+{{/is_cmake}}
+{{#is_autotools}}
+{{> langs/autotools}}
+{{/is_autotools}}
+{{#is_meson}}
+{{> langs/meson}}
+{{/is_meson}}
+{{#completions}}
+
+{{#bash}}
+    generate_completions_from_executable(bin/"{{formula_name}}", "completions", "bash",
+                                         shell_output_dir: bash_completion)
+{{/bash}}
+{{#zsh}}
+    generate_completions_from_executable(bin/"{{formula_name}}", "completions", "zsh",
+                                         shell_output_dir: zsh_completion)
+{{/zsh}}
+{{#fish}}
+    generate_completions_from_executable(bin/"{{formula_name}}", "completions", "fish",
+                                         shell_output_dir: fish_completion)
+{{/fish}}
+{{/completions}}
+  end
+{{#service}}
+
+  service do
+{{#run_is_array}}
+    run {{run_rendered}}
+{{/run_is_array}}
+{{^run_is_array}}
+    run [{{run_rendered}}]
+{{/run_is_array}}
+{{#run_type}}
+    run_type {{run_type}}
+{{/run_type}}
+{{#interval}}
+    interval {{interval}}
+{{/interval}}
+{{#keep_alive_bool}}
+    keep_alive {{keep_alive_rendered}}
+{{/keep_alive_bool}}
+{{#log_path}}
+    log_path "{{log_path}}"
+{{/log_path}}
+{{#error_log_path}}
+    error_log_path "{{error_log_path}}"
+{{/error_log_path}}
+{{#working_dir}}
+    working_dir "{{working_dir}}"
+{{/working_dir}}
+  end
+{{/service}}
+{{#test}}
+
+  test do
+{{#command}}
+    {{command}}
+{{/command}}
+{{#expected_output}}
+    assert_match "{{expected_output}}", shell_output("#{bin}/{{formula_name}} --help")
+{{/expected_output}}
+  end
+{{/test}}
+{{#caveats}}
+
+  def caveats
+    <<~EOS
+      {{caveats}}
+    EOS
+  end
+{{/caveats}}
+end
+{{/formulas}}

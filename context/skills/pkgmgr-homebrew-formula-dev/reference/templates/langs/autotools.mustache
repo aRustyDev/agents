@@ -1,0 +1,5 @@
+    {{#autoreconf}}
+    system "autoreconf", "-fiv"
+    {{/autoreconf}}
+    system "./configure", *std_configure_args{{#configure_args}}, "{{.}}"{{/configure_args}}
+    system "make", "install"
