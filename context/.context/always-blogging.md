@@ -1,0 +1,2 @@
+- all lessons learned should be blog posts
+- all problems solved should be blog posts

@@ -1,0 +1,349 @@
+---
+name: load-role
+description: Orchestrates efficient role activation with caching and optimization
+version: 1.0.0
+author: Claude
+---
+
+# Role Loader Process
+
+## Purpose
+Efficiently loads roles by leveraging caching, reusability detection, and intelligent module composition.
+
+## Process Flow
+
+### 1. Role Resolution
+```bash
+resolve_role() {
+  local ROLE_NAME="$1"
+  local ROLE_PATH=""
+  
+  # Check custom roles first
+  if [ -f ".claude/roles/custom/${ROLE_NAME}.yaml" ]; then
+    ROLE_PATH=".claude/roles/custom/${ROLE_NAME}.yaml"
+  # Then base roles
+  elif [ -f ".claude/roles/base/${ROLE_NAME}.yaml" ]; then
+    ROLE_PATH=".claude/roles/base/${ROLE_NAME}.yaml"
+  else
+    echo "Error: Role '${ROLE_NAME}' not found"
+    return 1
+  fi
+  
+  echo "$ROLE_PATH"
+}
+```
+
+### 2. Cache Check
+```bash
+load_role_from_cache() {
+  local ROLE_NAME="$1"
+  
+  # Use cache manager
+  if read_cached_role "$ROLE_NAME"; then
+    log_metric "cache_hit" "$ROLE_NAME"
+    return 0
+  fi
+  
+  log_metric "cache_miss" "$ROLE_NAME"
+  return 1
+}
+```
+
+### 3. Role Parsing
+```bash
+parse_role_definition() {
+  local ROLE_PATH="$1"
+  
+  # Extract role components
+  local ROLE_DATA=$(yq eval '.' "$ROLE_PATH")
+  
+  # Validate against schema
+  validate_role_schema "$ROLE_DATA" || return 1
+  
+  # Extract components
+  ROLE_CORE=$(echo "$ROLE_DATA" | yq e '.core' -)
+  ROLE_CAPABILITIES=$(echo "$ROLE_DATA" | yq e '.capabilities' -)
+  ROLE_KNOWLEDGE=$(echo "$ROLE_DATA" | yq e '.knowledge_base' -)
+  ROLE_BEHAVIORS=$(echo "$ROLE_DATA" | yq e '.behaviors' -)
+}
+```
+
+### 4. Reusability Analysis
+```bash
+analyze_reusability() {
+  local REQUIRED_MODULES=$(echo "$ROLE_CAPABILITIES" | yq e '.required[].module' -)
+  
+  # Check existing loaded modules
+  for module in $REQUIRED_MODULES; do
+    # Use determine-prompt-reusability process
+    local REUSE_RESULT=$(check_module_reusability "$module")
+    
+    if [ "$REUSE_RESULT" = "reusable" ]; then
+      REUSED_MODULES+=("$module")
+    else
+      LOAD_MODULES+=("$module")
+    fi
+  done
+  
+  echo "Reusing ${#REUSED_MODULES[@]} modules, loading ${#LOAD_MODULES[@]} new"
+}
+```
+
+### 5. Module Loading Strategy
+```bash
+determine_load_order() {
+  local -a MODULES=("$@")
+  local -a ORDERED_MODULES=()
+  
+  # Sort by priority and dependencies
+  for module in "${MODULES[@]}"; do
+    local PRIORITY=$(get_module_priority "$module")
+    local DEPS=$(get_module_dependencies "$module")
+    
+    # Add to ordered list based on priority and deps
+    insert_ordered "$module" "$PRIORITY" "$DEPS"
+  done
+  
+  echo "${ORDERED_MODULES[@]}"
+}
+```
+
+### 6. Core Loading
+```bash
+load_role_core() {
+  local ROLE_NAME="$1"
+  
+  # Load minimal core identity
+  cat << EOF
+## Active Role: $ROLE_NAME
+
+### Core Identity
+$(echo "$ROLE_CORE" | yq e '.mindset' -)
+
+### Communication Style
+$(echo "$ROLE_CORE" | yq e '.communication_style' -)
+
+### Decision Framework
+$(echo "$ROLE_CORE" | yq e '.decision_framework' -)
+
+### Values
+$(echo "$ROLE_CORE" | yq e '.values[]' - | sed 's/^/- /')
+
+### Traits
+$(echo "$ROLE_CORE" | yq e '.traits[]' - | sed 's/^/- /')
+EOF
+}
+```
+
+### 7. Capability Loading
+```bash
+load_capabilities() {
+  local CONTEXT="$1"
+  
+  # Always load required capabilities
+  for module in "${REQUIRED_MODULES[@]}"; do
+    load_module "$module" "required"
+  done
+  
+  # Load contextual capabilities based on triggers
+  local CONTEXTUAL=$(echo "$ROLE_CAPABILITIES" | yq e '.contextual[]' -)
+  
+  while IFS= read -r capability; do
+    local TRIGGERS=$(echo "$capability" | yq e '.triggers[]' -)
+    
+    # Check if context matches triggers
+    if matches_triggers "$CONTEXT" "$TRIGGERS"; then
+      local MODULES=$(echo "$capability" | yq e '.modules[]' -)
+      for module in $MODULES; do
+        load_module "$module" "contextual"
+      done
+    fi
+  done <<< "$CONTEXTUAL"
+}
+```
+
+### 8. Knowledge Integration
+```bash
+integrate_knowledge() {
+  local INHERIT=$(echo "$ROLE_KNOWLEDGE" | yq e '.inherit[].module' -)
+  
+  for knowledge_module in $INHERIT; do
+    # Load knowledge with caching
+    if [ -f ".claude/cache/knowledge/${knowledge_module}.zst" ]; then
+      zstd -d ".claude/cache/knowledge/${knowledge_module}.zst" -c
+    else
+      load_knowledge_module "$knowledge_module"
+      cache_knowledge_module "$knowledge_module" &
+    fi
+  done
+}
+```
+
+### 9. Behavior Configuration
+```bash
+configure_behaviors() {
+  # Set consultation preferences
+  CONSULTATION_ROLES=$(echo "$ROLE_BEHAVIORS" | yq e '.consultation.can_consult[]' -)
+  CONSULTATION_STYLE=$(echo "$ROLE_BEHAVIORS" | yq e '.consultation.consultation_style' -)
+  
+  # Set response style
+  RESPONSE_VERBOSITY=$(echo "$ROLE_BEHAVIORS" | yq e '.response_style.verbosity' -)
+  RESPONSE_LEVEL=$(echo "$ROLE_BEHAVIORS" | yq e '.response_style.technical_level' -)
+  
+  # Configure learning
+  CONTINUOUS_LEARNING=$(echo "$ROLE_BEHAVIORS" | yq e '.learning.continuous' -)
+  LEARNING_DOMAINS=$(echo "$ROLE_BEHAVIORS" | yq e '.learning.domains[]' -)
+}
+```
+
+### 10. Optimization
+```bash
+optimize_loading() {
+  local ROLE_NAME="$1"
+  local OPTIMIZATION=$(yq e '.optimization' "$ROLE_PATH")
+  
+  # Preload commonly used together
+  local PRELOAD_WITH=$(echo "$OPTIMIZATION" | yq e '.preload_with[]' -)
+  for role in $PRELOAD_WITH; do
+    preload_role_async "$role" &
+  done
+  
+  # Set cache priority
+  local CACHE_PRIORITY=$(echo "$OPTIMIZATION" | yq e '.cache_priority' -)
+  set_cache_priority "$ROLE_NAME" "$CACHE_PRIORITY"
+}
+```
+
+## Complete Loading Function
+```bash
+load_role() {
+  local ROLE_NAME="$1"
+  local CONTEXT="${2:-general}"
+  local START_TIME=$(date +%s%N)
+  
+  echo "Loading role: $ROLE_NAME"
+  
+  # Try cache first
+  if load_role_from_cache "$ROLE_NAME"; then
+    local CACHE_TIME=$(($(date +%s%N) - START_TIME))
+    echo "✓ Role loaded from cache in $((CACHE_TIME / 1000000))ms"
+    return 0
+  fi
+  
+  # Resolve role path
+  ROLE_PATH=$(resolve_role "$ROLE_NAME") || return 1
+  
+  # Parse role definition
+  parse_role_definition "$ROLE_PATH" || return 1
+  
+  # Analyze reusability
+  analyze_reusability
+  
+  # Load components in order
+  load_role_core "$ROLE_NAME"
+  load_capabilities "$CONTEXT"
+  integrate_knowledge
+  configure_behaviors
+  
+  # Optimize for future loads
+  optimize_loading "$ROLE_NAME"
+  
+  # Cache the loaded role
+  cache_role "$ROLE_NAME" "$ROLE_PATH" &
+  
+  # Record metrics
+  local LOAD_TIME=$(($(date +%s%N) - START_TIME))
+  record_load_metrics "$ROLE_NAME" "$LOAD_TIME" "${#REUSED_MODULES[@]}" "${#LOAD_MODULES[@]}"
+  
+  echo "✓ Role loaded in $((LOAD_TIME / 1000000))ms"
+  echo "  Reused: ${#REUSED_MODULES[@]} modules"
+  echo "  Loaded: ${#LOAD_MODULES[@]} new modules"
+}
+```
+
+## Context Detection
+```bash
+detect_context() {
+  local USER_INPUT="$1"
+  local DETECTED_CONTEXT="general"
+  
+  # Check for specific keywords
+  case "$USER_INPUT" in
+    *review*|*PR*|*merge*)
+      DETECTED_CONTEXT="code-review"
+      ;;
+    *architect*|*design*|*scale*)
+      DETECTED_CONTEXT="architecture"
+      ;;
+    *teach*|*explain*|*mentor*)
+      DETECTED_CONTEXT="mentoring"
+      ;;
+    *security*|*vulnerability*|*threat*)
+      DETECTED_CONTEXT="security"
+      ;;
+  esac
+  
+  echo "$DETECTED_CONTEXT"
+}
+```
+
+## Performance Monitoring
+```bash
+record_load_metrics() {
+  local ROLE="$1"
+  local LOAD_TIME="$2"
+  local REUSED="$3"
+  local NEW="$4"
+  
+  cat >> ".claude/metrics/role-loading.jsonl" << EOF
+{"timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","role":"$ROLE","load_time_ms":$((LOAD_TIME/1000000)),"modules_reused":$REUSED,"modules_loaded":$NEW}
+EOF
+}
+```
+
+## Error Handling
+
+### Missing Role
+```bash
+handle_missing_role() {
+  local ROLE="$1"
+  
+  echo "Error: Role '$ROLE' not found"
+  echo "Available roles:"
+  ls .claude/roles/base/ | sed 's/.yaml$//' | sed 's/^/  - /'
+  
+  # Suggest similar roles
+  suggest_similar_roles "$ROLE"
+}
+```
+
+### Module Load Failure
+```bash
+handle_module_failure() {
+  local MODULE="$1"
+  local ERROR="$2"
+  
+  echo "Warning: Failed to load module '$MODULE': $ERROR"
+  echo "Continuing with partial role load"
+  
+  # Log failure for analysis
+  log_module_failure "$MODULE" "$ERROR"
+}
+```
+
+## Integration Points
+
+### With Cache Manager
+- Checks cache before loading
+- Updates cache after successful load
+- Respects cache priorities
+
+### With Metrics System
+- Records all load operations
+- Tracks cache hit/miss rates
+- Monitors performance trends
+
+### With Version Manager
+- Ensures latest module versions
+- Handles version conflicts
+- Updates stale references

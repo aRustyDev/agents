@@ -1,0 +1,188 @@
+---
+# Tool version and integrity lockfile
+# ------------------------------------------------------------------
+# This file pins versions & checksums for all build-image tooling.
+# Update via a future 'just lock-update' recipe that:
+#   - Discovers latest releases
+#   - Downloads artifacts
+#   - Computes sha256 checksums
+#   - Writes resolved commit/tag info
+#
+# Fields:
+#   version:      Human-facing version/tag (or pseudo if not formal)
+#   commit:       Git commit hash (when applicable; optional)
+#   checksum:     sha256 of downloaded artifact or compiled binary
+#   source:       Origin of the artifact (github, hashicorp, aws, upstream)
+#   notes:        Optional clarifying text (e.g. build method)
+#
+# IMPORTANT:
+#   - Leave empty strings "" until populated.
+#   - Do not remove keys once introduced; use new sections for added tools.
+#   - Downstream Dockerfile expects these paths (modify both if schema changes).
+#
+# SBOM + License aggregation metadata included below for traceability.
+#
+# ------------------------------------------------------------------
+images:
+  default:
+    name: debian
+    tag: trixie-slim
+    digest: "sha256:936abff852736f951dab72d91a1b6337cf04217b2a77a5eaadc7c0f2f1ec1758" # sha256 digest of the base image (docker manifest)
+    source: dockerhub
+    notes: "Used for running the pipeline in CI."
+  golang:
+    name: golang
+    tag: trixie
+    digest: "sha256:936abff852736f951dab72d91a1b6337cf04217b2a77a5eaadc7c0f2f1ec1758" # sha256 digest of the base image (docker manifest)
+    source: dockerhub
+    notes: "Used for running the pipeline in CI."
+  builder:
+    name: debian
+    tag: trixie-slim
+    digest: "sha256:936abff852736f951dab72d91a1b6337cf04217b2a77a5eaadc7c0f2f1ec1758" # sha256 digest of the base image (docker manifest)
+    source: dockerhub
+    notes: "Used for running the pipeline in CI."
+  runtime:
+    name: debian
+    tag: trixie-slim
+    digest: "sha256:936abff852736f951dab72d91a1b6337cf04217b2a77a5eaadc7c0f2f1ec1758" # sha256 digest of the base image (docker manifest)
+    source: dockerhub
+    notes: "Used for running the pipeline in CI."
+tools:
+  packer:
+    version: "1.14.2" # latest packer release version
+    checksum: "cfefdea4ac580eba7b254ef34d25b756d4961741004e3e701a1476594d13e64a" # sha256 of packer_1.14.2_linux_amd64.zip
+    source: hashicorp-release
+    notes: "Downloaded via releases.hashicorp.com"
+
+  awscli:
+    version: "2.31.34" # e.g. 2.16.6
+    checksum: "dc3cc81f1e365a432b7e56a805058ec78c5109f4bad9400266c108b2a1ae1415" # sha256 of awscli-exe-linux-x86_64-<ver>.zip
+    source: aws-official
+    notes: "Installed from official AWS CLI v2 zip"
+
+  mustache:
+    version: "v1.4.0" # go module version or pseudo 'latest'
+    commit: "52295247b56175b48857d38fda6576844f43f7d1" # resolved git commit of mustache repo
+    checksum: "470a73e8bf84f7eb77fa4f3324e7ee09c2c112952ee4625275bc4d25436e9dd5"
+    source: github
+    notes: "Built via 'go install github.com/cbroglie/mustache/...@version'"
+
+  just:
+    version: "1.40.0-1+b1"
+    commit: "b7e7c46495b34e9407982ffbbb25eb2808ec40b7" # optional: release commit
+    checksum: "52b2231165a0382099f58e8b1d1741a540b98118a9e8ecb04f70f46ec713947b" # sha256 of release tarball OR extracted binary
+    source: github
+    notes: "Static musl binary from GitHub release assets"
+
+  yq:
+    version: "v4.48.1" # e.g. v4.44.1
+    commit: "0ecdce24e83f0fa127940334be98c86b07b0c488" # optional commit hash
+    checksum: "777ab159b9d8705859160fcf1eb362859cac5c56c970cd5fd25f5a4fc79e2707" # sha256 of yq_linux_amd64
+    source: github
+    notes: "Single binary download"
+
+  jq:
+    version: "1.8.1" # Upstream version (not dpkg)
+    checksum: "1138ab6f9bffed59952934a928618cd0f19beb0461ee872b2ca515c32076adae" # sha256 of jq-linux-amd64
+    source: github
+    notes: "Fetched upstream (not Debian package)"
+
+  go:
+    version: "1.25.1" # e.g. 1.22.6
+    checksum: "11557f0f7d6eb8216977f0adadcc943b3d8dd7abc198bce8dbacb1806da298bb" # sha256 of go<ver>.linux-amd64.tar.gz
+    source: golang
+    notes: "Builder stage only; not in final runtime"
+
+  syft:
+    version: "v1.37.0" # e.g. v1.18.1
+    commit: "4c93394bc26c0bd649b58a6a1a9eb498f4847124" # release commit
+    checksum: "" # sha256 of syft_<ver>_linux_amd64.tar.gz
+    source: github
+    notes: "Used to generate SBOMs in builder stage"
+
+  moreutils:
+    version: "0.69-1+b1" # dpkg version from apt (e.g. 0.67-1)
+    checksum: "f5061881ecfb195fb8389f416a76b96e09e7774a82e273c3cfd690a98348fa23" # find /path/to/moreutils/0.70/ -type f -exec sha256sum --quiet {} \; | sha256sum
+    source: debian-apt
+    notes: "Provides 'sponge' dependency for recipes"
+
+  python:
+    version: "3.13.5-1" # system python version
+    checksum: "4970a8c688841ce9726a217c549b29e5f34bfdb53abfe221a06d78c903a05368" # optional
+    source: debian-apt
+    notes: "System Python; no pyenv layer"
+
+  git:
+    version: "1:2.47.3-0+deb13u1" # dpkg version
+    checksum: "4970a8c688841ce9726a217c549b29e5f34bfdb53abfe221a06d78c903a05368" # optional
+    source: debian-apt
+    notes: "Used for metadata tags + repository operations"
+
+  bash:
+    version: "5.2.37-2+b5" # dpkg version
+    checksum: "1a0522260f2d3cc991bacafb97995b1bd24684b67d48cd9a254fdf5f1ef3fb91"
+    source: debian-apt
+    notes: "Shell required for recipe execution"
+
+  curl:
+    version: "8.14.1-2" # dpkg version
+    checksum: "57b30b4eaffba07612de38aff599c017b13200600d4ddf90dae085688c213a26" # optional
+    source: debian-apt
+    notes: "Used for fetching release artifacts"
+
+  wget:
+    version: "1.25.0-2" # dpkg version
+    commit: "" # not applicable
+    checksum: "" # optional
+    source: debian-apt
+    notes: "Secondary fetch tool"
+
+  unzip:
+    version: "6.0-29" # dpkg version
+    checksum: "272c3482baaf156a9d18baf932365aa5b6ac14a71f1d0eb72ca12adda67dca04" # optional
+    source: debian-apt
+    notes: "Needed to extract zip archives"
+
+  tar:
+    version: "1.35+dfsg-3.1" # dpkg version
+    checksum: "d9f5d3eecde935dde294148b96dc5b50b5935f28c9f486aaaa79738dad580575" # optional
+    source: debian-apt
+    notes: "Used for extracting .tar.gz artifacts"
+
+  gzip:
+    version: "1.13-1" # dpkg version
+    commit: "" # not applicable
+    checksum: "" # optional
+    source: debian-apt
+    notes: "Compression utility; may appear in build chain"
+
+  gpg:
+    version: "2.4.7-21+b3" # dpkg version
+    checksum: "d6f5e8f5f6f3e1e4b3e8e6f5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5" # optional
+    source: debian-apt
+    notes: "Used for verifying signatures of downloaded artifacts"
+
+sbom:
+  formats:
+    - syft-json
+    - spdx-json
+    - cyclonedx-json
+  generated_at: "" # UTC timestamp when SBOMs created
+  tool_version: "v1.37.0" # syft version used for generation
+  included_build_stage: true # indicates builder stage components included
+
+licenses:
+  aggregation_generated_at: "" # UTC timestamp of license scan
+  index_format_version: "1.0"
+  packages_count: 0
+  notes: "Populate 'components' from SBOM license data & apt copyright files."
+  components: [] # future list of objects: {name, version, license, path}
+
+meta:
+  lockfile_version: 1
+  last_updated: "2025-11-11T00:50:00Z" # UTC timestamp
+  managed_by: "just lock-update"
+  integrity_policy: "fail-on-mismatch"
+  description: "Pinned tool versions & checksums for build image reproducibility."
+# End of tools.lock.yaml

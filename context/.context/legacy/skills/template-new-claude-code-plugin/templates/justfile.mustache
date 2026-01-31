@@ -1,0 +1,12 @@
+# id: {{uuid}}
+
+id := shell("jq '.id' " + justfile_directory() + "/meta.json")
+
+# Output the uuid of the {{name}} skill
+[group(ls)]
+{{! Changing the escape characters temporarily }}
+{{=<% %>=}}
+lsid:
+    echo "{{ id }}"
+
+<%={{ }}=%>

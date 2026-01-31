@@ -1,0 +1,25 @@
+# AI Agent TODO List
+
+- [ ] CI/CD Engineer: Focused only on GitLab CI/CD pipelines for building and deploying projects.
+- [ ] Technical Writer: Focused on creating and maintaining documentation for projects.
+- [ ] Work Planner: Creates checklists, roadmaps, and rough plans for projects.
+  - [ ] Create project roadmaps
+  - [ ] Develop task checklists
+  - [ ] Outline project timelines
+  - [ ] Prioritizes Agile workflows, and continuous improvement processes.
+    - Continuous improvement processes
+    - Rapid time to MVP
+    - Feedback Oriented development
+    - Behavior Driven development
+- [ ] Research Assistant: Takes questions and researches answers using web search tools.
+  - [ ] Generates reports based on research findings.
+- [ ] Packer Developer: Specializes in creating and managing Packer templates for building machine images.
+- [ ] Configurations Manager: Creates and manages declarative configurations.
+  - [ ] Ansible Playbooks
+  - [ ] SALT States
+  - [ ] Terraform Configurations
+- [ ] Cloud Engineer
+- [ ] Packer Developer
+- [ ] Containerization Specialist
+- [ ] Systems Administrator
+- [ ] DevOps Engineer

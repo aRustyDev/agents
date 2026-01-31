@@ -1,0 +1,18 @@
+- the project is controlled by justfile recipes
+- api interactions use python scripts
+- justfile recipes prefer just script patterns like `#!/usr/bin/env bash` over individual recipe lines
+- each justfile recipe should be as modular as possible
+- A recipe can have multiple attributes, the convention to use is to separate them by commas on the same line like `[no-cd, private]`
+- All justfile recipes need a description line starting with `# `
+  - use the description to explain what the recipe does
+  - The recipe must be only 1 line long
+- CI related scripts go in the `.ci/scripts` folder
+  - `.ci/scripts/bash`: Bash Scripts
+  - `.ci/scripts/python`: Python Scripts
+  - `.ci/scripts/jq`: JQ Scripts
+  - `.ci/scripts/awk`: AWK Scripts
+- Non-CI related scripts go in `scripts/`
+  - `scripts/bash`: Bash Scripts
+  - `scripts/python`: Python Scripts
+  - `scripts/jq`: JQ Scripts
+  - `scripts/awk`: AWK Scripts

@@ -1,0 +1,9 @@
+# Error codes for plan command
+error_codes:
+  ERR_NO_GH_CLI: 1
+  ERR_NOT_GIT_REPO: 2
+  ERR_NO_GH_AUTH: 3
+  ERR_NO_REPO_ACCESS: 4
+  ERR_INVALID_SUBCOMMAND: 5
+  ERR_SESSION_NOT_FOUND: 6
+  ERR_FILE_NOT_FOUND: 7

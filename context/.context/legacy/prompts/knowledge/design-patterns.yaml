@@ -1,0 +1,312 @@
+---
+id: design-patterns
+version: 1.0.0
+name: Software Design Patterns
+description: Reusable solutions to common software design problems
+cacheable: true
+auto_update: true
+---
+
+core_concepts:
+  - name: Design Pattern Categories
+    priority: critical
+    content: |
+      Three main categories of design patterns:
+      
+      1. **Creational Patterns**: Object creation mechanisms
+         - Factory, Builder, Singleton, Prototype
+      
+      2. **Structural Patterns**: Object composition
+         - Adapter, Decorator, Facade, Proxy
+      
+      3. **Behavioral Patterns**: Object collaboration
+         - Observer, Strategy, Command, Iterator
+    examples:
+      - description: "Pattern category usage"
+        code: |
+          # Creational: Factory for object creation
+          user = UserFactory.create_user(type="admin")
+          
+          # Structural: Decorator for adding behavior
+          coffee = MilkDecorator(SugarDecorator(Coffee()))
+          
+          # Behavioral: Observer for notifications
+          subject.attach(observer)
+          subject.notify()
+
+  - name: SOLID Principles
+    priority: critical
+    content: |
+      Five fundamental principles of object-oriented design:
+      
+      **S**ingle Responsibility Principle
+      **O**pen/Closed Principle
+      **L**iskov Substitution Principle
+      **I**nterface Segregation Principle
+      **D**ependency Inversion Principle
+    examples:
+      - description: "Single Responsibility"
+        code: |
+          # Bad: Multiple responsibilities
+          class Order:
+              def calculate_total(self): ...
+              def save_to_database(self): ...
+              def send_email(self): ...
+          
+          # Good: Single responsibility
+          class Order:
+              def calculate_total(self): ...
+          
+          class OrderRepository:
+              def save(self, order): ...
+          
+          class EmailService:
+              def send_order_confirmation(self, order): ...
+
+patterns:
+  - name: Singleton Pattern
+    description: Ensures only one instance of a class exists
+    when_to_use: When exactly one instance is needed (e.g., configuration, logging)
+    implementation: |
+      class Singleton:
+          _instance = None
+          
+          def __new__(cls):
+              if cls._instance is None:
+                  cls._instance = super().__new__(cls)
+              return cls._instance
+          
+          def __init__(self):
+              if not hasattr(self, 'initialized'):
+                  self.initialized = True
+                  # Initialize once
+    trade_offs:
+      pros:
+        - Controlled access to single instance
+        - Lazy initialization possible
+      cons:
+        - Global state issues
+        - Testing difficulties
+        - Thread safety concerns
+
+  - name: Factory Pattern
+    description: Creates objects without specifying exact classes
+    when_to_use: When creation logic is complex or type depends on input
+    implementation: |
+      from abc import ABC, abstractmethod
+      
+      class Animal(ABC):
+          @abstractmethod
+          def speak(self): pass
+      
+      class Dog(Animal):
+          def speak(self):
+              return "Woof!"
+      
+      class Cat(Animal):
+          def speak(self):
+              return "Meow!"
+      
+      class AnimalFactory:
+          @staticmethod
+          def create_animal(animal_type: str) -> Animal:
+              if animal_type == "dog":
+                  return Dog()
+              elif animal_type == "cat":
+                  return Cat()
+              raise ValueError(f"Unknown animal type: {animal_type}")
+    trade_offs:
+      pros:
+        - Decouples creation from usage
+        - Easy to add new types
+      cons:
+        - Can increase complexity
+        - Requires common interface
+
+  - name: Observer Pattern
+    description: Notifies multiple objects about state changes
+    when_to_use: When multiple objects need to react to changes
+    implementation: |
+      from typing import List
+      
+      class Subject:
+          def __init__(self):
+              self._observers: List[Observer] = []
+              self._state = None
+          
+          def attach(self, observer):
+              self._observers.append(observer)
+          
+          def detach(self, observer):
+              self._observers.remove(observer)
+          
+          def notify(self):
+              for observer in self._observers:
+                  observer.update(self._state)
+          
+          def set_state(self, state):
+              self._state = state
+              self.notify()
+      
+      class Observer(ABC):
+          @abstractmethod
+          def update(self, state): pass
+    trade_offs:
+      pros:
+        - Loose coupling
+        - Dynamic relationships
+      cons:
+        - Potential memory leaks
+        - Update ordering issues
+
+  - name: Strategy Pattern
+    description: Encapsulates algorithms and makes them interchangeable
+    when_to_use: When you have multiple ways to perform a task
+    implementation: |
+      from abc import ABC, abstractmethod
+      
+      class PaymentStrategy(ABC):
+          @abstractmethod
+          def pay(self, amount): pass
+      
+      class CreditCardPayment(PaymentStrategy):
+          def pay(self, amount):
+              return f"Paid ${amount} via credit card"
+      
+      class PayPalPayment(PaymentStrategy):
+          def pay(self, amount):
+              return f"Paid ${amount} via PayPal"
+      
+      class ShoppingCart:
+          def __init__(self, payment_strategy: PaymentStrategy):
+              self.payment_strategy = payment_strategy
+          
+          def checkout(self, amount):
+              return self.payment_strategy.pay(amount)
+    trade_offs:
+      pros:
+        - Algorithm flexibility
+        - Open/Closed principle
+      cons:
+        - Increased number of classes
+        - Client must know strategies
+
+  - name: Decorator Pattern
+    description: Adds new functionality to objects dynamically
+    when_to_use: When you need to add features to objects without altering their structure
+    implementation: |
+      from abc import ABC, abstractmethod
+      
+      class Coffee(ABC):
+          @abstractmethod
+          def cost(self): pass
+          
+          @abstractmethod
+          def description(self): pass
+      
+      class SimpleCoffee(Coffee):
+          def cost(self):
+              return 2.0
+          
+          def description(self):
+              return "Simple coffee"
+      
+      class CoffeeDecorator(Coffee):
+          def __init__(self, coffee: Coffee):
+              self._coffee = coffee
+      
+      class MilkDecorator(CoffeeDecorator):
+          def cost(self):
+              return self._coffee.cost() + 0.5
+          
+          def description(self):
+              return f"{self._coffee.description()}, milk"
+    trade_offs:
+      pros:
+        - Flexible alternative to subclassing
+        - Single Responsibility
+      cons:
+        - Many small objects
+        - Complex debugging
+
+deep_topics:
+  - name: Advanced Patterns
+    description: Complex patterns for specific scenarios
+    triggers: ["composite", "proxy", "chain of responsibility", "visitor"]
+    priority: contextual
+    prerequisites:
+      - Design Pattern Categories
+      - SOLID Principles
+    content: |
+      More sophisticated patterns for complex scenarios:
+      - Composite: Tree structures
+      - Proxy: Placeholder/surrogate
+      - Chain of Responsibility: Request handling chain
+      - Visitor: Operations on object structures
+    modules:
+      - patterns/advanced/composite.md
+      - patterns/advanced/proxy.md
+
+  - name: Pattern Combinations
+    description: Using multiple patterns together
+    triggers: ["combine patterns", "pattern composition", "complex design"]
+    priority: contextual
+    content: |
+      Common pattern combinations:
+      - Factory + Singleton: Single factory instance
+      - Strategy + Factory: Dynamic strategy creation
+      - Decorator + Factory: Configurable decorators
+      - Observer + Command: Event-driven commands
+
+pitfalls:
+  - name: Pattern Overuse
+    description: Using patterns where simple solutions suffice
+    symptoms:
+      - Every class follows a pattern
+      - Simple problems have complex solutions
+      - Code is hard to understand
+    solution: |
+      1. Start simple
+      2. Identify real problems
+      3. Apply patterns only when beneficial
+      4. Consider maintenance cost
+    example: |
+      # Overuse: Factory for simple case
+      class StringFactory:
+          def create_string(self, value):
+              return str(value)
+      
+      # Simple is better
+      value = str(input_value)
+
+  - name: Wrong Pattern Choice
+    description: Using inappropriate pattern for the problem
+    symptoms:
+      - Pattern doesn't fit naturally
+      - Lots of workarounds needed
+      - Benefits aren't realized
+    solution: |
+      1. Understand the problem deeply
+      2. Know pattern intents
+      3. Consider alternatives
+      4. Refactor if needed
+
+relationships:
+  requires:
+    - programming-fundamentals
+    - object-oriented-programming
+  enhances:
+    - software-engineering
+    - architecture-patterns
+  conflicts: []
+
+metadata:
+  domain: software-design
+  level: intermediate
+  update_frequency: stable
+  maintainer: architecture-team
+  tags:
+    - patterns
+    - design
+    - architecture
+    - best-practices

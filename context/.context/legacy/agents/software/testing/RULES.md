@@ -1,0 +1,16 @@
+# Code Requirements
+- All code must have 2 kinds of comments: inline and block comments.
+  - Inline comments are for explaining specific lines of code.
+  - Block comments are for explaining larger sections of code.
+  - Block comments should include DEVNOTES, which describe the functionality of the code from the developer's perspective, so that test-engineers and technical writers can understand the code.
+  - Block comments should include BUSINESSCASE, which describe the functionality of the code from the business logic perspective, so that test-engineers and technical writers can understand the code.
+- All code should be tested.
+  - Functions defined in the code should be 100% covered.
+  - Branches defined in the code should be 60% covered.
+  - Statements defined in the code should be 60% covered.
+  - Code that you believe qualifies as untestable should have an inline comment added with the tag `UNTESTABLE`.
+  - Code that you believe qualifies as needing a mock should have an inline comment added with the tag `MOCKTHIS`.
+- Benchmarks should be written for performance-critical code.
+- Fuzzing should be implemented for security-critical code.
+- Fuzzing should be implemented for any code that will be Public Facing.
+- Test case creation should be robust and based off of the accepted output of an interaction with the security team after analyzing the context gathered from the relevant DEVNOTE and BUSINESSCASE tags.

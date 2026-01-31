@@ -1,0 +1,45 @@
+# Tool Configurations TODO List
+
+- [ ] GitLab MCP
+- [ ] GitHub MCP
+- [ ] Jira MCP
+- [ ] Packer MCP
+- [ ] Ansible MCP
+- [ ] Just MCP
+- [ ] AST Grep MCP
+- [ ] Project Memory MCP
+  - How can I enable persistent project memory across sessions? (git-backed?)
+  - How can I store the memory locally?
+  - How can I index/search the memory efficiently? (semantic search/vector DB?)
+    - Contextual Queries: Search for information using natural language
+    - Semantic Similarity based ranking
+  - File Uploads: What goes in the Vector Store?
+    - conversation logs?
+    - other files?
+  - Data Chunking: How to configure chunk sizes and overlaps to store data
+    - What makes segments "manageable"
+    - How does it improve search accuracy and system performance?
+  - Summarization: How to summarize conversations
+    - condense key points
+    - reducing redundancy
+    - enhancing retrieval efficiency
+  - How to make Summarization Configurable?
+    - user-defined parameters
+    - User visible summarization interface
+  - Sources
+    - [OpenMemory](https://github.com/CaviraOSS/OpenMemory)
+    - Docker: mcp/memory
+  - Data Objects
+    - User preferences
+    - Past questions or actions
+    - Role Contexts / Preferences
+    - Summaries of previous conversations
+
+- [ ] Sequential Thinking MCP
+- [ ] Task Orchestrator MCP
+- [ ] Checklist MCP
+- [ ] MongoDB/SurrealDB/Postgres MCP
+- [ ] Git MCP (Pre-Commit Hooks, Context Gathering, etc)
+- [ ] Search: DuckDuckGo, Fetch, Google, Brave, etc MCP
+- [ ] Curl MCP
+- [ ] Docker-Compose/Dockerfile/DockerCLI MCP

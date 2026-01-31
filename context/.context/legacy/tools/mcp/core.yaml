@@ -1,0 +1,59 @@
+---
+services:
+  sequentialthinking:
+    image: mcp/sequentialthinking
+    restart: always
+  ast-grep:
+    image: mcp/ast-grep
+    restart: always
+  airtable:
+    image: mcp/airtable
+    restart: always
+  context7:
+    image: mcp/context7
+    restart: always
+  astro-docs:
+    image: mcp/astro-docs
+    restart: always
+  cloudflare-docs:
+    image: mcp/cloudflare-docs
+    restart: always
+  ref:
+    image: mcp/ref
+    restart: always
+  duckduckgo:
+    image: mcp/duckduckgo
+    restart: always
+  fetch:
+    image: mcp/fetch
+    restart: always
+  dockerhub:
+    image: mcp/dockerhub
+    restart: always
+  github:
+    image: mcp/github
+    restart: always
+  gitlab:
+    image: mcp/gitlab
+    restart: always
+  time:
+    image: mcp/time
+    restart: always
+  math:
+    image: mcp/math
+    restart: always
+  ollama:
+    image: mcp/ollama
+    restart: always
+  graphiti:
+    image: mcp/graphiti
+    restart: always
+  git:
+    image: mcp/git
+    restart: always
+  gitea:
+    image: mcp/gitea
+    restart: always
+  taskorchestrator:
+    image: mcp/taskorchestrator
+    restart: always

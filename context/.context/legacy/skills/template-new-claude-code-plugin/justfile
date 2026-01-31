@@ -1,0 +1,55 @@
+# Source
+
+root := `git rev-parse --show-toplevel`
+templates := justfile_directory() + "/templates"
+
+# Target
+
+id := shell("jq '.id' " + plugindir / "meta.json || uuidgen")
+name := env("NAME")
+description := env("DESC", "")
+scope := if env("SCOPE", "") == "personal" { env("HOME") / ".claude/plugins" } else { root / ".claude/plugins" }
+plugindir := scope / `echo "{{ name }}" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'`
+brewery := env("XDG_CONFIG_HOME", env("HOME") / ".config") / "brew/files/"
+
+# Create a new Claude skill
+init: mktree meta templates files
+
+templates:
+    #!/usr/bin/env bash
+    json='{"uuid":"{{ id }}", "name":"{{ name }}", "description":"{{ description }}"}'
+    just template "justfile" "$json"
+    just template "SKILL" "$json"
+    just template "INDEX" "$json"
+
+template target json="":
+    #!/usr/bin/env bash
+    echo "{{ json }}" | mustache "{{ templates / target }}.mustache" > "{{ plugindir / target }}"
+
+# Create a new skill directory
+mktree:
+    mkdir -p "{{ plugindir }}/{.claude-plugin,commands,agents,skills,hooks}"
+
+meta:
+    echo '{"id":"{{ id }}"}' | jq -r '.' > "{{ plugindir }}/meta.json"
+
+files:
+    #!/usr/bin/env bash
+    echo "{}" > "{{ plugindir }}/dependencies.json"
+    touch "{{ plugindir }}/{.claude-plugin,commands,agents,skills,hooks,scripts}/.gitkeep"
+    touch "{{ plugindir }}/.claude-plugin/plugin.json"
+    touch "{{ plugindir }}/.mcp.json"
+    touch "{{ plugindir }}/LICENSE"
+    touch "{{ plugindir }}/CHANGELOG.md"
+    cd "{{ plugindir }}"
+    rename "/(INDEX)|(SKILL)/\1.md"
+
+create-gh-issue:
+    #!/usr/bin/env bash
+    echo "Creating GitHub issue for {{ name }}..."
+    gh issue create --title "{{ name }}" --body "Description: {{ description }}"
+
+create-branch name:
+    #!/usr/bin/env bash
+    echo "Creating branch for {{ name }}..."
+    git checkout -b "{{ name }}"

@@ -1,0 +1,17 @@
+Tool Use (ast-grep): Code Search and Pattern Matching - justfiles
+- Use the Just MCP Server for:
+  - Running justfile recipes and tasks
+  - Listing available recipes, their descriptions, and groups
+  - Understanding recipe parameters, defaults, attributes, and groups
+  - Justfile variable inspection
+  - Justfile Import Analysis
+  - Recipe Dependency analysis
+  - Semantic operations on justfiles
+
+- Use the AST-Grep MCP Server for:
+  - Structural pattern searches: Finding recipes matching specific AST patterns
+  - Cross-file pattern analysis: Searching for syntax patterns across multiple justfiles
+  - Recipe refactoring: Finding all occurrences of a specific recipe structure to modify
+  - Code quality checks: Identifying recipes that don't follow project conventions (e.g., missing description comments)
+  - Template matching
+  - Low-level syntax inspection: When you need to match exact AST nodes rather than semantic meaning

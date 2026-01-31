@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rustup show)",
+      "Bash(rustup target list:*)",
+      "Bash(rustup default:*)",
+      "Bash(rustup target:*)",
+      "Bash(uv add:*)",
+      "Bash(cargo --version)",
+      "Bash(cat:*)",
+      "Bash(echo $PATH)",
+      "Read(//Users/arustydev/.rustup/toolchains/**)",
+      "Bash(~/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo --version)",
+      "Read(//Users/arustydev/**)",
+      "Bash(echo $SHELL)",
+      "Bash(pyenv:*)",
+      "Bash(ps:*)",
+      "Read(//bin/**)",
+      "Bash(brew list:*)",
+      "Bash(rustup --version)",
+      "Bash(brew info:*)",
+      "Bash(rustup show:*)",
+      "Bash(rustup:*)",
+      "Bash(ln:*)",
+      "Bash(source:*)",
+      "Bash(export PATH=\"$HOME/.cargo/bin:$PATH\")",
+      "Bash(uv tree:*)",
+      "Bash(python:*)",
+      "WebSearch",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:github.com)",
+      "Bash(uv run:*)",
+      "Bash(just init:*)",
+      "Bash(uv pip:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

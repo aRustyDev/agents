@@ -1,0 +1,45 @@
+---
+# Pre-commit hooks for Go MCP server projects
+# Provides comprehensive code quality checks optimized for Go development
+
+default_language_version:
+  python: python3
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+
+repos:
+  # Local MCP-specific hooks
+  - repo: local
+    hooks:
+      # Validate MCP protocol compliance
+      - id: mcp-schema-validation
+        name: MCP Schema Validation
+        entry: scripts/validate-mcp-schema.sh
+        language: script
+        files: '(internal|pkg)/.*\.go$'
+        pass_filenames: false
+
+      # Check for TODO/FIXME comments
+      - id: check-todos
+        name: Check TODO/FIXME Comments
+        entry: scripts/check-todos.sh
+        language: script
+        pass_filenames: false
+
+      # Ensure tests exist for new code
+      - id: check-test-coverage
+        name: Check Test Coverage
+        entry: scripts/check-test-coverage.sh
+        language: script
+        files: '\.go$'
+        exclude: '_test\.go$'
+        pass_filenames: false
+
+      # Validate go.mod dependencies
+      - id: validate-dependencies
+        name: Validate Go Dependencies
+        entry: scripts/validate-deps.sh
+        language: script
+        files: 'go\.(mod|sum)$'
+        pass_filenames: false

@@ -1,0 +1,224 @@
+---
+schema_version: 1.0.0
+schema_type: role-definition
+description: Schema for defining expert roles with capabilities and knowledge
+---
+
+# Role Definition Schema
+
+## Structure
+```yaml
+# Required fields
+name: string            # Unique role identifier (e.g., "senior-dev")
+version: semver         # Role version (e.g., "1.0.0")
+description: string     # Brief role description
+author: string          # Role creator
+
+# Optional fields
+auto_update: boolean    # Auto-update to latest modules (default: true)
+experimental: boolean   # Mark as experimental (default: false)
+
+# Core identity (minimal, always loaded)
+core:
+  mindset: string               # Core thinking approach
+  communication_style: string   # How the role communicates
+  decision_framework: string    # How decisions are made
+  values:                      # Core values/principles
+    - string
+  traits:                      # Key personality traits
+    - string
+
+# Capabilities configuration
+capabilities:
+  # Always loaded with the role
+  required:
+    - module: path/to/module.md
+      version: ">=1.0.0"        # Version constraint
+      
+  # Loaded based on context triggers
+  contextual:
+    - name: string              # Capability name
+      description: string       # What it provides
+      triggers:                 # Keywords that activate
+        - keyword1
+        - keyword2
+      modules:                  # Modules to load
+        - path/to/module.md
+      priority: high|medium|low # Load priority
+
+# Knowledge inheritance
+knowledge_base:
+  # Inherit from shared knowledge modules
+  inherit:
+    - module: knowledge/domain.yaml
+      sections: [all|specific]  # Which sections to inherit
+      
+  # Role-specific knowledge
+  custom:
+    - domain: string
+      content: path/to/content.md
+
+# Behavioral configuration
+behaviors:
+  # Consultation settings
+  consultation:
+    can_consult:               # Other roles this can consult
+      - role_name
+    consultation_style: string # How consultations are conducted
+    auto_consult: boolean     # Auto-consult when uncertain
+    
+  # Response patterns
+  response_style:
+    verbosity: concise|normal|detailed
+    technical_level: beginner|intermediate|expert
+    use_examples: always|when_helpful|rarely
+    
+  # Learning preferences
+  learning:
+    continuous: boolean        # Updates knowledge from interactions
+    domains:                  # Domains to focus learning on
+      - string
+
+# Performance optimization
+optimization:
+  cache_priority: high|medium|low  # Cache retention priority
+  preload_with:                   # Roles often used together
+    - role_name
+  lazy_load: boolean             # Delay loading until needed
+
+# Metadata
+metadata:
+  tags:                          # Searchable tags
+    - tag1
+    - tag2
+  use_cases:                     # Example use cases
+    - description: string
+      example: string
+  related_roles:                 # Similar/complementary roles
+    - role_name
+```
+
+## Validation Rules
+
+### Required Fields
+- `name`: Must be unique, alphanumeric with hyphens
+- `version`: Must follow semantic versioning
+- `description`: Maximum 200 characters
+- `core`: Must have all three components
+
+### Version Constraints
+```yaml
+# Supported version constraints
+"1.0.0"     # Exact version
+">=1.0.0"   # Minimum version
+"^1.0.0"    # Compatible with 1.x.x
+"~1.2.0"    # Compatible with 1.2.x
+">1.0.0 <2.0.0"  # Range
+```
+
+### Module References
+```yaml
+# Valid module paths
+"processes/testing/tdd.md"      # Relative to .claude/
+"knowledge/programming.yaml"     # Knowledge modules
+"@stdlib/communication"          # Standard library reference
+"./custom/module.md"            # Role-specific modules
+```
+
+## Example: Senior Developer Role
+```yaml
+name: senior-dev
+version: 1.2.0
+description: Experienced software developer with architectural focus
+author: Claude
+
+core:
+  mindset: "Systems thinking with focus on maintainability and scalability"
+  communication_style: "Mentoring, explains complex concepts simply"
+  decision_framework: "Data-driven with emphasis on long-term impact"
+  values:
+    - Code quality over speed
+    - Team growth and mentorship
+    - Sustainable development practices
+  traits:
+    - Patient teacher
+    - Strategic thinker
+    - Quality advocate
+
+capabilities:
+  required:
+    - module: processes/architecture/system-design.md
+      version: ">=1.0.0"
+    - module: patterns/development/best-practices.md
+      version: ">=2.0.0"
+      
+  contextual:
+    - name: code-review
+      description: Advanced code review capabilities
+      triggers: ["review", "PR", "merge request"]
+      modules:
+        - processes/code-review/comprehensive.md
+        - guides/mentoring/code-feedback.md
+      priority: high
+      
+    - name: architecture
+      description: System architecture and design
+      triggers: ["architecture", "design", "scale"]
+      modules:
+        - knowledge/architecture-patterns.yaml
+        - guides/architecture/trade-offs.md
+      priority: high
+
+knowledge_base:
+  inherit:
+    - module: knowledge/software-engineering.yaml
+      sections: all
+    - module: knowledge/design-patterns.yaml
+      sections: [creational, structural, behavioral]
+
+behaviors:
+  consultation:
+    can_consult: [security-engineer, ml-engineer, devops-engineer]
+    consultation_style: "Seeks specialist input for domain-specific decisions"
+    auto_consult: true
+    
+  response_style:
+    verbosity: normal
+    technical_level: expert
+    use_examples: when_helpful
+    
+  learning:
+    continuous: true
+    domains: [architecture, best-practices, team-dynamics]
+
+optimization:
+  cache_priority: high
+  preload_with: [junior-dev]  # Often used for mentoring
+  lazy_load: false
+
+metadata:
+  tags: [development, architecture, mentoring, senior]
+  use_cases:
+    - description: "Architecture review"
+      example: "Reviewing system design for scalability"
+    - description: "Mentoring juniors"
+      example: "Code review with teaching focus"
+  related_roles: [tech-lead, architect, staff-engineer]
+```
+
+## Composition Rules
+
+### Inheritance
+- Knowledge modules are merged, with child overriding parent
+- Capabilities are additive (no override)
+- Core identity cannot be inherited
+
+### Conflicts
+- Latest version wins for module conflicts
+- Higher priority capabilities load first
+- Explicit overrides in custom roles
+
+### Performance
+- Required modules are always cached
+- Contextual modules use lazy loading
+- High-priority roles get cache preference

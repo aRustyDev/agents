@@ -1,0 +1,50 @@
+import? './scripts/just/foo.just'
+
+justlibs := justfile_directory() / "scripts/just"
+
+libstd:
+    rm -f "{{ justlibs }}/*.just"
+    curl https://just.arusty.dev/std/vars.just >> "{{ justlibs }}/std.just"
+    curl https://just.arusty.dev/std/vars.just >> "{{ justlibs }}/std.just"
+
+init:
+    uv add langchain
+    uv add langchain-openai
+    uv add langchain-anthropic
+    uv add langchain-postgres
+    uv add langchain-google-genai
+    uv add langchain-google-vertexai
+    uv add langchain-mongodb
+    uv add langchain-qdrant
+    uv add langchain-redis
+    uv add toolbox-langchain
+    uv add langchain-graph-retriever
+    uv add langchain-agentql
+    uv add langchain-docling
+    uv add duckdb
+    uv add duckduckgo-search
+    uv add GitPython
+    uv add langchain-kuzu
+    uv add outlines
+    uv add langchain-prolog
+    uv add promptlayer
+    uv add langchain-qdrant
+    uv add langchain-surrealdb
+    uv add supabase
+    uv add typesense openapi-schema-pydantic
+    uv add meilisearch
+
+# https://docs.langchain.com/oss/python/integrations/chat_loaders/imessage
+# https://docs.langchain.com/oss/python/integrations/providers/github
+# https://docs.langchain.com/oss/python/integrations/providers/gitlab
+# https://docs.langchain.com/oss/python/integrations/providers/obsidian
+# https://docs.langchain.com/oss/python/integrations/providers/outlines
+# https://docs.langchain.com/oss/python/integrations/providers/prolog
+# https://docs.langchain.com/oss/python/integrations/tools/google_serper
+# https://docs.langchain.com/oss/python/integrations/tools/brave_search
+# https://docs.langchain.com/oss/python/integrations/tools/exa_search
+# https://docs.langchain.com/oss/python/integrations/tools/searx_search
+# https://docs.langchain.com/oss/python/integrations/tools/tavily_search
+# https://docs.langchain.com/oss/python/integrations/tools/jira
+# https://docs.langchain.com/oss/python/integrations/tools/playwright
+# https://docs.langchain.com/oss/python/integrations/tools/requests

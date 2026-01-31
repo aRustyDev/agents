@@ -1,0 +1,99 @@
+# Tree-sitter KVConf Project Justfile
+
+# Project configuration - paths relative to this justfile location
+project_dir := "../../../tree-sitter-dotenv"
+extension_dir := "../../../zed-env"
+
+# Import category recipes if they exist
+import? '../justfile'
+
+# Clean all generated files and build artifacts
+clean:
+    @echo "Cleaning tree-sitter-dotenv..."
+    cd {{project_dir}} && rm -rf build node_modules src/parser.c src/tree_sitter binding.gyp compile_commands.json package-lock.json
+    cd {{project_dir}} && rm -f tree-sitter-env.wasm *.log test.env test-*.env
+    @echo "Clean complete!"
+
+# Install dependencies
+install:
+    @echo "Installing tree-sitter-dotenv dependencies..."
+    cd {{project_dir}} && npm install
+    @echo "Dependencies installed!"
+
+# Generate parser from grammar
+generate:
+    @echo "Generating parser..."
+    cd {{project_dir}} && npx tree-sitter generate
+    @echo "Parser generated!"
+
+# Build WASM for Zed
+build-wasm:
+    @echo "Building WASM..."
+    cd {{project_dir}} && npx tree-sitter build --wasm
+    @echo "WASM built!"
+
+# Run tests
+test:
+    @echo "Running tree-sitter tests..."
+    cd {{project_dir}} && npx tree-sitter test
+    @echo "Tests complete!"
+
+# Parse a test file (usage: just parse FILE=test.env)
+parse FILE="test.env":
+    cd {{project_dir}} && npx tree-sitter parse {{FILE}}
+
+# Validate grammar syntax
+validate-grammar:
+    @echo "Validating grammar syntax..."
+    cd {{project_dir}} && node -c grammar.js
+    @echo "Grammar syntax is valid!"
+
+# Create a new git branch for development
+new-branch NAME:
+    cd {{project_dir}} && git checkout -b {{NAME}}
+    @echo "Created and switched to branch: {{NAME}}"
+
+# Commit with a descriptive message
+commit MESSAGE:
+    cd {{project_dir}} && git add -A && git commit -m "{{MESSAGE}}"
+    @echo "Committed: {{MESSAGE}}"
+
+# Show current parser output for a test case
+debug-parse TEST="key=value":
+    @echo "Parsing: {{TEST}}"
+    cd {{project_dir}} && echo "{{TEST}}" | npx tree-sitter parse -
+
+# Validate all test fixtures
+validate-fixtures:
+    @echo "Validating test fixtures..."
+    cd {{project_dir}} && node test/validate-fixtures.js
+
+# Generate regression test baselines
+regression-baseline:
+    @echo "Generating regression baselines..."
+    cd {{project_dir}} && node test/regression-test.js baseline
+
+# Run regression tests
+regression-test:
+    @echo "Running regression tests..."
+    cd {{project_dir}} && node test/regression-test.js test
+
+# Run specific test category
+test-corpus CATEGORY:
+    @echo "Running corpus tests for {{CATEGORY}}..."
+    cd {{project_dir}} && npx tree-sitter test -f {{CATEGORY}}
+
+# Create checkpoint tag
+checkpoint VERSION:
+    cd {{project_dir}} && git add -A
+    cd {{project_dir}} && git commit -m "checkpoint: {{VERSION}}" || true
+    cd {{project_dir}} && git tag -a "checkpoint-{{VERSION}}" -m "Checkpoint {{VERSION}}"
+    @echo "Created checkpoint: {{VERSION}}"
+
+# Full build pipeline
+build: generate build-wasm test
+    @echo "Full build complete!"
+
+# Full development cycle
+dev: clean install generate build-wasm test
+    @echo "Development cycle complete!"

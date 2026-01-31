@@ -1,0 +1,154 @@
+---
+# Pre-commit hooks for Go MCP server projects
+# Provides comprehensive code quality checks optimized for Go development
+
+default_language_version:
+  python: python3
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+
+repos:
+  # General file hygiene and security
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Go-specific formatting and linting
+  - repo: https://github.com/TekWizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      # Formatting
+      - id: go-fmt-repo
+      - id: go-fumpt-repo # Stricter gofmt
+      - id: go-imports-repo # Organize imports
+
+      # Module maintenance
+      - id: go-mod-tidy-repo
+      - id: go-mod-verify-repo
+
+      # Building and testing
+      - id: go-build-repo-mod
+      - id: go-test-repo-mod
+        args: ["-v", "-race", "-timeout=5m"]
+
+      # Static analysis
+      - id: go-vet-repo-mod
+      - id: go-sec-repo-mod # Security scanning
+      - id: go-staticcheck-repo-mod
+
+      # Cyclomatic complexity check
+      - id: go-cyclo-repo-mod
+        args: ["-over=15"]
+
+      # Ensure no //go:build ignore tags
+      - id: go-no-build-ignored-files
+
+  # Comprehensive linting with golangci-lint
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.59.1
+    hooks:
+      - id: golangci-lint
+        args: ["--fix", "--timeout=5m"]
+
+  # Security scanning for secrets
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+
+  # License header check
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        files: '\.go$'
+        args:
+          - --license-filepath
+          - LICENSE.header
+          - --comment-style
+          - //
+        exclude: |
+          (?x)^(
+            .*\.pb\.go$|
+            .*_gen\.go$|
+            vendor/.*
+          )$
+
+  # Conventional commits validation
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: ["--strict", "--force-scope"]
+
+  # Documentation linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.41.0
+    hooks:
+      - id: markdownlint
+        args: ["--fix"]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ["--strict", "-c", ".yamllint.yaml"]
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+
+  # Local MCP-specific hooks
+  - repo: local
+    hooks:
+      # Validate MCP protocol compliance
+      - id: mcp-schema-validation
+        name: MCP Schema Validation
+        entry: scripts/validate-mcp-schema.sh
+        language: script
+        files: '(internal|pkg)/.*\.go$'
+        pass_filenames: false
+
+      # Check for TODO/FIXME comments
+      - id: check-todos
+        name: Check TODO/FIXME Comments
+        entry: scripts/check-todos.sh
+        language: script
+        pass_filenames: false
+
+      # Ensure tests exist for new code
+      - id: check-test-coverage
+        name: Check Test Coverage
+        entry: scripts/check-test-coverage.sh
+        language: script
+        files: '\.go$'
+        exclude: '_test\.go$'
+        pass_filenames: false
+
+      # Validate go.mod dependencies
+      - id: validate-dependencies
+        name: Validate Go Dependencies
+        entry: scripts/validate-deps.sh
+        language: script
+        files: 'go\.(mod|sum)$'
+        pass_filenames: false

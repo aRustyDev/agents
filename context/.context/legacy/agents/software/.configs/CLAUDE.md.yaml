@@ -1,0 +1,564 @@
+# Claude General Development Guidelines Configuration
+# Language: go
+# Extends: ["base-development", "tdd-practices", "versioning-standards"]
+# Merge Strategy: deep_merge_with_override
+
+metadata:
+  title: "Claude General Development Guidelines"
+  description: "Critical guidelines and requirements for Claude when working on Go projects"
+  language: "go"
+  version: "1.0.0"
+  extends: ["base-development", "tdd-practices", "versioning-standards"]
+  merge_strategy: "deep_merge_with_override"
+
+quick_reference:
+  title: "Quick Reference Guide"
+  description: "Essential commands and workflows for development"
+
+  justfile:
+    title: "Using the Justfile"
+    description: "Development automation commands using Just"
+    ordered: true
+
+    rules:
+      - order: 1
+        title: "Always use Just commands"
+        description: "Use Just commands instead of raw go/make commands"
+        content: "Always use Just commands instead of raw go/make commands"
+
+      - order: 2
+        title: "Test changes"
+        description: "Test your changes with `just test` before any commit"
+        content: "Test your changes with `just test` before any commit"
+
+      - order: 3
+        title: "Check code quality"
+        description: "Check code quality with `just lint` and `just fmt`"
+        content: "Check code quality with `just lint` and `just fmt`"
+
+      - order: 4
+        title: "Build documentation"
+        description: "Build documentation with `just docs` after API changes"
+        content: "Build documentation with `just docs` after API changes"
+
+      - order: 5
+        title: "Run full CI"
+        description: "Run full CI locally with `just ci` before pushing"
+        content: "Run full CI locally with `just ci` before pushing"
+
+    commands:
+      title: "Common Commands"
+      description: "Frequently used development commands"
+      ordered: false
+
+      dev:
+        command: "just dev"
+        description: "Start development server with hot reload"
+
+      test:
+        command: "just test"
+        description: "Run all tests with race detection"
+
+      lint:
+        command: "just lint"
+        description: "Run golangci-lint and format check"
+
+      build:
+        command: "just build"
+        description: "Build optimized binary"
+
+      docs_serve:
+        command: "just docs-serve"
+        description: "Serve documentation locally"
+
+  precommit:
+    title: "Pre-commit"
+    description: "Pre-commit validation checks"
+    content: |
+      Pre-commit checks:
+
+      1. Go formatting (gofmt, gofumpt, goimports)
+      2. Linting (golangci-lint, go vet)
+      3. Security scanning (gosec, gitleaks)
+      4. Test execution
+      5. Build verification
+      6. Module tidiness
+
+strict_requirements:
+  merge_strategy: "override"
+
+  tdd:
+    title: "Test Driven Development (TDD)"
+    description: "Follow strict TDD practices with RED-GREEN-REFACTOR pattern"
+    required: true
+    ordered: true
+
+    steps:
+      - order: 1
+        name: "RED"
+        description: "Write a failing test FIRST"
+        content: "Write a failing test FIRST"
+
+      - order: 2
+        name: "GREEN"
+        description: "Write minimal code to make the test pass"
+        content: "Write minimal code to make the test pass"
+
+      - order: 3
+        name: "REFACTOR"
+        description: "Improve the code while keeping tests green"
+        content: "Improve the code while keeping tests green"
+
+    restrictions:
+      implementation_before_tests: false
+      description: "NEVER write implementation code before writing tests"
+
+  test_passing:
+    title: "100% Test Passing Rate"
+    description: "ALL tests must pass 100% before any commit"
+    required: true
+    ordered: 2
+    exceptions: false
+    placeholder_commands: "<language-specific-test-commands-here>"
+
+    validation:
+      content: "NO EXCEPTIONS - If a test fails, fix it before proceeding"
+      enforcement_level: "strict"
+
+  documentation:
+    title: "Documentation Updates"
+    description: "Update documentation to reflect current state BEFORE version bumps"
+    required: true
+    order: 3
+
+    requirements:
+      snapshot_based: true
+      godoc_comments: true
+      readme_sync: true
+      mdbook_sync: true
+      no_historical_notes: true
+
+      description:
+        snapshot_based: "Documentation must be a snapshot of the current code"
+        godoc_comments: "Update godoc comments for all exported functions, types, and packages"
+        readme_sync: "Keep README.md and mdbook documentation synchronized"
+        mdbook_sync: "Keep mdbook documentation synchronized with code"
+        no_historical_notes: "Do NOT include historical notes like 'changed from X to Y'"
+
+    validation:
+      build_command: "just docs"
+      test_command: "just docs-test"
+      placeholder_standards: "<language-specific-documentation-standards>"
+
+  conventional_commits:
+    title: "Conventional Commits"
+    description: "Every commit must follow conventional commit standards"
+    required: true
+    order: 4
+
+    format:
+      structure: |
+        <type>(<scope>): <subject>
+
+        <body>
+
+        <footer>
+
+    types:
+      allowed:
+        [
+          "feat",
+          "fix",
+          "docs",
+          "style",
+          "refactor",
+          "test",
+          "chore",
+          "ci",
+          "perf",
+          "build",
+        ]
+
+    example:
+      title: "Example Commit"
+      content: |
+        feat(mcp): add streaming response support for tools
+
+        Implements server-sent events for long-running tool operations,
+        allowing real-time progress updates to clients.
+
+        - Add SSE handler for tool execution
+        - Update protocol to support streaming responses
+        - Add tests for streaming functionality
+
+        Closes #123
+
+  version_management:
+    title: "Version Management"
+    description: "Follow versioning conventions"
+    required: true
+    order: 5
+
+    format:
+      scheme: "semantic"
+      pattern: "vMAJOR.MINOR.PATCH"
+      tag_prefix: "v"
+      example: "v1.2.3"
+
+  patch_updates:
+    title: "Patch Version Updates"
+    description: "Update patch version on EVERY fully passing commit"
+    required: true
+    order: 6
+
+    triggers:
+      - condition: "New test added + passing"
+        action: "new patch version"
+
+      - condition: "Bug fix + tests passing"
+        action: "new patch version"
+
+      - condition: "Documentation update + passing"
+        action: "new patch version"
+
+    example:
+      from: "v0.1.1"
+      to: "v0.1.2"
+
+  minor_updates:
+    title: "Minor Version Updates"
+    description: "Update minor version on completion of atomic features"
+    required: true
+    order: 7
+
+    triggers:
+      - condition: "New MCP tool implemented"
+        action: "minor version"
+
+      - condition: "New API endpoint added"
+        action: "minor version"
+
+      - condition: "New protocol feature completed"
+        action: "minor version"
+
+    example:
+      from: "v0.1.x"
+      to: "v0.2.0"
+
+  precommit_validation:
+    title: "Pre-commit Validation"
+    description: "100% pre-commit hook passing rate"
+    required: true
+    order: 8
+
+    setup:
+      install_command: "pre-commit install --install-hooks"
+
+    restrictions:
+      no_verify_flag: false
+      description: "NEVER use --no-verify flag"
+      fix_before_commit: true
+
+  issue_tracking:
+    title: "Issue Tracking"
+    description: "Create GitHub issues for EVERY problem"
+    required: true
+    order: 9
+
+    workflow:
+      - order: 1
+        step: "Create Issue"
+        description: "Document the problem clearly"
+        template: |
+          Title: MCP tool registration fails with nil pointer
+          Body:
+          - Steps to reproduce
+          - Expected behavior
+          - Actual behavior
+          - Environment details (Language version, OS, etc.)
+          - Latest related commit hash
+
+      - order: 2
+        step: "Update Issue"
+        description: "Add investigation notes and potential solutions"
+        template: |
+          Investigation:
+          - Found tool map not initialized in NewServer
+          - Missing nil check in RegisterTool method
+
+          Solution:
+          - Initialize tools map in constructor
+          - Add validation in RegisterTool
+
+      - order: 3
+        step: "Close Issue"
+        description: "Reference in commit message"
+        template: |
+          fix(mcp): initialize tools map to prevent nil pointer
+
+          Ensures the tools map is properly initialized during server
+          creation, preventing panic when registering tools.
+
+          Fixes #42
+
+development_workflow:
+  title: "Development Workflow"
+  description: "Step-by-step development process"
+
+  steps:
+    - order: 1
+      description: "Pick a task from TODO.md or create an issue"
+
+    - order: 2
+      description: "Create a feature branch: git checkout -b feat/issue-number-description"
+
+    - order: 3
+      description: "Write failing tests (RED)"
+
+    - order: 4
+      description: "Implement minimal solution (GREEN)"
+
+    - order: 5
+      description: "Refactor if needed (REFACTOR)"
+
+    - order: 6
+      description: "Update documentation (godoc, README, mdbook)"
+
+    - order: 7
+      description: "Run just ci to verify everything"
+
+    - order: 8
+      description: "Update patch/minor version as appropriate"
+
+    - order: 9
+      description: "Commit with conventional commit message"
+
+    - order: 10
+      description: "Push branch and create PR"
+
+    - order: 11
+      description: "Reference and close the issue"
+
+  debugging:
+    title: "Debugging Process"
+    description: "Systematic approach to solving errors"
+
+    steps:
+      - order: 1
+        action: "Document"
+        description: "Create an issue immediately"
+
+      - order: 2
+        action: "Reproduce"
+        description: "Create minimal test case"
+
+      - order: 3
+        action: "Debug"
+        description: "Use dlv debugger or extensive logging"
+
+      - order: 4
+        action: "Research"
+        description: "Check Go documentation, similar issues"
+
+      - order: 5
+        action: "Experiment"
+        description: "Try solutions in isolated test"
+
+      - order: 6
+        action: "Test"
+        description: "Verify fix doesn't break other functionality"
+
+      - order: 7
+        action: "Document"
+        description: "Update issue with solution"
+
+      - order: 8
+        action: "Implement"
+        description: "Apply fix with proper tests"
+
+      - order: 9
+        action: "Close"
+        description: "Reference issue in commit"
+
+commands:
+  title: "Commands Quick Reference"
+  description: "All available development commands organized by category"
+
+  development:
+    title: "Development"
+
+    dev:
+      command: "just dev"
+      description: "Start with hot reload"
+      category: "development"
+
+    test:
+      command: "just test"
+      description: "Run tests"
+      category: "development"
+
+    test_watch:
+      command: "just test-watch"
+      description: "Watch mode"
+      category: "development"
+
+    lint:
+      command: "just lint"
+      description: "Lint code"
+      category: "development"
+
+    fmt:
+      command: "just fmt"
+      description: "Format code"
+      category: "development"
+
+  building:
+    title: "Building"
+
+    build:
+      command: "just build"
+      description: "Build binary"
+      category: "building"
+
+    build_all:
+      command: "just build-all"
+      description: "Cross-platform builds"
+      category: "building"
+
+    docker:
+      command: "just docker"
+      description: "Build Docker image"
+      category: "building"
+
+  documentation:
+    title: "Documentation"
+
+    docs:
+      command: "just docs"
+      description: "Build docs"
+      category: "documentation"
+
+    docs_serve:
+      command: "just docs-serve"
+      description: "Serve docs"
+      category: "documentation"
+
+    docs_api:
+      command: "just docs-api"
+      description: "Generate API docs"
+      category: "documentation"
+
+  quality:
+    title: "Quality"
+
+    cover:
+      command: "just cover"
+      description: "Coverage report"
+      category: "quality"
+
+    bench:
+      command: "just bench"
+      description: "Run benchmarks"
+      category: "quality"
+
+    sec:
+      command: "just sec"
+      description: "Security scan"
+      category: "quality"
+
+  utilities:
+    title: "Utilities"
+
+    clean:
+      command: "just clean"
+      description: "Clean artifacts"
+      category: "utilities"
+
+    deps:
+      command: "just deps"
+      description: "Install dependencies"
+      category: "utilities"
+
+    update_deps:
+      command: "just update-deps"
+      description: "Update dependencies"
+      category: "utilities"
+
+    ci:
+      command: "just ci"
+      description: "Run full CI"
+      category: "utilities"
+
+principles:
+  title: "Remember"
+  description: "Core development principles to follow"
+
+  quality:
+    title: "Quality over speed"
+    content: "Better to do it right than do it twice"
+    order: 1
+
+  tests:
+    title: "Tests are documentation"
+    content: "Write clear, descriptive tests"
+    order: 2
+
+  commits:
+    title: "Small commits"
+    content: "Each commit should be atomic and meaningful"
+    order: 3
+
+  errors:
+    title: "Error context"
+    content: "Always wrap errors with meaningful context"
+    order: 4
+
+  concurrency:
+    title: "Concurrent safety"
+    content: "Design for concurrency from the start"
+    order: 5
+
+  memory:
+    title: "Memory efficiency"
+    content: "Profile and optimize allocations"
+    order: 6
+
+  api:
+    title: "API stability"
+    content: "Think carefully before exposing APIs"
+    order: 7
+
+mcp_considerations:
+  title: "MCP-Specific Considerations"
+  description: "Special considerations for MCP (Model Context Protocol) development"
+  language_specific: true
+
+  protocol_compliance:
+    title: "Protocol compliance"
+    content: "Validate all MCP messages against schema"
+    order: 1
+
+  tool_isolation:
+    title: "Tool isolation"
+    content: "Each tool should be independent and testable"
+    order: 2
+
+  resource_management:
+    title: "Resource management"
+    content: "Properly handle client connections and cleanup"
+    order: 3
+
+  error_responses:
+    title: "Error responses"
+    content: "Return proper MCP error codes and messages"
+    order: 4
+
+  streaming_support:
+    title: "Streaming support"
+    content: "Implement SSE for long-running operations"
+    order: 5
+
+  security:
+    title: "Security"
+    content: "Validate all inputs and implement proper auth when needed"
+    order: 6

@@ -1,0 +1,10 @@
+- CI related scripts go in the `.ci/scripts` folder
+  - `.ci/scripts/bash`: Bash Scripts
+  - `.ci/scripts/python`: Python Scripts
+  - `.ci/scripts/jq`: JQ Scripts
+  - `.ci/scripts/awk`: AWK Scripts
+- Non-CI related scripts go in `scripts/`
+  - `scripts/bash`: Bash Scripts
+  - `scripts/python`: Python Scripts
+  - `scripts/jq`: JQ Scripts
+  - `scripts/awk`: AWK Scripts

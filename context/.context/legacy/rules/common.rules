@@ -1,0 +1,34 @@
+- project memory is held in the `.aim/` directory
+  - `.aim/examples/`
+  - `.aim/archive/`
+  - `.aim/tools/`
+  - `.aim/todo/`
+  - `.aim/help/`
+- TODO items are tracked in `.aim/todo/**/*.md` files
+  - each TODO item should have a checkbox `- [ ]` at the start of the line
+  - `.aim/todo/` has subfolders for different branches of work
+    - `.aim/todo/refactor/`: refactoring work
+    - `.aim/todo/chore/`: chore work
+    - `.aim/todo/feat/`: new features
+    - `.aim/todo/fix/`: new fixes
+    - `.aim/todo/scratch/`: these are temporary TODOs that can be deleted later
+- All branch related subfolders in `.aim/todo/` have the following pattern
+  - `.aim/todo/<branch>/<id>`: the "id" of the specific work branch
+  - `.aim/todo/<branch>/<id>/reference.json`: Links to related resources
+    - Jira tickets
+    - Documentation pages
+    - GitHub/GitLab issues/PRs
+    - Database tables to for shared project memories and MCP servers
+  - `.aim/todo/<branch>/<id>/MEMORY.md`: the memory file for this work branch
+  - `.aim/todo/<branch>/<id>/GOALS.md`: Specific GOALS for this work branch
+  - `.aim/todo/<branch>/<id>/SCOPE.md`: Specific SCOPE for this work branch
+  - `.aim/todo/<branch>/<id>/feedback/`: Current feedback documents
+  - `.aim/todo/<branch>/<id>/archive/`: Archived documents
+  - `.aim/todo/<branch>/<id>/plans/`: planning documents related to the branch
+  - `.aim/todo/<branch>/<id>/tasks/`: Unordered lists of things to do
+  - `.aim/todo/<branch>/<id>/lessons/`: Documented lessons learned
+  - This pattern can be derived from the git branch name
+    - Example `feat/adamsm/map-3421-cicd` would be stored in
+      - `.aim/todo/feat/map-3421-cicd/`
+    - Example `feat/adamsm/map-3421/core` would be stored in
+      - `.aim/todo/feat/map-3421/core/`

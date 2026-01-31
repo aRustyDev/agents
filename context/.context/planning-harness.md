@@ -1,0 +1,10 @@
+- searching/creating/updating/archiving milestones
+- searching/creating/updating/archiving plans
+- use sequence diagrams
+- use skills
+- using discussions
+- Plans start locally, then migrate to issues
+- Plans need roadmaps
+- Plans need deconfliction
+- Plans need to be atomic
+- Plans need projects

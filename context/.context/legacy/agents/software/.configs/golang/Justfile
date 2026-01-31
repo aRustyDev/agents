@@ -1,0 +1,327 @@
+```makefile
+# Justfile for Go projects
+# This file defines common development tasks and automation
+
+# Load .env file if it exists
+set dotenv-load
+
+# Use bash for shell commands
+set shell := ["bash", "-uc"]
+
+# Default to parallel execution
+set positional-arguments
+
+# Project detection (dynamic)
+PROJECT_NAME := file_name(justfile_directory())
+PROJECT_DIR := justfile_directory()
+GO_MODULE := `go list -m 2>/dev/null || echo "unknown"`
+GIT_COMMIT := `git rev-parse --short HEAD 2>/dev/null || echo "unknown"`
+GIT_TAG := `git describe --tags --always 2>/dev/null || echo "dev"`
+VERSION := env_var_or_default("VERSION", GIT_TAG)
+BUILD_TIME := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
+# Build variables
+BINARY_NAME := env_var_or_default("BINARY_NAME", PROJECT_NAME)
+MAIN_PACKAGE := "./cmd/" + BINARY_NAME
+CGO_ENABLED := env_var_or_default("CGO_ENABLED", "0")
+
+# Go build flags
+LD_FLAGS := '-X "main.Version=' + VERSION + '" -X "main.GitCommit=' + GIT_COMMIT + '" -X "main.BuildTime=' + BUILD_TIME + '" -s -w'
+BUILD_FLAGS := "-trimpath -ldflags '" + LD_FLAGS + "'"
+
+# Default task - show available commands
+default:
+    @just --list --unsorted
+
+# Run development server with hot reload
+dev:
+    @if command -v air >/dev/null 2>&1; then \
+        air -c .air.toml; \
+    else \
+        echo "Installing air..."; \
+        go install github.com/cosmtrek/air@latest; \
+        air -c .air.toml; \
+    fi
+
+# Build the binary
+build:
+    CGO_ENABLED={{CGO_ENABLED}} go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}} {{MAIN_PACKAGE}}
+
+# Build for all platforms
+build-all: clean
+    @echo "Building for all platforms..."
+    @mkdir -p bin
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}}-linux-amd64 {{MAIN_PACKAGE}}
+    GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}}-linux-arm64 {{MAIN_PACKAGE}}
+    GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}}-darwin-amd64 {{MAIN_PACKAGE}}
+    GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}}-darwin-arm64 {{MAIN_PACKAGE}}
+    GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build {{BUILD_FLAGS}} -o bin/{{BINARY_NAME}}-windows-amd64.exe {{MAIN_PACKAGE}}
+    @echo "Build complete! Binaries in ./bin/"
+
+# Run the application (stdio mode)
+run *args:
+    go run {{MAIN_PACKAGE}} {{args}}
+
+# Run tests
+test:
+    go test -v -race -timeout=30s ./...
+
+# Run tests with coverage
+test-coverage:
+    go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+    go tool cover -html=coverage.out -o coverage.html
+    @echo "Coverage report generated: coverage.html"
+
+# Run tests and check coverage threshold
+test-coverage-check: test-coverage
+    #!/usr/bin/env bash
+    COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+    THRESHOLD=${COVERAGE_THRESHOLD:-80}
+    echo "Coverage: $COVERAGE% (threshold: $THRESHOLD%)"
+    if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+        echo "❌ Coverage $COVERAGE% is below threshold $THRESHOLD%"
+        exit 1
+    else
+        echo "✅ Coverage meets threshold"
+    fi
+
+# Run integration tests
+test-integration:
+    go test -v -race -tags=integration -timeout=5m ./...
+
+# Run end-to-end tests
+test-e2e:
+    go test -v -tags=e2e -timeout=10m ./tests/e2e/...
+
+# Run all tests
+test-all: test test-integration test-e2e
+
+# Watch tests
+test-watch:
+    @if command -v gotestsum >/dev/null 2>&1; then \
+        gotestsum --watch -- -v -race ./...; \
+    else \
+        echo "Installing gotestsum..."; \
+        go install gotest.tools/gotestsum@latest; \
+        gotestsum --watch -- -v -race ./...; \
+    fi
+
+# Run benchmarks
+bench:
+    go test -bench=. -benchmem -benchtime=10s ./...
+
+# Format code
+fmt:
+    go fmt ./...
+    @if command -v gofumpt >/dev/null 2>&1; then \
+        gofumpt -w .; \
+    else \
+        echo "Installing gofumpt..."; \
+        go install mvdan.cc/gofumpt@latest; \
+        gofumpt -w .; \
+    fi
+
+# Lint code
+lint:
+    @if command -v golangci-lint >/dev/null 2>&1; then \
+        golangci-lint run --fix; \
+    else \
+        echo "Installing golangci-lint..."; \
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+        golangci-lint run --fix; \
+    fi
+
+# Run security scan
+sec:
+    @if command -v gosec >/dev/null 2>&1; then \
+        gosec -fmt=sarif -out=gosec-report.sarif ./...; \
+    else \
+        echo "Installing gosec..."; \
+        go install github.com/securego/gosec/v2/cmd/gosec@latest; \
+        gosec -fmt=sarif -out=gosec-report.sarif ./...; \
+    fi
+    @echo "Security report generated: gosec-report.sarif"
+
+# Check for vulnerabilities
+vuln:
+    go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+# Clean build artifacts
+clean:
+    rm -rf bin/ dist/ coverage.* *.test *.out
+    go clean -cache -testcache -modcache
+
+# Install development dependencies
+deps:
+    @echo "Installing development dependencies..."
+    go install github.com/cosmtrek/air@latest
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    go install mvdan.cc/gofumpt@latest
+    go install github.com/securego/gosec/v2/cmd/gosec@latest
+    go install golang.org/x/tools/cmd/goimports@latest
+    go install gotest.tools/gotestsum@latest
+    go install github.com/swaggo/swag/cmd/swag@latest
+    @echo "Installing pre-commit hooks..."
+    pre-commit install --install-hooks
+    @echo "✅ Dependencies installed!"
+
+# Update dependencies
+update-deps:
+    go get -u ./...
+    go mod tidy
+    go mod verify
+
+# Verify dependencies
+verify-deps:
+    go mod verify
+    go mod download
+
+# Generate code (mocks, protobuf, etc.)
+generate:
+    go generate ./...
+
+# Build Docker image
+docker:
+    docker build -t {{BINARY_NAME}}:{{VERSION}} -t {{BINARY_NAME}}:latest .
+
+# Run in Docker
+docker-run:
+    docker run --rm -it {{BINARY_NAME}}:latest
+
+# Generate API documentation
+docs-api:
+    @if command -v swag >/dev/null 2>&1; then \
+        swag init -g {{MAIN_PACKAGE}}/main.go -o ./docs/api; \
+    else \
+        echo "Installing swag..."; \
+        go install github.com/swaggo/swag/cmd/swag@latest; \
+        swag init -g {{MAIN_PACKAGE}}/main.go -o ./docs/api; \
+    fi
+
+# Build documentation
+docs:
+    @if command -v mdbook >/dev/null 2>&1; then \
+        mdbook build docs/; \
+    else \
+        echo "mdbook not found. Install from: https://github.com/rust-lang/mdBook/releases"; \
+        exit 1; \
+    fi
+
+# Serve documentation
+docs-serve:
+    @if command -v mdbook >/dev/null 2>&1; then \
+        mdbook serve docs/ --open; \
+    else \
+        echo "mdbook not found. Install from: https://github.com/rust-lang/mdBook/releases"; \
+        exit 1; \
+    fi
+
+# Test documentation examples
+docs-test:
+    @if command -v mdbook >/dev/null 2>&1; then \
+        mdbook test docs/; \
+    else \
+        echo "mdbook not found. Install from: https://github.com/rust-lang/mdBook/releases"; \
+        exit 1; \
+    fi
+
+# Create a new release
+release version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Validate version format
+    if ! [[ "{{version}}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "❌ Invalid version format. Use: just release v1.2.3"
+        exit 1
+    fi
+
+    # Run all checks
+    just ci
+
+    # Tag the release
+    git tag -a {{version}} -m "Release {{version}}"
+    git push origin {{version}}
+
+    # Build release artifacts
+    just build-all
+
+    # Create GitHub release if gh is installed
+    if command -v gh >/dev/null 2>&1; then
+        gh release create {{version}} \
+            --title "Release {{version}}" \
+            --generate-notes \
+            bin/*
+    else
+        echo "GitHub CLI not found. Create release manually."
+    fi
+
+# Run CI pipeline locally
+ci: deps verify-deps fmt lint test-coverage-check sec vuln build test-all docs
+    @echo "✅ All CI checks passed!"
+
+# Show project info
+info:
+    @echo "Project: {{PROJECT_NAME}}"
+    @echo "Module:  {{GO_MODULE}}"
+    @echo "Version: {{VERSION}}"
+    @echo "Commit:  {{GIT_COMMIT}}"
+    @echo "Binary:  {{BINARY_NAME}}"
+
+# Run pre-commit on all files
+pre-commit:
+    pre-commit run --all-files
+
+# Install git hooks
+install-hooks:
+    pre-commit install --install-hooks
+    @echo "✅ Git hooks installed!"
+
+# Database migrations (if applicable)
+migrate-up:
+    @if [ -d "migrations" ]; then \
+        go run -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+            -path=./migrations -database="${DATABASE_URL}" up; \
+    else \
+        echo "No migrations directory found"; \
+    fi
+
+migrate-down:
+    @if [ -d "migrations" ]; then \
+        go run -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest \
+            -path=./migrations -database="${DATABASE_URL}" down 1; \
+    else \
+        echo "No migrations directory found"; \
+    fi
+
+# Start all services (for development)
+up:
+    docker-compose up -d
+
+# Stop all services
+down:
+    docker-compose down
+
+# View logs
+logs service="":
+    @if [ -z "{{service}}" ]; then \
+        docker-compose logs -f; \
+    else \
+        docker-compose logs -f {{service}}; \
+    fi
+
+# Platform-specific tasks
+[linux]
+package:
+    @echo "Creating Linux packages..."
+    # Add Linux-specific packaging commands
+
+[windows]
+package:
+    @echo "Creating Windows installer..."
+    # Add Windows-specific packaging commands
+
+[macos]
+package:
+    @echo "Creating macOS bundle..."
+    # Add macOS-specific packaging commands

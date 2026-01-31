@@ -1,0 +1,4 @@
+- programmatic support of highlight detection
+- config file based
+  - set
+- remote repo/resource support

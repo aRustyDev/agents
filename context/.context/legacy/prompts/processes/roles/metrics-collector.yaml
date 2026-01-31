@@ -1,0 +1,432 @@
+---
+name: role-metrics-collector
+description: Collects and analyzes metrics for role system optimization
+version: 1.0.0
+author: Claude
+---
+
+# Role Metrics Collection Process
+
+## Purpose
+Track usage patterns, performance data, and relevance scores to enable data-driven optimization of the role system.
+
+## Metrics Categories
+
+### 1. Usage Metrics
+```yaml
+usage_metrics:
+  role_activations:
+    - timestamp: ISO8601
+      role: string
+      activation_method: manual|auto|suggested
+      context: string
+      session_id: string
+      
+  role_switches:
+    - timestamp: ISO8601
+      from_role: string
+      to_role: string
+      switch_reason: string
+      time_in_previous_role: seconds
+      
+  capability_usage:
+    - timestamp: ISO8601
+      role: string
+      capability: string
+      trigger: string
+      usage_duration: milliseconds
+      relevance_score: 0-1
+```
+
+### 2. Performance Metrics
+```yaml
+performance_metrics:
+  load_times:
+    - timestamp: ISO8601
+      role: string
+      load_type: cold|warm|cached
+      total_time_ms: integer
+      breakdown:
+        core_load_ms: integer
+        capability_load_ms: integer
+        knowledge_load_ms: integer
+        cache_check_ms: integer
+        
+  cache_performance:
+    - timestamp: ISO8601
+      operation: read|write|invalidate
+      role: string
+      cache_hit: boolean
+      size_bytes: integer
+      compression_ratio: float
+      
+  memory_usage:
+    - timestamp: ISO8601
+      role: string
+      memory_bytes: integer
+      modules_loaded: integer
+      capabilities_active: integer
+```
+
+### 3. Relevance Metrics
+```yaml
+relevance_metrics:
+  module_relevance:
+    - timestamp: ISO8601
+      role: string
+      module: string
+      times_loaded: integer
+      times_used: integer
+      relevance_score: float  # times_used / times_loaded
+      
+  capability_effectiveness:
+    - timestamp: ISO8601
+      role: string
+      capability: string
+      trigger_accuracy: float  # correct triggers / total triggers
+      user_satisfaction: float  # based on implicit signals
+      
+  consultation_value:
+    - timestamp: ISO8601
+      primary_role: string
+      consultant_role: string
+      question_type: string
+      response_used: boolean
+      value_score: 0-1
+```
+
+## Collection Implementation
+
+### 1. Event Tracking
+```bash
+track_event() {
+  local EVENT_TYPE="$1"
+  local EVENT_DATA="$2"
+  local TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  
+  # Structured event format
+  local EVENT=$(jq -n \
+    --arg type "$EVENT_TYPE" \
+    --arg ts "$TIMESTAMP" \
+    --argjson data "$EVENT_DATA" \
+    '{
+      event_type: $type,
+      timestamp: $ts,
+      session_id: env.CLAUDE_SESSION_ID,
+      data: $data
+    }')
+  
+  # Append to metrics log
+  echo "$EVENT" >> ".claude/metrics/events.jsonl"
+  
+  # Real-time processing for critical metrics
+  if is_critical_event "$EVENT_TYPE"; then
+    process_event_realtime "$EVENT"
+  fi
+}
+```
+
+### 2. Performance Monitoring
+```bash
+measure_role_load() {
+  local ROLE="$1"
+  local START_TIME=$(date +%s%N)
+  local METRICS={}
+  
+  # Measure cache check
+  local CACHE_START=$(date +%s%N)
+  local CACHE_HIT=$(check_cache "$ROLE")
+  METRICS=$(echo "$METRICS" | jq --arg time "$(($(date +%s%N) - CACHE_START))" '.cache_check_ms = ($time | tonumber / 1000000)')
+  
+  # Measure core load
+  local CORE_START=$(date +%s%N)
+  load_role_core "$ROLE"
+  METRICS=$(echo "$METRICS" | jq --arg time "$(($(date +%s%N) - CORE_START))" '.core_load_ms = ($time | tonumber / 1000000)')
+  
+  # Measure capability load
+  local CAP_START=$(date +%s%N)
+  load_capabilities "$ROLE"
+  METRICS=$(echo "$METRICS" | jq --arg time "$(($(date +%s%N) - CAP_START))" '.capability_load_ms = ($time | tonumber / 1000000)')
+  
+  # Calculate total
+  local TOTAL_TIME=$(($(date +%s%N) - START_TIME))
+  METRICS=$(echo "$METRICS" | jq --arg time "$TOTAL_TIME" '.total_time_ms = ($time | tonumber / 1000000)')
+  
+  # Track the metrics
+  track_event "role_load_performance" "$METRICS"
+}
+```
+
+### 3. Usage Pattern Analysis
+```bash
+analyze_usage_patterns() {
+  local ANALYSIS_WINDOW="${1:-7d}"  # Default 7 days
+  local EVENTS_FILE=".claude/metrics/events.jsonl"
+  
+  # Role transition patterns
+  local TRANSITIONS=$(jq -s '
+    map(select(.event_type == "role_switch")) |
+    group_by(.data.from_role + "->" + .data.to_role) |
+    map({
+      transition: .[0].data.from_role + "->" + .[0].data.to_role,
+      count: length,
+      avg_time_in_previous: (map(.data.time_in_previous_role) | add / length)
+    }) |
+    sort_by(.count) |
+    reverse
+  ' "$EVENTS_FILE")
+  
+  # Capability usage patterns
+  local CAPABILITY_USAGE=$(jq -s '
+    map(select(.event_type == "capability_activated")) |
+    group_by(.data.role + ":" + .data.capability) |
+    map({
+      role_capability: .[0].data.role + ":" + .[0].data.capability,
+      activation_count: length,
+      triggers: (map(.data.trigger) | unique),
+      avg_relevance: (map(.data.relevance_score) | add / length)
+    })
+  ' "$EVENTS_FILE")
+  
+  # Time-based patterns
+  local HOURLY_PATTERNS=$(jq -s '
+    map(select(.event_type == "role_activation")) |
+    map({
+      hour: (.timestamp | fromdateiso8601 | strftime("%H") | tonumber),
+      role: .data.role
+    }) |
+    group_by(.hour) |
+    map({
+      hour: .[0].hour,
+      activations: length,
+      popular_roles: (group_by(.role) | map({role: .[0].role, count: length}) | sort_by(.count) | reverse | .[0:3])
+    })
+  ' "$EVENTS_FILE")
+  
+  # Generate report
+  cat > ".claude/metrics/usage-analysis.json" << EOF
+{
+  "analysis_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "window": "$ANALYSIS_WINDOW",
+  "transitions": $TRANSITIONS,
+  "capability_usage": $CAPABILITY_USAGE,
+  "hourly_patterns": $HOURLY_PATTERNS
+}
+EOF
+}
+```
+
+### 4. Relevance Scoring
+```bash
+calculate_module_relevance() {
+  local MODULE="$1"
+  local WINDOW="${2:-24h}"
+  
+  # Count loads vs actual usage
+  local LOAD_COUNT=$(jq -s "
+    map(select(.event_type == \"module_loaded\" and .data.module == \"$MODULE\")) |
+    length
+  " ".claude/metrics/events.jsonl")
+  
+  local USE_COUNT=$(jq -s "
+    map(select(.event_type == \"module_used\" and .data.module == \"$MODULE\")) |
+    length
+  " ".claude/metrics/events.jsonl")
+  
+  # Calculate relevance score
+  if [ "$LOAD_COUNT" -eq 0 ]; then
+    echo "0"
+  else
+    echo "scale=2; $USE_COUNT / $LOAD_COUNT" | bc
+  fi
+}
+```
+
+## Optimization Actions
+
+### 1. Auto-Optimization Process
+```bash
+run_auto_optimization() {
+  local OPTIMIZATION_REPORT=".claude/metrics/optimization-report.json"
+  
+  # Analyze current metrics
+  analyze_usage_patterns "7d"
+  
+  # Identify optimization opportunities
+  local OPTIMIZATIONS=$(jq -n '
+    {
+      cache_candidates: [],
+      preload_patterns: [],
+      remove_unused: [],
+      capability_adjustments: []
+    }
+  ')
+  
+  # Find roles to cache
+  OPTIMIZATIONS=$(echo "$OPTIMIZATIONS" | jq --slurpfile usage ".claude/metrics/usage-analysis.json" '
+    .cache_candidates = ($usage[0].transitions | 
+      map(select(.count > 10)) | 
+      map(.transition | split("->")[1]) | 
+      unique)
+  ')
+  
+  # Find preload patterns
+  OPTIMIZATIONS=$(echo "$OPTIMIZATIONS" | jq --slurpfile patterns ".claude/metrics/usage-analysis.json" '
+    .preload_patterns = ($patterns[0].transitions |
+      map(select(.count > 5)) |
+      map({from: (.transition | split("->")[0]), to: (.transition | split("->")[1])}))
+  ')
+  
+  # Find unused modules
+  OPTIMIZATIONS=$(find_unused_modules | jq -R . | jq -s '. as $unused | $OPTIMIZATIONS | .remove_unused = $unused')
+  
+  # Apply optimizations
+  apply_optimizations "$OPTIMIZATIONS"
+}
+```
+
+### 2. Cache Warming
+```bash
+warm_cache_based_on_patterns() {
+  local PATTERNS_FILE=".claude/metrics/usage-analysis.json"
+  
+  # Get most used roles
+  local TOP_ROLES=$(jq -r '
+    .transitions | 
+    map(.transition | split("->") | .[]) | 
+    group_by(.) | 
+    map({role: .[0], count: length}) | 
+    sort_by(.count) | 
+    reverse | 
+    .[0:5] | 
+    .[].role
+  ' "$PATTERNS_FILE")
+  
+  # Warm cache for top roles
+  echo "Warming cache for frequently used roles..."
+  for role in $TOP_ROLES; do
+    echo "  Caching $role..."
+    cache_role "$role" "$(resolve_role "$role")" &
+  done
+  wait
+  
+  echo "Cache warming complete"
+}
+```
+
+### 3. Module Pruning
+```bash
+prune_low_relevance_modules() {
+  local THRESHOLD="${1:-0.1}"  # Remove if used less than 10% of loads
+  local PRUNE_LIST=()
+  
+  # Check each cached module
+  for module in $(find .claude/cache -name "*.zst" -mtime +7); do
+    local MODULE_NAME=$(basename "$module" .zst)
+    local RELEVANCE=$(calculate_module_relevance "$MODULE_NAME" "7d")
+    
+    if (( $(echo "$RELEVANCE < $THRESHOLD" | bc -l) )); then
+      PRUNE_LIST+=("$module")
+    fi
+  done
+  
+  # Remove low-relevance cached modules
+  if [ ${#PRUNE_LIST[@]} -gt 0 ]; then
+    echo "Pruning ${#PRUNE_LIST[@]} low-relevance modules..."
+    for module in "${PRUNE_LIST[@]}"; do
+      rm -f "$module"
+      echo "  Removed: $(basename "$module")"
+    done
+  fi
+}
+```
+
+## Reporting
+
+### 1. Performance Dashboard
+```bash
+generate_performance_dashboard() {
+  local REPORT_FILE=".claude/metrics/performance-dashboard.md"
+  
+  cat > "$REPORT_FILE" << 'EOF'
+# Role System Performance Dashboard
+
+Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+## Load Time Performance
+
+| Role | Avg Load (ms) | Cache Hit Rate | P95 Load (ms) |
+|------|---------------|----------------|---------------|
+$(generate_load_time_table)
+
+## Most Active Roles (Last 7 Days)
+
+| Role | Activations | Avg Session Time | Consultations |
+|------|-------------|------------------|---------------|
+$(generate_activity_table)
+
+## Cache Efficiency
+
+- Total Cache Size: $(du -sh .claude/cache | cut -f1)
+- Overall Hit Rate: $(calculate_overall_hit_rate)%
+- Space Saved: $(calculate_space_saved)%
+- Time Saved: $(calculate_time_saved) hours
+
+## Optimization Recommendations
+
+$(generate_optimization_recommendations)
+
+EOF
+}
+```
+
+### 2. Weekly Summary
+```bash
+generate_weekly_summary() {
+  local SUMMARY_FILE=".claude/metrics/weekly-summary-$(date +%Y-%W).json"
+  
+  jq -n --slurpfile events ".claude/metrics/events.jsonl" '
+    {
+      week: (now | strftime("%Y-W%V")),
+      summary: {
+        total_role_activations: ($events | map(select(.event_type == "role_activation")) | length),
+        unique_roles_used: ($events | map(select(.event_type == "role_activation") | .data.role) | unique | length),
+        avg_load_time_ms: ($events | map(select(.event_type == "role_load_performance") | .data.total_time_ms) | add / length),
+        cache_hit_rate: ($events | map(select(.event_type == "cache_access")) | map(if .data.cache_hit then 1 else 0 end) | add / length),
+        top_roles: ($events | map(select(.event_type == "role_activation") | .data.role) | group_by(.) | map({role: .[0], count: length}) | sort_by(.count) | reverse | .[0:5])
+      }
+    }
+  ' > "$SUMMARY_FILE"
+}
+```
+
+## Integration Points
+
+### With Role Loader
+- Track every load operation
+- Measure component load times
+- Record cache hit/miss
+
+### With Cache Manager
+- Monitor cache effectiveness
+- Track eviction patterns
+- Measure compression ratios
+
+### With Consultation Protocol
+- Track consultation patterns
+- Measure consultation value
+- Identify common questions
+
+## Privacy Considerations
+
+### Data Retention
+- Event logs: 30 days
+- Aggregated metrics: 90 days
+- Performance reports: 1 year
+
+### Sensitive Data
+- No conversation content stored
+- Only metadata and patterns
+- User-identifiable data anonymized
+
+This metrics collection system provides comprehensive insights for continuous optimization of the role system.

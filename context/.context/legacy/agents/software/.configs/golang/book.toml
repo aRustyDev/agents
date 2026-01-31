@@ -1,0 +1,169 @@
+# mdbook configuration for Go project documentation
+# Place this file in your docs/ directory
+
+[book]
+title = "Project Documentation"
+authors = ["Your Team"]
+description = "Comprehensive documentation for our Go project"
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = true
+use-default-preprocessors = true
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "ayu"
+curly-quotes = true
+mathjax-support = true
+copy-fonts = true
+additional-css = ["theme/custom.css"]
+additional-js = ["theme/go-playground.js", "theme/mermaid-init.js"]
+git-repository-url = "https://github.com/your-org/your-project"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/your-org/your-project/edit/main/docs/{path}"
+site-url = "/docs/"
+cname = ""
+input-404 = ""
+no-section-label = false
+fold = { enable = true, level = 0 }
+playground = { editable = true, copyable = true, copy-js = true, line-numbers = true }
+print = { enable = true }
+mathjax = { enable = true }
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+copy-js = true
+
+# Code highlighting theme
+[output.html.code]
+hidelines = { other = "#" }
+
+# Navigation options
+[output.html.fold]
+enable = false
+level = 0
+
+# Table of contents depth
+[output.html.playground]
+editable = true
+copyable = true
+copy-js = true
+line-numbers = true
+runnable = true
+
+# Preprocessor for table of contents
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]
+max-level = 4
+marker = "<!-- toc -->"
+
+# Preprocessor for including files
+[preprocessor.include]
+command = "mdbook-include"
+renderer = ["html"]
+
+# Preprocessor for admonitions (info, warning, danger boxes)
+[preprocessor.admonish]
+command = "mdbook-admonish"
+renderer = ["html"]
+on_failure = "bail"
+
+# Custom admonish blocks
+[preprocessor.admonish.custom]
+mcp-note = { title = "MCP Note", color = "#4CAF50", icon = "⚡" }
+performance = { title = "Performance", color = "#FF9800", icon = "🚀" }
+security = { title = "Security", color = "#F44336", icon = "🔒" }
+
+# Preprocessor for mermaid diagrams
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+renderer = ["html"]
+
+# Preprocessor for PlantUML diagrams
+[preprocessor.plantuml]
+command = "mdbook-plantuml"
+renderer = ["html"]
+plantuml-server = "https://www.plantuml.com/plantuml"
+clickable-img = true
+
+# Preprocessor for link checking
+[preprocessor.linkcheck]
+command = "mdbook-linkcheck"
+renderer = ["html"]
+warning-policy = "warn"
+follow-web-links = true
+traverse-parent-directories = false
+exclude = ["localhost", "127.0.0.1"]
+
+# Preprocessor for open-on-gh links
+[preprocessor.open-on-gh]
+command = "mdbook-open-on-gh"
+renderer = ["html"]
+
+# Preprocessor for generating pagetoc
+[preprocessor.pagetoc]
+command = "mdbook-pagetoc"
+renderer = ["html"]
+
+# Output formats
+[output.html.print]
+enable = true
+page-break = true
+
+# PDF output (requires mdbook-pdf)
+[output.pdf]
+optional = true
+command = "mdbook-pdf"
+
+# ePub output (requires mdbook-epub)
+[output.epub]
+optional = true
+command = "mdbook-epub"
+cover-image = "images/cover.png"
+curly-quotes = true
+
+# Custom variables accessible in templates
+[output.html.playground.env_vars]
+GO_PLAYGROUND_URL = "https://play.golang.org"
+
+# Redirect mapping
+[output.html.redirect]
+"/old-page.html" = "/new-page.html"
+
+# For GitHub Pages deployment
+[output.html.site-url]
+site-url = "/your-project/"
+
+# Search configuration
+[output.html.search.use-boolean-and]
+use-boolean-and = true
+
+# Book metadata
+[book.metadata]
+keywords = "Go, Golang, MCP, Model Context Protocol, Documentation"
+language = "en"
+description = "Complete documentation for our Go MCP server implementation"
+
+# Build only specific languages (if multilingual)
+[build.build-only]
+# languages = ["en"]
+
+# Preprocessor order (if order matters)
+[preprocessor]
+
+# Watch additional directories during `mdbook serve`
+[[watch]]
+paths = ["../api/", "../examples/"]

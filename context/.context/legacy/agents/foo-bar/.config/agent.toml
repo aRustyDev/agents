@@ -1,0 +1,12 @@
+[agent.foo-bar]
+model = "claude-sonnet-4-5-20250929"
+temperature = 0.5
+timeout = 10
+max_tokens = 1000
+roles = ["assistant"]
+prompt = "You are a helpful assistant"
+tools = [""]
+skills = [""]
+output-styles = [""]
+rules = [""]
+plugins = ["tdd-guard"]

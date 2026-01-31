@@ -1,0 +1,9 @@
+- docs sync strategy
+- blog sync strategy
+- notes sync strategy
+- skills sync strategy
+- adr sync strategy
+- memorization strategy
+- rule building strategy
+- CONTRIBUTING.md is context
+-

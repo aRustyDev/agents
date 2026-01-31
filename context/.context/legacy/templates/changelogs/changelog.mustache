@@ -1,0 +1,106 @@
+{{! schema: <id>}}
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+
+{{#logs}}
+## [Unreleased]
+
+{{#unreleased}}
+{{#additions}}
+
+### Added
+
+{{.}}
+{{/additions}}
+{{#changes}}
+
+### Changed
+
+{{.}}
+{{/changes}}
+{{#deprecations}}
+
+### Deprecated
+
+{{.}}
+{{/deprecations}}
+{{#removals}}
+
+### Removed
+
+{{.}}
+{{/removals}}
+{{#fixes}}
+
+### Fixed
+
+{{.}}
+{{/fixes}}
+{{#vulns}}
+
+### Security
+
+{{.}}
+{{/vulns}}
+{{/unreleased}}
+
+{{#releases}}
+## [[{{version}}]({{diff_url}})] - {{date}}
+{{#additions}}
+
+### Added
+
+{{.}}
+{{/additions}}
+{{#changes}}
+
+### Changed
+
+{{.}}
+{{/changes}}
+{{#deprecations}}
+
+### Deprecated
+
+{{.}}
+{{/deprecations}}
+{{#removals}}
+
+### Removed
+
+{{.}}
+{{/removals}}
+{{#fixes}}
+
+### Fixed
+
+{{.}}
+{{/fixes}}
+{{#vulns}}
+
+### Security
+
+{{.}}
+{{/vulns}}
+{{/releases}}
+{{/logs}}
+
+{{! Project links are local to the project, and MUST be permalinks }}
+{{! External links are not under your control }}
+{{! Private links are not publicly accessible }}
+{{#links}}
+{{#project}}
+- perm{{index}}: {{permalink}} "{{hint}}"
+{{/project}}
+{{#external}}
+- ext{{index}}: {{url}} "{{hint}}"
+{{/external}}
+{{#private}}
+- priv{{index}}: {{url}} "{{hint}}"
+{{/private}}
+{{/links}}

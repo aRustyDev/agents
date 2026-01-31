@@ -1,0 +1,57 @@
+Task Mgmt (Default): How to manage Tasks
+Use task-orchestrator MCP Server for planning and task management
+
+- TODO Items:
+    - Structured (version-controlled, team-visible)
+        - Categorized by work type: `refactor`, `chore`, `feat`, `fix`
+        - Linked to features, components, or users
+        - Have explicit completion status
+        - Require team review or coordination
+        - ✅ **User Profiles**: Individual developer preferences, expertise, working styles
+        - ✅ **User Preferences**: Tool choices, communication style, preferred workflows
+        - ✅ **User Goals**: Current objectives based on branch context (prevents scope creep)
+        - ✅ **User Expertise**: What each developer knows/doesn't know (tailors responses)
+        - ✅ **TODO Items**: Structured tasks with status, ownership, and dependencies
+        - ✅ **Branch Context**: Active work, goals, scope for current branch
+        - ✅ **ADRs**: Architectural Decision Records with context and rationale
+        - ✅ **Project Structure**: Main components, file organization, key directories
+        - ✅ **Feature Registry**: Explicit list of features and their relationships
+        - ✅ **Component Dependencies**: Known relationships between system parts
+        - ✅ **Team Conventions**: Coding standards, naming patterns, review processes
+        - ✅ **External References**: Links to Jira, docs, PRs, issues
+    - Entity Structure:
+    - Relations:
+    - Dynamic TODO Discovery (conversational, evolving):
+        - TODOs discovered during code review
+        - Quick fixes that need follow-up
+        - Temporary workarounds requiring proper solutions
+        - Context-rich implementation notes
+    - Naming Convention:
+        - Format: `TODO_<ticket-id>_<short-description>`
+    - Categories (entityType: "todo"):
+        - `refactor`: Code improvements and restructuring
+        - `chore`: Maintenance, dependencies, tooling
+        - `feat`: New features and capabilities
+        - `fix`: Bug fixes and corrections
+        - `docs`: Documentation updates
+    - Branch Context Tracking:
+        - **Deriving branch context from git:**
+        - **Branch Context Entity (mcp/memory):**
+    - Relations:
+    - Workflow Operations
+        - Creating a TODO (mcp/memory):
+        - Updating TODO Status:
+        - Querying TODOs:
+        - Finding Related Work (OpenMemory):
+        1. **User Identification:**
+        2. **Memory Retrieval (Start of Each Interaction):**
+        3. **User Profile Maintenance (mcp/memory):**
+        4. **Project Knowledge Storage (mcp/memory):**
+        5. **Dynamic Context Storage (OpenMemory):**
+        6. **Querying for Context:**
+    - Reference Links and External Resources
+        - Track external references in mcp/memory:
+        - Relations:
+    - Lessons Learned and Retrospectives
+        - Store in OpenMemory for semantic search:
+        - Link to TODO in mcp/memory:

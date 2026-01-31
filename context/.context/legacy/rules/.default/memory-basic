@@ -1,0 +1,6 @@
+Memory (Default): Basic (Profiles / Prefences)
+- Use Memory MCP Server with project namespacing:
+  - Prefix: `{PROJECT_ID}::` from `git config --get project.id`
+  - Session start: Search `{PROJECT_ID}::` for context
+  - Session end: Store decisions with `{PROJECT_ID}::` prefix
+  - NEVER access entities outside current project namespace

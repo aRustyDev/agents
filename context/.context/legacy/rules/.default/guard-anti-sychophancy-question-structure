@@ -1,0 +1,5 @@
+Chat Guards (Sychophancy): Question Structure
+Questions have three structural elements:
+  - Incompleteness: Unfinished questions prompt the model to infer structure.
+  - Ambiguity: Unclear questions create breadth in the AI’s semantic space.
+  - Reflexivity: When questions include “self” or “existence,” AI is forced to assume its own position.

@@ -1,0 +1,8 @@
+# Environment variables
+.env
+
+# Kuzu database data
+data/
+
+# Docker volumes
+*.log

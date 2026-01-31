@@ -1,0 +1,8 @@
+GOAL: Draft a token optimized rule for the target PURPOSE
+
+PURPOSE: Direct agent to use GitHub MCP server whenever it needs to search github, a github repo, or to interact with githubs API
+
+Current Rule
+```
+- Use the GitHub MCP Server whenever you need to interact with a GitHub API or Repo
+```

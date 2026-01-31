@@ -1,0 +1,4 @@
+- always start from an issue
+- all work is done in worktrees & on feature branches
+- describe feature branch pattern; does it change from repo to repo, where is it kept in each repo?
+-

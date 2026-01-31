@@ -1,0 +1,1 @@
+- [ ] : Diagram focused (Mermaid, Graphviz, PlantUML, etc.)

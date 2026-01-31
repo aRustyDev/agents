@@ -1,0 +1,70 @@
+# ========= core =========
+ca_cert_path="data/certs/map-dev-il5-ca.cer"
+ssh_username="{{ssh.user}}"
+
+{{#ssh.bastion}}
+ssh_bastion_user = "{{user}}"
+{{#agent}}
+ssh_bastion_agent_auth = true
+{{/agent}}
+{{^agent}}
+{{#pub}}
+ssh_bastion_pub_file = "{{.}}"
+{{/pub}}
+{{#key}}
+ssh_bastion_key_file = "{{.}}"
+{{/key}}
+{{/agent}}
+{{/ssh.bastion}}
+
+# ========= aws =========
+environment = "{{tags.environment}}"
+emulated_region="{{aws.region.emulated}}"
+profile="{{aws.profile}}" # AWS Profile Name to use
+region="{{aws.region.standard}}"
+org_arn="arn:aws:organizations::{{aws.account.id}}:organization/{{aws.organization.id}}"
+
+# ========= kms =========
+kms_key_id="{{kms.id}}"
+
+# ========= ec2 =========
+{{! --- Instance Type for the AMI --- }}
+{{#ec2.instance_type}}
+instance_type="{{.}}"
+{{/ec2.instance_type}}
+{{! --- EKS Minor Version --- }}
+{{#ec2.ami.eks}}
+eks_version="{{version}}"
+{{/ec2.ami.eks}}
+{{! --- AMI Configs --- }}
+ami= {
+    distro          = "{{ec2.ami.distro}}"
+    features        = [{{#ec2.ami.features}}"{{.}}"{{/ec2.ami.features}}]
+}
+
+# ========= vpc =========
+{{! --- VPC_ID Overrides VPC Name --- }}
+{{#vpc}}
+{{#id}}
+vpc_id="{{.}}" # {{vpc.name}}
+{{/id}}
+{{! --- Only include if VPC-ID not set --- }}
+{{^id}}
+vpc_name="{{vpc.name}}"
+{{/id}}
+{{#subnet}}
+subnet_id="{{id}}"
+{{/subnet}}
+{{#sg}}
+security_group_id="{{id}}"
+{{/sg}}
+{{/vpc}}
+
+# ========= naming =========
+
+tags = {
+{{#tags}}
+    Creator     = "{{owner.name}}"
+    Contact     = "{{owner.email}}"
+{{/tags}}
+}

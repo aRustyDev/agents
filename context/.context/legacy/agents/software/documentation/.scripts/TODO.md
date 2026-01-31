@@ -1,0 +1,8 @@
+- [ ] Run full test suite and update external shared memory
+- [ ] Check external shared memory
+- [ ] Decide if tests are stale
+- [ ] Synchronize testing state and statistics with documentation on tests
+- [ ] Determine if extra tests are needed
+- [ ] Decide if tests are stale
+- [ ] Decide if tests are stale
+- [ ] Decide if tests are stale

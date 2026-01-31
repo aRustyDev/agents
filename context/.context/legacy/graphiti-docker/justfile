@@ -1,0 +1,64 @@
+# Justfile for Graphiti MCP Server management
+
+# Show available commands
+default:
+    @just --list
+
+# Run initial setup
+setup:
+    ./setup.sh
+
+# Start the Graphiti MCP server
+start:
+    docker compose up -d
+
+# Stop the Graphiti MCP server
+stop:
+    docker compose down
+
+# Restart the server
+restart: stop start
+
+# View server logs (follow mode)
+logs:
+    docker compose logs -f graphiti-mcp
+
+# View last 100 log lines
+logs-tail:
+    docker compose logs --tail=100 graphiti-mcp
+
+# Check server status
+status:
+    @echo "Container Status:"
+    @docker ps | grep graphiti || echo "❌ Container not running"
+    @echo ""
+    @echo "Health Check:"
+    @curl -s http://localhost:8000/health || echo "❌ Server not responding"
+
+# Backup Kuzu database
+backup:
+    @mkdir -p ~/backups
+    tar -czf ~/backups/graphiti-$(date +%Y%m%d-%H%M%S).tar.gz data/kuzu/
+    @echo "✅ Backup created: ~/backups/graphiti-$(date +%Y%m%d-%H%M%S).tar.gz"
+
+# Clear all memory (DANGEROUS!)
+clear:
+    @echo "⚠️  This will DELETE all Graphiti memory!"
+    @read -p "Type 'YES' to confirm: " confirm && [ "$$confirm" = "YES" ] || exit 1
+    docker compose down
+    rm -rf data/kuzu/*
+    docker compose up -d
+    @echo "✅ Memory cleared and server restarted"
+
+# Rebuild container from scratch
+rebuild:
+    docker compose down
+    docker compose up --build -d
+
+# Show Zed configuration
+show-zed-config:
+    @cat ZED_SETUP.md | grep -A 20 "Manual Configuration"
+
+# Run health check
+health:
+    @curl -s http://localhost:8000/health && echo "✅ Server healthy" || echo "❌ Server unhealthy"

@@ -1,0 +1,13 @@
+Tool Use (ast-grep): Code Search and Pattern Matching - Packer
+- Use the AST-Grep MCP Server for structural code searches across:
+  - Packer files (`*.pkr.hcl`, `*.pkrvars.hcl`):
+    - Finding provisioner blocks: `provisioner "$_" { $$$ }`
+    - Locating source definitions: `source "$_" { $$$ }`
+    - Searching variable declarations: `variable "$_" { $$$ }`
+    - Finding build configurations: `build { $$$ }`
+    - Locating specific configuration patterns like `execute_command`, `inline` scripts
+- Prefer the AST-Grep MCP Server for:
+  - Syntax-aware searches in HCL and bash
+  - Structural patterns (blocks, functions, declarations)
+  - Multi-line pattern matching
+- Use `grep` for simple text searches and when AST-Grep MCP Server is unavailable

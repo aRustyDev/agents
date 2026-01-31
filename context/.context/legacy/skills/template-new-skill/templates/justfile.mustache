@@ -1,0 +1,23 @@
+# id: {{uuid}}
+
+id := shell("jq '.id' " + justfile_directory() + "/meta.json")
+brewery := env("XDG_CONFIG_HOME", env("HOME") + "/.config") + "/brew/files/" + id
+dependencies := justfile_directory() + "/dependencies.json"
+
+# Output the uuid of the {{name}} skill
+[group(ls)]
+{{! Changing the escape characters temporarily }}
+{{=<% %>=}}
+lsid:
+    echo "{{ id }}"
+
+ls-requirements:
+    jq '.' "{{ dependencies }}"
+
+add-requirement:
+    jq '.' "{{ dependencies }}"
+
+requirements id:
+    echo "TODO(agent)"
+
+<%={{ }}=%>

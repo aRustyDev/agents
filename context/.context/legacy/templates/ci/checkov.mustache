@@ -1,0 +1,13 @@
+skip-check:
+  - CKV_GLB_1
+  - CKV_GLB_3
+  - CKV_GLB_4
+  - CKV2_GIT_1
+  - CKV_AWS_144
+  - CKV_TF_1  # we use version tags instead of git commit hashes
+skip-path:
+  - external
+  - /external
+  - helm-charts
+  - /helm-charts
+download-external-modules: false

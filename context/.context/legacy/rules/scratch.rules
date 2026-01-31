@@ -1,0 +1,19 @@
+Be specific and clear:
+        Avoid ambiguity—use precise language and define any technical terms.
+        Specify the exact actions the AI should take to avoid any off-tangent behavior.
+Provide context and background:
+    Give the AI enough information to understand the task's purpose and importance.
+    Explain the desired audience or use case for the output.
+    For example, "Generate an expert-level keyword research report" tells the AI the expected quality and expertise level.
+Define the output format:
+    Specify the structure, style, and tone of the desired output.
+    Use examples to illustrate the expected format.
+    Define using natural language or Markdown structure with headings, tables, and specific sections is clearly defined.
+Incorporate tool usage guidelines:
+    Clearly state which tools the AI should use and how to use them.
+    Provide examples of tool calls and expected inputs/outputs.
+    Explain how to handle potential errors or missing data from tool calls.
+Encourage iteration and refinement:
+    Include instructions for how the AI should respond to user feedback or requests for further action.
+    Allow the AI to ask clarifying questions if needed.
+    The "Offer to Go Deeper" section in the example encourages further interaction and refinement of the research.

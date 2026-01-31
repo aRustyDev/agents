@@ -1,0 +1,5 @@
+Meta (Default): UUID Per Project
+- Every Project MUST have a UUIDv4 identifier:
+  - Stored in `git config --local project.id`
+  - Mirrored in `.meta.json` at project root: `{"id":"<uuid>"}`
+  - Auto-generate if missing: `git config --local project.id "$(uuidgen)"`

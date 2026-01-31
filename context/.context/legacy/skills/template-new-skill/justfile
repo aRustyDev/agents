@@ -1,0 +1,45 @@
+# id: B90F6D72-BB47-434C-8BDC-3C880E13AC9A
+# Source
+
+root := `git rev-parse --show-toplevel`
+templates := justfile_directory() + "/templates"
+
+# Target
+
+id := shell("jq '.id' " + skilldir / "meta.json || uuidgen")
+name := env("NAME")
+description := env("DESC", "")
+scope := if env("SCOPE", "") == "personal" { env("HOME") / ".claude/skills" } else { root / ".claude/skills" }
+skilldir := scope / `echo "{{ name }}" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'`
+brewery := env("XDG_CONFIG_HOME", env("HOME") / ".config") / "brew/files/"
+
+# Create a new Claude skill
+init: mktree meta templates files
+
+templates:
+    #!/usr/bin/env bash
+    json='{"uuid":"{{ id }}", "name":"{{ name }}", "description":"{{ description }}"}'
+    just template "justfile" "$json"
+    just template "SKILL" "$json"
+    just template "INDEX" "$json"
+    just template "brewfile" "$json"
+
+template target json="":
+    #!/usr/bin/env bash
+    echo "{{ json }}" | mustache "{{ templates / target }}.mustache" > "{{ skilldir / target }}"
+
+# Create a new skill directory
+mktree:
+    mkdir -p "{{ skilldir }}/{scripts,templates}"
+    mkdir -p "{{ brewery }}"
+
+meta:
+    echo '{"id":"{{ id }}"}' | jq -r '.' > "{{ skilldir }}/meta.json"
+
+files:
+    #!/usr/bin/env bash
+    echo "{}" > "{{ skilldir }}/dependencies.json"
+    touch "{{ skilldir }}/{scripts,templates,examples,reference}/.gitkeep"
+    mv "{{ skilldir }}/brewfile" "{{ brewery / id }}"
+    cd "{{ skilldir }}"
+    rename "/(INDEX)|(SKILL)/\1.md"
