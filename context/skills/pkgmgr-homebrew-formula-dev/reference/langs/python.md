@@ -1,0 +1,97 @@
+## Python Formula Patterns
+
+### Researching a Python Project
+
+| What | Where to Look | Command / File |
+|------|---------------|----------------|
+| Build system | Repo root | `pyproject.toml` (modern), `setup.py`/`setup.cfg` (legacy) |
+| Binary name(s) | `pyproject.toml` `[project.scripts]` or `setup.py` `entry_points` | The key is the binary name, the value is the module path |
+| Python version | `pyproject.toml` `requires-python` | Map to Homebrew's `python@3.XX` — use latest compatible |
+| Direct dependencies | `pyproject.toml` `[project.dependencies]` or `requirements.txt` | Each becomes a `resource` block unless already in homebrew-core |
+| Resource URLs | PyPI | `https://pypi.org/project/<pkg>/#files` — use the `.tar.gz` sdist, not wheel |
+| Completions | CLI framework | If using `click`: look for `shell_complete`; if using `argparse`: check for custom completion |
+| Native extensions | `setup.py` or `pyproject.toml` build-backend | If using `setuptools` with C extensions: needs compiler deps |
+| Test command | README, `--help` output | Check if tool supports `--version` or `--help` |
+
+**Quick check sequence:**
+
+```bash
+# Confirm Python project, find entry points
+gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep -A10 '\[project.scripts\]'
+
+# Find Python version requirement
+gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep 'requires-python'
+
+# List dependencies
+gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep -A30 '\[project\]' | grep -A20 'dependencies'
+```
+
+**Generating resource blocks:** After initial formula creation, use `brew update-python-resources <formula>` to auto-generate resource blocks from PyPI.
+
+### Dependencies
+
+```text
+depends_on "python@3.12"
+```
+
+### Install Block
+
+```text
+include Language::Python::Virtualenv
+
+def install
+  virtualenv_install_with_resources
+end
+```
+
+- `virtualenv_install_with_resources` creates a venv, installs resource blocks, then installs the formula
+- Check `pyproject.toml`, `setup.py`, or `setup.cfg` for the project's build system
+
+### JSON Schema Fields (`install-python`)
+
+| Field | Default | Purpose |
+|-------|---------|---------|
+| `python_version` | `"python3"` | Python version dependency |
+| `using` | `"virtualenv"` | Install method (`virtualenv`, `pip`, `setuptools`) |
+| `site_packages` | `false` | Allow access to system site-packages |
+| `resources` | — | Python package dependencies (defined at formula level) |
+
+### Mustache Partial
+
+The `langs/python.mustache` partial renders `virtualenv_install_with_resources`.
+
+### Resource Blocks
+
+Python formulas need `resource` blocks for pip dependencies not in homebrew-core:
+
+```text
+resource "certifi" do
+  url "https://files.pythonhosted.org/packages/certifi-2024.2.2.tar.gz"
+  sha256 "..."
+end
+```
+
+Generate resource blocks with:
+
+```bash
+brew update-python-resources <formula-name>
+```
+
+### Entry Points
+
+Check `pyproject.toml` `[project.scripts]` for the binary names the formula will install:
+
+```toml
+[project.scripts]
+my-tool = "my_package.cli:main"
+```
+
+### Common Issues
+
+- **Missing resources:** Python dependencies must be declared as `resource` blocks — they're not auto-resolved
+- **Version pinning:** Use the exact source tarball versions that match the project's requirements
+- **Site packages:** Set `site_packages: true` only when the formula needs access to Homebrew-installed Python packages
+
+### Reference
+
+See `reference/templates/formulas/python.rb` for a pipeline-generated example.

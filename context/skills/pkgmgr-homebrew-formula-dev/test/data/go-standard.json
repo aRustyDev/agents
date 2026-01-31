@@ -1,0 +1,38 @@
+{
+  "formulas": [
+    {
+      "name": "my-tool",
+      "desc": "A fast CLI tool written in Go",
+      "homepage": "https://github.com/example/my-tool",
+      "url": "https://github.com/example/my-tool/archive/refs/tags/v1.2.3.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "go",
+      "head": {
+        "url": "https://github.com/example/my-tool.git",
+        "branch": "main"
+      },
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "go", "type": ":build" },
+        { "name": "pkg-config", "type": ":build" }
+      ],
+      "install": {
+        "ldflags": "-s -w -X main.version=#{version}",
+        "cmd_path": "./cmd/my-tool"
+      },
+      "completions": {
+        "bash": "generate_completions bash > bash_completion.d/my-tool",
+        "zsh": "generate_completions zsh > zsh/site-functions/_my-tool",
+        "fish": "generate_completions fish > fish/vendor_completions.d/my-tool.fish"
+      },
+      "test": {
+        "command": "system bin/\"my-tool\", \"--version\"",
+        "expected_output": "my-tool version #{version}"
+      }
+    }
+  ]
+}
