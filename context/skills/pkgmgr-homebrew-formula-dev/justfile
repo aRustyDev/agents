@@ -1,19 +1,31 @@
-data := '{"formulas":[{"name":"Chris","role":"Developer"},{"name":"Anna","role":"Designer"}]}'
+export PATH := "./node_modules/.bin:" + env('PATH')
+export NODE_PATH := justfile_directory() + "/node_modules"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Setup
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Install dependencies (macOS)
+[group('setup')]
+[macos]
+deps:
+    brew bundle -f "{{ justfile_directory() }}/reference/Brewfile"
+    npm install
+
+# Print kebab-case and PascalCase for a formula name
+[group('setup')]
 add-formula name:
     echo "{{ kebabcase(name) }}"
     echo "{{ uppercamelcase(name) }}"
 
-[macos]
-_deps:
-    brew bundle -f "{{ justfile_directory() }}/reference/Brewfile"
-    npm install
+# ─────────────────────────────────────────────────────────────────────────────
+# Template Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
 
-
-export PATH := "./node_modules/.bin:" + env('PATH')
-export NODE_PATH := justfile_directory() + "/node_modules"
-
-javascript-recipe json=data:
+# Validate JSON against schema and render a Homebrew formula via Mustache
+[group('pipeline')]
+[no-exit-message]
+template-formula json:
     #!/usr/bin/env node
     const Mustache = require('mustache');
     const fs = require('fs');
@@ -39,6 +51,13 @@ javascript-recipe json=data:
     const main = fs.readFileSync(path.join(baseDir, 'main.mustache'), 'utf8');
     console.log(Mustache.render(main, jsObject, partials));
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Testing
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Run all test cases in test/cases/
+[group('test')]
+[no-exit-message]
 test:
     #!/usr/bin/env bash
     set -euo pipefail
