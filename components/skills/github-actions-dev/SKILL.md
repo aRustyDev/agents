@@ -11,57 +11,36 @@ Guide for developing custom GitHub Actions - the reusable units that are called 
 
 ## Action Types
 
-| Type | Best For | Runtime |
-|------|----------|---------|
-| **JavaScript/TypeScript** | Fast startup, GitHub API integration | Node.js 20 |
-| **Docker** | Custom environments, any language | Container |
-| **Composite** | Orchestrating other actions | None (YAML) |
+| Type | Best For | Runtime | See Also |
+|------|----------|---------|----------|
+| **JavaScript/TypeScript** | Fast startup, GitHub API integration | Node.js 20 | [Project Setup](references/project-setup.md) |
+| **Docker** | Custom environments, any language | Container | [Docker Guide](references/docker-actions.md) |
+| **Composite** | Orchestrating other actions | None (YAML) | [Composite Guide](references/composite-actions.md) |
 
-## Project Structure
+## Quick Start
 
-### JavaScript/TypeScript Action
-
-```
-my-action/
-├── action.yml           # Action metadata
-├── src/
-│   ├── main.ts          # Entry point
-│   ├── input.ts         # Input parsing
-│   └── utils.ts         # Helpers
-├── dist/
-│   └── index.js         # Bundled output (committed)
-├── __tests__/
-│   └── main.test.ts     # Tests
-├── package.json
-├── tsconfig.json
-└── README.md
+### JavaScript Action
+```bash
+mkdir my-action && cd my-action
+npm init -y
+npm install @actions/core @actions/github
+# See detailed setup: references/project-setup.md
 ```
 
 ### Docker Action
-
-```
-my-docker-action/
-├── action.yml
-├── Dockerfile
-├── entrypoint.sh
-└── README.md
+```bash
+mkdir my-docker-action && cd my-docker-action
+# Create Dockerfile and action.yml
+# See: references/docker-actions.md
 ```
 
-### Composite Action
+## action.yml Essentials
 
-```
-my-composite-action/
-├── action.yml           # Contains all steps
-└── README.md
-```
-
-## action.yml Reference
-
-### JavaScript/TypeScript Action
+Basic structure for all action types:
 
 ```yaml
 name: 'My Action'
-description: 'Does something useful'
+description: 'What it does'
 author: 'Your Name'
 
 branding:
@@ -72,483 +51,265 @@ inputs:
   token:
     description: 'GitHub token'
     required: true
-  config-path:
-    description: 'Path to config file'
-    required: false
-    default: '.github/config.yml'
 
 outputs:
   result:
-    description: 'The result of the action'
-  artifact-url:
-    description: 'URL to uploaded artifact'
+    description: 'Action result'
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
-  post: 'dist/cleanup.js'        # Optional cleanup
-  post-if: 'always()'            # When to run cleanup
+  using: 'node20'        # or 'docker' or 'composite'
+  main: 'dist/index.js'  # Entry point
 ```
 
-### Docker Action
+Complete reference: [Action Metadata](references/action-metadata.md)
+
+## Core Development Patterns
+
+### Module System
+
+| Pattern | Usage | Example |
+|---------|-------|---------|
+| **Toolkit Imports** | Standard action libraries | `import * as core from '@actions/core'` |
+| **ES Modules** | Modern JavaScript | `import { readFile } from 'fs/promises'` |
+| **CommonJS** | TypeScript compilation | `module: 'commonjs'` in tsconfig |
+
+See [Toolkit API Reference](references/toolkit-api.md) for complete module documentation.
+
+### Error Handling
+
+| Pattern | When to Use | Implementation |
+|---------|-------------|----------------|
+| **Input Validation** | Required parameters | `core.getInput('token', { required: true })` |
+| **Try-Catch** | Async operations | Wrap main logic, call `core.setFailed()` |
+| **Graceful Degradation** | Optional features | Continue with warnings vs failing |
+
+```typescript
+try {
+  const result = await performAction();
+  core.setOutput('result', result);
+} catch (error) {
+  core.setFailed(error instanceof Error ? error.message : 'Unknown error');
+}
+```
+
+### Concurrency
+
+| Pattern | GitHub Actions Context | Example |
+|---------|------------------------|---------|
+| **Async/Await** | All toolkit APIs are async | `await octokit.rest.issues.get()` |
+| **Parallel Operations** | Independent API calls | `Promise.all([getIssue(), getPR()])` |
+| **Sequential Flow** | Dependent operations | `await step1(); await step2();` |
+
+```typescript
+// Parallel execution for independent tasks
+await core.group('Parallel operations', async () => {
+  await Promise.all([
+    checkIssues(),
+    updatePR(),
+    uploadArtifact()
+  ]);
+});
+```
+
+### Metaprogramming
+
+GitHub Actions provides powerful metaprogramming capabilities for dynamic workflow generation:
+
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| **Expression Functions** | Runtime evaluation | `${{ fromJson(steps.data.outputs.config) }}` |
+| **Matrix Strategies** | Dynamic job generation | Generate jobs from API data |
+| **Context Injection** | Runtime inspection | `${{ github.event.pull_request.title }}` |
+| **Reusable Workflows** | Macro-like abstractions | Template workflows with parameters |
+| **Code Generation** | TypeScript action builders | Generate action.yml from schema |
 
 ```yaml
-name: 'My Docker Action'
-description: 'Runs in a container'
+# Dynamic matrix from API
+strategy:
+  matrix:
+    include: ${{ fromJson(steps.get-matrix.outputs.matrix) }}
 
-inputs:
-  args:
-    description: 'Arguments to pass'
-    required: true
+# Context-based conditionals
+if: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.title, 'feat') }}
 
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.args }}
-  env:
-    CUSTOM_VAR: 'value'
+# Expression functions
+run: |
+  CONFIG='${{ toJson(github.event.client_payload) }}'
+  ESCAPED='${{ toJson(env.USER_INPUT) }}'
 ```
 
-### Composite Action
+**Advanced Metaprogramming:**
+```typescript
+// TypeScript action that generates other actions
+import { generateActionMetadata } from './generator';
 
-```yaml
-name: 'My Composite Action'
-description: 'Combines multiple steps'
-
-inputs:
-  node-version:
-    description: 'Node.js version'
-    default: '20'
-
-outputs:
-  cache-hit:
-    description: 'Whether cache was hit'
-    value: ${{ steps.cache.outputs.cache-hit }}
-
-runs:
-  using: 'composite'
-  steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
-
-    - id: cache
-      uses: actions/cache@v4
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
-    - run: npm ci
-      shell: bash
-      if: steps.cache.outputs.cache-hit != 'true'
+const schema = await readSchema('action-schema.json');
+const actionYml = generateActionMetadata(schema);
+await writeFile('action.yml', actionYml);
 ```
 
-## JavaScript/TypeScript Development
+See [Metaprogramming Patterns](references/metaprogramming.md) for complete examples.
 
-### Setup
+### Zero/Default Handling
 
-```bash
-# Initialize project
-mkdir my-action && cd my-action
-npm init -y
+| Pattern | GitHub Actions Context | Implementation |
+|---------|------------------------|----------------|
+| **Input Defaults** | action.yml defaults | `default: '.github/config.yml'` |
+| **Runtime Defaults** | Code-level defaults | `core.getInput('timeout') || '30'` |
+| **Empty Handling** | Missing inputs/outputs | Check for empty strings, not undefined |
 
-# Install action toolkit
-npm install @actions/core @actions/github @actions/exec @actions/io @actions/cache
-
-# Dev dependencies
-npm install -D typescript @types/node @vercel/ncc jest @types/jest ts-jest
+```typescript
+const timeout = parseInt(core.getInput('timeout') || '30', 10);
+const files = core.getMultilineInput('files').filter(f => f.trim());
 ```
 
-### package.json
+### Serialization
+
+| Data Type | GitHub Actions Pattern | Usage |
+|-----------|------------------------|-------|
+| **JSON Objects** | Inputs/outputs | `core.setOutput('data', JSON.stringify(obj))` |
+| **Multiline Strings** | File contents | `core.getMultilineInput()` |
+| **Base64** | Binary data | Encode before setting output |
+
+```typescript
+// Complex data serialization
+const results = { passed: 10, failed: 2, files: ['a.js', 'b.js'] };
+core.setOutput('test-results', JSON.stringify(results));
+
+// Reading complex input
+const config = JSON.parse(core.getInput('config') || '{}');
+```
+
+### Build/Tooling
+
+| Tool | Purpose | Configuration |
+|------|---------|---------------|
+| **TypeScript** | Type safety | `tsconfig.json` with Node.js targets |
+| **ncc** | Bundling | Single file for distribution |
+| **Jest** | Testing | Unit and integration tests |
 
 ```json
 {
-  "name": "my-action",
-  "version": "1.0.0",
-  "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build src/main.ts -o dist --source-map --license licenses.txt",
+    "build": "ncc build src/main.ts -o dist --source-map",
     "test": "jest",
     "all": "npm run build && npm test"
   }
 }
 ```
 
-### tsconfig.json
+See [Build Configuration](references/build-tooling.md) for complete setup.
 
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "lib": ["ES2022"],
-    "outDir": "./lib",
-    "rootDir": "./src",
-    "strict": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "exclude": ["node_modules", "dist", "__tests__"]
-}
-```
+### Testing
 
-### Main Entry Point
+| Test Type | Scope | Implementation |
+|-----------|-------|----------------|
+| **Unit Tests** | Individual functions | Jest with mocked toolkit |
+| **Integration Tests** | Full action | Real GitHub workflows |
+| **Local Testing** | Development | Act for local execution |
 
 ```typescript
-// src/main.ts
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-
-async function run(): Promise<void> {
-  try {
-    // Get inputs
-    const token = core.getInput('token', { required: true });
-    const configPath = core.getInput('config-path');
-
-    // Debug logging (only visible with ACTIONS_STEP_DEBUG)
-    core.debug(`Config path: ${configPath}`);
-
-    // Get GitHub context
-    const { owner, repo } = github.context.repo;
-    core.info(`Running on ${owner}/${repo}`);
-
-    // Create authenticated client
-    const octokit = github.getOctokit(token);
-
-    // Do work...
-    const result = await doWork(octokit, configPath);
-
-    // Set outputs
-    core.setOutput('result', result);
-
-    // Export variable for subsequent steps
-    core.exportVariable('MY_ACTION_RESULT', result);
-
-  } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message);
-    }
-  }
-}
-
-run();
-```
-
-### Action Toolkit APIs
-
-```typescript
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import * as exec from '@actions/exec';
-import * as io from '@actions/io';
-import * as cache from '@actions/cache';
-
-// --- @actions/core ---
-// Inputs
-const required = core.getInput('name', { required: true });
-const optional = core.getInput('name');  // Empty string if not set
-const multiline = core.getMultilineInput('items');
-const boolean = core.getBooleanInput('flag');
-
-// Outputs
-core.setOutput('key', 'value');
-
-// Logging
-core.debug('Debug message');      // Only with ACTIONS_STEP_DEBUG
-core.info('Info message');
-core.notice('Notice annotation');
-core.warning('Warning annotation');
-core.error('Error annotation');
-
-// Grouping
-core.startGroup('Group name');
-core.info('Inside group');
-core.endGroup();
-
-// Or with async
-await core.group('Group name', async () => {
-  await someAsyncWork();
-});
-
-// Masking secrets
-core.setSecret(sensitiveValue);
-
-// Failure
-core.setFailed('Action failed');
-
-// --- @actions/github ---
-// Context
-const { owner, repo } = github.context.repo;
-const sha = github.context.sha;
-const ref = github.context.ref;
-const actor = github.context.actor;
-const eventName = github.context.eventName;
-const payload = github.context.payload;
-
-// Octokit client
-const octokit = github.getOctokit(token);
-const { data: issue } = await octokit.rest.issues.get({
-  owner,
-  repo,
-  issue_number: 1
-});
-
-// --- @actions/exec ---
-// Run command
-const exitCode = await exec.exec('npm', ['install']);
-
-// Capture output
-let output = '';
-await exec.exec('git', ['rev-parse', 'HEAD'], {
-  listeners: {
-    stdout: (data) => { output += data.toString(); }
-  }
-});
-
-// --- @actions/io ---
-// File operations
-await io.mkdirP('/path/to/dir');
-await io.cp('src', 'dest', { recursive: true });
-await io.mv('old', 'new');
-await io.rmRF('/path/to/remove');
-const toolPath = await io.which('node', true);  // Throws if not found
-
-// --- @actions/cache ---
-// Cache dependencies
-const paths = ['node_modules'];
-const key = `node-${process.env.RUNNER_OS}-${hashFiles('package-lock.json')}`;
-const restoreKeys = [`node-${process.env.RUNNER_OS}-`];
-
-const cacheKey = await cache.restoreCache(paths, key, restoreKeys);
-if (!cacheKey) {
-  // Cache miss, install deps
-  await exec.exec('npm', ['ci']);
-  await cache.saveCache(paths, key);
-}
-```
-
-## Docker Action Development
-
-### Dockerfile
-
-```dockerfile
-FROM node:20-alpine
-
-LABEL maintainer="Your Name <email@example.com>"
-LABEL com.github.actions.name="My Docker Action"
-LABEL com.github.actions.description="Description"
-LABEL com.github.actions.icon="check-circle"
-LABEL com.github.actions.color="green"
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-```
-
-### entrypoint.sh
-
-```bash
-#!/bin/sh -l
-
-# Inputs are passed as environment variables
-# INPUT_<NAME> in uppercase
-echo "Token: $INPUT_TOKEN"
-echo "Config: $INPUT_CONFIG_PATH"
-
-# Do work...
-RESULT="success"
-
-# Set output (write to $GITHUB_OUTPUT)
-echo "result=$RESULT" >> $GITHUB_OUTPUT
-
-# Set environment variable for subsequent steps
-echo "MY_VAR=value" >> $GITHUB_ENV
-```
-
-## Testing Actions
-
-### Unit Tests
-
-```typescript
-// __tests__/main.test.ts
-import * as core from '@actions/core';
-import * as github from '@actions/github';
-import { run } from '../src/main';
-
-// Mock the toolkit
+// Unit test with mocked toolkit
 jest.mock('@actions/core');
-jest.mock('@actions/github');
+const mockSetOutput = core.setOutput as jest.Mock;
 
-describe('action', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('sets output on success', async () => {
-    // Arrange
-    (core.getInput as jest.Mock).mockImplementation((name: string) => {
-      if (name === 'token') return 'fake-token';
-      return '';
-    });
-
-    // Act
-    await run();
-
-    // Assert
-    expect(core.setOutput).toHaveBeenCalledWith('result', expect.any(String));
-    expect(core.setFailed).not.toHaveBeenCalled();
-  });
-
-  it('fails when token missing', async () => {
-    (core.getInput as jest.Mock).mockImplementation(() => {
-      throw new Error('Input required: token');
-    });
-
-    await run();
-
-    expect(core.setFailed).toHaveBeenCalledWith('Input required: token');
-  });
+test('sets correct output', async () => {
+  await run();
+  expect(mockSetOutput).toHaveBeenCalledWith('result', 'success');
 });
 ```
 
-### Integration Testing
+See [Testing Guide](references/testing.md) for comprehensive examples.
 
-```yaml
-# .github/workflows/test.yml
-name: Test Action
+## Development Workflow
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run action
-        id: test
-        uses: ./
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify output
-        run: |
-          if [ "${{ steps.test.outputs.result }}" != "expected" ]; then
-            echo "Unexpected output"
-            exit 1
-          fi
+### 1. Setup
+```bash
+# Quick start
+npx create-action my-action
+# or manual setup - see references/project-setup.md
 ```
 
-### Local Testing with Act
-
+### 2. Development
 ```bash
-# Test the action locally
+npm run build    # Bundle with ncc
+npm test         # Run test suite
+npm run all      # Build + test
+```
+
+### 3. Testing
+```bash
+# Local testing with act
 act -j test -s GITHUB_TOKEN="$(gh auth token)"
-
-# With specific event
-act push -j test
 ```
 
-## Publishing to Marketplace
-
-### Requirements
-
-1. Public repository
-2. `action.yml` in repository root
-3. README.md with documentation
-4. Semantic versioning with tags
-
-### Release Process
-
+### 4. Publishing
 ```bash
-# Tag release
-git tag -a v1.0.0 -m "Release v1.0.0"
+git tag v1.0.0
 git push origin v1.0.0
-
-# Create major version tag (for users: uses: org/action@v1)
-git tag -fa v1 -m "Update v1 tag"
-git push origin v1 --force
+# Create GitHub release
+# Check "Publish to Marketplace"
 ```
 
-### Release Workflow
+See [Publishing Guide](references/publishing.md) for complete release process.
 
-```yaml
-# .github/workflows/release.yml
-name: Release
+## Common Gotchas
 
-on:
-  release:
-    types: [published]
+### Input/Output Issues
+- Empty inputs return `""`, not `undefined`
+- Outputs must be strings (use `JSON.stringify()` for objects)
+- Required inputs throw if missing, optional inputs return empty string
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+### Bundle Management
+- Always commit `dist/` folder for JavaScript actions
+- Use `ncc` to create single-file bundles
+- Don't bundle `node_modules` in Docker actions
 
-      - name: Update major version tag
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          MAJOR=${VERSION%%.*}
-          git tag -fa $MAJOR -m "Update $MAJOR tag"
-          git push origin $MAJOR --force
+### Permissions
+- Default `GITHUB_TOKEN` has limited permissions
+- Use `permissions:` in workflow to grant specific access
+- Personal tokens need explicit scopes
+
+## Quick Reference
+
+### Essential Commands
+```bash
+# Toolkit APIs
+npm install @actions/core @actions/github @actions/exec @actions/io
+
+# Development
+npm run build && npm test
+act -j test
+
+# Release
+git tag v1.0.0 && git push origin v1.0.0
 ```
 
-## Best Practices
-
-### Input Validation
-
-```typescript
-function validateInputs(): Config {
-  const token = core.getInput('token', { required: true });
-  if (!token.startsWith('ghp_') && !token.startsWith('ghs_')) {
-    throw new Error('Invalid token format');
-  }
-
-  const timeout = parseInt(core.getInput('timeout') || '30', 10);
-  if (isNaN(timeout) || timeout < 1 || timeout > 300) {
-    throw new Error('Timeout must be between 1 and 300');
-  }
-
-  return { token, timeout };
-}
+### File Structure
 ```
-
-### Error Handling
-
-```typescript
-try {
-  await run();
-} catch (error) {
-  if (error instanceof Error) {
-    // Add error annotation to file if available
-    core.error(error.message, {
-      file: 'src/main.ts',
-      startLine: 10
-    });
-    core.setFailed(error.message);
-  } else {
-    core.setFailed('An unexpected error occurred');
-  }
-}
+my-action/
+├── action.yml          # Action metadata
+├── src/main.ts         # Entry point
+├── dist/index.js       # Bundled output (committed)
+├── __tests__/          # Test files
+└── package.json        # Dependencies
 ```
-
-### Idempotency
-
-Design actions to be safely re-run:
-- Check if work already done before doing it
-- Use conditional creation (if not exists)
-- Clean up partial state on failure
 
 ## See Also
 
-- Reference: [toolkit-api.md](references/toolkit-api.md)
-- Reference: [publishing.md](references/publishing.md)
-- Assets: [templates/](assets/)
+### Reference Documentation
+- [Toolkit API Reference](references/toolkit-api.md) - Complete `@actions/*` package documentation
+- [Publishing Guide](references/publishing.md) - Marketplace publication process
+- [Project Setup](references/project-setup.md) - Detailed project initialization
+- [Testing Guide](references/testing.md) - Comprehensive testing strategies
+- [Build Tooling](references/build-tooling.md) - TypeScript, bundling, CI configuration
+- [Metaprogramming Patterns](references/metaprogramming.md) - Dynamic workflow generation
+
+### Action Type Guides
+- [Action Metadata](references/action-metadata.md) - Complete action.yml reference
+- [Docker Actions](references/docker-actions.md) - Container-based actions
+- [Composite Actions](references/composite-actions.md) - YAML-based action orchestration
+
+### Examples
+- [Templates](assets/templates/) - Project templates and examples
+- [Sample Actions](assets/examples/) - Real-world action implementations
