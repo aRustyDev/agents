@@ -1,0 +1,12 @@
+{
+  "formulas": [
+    {
+      "name": "bad-formula",
+      "homepage": "https://github.com/example/bad",
+      "license": "MIT",
+      "head": {
+        "url": "https://github.com/example/bad.git"
+      }
+    }
+  ]
+}

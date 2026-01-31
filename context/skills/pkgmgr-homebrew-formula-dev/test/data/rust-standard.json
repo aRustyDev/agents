@@ -1,0 +1,31 @@
+{
+  "formulas": [
+    {
+      "name": "rust-analyzer",
+      "desc": "Experimental Rust compiler front-end for IDEs",
+      "homepage": "https://rust-analyzer.github.io",
+      "url": "https://github.com/rust-lang/rust-analyzer/archive/refs/tags/v0.3.1.tar.gz",
+      "sha256": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "license": "Apache-2.0",
+      "language": "rust",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "rust", "type": ":build" }
+      ],
+      "uses_from_macos": [
+        { "name": "zlib" }
+      ],
+      "install": {
+        "features": ["lsp", "jemalloc"],
+        "bins": ["rust-analyzer"]
+      },
+      "test": {
+        "command": "system bin/\"rust-analyzer\", \"--help\"",
+        "expected_output": "rust-analyzer"
+      }
+    }
+  ]
+}
