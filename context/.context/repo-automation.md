@@ -1,0 +1,5 @@
+- updating README.md
+- updating CONTRIBUTING.md
+- updating AGENT(s).md
+- updating CLAUDE.md or .claude/CLAUDE.md
+- Project automation
