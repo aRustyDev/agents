@@ -60,6 +60,10 @@ def parse_args():
     parser.add_argument(
         "--cleanup", action="store_true", help="Clean up worktree after completion"
     )
+    parser.add_argument(
+        "--force", "-f", action="store_true",
+        help="Force recreate branch if it already exists (deletes existing branch)"
+    )
     parser.add_argument("--config", help="Path to config file")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 

@@ -1,0 +1,121 @@
+# Skill PR Addresser - Justfile
+# Run: just -f .claude/agents/skill-pr-addresser/justfile <recipe>
+
+set shell := ["bash", "-cu"]
+
+# Default recipe: show help
+default:
+    @just -f {{justfile()}} --list
+
+# Agent directory
+agent_dir := justfile_directory()
+
+# Use uv for dependency management
+python := "uv run python"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main Commands
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Address review feedback on a PR
+address pr_number *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py address {{pr_number}} {{FLAGS}}
+
+# Address with specific skill path
+address-skill pr_number skill *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py address {{pr_number}} --skill {{skill}} {{FLAGS}}
+
+# Address in dry-run mode
+address-dry pr_number *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py address {{pr_number}} --dry-run {{FLAGS}}
+
+# Check addressing status for a PR
+status pr_number:
+    cd "{{agent_dir}}" && {{python}} main.py status {{pr_number}}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Batch Processing
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Find PRs with pending feedback
+find *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py find {{FLAGS}}
+
+# Address all PRs with pending feedback
+batch *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py batch {{FLAGS}}
+
+# Address all PRs with pending feedback (dry run)
+batch-dry *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py batch --dry-run {{FLAGS}}
+
+# Address PRs with specific label
+batch-label label *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py batch --label {{label}} {{FLAGS}}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Session Management
+# ─────────────────────────────────────────────────────────────────────────────
+
+# List all sessions
+sessions:
+    cd "{{agent_dir}}" && {{python}} main.py sessions
+
+# List all sessions including completed
+sessions-all:
+    cd "{{agent_dir}}" && {{python}} main.py sessions --all
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Development
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Install dependencies
+install:
+    pip install -e "{{agent_dir}}[dev]"
+
+# Run tests
+test *FLAGS:
+    pytest "{{agent_dir}}/tests" {{FLAGS}}
+
+# Run tests with coverage
+test-cov:
+    pytest "{{agent_dir}}/tests" --cov="{{agent_dir}}/src" --cov-report=term-missing
+
+# Lint code
+lint:
+    ruff check "{{agent_dir}}/src" "{{agent_dir}}/tests"
+
+# Format code
+fmt:
+    ruff format "{{agent_dir}}/src" "{{agent_dir}}/tests"
+
+# Show help
+help:
+    cd "{{agent_dir}}" && {{python}} main.py --help
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Debugging
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Address PR with sub-agent output streaming (recommended for debugging)
+address-stream pr_number *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py address {{pr_number}} --stream {{FLAGS}}
+
+# Address PR in TUI mode (watch-only, workflow won't complete)
+address-interactive pr_number *FLAGS:
+    cd "{{agent_dir}}" && {{python}} main.py address {{pr_number}} --interactive {{FLAGS}}
+
+# Show config
+config:
+    @cat "{{agent_dir}}/config/skill-pr-addresser.conf"
+
+# Verify CLI works
+verify:
+    @echo "Checking CLI..."
+    @cd "{{agent_dir}}" && {{python}} main.py --help > /dev/null && echo "✓ CLI works"
+    @cd "{{agent_dir}}" && {{python}} main.py address --help > /dev/null && echo "✓ address command works"
+    @cd "{{agent_dir}}" && {{python}} main.py status --help > /dev/null && echo "✓ status command works"
+    @cd "{{agent_dir}}" && {{python}} main.py find --help > /dev/null && echo "✓ find command works"
+    @cd "{{agent_dir}}" && {{python}} main.py batch --help > /dev/null && echo "✓ batch command works"
+    @cd "{{agent_dir}}" && {{python}} main.py sessions --help > /dev/null && echo "✓ sessions command works"
+    @echo "All checks passed!"

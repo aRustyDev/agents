@@ -1,7 +1,27 @@
+"""Session management for skill-reviewer agent.
+
+Combines agent-specific functions with shared utilities from skill-agents-common.
+"""
+
 import json
 import sys
-import uuid
+from pathlib import Path
 
+# Add parent directory to path for shared library import
+_agents_dir = Path(__file__).parent.parent.parent
+if str(_agents_dir) not in sys.path:
+    sys.path.insert(0, str(_agents_dir))
+
+# Re-export shared utilities
+from skill_agents_common.session import (
+    generate_session_id,
+    find_session_by_issue,
+    find_session_by_pr,
+    extract_linked_issues,
+    create_session_from_pr,
+)
+
+# Local imports
 from .models import AgentSession, Stage
 from .orchestrator import Orchestrator
 
@@ -30,13 +50,8 @@ def resume_session(
     return result
 
 
-def generate_session_id() -> str:
-    """Generate a short unique session ID."""
-    return str(uuid.uuid4())[:8]
-
-
 def list_sessions(orchestrator: Orchestrator):
-    """List all sessions."""
+    """List all sessions with formatted output."""
     sessions_dir = orchestrator.sessions_dir
 
     if not sessions_dir.exists():
@@ -66,3 +81,16 @@ def list_sessions(orchestrator: Orchestrator):
         print(
             f"{s['session_id']:<10} {s['stage']:<20} {s['skill_path']:<40} ${s['estimated_cost_usd']:.4f}"
         )
+
+
+__all__ = [
+    # Shared utilities
+    "generate_session_id",
+    "find_session_by_issue",
+    "find_session_by_pr",
+    "extract_linked_issues",
+    "create_session_from_pr",
+    # Agent-specific functions
+    "resume_session",
+    "list_sessions",
+]

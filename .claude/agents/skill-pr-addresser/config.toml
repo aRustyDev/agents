@@ -1,0 +1,15 @@
+# skill-pr-addresser configuration
+
+[skill-pr-addresser]
+repo_owner = "aRustyDev"
+repo_name = "ai"
+max_iterations = 3
+rate_limit_delay = 1.0
+worktree_base = "/private/tmp/worktrees"
+
+[otel]
+enabled = true
+# gRPC endpoint (no http:// prefix for gRPC)
+endpoint = "localhost:4317"
+service_name = "skill-pr-addresser"
+version = "0.1.0"

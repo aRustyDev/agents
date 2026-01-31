@@ -1,0 +1,4 @@
+    {{#env}}
+    ENV["CGO_ENABLED"] = "{{CGO_ENABLED}}"
+    {{/env}}
+    system "go", "build", *std_go_args(ldflags: "{{ldflags}}"){{#cmd_path}}, "{{cmd_path}}"{{/cmd_path}}

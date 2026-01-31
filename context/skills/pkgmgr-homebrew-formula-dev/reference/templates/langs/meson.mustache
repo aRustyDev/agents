@@ -1,0 +1,3 @@
+    system "meson", "setup", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}", *std_meson_args{{#meson_args}}, "{{.}}"{{/meson_args}}
+    system "meson", "compile", "-C", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}"
+    system "meson", "install", "-C", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}"

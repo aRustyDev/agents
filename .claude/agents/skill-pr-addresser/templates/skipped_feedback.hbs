@@ -1,0 +1,23 @@
+## Feedback Not Addressed
+
+The following feedback items could not be addressed automatically:
+
+{{#skipped}}
+### {{id}}
+
+**Reason:** {{reason}}
+
+{{/skipped}}
+
+---
+
+{{#addressed_count}}
+*The agent successfully addressed {{addressed_count}} of {{total_count}} feedback items.*
+{{/addressed_count}}
+{{^addressed_count}}
+*No feedback items could be addressed automatically. Please review the items above.*
+{{/addressed_count}}
+
+{{#needs_manual_review}}
+**Manual review required** for the remaining items.
+{{/needs_manual_review}}

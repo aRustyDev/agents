@@ -1,0 +1,10 @@
+{
+  "repo_owner": "aRustyDev",
+  "repo_name": "ai",
+  "review_labels": ["refinement", "skills"],
+  "max_parallel": 3,
+  "max_cost_per_pr": 2.0,
+  "max_iterations": 3,
+  "rate_limit_delay": 1.0,
+  "worktree_base": "/private/tmp/worktrees"
+}

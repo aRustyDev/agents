@@ -14,8 +14,14 @@ ls-tags:
     yq --output-format=json '.' "{{ justfile_directory() }}/components/skills/external.yaml" | jq '[ .manifest[] | add | .tags[] ] | unique'
 
 [private]
-_install-claude: _install-claude-commands _install-claude-rules _install-claude-skills _install-claude-hooks
+_install-claude: _install-claude-commands _install-claude-rules _install-claude-skills _install-claude-hooks _install-claude-settings
     @echo "✓ Claude Code components installed to {{ CLAUDE_DIR }}"
+
+[private]
+_install-claude-settings:
+    @echo "Installing settings..."
+    @mkdir -p "{{ CLAUDE_DIR }}"
+    @ln -sf "$(pwd)/settings/claude.json" "{{ CLAUDE_DIR }}/settings.json" && echo "  → ~/claude/settings.json" || true
 
 [private]
 _install-claude-commands:
@@ -179,6 +185,7 @@ anthropic-version:
     @cat "{{ ANTHROPIC_VERSION_FILE }}" 2>/dev/null || echo "not installed"
 
 # External skills manifest
+
 EXTERNAL_MANIFEST := justfile_directory() / "components/skills/external.yaml"
 EXTERNAL_VERSION_DIR := justfile_directory() / "components/skills/.versions"
 
@@ -364,6 +371,7 @@ check-external-updates:
     done
 
 # Skill management
+
 SKILL_TEMPLATE_DIR := justfile_directory() / "components/skills/.templates"
 
 # Create new skill from template

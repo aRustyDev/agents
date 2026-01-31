@@ -1,0 +1,41 @@
+{
+  "session_id": "6de157aa",
+  "skill_path": "components/skills/github-app-dev",
+  "issue_number": 692,
+  "repo_owner": "aRustyDev",
+  "repo_name": "ai",
+  "stage": "complete",
+  "worktree_path": "/private/tmp/worktrees/11588216-9567-4F5D-9E12-41F8AB6D7E8F/issue-692",
+  "branch_name": "feat/fix-github-app-dev-692",
+  "pr_number": 795,
+  "started_at": "2026-01-02T06:22:36.877436",
+  "updated_at": "2026-01-03T04:56:32.893415",
+  "completed_at": null,
+  "results": {
+    "total_cost": 0.0505,
+    "iteration_1": {
+      "analysis_summary": "Improve GitHub App Dev skill documentation by restructuring content, adding comprehensive examples, and following progressive disclosure patterns.",
+      "feedback_count": 4,
+      "action_groups": 4,
+      "guidance": [
+        "Follow progressive disclosure patterns",
+        "Adopt a 'best-practices & anti-patterns' approach",
+        "Use references/*.md for deep explanations",
+        "Use examples/* for code/configuration samples",
+        "Identify common patterns, with references to implementation details"
+      ],
+      "addressed": 4,
+      "skipped": 0,
+      "files_modified": [
+        "components/skills/github-app-dev/SKILL.md",
+        "SKILL.md"
+      ],
+      "commit_sha": "d105357f7267e0a7bcbc66158830f4460aa06726",
+      "cost": 0.0435
+    }
+  },
+  "total_input_tokens": 0,
+  "total_output_tokens": 0,
+  "estimated_cost_usd": 0.0,
+  "errors": []
+}

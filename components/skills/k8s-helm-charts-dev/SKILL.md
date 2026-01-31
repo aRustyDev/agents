@@ -21,6 +21,95 @@ Use this skill when you need to:
 - Set up Helm chart repositories
 - Follow Helm best practices and conventions
 
+## Chart Complexity Classification
+
+Before starting, classify your chart to determine the appropriate approach:
+
+| Level | Characteristics | CI Handling | Example |
+|-------|-----------------|-------------|---------|
+| **Simple** | Single container, no external deps, standard probes | Full lint + install | Static site, simple API |
+| **Standard** | Multiple resources, ConfigMaps/Secrets, optional deps | Full lint + install | Web app with ingress |
+| **Complex** | External services required, multi-port, JVM config | Lint only, skip install | OpenMetadata, data platforms |
+| **Operator** | CRDs, webhooks, cluster-wide resources | Lint only, manual test | Prometheus Operator |
+
+**Quick Decision:**
+- Needs database/search/messaging at runtime? → **Complex** (exclude from install tests)
+- Has admin port separate from main port? → Check `assets/patterns/multi-port-service.yaml`
+- JVM application? → Check `assets/patterns/jvm-application.yaml`
+
+> **Details**: See `references/chart-complexity.md` for full classification guide and CI configuration.
+
+## Research Strategy
+
+Before creating a chart, research the application:
+
+1. **Check for official chart** - Many projects maintain their own Helm charts
+2. **Review Docker documentation** - Container entrypoint, environment variables, ports
+3. **Identify external dependencies** - What services does the app need?
+
+**If documentation scraping fails**, use alternative methods:
+- Search GitHub for existing implementations
+- Check Docker Hub for environment variable documentation
+- Review Kubernetes deployment examples in project repos
+
+> **Details**: See `references/research-strategy.md` for complete fallback strategies and information gathering checklist.
+
+## Structured Development Workflow
+
+For complex charts or when contributing to existing projects, use a structured approach:
+
+### Workflow Selection
+
+| Chart Complexity | Official Chart Exists | Workflow |
+|------------------|----------------------|----------|
+| Simple/Standard | No | **Fast Path** - Quick research, create, validate |
+| Simple/Standard | Yes (use as-is) | **Skip** - Use existing chart |
+| Complex/Operator | No | **Full Workflow** - Research → Plan → Implement |
+| Any | Yes (extend) | **Full Workflow** with contribution strategy |
+
+### Research Phase
+
+Systematically investigate the application before creating templates:
+1. Check for existing charts (official, community)
+2. Gather configuration details (image, ports, env vars)
+3. Document findings in structured format
+4. Get approval for complex applications
+
+> **Details**: See `references/research-phase-workflow.md`
+
+### Planning Phase
+
+Translate research into actionable implementation plan:
+1. Create high-level plan with target features
+2. Break down into atomic components (phases)
+3. Draft phase plans for each component
+4. Get sequential approvals
+5. Map plans to GitHub issues (optional)
+
+> **Details**: See `references/planning-phase-workflow.md`
+
+### Implementation Phase
+
+Execute with quality gates and review checkpoints:
+1. Create worktree and draft PR immediately
+2. Implement following phase plan
+3. Run sanity checks (lint, template, security)
+4. Pause for external review when needed
+5. Submit PR when complete, clean up worktree
+
+> **Details**: See `references/implementation-workflow.md`
+
+### Extending Existing Charts
+
+When an official chart exists but needs improvements:
+1. Decide: fork repo vs copy locally
+2. Review upstream patterns and values schema
+3. Maintain compatibility for contribution
+4. Document differences and improvements
+5. Prepare upstream contribution (PR or patch)
+
+> **Details**: See `references/extend-contribute-strategy.md`
+
 ## Helm Overview
 
 **Helm** is the package manager for Kubernetes that:
@@ -499,6 +588,37 @@ global:
 image: {{ .Values.global.imageRegistry }}/{{ .Values.image.repository }}
 ```
 
+## Pattern Templates
+
+Ready-to-use patterns for common scenarios. Copy values and template sections to your chart.
+
+### External Services
+
+| Pattern | Use When | File |
+|---------|----------|------|
+| Database | Chart connects to MySQL or PostgreSQL | `assets/patterns/external-database.yaml` |
+| Search | Chart connects to Elasticsearch or OpenSearch | `assets/patterns/external-search.yaml` |
+| Messaging | Chart connects to Airflow, Kafka, RabbitMQ, or Redis | `assets/patterns/external-messaging.yaml` |
+
+All patterns include:
+- Values structure with `existingSecret` support
+- Helper template functions
+- Environment variable configuration
+- Example configurations
+
+### Application Architecture
+
+| Pattern | Use When | File |
+|---------|----------|------|
+| Multi-Port Service | App has main + admin/metrics ports | `assets/patterns/multi-port-service.yaml` |
+| JVM Application | Java/Kotlin/Scala app needing heap/GC config | `assets/patterns/jvm-application.yaml` |
+| Health Probes (Multi-Port) | Different probes on different ports | `assets/patterns/health-probes-multiport.yaml` |
+
+### Quick Reference
+
+For port numbers, environment variables, and connection strings:
+- `references/external-services.md` - Common services reference table
+
 ## Best Practices
 
 1. **Use semantic versioning** for chart and app versions
@@ -533,10 +653,36 @@ kubectl get events --sort-by='.lastTimestamp'
 
 ## Reference Files
 
+### Chart Templates
 - `assets/Chart.yaml.template` - Chart metadata template
 - `assets/values.yaml.template` - Values structure template
-- `scripts/validate-chart.sh` - Validation script
+
+### Pattern Files
+- `assets/patterns/external-database.yaml` - MySQL/PostgreSQL configuration
+- `assets/patterns/external-search.yaml` - Elasticsearch/OpenSearch configuration
+- `assets/patterns/external-messaging.yaml` - Airflow/Kafka/RabbitMQ/Redis configuration
+- `assets/patterns/multi-port-service.yaml` - Multiple ports pattern
+- `assets/patterns/jvm-application.yaml` - JVM heap/GC/JMX configuration
+- `assets/patterns/health-probes-multiport.yaml` - Probes on different ports
+
+### Workflow Templates
+- `assets/templates/research-summary.md` - Research findings documentation
+- `assets/templates/high-level-plan.md` - High-level chart plan
+- `assets/templates/phase-plan.md` - Per-phase implementation plan
+- `assets/templates/issue-structure.md` - GitHub issue hierarchy
+
+### References
 - `references/chart-structure.md` - Detailed chart organization
+- `references/chart-complexity.md` - Chart complexity classification guide
+- `references/research-strategy.md` - Documentation research and fallback strategies
+- `references/external-services.md` - Common ports, env vars, connection strings
+- `references/extend-contribute-strategy.md` - Extending and contributing to existing charts
+- `references/research-phase-workflow.md` - Research phase structured workflow
+- `references/planning-phase-workflow.md` - Planning phase structured workflow
+- `references/implementation-workflow.md` - Implementation phase with checkpoints
+
+### Scripts
+- `scripts/validate-chart.sh` - Validation script
 
 ## Related Skills
 

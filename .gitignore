@@ -7,3 +7,7 @@ dist/
 
 # Temporary files
 temp.md
+
+__pycache__/
+*.egg-info
+htmlcov/

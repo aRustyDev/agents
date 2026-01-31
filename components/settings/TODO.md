@@ -1,0 +1,2 @@
+- `-C /private/tmp/worktrees/*`
+- `--work-tree`

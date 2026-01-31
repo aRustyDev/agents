@@ -1,0 +1,13 @@
+    {{#source_dir}}
+    cd "{{source_dir}}" do
+    {{/source_dir}}
+    args = std_cmake_args
+    {{#cmake_args}}
+    args << "{{.}}"
+    {{/cmake_args}}
+    system "cmake", "-S", "{{#source_dir}}{{source_dir}}{{/source_dir}}{{^source_dir}}.{{/source_dir}}", "-B", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}", *args
+    system "cmake", "--build", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}"
+    system "cmake", "--install", "{{#build_dir}}{{build_dir}}{{/build_dir}}{{^build_dir}}build{{/build_dir}}"
+    {{#source_dir}}
+    end
+    {{/source_dir}}
