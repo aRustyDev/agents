@@ -1,0 +1,4 @@
+    system "zig", "build"{{#build_mode}}, "-Doptimize={{build_mode}}"{{/build_mode}}{{#targets}}{{#.}}, "{{.}}"{{/.}}{{/targets}}
+    {{#bins}}
+    bin.install ".zig-out/bin/{{.}}"
+    {{/bins}}

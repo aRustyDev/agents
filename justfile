@@ -689,6 +689,100 @@ import-and-normalize repo skill target:
     # Validate the result
     just validate-skill "{{ justfile_directory() }}/components/skills/{{ target }}"
 
+# Plugin management
+
+# Install a plugin locally via symlinks
+[group('plugins')]
+install-plugin name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PLUGIN_DIR="context/plugins/{{ name }}"
+    SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
+    if [ ! -f "$SOURCES" ]; then
+      echo "Error: $SOURCES not found"; exit 1
+    fi
+    RECEIPT="{{ CLAUDE_DIR }}/plugins/{{ name }}.installed"
+    mkdir -p "{{ CLAUDE_DIR }}/plugins"
+    # Read each source mapping and create symlinks
+    jq -r '.sources | to_entries[] | "\(.key)\t\(.value)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
+      target="{{ CLAUDE_DIR }}/$local_path"
+      mkdir -p "$(dirname "$target")"
+      ln -sfn "$(pwd)/$source_path" "$target"
+      echo "  → $local_path"
+    done
+    # Write receipt
+    jq -r '.sources | keys[]' "$SOURCES" > "$RECEIPT"
+    echo "✓ Plugin {{ name }} installed"
+
+# Build a plugin — copy source components into the plugin directory
+[group('plugins')]
+build-plugin name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PLUGIN_DIR="context/plugins/{{ name }}"
+    SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
+    if [ ! -f "$SOURCES" ]; then
+      echo "Error: $SOURCES not found"; exit 1
+    fi
+    # Copy each source component into the plugin directory
+    jq -r '.sources | to_entries[] | "\(.key)\t\(.value)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
+      target="$PLUGIN_DIR/$local_path"
+      mkdir -p "$(dirname "$target")"
+      if [ -d "$source_path" ]; then
+        rm -rf "$target"
+        cp -r "$source_path" "$target"
+      else
+        cp "$source_path" "$target"
+      fi
+      echo "  → $local_path"
+    done
+    echo "✓ Plugin {{ name }} built"
+
+# Uninstall a plugin
+[group('plugins')]
+uninstall-plugin name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    RECEIPT="{{ CLAUDE_DIR }}/plugins/{{ name }}.installed"
+    if [ ! -f "$RECEIPT" ]; then
+      echo "Plugin {{ name }} is not installed"; exit 1
+    fi
+    while read -r local_path; do
+      rm -f "{{ CLAUDE_DIR }}/$local_path"
+      echo "  ✕ $local_path"
+    done < "$RECEIPT"
+    rm -f "$RECEIPT"
+    echo "✓ Plugin {{ name }} uninstalled"
+
+# Validate plugin source mappings
+[group('plugins')]
+check-plugin-sources name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PLUGIN_DIR="context/plugins/{{ name }}"
+    SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
+    errors=0
+    jq -r '.sources | to_entries[] | "\(.key)\t\(.value)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
+      if [ ! -e "$source_path" ]; then
+        echo "MISSING: $source_path (for $local_path)"
+        errors=$((errors + 1))
+      fi
+    done
+    [ "$errors" -eq 0 ] && echo "✓ All sources exist" || exit 1
+
+# List available and installed plugins
+[group('plugins')]
+list-plugins:
+    #!/usr/bin/env bash
+    echo "Available plugins:"
+    for d in context/plugins/*/; do
+      name=$(basename "$d")
+      [ "$name" = "TODO.md" ] && continue
+      installed=""
+      [ -f "{{ CLAUDE_DIR }}/plugins/$name.installed" ] && installed=" [installed]"
+      echo "  $name$installed"
+    done
+
 opencode:
     echo "TODO: Setup repo for OpenCode integration, using .ai/* contents"
 

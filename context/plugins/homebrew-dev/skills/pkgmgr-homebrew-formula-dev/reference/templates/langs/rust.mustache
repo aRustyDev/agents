@@ -1,0 +1,1 @@
+    system "cargo", "install", *std_cargo_args{{#path}}(path: "{{path}}"){{/path}}{{#features}}, "--features", "{{.}}"{{/features}}

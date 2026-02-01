@@ -1,0 +1,14 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Bash(git commit:*)",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "<TODO: Check git logs for signed commit status>",
+          "description": "Check that commits were actually signed w/ trusted keys"
+        }
+      ]
+    }
+  ]
+}

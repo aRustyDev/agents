@@ -1,0 +1,10 @@
+{
+  "$schema": "Plugin source mapping — maps local paths to repo source paths",
+  "sources": {
+    "commands/foo.md": "context/commands/foo.md",
+    "commands/bar.md": "context/commands/bar.md",
+    "commands/baz.md": "context/commands/baz.md",
+    "agents/foo.md": "context/agents/foo.md",
+    "skills/boo": "context/skills/boo"
+  }
+}

@@ -1,0 +1,77 @@
+export PATH := "./node_modules/.bin:" + env('PATH')
+export NODE_PATH := justfile_directory() + "/node_modules"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Setup
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Install dependencies (macOS)
+[group('setup')]
+[macos]
+deps:
+    brew bundle -f "{{ justfile_directory() }}/reference/Brewfile"
+    npm install
+
+# Print kebab-case and PascalCase for a formula name
+[group('setup')]
+add-formula name:
+    echo "{{ kebabcase(name) }}"
+    echo "{{ uppercamelcase(name) }}"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Template Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Validate JSON against schema and render a Homebrew formula via Mustache
+[group('pipeline')]
+[no-exit-message]
+template-formula json:
+    #!/usr/bin/env node
+    const Mustache = require('mustache');
+    const fs = require('fs');
+    const path = require('path');
+    const Ajv = require('ajv/dist/2020');
+
+    Mustache.escape = (text) => text;
+    const { SCHEMA } = require('{{ justfile_directory() }}/scripts/formula.schema.ts');
+    const { preprocessFormulas, loadPartials, parseInput } = require('{{ justfile_directory() }}/scripts/formula.helper.ts');
+    const baseDir = '{{ justfile_directory() }}/reference/templates';
+
+    const jsObject = JSON.parse(parseInput(`{{json}}`));
+    const ajv = new Ajv();
+    const validate = ajv.compile(SCHEMA);
+    if (!validate(jsObject)) {
+      console.error(JSON.stringify(validate.errors, null, 2));
+      process.exit(1);
+    }
+
+    const partials = loadPartials(path.join(baseDir, 'langs'));
+    preprocessFormulas(jsObject.formulas);
+
+    const main = fs.readFileSync(path.join(baseDir, 'main.mustache'), 'utf8');
+    console.log(Mustache.render(main, jsObject, partials));
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Testing
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Run all test cases in test/cases/
+[group('test')]
+[no-exit-message]
+test:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{ justfile_directory() }}"
+    passed=0
+    failed=0
+    for t in test/cases/test-*.sh; do
+      echo "--- Running $(basename "$t") ---"
+      if bash "$t"; then
+        passed=$((passed + 1))
+      else
+        failed=$((failed + 1))
+      fi
+    done
+    echo ""
+    echo "Results: $passed passed, $failed failed"
+    [ "$failed" -eq 0 ]
