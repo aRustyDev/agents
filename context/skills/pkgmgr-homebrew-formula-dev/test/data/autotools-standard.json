@@ -1,0 +1,22 @@
+{
+  "formulas": [
+    {
+      "name": "my-autotools-tool",
+      "desc": "An autotools-based CLI tool",
+      "homepage": "https://github.com/example/my-autotools-tool",
+      "url": "https://github.com/example/my-autotools-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "GPL-3.0-only",
+      "language": "autotools",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "install": {},
+      "test": {
+        "command": "system bin/\"my-autotools-tool\", \"--version\"",
+        "expected_output": "my-autotools-tool"
+      }
+    }
+  ]
+}

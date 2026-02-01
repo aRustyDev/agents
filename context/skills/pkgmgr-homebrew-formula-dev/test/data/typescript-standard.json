@@ -1,0 +1,27 @@
+{
+  "formulas": [
+    {
+      "name": "my-ts-tool",
+      "desc": "A TypeScript CLI tool",
+      "homepage": "https://github.com/example/my-ts-tool",
+      "url": "https://registry.npmjs.org/my-ts-tool/-/my-ts-tool-1.0.0.tgz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "nodejs",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":npm"
+      },
+      "dependencies": [
+        { "name": "node" }
+      ],
+      "install": {
+        "node_version": "node"
+      },
+      "test": {
+        "command": "system bin/\"my-ts-tool\", \"--version\"",
+        "expected_output": "my-ts-tool"
+      }
+    }
+  ]
+}

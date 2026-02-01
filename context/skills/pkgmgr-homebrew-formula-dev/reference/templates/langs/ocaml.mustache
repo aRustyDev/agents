@@ -1,0 +1,7 @@
+    {{#build_system_is_dune}}
+    system "dune", "build"{{#dune_args}}, "{{.}}"{{/dune_args}}
+    bin.install "_build/default/bin/{{formula_name}}.exe" => "{{formula_name}}"
+    {{/build_system_is_dune}}
+    {{#build_system_is_opam}}
+    system "opam", "install", ".", "--destdir=#{prefix}", "--yes"
+    {{/build_system_is_opam}}

@@ -1,0 +1,28 @@
+{
+  "formulas": [
+    {
+      "name": "my-roc-tool",
+      "desc": "A Roc CLI tool",
+      "homepage": "https://github.com/example/my-roc-tool",
+      "url": "https://github.com/example/my-roc-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "roc",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "roc", "type": ":build" }
+      ],
+      "install": {
+        "optimize": true,
+        "source_file": "main.roc"
+      },
+      "test": {
+        "command": "system bin/\"my-roc-tool\", \"--version\"",
+        "expected_output": "my-roc-tool"
+      }
+    }
+  ]
+}

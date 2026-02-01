@@ -1,0 +1,5 @@
+    system "sbt", "{{#sbt_task}}{{sbt_task}}{{/sbt_task}}{{^sbt_task}}assembly{{/sbt_task}}"
+    {{#wrapper_name}}
+    libexec.install Dir["target/**/*.jar"]
+    bin.write_jar_script Dir[libexec/"*.jar"].first, "{{wrapper_name}}"
+    {{/wrapper_name}}

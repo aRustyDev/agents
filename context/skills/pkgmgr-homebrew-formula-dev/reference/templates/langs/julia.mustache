@@ -1,0 +1,5 @@
+    libexec.install Dir["*"]
+    (bin/"{{formula_name}}").write <<~SH
+      #!/bin/bash
+      exec "#{Formula["julia"].opt_bin}/julia" "#{libexec}/{{#script_path}}{{script_path}}{{/script_path}}{{^script_path}}src/main.jl{{/script_path}}" "$@"
+    SH

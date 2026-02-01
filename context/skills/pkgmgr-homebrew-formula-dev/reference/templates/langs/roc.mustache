@@ -1,0 +1,2 @@
+    system "roc", "build"{{#optimize}}, "--optimize"{{/optimize}}, "{{#source_file}}{{source_file}}{{/source_file}}{{^source_file}}main.roc{{/source_file}}"
+    bin.install "{{formula_name}}"

@@ -1,0 +1,2 @@
+    system "make"{{#make_args}}, "{{.}}"{{/make_args}}
+    system "make", "{{#install_target}}{{install_target}}{{/install_target}}{{^install_target}}install{{/install_target}}"{{#make_args}}, "{{.}}"{{/make_args}}, "PREFIX=#{prefix}"

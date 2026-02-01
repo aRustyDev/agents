@@ -1,0 +1,27 @@
+{
+  "formulas": [
+    {
+      "name": "my-perl-tool",
+      "desc": "A Perl CLI tool",
+      "homepage": "https://github.com/example/my-perl-tool",
+      "url": "https://github.com/example/my-perl-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "Artistic-2.0",
+      "language": "custom",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "perl" }
+      ],
+      "install": {
+        "commands": ["system \"perl\", \"Makefile.PL\", \"INSTALL_BASE=#{libexec}\"", "system \"make\", \"install\"", "bin.install Dir[libexec/\"bin/*\"]"]
+      },
+      "test": {
+        "command": "system bin/\"my-perl-tool\", \"--version\"",
+        "expected_output": "my-perl-tool"
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "formulas": [
+    {
+      "name": "my-julia-tool",
+      "desc": "A Julia CLI tool",
+      "homepage": "https://github.com/example/my-julia-tool",
+      "url": "https://github.com/example/my-julia-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "julia",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "julia" }
+      ],
+      "install": {
+        "script_path": "src/main.jl"
+      },
+      "test": {
+        "command": "system bin/\"my-julia-tool\", \"--help\"",
+        "expected_output": "my-julia-tool"
+      }
+    }
+  ]
+}

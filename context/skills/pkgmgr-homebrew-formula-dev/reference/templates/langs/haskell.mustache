@@ -1,0 +1,7 @@
+    {{#build_system_is_cabal}}
+    system "cabal", "v2-update"
+    system "cabal", "v2-install", *std_cabal_v2_args{{#flags}}, "{{.}}"{{/flags}}
+    {{/build_system_is_cabal}}
+    {{#build_system_is_stack}}
+    system "stack", "install"{{#flags}}, "{{.}}"{{/flags}}, "--local-bin-path=#{bin}"
+    {{/build_system_is_stack}}

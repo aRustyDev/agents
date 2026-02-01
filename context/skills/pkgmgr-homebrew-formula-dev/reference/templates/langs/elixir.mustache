@@ -1,0 +1,4 @@
+    ENV["MIX_ENV"] = "{{#mix_env}}{{mix_env}}{{/mix_env}}{{^mix_env}}prod{{/mix_env}}"
+    system "mix", "deps.get"
+    system "mix", "escript.build"
+    bin.install "{{formula_name}}"
