@@ -12,12 +12,6 @@ deps:
     brew bundle -f "{{ justfile_directory() }}/reference/Brewfile"
     npm install
 
-# Print kebab-case and PascalCase for a formula name
-[group('setup')]
-add-formula name:
-    echo "{{ kebabcase(name) }}"
-    echo "{{ uppercamelcase(name) }}"
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Template Pipeline
 # ─────────────────────────────────────────────────────────────────────────────
