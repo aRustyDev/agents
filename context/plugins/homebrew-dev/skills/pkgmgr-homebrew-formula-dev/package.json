@@ -1,0 +1,20 @@
+{
+  "name": "pkgmgr-homebrew-formula-dev",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "mustache": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0"
+  }
+}

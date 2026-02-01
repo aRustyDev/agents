@@ -1,0 +1,23 @@
+{
+  "name": "arustydev",
+  "owner": {
+    "name": "aRustyDev",
+    "email": "developer@arusty.dev"
+  },
+  "plugins": [
+    {
+      "name": "homebrew-dev",
+      "source": "./context/plugins/homebrew-dev",
+      "description": "Homebrew formula development toolkit — research packages, generate formulas from JSON schema, validate with brew audit/style, and batch-create formulas for a custom tap.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": ["homebrew", "formula", "tap", "package-manager", "macos"],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/homebrew-dev",
+      "repository": "https://github.com/aRustyDev/ai.git"
+    }
+  ]
+}

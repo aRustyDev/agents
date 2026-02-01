@@ -1,0 +1,24 @@
+{
+  "mcp": {
+    "servers": {
+      "json-mcp-server": {
+        "command": "npx",
+        "args": [
+          "json-mcp-server@latest",
+          "--verbose=true",
+          "--file-path=/path/to/file.json",
+          "--jq-path=/path/to/jq"
+        ]
+      },
+      "jq-mcp-server": {
+        "command": "python",
+        "args": ["/absolute/path/to/jq-mcp-server/mcp_server.py"],
+        "env": {
+          "DATA_PATH": "/absolute/path/to/your/data/directory",
+          "JSON_FILE_PATH": "main.json",
+          "JSON_SCHEMA_FILE_PATH": "schema.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "formulas": [
+    {
+      "name": "my-daemon",
+      "desc": "A background service daemon",
+      "homepage": "https://github.com/example/my-daemon",
+      "url": "https://github.com/example/my-daemon/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "license": "MIT",
+      "language": "go",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "go", "type": ":build" }
+      ],
+      "install": {
+        "ldflags": "-s -w -X main.version=#{version}"
+      },
+      "service": {
+        "run": ["#{opt_bin}/my-daemon", "--config", "#{etc}/my-daemon.conf"],
+        "run_type": ":immediate",
+        "keep_alive": true,
+        "log_path": "#{var}/log/my-daemon.log",
+        "error_log_path": "#{var}/log/my-daemon-error.log"
+      },
+      "caveats": "To start my-daemon now and restart at login:\\n  brew services start my-daemon",
+      "test": {
+        "command": "system bin/\"my-daemon\", \"--version\"",
+        "expected_output": "my-daemon version #{version}"
+      }
+    }
+  ]
+}

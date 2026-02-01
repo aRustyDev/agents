@@ -1,0 +1,10 @@
+{
+  "$schema": "Plugin source mapping — maps local paths to repo source paths",
+  "sources": {
+    "commands/add-formula.md": "context/commands/add-formula.md",
+    "commands/validate-formula.md": "context/commands/validate-formula.md",
+    "commands/batch-formulas.md": "context/commands/batch-formulas.md",
+    "agents/homebrew-expert.md": "context/agents/homebrew-expert.md",
+    "skills/pkgmgr-homebrew-formula-dev": "context/skills/pkgmgr-homebrew-formula-dev"
+  }
+}
