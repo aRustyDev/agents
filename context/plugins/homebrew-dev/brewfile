@@ -1,1 +1,3 @@
 brew "just"
+brew "jq"
+brew "node"
