@@ -1,0 +1,37 @@
+--- 
+kaggle:
+  - url: https://mcpservers.org/servers/www-kaggle-com-docs-mcp
+    desc: ""
+    name: www-kaggle-com-docs-mcp
+linear-regression:
+  - url: https://mcpservers.org/servers/HeetVekariya/Linear-Regression-MCP
+    desc: ""
+    name: HeetVekariya/Linear-Regression-MCP
+metal:
+  - url: https://mcpservers.org/servers/aldrin-labs/metal-mcp-server
+    desc: ""
+    name: aldrin-labs/metal-mcp-server
+omilia:
+  - url: https://mcpservers.org/servers/omilia/mcp
+    desc: ""
+    name: omilia/mcp
+onyx:
+  - url: https://mcpservers.org/servers/elias-michaias/onyx_mcp
+    desc: ""
+    name: elias-michaias/onyx_mcp
+tidymodels:
+  - url: https://mcpservers.org/servers/JavOrraca/tidymodels-mcp
+    desc: ""
+    name: JavOrraca/tidymodels-mcp
+tiktoken:
+  - url: https://mcpservers.org/servers/adbertram/tiktoken-mcp
+    desc: ""
+    name: adbertram/tiktoken-mcp
+transformer:
+  - url: https://mcpservers.org/servers/Hochfrequenz/TransformerBee.mcp
+    desc: ""
+    name: Hochfrequenz/TransformerBee.mcp
+trustwise:
+  - url: https://mcpservers.org/servers/trustwiseai/trustwise-mcp-server
+    desc: ""
+    name: trustwiseai/trustwise-mcp-server

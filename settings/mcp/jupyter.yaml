@@ -1,0 +1,17 @@
+--- 
+server:
+  - url: https://mcpservers.org/servers/datalayer/jupyter-earth-mcp-server
+    desc: ""
+    name: datalayer/jupyter-earth-mcp-server
+  - url: https://mcpservers.org/servers/datalayer/jupyter-mcp-server
+    desc: ""
+    name: datalayer/jupyter-mcp-server
+  - url: https://mcpservers.org/servers/shwetalsoni/jupyter-notebook-mcp-server
+    desc: ""
+    name: shwetalsoni/jupyter-notebook-mcp-server
+  - url: https://mcpservers.org/servers/tofunori/mcp-jupyter-complete
+    desc: ""
+    name: tofunori/mcp-jupyter-complete
+  - url: https://mcpservers.org/servers/UsamaK98/python-notebook-mcp
+    desc: ""
+    name: UsamaK98/python-notebook-mcp

@@ -1,0 +1,16 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/www-kaggle-com-docs-mcp
+    desc: ""
+    name: www-kaggle-com-docs-mcp
+mlflow:
+  - url: https://mcpservers.org/servers/yesid-lopez/mlflow-mcp-server
+    desc: ""
+    name: yesid-lopez/mlflow-mcp-server
+  - url: https://mcpservers.org/servers/B-Step62/mcp-server-mlflow
+    desc: ""
+    name: B-Step62/mcp-server-mlflow
+zenml:
+  - url: https://mcpservers.org/servers/zenml-io/mcp-zenml
+    desc: ""
+    name: zenml-io/mcp-zenml

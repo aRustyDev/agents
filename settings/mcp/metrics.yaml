@@ -1,0 +1,23 @@
+--- 
+grafana:
+  - url: https://mcpservers.org/servers/grafana/mcp-grafana
+    desc: ""
+    name: grafana/mcp-grafana
+  - url: https://mcpservers.org/servers/kis9a/mcp-grafana-with-questdb
+    desc: ""
+    name: kis9a/mcp-grafana-with-questdb
+loki:
+  - url: https://mcpservers.org/servers/tumf/grafana-loki-mcp
+    desc: ""
+    name: tumf/grafana-loki-mcp
+  - url: https://mcpservers.org/servers/scottlepp/loki-mcp
+    desc: ""
+    name: scottlepp/loki-mcp
+tracing:
+  - url: https://mcpservers.org/servers/gigapipehq/gigapipe-traces-mcp
+    desc: ""
+    name: gigapipehq/gigapipe-traces-mcp
+network-monitoring:
+  - url: https://mcpservers.org/servers/Gabbo01/Zeek-MCP
+    desc: ""
+    name: Gabbo01/Zeek-MCP

@@ -1,0 +1,17 @@
+--- 
+framework-support:
+  - url: https://mcpservers.org/servers/adamsmaka/flutter-mcp
+    desc: ""
+    name: adamsmaka/flutter-mcp
+documentation:
+  - url: https://mcpservers.org/servers/adamsmaka/flutter-docs-mcp
+    desc: ""
+    name: adamsmaka/flutter-docs-mcp
+package-management:
+  - url: https://mcpservers.org/servers/OrtakProje-1/flutter-package-mcp-server
+    desc: ""
+    name: OrtakProje-1/flutter-package-mcp-server
+tooling:
+  - url: https://mcpservers.org/servers/dkpoulsen/flutter-tools
+    desc: ""
+    name: dkpoulsen/flutter-tools

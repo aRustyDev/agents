@@ -1,0 +1,14 @@
+--- 
+rag:
+  - url: https://mcpservers.org/servers/kyopark2014/mcp
+    desc: ""
+    name: kyopark2014/mcp
+  - url: https://mcpservers.org/servers/karaage0703/mcp-rag-server
+    desc: ""
+    name: karaage0703/mcp-rag-server
+  - url: https://mcpservers.org/servers/bixentemal/mcp-ragnar
+    desc: ""
+    name: bixentemal/mcp-ragnar
+  - url: https://mcpservers.org/servers/sionic-ai/serverless-rag-mcp-server
+    desc: ""
+    name: sionic-ai/serverless-rag-mcp-server

@@ -1,0 +1,45 @@
+--- 
+repl:
+  - url: https://mcpservers.org/servers/nathanschepers/mcp-py3repl
+    desc: ""
+    name: nathanschepers/mcp-py3repl
+  - url: https://mcpservers.org/servers/barvhaim/python-interpreter-mcp
+    desc: ""
+    name: barvhaim/python-interpreter-mcp
+pip:
+  - url: https://mcpservers.org/servers/elchika-inc/pip-package-readme-mcp-server
+    desc: ""
+    name: elchika-inc/pip-package-readme-mcp-server
+pydantic:
+  - url: https://mcpservers.org/servers/i2y/pydantic-rpc
+    desc: ""
+    name: i2y/pydantic-rpc
+pypi:
+  - url: https://mcpservers.org/servers/loonghao/pypi-query-mcp-server
+    desc: ""
+    name: loonghao/pypi-query-mcp-server
+  - url: https://mcpservers.org/servers/JackKuo666/PyPI-MCP-Server
+    desc: ""
+    name: JackKuo666/PyPI-MCP-Server
+pymilvus:
+  - url: https://mcpservers.org/servers/Shawnzheng011019/mcp-pymilvus-code-generate-helper
+    desc: ""
+    name: Shawnzheng011019/mcp-pymilvus-code-generate-helper
+python:
+  - url: https://mcpservers.org/servers/hesiod-au/python-mcp
+    desc: ""
+    name: hesiod-au/python-mcp
+  - url: https://mcpservers.org/servers/hdresearch/mcp-python
+    desc: ""
+    name: hdresearch/mcp-python
+  - url: https://mcpservers.org/servers/Alec2435/python_mcp
+    desc: ""
+    name: Alec2435/python_mcp
+pyvista:
+  - url: https://mcpservers.org/servers/pyvista/pyvista-mcp-server
+    desc: ""
+    name: pyvista/pyvista-mcp-server
+testing:
+  - url: https://mcpservers.org/servers/that1guy15/tox-testing
+    desc: ""
+    name: that1guy15/tox-testing

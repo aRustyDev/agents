@@ -1,0 +1,14 @@
+---
+automation:
+  - url: https://mcpservers.org/servers/nim444/mcp-android-server-python
+    desc: ""
+    name: nim444/mcp-android-server-python
+  - url: https://mcpservers.org/servers/hao-cyber/phone-mcp
+    desc: ""
+    name: hao-cyber/phone-mcp
+  - url: https://mcpservers.org/servers/GitDzreal93/uiautomator2-mcp
+    desc: ""
+    name: GitDzreal93/uiautomator2-mcp
+  - url: https://mcpservers.org/servers/nam0101/android-mcp-toolkit
+    desc: ""
+    name: nam0101/android-mcp-toolkit

@@ -1,0 +1,12 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/vexxvakan/mcp-docsrs
+    desc: ""
+    name: vexxvakan/mcp-docsrs
+  - url: https://mcpservers.org/servers/Govcraft/rust-docs-mcp-server
+    desc: ""
+    name: Govcraft/rust-docs-mcp-server
+tauri:
+  - url: https://mcpservers.org/servers/dirvine/tauri-mcp
+    desc: ""
+    name: dirvine/tauri-mcp

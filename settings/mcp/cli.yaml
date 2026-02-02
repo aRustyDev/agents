@@ -1,0 +1,18 @@
+--- 
+tmux:
+  - url: https://mcpservers.org/servers/bnomei/tmux-mcp
+    desc: ""
+    name: bnomei/tmux-mcp
+  - url: https://mcpservers.org/servers/Tater-T/tmux-mcp-server
+    desc: ""
+    name: Tater-T/tmux-mcp-server
+  - url: https://mcpservers.org/servers/nickgnd/tmux-mcp
+    desc: ""
+    name: nickgnd/tmux-mcp
+  - url: https://mcpservers.org/servers/cni-locates-rumen/t-pane
+    desc: ""
+    name: cni-locates-rumen/t-pane
+shell:
+  - url: https://mcpservers.org/servers/TNTisdial/persistent-shell-mcp
+    desc: ""
+    name: TNTisdial/persistent-shell-mcp

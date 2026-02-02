@@ -1,0 +1,20 @@
+--- 
+opnsense:
+  - url: https://mcpservers.org/servers/vespo92/OPNSenseMCP
+    desc: ""
+    name: vespo92/OPNSenseMCP
+  - url: https://mcpservers.org/servers/Pixelworlds/opnsense-mcp-server
+    desc: ""
+    name: Pixelworlds/opnsense-mcp-server
+networking:
+  - url: https://mcpservers.org/servers/davidlin2k/pox-mcp-server
+    desc: ""
+    name: davidlin2k/pox-mcp-server
+git-hosting:
+  - url: https://mcpservers.org/servers/MushroomFleet/gitea-mcp
+    desc: ""
+    name: MushroomFleet/gitea-mcp
+access-management:
+  - url: https://mcpservers.org/servers/greedy52/teleport-docs-mcp
+    desc: ""
+    name: greedy52/teleport-docs-mcp

@@ -1,0 +1,30 @@
+--- 
+jenkins:
+  - url: https://mcpservers.org/servers/gcorroto/mcp-jenkins
+    desc: ""
+    name: gcorroto/mcp-jenkins
+  - url: https://mcpservers.org/servers/ProgrammerAgua/jenkins-mcp-server
+    desc: ""
+    name: ProgrammerAgua/jenkins-mcp-server
+  - url: https://mcpservers.org/servers/akhilthomas236/jenkins_mcp_server
+    desc: ""
+    name: akhilthomas236/jenkins_mcp_server
+  - url: https://mcpservers.org/servers/ddang-jung/jenkins-mcp-server
+    desc: ""
+    name: ddang-jung/jenkins-mcp-server
+  - url: https://mcpservers.org/servers/hekmon8/Jenkins-server-mcp
+    desc: ""
+    name: hekmon8/Jenkins-server-mcp
+  - url: https://mcpservers.org/servers/github-com-heniv96-mcp-jenkins-intelligence
+    desc: ""
+    name: github-com-heniv96-mcp-jenkins-intelligence
+  - url: https://mcpservers.org/servers/lanbaoshen/mcp-jenkins
+    desc: ""
+    name: lanbaoshen/mcp-jenkins
+sonarqube:
+  - url: https://mcpservers.org/servers/sapientpants/sonarqube-mcp-server
+    desc: ""
+    name: sapientpants/sonarqube-mcp-server
+  - url: https://mcpservers.org/servers/SonarSource/sonarqube-mcp-server
+    desc: ""
+    name: SonarSource/sonarqube-mcp-server

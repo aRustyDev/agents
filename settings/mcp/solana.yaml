@@ -1,0 +1,35 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/solana-foundation/solana-dev-mcp
+    desc: ""
+    name: solana-foundation/solana-dev-mcp
+  - url: https://mcpservers.org/servers/aldrin-labs/solana-docs-mcp-server
+    desc: ""
+    name: aldrin-labs/solana-docs-mcp-server
+metrics:
+  - url: https://mcpservers.org/servers/wcampbellgalaxy/solana-metrics-mcp-server
+    desc: ""
+    name: wcampbellgalaxy/solana-metrics-mcp-server
+tracking:
+  - url: https://mcpservers.org/servers/a6b8/solTracker-mcp
+    desc: ""
+    name: a6b8/solTracker-mcp
+squads:
+  - url: https://mcpservers.org/servers/dorkydhruv/squads-mcp
+    desc: ""
+    name: dorkydhruv/squads-mcp
+helius:
+  - url: https://mcpservers.org/servers/dcSpark/mcp-server-helius
+    desc: ""
+    name: dcSpark/mcp-server-helius
+launchpads:
+  - url: https://mcpservers.org/servers/kukapay/solana-launchpads-mcp
+    desc: ""
+    name: kukapay/solana-launchpads-mcp
+general:
+  - url: https://mcpservers.org/servers/Devang0907/Solana-MCP
+    desc: ""
+    name: Devang0907/Solana-MCP
+  - url: https://mcpservers.org/servers/aldrin-labs/solana-mcp-server
+    desc: ""
+    name: aldrin-labs/solana-mcp-server

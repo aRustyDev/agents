@@ -1,0 +1,105 @@
+--- 
+figma:
+  - url: https://mcpservers.org/servers/1yhy/Figma-Context-MCP
+    desc: ""
+    name: 1yhy/Figma-Context-MCP
+  - url: https://mcpservers.org/servers/thirdstrandstudio/mcp-figma
+    desc: ""
+    name: thirdstrandstudio/mcp-figma
+  - url: https://mcpservers.org/servers/MatthewDailey/figma-mcp
+    desc: ""
+    name: MatthewDailey/figma-mcp
+  - url: https://mcpservers.org/servers/JayZeeDesign/figma-mcp
+    desc: ""
+    name: JayZeeDesign/figma-mcp
+  - url: https://mcpservers.org/servers/boraalapgh/figma-vue-design-system
+    desc: ""
+    name: boraalapgh/figma-vue-design-system
+  - url: https://mcpservers.org/servers/tercumantanumut/sunnysideFigma-Context-MCP
+    desc: ""
+    name: tercumantanumut/sunnysideFigma-Context-MCP
+  - url: https://mcpservers.org/servers/github-com-glips-figma-context-mcp
+    desc: ""
+    name: github-com-glips-figma-context-mcp
+  - url: https://mcpservers.org/servers/xlzuvekas/figma-copilot
+    desc: ""
+    name: xlzuvekas/figma-copilot
+  - url: https://mcpservers.org/servers/mohammeduvaiz/figma-mcp-server
+    desc: ""
+    name: mohammeduvaiz/figma-mcp-server
+  - url: https://mcpservers.org/servers/kdoronin/figma_mcp
+    desc: ""
+    name: kdoronin/figma_mcp
+  - url: https://mcpservers.org/servers/deepsuthar496/figma-mcp-server
+    desc: ""
+    name: deepsuthar496/figma-mcp-server
+  - url: https://mcpservers.org/servers/TimHolden/figma-mcp-server
+    desc: ""
+    name: TimHolden/figma-mcp-server
+  - url: https://mcpservers.org/servers/ArchimedesCrypto/figma-mcp-chunked
+    desc: ""
+    name: ArchimedesCrypto/figma-mcp-chunked
+  - url: https://mcpservers.org/servers/kailashAppDev/figma-mcp-toolkit
+    desc: ""
+    name: kailashAppDev/figma-mcp-toolkit
+  - url: https://mcpservers.org/servers/hyun1202/talk-to-figma-mcp
+    desc: ""
+    name: hyun1202/talk-to-figma-mcp
+accessibility:
+  - url: https://mcpservers.org/servers/ronantakizawa/a11ymcp
+    desc: ""
+    name: ronantakizawa/a11ymcp
+  - url: https://mcpservers.org/servers/bilhasry-deriv/mcp-web-a11y
+    desc: ""
+    name: bilhasry-deriv/mcp-web-a11y
+ui-components:
+  - url: https://mcpservers.org/servers/mikeapp/mcp-iiif-images
+    desc: ""
+    name: mikeapp/mcp-iiif-images
+  - url: https://mcpservers.org/servers/pchalupa/svgr-mcp
+    desc: ""
+    name: pchalupa/svgr-mcp
+  - url: https://mcpservers.org/servers/nakai95/ui-prototype
+    desc: ""
+    name: nakai95/ui-prototype
+  - url: https://mcpservers.org/servers/sbilde/untitledui-mcp
+    desc: ""
+    name: sbilde/untitledui-mcp
+design-systems:
+  - url: https://mcpservers.org/servers/chihebnabil/page-design-guide-mcp
+    desc: ""
+    name: chihebnabil/page-design-guide-mcp
+diagramming:
+  - url: https://mcpservers.org/servers/umshere/uiflowchartcreator
+    desc: ""
+    name: umshere/uiflowchartcreator
+  - url: https://mcpservers.org/servers/antoinebou12/uml-mcp
+    desc: ""
+    name: antoinebou12/uml-mcp
+  - url: https://mcpservers.org/servers/Swayingleaves/uml-mcp-server
+    desc: ""
+    name: Swayingleaves/uml-mcp-server
+tauri:
+  - url: https://mcpservers.org/servers/dirvine/tauri-mcp
+    desc: ""
+    name: dirvine/tauri-mcp
+  - url: https://mcpservers.org/servers/8beeeaaat/touchdesigner-mcp
+    desc: ""
+    name: 8beeeaaat/touchdesigner-mcp
+storybook:
+  - url: https://mcpservers.org/servers/github-com-storybookjs-addon-mcp
+    desc: ""
+    name: github-com-storybookjs-addon-mcp
+readability:
+  - url: https://mcpservers.org/servers/emzimmer/server-moz-readability
+    desc: ""
+    name: emzimmer/server-moz-readability
+  - url: https://mcpservers.org/servers/jmh108/MCP-server-readability-python
+    desc: ""
+    name: jmh108/MCP-server-readability-python
+  - url: https://mcpservers.org/servers/luebken/playlist-mcp
+    desc: ""
+    name: luebken/playlist-mcp
+  - url: https://mcpservers.org/servers/desplega-ai/qa-use
+    desc: ""
+    name: desplega-ai/qa-use

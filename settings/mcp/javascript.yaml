@@ -1,0 +1,59 @@
+--- 
+debugging:
+  - url: https://mcpservers.org/servers/johngrimes/mcp-js-debugger
+    desc: ""
+    name: johngrimes/mcp-js-debugger
+  - url: https://mcpservers.org/servers/hyperdrive-eng/mcp-nodejs-debugger
+    desc: ""
+    name: hyperdrive-eng/mcp-nodejs-debugger
+sandbox:
+  - url: https://mcpservers.org/servers/mark3labs/codebench-mcp
+    desc: ""
+    name: mark3labs/codebench-mcp
+  - url: https://mcpservers.org/servers/garc33/js-sandbox-mcp-server
+    desc: ""
+    name: garc33/js-sandbox-mcp-server
+  - url: https://mcpservers.org/servers/Tymek/js-mcp
+    desc: ""
+    name: Tymek/js-mcp
+  - url: https://mcpservers.org/servers/alfonsograziano/node-code-sandbox-mcp
+    desc: ""
+    name: alfonsograziano/node-code-sandbox-mcp
+npm:
+  - url: https://mcpservers.org/servers/bsmi021/mcp-node-omnibus-server
+    desc: ""
+    name: bsmi021/mcp-node-omnibus-server
+  - url: https://mcpservers.org/servers/lirantal/mcp-server-nodejs-api-docs
+    desc: ""
+    name: lirantal/mcp-server-nodejs-api-docs
+  - url: https://mcpservers.org/servers/Nekzus/npm-sentinel-mcp
+    desc: ""
+    name: Nekzus/npm-sentinel-mcp
+  - url: https://mcpservers.org/servers/elchika-inc/npm-package-readme-mcp-server
+    desc: ""
+    name: elchika-inc/npm-package-readme-mcp-server
+  - url: https://mcpservers.org/servers/btwiuse/npm-search-mcp-server
+    desc: ""
+    name: btwiuse/npm-search-mcp-server
+react-native:
+  - url: https://mcpservers.org/servers/twodoorsdev/react-native-debugger-mcp
+    desc: ""
+    name: twodoorsdev/react-native-debugger-mcp
+security:
+  - url: https://mcpservers.org/servers/qianniuspace/mcp-security-audit
+    desc: ""
+    name: qianniuspace/mcp-security-audit
+typescript:
+  - url: https://mcpservers.org/servers/SiroSuzume/mcp-ts-morph
+    desc: ""
+    name: SiroSuzume/mcp-ts-morph
+  - url: https://mcpservers.org/servers/mizchi/typescript-mcp
+    desc: ""
+    name: mizchi/typescript-mcp
+  - url: https://mcpservers.org/servers/LiangYingC/typescript-migrator-mcp
+    desc: ""
+    name: LiangYingC/typescript-migrator-mcp
+code-analysis:
+  - url: https://mcpservers.org/servers/qckfx/tree-hugger-js-mcp
+    desc: ""
+    name: qckfx/tree-hugger-js-mcp

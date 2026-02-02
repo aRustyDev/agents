@@ -1,0 +1,5 @@
+--- 
+package-management:
+  - url: https://mcpservers.org/servers/maverox/fdep-mcp-server
+    desc: ""
+    name: maverox/fdep-mcp-server

@@ -1,0 +1,76 @@
+---
+scanning:
+  - url: https://mcpservers.org/servers/0x7556/kali_mcp
+    desc: ""
+    name: 0x7556/kali_mcp
+  - url: https://mcpservers.org/servers/k3nn3dy-ai/kali-mcp
+    desc: ""
+    name: k3nn3dy-ai/kali-mcp
+  - url: https://mcpservers.org/servers/PhialsBasement/nmap-mcp-server
+    desc: ""
+    name: PhialsBasement/nmap-mcp-server
+  - url: https://mcpservers.org/servers/0xPratikPatil/NmapMCP
+    desc: ""
+    name: 0xPratikPatil/NmapMCP
+  - url: https://mcpservers.org/servers/Cyreslab-AI/nessus-mcp-server
+    desc: ""
+    name: Cyreslab-AI/nessus-mcp-server
+  - url: https://mcpservers.org/servers/yuhano/PentestGPT-MCP
+    desc: ""
+    name: yuhano/PentestGPT-MCP
+  - url: https://mcpservers.org/servers/scanmalware/mcp-server
+    desc: ""
+    name: scanmalware/mcp-server
+vulnerability-intel:
+  - url: https://mcpservers.org/servers/Cyreslab-AI/exploitdb-mcp-server
+    desc: ""
+    name: Cyreslab-AI/exploitdb-mcp-server
+  - url: https://mcpservers.org/servers/LyuboslavLyubenov/search-solodit-mcp
+    desc: ""
+    name: LyuboslavLyubenov/search-solodit-mcp
+  - url: https://mcpservers.org/servers/StacklokLabs/osv-mcp
+    desc: ""
+    name: StacklokLabs/osv-mcp
+  - url: https://mcpservers.org/servers/socteam-ai/nvd-cve-mcp-server
+    desc: ""
+    name: socteam-ai/nvd-cve-mcp-server
+network-analysis:
+  - url: https://mcpservers.org/servers/Gabbo01/Zeek-MCP
+    desc: ""
+    name: Gabbo01/Zeek-MCP
+  - url: https://mcpservers.org/servers/vadims06/topolograph-mcp-server
+    desc: ""
+    name: vadims06/topolograph-mcp-server
+forensics:
+  - url: https://mcpservers.org/servers/izzy0101010101/mcp-reports-server
+    desc: ""
+    name: izzy0101010101/mcp-reports-server
+osint:
+  - url: https://mcpservers.org/servers/BurtTheCoder/mcp-shodan
+    desc: ""
+    name: BurtTheCoder/mcp-shodan
+  - url: https://mcpservers.org/servers/X3r0K/shodan-mcp-server
+    desc: ""
+    name: X3r0K/shodan-mcp-server
+  - url: https://mcpservers.org/servers/Cyreslab-AI/shodan-mcp-server
+    desc: ""
+    name: Cyreslab-AI/shodan-mcp-server
+  - url: https://mcpservers.org/servers/abtdomain/domainkits-mcp
+    desc: ""
+    name: abtdomain/domainkits-mcp
+  - url: https://mcpservers.org/servers/brutus-gr/osint-mcp
+    desc: ""
+    name: brutus-gr/osint-mcp
+threat-intel:
+  - url: https://mcpservers.org/servers/NAXG/ThreatMCP
+    desc: ""
+    name: NAXG/ThreatMCP
+  - url: https://mcpservers.org/servers/Spathodea-Network/opencti-mcp
+    desc: ""
+    name: Spathodea-Network/opencti-mcp
+  - url: https://mcpservers.org/servers/MCP-Mirror/bornpresident_MISP-MCP-SERVER
+    desc: ""
+    name: MCP-Mirror/bornpresident_MISP-MCP-SERVER
+  - url: https://mcpservers.org/servers/4R9UN/fastmcp-threatintel
+    desc: ""
+    name: 4R9UN/fastmcp-threatintel

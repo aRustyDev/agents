@@ -1,0 +1,326 @@
+---
+calculations:
+  - url: https://mcpservers.org/servers/clouatre-labs/math-mcp-learning-server
+    desc: ""
+    name: clouatre-labs/math-mcp-learning-server
+  - url: https://mcpservers.org/servers/inanna-malick/calculate-mcp
+    desc: ""
+    name: inanna-malick/calculate-mcp
+matlab:
+  - url: https://mcpservers.org/servers/WilliamCloudQi/matlab-mcp-server
+    desc: ""
+    name: WilliamCloudQi/matlab-mcp-server
+  - url: https://mcpservers.org/servers/Tsuchijo/matlab-mcp
+    desc: ""
+    name: Tsuchijo/matlab-mcp
+theorem-provers:
+  - url: https://mcpservers.org/servers/angrysky56/mcp-logic
+    desc: ""
+    name: angrysky56/mcp-logic
+  - url: https://mcpservers.org/servers/oOo0oOo/lean-lsp-mcp
+    desc: ""
+    name: oOo0oOo/lean-lsp-mcp
+scientific-computation:
+  - url: https://mcpservers.org/servers/Aman-Amith-Shastry/scientific_computation_mcp
+    desc: ""
+    name: Aman-Amith-Shastry/scientific_computation_mcp
+symbolic-math:
+  - url: https://mcpservers.org/servers/YuChenSSR/symbolica-mcp
+    desc: ""
+    name: YuChenSSR/symbolica-mcp
+  - url: https://mcpservers.org/servers/sdiehl/sympy-mcp
+    desc: ""
+    name: sdiehl/sympy-mcp
+solver:
+  - url: https://mcpservers.org/servers/sdiehl/usolver
+    desc: ""
+    name: sdiehl/usolver
+_tools:
+  - name: null
+    tool: highs
+    desc: Linear and mixed-integer programming solver
+  - name: null
+    tool: ortools
+    desc: Combinatorial optimization solver
+  - name: null
+    tool: cvxpy
+    desc: Convex optimization solver
+  - name: null
+    tool: z3
+    desc: SMT solver over booleans, integers, reals, and strings
+  - name: null
+    tool: tensors
+    desc: Execute tensor operations and complex matrix calculations
+  - name: symbolic mathematics
+    tool: null
+    desc: Solve symbolic equations and solve differential equations
+  - name: Variable-Introduction
+    tool: intro
+    desc: Introduces a variable with specified assumptions and stores it
+  - name: Multiple Variables
+    tool: intro_many
+    desc: Introduces multiple variables with specified assumptions simultaneously
+  - name: Expression Parser
+    tool: introduce_expression
+    desc: Parses an expression string using available local variables and stores it
+  - name: LaTeX Printer
+    tool: print_latex_expression
+    desc: Prints a stored expression in LaTeX format, along with variable assumptions
+  - name: Algebraic Solver
+    tool: solve_algebraically
+    desc: Solves an equation algebraically for a given variable over a given domain
+  - name: Linear Solver
+    tool: solve_linear_system
+    desc: Solves a system of linear equations
+  - name: Nonlinear Solver
+    tool: solve_nonlinear_system
+    desc: Solves a system of nonlinear equations
+  - name: Function Variable
+    tool: introduce_function
+    desc: Introduces a function variable for use in differential equations
+  - name: ODE Solver
+    tool: dsolve_ode
+    desc: Solves an ordinary differential equation
+  - name: PDE Solver
+    tool: pdsolve_pde
+    desc: Solves a partial differential equation
+  - name: Standard Metric
+    tool: create_predefined_metric
+    desc: Creates a predefined spacetime metric (e.g. Schwarzschild, Kerr, Minkowski)
+  - name: Metric Search
+    tool: search_predefined_metrics
+    desc: Searches available predefined metrics
+  - name: Tensor Calculator
+    tool: calculate_tensor
+    desc: Calculates tensors from a metric (Ricci, Einstein, Weyl tensors)
+  - name: Custom Metric
+    tool: create_custom_metric
+    desc: Creates a custom metric tensor from provided components and symbols
+  - name: Tensor LaTeX
+    tool: print_latex_tensor
+    desc: Prints a stored tensor expression in LaTeX format
+  - name: Simplifier
+    tool: simplify_expression
+    desc: Simplifies a mathematical expression using SymPy's canonicalize function
+  - name: Substitution
+    tool: substitute_expression
+    desc: Substitutes a variable with an expression in another expression
+  - name: Integration
+    tool: integrate_expression
+    desc: Integrates an expression with respect to a variable
+  - name: Differentiation
+    tool: differentiate_expression
+    desc: Differentiates an expression with respect to a variable
+  - name: Coordinates
+    tool: create_coordinate_system
+    desc: Creates a 3D coordinate system for vector calculus operations
+  - name: Vector Field
+    tool: create_vector_field
+    desc: Creates a vector field in the specified coordinate system
+  - name: Curl
+    tool: calculate_curl
+    desc: Calculates the curl of a vector field
+  - name: Divergence
+    tool: calculate_divergence
+    desc: Calculates the divergence of a vector field
+  - name: Gradient
+    tool: calculate_gradient
+    desc: Calculates the gradient of a scalar field
+  - name: Unit Converter
+    tool: convert_to_units
+    desc: Converts a quantity to given target units
+  - name: Unit Simplifier
+    tool: quantity_simplify_units
+    desc: Simplifies a quantity with units
+  - name: Matrix Creator
+    tool: create_matrix
+    desc: Creates a SymPy matrix from the provided data
+  - name: Determinant
+    tool: matrix_determinant
+    desc: Calculates the determinant of a matrix
+  - name: Matrix Inverse
+    tool: matrix_inverse
+    desc: Calculates the inverse of a matrix
+  - name: Eigenvalues
+    tool: matrix_eigenvalues
+    desc: Calculates the eigenvalues of a matrix
+  - name: Eigenvectors
+    tool: matrix_eigenvectors
+    desc: Calculates the eigenvectors of a matrix
+  - name: null
+    tool: create_tensor
+    desc: Creates a new tensor based on a given name, shape, and values, and adds it to the tensor store. For the purposes of this server, tensors are vectors and matrices.
+  - name: null
+    tool: view_tensor
+    desc: Display the contents of a tensor from the store .
+  - name: null
+    tool: delete_tensor
+    desc: Deletes a tensor based on its name in the tensor store.
+  - name: null
+    tool: add_matrices
+    desc: Adds two matrices with the provided names, if compatible.
+  - name: null
+    tool: subtract_matrices
+    desc: Subtracts two matrices with the provided names, if compatible.
+  - name: null
+    tool: multiply_matrices
+    desc: Multiplies two matrices with the provided names, if compatible.
+  - name: null
+    tool: scale_matrix
+    desc: Scales a matrix of the provided name by a certain factor, in-place by default.
+  - name: null
+    tool: matrix_inverse
+    desc: Computes the inverse of the matrix with the provided name.
+  - name: null
+    tool: transpose
+    desc: Computes the transpose of the inverse of the matrix of the provided name.
+  - name: null
+    tool: determinant
+    desc: Computes the determinant of the matrix of the provided name.
+  - name: null
+    tool: rank
+    desc: Computes the rank (number of pivots) of the matrix of the provided name.
+  - name: null
+    tool: compute_eigen
+    desc: Calculates the eigenvectors and eigenvalues of the matrix of the provided name.
+  - name: null
+    tool: qr_decompose
+    desc: Computes the QR factorization of the matrix of the provided name. The columns of Q are an orthonormal basis for the image of the matrix, and R is upper triangular.
+  - name: null
+    tool: svd_decompose
+    desc: Computes the Singular Value Decomposition of the matrix of the provided name.
+  - name: null
+    tool: find_orthonormal_basis
+    desc: Finds an orthonormal basis for the matrix of the provided name. The vectors returned are all pair-wise orthogonal and are of unit length.
+  - name: null
+    tool: change_basis
+    desc: Computes the matrix of the provided name in the new basis.
+  - name: null
+    tool: vector_project
+    desc: Projects a vector in the tensor store to the specified vector in the same vector space
+  - name: null
+    tool: vector_dot_product
+    desc: Computes the dot product of two vectors in the tensor stores based on their provided names.
+  - name: null
+    tool: vector_cross_product
+    desc: Computes the cross product of two vectors in the tensor stores based on their provided names.
+  - name: null
+    tool: gradient
+    desc: 'Computes the gradient of a multivariable function based on the input function. Example call: gradient("x^2 + 2xyz + zy^3"). Do NOT include the function name (like f(x, y, z) = ...`).'
+  - name: null
+    tool: curl
+    desc: 'Computes the curl of a vector field based on the input vector field. The input string must be formatted as a python list. Example call: curl("[3xy, 2z^4, 2y]").'
+  - name: null
+    tool: divergence
+    desc: 'Computes the divergence of a vector field based on the input vector field. The input string must be formatted as a python list. Example call: divergence("[3xy, 2z^4, 2y]").'
+  - name: null
+    tool: divergence
+    desc: 'Computes the divergence of a vector field based on the input vector field. The input string must be formatted as a python list. Example call: divergence("[3xy, 2z^4, 2y]").'
+  - name: null
+    tool: laplacian
+    desc: Computes the laplacian of a scalar function (as the divergence of the gradient) or a vector field (where a component-wise laplacian is computed). If a scalar function is the input, it must be input in the same format as in the gradient tool. If the input is a vector field, it must be input in the same manner as the curl/divergence tools
+  - name: null
+    tool: directional_deriv
+    desc: Computes the directional derivative of a function in a given direction u By default, the tool normalizes u before computing the directional derivative, as specified by the unit parameter.
+  - name: null
+    tool: plot_vector_field
+    desc: Plots a vector field (specified in the same format as in the curl/divergence functions). Currently, only 3d vector fields are supported. A 2d png perspective image of the vector field is returned. By default, the bounds of the graph are from -1 to 1 on each axis.
+  - name: null
+    tool: plot_function
+    desc: Plots a function in 2d or 3d (based on the input variables), specified in the same format as in the gradient tool. Only the variables x and y can be used
+  - name: null
+    tool: matrix_multiply
+    desc: Multiply two matrices with dimension validation
+  - name: null
+    tool: matrix_transpose
+    desc: Transpose a matrix (swap rows and columns)
+  - name: null
+    tool: matrix_determinant
+    desc: Calculate determinant of square matrices
+  - name: null
+    tool: matrix_inverse
+    desc: Compute matrix inverse with singular matrix detection
+  - name: null
+    tool: matrix_eigenvalues
+    desc: Calculate eigenvalues (supports complex numbers)
+  - name: null
+    tool: plot_function
+    desc: Generate mathematical function plots (base64-encoded PNG)
+  - name: null
+    tool: create_histogram
+    desc: Create statistical histograms with distribution analysis
+  - name: null
+    tool: plot_line_chart
+    desc: Create line charts for sequential data visualization
+  - name: null
+    tool: plot_scatter_chart
+    desc: Create scatter plots for relationship analysis
+  - name: null
+    tool: plot_box_plot
+    desc: Create box plots for statistical distribution comparison
+  - name: null
+    tool: plot_financial_line
+    desc: Create financial trend plots with bullish/bearish/volatile patterns
+  - name: null
+    tool: calculate
+    desc: Safely evaluate mathematical expressions (supports basic ops and math functions)
+  - name: null
+    tool: statistics
+    desc: Perform statistical calculations (mean, median, mode, std_dev, variance)
+  - name: null
+    tool: compound_interest
+    desc: Calculate compound interest for investments
+  - name: null
+    tool: convert_units
+    desc: Convert between units (length, weight, temperature)
+  - name: null
+    tool: save_calculation
+    desc: Save calculations to persistent storage for cross-session access
+  - name: null
+    tool: load_variable
+    desc: Access previously saved calculations from any MCP client session
+  - name: null
+    tool: lean_file_contents
+    desc: Get the contents of a Lean file, optionally with line number annotations.
+  - name: null
+    tool: lean_diagnostic_messages
+    desc: Get all diagnostic messages for a Lean file. This includes infos, warnings and errors.
+  - name: null
+    tool: lean_goal
+    desc: Get the proof goal at a specific location (line or line & column) in a Lean file.
+  - name: null
+    tool: lean_term_goal
+    desc: Get the term goal at a specific position (line & column) in a Lean file.
+  - name: null
+    tool: lean_hover_info
+    desc: Retrieve hover information (documentation) for symbols, terms, and expressions in a Lean file (at a specific line & column).
+  - name: null
+    tool: lean_declaration_file
+    desc: Get the file contents where a symbol or term is declared.
+  - name: null
+    tool: lean_completions
+    desc: "Code auto-completion: Find available identifiers or import suggestions at a specific position (line & column) in a Lean file."
+  - name: null
+    tool: lean_run_code
+    desc: Run/compile an independent Lean code snippet/file and return the result or error message.
+  - name: null
+    tool: lean_multi_attempt
+    desc: Attempt multiple lean code snippets on a line and return goal state and diagnostics for each snippet. This tool is useful to screen different proof attempts before using the most promising one.
+  - name: null
+    tool: lean_local_search
+    desc: Search for Lean definitions and theorems in the local Lean project and stdlib. This is useful to confirm declarations actually exist and prevent hallucinating APIs.
+  - name: null
+    tool: lean_leansearch
+    desc: Search for theorems in Mathlib using leansearch.net (natural language search).
+  - name: null
+    tool: lean_loogle
+    desc: Search for Lean definitions and theorems using loogle.lean-lang.org.
+  - name: null
+    tool: lean_state_search
+    desc: Search for applicable theorems for the current proof goal using premise-search.com.
+  - name: null
+    tool: lean_hammer_premise
+    desc: Search for relevant premises based on the current proof state using the Lean Hammer Premise Search.
+  - name: null
+    tool: lean_build
+    desc: Rebuild the Lean project and restart the Lean LSP server.

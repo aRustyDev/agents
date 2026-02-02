@@ -1,0 +1,25 @@
+--- 
+copy-tuner:
+  - url: https://mcpservers.org/servers/SonicGarden/copy_tuner_client-mcp
+    desc: ""
+    name: SonicGarden/copy_tuner_client-mcp
+i18next:
+  - url: https://mcpservers.org/servers/gtrias/i18next-mcp-server
+    desc: ""
+    name: gtrias/i18next-mcp-server
+intlayer:
+  - url: https://mcpservers.org/servers/aymericzip/intlayer
+    desc: ""
+    name: aymericzip/intlayer
+lokalise:
+  - url: https://mcpservers.org/servers/mdrafee03/mcp-lokalise
+    desc: ""
+    name: mdrafee03/mcp-lokalise
+simplelocalize:
+  - url: https://mcpservers.org/servers/GalvinGao/mcp-simplelocalize
+    desc: ""
+    name: GalvinGao/mcp-simplelocalize
+translator:
+  - url: https://mcpservers.org/servers/DatanoiseTV/translator-ai
+    desc: ""
+    name: DatanoiseTV/translator-ai

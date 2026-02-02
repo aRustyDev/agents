@@ -1,0 +1,21 @@
+--- 
+terraform:
+  - url: https://mcpservers.org/servers/thrashr888/terraform-mcp-server
+    desc: ""
+    name: thrashr888/terraform-mcp-server
+  - url: https://mcpservers.org/servers/binadox-public/binadox-terraform-mcp
+    desc: ""
+    name: binadox-public/binadox-terraform-mcp
+  - url: https://mcpservers.org/servers/hashicorp/terraform-mcp-server
+    desc: ""
+    name: hashicorp/terraform-mcp-server
+  - url: https://mcpservers.org/servers/nwiizo/tfmcp
+    desc: ""
+    name: nwiizo/tfmcp
+  - url: https://mcpservers.org/servers/aj-geddes/terry-form-mcp
+    desc: ""
+    name: aj-geddes/terry-form-mcp
+terragrunt:
+  - url: https://mcpservers.org/servers/Excoriate/mcp-terragrunt-docs
+    desc: ""
+    name: Excoriate/mcp-terragrunt-docs

@@ -1,0 +1,68 @@
+--- 
+optimization:
+  - url: https://mcpservers.org/servers/jbmattos03/genetic_mcp
+    desc: ""
+    name: jbmattos03/genetic_mcp
+  - url: https://mcpservers.org/servers/KKonuru/GurobiMCP
+    desc: ""
+    name: KKonuru/GurobiMCP
+  - url: https://mcpservers.org/servers/wspringer/highs-mcp
+    desc: ""
+    name: wspringer/highs-mcp
+code-generation:
+  - url: https://mcpservers.org/servers/smat-dev/jinni
+    desc: ""
+    name: smat-dev/jinni
+  - url: https://mcpservers.org/servers/thirdstrandstudio/mcp-yeoman
+    desc: ""
+    name: thirdstrandstudio/mcp-yeoman
+audio:
+  - url: https://mcpservers.org/servers/DeveloperZo/mcp-audio-inspector
+    desc: ""
+    name: DeveloperZo/mcp-audio-inspector
+expressions:
+  - url: https://mcpservers.org/servers/ivan-saorin/mcp-expr-lang
+    desc: ""
+    name: ivan-saorin/mcp-expr-lang
+specialized-tools:
+  - url: https://mcpservers.org/servers/jaspertvdm/mcp-server-tibet
+    desc: ""
+    name: jaspertvdm/mcp-server-tibet
+  - url: https://mcpservers.org/servers/ariunbolor/nsaf-mcp-server
+    desc: ""
+    name: ariunbolor/nsaf-mcp-server
+  - url: https://mcpservers.org/servers/MattMorgis/nuanced-mcp
+    desc: ""
+    name: MattMorgis/nuanced-mcp
+visualization:
+  - url: https://mcpservers.org/servers/LLNL/paraview_mcp
+    desc: ""
+    name: LLNL/paraview_mcp
+  - url: https://mcpservers.org/servers/manasp21/PsiAnimator-MCP
+    desc: ""
+    name: manasp21/PsiAnimator-MCP
+quantum:
+  - url: https://mcpservers.org/servers/YuChenSSR/quantum-simulator-mcp
+    desc: ""
+    name: YuChenSSR/quantum-simulator-mcp
+  - url: https://mcpservers.org/servers/sakshiglaze/QuantumCompute_mcp_server
+    desc: ""
+    name: sakshiglaze/QuantumCompute_mcp_server
+  - url: https://mcpservers.org/servers/Qyusu/quantum-code-validator
+    desc: ""
+    name: Qyusu/quantum-code-validator
+entertainment:
+  - url: https://mcpservers.org/servers/cbuntingde/ralph-wiggum-mcp
+    desc: ""
+    name: cbuntingde/ralph-wiggum-mcp
+  - url: https://mcpservers.org/servers/SterlingChin/ferengi-rules-of-acquisition-mcp
+    desc: ""
+    name: SterlingChin/ferengi-rules-of-acquisition-mcp
+evaluation:
+  - url: https://mcpservers.org/servers/evolv3ai/scorecard-mcp
+    desc: ""
+    name: evolv3ai/scorecard-mcp
+security:
+  - url: https://mcpservers.org/servers/malaya-zemlya/tls-mcp
+    desc: ""
+    name: malaya-zemlya/tls-mcp

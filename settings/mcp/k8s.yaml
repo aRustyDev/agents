@@ -1,0 +1,26 @@
+--- 
+cluster-management:
+  - url: https://mcpservers.org/servers/basebandit/kai
+    desc: ""
+    name: basebandit/kai
+  - url: https://mcpservers.org/servers/github-com-vp1099-vp1099-kubernetes-mcp-server
+    desc: ""
+    name: github-com-vp1099-vp1099-kubernetes-mcp-server
+  - url: https://mcpservers.org/servers/TaichiHo/k8s-interactive-mcp
+    desc: ""
+    name: TaichiHo/k8s-interactive-mcp
+  - url: https://mcpservers.org/servers/k4mrul/kubernetes-mcp
+    desc: ""
+    name: k4mrul/kubernetes-mcp
+manifest:
+  - url: https://mcpservers.org/servers/EgorKluch/mcp-laml
+    desc: ""
+    name: EgorKluch/mcp-laml
+registry:
+  - url: https://mcpservers.org/servers/mapyr/mcp-hangar
+    desc: ""
+    name: mapyr/mcp-hangar
+package-manager:
+  - url: https://mcpservers.org/servers/StacklokLabs/mkp
+    desc: ""
+    name: StacklokLabs/mkp

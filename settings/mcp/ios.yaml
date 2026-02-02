@@ -1,0 +1,106 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/MightyDillah/apple-doc-mcp
+    desc: ""
+    name: MightyDillah/apple-doc-mcp
+  - url: https://mcpservers.org/servers/github-com-kimsungwhee-apple-docs-mcp
+    desc: ""
+    name: github-com-kimsungwhee-apple-docs-mcp
+  - url: https://mcpservers.org/servers/angelodipaolo/docc-mcp
+    desc: ""
+    name: angelodipaolo/docc-mcp
+simulators:
+  - url: https://mcpservers.org/servers/chrishayuk/chuk-mcp-ios-simulator
+    desc: ""
+    name: chrishayuk/chuk-mcp-ios-simulator
+  - url: https://mcpservers.org/servers/JoshuaRileyDev/simulator-mcp-server
+    desc: ""
+    name: JoshuaRileyDev/simulator-mcp-server
+  - url: https://mcpservers.org/servers/github-com-joshuayoes-ios-simulator-mcp
+    desc: ""
+    name: github-com-joshuayoes-ios-simulator-mcp
+  - url: https://mcpservers.org/servers/atom2ueki/mcp-server-ios-simulator
+    desc: ""
+    name: atom2ueki/mcp-server-ios-simulator
+  - url: https://mcpservers.org/servers/InditexTech/mcp-server-simulator-ios-idb
+    desc: ""
+    name: InditexTech/mcp-server-simulator-ios-idb
+  - url: https://mcpservers.org/servers/nzrsky/simctl-mcp-server
+    desc: ""
+    name: nzrsky/simctl-mcp-server
+xcode:
+  - url: https://mcpservers.org/servers/CodeFreezeAI/xcf
+    desc: ""
+    name: CodeFreezeAI/xcf
+  - url: https://mcpservers.org/servers/devyhan/xcode-mcp
+    desc: ""
+    name: devyhan/xcode-mcp
+  - url: https://mcpservers.org/servers/github-com-r-huijts-xcode-mcp-server
+    desc: ""
+    name: github-com-r-huijts-xcode-mcp-server
+  - url: https://mcpservers.org/servers/ShenghaiWang/xcodebuild
+    desc: ""
+    name: ShenghaiWang/xcodebuild
+  - url: https://mcpservers.org/servers/cameroncooke/XcodeBuildMCP
+    desc: ""
+    name: cameroncooke/XcodeBuildMCP
+  - url: https://mcpservers.org/servers/cameroncooke/xcodebuildmcp
+    desc: ""
+    name: cameroncooke/xcodebuildmcp
+  - url: https://mcpservers.org/servers/lapfelix/XcodeMCP
+    desc: ""
+    name: lapfelix/XcodeMCP
+  - url: https://mcpservers.org/servers/giginet/xcodeproj-mcp-server
+    desc: ""
+    name: giginet/xcodeproj-mcp-server
+  - url: https://mcpservers.org/servers/nzrsky/xctools-mcp-server
+    desc: ""
+    name: nzrsky/xctools-mcp-server
+swift:
+  - url: https://mcpservers.org/servers/mihaelamj/cupertino
+    desc: ""
+    name: mihaelamj/cupertino
+  - url: https://mcpservers.org/servers/KrunalDarekar/swift-mcp-server
+    desc: ""
+    name: KrunalDarekar/swift-mcp-server
+  - url: https://mcpservers.org/servers/elchika-inc/swift-package-readme-mcp-server
+    desc: ""
+    name: elchika-inc/swift-package-readme-mcp-server
+  - url: https://mcpservers.org/servers/efremidze/swift-mcp
+    desc: ""
+    name: efremidze/swift-mcp
+  - url: https://mcpservers.org/servers/swiftzilla-dev
+    desc: ""
+    name: swiftzilla-dev
+mobile-testing:
+  - url: https://mcpservers.org/servers/askui/idb-mcp
+    desc: ""
+    name: askui/idb-mcp
+  - url: https://mcpservers.org/servers/noahlozevski/mcp-idb
+    desc: ""
+    name: noahlozevski/mcp-idb
+  - url: https://mcpservers.org/servers/iHackSubhodip/ios-mcp-server
+    desc: ""
+    name: iHackSubhodip/ios-mcp-server
+  - url: https://mcpservers.org/servers/iHackSubhodip/ios-automation-mcp-server
+    desc: ""
+    name: iHackSubhodip/ios-automation-mcp-server
+  - url: https://mcpservers.org/servers/aldrin-labs/metal-mcp-server
+    desc: ""
+    name: aldrin-labs/metal-mcp-server
+  - url: https://mcpservers.org/servers/mobile-next/mobile-mcp
+    desc: ""
+    name: mobile-next/mobile-mcp
+  - url: https://mcpservers.org/servers/CultivX/mobile-xray-mcp
+    desc: ""
+    name: CultivX/mobile-xray-mcp
+  - url: https://mcpservers.org/servers/mobai-app/mobai-mcp
+    desc: ""
+    name: mobai-app/mobai-mcp
+package-managers:
+  - url: https://mcpservers.org/servers/elchika-inc/cocoapods-package-readme-mcp-server
+    desc: ""
+    name: elchika-inc/cocoapods-package-readme-mcp-server
+  - url: https://mcpservers.org/servers/simpleswift/spm-mcp
+    desc: ""
+    name: simpleswift/spm-mcp
