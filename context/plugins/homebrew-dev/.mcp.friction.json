@@ -1,0 +1,18 @@
+{
+  "mcp": {
+    "servers": {
+      "json-validate": {
+        "command": "node",
+        "args": [".mcp-servers/json-validate/dist/index.js"]
+      },
+      "jsondiffpatch": {
+        "command": "node",
+        "args": [".mcp-servers/jsondiffpatch/packages/diff-mcp/build/index.js"]
+      },
+      "json-mcp-server": {
+        "command": "node",
+        "args": [".mcp-servers/json-mcp-server/index.js"]
+      }
+    }
+  }
+}
