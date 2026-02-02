@@ -1,0 +1,24 @@
+--- 
+decompiler:
+  - url: https://mcpservers.org/servers/mobilehackinglab/jadx-mcp-plugin
+    desc: ""
+    name: mobilehackinglab/jadx-mcp-plugin
+  - url: https://mcpservers.org/servers/zinja-coder/jadx-ai-mcp
+    desc: ""
+    name: zinja-coder/jadx-ai-mcp
+repl:
+  - url: https://mcpservers.org/servers/terseprompts/jarp-mcp
+    desc: ""
+    name: terseprompts/jarp-mcp
+docs:
+  - url: https://mcpservers.org/servers/github-com-beamliu-mcp-java-doc-tree-main
+    desc: ""
+    name: github-com-beamliu-mcp-java-doc-tree-main
+monitoring:
+  - url: https://mcpservers.org/servers/jolokia/jolokia-mcp-server
+    desc: ""
+    name: jolokia/jolokia-mcp-server
+jvm:
+  - url: https://mcpservers.org/servers/xzq-xu/jvm-mcp-server
+    desc: ""
+    name: xzq-xu/jvm-mcp-server

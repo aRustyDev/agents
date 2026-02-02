@@ -1,0 +1,30 @@
+{
+  "formulas": [
+    {
+      "name": "my-clojure-tool",
+      "desc": "A Clojure CLI tool",
+      "homepage": "https://github.com/example/my-clojure-tool",
+      "url": "https://github.com/example/my-clojure-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "java",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "leiningen", "type": ":build" },
+        { "name": "openjdk" }
+      ],
+      "install": {
+        "build_system": "maven",
+        "jar_path": "target/my-clojure-tool-standalone.jar",
+        "wrapper_name": "my-clojure-tool"
+      },
+      "test": {
+        "command": "system bin/\"my-clojure-tool\", \"--version\"",
+        "expected_output": "my-clojure-tool"
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+--- 
+packages:
+  - url: https://mcpservers.org/servers/elchika-inc/cran-package-readme-mcp-server
+    desc: ""
+    name: elchika-inc/cran-package-readme-mcp-server
+  - url: https://mcpservers.org/servers/chi2labs/mcpr
+    desc: ""
+    name: chi2labs/mcpr

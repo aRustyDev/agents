@@ -1,0 +1,27 @@
+--- 
+graphql:
+  - url: https://mcpservers.org/servers/galley-solutions/galley-mcp
+    desc: ""
+    name: galley-solutions/galley-mcp
+  - url: https://mcpservers.org/servers/blurrah/mcp-graphql
+    desc: ""
+    name: blurrah/mcp-graphql
+  - url: https://mcpservers.org/servers/hannesj/mcp-graphql-schema
+    desc: ""
+    name: hannesj/mcp-graphql-schema
+  - url: https://mcpservers.org/servers/ctkadvisors/graphql-mcp
+    desc: ""
+    name: ctkadvisors/graphql-mcp
+  - url: https://mcpservers.org/servers/martinshumberto/mcp-server-graphql
+    desc: ""
+    name: martinshumberto/mcp-server-graphql
+  - url: https://mcpservers.org/servers/kailashAppDev/graphql-mcp-toolkit
+    desc: ""
+    name: kailashAppDev/graphql-mcp-toolkit
+  - url: https://mcpservers.org/servers/jorgeraad/mcp4gql
+    desc: ""
+    name: jorgeraad/mcp4gql
+text-to-graphql:
+  - url: https://mcpservers.org/servers/Arize-ai/text-to-graphql-mcp
+    desc: ""
+    name: Arize-ai/text-to-graphql-mcp

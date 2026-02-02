@@ -1,0 +1,5 @@
+--- 
+linting:
+  - url: https://mcpservers.org/servers/antoprince001/mcp-server-sqlfluff
+    desc: ""
+    name: antoprince001/mcp-server-sqlfluff

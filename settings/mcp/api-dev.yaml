@@ -1,0 +1,44 @@
+--- 
+postman:
+  - url: https://mcpservers.org/servers/abhishekms1047/postman-mcp-server
+    desc: ""
+    name: abhishekms1047/postman-mcp-server
+  - url: https://mcpservers.org/servers/ma3u/dust-mcp-server-postman-railway
+    desc: ""
+    name: ma3u/dust-mcp-server-postman-railway
+  - url: https://mcpservers.org/servers/postmanlabs/postman-api-mcp
+    desc: ""
+    name: postmanlabs/postman-api-mcp
+  - url: https://mcpservers.org/servers/Gechmind/mcp-postman
+    desc: ""
+    name: Gechmind/mcp-postman
+  - url: https://mcpservers.org/servers/shannonlal/mcp-postman
+    desc: ""
+    name: shannonlal/mcp-postman
+  - url: https://mcpservers.org/servers/delano/postman-mcp-server
+    desc: ""
+    name: delano/postman-mcp-server
+  - url: https://mcpservers.org/servers/giovannicocco/mcp-server-postman-tool-generation
+    desc: ""
+    name: giovannicocco/mcp-server-postman-tool-generation
+  - url: https://mcpservers.org/servers/postmanv3/postman-mcp-server
+    desc: ""
+    name: postmanv3/postman-mcp-server
+  - url: https://mcpservers.org/servers/postmanv2/postman-mcp-server
+    desc: ""
+    name: postmanv2/postman-mcp-server
+swagger:
+  - url: https://mcpservers.org/servers/MCP-Mirror/AlanGreyjoy_swag-mcp
+    desc: ""
+    name: MCP-Mirror/AlanGreyjoy_swag-mcp
+http-tools:
+  - url: https://mcpservers.org/servers/usestring/powhttp-mcp
+    desc: ""
+    name: usestring/powhttp-mcp
+testing:
+  - url: https://mcpservers.org/servers/jonico/octocat-harry-potter-mcp-server
+    desc: ""
+    name: jonico/octocat-harry-potter-mcp-server
+  - url: https://mcpservers.org/servers/softprobe/mcp-server
+    desc: ""
+    name: softprobe/mcp-server

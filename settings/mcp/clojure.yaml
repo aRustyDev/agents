@@ -1,0 +1,17 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/bhauman/clojure-mcp
+    desc: ""
+    name: bhauman/clojure-mcp
+linting:
+  - url: https://mcpservers.org/servers/Bigsy/clj-kondo-MCP
+    desc: ""
+    name: Bigsy/clj-kondo-MCP
+packages:
+  - url: https://mcpservers.org/servers/Bigsy/Clojars-MCP-Server
+    desc: ""
+    name: Bigsy/Clojars-MCP-Server
+repl:
+  - url: https://mcpservers.org/servers/JohanCodinha/nrepl-mcp-server
+    desc: ""
+    name: JohanCodinha/nrepl-mcp-server

@@ -1,0 +1,12 @@
+--- 
+freecad:
+  - url: https://mcpservers.org/servers/bonninr/freecad_mcp
+    desc: ""
+    name: bonninr/freecad_mcp
+  - url: https://mcpservers.org/servers/github-com-neka-nat-freecad-mcp
+    desc: ""
+    name: github-com-neka-nat-freecad-mcp
+shape-modeling:
+  - url: https://mcpservers.org/servers/rajgandhi1/shapebridge.git
+    desc: ""
+    name: rajgandhi1/shapebridge.git

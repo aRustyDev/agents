@@ -1,0 +1,28 @@
+{
+  "formulas": [
+    {
+      "name": "my-cpp-tool",
+      "desc": "A C++ CLI tool",
+      "homepage": "https://github.com/example/my-cpp-tool",
+      "url": "https://github.com/example/my-cpp-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "cmake",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "cmake", "type": ":build" },
+        { "name": "pkg-config", "type": ":build" }
+      ],
+      "install": {
+        "cmake_args": ["-DCMAKE_CXX_STANDARD=17"]
+      },
+      "test": {
+        "command": "system bin/\"my-cpp-tool\", \"--version\"",
+        "expected_output": "my-cpp-tool"
+      }
+    }
+  ]
+}

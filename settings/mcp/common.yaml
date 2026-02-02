@@ -1,0 +1,1593 @@
+---
+code-analysis:
+  - url: https://mcpservers.org/servers/github-com-er77-code-graph-rag-mcp
+    desc: ""
+    name: github-com-er77-code-graph-rag-mcp
+  - url: https://mcpservers.org/servers/mettamatt/code-reasoning
+    desc: ""
+    name: mettamatt/code-reasoning
+  - url: https://mcpservers.org/servers/davidvc/code-knowledge-mcptool
+    desc: ""
+    name: davidvc/code-knowledge-mcptool
+  - url: https://mcpservers.org/servers/johnhuang316/code-index-mcp
+    desc: ""
+    name: johnhuang316/code-index-mcp
+  - url: https://mcpservers.org/servers/ViperJuice/Code-Index-MCP
+    desc: ""
+    name: ViperJuice/Code-Index-MCP
+  - url: https://mcpservers.org/servers/klitchevo/code-council
+    desc: ""
+    name: klitchevo/code-council
+  - url: https://mcpservers.org/servers/fkesheh/code-context-mcp
+    desc: ""
+    name: fkesheh/code-context-mcp
+  - url: https://mcpservers.org/servers/abhishekbhakat/mcp_server_code_assist
+    desc: ""
+    name: abhishekbhakat/mcp_server_code_assist
+  - url: https://mcpservers.org/servers/AB498/code-context-provider-mcp
+    desc: ""
+    name: AB498/code-context-provider-mcp
+  - url: https://mcpservers.org/servers/stippi/code-assistant
+    desc: ""
+    name: stippi/code-assistant
+  - url: https://mcpservers.org/servers/zeocax/code-mcp
+    desc: ""
+    name: zeocax/code-mcp
+  - url: https://mcpservers.org/servers/codacy/codacy-mcp-server
+    desc: ""
+    name: codacy/codacy-mcp-server
+  - url: https://mcpservers.org/servers/3d-tech-solutions/code-scalpel
+    desc: ""
+    name: 3d-tech-solutions/code-scalpel
+  - url: https://mcpservers.org/servers/Ixe1/code-scanner-server
+    desc: ""
+    name: Ixe1/code-scanner-server
+  - url: https://mcpservers.org/servers/codingthefuturewithai/mcp-code-understanding
+    desc: ""
+    name: codingthefuturewithai/mcp-code-understanding
+  - url: https://mcpservers.org/servers/nicobailon/code-summarizer
+    desc: ""
+    name: nicobailon/code-summarizer
+  - url: https://mcpservers.org/servers/CodeAlive-AI/codealive-mcp
+    desc: ""
+    name: CodeAlive-AI/codealive-mcp
+  - url: https://mcpservers.org/servers/lex-tools/codebase-context-dumper
+    desc: ""
+    name: lex-tools/codebase-context-dumper
+  - url: https://mcpservers.org/servers/mengtoumingren/CodebaseIndexMCP
+    desc: ""
+    name: mengtoumingren/CodebaseIndexMCP
+  - url: https://mcpservers.org/servers/MyunghoBae/codebase-mcp-server
+    desc: ""
+    name: MyunghoBae/codebase-mcp-server
+  - url: https://mcpservers.org/servers/liadgez/codebase-optimizer-mcp
+    desc: ""
+    name: liadgez/codebase-optimizer-mcp
+  - url: https://mcpservers.org/servers/chatcbdai/codebase-iq-pro
+    desc: ""
+    name: chatcbdai/codebase-iq-pro
+  - url: https://mcpservers.org/servers/CartographAI/mcp-server-codegraph
+    desc: ""
+    name: CartographAI/mcp-server-codegraph
+  - url: https://mcpservers.org/servers/github-com-jakedismo-codegraph-rust
+    desc: ""
+    name: github-com-jakedismo-codegraph-rust
+  - url: https://mcpservers.org/servers/shashankss1205/codegraphcontext
+    desc: ""
+    name: shashankss1205/codegraphcontext
+  - url: https://mcpservers.org/servers/mixelpixx/CodeSeeker-MCP
+    desc: ""
+    name: mixelpixx/CodeSeeker-MCP
+  - url: https://mcpservers.org/servers/yash9439/codetoprompt-mcp
+    desc: ""
+    name: yash9439/codetoprompt-mcp
+  - url: https://mcpservers.org/servers/ggerve/coding-standards-mcp
+    desc: ""
+    name: ggerve/coding-standards-mcp
+  - url: https://mcpservers.org/servers/haasonsaas/deep-code-reasoning-mcp
+    desc: ""
+    name: haasonsaas/deep-code-reasoning-mcp
+  - url: https://mcpservers.org/servers/olaservo/mcp-code-crosscheck
+    desc: ""
+    name: olaservo/mcp-code-crosscheck
+  - url: https://mcpservers.org/servers/github-com-judinilabs-mcp-code-graph
+    desc: ""
+    name: github-com-judinilabs-mcp-code-graph
+  - url: https://mcpservers.org/servers/DaSheng1994/mcp_analyze_quality
+    desc: ""
+    name: DaSheng1994/mcp_analyze_quality
+  - url: https://mcpservers.org/servers/semgrep/mcp
+    desc: ""
+    name: semgrep/mcp
+  - url: https://mcpservers.org/servers/Szowesgad/mcp-server-semgrep
+    desc: ""
+    name: Szowesgad/mcp-server-semgrep
+  - url: https://mcpservers.org/servers/gkhays/mcp-sbom-server
+    desc: ""
+    name: gkhays/mcp-sbom-server
+  - url: https://mcpservers.org/servers/MCP-Mirror/gkhays_mcp-sbom-server
+    desc: ""
+    name: MCP-Mirror/gkhays_mcp-sbom-server
+  - url: https://mcpservers.org/servers/wrale/mcp-server-tree-sitter
+    desc: ""
+    name: wrale/mcp-server-tree-sitter
+  - url: https://mcpservers.org/servers/nahmanmate/code-research-mcp-server
+    desc: ""
+    name: nahmanmate/code-research-mcp-server
+  - url: https://mcpservers.org/servers/steiner385/mcp-qdrant-codebase-embeddings
+    desc: ""
+    name: steiner385/mcp-qdrant-codebase-embeddings
+code-sandbox:
+  - url: https://mcpservers.org/servers/Automata-Labs-team/code-sandbox-mcp
+    desc: ""
+    name: Automata-Labs-team/code-sandbox-mcp
+  - url: https://mcpservers.org/servers/babelcloud/gru-sandbox
+    desc: ""
+    name: babelcloud/gru-sandbox
+  - url: https://mcpservers.org/servers/Tsuchijo/sandbox-mcp
+    desc: ""
+    name: Tsuchijo/sandbox-mcp
+reasoning:
+  - url: https://mcpservers.org/servers/haasonsaas/deliberate-reasoning-engine
+    desc: ""
+    name: haasonsaas/deliberate-reasoning-engine
+  - url: https://mcpservers.org/servers/brendancopley/mcp-chain-of-draft-prompt-tool
+    desc: ""
+    name: brendancopley/mcp-chain-of-draft-prompt-tool
+  - url: https://mcpservers.org/servers/Jacck/mcp-reasoner
+    desc: ""
+    name: Jacck/mcp-reasoner
+  - url: https://mcpservers.org/servers/iamwavecut/MCP-Think
+    desc: ""
+    name: iamwavecut/MCP-Think
+  - url: https://mcpservers.org/servers/FradSer/mcp-server-mas-sequential-thinking
+    desc: ""
+    name: FradSer/mcp-server-mas-sequential-thinking
+  - url: https://mcpservers.org/servers/modelcontextprotocol/sequentialthinking
+    desc: ""
+    name: modelcontextprotocol/sequentialthinking
+  - url: https://mcpservers.org/servers/dhkts1/sequentialStory
+    desc: ""
+    name: dhkts1/sequentialStory
+  - url: https://mcpservers.org/servers/arben-adm/mcp-sequential-thinking
+    desc: ""
+    name: arben-adm/mcp-sequential-thinking
+  - url: https://mcpservers.org/servers/camilovelezr/server-sequential-thinking
+    desc: ""
+    name: camilovelezr/server-sequential-thinking
+  - url: https://mcpservers.org/servers/olaservo/shannon-thinking
+    desc: ""
+    name: olaservo/shannon-thinking
+  - url: https://mcpservers.org/servers/spences10/mcp-sequentialthinking-tools
+    desc: ""
+    name: spences10/mcp-sequentialthinking-tools
+  - url: https://mcpservers.org/servers/stagsz/Unconventional-thinking
+    desc: ""
+    name: stagsz/Unconventional-thinking
+  - url: https://mcpservers.org/servers/stat-guy/retrieval-augmented-thinking
+    desc: ""
+    name: stat-guy/retrieval-augmented-thinking
+  - url: https://mcpservers.org/servers/Paulhb7/mcp-sequential-ethical-thinking
+    desc: ""
+    name: Paulhb7/mcp-sequential-ethical-thinking
+  - url: https://mcpservers.org/servers/Leghis/Smart-Thinking
+    desc: ""
+    name: Leghis/Smart-Thinking
+  - url: https://mcpservers.org/servers/kastalien-research/thoughtbox
+    desc: ""
+    name: kastalien-research/thoughtbox
+documentation:
+  - url: https://mcpservers.org/servers/docfork/mcp
+    desc: ""
+    name: docfork/mcp
+  - url: https://mcpservers.org/servers/dadapera/mcp-sop-server
+    desc: ""
+    name: dadapera/mcp-sop-server
+  - url: https://mcpservers.org/servers/rjadhavJT/docgen-mcp
+    desc: ""
+    name: rjadhavJT/docgen-mcp
+  - url: https://mcpservers.org/servers/Sunwood-ai-labs/documind-mcp-server
+    desc: ""
+    name: Sunwood-ai-labs/documind-mcp-server
+  - url: https://mcpservers.org/servers/fkom13/gencodedoc
+    desc: ""
+    name: fkom13/gencodedoc
+  - url: https://mcpservers.org/servers/MCP-Mirror/teddylee777_mcpdoc
+    desc: ""
+    name: MCP-Mirror/teddylee777_mcpdoc
+  - url: https://mcpservers.org/servers/YassineTk/mcp-docs-provider
+    desc: ""
+    name: YassineTk/mcp-docs-provider
+  - url: https://mcpservers.org/servers/Unlock-MCP/mcp-docs-server
+    desc: ""
+    name: Unlock-MCP/mcp-docs-server
+  - url: https://mcpservers.org/servers/mahawi1992/mcp-documentation-server
+    desc: ""
+    name: mahawi1992/mcp-documentation-server
+  - url: https://mcpservers.org/servers/esakrissa/mcp-doc
+    desc: ""
+    name: esakrissa/mcp-doc
+  - url: https://mcpservers.org/servers/shayonpal/mcp-for-docs
+    desc: ""
+    name: shayonpal/mcp-for-docs
+  - url: https://mcpservers.org/servers/ruan11223344/McpDocServer
+    desc: ""
+    name: ruan11223344/McpDocServer
+  - url: https://mcpservers.org/servers/ZebraRoy/read-docs-mcp
+    desc: ""
+    name: ZebraRoy/read-docs-mcp
+  - url: https://mcpservers.org/servers/arabold/docs-mcp-server
+    desc: ""
+    name: arabold/docs-mcp-server
+  - url: https://mcpservers.org/servers/herring101/docs-mcp
+    desc: ""
+    name: herring101/docs-mcp
+  - url: https://mcpservers.org/servers/buger/docs-mcp
+    desc: ""
+    name: buger/docs-mcp
+  - url: https://mcpservers.org/servers/wolfyy970/docs-fetch-mcp
+    desc: ""
+    name: wolfyy970/docs-fetch-mcp
+  - url: https://mcpservers.org/servers/MCP-Mirror/alizdavoodi_MCPDocSearch
+    desc: ""
+    name: MCP-Mirror/alizdavoodi_MCPDocSearch
+  - url: https://mcpservers.org/servers/nirholas/extract-llms-docs
+    desc: ""
+    name: nirholas/extract-llms-docs
+  - url: https://mcpservers.org/servers/tevinric/mcpdoc
+    desc: ""
+    name: tevinric/mcpdoc
+  - url: https://mcpservers.org/servers/andrea9293/mcp-documentation-server
+    desc: ""
+    name: andrea9293/mcp-documentation-server
+  - url: https://mcpservers.org/servers/DynamicEndpoints/documentation-mcp-using-pocketbase
+    desc: ""
+    name: DynamicEndpoints/documentation-mcp-using-pocketbase
+  - url: https://mcpservers.org/servers/mffrydman/doc-reading-mcp
+    desc: ""
+    name: mffrydman/doc-reading-mcp
+  - url: https://mcpservers.org/servers/shifusen329/doc-lib-mcp
+    desc: ""
+    name: shifusen329/doc-lib-mcp
+  - url: https://mcpservers.org/servers/StanleyFishman/mcp-document-translator
+    desc: ""
+    name: StanleyFishman/mcp-document-translator
+  - url: https://mcpservers.org/servers/lvLokkie/doc-workflow-mcp
+    desc: ""
+    name: lvLokkie/doc-workflow-mcp
+  - url: https://mcpservers.org/servers/docs-paramus-ai-v2-documentation
+    desc: ""
+    name: docs-paramus-ai-v2-documentation
+  - url: https://mcpservers.org/servers/shuji-bonji/rfcxml-mcp
+    desc: ""
+    name: shuji-bonji/rfcxml-mcp
+search:
+  - url: https://mcpservers.org/servers/voxmenthe/search-tools-mcp
+    desc: ""
+    name: voxmenthe/search-tools-mcp
+  - url: https://mcpservers.org/servers/fetchSERP/fetchserp-mcp-server-node
+    desc: ""
+    name: fetchSERP/fetchserp-mcp-server-node
+  - url: https://mcpservers.org/servers/jae-jae/g-search-mcp
+    desc: ""
+    name: jae-jae/g-search-mcp
+  - url: https://mcpservers.org/servers/alexcong/gemini-deepsearch-mcp
+    desc: ""
+    name: alexcong/gemini-deepsearch-mcp
+  - url: https://mcpservers.org/servers/rendyfebry/google-pse-mcp
+    desc: ""
+    name: rendyfebry/google-pse-mcp
+  - url: https://mcpservers.org/servers/mixelpixx/Google-Research-MCP
+    desc: ""
+    name: mixelpixx/Google-Research-MCP
+  - url: https://mcpservers.org/servers/JackKuo666/Google-Scholar-MCP-Server
+    desc: ""
+    name: JackKuo666/Google-Scholar-MCP-Server
+  - url: https://mcpservers.org/servers/yohannhommet/mcp-repo-search-server
+    desc: ""
+    name: yohannhommet/mcp-repo-search-server
+  - url: https://mcpservers.org/servers/kshern/mcp-tavily
+    desc: ""
+    name: kshern/mcp-tavily
+  - url: https://mcpservers.org/servers/atonomus/mcp-servers-search
+    desc: ""
+    name: atonomus/mcp-servers-search
+  - url: https://mcpservers.org/servers/OvertliDS/mcp-searxng-enhanced
+    desc: ""
+    name: OvertliDS/mcp-searxng-enhanced
+  - url: https://mcpservers.org/servers/meilisearch/meilisearch-mcp
+    desc: ""
+    name: meilisearch/meilisearch-mcp
+  - url: https://mcpservers.org/servers/naoto24kawa/open-custom-search-api-mcp-server
+    desc: ""
+    name: naoto24kawa/open-custom-search-api-mcp-server
+  - url: https://mcpservers.org/servers/DeepSpringAI/search_mcp_server
+    desc: ""
+    name: DeepSpringAI/search_mcp_server
+  - url: https://mcpservers.org/servers/captainChaozi/search-intent-mcp
+    desc: ""
+    name: captainChaozi/search-intent-mcp
+  - url: https://mcpservers.org/servers/fengin/search-server
+    desc: ""
+    name: fengin/search-server
+  - url: https://mcpservers.org/servers/searchcraft-inc/searchcraft-mcp-server
+    desc: ""
+    name: searchcraft-inc/searchcraft-mcp-server
+  - url: https://mcpservers.org/servers/SecretiveShell/MCP-searxng
+    desc: ""
+    name: SecretiveShell/MCP-searxng
+  - url: https://mcpservers.org/servers/ihor-sokoliuk/mcp-searxng
+    desc: ""
+    name: ihor-sokoliuk/mcp-searxng
+  - url: https://mcpservers.org/servers/The-AI-Workshops/searxng-mcp-server
+    desc: ""
+    name: The-AI-Workshops/searxng-mcp-server
+  - url: https://mcpservers.org/servers/tobioffice/mcp-searxng
+    desc: ""
+    name: tobioffice/mcp-searxng
+  - url: https://mcpservers.org/servers/Sacode/searxng-simple-mcp
+    desc: ""
+    name: Sacode/searxng-simple-mcp
+  - url: https://mcpservers.org/servers/nitish-raj/searxng-mcp-bridge
+    desc: ""
+    name: nitish-raj/searxng-mcp-bridge
+  - url: https://mcpservers.org/servers/serpapi/serpapi-mcp
+    desc: ""
+    name: serpapi/serpapi-mcp
+  - url: https://mcpservers.org/servers/MCP-Mirror/ilyazub_serpapi-mcp-server
+    desc: ""
+    name: MCP-Mirror/ilyazub_serpapi-mcp-server
+  - url: https://mcpservers.org/servers/URDJMK/serpapi-mcp-server
+    desc: ""
+    name: URDJMK/serpapi-mcp-server
+  - url: https://mcpservers.org/servers/ilyazub/serpapi-mcp-server
+    desc: ""
+    name: ilyazub/serpapi-mcp-server
+  - url: https://mcpservers.org/servers/garylab/serper-mcp-server
+    desc: ""
+    name: garylab/serper-mcp-server
+  - url: https://mcpservers.org/servers/NightTrek/Serper-search-mcp
+    desc: ""
+    name: NightTrek/Serper-search-mcp
+  - url: https://mcpservers.org/servers/tahaswx/mcp-server-serper
+    desc: ""
+    name: tahaswx/mcp-server-serper
+  - url: https://mcpservers.org/servers/vitos73/serpstat-mcp-server-java
+    desc: ""
+    name: vitos73/serpstat-mcp-server-java
+  - url: https://mcpservers.org/servers/takuya0206/slack_search_function_mcp
+    desc: ""
+    name: takuya0206/slack_search_function_mcp
+  - url: https://mcpservers.org/servers/JDeun/unified-search-mcp-server
+    desc: ""
+    name: JDeun/unified-search-mcp-server
+  - url: https://mcpservers.org/servers/nickclyde/duckduckgo-mcp-server
+    desc: ""
+    name: nickclyde/duckduckgo-mcp-server
+  - url: https://mcpservers.org/servers/misanthropic-ai/ddg-mcp
+    desc: ""
+    name: misanthropic-ai/ddg-mcp
+  - url: https://mcpservers.org/servers/zhsama/duckduckgo-mpc-
+    desc: ""
+    name: zhsama/duckduckgo-mpc-
+  - url: https://mcpservers.org/servers/damionrashford/rivalsearchmcp
+    desc: ""
+    name: damionrashford/rivalsearchmcp
+research:
+  - url: https://mcpservers.org/servers/Ragha02/Deep-research-mcp
+    desc: ""
+    name: Ragha02/Deep-research-mcp
+  - url: https://mcpservers.org/servers/ameeralns/DeepResearchMCP
+    desc: ""
+    name: ameeralns/DeepResearchMCP
+  - url: https://mcpservers.org/servers/u14app/deep-research
+    desc: ""
+    name: u14app/deep-research
+  - url: https://mcpservers.org/servers/Hajime-Y/deep-research-mcp
+    desc: ""
+    name: Hajime-Y/deep-research-mcp
+  - url: https://mcpservers.org/servers/OctagonAI/octagon-deep-research-mcp
+    desc: ""
+    name: OctagonAI/octagon-deep-research-mcp
+  - url: https://mcpservers.org/servers/reading-plus-ai/mcp-server-deep-research
+    desc: ""
+    name: reading-plus-ai/mcp-server-deep-research
+  - url: https://mcpservers.org/servers/baranwang/mcp-deep-research
+    desc: ""
+    name: baranwang/mcp-deep-research
+  - url: https://mcpservers.org/servers/just-every/mcp-deep-search
+    desc: ""
+    name: just-every/mcp-deep-search
+  - url: https://mcpservers.org/servers/PhialsBasement/mcp-webresearch-stealthified
+    desc: ""
+    name: PhialsBasement/mcp-webresearch-stealthified
+  - url: https://mcpservers.org/servers/mzxrai/mcp-webresearch
+    desc: ""
+    name: mzxrai/mcp-webresearch
+  - url: https://mcpservers.org/servers/IlyaGusev/academia_mcp
+    desc: ""
+    name: IlyaGusev/academia_mcp
+  - url: https://mcpservers.org/servers/afrise/academic-search-mcp-server
+    desc: ""
+    name: afrise/academic-search-mcp-server
+  - url: https://mcpservers.org/servers/github-com-blazickjp-arxiv-mcp-server
+    desc: ""
+    name: github-com-blazickjp-arxiv-mcp-server
+  - url: https://mcpservers.org/servers/takashiishida/arxiv-latex-mcp
+    desc: ""
+    name: takashiishida/arxiv-latex-mcp
+  - url: https://mcpservers.org/servers/daheepk/arxiv-paper-mcp
+    desc: ""
+    name: daheepk/arxiv-paper-mcp
+  - url: https://mcpservers.org/servers/markmcd/arxiv-search-mcp
+    desc: ""
+    name: markmcd/arxiv-search-mcp
+  - url: https://mcpservers.org/servers/kelvingao/arxiv-mcp
+    desc: ""
+    name: kelvingao/arxiv-mcp
+  - url: https://mcpservers.org/servers/Xceron/bibtex-mcp
+    desc: ""
+    name: Xceron/bibtex-mcp
+  - url: https://mcpservers.org/servers/JackKuo666/Crossref-MCP-Server
+    desc: ""
+    name: JackKuo666/Crossref-MCP-Server
+  - url: https://mcpservers.org/servers/sssjiang/pubchem_mcp_server
+    desc: ""
+    name: sssjiang/pubchem_mcp_server
+  - url: https://mcpservers.org/servers/JackKuo666/PubChem-MCP-Server
+    desc: ""
+    name: JackKuo666/PubChem-MCP-Server
+  - url: https://mcpservers.org/servers/ywwAHU/mcp-scholarly
+    desc: ""
+    name: ywwAHU/mcp-scholarly
+  - url: https://mcpservers.org/servers/benedict2310/Scientific-Papers-MCP
+    desc: ""
+    name: benedict2310/Scientific-Papers-MCP
+  - url: https://mcpservers.org/servers/JackKuo666/Sci-Hub-MCP-Server
+    desc: ""
+    name: JackKuo666/Sci-Hub-MCP-Server
+  - url: https://mcpservers.org/servers/adityak74/mcp-scholarly
+    desc: ""
+    name: adityak74/mcp-scholarly
+  - url: https://mcpservers.org/servers/FujishigeTemma/semantic-scholar-mcp
+    desc: ""
+    name: FujishigeTemma/semantic-scholar-mcp
+  - url: https://mcpservers.org/servers/JackKuo666/semanticscholar-MCP-Server
+    desc: ""
+    name: JackKuo666/semanticscholar-MCP-Server
+  - url: https://mcpservers.org/servers/andybrandt/mcp-simple-arxiv
+    desc: ""
+    name: andybrandt/mcp-simple-arxiv
+  - url: https://mcpservers.org/servers/Abhijeeth8/MCP_arXiv_chatbot
+    desc: ""
+    name: Abhijeeth8/MCP_arXiv_chatbot
+memory:
+  - url: https://mcpservers.org/servers/yodakeisuke/mcp-memory-domain-knowledge
+    desc: ""
+    name: yodakeisuke/mcp-memory-domain-knowledge
+  - url: https://mcpservers.org/servers/dzivkovi/mcp-memory-visualizer
+    desc: ""
+    name: dzivkovi/mcp-memory-visualizer
+  - url: https://mcpservers.org/servers/mkreyman/mcp-memory-keeper
+    desc: ""
+    name: mkreyman/mcp-memory-keeper
+  - url: https://mcpservers.org/servers/byronwade/memoria
+    desc: ""
+    name: byronwade/memoria
+  - url: https://mcpservers.org/servers/Andre-Buzeli/json-advanced-memory-bank
+    desc: ""
+    name: Andre-Buzeli/json-advanced-memory-bank
+  - url: https://mcpservers.org/servers/adamkwhite/claude-memory-mcp
+    desc: ""
+    name: adamkwhite/claude-memory-mcp
+  - url: https://mcpservers.org/servers/www-npmjs-com-package-theorhd-deepmemorymcp
+    desc: ""
+    name: www-npmjs-com-package-theorhd-deepmemorymcp
+  - url: https://mcpservers.org/servers/IzumiSy/mcp-duckdb-memory-server
+    desc: ""
+    name: IzumiSy/mcp-duckdb-memory-server
+  - url: https://mcpservers.org/servers/FalkorDB/FalkorDB-MCPServer
+    desc: ""
+    name: FalkorDB/FalkorDB-MCPServer
+  - url: https://mcpservers.org/servers/rileylemm/graphrag_mcp
+    desc: ""
+    name: rileylemm/graphrag_mcp
+  - url: https://mcpservers.org/servers/chen9z/graphiti_mcp_server
+    desc: ""
+    name: chen9z/graphiti_mcp_server
+  - url: https://mcpservers.org/servers/steveoro/graph_mem
+    desc: ""
+    name: steveoro/graph_mem
+  - url: https://mcpservers.org/servers/doobidoo/mcp-memory-dashboard
+    desc: ""
+    name: doobidoo/mcp-memory-dashboard
+  - url: https://mcpservers.org/servers/syyunn/mcp-memory-toolkit
+    desc: ""
+    name: syyunn/mcp-memory-toolkit
+  - url: https://mcpservers.org/servers/joleyline/mcp-memory-libsql
+    desc: ""
+    name: joleyline/mcp-memory-libsql
+  - url: https://mcpservers.org/servers/delorenj/mcp-qdrant-memory
+    desc: ""
+    name: delorenj/mcp-qdrant-memory
+rag:
+  - url: https://mcpservers.org/servers/pedarias/gemini-cli-rag-mcp
+    desc: ""
+    name: pedarias/gemini-cli-rag-mcp
+  - url: https://mcpservers.org/servers/jrmatherly/crawl4ai-rag-mcp
+    desc: ""
+    name: jrmatherly/crawl4ai-rag-mcp
+  - url: https://mcpservers.org/servers/getfit-us/mcp-crawl4ai-rag
+    desc: ""
+    name: getfit-us/mcp-crawl4ai-rag
+  - url: https://mcpservers.org/servers/coleam00/mcp-crawl4ai-rag
+    desc: ""
+    name: coleam00/mcp-crawl4ai-rag
+  - url: https://mcpservers.org/servers/Unlock-MCP/local-research-server
+    desc: ""
+    name: Unlock-MCP/local-research-server
+  - url: https://mcpservers.org/servers/suwa-sh/local-RAG-backend
+    desc: ""
+    name: suwa-sh/local-RAG-backend
+  - url: https://mcpservers.org/servers/shinpr/mcp-local-rag
+    desc: ""
+    name: shinpr/mcp-local-rag
+  - url: https://mcpservers.org/servers/nkapila6/mcp-local-rag
+    desc: ""
+    name: nkapila6/mcp-local-rag
+  - url: https://mcpservers.org/servers/kyopark2014/mcp-rag
+    desc: ""
+    name: kyopark2014/mcp-rag
+  - url: https://mcpservers.org/servers/gergelyszerovay/mcp-server-qdrant-retrive
+    desc: ""
+    name: gergelyszerovay/mcp-server-qdrant-retrive
+  - url: https://mcpservers.org/servers/ancoleman/qdrant-rag-mcp
+    desc: ""
+    name: ancoleman/qdrant-rag-mcp
+  - url: https://mcpservers.org/servers/steiner385/qdrant-mcp-server
+    desc: ""
+    name: steiner385/qdrant-mcp-server
+  - url: https://mcpservers.org/servers/hannesrudolph/mcp-ragdocs
+    desc: ""
+    name: hannesrudolph/mcp-ragdocs
+  - url: https://mcpservers.org/servers/rahulretnan/mcp-ragdocs
+    desc: ""
+    name: rahulretnan/mcp-ragdocs
+  - url: https://mcpservers.org/servers/heltonteixeira/ragdocs
+    desc: ""
+    name: heltonteixeira/ragdocs
+  - url: https://mcpservers.org/servers/lishenxydlgzs/simple-files-vectorstore
+    desc: ""
+    name: lishenxydlgzs/simple-files-vectorstore
+  - url: https://mcpservers.org/servers/vectorize-io/vectorize-mcp-server
+    desc: ""
+    name: vectorize-io/vectorize-mcp-server
+  - url: https://mcpservers.org/servers/nonatofabio/local_faiss_mcp
+    desc: ""
+    name: nonatofabio/local_faiss_mcp
+  - url: https://mcpservers.org/servers/qdrant/mcp-server-qdrant
+    desc: ""
+    name: qdrant/mcp-server-qdrant
+  - url: https://mcpservers.org/servers/github-com-qdrant-mcp-server-qdrant
+    desc: ""
+    name: github-com-qdrant-mcp-server-qdrant
+  - url: https://mcpservers.org/servers/martin-papy/qdrant-loader
+    desc: ""
+    name: martin-papy/qdrant-loader
+  - url: https://mcpservers.org/servers/tomoyasu-sasaki/devrag
+    desc: ""
+    name: tomoyasu-sasaki/devrag
+docker:
+  - url: https://mcpservers.org/servers/QuantGeekDev/docker-mcp
+    desc: ""
+    name: QuantGeekDev/docker-mcp
+  - url: https://mcpservers.org/servers/elchika-inc/docker-hub-readme-mcp-server
+    desc: ""
+    name: elchika-inc/docker-hub-readme-mcp-server
+  - url: https://mcpservers.org/servers/afstanton/docker_mcp
+    desc: ""
+    name: afstanton/docker_mcp
+  - url: https://mcpservers.org/servers/ckreiling/mcp-server-docker
+    desc: ""
+    name: ckreiling/mcp-server-docker
+  - url: https://mcpservers.org/servers/Siddhant-K-code/mcp-devcontainer
+    desc: ""
+    name: Siddhant-K-code/mcp-devcontainer
+  - url: https://mcpservers.org/servers/crunchloop/mcp-devcontainers
+    desc: ""
+    name: crunchloop/mcp-devcontainers
+  - url: https://mcpservers.org/servers/phildougherty/mcp-compose
+    desc: ""
+    name: phildougherty/mcp-compose
+git:
+  - url: https://mcpservers.org/servers/Mubashwer/git-mob-mcp-server
+    desc: ""
+    name: Mubashwer/git-mob-mcp-server
+  - url: https://mcpservers.org/servers/davidorex/git-file-forensics
+    desc: ""
+    name: davidorex/git-file-forensics
+  - url: https://mcpservers.org/servers/FradSer/mcp-server-git-cz
+    desc: ""
+    name: FradSer/mcp-server-git-cz
+  - url: https://mcpservers.org/servers/singhashish4000/MCP-Server
+    desc: ""
+    name: singhashish4000/MCP-Server
+  - url: https://mcpservers.org/servers/TrelisResearch/trelis-gitingest-mcp
+    desc: ""
+    name: TrelisResearch/trelis-gitingest-mcp
+  - url: https://mcpservers.org/servers/adhikasp/mcp-git-ingest
+    desc: ""
+    name: adhikasp/mcp-git-ingest
+  - url: https://mcpservers.org/servers/Faresabdelghany/my-mcp-github-project-manager
+    desc: ""
+    name: Faresabdelghany/my-mcp-github-project-manager
+youtube:
+  - url: https://mcpservers.org/servers/sinjab/mcp_youtube_extract
+    desc: ""
+    name: sinjab/mcp_youtube_extract
+  - url: https://mcpservers.org/servers/lnmunhoz/mcp-youtube-transcript
+    desc: ""
+    name: lnmunhoz/mcp-youtube-transcript
+  - url: https://mcpservers.org/servers/anaisbetts/mcp-youtube
+    desc: ""
+    name: anaisbetts/mcp-youtube
+  - url: https://mcpservers.org/servers/icraft2170/youtube-data-mcp-server
+    desc: ""
+    name: icraft2170/youtube-data-mcp-server
+  - url: https://mcpservers.org/servers/dabidstudio/youtubeinsights-mcp-server
+    desc: ""
+    name: dabidstudio/youtubeinsights-mcp-server
+  - url: https://mcpservers.org/servers/nattyraz/youtube-mcp
+    desc: ""
+    name: nattyraz/youtube-mcp
+  - url: https://mcpservers.org/servers/deepakjois/ytt-mcp
+    desc: ""
+    name: deepakjois/ytt-mcp
+  - url: https://mcpservers.org/servers/Mohammad1704/youtube-transcript-mcp
+    desc: ""
+    name: Mohammad1704/youtube-transcript-mcp
+  - url: https://mcpservers.org/servers/emit-ia/youtube-transcript-mcp
+    desc: ""
+    name: emit-ia/youtube-transcript-mcp
+  - url: https://mcpservers.org/servers/MalikElate/yt-description-mcp
+    desc: ""
+    name: MalikElate/yt-description-mcp
+  - url: https://mcpservers.org/servers/github-com-kimtaeyoon83-mcp-server-youtube-transcript
+    desc: ""
+    name: github-com-kimtaeyoon83-mcp-server-youtube-transcript
+  - url: https://mcpservers.org/servers/kyong0612/youtube-mcp
+    desc: ""
+    name: kyong0612/youtube-mcp
+  - url: https://mcpservers.org/servers/brianshin22/youtube-translate-mcp
+    desc: ""
+    name: brianshin22/youtube-translate-mcp
+  - url: https://mcpservers.org/servers/nabid-pf/youtube-video-summarizer-mcp
+    desc: ""
+    name: nabid-pf/youtube-video-summarizer-mcp
+  - url: https://mcpservers.org/servers/Gtvar/yt-dlp-mcp
+    desc: ""
+    name: Gtvar/yt-dlp-mcp
+  - url: https://mcpservers.org/servers/kevinwatt/yt-dlp-mcp
+    desc: ""
+    name: kevinwatt/yt-dlp-mcp
+  - url: https://mcpservers.org/servers/pedrobrantes/yt-test-mcp-server
+    desc: ""
+    name: pedrobrantes/yt-test-mcp-server
+  - url: https://mcpservers.org/servers/bendelpino/youtube-mcp
+    desc: ""
+    name: bendelpino/youtube-mcp
+  - url: https://mcpservers.org/servers/github-com-kirbah-mcp-youtube
+    desc: ""
+    name: github-com-kirbah-mcp-youtube
+  - url: https://mcpservers.org/servers/IA-Programming/Youtube-MCP
+    desc: ""
+    name: IA-Programming/Youtube-MCP
+  - url: https://mcpservers.org/servers/jikime/py-mcp-youtube-toolbox
+    desc: ""
+    name: jikime/py-mcp-youtube-toolbox
+diagramming:
+  - url: https://mcpservers.org/servers/kayaozkur/mcp-server-mermaid
+    desc: ""
+    name: kayaozkur/mcp-server-mermaid
+  - url: https://mcpservers.org/servers/dwgeneral/draw_architecture_mcp
+    desc: ""
+    name: dwgeneral/draw_architecture_mcp
+  - url: https://mcpservers.org/servers/anatoly314/drawdb-mcp
+    desc: ""
+    name: anatoly314/drawdb-mcp
+  - url: https://mcpservers.org/servers/isdmx/markmap-mcp-server
+    desc: ""
+    name: isdmx/markmap-mcp-server
+  - url: https://mcpservers.org/servers/hustcc/mcp-mermaid
+    desc: ""
+    name: hustcc/mcp-mermaid
+  - url: https://mcpservers.org/servers/peng-shawn/mermaid-mcp-server
+    desc: ""
+    name: peng-shawn/mermaid-mcp-server
+  - url: https://mcpservers.org/servers/gittyburstein/mermaid-mcp-server
+    desc: ""
+    name: gittyburstein/mermaid-mcp-server
+  - url: https://mcpservers.org/servers/github-com-infobip-plantuml-mcp-server
+    desc: ""
+    name: github-com-infobip-plantuml-mcp-server
+  - url: https://mcpservers.org/servers/lgazo/drawio-mcp-server
+    desc: ""
+    name: lgazo/drawio-mcp-server
+  - url: https://mcpservers.org/servers/narasimhaponnada/mermaid-mcp.git
+    desc: ""
+    name: narasimhaponnada/mermaid-mcp.git
+  - url: https://mcpservers.org/servers/YuChenSSR/mindmap-mcp-server
+    desc: ""
+    name: YuChenSSR/mindmap-mcp-server
+  - url: https://mcpservers.org/servers/mockflow-com-integrations-ideaboard-mcp
+    desc: ""
+    name: mockflow-com-integrations-ideaboard-mcp
+design:
+  - url: https://mcpservers.org/servers/pglevy/design-system-server
+    desc: ""
+    name: pglevy/design-system-server
+  - url: https://mcpservers.org/servers/maslybs/mcp-config-generator
+    desc: ""
+    name: maslybs/mcp-config-generator
+  - url: https://mcpservers.org/servers/freema/mcp-design-system-extractor
+    desc: ""
+    name: freema/mcp-design-system-extractor
+  - url: https://mcpservers.org/servers/montevive/penpot-mcp
+    desc: ""
+    name: montevive/penpot-mcp
+web-scraping:
+  - url: https://mcpservers.org/servers/ddipass/context-scraper-mcp-server
+    desc: ""
+    name: ddipass/context-scraper-mcp-server
+  - url: https://mcpservers.org/servers/walksoda/crawl-mcp
+    desc: ""
+    name: walksoda/crawl-mcp
+  - url: https://mcpservers.org/servers/brettdavies/crawl4ai-skill
+    desc: ""
+    name: brettdavies/crawl4ai-skill
+  - url: https://mcpservers.org/servers/scrape-badger/scrapebadger-mcp
+    desc: ""
+    name: scrape-badger/scrapebadger-mcp
+  - url: https://mcpservers.org/servers/scrapeless-ai/scrapeless-mcp-server
+    desc: ""
+    name: scrapeless-ai/scrapeless-mcp-server
+  - url: https://mcpservers.org/servers/mugoosse/sitemap-mcp-server
+    desc: ""
+    name: mugoosse/sitemap-mcp-server
+  - url: https://mcpservers.org/servers/Cyreslab-AI/wayback-mcp-server
+    desc: ""
+    name: Cyreslab-AI/wayback-mcp-server
+  - url: https://mcpservers.org/servers/thirdstrandstudio/mcp-xpath
+    desc: ""
+    name: thirdstrandstudio/mcp-xpath
+notifications:
+  - url: https://mcpservers.org/servers/turlockmike/apple-notifier-mcp
+    desc: ""
+    name: turlockmike/apple-notifier-mcp
+  - url: https://mcpservers.org/servers/sinadarbouy/mcp-nats
+    desc: ""
+    name: sinadarbouy/mcp-nats
+  - url: https://mcpservers.org/servers/ohqay/notifications
+    desc: ""
+    name: ohqay/notifications
+  - url: https://mcpservers.org/servers/gitmotion/ntfy-me-mcp
+    desc: ""
+    name: gitmotion/ntfy-me-mcp
+  - url: https://mcpservers.org/servers/cyanheads/ntfy-mcp-server
+    desc: ""
+    name: cyanheads/ntfy-mcp-server
+task-management:
+  - url: https://mcpservers.org/servers/eyalzh/kanban-mcp
+    desc: ""
+    name: eyalzh/kanban-mcp
+  - url: https://mcpservers.org/servers/jpicklyk/task-orchestrator
+    desc: ""
+    name: jpicklyk/task-orchestrator
+  - url: https://mcpservers.org/servers/cjo4m06/mcp-shrimp-task-manager
+    desc: ""
+    name: cjo4m06/mcp-shrimp-task-manager
+  - url: https://mcpservers.org/servers/gosvig123/mcp_project_and_task_manager
+    desc: ""
+    name: gosvig123/mcp_project_and_task_manager
+  - url: https://mcpservers.org/servers/EchoingVesper/mcp-task-orchestrator
+    desc: ""
+    name: EchoingVesper/mcp-task-orchestrator
+  - url: https://mcpservers.org/servers/MuthuPalaniappan925/TaskFlow-MCP-Server-101
+    desc: ""
+    name: MuthuPalaniappan925/TaskFlow-MCP-Server-101
+  - url: https://mcpservers.org/servers/jbrinkman/valkey-ai-tasks
+    desc: ""
+    name: jbrinkman/valkey-ai-tasks
+  - url: https://mcpservers.org/servers/brysontang/DeltaTask
+    desc: ""
+    name: brysontang/DeltaTask
+notes:
+  - url: https://mcpservers.org/servers/iansinnott/obsidian-claude-code-mcp
+    desc: ""
+    name: iansinnott/obsidian-claude-code-mcp
+  - url: https://mcpservers.org/servers/kaliaboi/mcp-zotero
+    desc: ""
+    name: kaliaboi/mcp-zotero
+  - url: https://mcpservers.org/servers/ProfSynapse/claudesidian-mcp
+    desc: ""
+    name: ProfSynapse/claudesidian-mcp
+  - url: https://mcpservers.org/servers/boazy/notes-mcp
+    desc: ""
+    name: boazy/notes-mcp
+  - url: https://mcpservers.org/servers/jlevere/obsidian-mcp-plugin
+    desc: ""
+    name: jlevere/obsidian-mcp-plugin
+  - url: https://mcpservers.org/servers/kujenga/zotero-mcp
+    desc: ""
+    name: kujenga/zotero-mcp
+  - url: https://mcpservers.org/servers/54yyyu/zotero-mcp
+    desc: ""
+    name: 54yyyu/zotero-mcp
+  - url: https://mcpservers.org/servers/anpigon/mcp-server-obsidian-omnisearch
+    desc: ""
+    name: anpigon/mcp-server-obsidian-omnisearch
+  - url: https://mcpservers.org/servers/roomi-fields/notebooklm-mcp
+    desc: ""
+    name: roomi-fields/notebooklm-mcp
+  - url: https://mcpservers.org/servers/mrexodia/readeck-mcp
+    desc: ""
+    name: mrexodia/readeck-mcp
+rss:
+  - url: https://mcpservers.org/servers/mshk/mcp-rss-crawler
+    desc: ""
+    name: mshk/mcp-rss-crawler
+  - url: https://mcpservers.org/servers/Lunran/rssmcp
+    desc: ""
+    name: Lunran/rssmcp
+  - url: https://mcpservers.org/servers/CDataSoftware/rss-mcp-server-by-cdata
+    desc: ""
+    name: CDataSoftware/rss-mcp-server-by-cdata
+  - url: https://mcpservers.org/servers/RSS3-Network/mcp-server-rss3
+    desc: ""
+    name: RSS3-Network/mcp-server-rss3
+deepseek:
+  - url: https://mcpservers.org/servers/chew-z/DeepseekMCP
+    desc: ""
+    name: chew-z/DeepseekMCP
+  - url: https://mcpservers.org/servers/Sheshiyer/deepseek-mcp-with-MoE
+    desc: ""
+    name: Sheshiyer/deepseek-mcp-with-MoE
+  - url: https://mcpservers.org/servers/ruixingshi/deepseek-thinker-mcp
+    desc: ""
+    name: ruixingshi/deepseek-thinker-mcp
+  - url: https://mcpservers.org/servers/niko91i/MCP-deepseek-V3-et-claude-desktop
+    desc: ""
+    name: niko91i/MCP-deepseek-V3-et-claude-desktop
+  - url: https://mcpservers.org/servers/HarshJ23/deepseek-claude-MCP-server
+    desc: ""
+    name: HarshJ23/deepseek-claude-MCP-server
+  - url: https://mcpservers.org/servers/ai-1st/deepview-mcp
+    desc: ""
+    name: ai-1st/deepview-mcp
+context:
+  - url: https://mcpservers.org/servers/szeider/consult7
+    desc: ""
+    name: szeider/consult7
+  - url: https://mcpservers.org/servers/GreatScottyMac/context-portal
+    desc: ""
+    name: GreatScottyMac/context-portal
+  - url: https://mcpservers.org/servers/upstash/context7
+    desc: ""
+    name: upstash/context7
+  - url: https://mcpservers.org/servers/upstash/context7-mcp
+    desc: ""
+    name: upstash/context7-mcp
+  - url: https://mcpservers.org/servers/noimank/context7-mcp-python
+    desc: ""
+    name: noimank/context7-mcp-python
+  - url: https://mcpservers.org/servers/contextstream-io-docs-mcp
+    desc: ""
+    name: contextstream-io-docs-mcp
+  - url: https://mcpservers.org/servers/context-hub/generator
+    desc: ""
+    name: context-hub/generator
+  - url: https://mcpservers.org/servers/cyberchitta/llm-context.py
+    desc: ""
+    name: cyberchitta/llm-context.py
+  - url: https://mcpservers.org/servers/lrstanley/context7-http
+    desc: ""
+    name: lrstanley/context7-http
+  - url: https://mcpservers.org/servers/dodopayments/context-mcp
+    desc: ""
+    name: dodopayments/context-mcp
+  - url: https://mcpservers.org/servers/ContextualAI/contextual-mcp-server
+    desc: ""
+    name: ContextualAI/contextual-mcp-server
+  - url: https://mcpservers.org/servers/aurda012/devcontext
+    desc: ""
+    name: aurda012/devcontext
+  - url: https://mcpservers.org/servers/context-fabric/context-fabric
+    desc: ""
+    name: context-fabric/context-fabric
+  - url: https://mcpservers.org/servers/cornelcroi/context-lens
+    desc: ""
+    name: cornelcroi/context-lens
+  - url: https://mcpservers.org/servers/fyrsmithlabs/contextd
+    desc: ""
+    name: fyrsmithlabs/contextd
+utilities:
+  - url: https://mcpservers.org/servers/myownipgit/enhanced-qrcode-mcp
+    desc: ""
+    name: myownipgit/enhanced-qrcode-mcp
+  - url: https://mcpservers.org/servers/isaacphi/mcp-language-server
+    desc: ""
+    name: isaacphi/mcp-language-server
+  - url: https://mcpservers.org/servers/myownipgit/mcp-server-qrcode-enhanced
+    desc: ""
+    name: myownipgit/mcp-server-qrcode-enhanced
+  - url: https://mcpservers.org/servers/ai-tools-all/grep_app_mcp
+    desc: ""
+    name: ai-tools-all/grep_app_mcp
+  - url: https://mcpservers.org/servers/galprz/grep-mcp
+    desc: ""
+    name: galprz/grep-mcp
+  - url: https://mcpservers.org/servers/devstacks-software-engineering/id-generator-mcp
+    desc: ""
+    name: devstacks-software-engineering/id-generator-mcp
+  - url: https://mcpservers.org/servers/YohanLiu/mcp-jsondiff
+    desc: ""
+    name: YohanLiu/mcp-jsondiff
+  - url: https://mcpservers.org/servers/HappyAny/latex-mathml-mcp-server
+    desc: ""
+    name: HappyAny/latex-mathml-mcp-server
+  - url: https://mcpservers.org/servers/tobioffice/LateXPDF-MCP
+    desc: ""
+    name: tobioffice/LateXPDF-MCP
+  - url: https://mcpservers.org/servers/RobertoDure/mcp-latex-server
+    desc: ""
+    name: RobertoDure/mcp-latex-server
+  - url: https://mcpservers.org/servers/SeeYangZhi/lucide-icons-mcp
+    desc: ""
+    name: SeeYangZhi/lucide-icons-mcp
+  - url: https://mcpservers.org/servers/yossi-lee/md2svg-mcp
+    desc: ""
+    name: yossi-lee/md2svg-mcp
+  - url: https://mcpservers.org/servers/vivekVells/mcp-pandoc
+    desc: ""
+    name: vivekVells/mcp-pandoc
+  - url: https://mcpservers.org/servers/jathinkolla/pandoc-mcp
+    desc: ""
+    name: jathinkolla/pandoc-mcp
+  - url: https://mcpservers.org/servers/longbowzz/svg2png_mcp
+    desc: ""
+    name: longbowzz/svg2png_mcp
+  - url: https://mcpservers.org/servers/pchalupa/svgr-mcp
+    desc: ""
+    name: pchalupa/svgr-mcp
+  - url: https://mcpservers.org/servers/tanker327/uuid-mcp
+    desc: ""
+    name: tanker327/uuid-mcp
+  - url: https://mcpservers.org/servers/pomazanbohdan/mcp-uuidv7-generator
+    desc: ""
+    name: pomazanbohdan/mcp-uuidv7-generator
+  - url: https://mcpservers.org/servers/EgorKluch/mcp-laml
+    desc: ""
+    name: EgorKluch/mcp-laml
+  - url: https://mcpservers.org/servers/gorosun/unified-diff-mcp
+    desc: ""
+    name: gorosun/unified-diff-mcp
+  - url: https://mcpservers.org/servers/FujishigeTemma/typst-mcp
+    desc: ""
+    name: FujishigeTemma/typst-mcp
+  - url: https://mcpservers.org/servers/very99/text-master-mcp
+    desc: ""
+    name: very99/text-master-mcp
+
+data:
+  - url: https://mcpservers.org/servers/databutton/databutton-mcp
+    desc: ""
+    name: databutton/databutton-mcp
+  - url: https://mcpservers.org/servers/databutton/databutton-app-mcp
+    desc: ""
+    name: databutton/databutton-app-mcp
+  - url: https://mcpservers.org/servers/xoniks/mcp-visualization-duckdb
+    desc: ""
+    name: xoniks/mcp-visualization-duckdb
+  - url: https://mcpservers.org/servers/alaturqua/mcp-trino-python
+    desc: ""
+    name: alaturqua/mcp-trino-python
+  - url: https://mcpservers.org/servers/truaxki/mcp-variance-log
+    desc: ""
+    name: truaxki/mcp-variance-log
+  - url: https://mcpservers.org/servers/damonxue/mcp-ossinsight
+    desc: ""
+    name: damonxue/mcp-ossinsight
+compliance:
+  - url: https://mcpservers.org/servers/ansvar-systems/eu_compliance_mcp
+    desc: ""
+    name: ansvar-systems/eu_compliance_mcp
+  - url: https://mcpservers.org/servers/unctad-ai/eregulations-mcp-server
+    desc: ""
+    name: unctad-ai/eregulations-mcp-server
+marketing:
+  - url: https://mcpservers.org/servers/open-strategy-partners/osp_marketing_tools
+    desc: ""
+    name: open-strategy-partners/osp_marketing_tools
+  - url: https://mcpservers.org/servers/x51xxx/osp-marketing-tools-mcp
+    desc: ""
+    name: x51xxx/osp-marketing-tools-mcp
+  - url: https://mcpservers.org/servers/AVIMBU/plausible-mcp-server
+    desc: ""
+    name: AVIMBU/plausible-mcp-server
+  - url: https://mcpservers.org/servers/profitelligence/profitelligence-mcp-server
+    desc: ""
+    name: profitelligence/profitelligence-mcp-server
+misc:
+  - url: https://mcpservers.org/servers/peragus-dev/model-enhancement-servers
+    desc: ""
+    name: peragus-dev/model-enhancement-servers
+  - url: https://mcpservers.org/servers/cnzhihao/dev-manager
+    desc: ""
+    name: cnzhihao/dev-manager
+  - url: https://mcpservers.org/servers/rawveg/devtomcp
+    desc: ""
+    name: rawveg/devtomcp
+  - url: https://mcpservers.org/servers/mimeCam/mcp-devbrain-stdio
+    desc: ""
+    name: mimeCam/mcp-devbrain-stdio
+  - url: https://mcpservers.org/servers/ivangrynenko/devstandards_mcp
+    desc: ""
+    name: ivangrynenko/devstandards_mcp
+  - url: https://mcpservers.org/servers/hew/dieter-mcp
+    desc: ""
+    name: hew/dieter-mcp
+  - url: https://mcpservers.org/servers/digma-ai/digma-mcp-server
+    desc: ""
+    name: digma-ai/digma-mcp-server
+  - url: https://mcpservers.org/servers/ScriptonBasestar/mcp-schema-specs
+    desc: ""
+    name: ScriptonBasestar/mcp-schema-specs
+  - url: https://mcpservers.org/servers/ajot/domain-checker-mcp-server
+    desc: ""
+    name: ajot/domain-checker-mcp-server
+  - url: https://mcpservers.org/servers/sameehj/ebpf-mcp
+    desc: ""
+    name: sameehj/ebpf-mcp
+  - url: https://mcpservers.org/servers/cnkanwei/mcp-server-echart
+    desc: ""
+    name: cnkanwei/mcp-server-echart
+  - url: https://mcpservers.org/servers/zhr7777777/echarts-mcp-server
+    desc: ""
+    name: zhr7777777/echarts-mcp-server
+  - url: https://mcpservers.org/servers/enkryptai/enkryptai-mcp-server
+    desc: ""
+    name: enkryptai/enkryptai-mcp-server
+  - url: https://mcpservers.org/servers/squirrelogic/mcp-feature-discussion
+    desc: ""
+    name: squirrelogic/mcp-feature-discussion
+  - url: https://mcpservers.org/servers/iMAGRAY/FileForge
+    desc: ""
+    name: iMAGRAY/FileForge
+  - url: https://mcpservers.org/servers/admica/FileScopeMCP
+    desc: ""
+    name: admica/FileScopeMCP
+  - url: https://mcpservers.org/servers/PV-Bhat/GemForge-MCP
+    desc: ""
+    name: PV-Bhat/GemForge-MCP
+  - url: https://mcpservers.org/servers/iamhenry/GenSpec-MCP
+    desc: ""
+    name: iamhenry/GenSpec-MCP
+  - url: https://mcpservers.org/servers/dromologue/Graph-Tools
+    desc: ""
+    name: dromologue/Graph-Tools
+  - url: https://mcpservers.org/servers/grebmcp-com-get-started-installation
+    desc: ""
+    name: grebmcp-com-get-started-installation
+  - url: https://mcpservers.org/servers/growthbook/growthbook-mcp
+    desc: ""
+    name: growthbook/growthbook-mcp
+  - url: https://mcpservers.org/servers/GroundDocs/grounddocs
+    desc: ""
+    name: GroundDocs/grounddocs
+  - url: https://mcpservers.org/servers/www-npmjs-com-package-skyastrall-mcp-guardian
+    desc: ""
+    name: www-npmjs-com-package-skyastrall-mcp-guardian
+  - url: https://mcpservers.org/servers/sinedied/grumpydev-mcp
+    desc: ""
+    name: sinedied/grumpydev-mcp
+  - url: https://mcpservers.org/servers/hed-standard/hed-mcp
+    desc: ""
+    name: hed-standard/hed-mcp
+  - url: https://mcpservers.org/servers/liaosiqian/interactive-feedback-mcp
+    desc: ""
+    name: liaosiqian/interactive-feedback-mcp
+  - url: https://mcpservers.org/servers/zengxiaolou/Interactive-Feedback-MCP
+    desc: ""
+    name: zengxiaolou/Interactive-Feedback-MCP
+  - url: https://mcpservers.org/servers/noopstudios/interactive-feedback-mcp
+    desc: ""
+    name: noopstudios/interactive-feedback-mcp
+  - url: https://mcpservers.org/servers/lxy2109/instant-meshes-mcp
+    desc: ""
+    name: lxy2109/instant-meshes-mcp
+  - url: https://mcpservers.org/servers/justinbeckwith/linkinator-mcp
+    desc: ""
+    name: justinbeckwith/linkinator-mcp
+  - url: https://mcpservers.org/servers/Tritlo/lsp-mcp
+    desc: ""
+    name: Tritlo/lsp-mcp
+  - url: https://mcpservers.org/servers/frocher/luskad-mcp
+    desc: ""
+    name: frocher/luskad-mcp
+  - url: https://mcpservers.org/servers/wrale/mcp-server-make
+    desc: ""
+    name: wrale/mcp-server-make
+  - url: https://mcpservers.org/servers/mparker3/makefilemcp
+    desc: ""
+    name: mparker3/makefilemcp
+  - url: https://mcpservers.org/servers/yoseforb/markdown-navigator-mcp
+    desc: ""
+    name: yoseforb/markdown-navigator-mcp
+  - url: https://mcpservers.org/servers/r3-yamauchi/mcp-conf-mcp-server
+    desc: ""
+    name: r3-yamauchi/mcp-conf-mcp-server
+  - url: https://mcpservers.org/servers/PixllCreations/mcp-devkit
+    desc: ""
+    name: PixllCreations/mcp-devkit
+  - url: https://mcpservers.org/servers/dillip285/mcp-dev-server
+    desc: ""
+    name: dillip285/mcp-dev-server
+  - url: https://mcpservers.org/servers/emson/mcpdom-com
+    desc: ""
+    name: emson/mcpdom-com
+  - url: https://mcpservers.org/servers/crazyrabbitLTC/mcp-expert-server
+    desc: ""
+    name: crazyrabbitLTC/mcp-expert-server
+  - url: https://mcpservers.org/servers/Minidoracat/mcp-feedback-enhanced
+    desc: ""
+    name: Minidoracat/mcp-feedback-enhanced
+  - url: https://mcpservers.org/servers/aindreyway/mcp-neurolora
+    desc: ""
+    name: aindreyway/mcp-neurolora
+  - url: https://mcpservers.org/servers/Bubobot-Team/mcp-prompt-optimizer
+    desc: ""
+    name: Bubobot-Team/mcp-prompt-optimizer
+  - url: https://mcpservers.org/servers/neanderthal/mcp-qemu-vm
+    desc: ""
+    name: neanderthal/mcp-qemu-vm
+  - url: https://mcpservers.org/servers/Rajawatrajat/mcp-software-engineer
+    desc: ""
+    name: Rajawatrajat/mcp-software-engineer
+  - url: https://mcpservers.org/servers/neaigd/mcp_stack
+    desc: ""
+    name: neaigd/mcp_stack
+  - url: https://mcpservers.org/servers/jurasofish/mcpunk
+    desc: ""
+    name: jurasofish/mcpunk
+  - url: https://mcpservers.org/servers/abrinsmead/mindpilot-mcp
+    desc: ""
+    name: abrinsmead/mindpilot-mcp
+  - url: https://mcpservers.org/servers/TwT23333/mcp
+    desc: ""
+    name: TwT23333/mcp
+  - url: https://mcpservers.org/servers/github-com-hekmon8-mybacklinks-tools-tree-main-mybacklinks-mcp
+    desc: ""
+    name: github-com-hekmon8-mybacklinks-tools-tree-main-mybacklinks-mcp
+  - url: https://mcpservers.org/servers/trevorprater/nvim-lsp-mcp
+    desc: ""
+    name: trevorprater/nvim-lsp-mcp
+  - url: https://mcpservers.org/servers/Cyreslab-AI/nessus-mcp-server
+    desc: ""
+    name: Cyreslab-AI/nessus-mcp-server
+  - url: https://mcpservers.org/servers/bigcodegen/mcp-neovim-server
+    desc: ""
+    name: bigcodegen/mcp-neovim-server
+  - url: https://mcpservers.org/servers/github-com-bgauryy-octocode-mcp
+    desc: ""
+    name: github-com-bgauryy-octocode-mcp
+  - url: https://mcpservers.org/servers/OctoMind-dev/octomind-mcp
+    desc: ""
+    name: OctoMind-dev/octomind-mcp
+  - url: https://mcpservers.org/servers/github-com-octopusdeploy-mcp-server
+    desc: ""
+    name: github-com-octopusdeploy-mcp-server
+  - url: https://mcpservers.org/servers/StacklokLabs/ocireg-mcp
+    desc: ""
+    name: StacklokLabs/ocireg-mcp
+  - url: https://mcpservers.org/servers/mottibec/otelcol-mcp
+    desc: ""
+    name: mottibec/otelcol-mcp
+  - url: https://mcpservers.org/servers/tecnomanu/pampa
+    desc: ""
+    name: tecnomanu/pampa
+  - url: https://mcpservers.org/servers/mickdarling/persona-mcp-server
+    desc: ""
+    name: mickdarling/persona-mcp-server
+  - url: https://mcpservers.org/servers/otdavies/Rapid
+    desc: ""
+    name: otdavies/Rapid
+  - url: https://mcpservers.org/servers/ref-tools/ref-tools-mcp
+    desc: ""
+    name: ref-tools/ref-tools-mcp
+  - url: https://mcpservers.org/servers/myuon/refactor-mcp
+    desc: ""
+    name: myuon/refactor-mcp
+  - url: https://mcpservers.org/servers/felippefarias/refine-prompt
+    desc: ""
+    name: felippefarias/refine-prompt
+  - url: https://mcpservers.org/servers/nickbaumann98/release-notes-server
+    desc: ""
+    name: nickbaumann98/release-notes-server
+  - url: https://mcpservers.org/servers/pdavis68/RepoMapper
+    desc: ""
+    name: pdavis68/RepoMapper
+  - url: https://mcpservers.org/servers/stancld/rossum-mcp
+    desc: ""
+    name: stancld/rossum-mcp
+  - url: https://mcpservers.org/servers/Omer-Sadeh/RubberDuckMCP
+    desc: ""
+    name: Omer-Sadeh/RubberDuckMCP
+  - url: https://mcpservers.org/servers/ulasbilgen/sacl
+    desc: ""
+    name: ulasbilgen/sacl
+  - url: https://mcpservers.org/servers/khromov/safe-file-mcp
+    desc: ""
+    name: khromov/safe-file-mcp
+  - url: https://mcpservers.org/servers/aj-geddes/sailor
+    desc: ""
+    name: aj-geddes/sailor
+  - url: https://mcpservers.org/servers/davidkingzyb/SCAST
+    desc: ""
+    name: davidkingzyb/SCAST
+  - url: https://mcpservers.org/servers/github-com-jacksenechal-scan-mcp
+    desc: ""
+    name: github-com-jacksenechal-scan-mcp
+  - url: https://mcpservers.org/servers/Phazzie/SDD-MCP
+    desc: ""
+    name: Phazzie/SDD-MCP
+  - url: https://mcpservers.org/servers/arunmenon/sdk-mcp-server
+    desc: ""
+    name: arunmenon/sdk-mcp-server
+  - url: https://mcpservers.org/servers/Pratik-Kumar-Cse/script-generation-mcp
+    desc: ""
+    name: Pratik-Kumar-Cse/script-generation-mcp
+  - url: https://mcpservers.org/servers/PoliTwit1984/second-opinion-mcp-server
+    desc: ""
+    name: PoliTwit1984/second-opinion-mcp-server
+  - url: https://mcpservers.org/servers/dshills/second-opinion
+    desc: ""
+    name: dshills/second-opinion
+  - url: https://mcpservers.org/servers/MCP-100/mcp-sentry
+    desc: ""
+    name: MCP-100/mcp-sentry
+  - url: https://mcpservers.org/servers/getsentry/sentry-mcp-ts
+    desc: ""
+    name: getsentry/sentry-mcp-ts
+  - url: https://mcpservers.org/servers/getsentry/sentry-mcp
+    desc: ""
+    name: getsentry/sentry-mcp
+  - url: https://mcpservers.org/servers/codyde/mcp-sentry-ts
+    desc: ""
+    name: codyde/mcp-sentry-ts
+  - url: https://mcpservers.org/servers/claytongroth/sep-mpc-server
+    desc: ""
+    name: claytongroth/sep-mpc-server
+  - url: https://mcpservers.org/servers/abda11ah/serencp
+    desc: ""
+    name: abda11ah/serencp
+  - url: https://mcpservers.org/servers/oraios/serena
+    desc: ""
+    name: oraios/serena
+  - url: https://mcpservers.org/servers/CodeHalwell/gradio-mcp-agent-hack
+    desc: ""
+    name: CodeHalwell/gradio-mcp-agent-hack
+  - url: https://mcpservers.org/servers/anilcancakir/skillsmp-mcp-server
+    desc: ""
+    name: anilcancakir/skillsmp-mcp-server
+  - url: https://mcpservers.org/servers/PhilippMT/Software-planning-mcp
+    desc: ""
+    name: PhilippMT/Software-planning-mcp
+  - url: https://mcpservers.org/servers/NightTrek/Software-planning-mcp
+    desc: ""
+    name: NightTrek/Software-planning-mcp
+  - url: https://mcpservers.org/servers/TBosak/specbridge
+    desc: ""
+    name: TBosak/specbridge
+  - url: https://mcpservers.org/servers/ivan-saorin/synapse-forge
+    desc: ""
+    name: ivan-saorin/synapse-forge
+  - url: https://mcpservers.org/servers/bypawel/tachibot-mcp
+    desc: ""
+    name: bypawel/tachibot-mcp
+  - url: https://mcpservers.org/servers/Sacxy/tekion-persona-loader-mcp
+    desc: ""
+    name: Sacxy/tekion-persona-loader-mcp
+  - url: https://mcpservers.org/servers/raisinbread/teleprompter
+    desc: ""
+    name: raisinbread/teleprompter
+  - url: https://mcpservers.org/servers/cyanheads/toolkit-mcp-server
+    desc: ""
+    name: cyanheads/toolkit-mcp-server
+  - url: https://mcpservers.org/servers/fernicar/zero-vector-3
+    desc: ""
+    name: fernicar/zero-vector-3
+  - url: https://mcpservers.org/servers/younis-ali/mcp-chatbot
+    desc: ""
+    name: younis-ali/mcp-chatbot
+  - url: https://mcpservers.org/servers/MCP-Mirror/trakru_mcp-library-server
+    desc: ""
+    name: MCP-Mirror/trakru_mcp-library-server
+  - url: https://mcpservers.org/servers/devin/deepwiki
+    desc: ""
+    name: devin/deepwiki
+  - url: https://mcpservers.org/servers/regenrek/deepwiki-mcp
+    desc: ""
+    name: regenrek/deepwiki-mcp
+  - url: https://mcpservers.org/servers/AshDevFr/discourse-mcp-server
+    desc: ""
+    name: AshDevFr/discourse-mcp-server
+  - url: https://mcpservers.org/servers/Geeksfino/kb-mcp-server
+    desc: ""
+    name: Geeksfino/kb-mcp-server
+  - url: https://mcpservers.org/servers/agentience/expert-registry-mcp
+    desc: ""
+    name: agentience/expert-registry-mcp
+  - url: https://mcpservers.org/servers/tomoyasu-sasaki/expo-mcp-server
+    desc: ""
+    name: tomoyasu-sasaki/expo-mcp-server
+  - url: https://mcpservers.org/servers/the0807/GeekNews-MCP-Server
+    desc: ""
+    name: the0807/GeekNews-MCP-Server
+  - url: https://mcpservers.org/servers/pskill9/hn-server
+    desc: ""
+    name: pskill9/hn-server
+  - url: https://mcpservers.org/servers/jmanek/google_news_trends_mcp
+    desc: ""
+    name: jmanek/google_news_trends_mcp
+  - url: https://mcpservers.org/servers/thedaviddias/mcp-llms-txt-explorer
+    desc: ""
+    name: thedaviddias/mcp-llms-txt-explorer
+  - url: https://mcpservers.org/servers/michalnaka/mcp-substack
+    desc: ""
+    name: michalnaka/mcp-substack
+  - url: https://mcpservers.org/servers/chatmcp/mcp-server-collector
+    desc: ""
+    name: chatmcp/mcp-server-collector
+  - url: https://mcpservers.org/servers/MaelitoP/mention-mcp-server
+    desc: ""
+    name: MaelitoP/mention-mcp-server
+  - url: https://mcpservers.org/servers/GridfireAI/reddit-mcp
+    desc: ""
+    name: GridfireAI/reddit-mcp
+  - url: https://mcpservers.org/servers/socialapishub/mcp-server
+    desc: ""
+    name: socialapishub/mcp-server
+  - url: https://mcpservers.org/servers/RuumaLilja/tech-collector-mcp
+    desc: ""
+    name: RuumaLilja/tech-collector-mcp
+  - url: https://mcpservers.org/servers/baranwang/mcp-trends-hub
+    desc: ""
+    name: baranwang/mcp-trends-hub
+  - url: https://mcpservers.org/servers/Winify/webdriverio-mcp
+    desc: ""
+    name: Winify/webdriverio-mcp
+  - url: https://mcpservers.org/servers/xpoz-ai
+    desc: ""
+    name: xpoz-ai
+  - url: https://mcpservers.org/servers/tannmaycoding/Dictionary-MCP
+    desc: ""
+    name: tannmaycoding/Dictionary-MCP
+  - url: https://mcpservers.org/servers/alexsowt/hardcover-mcp
+    desc: ""
+    name: alexsowt/hardcover-mcp
+  - url: https://mcpservers.org/servers/fondutech/mcp_tools
+    desc: ""
+    name: fondutech/mcp_tools
+  - url: https://mcpservers.org/servers/bmorphism/krep-mcp-server
+    desc: ""
+    name: bmorphism/krep-mcp-server
+  - url: https://mcpservers.org/servers/haelyons/local_flow
+    desc: ""
+    name: haelyons/local_flow
+  - url: https://mcpservers.org/servers/krajcik/manticore-mcp-server
+    desc: ""
+    name: krajcik/manticore-mcp-server
+  - url: https://mcpservers.org/servers/zbkm/mmnt-mcp-server
+    desc: ""
+    name: zbkm/mmnt-mcp-server
+  - url: https://mcpservers.org/servers/TeXmeijin/manalinkMCP
+    desc: ""
+    name: TeXmeijin/manalinkMCP
+  - url: https://mcpservers.org/servers/bmorphism/marginalia-mcp-server
+    desc: ""
+    name: bmorphism/marginalia-mcp-server
+  - url: https://mcpservers.org/servers/istarwyh/mcpadvisor
+    desc: ""
+    name: istarwyh/mcpadvisor
+  - url: https://mcpservers.org/servers/liuyoshio/mcp-compass
+    desc: ""
+    name: liuyoshio/mcp-compass
+  - url: https://mcpservers.org/servers/ikungsjl/mcp-knowledge-base
+    desc: ""
+    name: ikungsjl/mcp-knowledge-base
+  - url: https://mcpservers.org/servers/redmorestudio/thebrain-mcp
+    desc: ""
+    name: redmorestudio/thebrain-mcp
+  - url: https://mcpservers.org/servers/8enSmith/mcp-open-library
+    desc: ""
+    name: 8enSmith/mcp-open-library
+  - url: https://mcpservers.org/servers/mcollina/mcp-ripgrep
+    desc: ""
+    name: mcollina/mcp-ripgrep
+  - url: https://mcpservers.org/servers/KBB99/mcp-registry-server
+    desc: ""
+    name: KBB99/mcp-registry-server
+  - url: https://mcpservers.org/servers/dadapera/mcp-sop-server
+    desc: ""
+    name: dadapera/mcp-sop-server
+  - url: https://mcpservers.org/servers/utensils/mcp-nixos
+    desc: ""
+    name: utensils/mcp-nixos
+  - url: https://mcpservers.org/servers/ferrants/memvid-mcp-server
+    desc: ""
+    name: ferrants/memvid-mcp-server
+  - url: https://mcpservers.org/servers/dmayboroda/minima
+    desc: ""
+    name: dmayboroda/minima
+  - url: https://mcpservers.org/servers/danielfleischer/mu-mcp
+    desc: ""
+    name: danielfleischer/mu-mcp
+  - url: https://mcpservers.org/servers/usadamasa/orm-discovery-mcp-go
+    desc: ""
+    name: usadamasa/orm-discovery-mcp-go
+  - url: https://mcpservers.org/servers/asachs01/propublica-mcp
+    desc: ""
+    name: asachs01/propublica-mcp
+  - url: https://mcpservers.org/servers/orliesaurus/pulsemcp-server
+    desc: ""
+    name: orliesaurus/pulsemcp-server
+  - url: https://mcpservers.org/servers/ReexpressAI/reexpress_mcp_server
+    desc: ""
+    name: ReexpressAI/reexpress_mcp_server
+  - url: https://mcpservers.org/servers/skydeckai/rememberizer-mcp-company-data-ck
+    desc: ""
+    name: skydeckai/rememberizer-mcp-company-data-ck
+  - url: https://mcpservers.org/servers/lignertys/reddit-insights-mcp
+    desc: ""
+    name: lignertys/reddit-insights-mcp
+  - url: https://mcpservers.org/servers/kpetrovsky/kp-ripgrep-mcp
+    desc: ""
+    name: kpetrovsky/kp-ripgrep-mcp
+  - url: https://mcpservers.org/servers/api-stackexchange-com-docs-mcp-server
+    desc: ""
+    name: api-stackexchange-com-docs-mcp-server
+  - url: https://mcpservers.org/servers/suhail-ak-s/mcp-typesense-server
+    desc: ""
+    name: suhail-ak-s/mcp-typesense-server
+  - url: https://mcpservers.org/servers/avarant/typesense-mcp-server
+    desc: ""
+    name: avarant/typesense-mcp-server
+  - url: https://mcpservers.org/servers/boodrow/MCP-Server-unified-docs-hub
+    desc: ""
+    name: boodrow/MCP-Server-unified-docs-hub
+  - url: https://mcpservers.org/servers/Rudra-ravi/wikipedia-mcp
+    desc: ""
+    name: Rudra-ravi/wikipedia-mcp
+  - url: https://mcpservers.org/servers/progamesigner/wikipedia-mcp
+    desc: ""
+    name: progamesigner/wikipedia-mcp
+  - url: https://mcpservers.org/servers/bhubbb/mcp-se-wikipedia
+    desc: ""
+    name: bhubbb/mcp-se-wikipedia
+  - url: https://mcpservers.org/servers/SecretiveShell/MCP-wolfram-alpha
+    desc: ""
+    name: SecretiveShell/MCP-wolfram-alpha
+  - url: https://mcpservers.org/servers/Garoth/wolframalpha-llm-mcp
+    desc: ""
+    name: Garoth/wolframalpha-llm-mcp
+  - url: https://mcpservers.org/servers/akalaric/mcp-wolframalpha
+    desc: ""
+    name: akalaric/mcp-wolframalpha
+  - url: https://mcpservers.org/servers/brysgo/webrtc-mcp-chat
+    desc: ""
+    name: brysgo/webrtc-mcp-chat
+  - url: https://mcpservers.org/servers/codyburleson/4th-brain-mcp-server
+    desc: ""
+    name: codyburleson/4th-brain-mcp-server
+  - url: https://mcpservers.org/servers/coladapo/cognitive-compass-mcp
+    desc: ""
+    name: coladapo/cognitive-compass-mcp
+  - url: https://mcpservers.org/servers/teknologika/deck-builder-mcp
+    desc: ""
+    name: teknologika/deck-builder-mcp
+  - url: https://mcpservers.org/servers/teknologika/Deckbuilder
+    desc: ""
+    name: teknologika/Deckbuilder
+  - url: https://mcpservers.org/servers/landicefu/divide-and-conquer-mcp-server
+    desc: ""
+    name: landicefu/divide-and-conquer-mcp-server
+  - url: https://mcpservers.org/servers/yamasite/GlobalizationWritingMCP
+    desc: ""
+    name: yamasite/GlobalizationWritingMCP
+  - url: https://mcpservers.org/servers/marcinwyszynski/featurebase-mcp
+    desc: ""
+    name: marcinwyszynski/featurebase-mcp
+  - url: https://mcpservers.org/servers/Quinncuatro/jane-mcp-server
+    desc: ""
+    name: Quinncuatro/jane-mcp-server
+  - url: https://mcpservers.org/servers/linxule/lotus-wisdom-mcp
+    desc: ""
+    name: linxule/lotus-wisdom-mcp
+  - url: https://mcpservers.org/servers/JDJR2024/markdownify-mcp-utf8
+    desc: ""
+    name: JDJR2024/markdownify-mcp-utf8
+  - url: https://mcpservers.org/servers/cyanheads/workflows-mcp-server
+    desc: ""
+    name: cyanheads/workflows-mcp-server
+  - url: https://mcpservers.org/servers/snapspecter/mcp-meta-mind
+    desc: ""
+    name: snapspecter/mcp-meta-mind
+  - url: https://mcpservers.org/servers/AllenNeuralDynamics/aind-metadata-mcp
+    desc: ""
+    name: AllenNeuralDynamics/aind-metadata-mcp
+  - url: https://mcpservers.org/servers/briancasteel/charity-mcp-server
+    desc: ""
+    name: briancasteel/charity-mcp-server
+  - url: https://mcpservers.org/servers/QuentinCody/civic-mcp-server
+    desc: ""
+    name: QuentinCody/civic-mcp-server
+  - url: https://mcpservers.org/servers/batprem/set-mcp
+    desc: ""
+    name: batprem/set-mcp
+  - url: https://mcpservers.org/servers/nsxdavid/surrealdb-mcp-server
+    desc: ""
+    name: nsxdavid/surrealdb-mcp-server
+  - url: https://mcpservers.org/servers/angrysky56/openended-philosophy-mcp
+    desc: ""
+    name: angrysky56/openended-philosophy-mcp
+  - url: https://mcpservers.org/servers/superlines/mcp-server
+    desc: ""
+    name: superlines/mcp-server
+  - url: https://mcpservers.org/servers/dash0hq/mcp-dash0
+    desc: ""
+    name: dash0hq/mcp-dash0
+  - url: https://mcpservers.org/servers/Phoenixrr2113/debugger-mcp
+    desc: ""
+    name: Phoenixrr2113/debugger-mcp
+  - url: https://mcpservers.org/servers/patent-dev-patent-connector
+    desc: ""
+    name: patent-dev-patent-connector
+  - url: https://mcpservers.org/servers/Saml1211/PRD-MCP-Server
+    desc: ""
+    name: Saml1211/PRD-MCP-Server
+  - url: https://mcpservers.org/servers/TerLand0berver/problem-solving-mcp
+    desc: ""
+    name: TerLand0berver/problem-solving-mcp
+  - url: https://mcpservers.org/servers/cardinalblue/prompt-book-mcp-server
+    desc: ""
+    name: cardinalblue/prompt-book-mcp-server
+  - url: https://mcpservers.org/servers/abhichandra21/promptheus
+    desc: ""
+    name: abhichandra21/promptheus
+  - url: https://mcpservers.org/servers/github-com-llxxbb-mcp-prototype
+    desc: ""
+    name: github-com-llxxbb-mcp-prototype
+  - url: https://mcpservers.org/servers/Deepractice/PromptX
+    desc: ""
+    name: Deepractice/PromptX
+  - url: https://mcpservers.org/servers/roampal-ai/roampal-core
+    desc: ""
+    name: roampal-ai/roampal-core
+  - url: https://mcpservers.org/servers/Swan-and-Co-Innovations/MCP
+    desc: ""
+    name: Swan-and-Co-Innovations/MCP
+  - url: https://mcpservers.org/servers/MushroomFleet/UNO-MCP
+    desc: ""
+    name: MushroomFleet/UNO-MCP
+  - url: https://mcpservers.org/servers/jasnonaz/vibe-worldbuilding-mcp
+    desc: ""
+    name: jasnonaz/vibe-worldbuilding-mcp
+  - url: https://mcpservers.org/servers/mikewei/whiteboard-mcp
+    desc: ""
+    name: mikewei/whiteboard-mcp
+  - url: https://mcpservers.org/servers/drAbreu/alex-mcp
+    desc: ""
+    name: drAbreu/alex-mcp
+  - url: https://mcpservers.org/servers/github-com-embassy-of-the-free-mind-sourcelibrary-v2-tree-main-mcp-server
+    desc: ""
+    name: github-com-embassy-of-the-free-mind-sourcelibrary-v2-tree-main-mcp-server

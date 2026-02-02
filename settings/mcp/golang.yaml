@@ -1,0 +1,20 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/captjt/godoc-mcp
+    desc: ""
+    name: captjt/godoc-mcp
+  - url: https://mcpservers.org/servers/yikakia/godoc-mcp-server
+    desc: ""
+    name: yikakia/godoc-mcp-server
+lsp:
+  - url: https://mcpservers.org/servers/hloiseaufcms/mcp-gopls
+    desc: ""
+    name: hloiseaufcms/mcp-gopls
+profiling:
+  - url: https://mcpservers.org/servers/ZephyrDeng/pprof-analyzer-mcp
+    desc: ""
+    name: ZephyrDeng/pprof-analyzer-mcp
+packages:
+  - url: https://mcpservers.org/servers/tenkoh/recent-go-mcp
+    desc: ""
+    name: tenkoh/recent-go-mcp

@@ -30,6 +30,9 @@ function preprocessFormulas(formulas) {
 
     if (formula.install) {
       Object.assign(formula, formula.install);
+      if (formula.install.build_system) {
+        formula["build_system_is_" + formula.install.build_system] = true;
+      }
     }
 
     if (formula.service) {

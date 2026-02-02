@@ -13,3 +13,36 @@ check:
 # Run tests
 test: check
     echo "TODO: additional plugin-specific tests"
+
+# Install friction MCP servers (clone + build from source)
+[confirm("This will clone 3 git repos into .mcp-servers/ and build them. Continue?")]
+install-friction-servers:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "{{justfile_directory()}}"
+    mkdir -p .mcp-servers
+
+    # json-validate (BUZDOLAPCI) — JSON Schema validation
+    echo "==> Cloning json-validate..."
+    git clone --depth 1 https://github.com/BUZDOLAPCI/json-validate.git .mcp-servers/json-validate 2>/dev/null || \
+        git -C .mcp-servers/json-validate pull
+    cd .mcp-servers/json-validate && npm install && npm run build && cd ../..
+
+    # jsondiffpatch (benjamine) — JSON diff MCP
+    echo "==> Cloning jsondiffpatch..."
+    git clone --depth 1 https://github.com/benjamine/jsondiffpatch.git .mcp-servers/jsondiffpatch 2>/dev/null || \
+        git -C .mcp-servers/jsondiffpatch pull
+    cd .mcp-servers/jsondiffpatch && npm install && npm run build -w packages/diff-mcp && cd ../..
+
+    # berrydev-ai/json-mcp-server — JSON read/write/query
+    echo "==> Cloning json-mcp-server..."
+    git clone --depth 1 https://github.com/berrydev-ai/json-mcp-server.git .mcp-servers/json-mcp-server 2>/dev/null || \
+        git -C .mcp-servers/json-mcp-server pull
+    cd .mcp-servers/json-mcp-server && npm install && cd ../..
+
+    # Merge .mcp.friction.json into .mcp.json
+    echo "==> Merging .mcp.friction.json into .mcp.json..."
+    jq -s '.[0] * {mcp: {servers: (.[0].mcp.servers + .[1].mcp.servers)}}' \
+        .mcp.json .mcp.friction.json > .mcp.json.tmp && mv .mcp.json.tmp .mcp.json
+
+    echo "==> Done. Friction MCP servers installed and merged into .mcp.json"

@@ -1,0 +1,84 @@
+--- 
+gdb:
+  - url: https://mcpservers.org/servers/smadi0x86/GDB-MCP
+    desc: ""
+    name: smadi0x86/GDB-MCP
+  - url: https://mcpservers.org/servers/pansila/mcp_server_gdb
+    desc: ""
+    name: pansila/mcp_server_gdb
+ghidra:
+  - url: https://mcpservers.org/servers/themixednuts/GhidraMCP
+    desc: ""
+    name: themixednuts/GhidraMCP
+  - url: https://mcpservers.org/servers/Bamimore-Tomi/ghidra_mcp
+    desc: ""
+    name: Bamimore-Tomi/ghidra_mcp
+  - url: https://mcpservers.org/servers/LaurieWired/GhidraMCP
+    desc: ""
+    name: LaurieWired/GhidraMCP
+ida-pro:
+  - url: https://mcpservers.org/servers/cnitlrt/headless-ida-mcp-server
+    desc: ""
+    name: cnitlrt/headless-ida-mcp-server
+  - url: https://mcpservers.org/servers/github-com-mxiris-reverse-engineering-ida-mcp-server
+    desc: ""
+    name: github-com-mxiris-reverse-engineering-ida-mcp-server
+  - url: https://mcpservers.org/servers/fdrechsler/mcp-server-idapro
+    desc: ""
+    name: fdrechsler/mcp-server-idapro
+  - url: https://mcpservers.org/servers/mrexodia/ida-pro-mcp
+    desc: ""
+    name: mrexodia/ida-pro-mcp
+malware-analysis:
+  - url: https://mcpservers.org/servers/MCP-Mirror/abdessamad-elamrani_MalwareAnalyzerMCP
+    desc: ""
+    name: MCP-Mirror/abdessamad-elamrani_MalwareAnalyzerMCP
+  - url: https://mcpservers.org/servers/mytechnotalent/MalwareBazaar_MCP
+    desc: ""
+    name: mytechnotalent/MalwareBazaar_MCP
+volatility:
+  - url: https://mcpservers.org/servers/Gaffx/volatility-mcp
+    desc: ""
+    name: Gaffx/volatility-mcp
+  - url: https://mcpservers.org/servers/Kirandawadi/volatility3-mcp
+    desc: ""
+    name: Kirandawadi/volatility3-mcp
+  - url: https://mcpservers.org/servers/bornpresident/Volatility-MCP-Server
+    desc: ""
+    name: bornpresident/Volatility-MCP-Server
+windows:
+  - url: https://mcpservers.org/servers/capuluscodeninja/mcp-win-ai-dbg
+    desc: ""
+    name: capuluscodeninja/mcp-win-ai-dbg
+  - url: https://mcpservers.org/servers/SimonB97/win-cli-mcp-server
+    desc: ""
+    name: SimonB97/win-cli-mcp-server
+  - url: https://mcpservers.org/servers/SecretiveShell/mcp-windows
+    desc: ""
+    name: SecretiveShell/mcp-windows
+  - url: https://mcpservers.org/servers/Wasdubya/x64dbgMCP
+    desc: ""
+    name: Wasdubya/x64dbgMCP
+  - url: https://mcpservers.org/servers/spences10/mcp-wsl-exec
+    desc: ""
+    name: spences10/mcp-wsl-exec
+network-forensics:
+  - url: https://mcpservers.org/servers/0xKoda/WireMCP
+    desc: ""
+    name: 0xKoda/WireMCP
+  - url: https://mcpservers.org/servers/Gabbo01/Zeek-MCP
+    desc: ""
+    name: Gabbo01/Zeek-MCP
+decompilers:
+  - url: https://mcpservers.org/servers/idachev/mcp-javadc
+    desc: ""
+    name: idachev/mcp-javadc
+  - url: https://mcpservers.org/servers/rand-tech/pcm
+    desc: ""
+    name: rand-tech/pcm
+  - url: https://mcpservers.org/servers/urldna/mcp
+    desc: ""
+    name: urldna/mcp
+  - url: https://mcpservers.org/servers/urlbox/urlbox-mcp-server
+    desc: ""
+    name: urlbox/urlbox-mcp-server

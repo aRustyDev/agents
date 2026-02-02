@@ -1,0 +1,28 @@
+--- 
+docs:
+  - url: https://mcpservers.org/servers/usecroft/laravel
+    desc: ""
+    name: usecroft/laravel
+codebase:
+  - url: https://mcpservers.org/servers/Capevace/laravel-codebase-mcp
+    desc: ""
+    name: Capevace/laravel-codebase-mcp
+development:
+  - url: https://mcpservers.org/servers/brianirish/laravel-mcp-companion
+    desc: ""
+    name: brianirish/laravel-mcp-companion
+deployment:
+  - url: https://mcpservers.org/servers/JordanDalton/laravel-forge-mcp-server
+    desc: ""
+    name: JordanDalton/laravel-forge-mcp-server
+local-dev:
+  - url: https://mcpservers.org/servers/kirschbaum-development/laravel-loop
+    desc: ""
+    name: kirschbaum-development/laravel-loop
+server:
+  - url: https://mcpservers.org/servers/github-com-opgginc-laravel-mcp-server
+    desc: ""
+    name: github-com-opgginc-laravel-mcp-server
+  - url: https://mcpservers.org/servers/php-mcp/laravel
+    desc: ""
+    name: php-mcp/laravel

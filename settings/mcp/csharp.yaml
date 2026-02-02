@@ -1,0 +1,9 @@
+--- 
+refactoring:
+  - url: https://mcpservers.org/servers/dave-hillier/refactor-mcp
+    desc: ""
+    name: dave-hillier/refactor-mcp
+roslyn:
+  - url: https://mcpservers.org/servers/carquiza/RoslynMCP
+    desc: ""
+    name: carquiza/RoslynMCP

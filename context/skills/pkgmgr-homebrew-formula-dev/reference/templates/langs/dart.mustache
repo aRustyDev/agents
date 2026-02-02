@@ -1,0 +1,3 @@
+    system "dart", "pub", "get"
+    system "dart", "compile", "{{#compile_target}}{{compile_target}}{{/compile_target}}{{^compile_target}}exe{{/compile_target}}", "{{#source_file}}{{source_file}}{{/source_file}}{{^source_file}}bin/main.dart{{/source_file}}", "-o", "{{formula_name}}"
+    bin.install "{{formula_name}}"

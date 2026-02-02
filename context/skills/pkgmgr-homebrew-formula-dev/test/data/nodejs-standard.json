@@ -1,0 +1,27 @@
+{
+  "formulas": [
+    {
+      "name": "my-node-tool",
+      "desc": "A Node.js CLI tool",
+      "homepage": "https://github.com/example/my-node-tool",
+      "url": "https://registry.npmjs.org/my-node-tool/-/my-node-tool-1.0.0.tgz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "nodejs",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":npm"
+      },
+      "dependencies": [
+        { "name": "node" }
+      ],
+      "install": {
+        "node_version": "node"
+      },
+      "test": {
+        "command": "system bin/\"my-node-tool\", \"--version\"",
+        "expected_output": "my-node-tool"
+      }
+    }
+  ]
+}

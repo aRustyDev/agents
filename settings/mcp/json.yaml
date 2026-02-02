@@ -1,0 +1,20 @@
+--- 
+query:
+  - url: https://mcpservers.org/servers/joshrotenberg/jmespath-extensions
+    desc: ""
+    name: joshrotenberg/jmespath-extensions
+diff:
+  - url: https://mcpservers.org/servers/YohanLiu/mcp-jsondiff
+    desc: ""
+    name: YohanLiu/mcp-jsondiff
+placeholder:
+  - url: https://mcpservers.org/servers/danielpdev/mcp-JSONPlaceholder
+    desc: ""
+    name: danielpdev/mcp-JSONPlaceholder
+tools:
+  - url: https://mcpservers.org/servers/VadimNastoyashchy/json-mcp
+    desc: ""
+    name: VadimNastoyashchy/json-mcp
+  - url: https://mcpservers.org/servers/VRSoda/MCP_JSON
+    desc: ""
+    name: VRSoda/MCP_JSON

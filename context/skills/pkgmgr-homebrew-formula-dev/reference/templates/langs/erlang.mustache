@@ -1,0 +1,2 @@
+    system "rebar3", "escriptize"{{#rebar3_args}}, "{{.}}"{{/rebar3_args}}
+    bin.install "_build/default/bin/{{formula_name}}"

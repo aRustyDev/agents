@@ -1,0 +1,21 @@
+--- 
+blogging:
+  - url: https://mcpservers.org/servers/rawveg/devtomcp
+    desc: ""
+    name: rawveg/devtomcp
+reddit:
+  - url: https://mcpservers.org/servers/reddit/devvit-mcp
+    desc: ""
+    name: reddit/devvit-mcp
+diff:
+  - url: https://mcpservers.org/servers/peteretelej/diffchunk
+    desc: ""
+    name: peteretelej/diffchunk
+tag-manager:
+  - url: https://mcpservers.org/servers/neep305/mcp-for-gtm
+    desc: ""
+    name: neep305/mcp-for-gtm
+animation:
+  - url: https://mcpservers.org/servers/abhiemj/manim-mcp-server
+    desc: ""
+    name: abhiemj/manim-mcp-server

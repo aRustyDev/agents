@@ -1,0 +1,16 @@
+--- 
+local-dev:
+  - url: https://mcpservers.org/servers/AkibaAT/ddev-mcp
+    desc: ""
+    name: AkibaAT/ddev-mcp
+framework:
+  - url: https://mcpservers.org/servers/php-mcp/laravel
+    desc: ""
+    name: php-mcp/laravel
+server:
+  - url: https://mcpservers.org/servers/php-mcp/server
+    desc: ""
+    name: php-mcp/server
+  - url: https://mcpservers.org/servers/taiki-ssss/php-mcp
+    desc: ""
+    name: taiki-ssss/php-mcp

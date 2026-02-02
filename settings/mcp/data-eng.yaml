@@ -1,0 +1,62 @@
+--- 
+general:
+  - url: https://mcpservers.org/servers/scriptstar/de-mcp-server
+    desc: ""
+    name: scriptstar/de-mcp-server
+  - url: https://mcpservers.org/servers/emircansoftware/MCP_DataScience
+    desc: ""
+    name: emircansoftware/MCP_DataScience
+enrichment:
+  - url: https://mcpservers.org/servers/MSAdministrator/enrichment-mcp
+    desc: ""
+    name: MSAdministrator/enrichment-mcp
+data-platforms:
+  - url: https://mcpservers.org/servers/fusedio/fused-mcp
+    desc: ""
+    name: fusedio/fused-mcp
+  - url: https://mcpservers.org/servers/jettyio/mlcbakery
+    desc: ""
+    name: jettyio/mlcbakery
+kafka:
+  - url: https://mcpservers.org/servers/shivamxtech/kafka-mcp
+    desc: ""
+    name: shivamxtech/kafka-mcp
+  - url: https://mcpservers.org/servers/aywengo/kafka-schema-reg-mcp
+    desc: ""
+    name: aywengo/kafka-schema-reg-mcp
+kaggle:
+  - url: https://mcpservers.org/servers/www-kaggle-com-docs-mcp
+    desc: ""
+    name: www-kaggle-com-docs-mcp
+orchestration:
+  - url: https://mcpservers.org/servers/fortunto2/prefect-mcp-server
+    desc: ""
+    name: fortunto2/prefect-mcp-server
+  - url: https://mcpservers.org/servers/allen-munsch/mcp-prefect
+    desc: ""
+    name: allen-munsch/mcp-prefect
+sensors:
+  - url: https://mcpservers.org/servers/sensormcp/sensor-mcp
+    desc: ""
+    name: sensormcp/sensor-mcp
+data-structuring:
+  - url: https://mcpservers.org/servers/pcliu/structurize-mcp
+    desc: ""
+    name: pcliu/structurize-mcp
+  - url: https://mcpservers.org/servers/Unstructured-IO/UNS-MCP
+    desc: ""
+    name: Unstructured-IO/UNS-MCP
+  - url: https://mcpservers.org/servers/ReexpressAI/reexpress_mcp_server
+    desc: ""
+    name: ReexpressAI/reexpress_mcp_server
+dbt:
+  - url: https://mcpservers.org/servers/dbt-labs/dbt-mcp
+    desc: ""
+    name: dbt-labs/dbt-mcp
+  - url: https://mcpservers.org/servers/mattijsdp/dbt-docs-mcp
+    desc: ""
+    name: mattijsdp/dbt-docs-mcp
+datasets:
+  - url: https://mcpservers.org/servers/privetin/dataset-viewer
+    desc: ""
+    name: privetin/dataset-viewer

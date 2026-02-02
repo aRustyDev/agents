@@ -1,0 +1,9 @@
+--- 
+automation:
+  - url: https://mcpservers.org/servers/iamsnh01/test-automator
+    desc: ""
+    name: iamsnh01/test-automator
+vitest:
+  - url: https://mcpservers.org/servers/fyuuki0jp/testing-mcp-vitest
+    desc: ""
+    name: fyuuki0jp/testing-mcp-vitest
