@@ -45,7 +45,14 @@
       "**/*.ts",
       "**/*.tsx",
       "**/*.mjs",
-      "**/*.cjs"
+      "**/*.cjs",
+      "!node_modules/**",
+      "!dist/**",
+      "!build/**",
+      "!*.min.*",
+      "!context/.context/**",
+      "!context/skills/**/examples/**",
+      "!context/skills/**/references/**"
     ]
   }
 }

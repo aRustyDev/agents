@@ -20,14 +20,15 @@ Tool configs: `.github/pre-commit/`
 ├── ruff.toml                    # Python linting
 ├── rumdl.toml                   # Markdown linting
 ├── sqlfluff.cfg                 # SQL linting
-└── yamllint.yaml                # YAML linting
+├── yamllint.yaml                # YAML linting
+└── words/                       # CSpell dictionaries
+    ├── project.txt              # Project-specific terms
+    └── tools.txt                # Tool/library names
 
-# Symlinks in root (tools requiring root config discovery)
-biome.json -> .github/pre-commit/biome.json
-.cspell.json -> .github/pre-commit/cspell.json
-ruff.toml -> .github/pre-commit/ruff.toml
-rumdl.toml -> .github/pre-commit/rumdl.toml
-.sqlfluff -> .github/pre-commit/sqlfluff.cfg
+.data/cache/                     # Tool caches (gitignored)
+├── lychee/                      # Link checker cache
+├── ruff/                        # Python linter cache
+└── rumdl/                       # Markdown linter cache
 ```
 
 ## Hook Sources
@@ -44,17 +45,17 @@ rumdl.toml -> .github/pre-commit/rumdl.toml
 | `adrienverge/yamllint` | v1.38.0 | yamllint |
 | `sqlfluff/sqlfluff` | 4.0.0 | sqlfluff-lint, sqlfluff-fix |
 | `lycheeverse/lychee` | lychee-v0.18.0 | lychee |
+| `rvben/rumdl-pre-commit` | v0.1.11 | rumdl |
+| `aRustyDev/shellharden` | v0.1.0 | shellharden (fork with pre-commit hooks) |
 
-### Local Hooks (No Public Repo Available)
+### Local Hooks (Project-Specific)
 
 | Hook | Tool | Reason |
 |------|------|--------|
-| rumdl-check/fix | rumdl | Rust tool, no pre-commit repo |
-| shellharden | shellharden | No official pre-commit repo |
-| cspell | cspell | No official pre-commit hook repo |
-| cclint | scripts/lint-context.sh | Project-specific |
-| brewfile-lint | ruby -c | Project-specific |
-| justfile-check/format | just | Project-specific |
+| cspell | cspell | Custom dictionaries in `.github/pre-commit/words/` |
+| cclint | scripts/lint-context.sh | Project-specific Claude context validation |
+| brewfile-lint | ruby -c | Project-specific build file |
+| justfile-check/format | just | Project-specific build file |
 | json-validate | python3 | Explicit validation beyond check-json |
 
 ## Explicit Config Paths

@@ -3,6 +3,7 @@
 
 target-version = "py311"
 line-length = 100
+cache-dir = ".data/cache/ruff"
 
 [lint]
 select = [

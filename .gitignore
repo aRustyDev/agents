@@ -23,3 +23,7 @@ htmlcov/
 .claude_consciousness.m8
 models/
 documents/
+
+# Tool caches
+.data/cache/
+.lycheecache

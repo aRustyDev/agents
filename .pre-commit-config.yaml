@@ -4,7 +4,7 @@
 # Update: pre-commit autoupdate
 #
 # Config files: .github/pre-commit/
-# Symlinks in root for tools requiring root config discovery
+# Cache directories: .data/cache/
 
 # Fail fast on first error
 fail_fast: false
@@ -68,22 +68,21 @@ repos:
         exclude: 'context/\.context/legacy/.*'
 
   # =============================================================================
-  # Markdown Linting (rumdl) - Local, no public hook
+  # Markdown Linting (rumdl)
   # =============================================================================
-  - repo: local
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.1.11
     hooks:
-      - id: rumdl-check
+      - id: rumdl
         name: "markdown: rumdl check"
-        entry: rumdl check --config .github/pre-commit/rumdl.toml
-        language: system
-        types: [markdown]
-
-      - id: rumdl-fix
-        name: "markdown: rumdl fix"
-        entry: rumdl fmt --config .github/pre-commit/rumdl.toml
-        language: system
-        types: [markdown]
-        stages: [manual]
+        args:
+          - '--config=.github/pre-commit/rumdl.toml'
+        exclude: |
+          (?x)^(
+            context/\.context/.*|
+            context/skills/.*/examples/.*|
+            context/skills/.*/references/.*
+          )$
 
   # =============================================================================
   # Link Checking (lychee)
@@ -102,6 +101,12 @@ repos:
           - '--exclude=127.0.0.1'
           - '--exclude=^#'
         types: [markdown]
+        exclude: |
+          (?x)^(
+            context/\.context/.*|
+            context/skills/.*/examples/.*|
+            context/skills/.*/references/.*
+          )$
 
   # =============================================================================
   # YAML Linting (yamllint)
@@ -115,7 +120,7 @@ repos:
           - '--config-file=.github/pre-commit/yamllint.yaml'
 
   # =============================================================================
-  # JSON Linting - Local (explicit validation)
+  # JSON Linting - Local (explicit validation beyond check-json)
   # =============================================================================
   - repo: local
     hooks:
@@ -126,29 +131,40 @@ repos:
         types: [json]
 
   # =============================================================================
-  # Spell Checking (cspell) - Local, no official public hook
+  # Spell Checking (cspell) - Local, uses config with multiple dictionaries
   # =============================================================================
   - repo: local
     hooks:
       - id: cspell
         name: "spelling: cspell check"
-        entry: cspell lint --config .github/pre-commit/cspell.json
+        entry: cspell lint --config .github/pre-commit/cspell.json --no-progress --no-summary
         language: system
         types: [text]
-        args:
-          - '--no-progress'
-          - '--no-summary'
         exclude: |
           (?x)^(
             .*\.sql$|
             .*\.lock$|
+            .*\.tex$|
             .*\.min\..*|
             package-lock\.json$|
-            uv\.lock$
+            uv\.lock$|
+            context/\.context/.*|
+            context/skills/.*/examples/.*|
+            context/skills/.*/references/.*|
+            context/skills/.*/assets/.*|
+            context/skills/convert-.*|
+            context/skills/analysis\.md$|
+            context/rules/schemas\.md$|
+            settings/mcp/.*|
+            settings/claude/.*|
+            context/skills/pkgmgr-homebrew-formula-dev/.*|
+            context/skills/external\.yaml$|
+            assets/templates/.*|
+            context/plugins/homebrew-dev/skills/.*
           )$
 
   # =============================================================================
-  # Claude Context Linting (cclint) - Local, project-specific
+  # Claude Context Linting (cclint) - Local, requires scripts/lint-context.sh
   # =============================================================================
   - repo: local
     hooks:
@@ -216,15 +232,13 @@ repos:
         stages: [manual]
 
   # =============================================================================
-  # Bash Security (shellharden) - Local, no public hook
+  # Bash Security (shellharden)
   # =============================================================================
-  - repo: local
+  - repo: https://github.com/aRustyDev/shellharden
+    rev: v0.1.0
     hooks:
       - id: shellharden
         name: "bash: shellharden check"
-        entry: shellharden --check
-        language: system
-        types: [shell]
 
   # =============================================================================
   # Brewfile Linting - Local, project-specific
@@ -300,8 +314,9 @@ repos:
             dist/|
             build/|
             .*\.min\..*|
-            context/\.context/legacy/.*|
-            context/skills/.*/examples/.*
+            context/\.context/.*|
+            context/skills/.*/examples/.*|
+            context/skills/.*/references/.*
           )$
 
       - id: biome-format
@@ -316,7 +331,8 @@ repos:
             dist/|
             build/|
             .*\.min\..*|
-            context/\.context/legacy/.*|
-            context/skills/.*/examples/.*
+            context/\.context/.*|
+            context/skills/.*/examples/.*|
+            context/skills/.*/references/.*
           )$
         stages: [manual]

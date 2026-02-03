@@ -17,11 +17,13 @@ disable = [
 
 # Files to exclude
 exclude = [
-    "context/.context/legacy/**",
+    "context/.context/**",
     ".data/**",
     "node_modules/**",
     "dist/**",
     "*.min.*",
+    "context/skills/**/references/**",
+    "context/skills/**/examples/**",
 ]
 
 # Per-file rule ignores
