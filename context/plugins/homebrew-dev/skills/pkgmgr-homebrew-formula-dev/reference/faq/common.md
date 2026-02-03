@@ -1,5 +1,47 @@
 ## Common Issues
 
+### Architecture-Specific Binary Downloads
+
+**Problem:** Need different binaries for ARM (Apple Silicon) vs Intel.
+
+**WRONG (deprecated):**
+```ruby
+# DO NOT use url/sha256 inside on_arm/on_intel blocks
+on_arm do
+  url "https://example.com/tool-arm64.tar.gz"
+  sha256 "abc123..."
+end
+on_intel do
+  url "https://example.com/tool-x86_64.tar.gz"
+  sha256 "def456..."
+end
+```
+
+**CORRECT: Use resource blocks:**
+```ruby
+on_arm do
+  resource "binary" do
+    url "https://example.com/tool-arm64.tar.gz"
+    sha256 "abc123..."
+  end
+end
+
+on_intel do
+  resource "binary" do
+    url "https://example.com/tool-x86_64.tar.gz"
+    sha256 "def456..."
+  end
+end
+
+def install
+  resource("binary").stage do
+    bin.install "tool"
+  end
+end
+```
+
+**Best Practice:** If possible, build from source instead of downloading pre-built binaries. This avoids architecture complexity entirely.
+
 ### CI Failures from Rubocop
 
 **Problem:** `brew style` fails on markdown files containing Ruby code blocks.

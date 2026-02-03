@@ -1,0 +1,33 @@
+# MCP Server Docker Services
+# Usage: docker compose -f .docker/compose.yaml up -d
+
+services:
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    container_name: crawl4ai
+    ports:
+      - "11235:11235"
+    shm_size: 1g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11235/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Optional: LLM API keys for extraction features
+    # env_file:
+    #   - .llm.env
+    # Example .llm.env contents:
+    #   OPENAI_API_KEY=sk-...
+    #   ANTHROPIC_API_KEY=...
+
+# MCP Endpoints (after starting):
+#   - SSE:       http://localhost:11235/mcp/sse
+#   - WebSocket: ws://localhost:11235/mcp/ws
+#   - Schema:    http://localhost:11235/mcp/schema
+#   - Playground: http://localhost:11235/playground
+#   - Monitor:   http://localhost:11235/monitor
+#
+# Add to Claude Code:
+#   claude mcp add --transport sse crawl4ai http://localhost:11235/mcp/sse

@@ -1,10 +1,11 @@
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"
+EMBEDDING_MODEL := "nomic-embed-text"
 
 # Install project dependencies (idempotent)
 [group('install')]
-init: _init-brew _init-python _init-ollama _init-db
+init: _init-brew _init-python _init-docker _init-ollama _init-db
     @echo "✓ Project initialized"
 
 [private]
@@ -18,14 +19,42 @@ _init-python:
     @uv sync --quiet
 
 [private]
+_init-docker: mcp-up
+
+[private]
 _init-ollama:
-    @echo "Ensuring Ollama embedding model..."
-    @ollama list | grep -q "nomic-embed-text" || ollama pull nomic-embed-text
+    #!/usr/bin/env bash
+    echo "Checking Ollama embedding model..."
+    if ollama list 2>/dev/null | grep -q "{{ EMBEDDING_MODEL }}"; then
+        echo "  ✓ {{ EMBEDDING_MODEL }} available"
+    else
+        echo "  Pulling {{ EMBEDDING_MODEL }}..."
+        ollama pull "{{ EMBEDDING_MODEL }}" || echo "  ⚠ Ollama not running - will use sentence-transformers fallback"
+    fi
 
 [private]
 _init-db:
     @echo "Initializing knowledge graph database..."
     @just kg-init
+
+# Docker MCP services
+[group('docker')]
+mcp-up:
+    @"{{ which("docker") }}" compose -f .docker/compose.yaml up -d
+    @echo "✓ MCP services started"
+    @echo "  Add crawl4ai to Claude: claude mcp add --transport sse crawl4ai http://localhost:11235/mcp/sse"
+
+[group('docker')]
+mcp-down:
+    @"{{ which("docker") }}" compose -f .docker/compose.yaml down
+
+[group('docker')]
+mcp-logs service="crawl4ai":
+    @"{{ which("docker") }}" compose -f .docker/compose.yaml logs -f "{{ service }}"
+
+[group('docker')]
+mcp-status:
+    @"{{ which("docker") }}" compose -f .docker/compose.yaml ps
 
 # Install Claude Code components to ~/.claude/
 [group('install')]
@@ -813,52 +842,52 @@ list-plugins:
 # Initialize knowledge graph database
 [group('kg')]
 kg-init:
-    @uv run python scripts/init-db.py
+    @"{{which("uv")}}" run python scripts/init-db.py
 
 # Ingest all context files into knowledge graph
 [group('kg')]
 kg-ingest:
-    @uv run python scripts/embed.py ingest --all
+    @"{{which("uv")}}" run python scripts/embed.py ingest --all
 
 # Check for stale entities
 [group('kg')]
 kg-check:
-    @uv run python scripts/embed.py check
+    @"{{which("uv")}}" run python scripts/embed.py check
 
 # Semantic search
 [group('kg')]
 kg-search query:
-    @uv run python scripts/embed.py search "{{ query }}"
+    @"{{which("uv")}}" run python scripts/embed.py search "{{ query }}"
 
 # Find similar entities
 [group('kg')]
 kg-similar entity:
-    @uv run python scripts/embed.py similar "{{ entity }}"
+    @"{{which("uv")}}" run python scripts/embed.py similar "{{ entity }}"
 
 # Compute similarity cache
 [group('kg')]
 kg-similarity:
-    @uv run python scripts/embed.py similarity
+    @"{{which("uv")}}" run python scripts/embed.py similarity
 
 # Watch for changes and auto-embed
 [group('kg')]
 kg-watch:
-    @uv run python scripts/watch-embed.py
+    @"{{which("uv")}}" run python scripts/watch-embed.py
 
 # Dump knowledge graph to SQL
 [group('kg')]
 kg-dump:
-    @uv run python scripts/embed.py dump
+    @"{{which("uv")}}" run python scripts/embed.py dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
-    @uv run python scripts/init-db.py --load
+    @"{{which("uv")}}" run python scripts/init-db.py --load
 
 # Show knowledge graph statistics
 [group('kg')]
 kg-stats:
-    @uv run python scripts/kg-stats.py
+    @"{{which("uv")}}" run python scripts/kg-stats.py
 
 # Force re-embed all entities
 [group('kg')]

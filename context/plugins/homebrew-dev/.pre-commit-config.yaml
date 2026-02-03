@@ -1,0 +1,42 @@
+# Pre-commit hooks for Homebrew formula development
+# Install: brew install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Ruby syntax check
+  - repo: https://github.com/rubocop/rubocop
+    rev: v1.75.2
+    hooks:
+      - id: rubocop
+        name: rubocop (ruby syntax)
+        files: ^Formula/.*\.rb$
+        args: ['--force-exclusion']
+
+  # Local hooks for Homebrew-specific checks
+  - repo: local
+    hooks:
+      - id: ruby-syntax
+        name: ruby -c (syntax check)
+        entry: ruby -c
+        language: system
+        files: ^Formula/.*\.rb$
+        types: [ruby]
+
+      - id: brew-style
+        name: brew style (formatting)
+        entry: bash -c 'for f in "$@"; do brew style "$f" || exit 1; done' --
+        language: system
+        files: ^Formula/.*\.rb$
+        types: [ruby]
+
+      - id: brew-audit
+        name: brew audit --new (best practices)
+        entry: bash -c 'for f in "$@"; do brew audit --new "$f" || exit 1; done' --
+        language: system
+        files: ^Formula/.*\.rb$
+        types: [ruby]
+        # Set to false if you want audit to be advisory only
+        # verbose: true
+
+# Optional: Skip slow checks during rapid iteration
+# SKIP=brew-audit git commit -m "WIP"

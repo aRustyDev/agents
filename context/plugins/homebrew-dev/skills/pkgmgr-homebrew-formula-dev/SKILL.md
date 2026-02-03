@@ -150,15 +150,47 @@ When creating many formulas at once:
 4. **Create branches/PRs sequentially** — one branch per formula, each from main
 5. **Use `ruby -c *.rb`** to syntax-check all formulas before pushing
 
+## Architecture-Specific Binaries
+
+When a project provides pre-built binaries for different architectures:
+
+**Preferred:** Build from source (avoids architecture complexity)
+
+**If pre-built binaries required:** Use resource blocks, NOT url/sha256 in on_arm/on_intel:
+
+```ruby
+on_arm do
+  resource "binary" do
+    url "https://github.com/org/repo/releases/download/vX.Y.Z/tool-darwin-arm64.tar.gz"
+    sha256 "..."
+  end
+end
+
+on_intel do
+  resource "binary" do
+    url "https://github.com/org/repo/releases/download/vX.Y.Z/tool-darwin-amd64.tar.gz"
+    sha256 "..."
+  end
+end
+
+def install
+  resource("binary").stage do
+    bin.install "tool"
+  end
+end
+```
+
+See `reference/faq/common.md` for details on deprecated patterns.
+
 ## Checklist
 
 - [ ] Research complete (version, license, build system, deps, binary name, default branch)
 - [ ] Formula type determined (standard vs HEAD-only)
 - [ ] SHA256 calculated (if not HEAD-only)
 - [ ] Formula file created at `Formula/<letter>/<name>.rb`
-- [ ] `ruby -c` passes
+- [ ] `ruby -c` passes (syntax check)
 - [ ] `brew audit --new` passes
-- [ ] `brew style arustydev/tap` passes
+- [ ] `brew style` passes (or issues addressed)
 - [ ] `brew install --build-from-source` succeeds
 - [ ] `brew test` passes
 - [ ] Binary executes correctly

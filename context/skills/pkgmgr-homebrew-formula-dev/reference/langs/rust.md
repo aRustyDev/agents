@@ -77,11 +77,32 @@ def install
 end
 ```
 
+### Linux Dependencies (OpenSSL, zlib)
+
+Many Rust crates use `openssl-sys` or `libz-sys` which require system libraries on Linux. macOS includes these, but Homebrew on Linux does not.
+
+```text
+depends_on "rust" => :build
+
+on_linux do
+  depends_on "pkgconf" => :build  # helps cargo find OpenSSL
+  depends_on "openssl@3"
+  depends_on "zlib"
+end
+```
+
+**Important:** Within `on_linux` (or any block), list dependencies in this order:
+1. Build dependencies (`=> :build`) first
+2. Runtime dependencies second
+3. Alphabetically within each category
+
 ### Common Issues
 
 - **Lock file version mismatch:** Ensure the Rust toolchain version matches the project's `Cargo.lock`
 - **Vendored dependencies:** Some projects vendor C libraries — check for `build.rs` and add system deps
 - **uses_from_macos:** Rust projects using `openssl` often need `uses_from_macos "zlib"`
+- **Linkage failures on Linux:** Add `zlib` and `openssl@3` dependencies for Linux (see above)
+- **Binary name mismatch:** Check `Cargo.toml` `[[bin]]` section — the installed binary name may differ from formula name
 
 ### Reference
 

@@ -8,8 +8,12 @@ brew "jq"
 # Python package manager (fast, Rust-based)
 brew "uv"
 
-# AI/ML tools
-brew "ollama"
+# Container runtime
+cask "docker"              # Docker Desktop (includes docker-compose)
 
-# Directory visualization with MCP support
-# brew "smart-tree"
+# AI/ML tools
+brew "ollama", restart_service: :changed
+
+# MCP servers
+brew "smart-tree"
+brew "devrag"

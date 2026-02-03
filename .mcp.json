@@ -1,26 +1,12 @@
 {
   "mcpServers": {
-    "crawl4ai": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/walksoda/crawl-mcp",
-        "crawl-mcp"
-      ]
-    },
-    "markdownify": {
-      "command": "node",
-      "args": [
-        "${HOME}/.local/share/mcp/markdownify-mcp/dist/index.js"
-      ]
-    },
     "smart-tree": {
       "command": "st",
       "args": ["--mcp"]
     },
     "text-editor": {
       "command": "uvx",
-      "args": ["mcp-text-editor"]
+      "args": ["--python", "3.12", "mcp-text-editor"]
     },
     "mindmap": {
       "command": "uvx",
@@ -32,7 +18,7 @@
     },
     "devrag": {
       "command": "devrag",
-      "args": []
+      "args": ["-config", ".claude/devrag.json"]
     }
   }
 }

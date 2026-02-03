@@ -150,15 +150,76 @@ When creating many formulas at once:
 4. **Create branches/PRs sequentially** — one branch per formula, each from main
 5. **Use `ruby -c *.rb`** to syntax-check all formulas before pushing
 
+## Architecture-Specific Binaries
+
+When a project provides pre-built binaries for different architectures:
+
+**Preferred:** Build from source (avoids architecture complexity)
+
+**If pre-built binaries required:** Use resource blocks, NOT url/sha256 in on_arm/on_intel:
+
+```ruby
+on_arm do
+  resource "binary" do
+    url "https://github.com/org/repo/releases/download/vX.Y.Z/tool-darwin-arm64.tar.gz"
+    sha256 "..."
+  end
+end
+
+on_intel do
+  resource "binary" do
+    url "https://github.com/org/repo/releases/download/vX.Y.Z/tool-darwin-amd64.tar.gz"
+    sha256 "..."
+  end
+end
+
+def install
+  resource("binary").stage do
+    bin.install "tool"
+  end
+end
+```
+
+See `reference/faq/common.md` for details on deprecated patterns.
+
+## Common Pitfalls
+
+### Dependency Issues
+
+| Problem | Symptom | Solution |
+|---------|---------|----------|
+| Missing runtime dependency | `brew linkage --test` shows broken deps | Add dependency globally, not just in `on_linux` |
+| Wrong dependency order | `brew style` fails with ordering error | Build deps (`=> :build`) before runtime deps, alphabetically within each |
+| Rust + OpenSSL linkage | Linkage test shows `libssl.3.dylib` broken | Add `depends_on "openssl@3"` globally (not just Linux) if binary links dynamically |
+
+### Python Formula Issues
+
+| Problem | Symptom | Solution |
+|---------|---------|----------|
+| `pip_install buildpath` missing deps | `ModuleNotFoundError` at runtime | Use `pip_install "package==#{version}"` to install from PyPI |
+| PyPI name differs from repo | pip can't find package | Check `pyproject.toml` for actual `name` field (e.g., `ktool` → `k2l`) |
+| Missing setuptools | `No module named 'pkg_resources'` | Add `venv.pip_install "setuptools"` before main package |
+| Wrong pip invocation | `Failed to execute: .../libexec/bin/pip` | Use `venv.pip_install`, not `system libexec/"bin/pip"` |
+
+### Test Block Issues
+
+| Problem | Symptom | Solution |
+|---------|---------|----------|
+| Binary name mismatch | Test can't find binary | Check `Cargo.toml [[bin]]` or `pyproject.toml [project.scripts]` for actual name |
+| Help text mismatch | `assert_match` fails | Run binary locally to verify actual output before writing test |
+| Output to stderr | `shell_output` returns empty | Add `2>&1` redirect: `shell_output("#{bin}/tool --help 2>&1")` |
+
+See `reference/faq/common.md` for detailed explanations and additional issues.
+
 ## Checklist
 
 - [ ] Research complete (version, license, build system, deps, binary name, default branch)
 - [ ] Formula type determined (standard vs HEAD-only)
 - [ ] SHA256 calculated (if not HEAD-only)
 - [ ] Formula file created at `Formula/<letter>/<name>.rb`
-- [ ] `ruby -c` passes
+- [ ] `ruby -c` passes (syntax check)
 - [ ] `brew audit --new` passes
-- [ ] `brew style arustydev/tap` passes
+- [ ] `brew style` passes (or issues addressed)
 - [ ] `brew install --build-from-source` succeeds
 - [ ] `brew test` passes
 - [ ] Binary executes correctly

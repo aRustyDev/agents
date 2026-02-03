@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; if [[ \"$FILE\" == Formula/*/*.rb ]]; then echo \"🔍 Validating formula: $FILE\"; ruby -c \"$FILE\" && echo \"✓ Ruby syntax OK\" || exit 1; fi'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; if [[ \"$FILE\" == Formula/*/*.rb ]]; then echo \"🎨 Style check...\"; brew style \"$FILE\" 2>&1 | head -20; echo \"✓ Style check complete\"; fi'",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; if [[ \"$FILE\" == Formula/*/*.rb ]]; then echo \"📋 Audit check...\"; brew audit --new \"$FILE\" 2>&1 | head -30 || echo \"⚠ Audit issues found (review above)\"; fi'",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+  "_comments": {
+    "brew_test": "brew test requires installation first. Run manually: brew install --build-from-source <formula> && brew test <formula>",
+    "validation_order": "1. ruby -c (syntax), 2. brew style (formatting), 3. brew audit (Homebrew rules)"
+  }
+}
