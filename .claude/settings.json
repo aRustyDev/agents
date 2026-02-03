@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.sh) shellcheck --severity=warning --shell=bash \"$FILE\" && echo \"✓ shellcheck passed\";; esac; true'",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.sh) shfmt -d -i=2 -ci \"$FILE\" && echo \"✓ shfmt passed\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.sh) shellharden --check \"$FILE\" && echo \"✓ shellharden passed\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.md) rumdl check \"$FILE\" 2>&1 | grep -v \"^warning:\" | head -20; echo \"✓ rumdl checked\";; esac; true'",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.sql) SIZE=$(stat -f%z \"$FILE\" 2>/dev/null || stat -c%s \"$FILE\" 2>/dev/null); if [ \"$SIZE\" -gt 52428800 ]; then echo \"SQL file exceeds 50MB: $((SIZE/1048576))MB\"; exit 1; fi; echo \"✓ SQL size OK\";; esac; true'",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; NAME=$(basename \"$FILE\"); case \"$NAME\" in brewfile|Brewfile) ruby -c \"$FILE\" >/dev/null && echo \"✓ brewfile syntax OK\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; NAME=$(basename \"$FILE\"); case \"$NAME\" in justfile|Justfile) just --check --fmt --unstable -f \"$FILE\" && echo \"✓ justfile syntax OK\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.py) ruff check \"$FILE\" && echo \"✓ ruff check passed\";; esac; true'",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.js|*.jsx|*.ts|*.tsx|*.mjs|*.cjs) biome check \"$FILE\" && echo \"✓ biome check passed\";; esac; true'",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.yaml|*.yml) yamllint -d \"{extends: default, rules: {line-length: {max: 120}, truthy: disable}}\" \"$FILE\" && echo \"✓ yamllint passed\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.json) python3 -c \"import json; json.load(open(\\\"$FILE\\\"))\" && echo \"✓ JSON syntax OK\";; esac; true'",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in context/*.md|.claude/*.md|CLAUDE.md) scripts/lint-context.sh;; esac; true'",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
