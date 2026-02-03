@@ -1,0 +1,11 @@
+# SQLite database files (binary, regenerated from .sql dumps)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Keep the SQL dumps (version controlled)
+!*.sql
+
+# Keep schema files
+!*.schema.sql

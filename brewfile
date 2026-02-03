@@ -1,0 +1,15 @@
+tap "arustydev/tap"
+
+# Core tools
+brew "just"
+brew "yq"
+brew "jq"
+
+# Python package manager (fast, Rust-based)
+brew "uv"
+
+# AI/ML tools
+brew "ollama"
+
+# Directory visualization with MCP support
+# brew "smart-tree"
