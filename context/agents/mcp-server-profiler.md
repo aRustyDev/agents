@@ -2,7 +2,7 @@
 name: mcp-server-profiler
 description: Enrich a cached MCP server record with detailed metadata from its homepage and repository
 model: sonnet
-tools: WebSearch, WebFetch, Bash, Read
+tools: WebSearch, WebFetch, Bash, Read, mcp__crawl4ai__md, mcp__crawl4ai__crawl
 ---
 
 # MCP Server Profiler
@@ -166,14 +166,16 @@ sonnet — Thorough research and extraction requires stronger reasoning.
 When fetching server content (READMEs, registry pages), use this fallback chain in order:
 
 1. **gh api** — `gh api repos/<owner>/<repo>/readme --jq '.content' | base64 -d` (preferred for GitHub repos)
-2. **crawl4ai-mcp** — If the crawl4ai MCP server is connected, use it for JS-rendered pages
+2. **mcp__crawl4ai__md** — MCP tool for converting URLs to markdown; works in background mode
 3. **trafilatura** — `trafilatura -u <url>` CLI for clean text extraction
 4. **WebSearch** — `site:<domain> <server-name>` queries; results include summaries with key metadata
-5. **WebFetch** — Fetches URL and converts HTML to markdown; may be denied in background subagents
+5. **WebFetch** — Fetches URL and converts HTML to markdown; **IMPORTANT: may be denied in background subagents**
 6. **Jina Reader** — `curl -sL "https://r.jina.ai/<url>"` (free tier)
 7. **firecrawl** — `firecrawl_scrape` with `formats: ["markdown"]`; use when credits available
 8. **markdownify** — `curl -sL <url> | python3 -c "import sys; from markdownify import markdownify; print(markdownify(sys.stdin.read()))"`
 9. **html2text** — `curl -sL <url> | html2text` (last resort)
+
+**Note:** When running in background mode (via `run_in_background: true`), WebFetch and Bash may be auto-denied. Prefer MCP tools (crawl4ai) or gh api which work without prompts.
 
 ## Database Schema Reference
 
