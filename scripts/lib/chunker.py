@@ -9,7 +9,7 @@ Splits markdown content into hierarchical chunks:
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+
 import yaml
 
 
@@ -19,10 +19,10 @@ class Chunk:
     level: str  # 'file', 'section', 'paragraph'
     index: int  # Position at this level
     text: str
-    heading: Optional[str] = None  # Section heading if applicable
-    start_line: Optional[int] = None
-    end_line: Optional[int] = None
-    parent_index: Optional[int] = None  # Index of parent chunk
+    heading: str | None = None  # Section heading if applicable
+    start_line: int | None = None
+    end_line: int | None = None
+    parent_index: int | None = None  # Index of parent chunk
 
 
 @dataclass
@@ -64,7 +64,7 @@ def parse_frontmatter(content: str) -> tuple[dict, str]:
     return frontmatter, remaining.strip()
 
 
-def split_into_sections(content: str) -> list[tuple[Optional[str], str, int, int]]:
+def split_into_sections(content: str) -> list[tuple[str | None, str, int, int]]:
     """Split content by ## headings.
 
     Returns:

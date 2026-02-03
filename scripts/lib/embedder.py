@@ -5,9 +5,8 @@ Supports multiple embedding backends:
 - sentence-transformers (fallback)
 """
 
-from abc import ABC, abstractmethod
-from typing import Protocol
 import struct
+from typing import Protocol
 
 
 class Embedder(Protocol):

@@ -3,6 +3,7 @@
 
 import sqlite3
 import struct
+
 import sqlite_vec
 
 

@@ -6,13 +6,18 @@ EMBEDDING_MODEL := "nomic-embed-text"
 
 # Install project dependencies (idempotent)
 [group('install')]
-init: _init-brew _init-python _init-docker _init-ollama _init-db
+init: _init-brew _init-python _init-pre-commit _init-docker _init-ollama _init-db
     @echo "✓ Project initialized"
 
 [private]
 _init-brew:
     @echo "Installing Homebrew dependencies..."
     @brew bundle --quiet
+
+[private]
+_init-pre-commit:
+    @echo "Installing Pre-commit Hooks..."
+    @pre-commit install --install-hooks
 
 [private]
 _init-python:

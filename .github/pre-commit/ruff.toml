@@ -5,6 +5,18 @@ target-version = "py311"
 line-length = 100
 cache-dir = ".data/cache/ruff"
 
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "node_modules",
+    "dist",
+    "build",
+    "context/.context",
+    "context/skills/**/examples",
+    "context/skills/**/references",
+]
+
 [lint]
 select = [
     "E",      # pycodestyle errors

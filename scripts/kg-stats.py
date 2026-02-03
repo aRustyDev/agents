@@ -2,8 +2,9 @@
 """Show knowledge graph statistics."""
 
 import sqlite3
-import sqlite_vec
 from pathlib import Path
+
+import sqlite_vec
 
 DB_PATH = Path('.data/mcp/knowledge-graph.db')
 

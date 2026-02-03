@@ -2,7 +2,8 @@
 """Test markdown chunking."""
 
 from pathlib import Path
-from lib.chunker import chunk_markdown, chunk_file
+
+from lib.chunker import chunk_file, chunk_markdown
 
 
 def main():

@@ -7,21 +7,19 @@ Usage:
 """
 
 import argparse
-import time
-from pathlib import Path
-from typing import Optional
-from collections import defaultdict
-import threading
-
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
 # Import from embed.py
 import sys
-sys.path.insert(0, str(Path(__file__).parent))
-from embed import get_connection, ingest_file, guess_entity_type, ENTITY_PATTERNS
-from lib.embedder import get_embedder
+import threading
+import time
+from pathlib import Path
 
+from watchdog.events import FileSystemEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
+sys.path.insert(0, str(Path(__file__).parent))
+from embed import get_connection, guess_entity_type, ingest_file
+from lib.embedder import get_embedder
 
 # Debounce settings
 DEBOUNCE_SECONDS = 0.5
@@ -108,7 +106,7 @@ def process_file_change(path: str):
         embedder = get_embedder()
         ingest_file(conn, path_obj, entity_type, embedder)
         conn.close()
-        print(f"  ✓ Done")
+        print("  ✓ Done")
     except Exception as e:
         print(f"  ✗ Error: {e}")
 
@@ -134,7 +132,7 @@ def main():
     # Filter to existing directories
     watch_dirs = [d for d in watch_dirs if Path(d).exists()]
 
-    print(f"Watching directories:")
+    print("Watching directories:")
     for d in watch_dirs:
         print(f"  {d}")
     print()

@@ -37,13 +37,21 @@
     ".venv/**",
     "*.lock",
     "*.sql",
+    "*.tex",
     ".data/**",
     "dist/**",
     "build/**",
     "coverage/**",
     "*.min.*",
     ".git/**",
-    ".github/pre-commit/words/**"
+    ".github/pre-commit/words/**",
+    "context/.context/**",
+    "context/skills/**/examples/**",
+    "context/skills/**/references/**",
+    "context/skills/**/assets/**",
+    "**/convert-*/**",
+    "**/analysis.md",
+    "**/schemas.md"
   ],
   "ignoreRegExpList": [
     "```[\\s\\S]*?```",

@@ -5,8 +5,9 @@ This script is idempotent - safe to run multiple times.
 """
 
 import sqlite3
-import sqlite_vec
 from pathlib import Path
+
+import sqlite_vec
 
 # Configuration
 DB_DIR = Path('.data/mcp')
@@ -160,8 +161,8 @@ def load_from_dump():
     conn.commit()
     conn.close()
 
-    print(f"✓ Database loaded from dump")
-    print(f"⚠ Run 'just kg-rebuild-embeddings' to regenerate vector embeddings")
+    print("✓ Database loaded from dump")
+    print("⚠ Run 'just kg-rebuild-embeddings' to regenerate vector embeddings")
     return True
 
 
@@ -211,7 +212,7 @@ def dump_database():
     ]
 
     print(f"Dumping tables: {', '.join(tables_to_dump)}")
-    print(f"Skipping data for: vec_chunks, similarity_cache, entities_fts*")
+    print("Skipping data for: vec_chunks, similarity_cache, entities_fts*")
 
     # Build dump command for specific tables
     dump_commands = ['PRAGMA foreign_keys=OFF;', 'BEGIN TRANSACTION;']
@@ -221,7 +222,7 @@ def dump_database():
     result = subprocess.run(
         ['sqlite3', str(DB_PATH), '.schema'],
         capture_output=True,
-        text=True
+        text=True, check=False
     )
     if result.returncode != 0:
         print(f"Error getting schema: {result.stderr}")
@@ -262,7 +263,7 @@ def dump_database():
         result = subprocess.run(
             ['sqlite3', str(DB_PATH), f'.mode insert {table}', f'SELECT * FROM {table};'],
             capture_output=True,
-            text=True
+            text=True, check=False
         )
         if result.returncode != 0:
             print(f"Error dumping {table}: {result.stderr}")
@@ -302,7 +303,7 @@ def main():
     else:
         if args.force and DB_PATH.exists():
             DB_PATH.unlink()
-            print(f"Removed existing database")
+            print("Removed existing database")
         init_database()
 
 

@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: check-added-large-files
         name: "file-size: prevent large files"
-        args: ['--maxkb=50000']  # 50MB limit (GitHub max is 100MB)
+        args: ["--maxkb=50000"] # 50MB limit (GitHub max is 100MB)
 
       - id: trailing-whitespace
         name: "whitespace: trailing"
@@ -64,7 +64,7 @@ repos:
 
       - id: check-yaml
         name: "yaml: check syntax"
-        args: ['--unsafe']  # Allow custom tags
+        args: ["--unsafe"] # Allow custom tags
         exclude: 'context/\.context/legacy/.*'
 
   # =============================================================================
@@ -76,7 +76,7 @@ repos:
       - id: rumdl
         name: "markdown: rumdl check"
         args:
-          - '--config=.github/pre-commit/rumdl.toml'
+          - "--config=.github/pre-commit/rumdl.toml"
         exclude: |
           (?x)^(
             context/\.context/.*|
@@ -93,13 +93,7 @@ repos:
       - id: lychee
         name: "links: lychee check"
         args:
-          - '--no-progress'
-          - '--cache'
-          - '--max-cache-age=1d'
-          - '--exclude=mailto:'
-          - '--exclude=localhost'
-          - '--exclude=127.0.0.1'
-          - '--exclude=^#'
+          - "--config=.github/pre-commit/lychee.toml"
         types: [markdown]
         exclude: |
           (?x)^(
@@ -117,7 +111,7 @@ repos:
       - id: yamllint
         name: "yaml: yamllint validate"
         args:
-          - '--config-file=.github/pre-commit/yamllint.yaml'
+          - "--config-file=.github/pre-commit/yamllint.yaml"
 
   # =============================================================================
   # JSON Linting - Local (explicit validation beyond check-json)
@@ -189,13 +183,13 @@ repos:
       - id: sqlfluff-lint
         name: "sql: sqlfluff lint"
         args:
-          - '--config=.github/pre-commit/sqlfluff.cfg'
+          - "--config=.github/pre-commit/sqlfluff.cfg"
 
       - id: sqlfluff-fix
         name: "sql: sqlfluff fix"
         args:
-          - '--config=.github/pre-commit/sqlfluff.cfg'
-          - '--force'
+          - "--config=.github/pre-commit/sqlfluff.cfg"
+          - "--force"
         stages: [manual]
 
   # =============================================================================
@@ -207,8 +201,8 @@ repos:
       - id: shellcheck
         name: "bash: shellcheck lint"
         args:
-          - '--severity=warning'
-          - '--shell=bash'
+          - "--severity=warning"
+          - "--shell=bash"
 
   # =============================================================================
   # Bash Formatting (shfmt)
@@ -219,16 +213,16 @@ repos:
       - id: shfmt
         name: "bash: shfmt check"
         args:
-          - '-d'   # Diff mode (check only)
-          - '-i=2' # 2 space indent
-          - '-ci'  # Indent switch cases
+          - "-d" # Diff mode (check only)
+          - "-i=2" # 2 space indent
+          - "-ci" # Indent switch cases
 
       - id: shfmt
         name: "bash: shfmt fix"
         args:
-          - '-w'   # Write in place
-          - '-i=2'
-          - '-ci'
+          - "-w" # Write in place
+          - "-i=2"
+          - "-ci"
         stages: [manual]
 
   # =============================================================================
@@ -249,7 +243,7 @@ repos:
         name: "brewfile: syntax check"
         entry: bash -c 'ruby -c brewfile >/dev/null'
         language: system
-        files: '^brewfile$'
+        files: "^brewfile$"
         pass_filenames: false
 
   # =============================================================================
@@ -261,14 +255,14 @@ repos:
         name: "justfile: syntax check"
         entry: just --fmt --check --unstable
         language: system
-        files: '^justfile$'
+        files: "^justfile$"
         pass_filenames: false
 
       - id: justfile-format
         name: "justfile: format"
         entry: just --fmt --unstable
         language: system
-        files: '^justfile$'
+        files: "^justfile$"
         pass_filenames: false
         stages: [manual]
 
@@ -281,20 +275,20 @@ repos:
       - id: ruff
         name: "python: ruff check"
         args:
-          - '--config=.github/pre-commit/ruff.toml'
-          - '--fix'
-          - '--exit-non-zero-on-fix'
+          - "--config=.github/pre-commit/ruff.toml"
+          - "--fix"
+          - "--exit-non-zero-on-fix"
 
       - id: ruff-format
         name: "python: ruff format check"
         args:
-          - '--config=.github/pre-commit/ruff.toml'
-          - '--check'
+          - "--config=.github/pre-commit/ruff.toml"
+          - "--check"
 
       - id: ruff-format
         name: "python: ruff format fix"
         args:
-          - '--config=.github/pre-commit/ruff.toml'
+          - "--config=.github/pre-commit/ruff.toml"
         stages: [manual]
 
   # =============================================================================
@@ -305,9 +299,9 @@ repos:
     hooks:
       - id: biome-check
         name: "js/ts: biome check"
-        additional_dependencies: ['@biomejs/biome@2.0.0']
+        additional_dependencies: ["@biomejs/biome@2.0.0"]
         args:
-          - '--config-path=.github/pre-commit/biome.json'
+          - "--config-path=.github/pre-commit/biome.json"
         exclude: |
           (?x)^(
             node_modules/|
@@ -321,10 +315,10 @@ repos:
 
       - id: biome-format
         name: "js/ts: biome format"
-        additional_dependencies: ['@biomejs/biome@2.0.0']
+        additional_dependencies: ["@biomejs/biome@2.0.0"]
         args:
-          - '--config-path=.github/pre-commit/biome.json'
-          - '--write'
+          - "--config-path=.github/pre-commit/biome.json"
+          - "--write"
         exclude: |
           (?x)^(
             node_modules/|

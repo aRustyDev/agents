@@ -1,4 +1,4 @@
---- 
+---
 grafana:
   - url: https://mcpservers.org/servers/grafana/mcp-grafana
     desc: ""

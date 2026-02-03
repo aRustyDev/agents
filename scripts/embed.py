@@ -16,14 +16,11 @@ import argparse
 import hashlib
 import json
 import sqlite3
-import struct
 import sys
 from pathlib import Path
-from typing import Optional
 
 import sqlite_vec
-
-from lib.chunker import chunk_file, Chunk
+from lib.chunker import chunk_file
 from lib.embedder import get_embedder, serialize_embedding
 
 # Configuration
@@ -76,7 +73,7 @@ def find_files(entity_type: str) -> list[Path]:
     patterns = ENTITY_PATTERNS.get(entity_type, [])
     files = []
     for pattern in patterns:
-        files.extend(Path('.').glob(pattern))
+        files.extend(Path().glob(pattern))
     return sorted(set(files))
 
 
@@ -91,7 +88,7 @@ def ingest_file(
 
     Returns True if file was processed, False if skipped (no changes).
     """
-    path = path.resolve().relative_to(Path('.').resolve())
+    path = path.resolve().relative_to(Path().resolve())
     slug = path_to_slug(path, entity_type)
     file_hash = compute_file_hash(path)
 
@@ -456,7 +453,7 @@ def cmd_rebuild_embeddings(args):
         texts = [row[2] for row in batch]
         embeddings = embedder.embed(texts)
 
-        for (emb_id, chunk_id, _), embedding in zip(batch, embeddings):
+        for (emb_id, chunk_id, _), embedding in zip(batch, embeddings, strict=False):
             conn.execute(
                 'INSERT INTO vec_chunks (embedding_id, embedding) VALUES (?, ?)',
                 (emb_id, serialize_embedding(embedding))

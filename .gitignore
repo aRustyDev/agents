@@ -26,4 +26,6 @@ documents/
 
 # Tool caches
 .data/cache/
+.ruff_cache/
+.rumdl_cache/
 .lycheecache
