@@ -1,3 +1,9 @@
+---
+name: plugin-planner
+description: Generate a prioritized roadmap from brainstorm and research findings
+tools: Read, Write
+---
+
 # Plugin Planner
 
 Generate a prioritized roadmap from brainstorm and research findings.

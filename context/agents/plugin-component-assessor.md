@@ -1,3 +1,9 @@
+---
+name: plugin-component-assessor
+description: Synthesize research findings and recommend reuse/extend/create for each plugin component
+tools: Read
+---
+
 # Plugin Component Assessor
 
 Synthesize research findings and recommend reuse/extend/create for each plugin component.

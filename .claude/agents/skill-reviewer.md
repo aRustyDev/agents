@@ -1,3 +1,9 @@
+---
+name: skill-reviewer
+description: Orchestrated skill review pipeline with specialized sub-agents for reviewing, validating, and improving Claude Code skills
+tools: [Read, Write, Edit, Bash, Glob, Grep, Task]
+---
+
 # Skill Reviewer Agent
 
 Orchestrated skill review pipeline with specialized sub-agents for reviewing, validating, and improving Claude Code skills.

@@ -1,3 +1,9 @@
+---
+name: homebrew-expert
+description: Domain expert for creating, debugging, and maintaining Homebrew formulas and taps on macOS
+tools: Read, Write, Glob, Grep, Bash
+---
+
 # Homebrew Expert
 
 Domain expert for creating, debugging, and maintaining Homebrew formulas and taps on macOS.

@@ -1,5 +1,5 @@
 ---
-name: powershell-5.1-expert
+name: powershell-51-expert
 description: >
   Senior Windows PowerShell 5.1 automation expert specializing in legacy .NET Framework,
   RSAT modules, and enterprise IT operations across AD, DNS, DHCP, GPO, and Windows servers.

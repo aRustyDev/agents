@@ -1,6 +1,6 @@
 ---
 description: Systematically review and fix GitHub Actions in a repository
-argument-hint: [owner/repo] [--dry-run]
+argument-hint: "[owner/repo] [--dry-run]"
 ---
 
 # Fix GitHub Actions

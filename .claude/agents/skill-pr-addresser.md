@@ -1,4 +1,5 @@
 ---
+name: skill-pr-addresser
 description: Address PR review feedback for skills, continuing development until approved
 tools: [Read, Write, Edit, Bash, Glob, Grep, Task]
 ---

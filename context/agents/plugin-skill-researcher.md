@@ -1,3 +1,9 @@
+---
+name: plugin-skill-researcher
+description: Search skill registries in parallel to find existing skills matching a brainstormed need
+tools: Bash, WebSearch, WebFetch, Glob
+---
+
 # Plugin Skill Researcher
 
 Search skill registries in parallel to find existing skills matching a brainstormed need.
