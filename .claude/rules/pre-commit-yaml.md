@@ -1,10 +1,11 @@
 # YAML Linting Rules (yamllint)
 
-Configuration: Inline in `.pre-commit-config.yaml`
+Configuration: `.github/pre-commit/yamllint.yaml`
+Public hook: `https://github.com/adrienverge/yamllint` (v1.38.0)
 
 ## When to Modify
 
-Modify the yamllint configuration when:
+Modify `.github/pre-commit/yamllint.yaml` when:
 - Changing line length limits
 - Enabling/disabling specific rules
 - Adding custom rule configurations
@@ -12,9 +13,19 @@ Modify the yamllint configuration when:
 ## Current Configuration
 
 ```yaml
-args:
-  - '-d'
-  - '{extends: default, rules: {line-length: {max: 120}, truthy: disable}}'
+extends: default
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  truthy: disable
+  comments:
+    min-spaces-from-content: 1
+  indentation:
+    spaces: 2
+    indent-sequences: true
+  document-start: disable
 ```
 
 ## Key Rules

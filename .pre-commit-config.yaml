@@ -2,6 +2,9 @@
 # Install: pre-commit install
 # Run all: pre-commit run --all-files
 # Update: pre-commit autoupdate
+#
+# Config files: .github/pre-commit/
+# Symlinks in root for tools requiring root config discovery
 
 # Fail fast on first error
 fail_fast: false
@@ -11,7 +14,7 @@ default_stages: [pre-commit]
 
 repos:
   # =============================================================================
-  # File Size Detection (Prevent LFS)
+  # General Checks (pre-commit/pre-commit-hooks)
   # =============================================================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -20,288 +23,6 @@ repos:
         name: "file-size: prevent large files"
         args: ['--maxkb=50000']  # 50MB limit (GitHub max is 100MB)
 
-  # =============================================================================
-  # Markdown Linting (rumdl)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: rumdl-check
-        name: "markdown: rumdl check"
-        entry: rumdl check
-        language: system
-        types: [markdown]
-
-      - id: rumdl-fix
-        name: "markdown: rumdl fix"
-        entry: rumdl fmt
-        language: system
-        types: [markdown]
-        stages: [manual]
-
-  # =============================================================================
-  # Link Checking (lychee)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: lychee
-        name: "links: lychee check"
-        entry: lychee
-        language: system
-        types: [markdown]
-        args:
-          - '--no-progress'
-          - '--cache'
-          - '--max-cache-age=1d'
-          - '--exclude=mailto:'
-          - '--exclude=localhost'
-          - '--exclude=127.0.0.1'
-          - '--exclude=^#'
-        verbose: true
-
-  # =============================================================================
-  # JSON Linting
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: json-validate
-        name: "json: validate syntax"
-        entry: bash -c 'for f in "$@"; do python3 -c "import json; json.load(open(\"$f\"))" || exit 1; done'
-        language: system
-        types: [json]
-
-  # =============================================================================
-  # YAML Linting
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: yamllint
-        name: "yaml: yamllint validate"
-        entry: yamllint
-        language: system
-        types: [yaml]
-        args:
-          - '-d'
-          - '{extends: default, rules: {line-length: {max: 120}, truthy: disable}}'
-
-  # =============================================================================
-  # Spell Checking (cspell)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: cspell
-        name: "spelling: cspell check"
-        entry: cspell lint
-        language: system
-        types: [text]
-        args:
-          - '--no-progress'
-          - '--no-summary'
-          - '--config=.github/pre-commit/cspell.json'
-        exclude: |
-          (?x)^(
-            .*\.sql$|
-            .*\.lock$|
-            .*\.min\..*|
-            package-lock\.json$|
-            uv\.lock$
-          )$
-
-  # =============================================================================
-  # Claude Context Linting (cclint)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: cclint
-        name: "cclint: validate claude context files"
-        entry: bash -c 'scripts/lint-context.sh'
-        language: system
-        files: |
-          (?x)^(
-            context/.*\.md|
-            \.claude/.*\.md|
-            CLAUDE\.md
-          )$
-        pass_filenames: false
-
-  # =============================================================================
-  # SQL Linting (sqlfluff)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: sqlfluff-lint
-        name: "sql: sqlfluff lint"
-        entry: sqlfluff lint
-        language: system
-        types: [sql]
-        args:
-          - '--dialect=sqlite'
-
-      - id: sqlfluff-fix
-        name: "sql: sqlfluff fix"
-        entry: sqlfluff fix
-        language: system
-        types: [sql]
-        args:
-          - '--dialect=sqlite'
-          - '--force'
-        stages: [manual]
-
-  # =============================================================================
-  # Bash Linting (shellcheck)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: shellcheck
-        name: "bash: shellcheck lint"
-        entry: shellcheck
-        language: system
-        types: [shell]
-        args:
-          - '--severity=warning'
-          - '--shell=bash'
-
-  # =============================================================================
-  # Bash Formatting (shfmt)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: shfmt-check
-        name: "bash: shfmt check"
-        entry: shfmt
-        language: system
-        types: [shell]
-        args:
-          - '-d'   # Diff mode (check only)
-          - '-i=2' # 2 space indent
-          - '-ci'  # Indent switch cases
-
-      - id: shfmt-fix
-        name: "bash: shfmt fix"
-        entry: shfmt
-        language: system
-        types: [shell]
-        args:
-          - '-w'   # Write in place
-          - '-i=2'
-          - '-ci'
-        stages: [manual]
-
-  # =============================================================================
-  # Bash Security (shellharden)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: shellharden
-        name: "bash: shellharden check"
-        entry: shellharden
-        language: system
-        types: [shell]
-        args:
-          - '--check'
-
-  # =============================================================================
-  # Brewfile Linting
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: brewfile-lint
-        name: "brewfile: syntax check"
-        entry: bash -c 'ruby -c brewfile >/dev/null'
-        language: system
-        files: '^brewfile$'
-        pass_filenames: false
-
-  # =============================================================================
-  # Justfile Linting
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: justfile-check
-        name: "justfile: syntax check"
-        entry: just --fmt --check --unstable
-        language: system
-        files: '^justfile$'
-        pass_filenames: false
-
-      - id: justfile-format
-        name: "justfile: format"
-        entry: just --fmt --unstable
-        language: system
-        files: '^justfile$'
-        pass_filenames: false
-        stages: [manual]
-
-  # =============================================================================
-  # Python Linting (ruff)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: ruff-check
-        name: "python: ruff check"
-        entry: ruff check
-        language: system
-        types: [python]
-        args:
-          - '--fix'
-          - '--exit-non-zero-on-fix'
-
-      - id: ruff-format-check
-        name: "python: ruff format check"
-        entry: ruff format
-        language: system
-        types: [python]
-        args:
-          - '--check'
-
-      - id: ruff-format-fix
-        name: "python: ruff format fix"
-        entry: ruff format
-        language: system
-        types: [python]
-        stages: [manual]
-
-  # =============================================================================
-  # JavaScript/TypeScript Linting (biome)
-  # =============================================================================
-  - repo: local
-    hooks:
-      - id: biome-check
-        name: "js/ts: biome check"
-        entry: biome check
-        language: system
-        files: '\.(js|jsx|ts|tsx|mjs|cjs)$'
-        exclude: |
-          (?x)^(
-            node_modules/|
-            dist/|
-            build/|
-            .*\.min\..*|
-            context/\.context/legacy/.*|
-            context/skills/.*/examples/.*
-          )$
-
-      - id: biome-fix
-        name: "js/ts: biome fix"
-        entry: biome check --write
-        language: system
-        files: '\.(js|jsx|ts|tsx|mjs|cjs)$'
-        exclude: |
-          (?x)^(
-            node_modules/|
-            dist/|
-            build/|
-            .*\.min\..*|
-            context/\.context/legacy/.*|
-            context/skills/.*/examples/.*
-          )$
-        stages: [manual]
-
-  # =============================================================================
-  # General Checks
-  # =============================================================================
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
       - id: trailing-whitespace
         name: "whitespace: trailing"
         exclude: '\.md$'
@@ -345,3 +66,257 @@ repos:
         name: "yaml: check syntax"
         args: ['--unsafe']  # Allow custom tags
         exclude: 'context/\.context/legacy/.*'
+
+  # =============================================================================
+  # Markdown Linting (rumdl) - Local, no public hook
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: rumdl-check
+        name: "markdown: rumdl check"
+        entry: rumdl check --config .github/pre-commit/rumdl.toml
+        language: system
+        types: [markdown]
+
+      - id: rumdl-fix
+        name: "markdown: rumdl fix"
+        entry: rumdl fmt --config .github/pre-commit/rumdl.toml
+        language: system
+        types: [markdown]
+        stages: [manual]
+
+  # =============================================================================
+  # Link Checking (lychee)
+  # =============================================================================
+  - repo: https://github.com/lycheeverse/lychee
+    rev: lychee-v0.18.0
+    hooks:
+      - id: lychee
+        name: "links: lychee check"
+        args:
+          - '--no-progress'
+          - '--cache'
+          - '--max-cache-age=1d'
+          - '--exclude=mailto:'
+          - '--exclude=localhost'
+          - '--exclude=127.0.0.1'
+          - '--exclude=^#'
+        types: [markdown]
+
+  # =============================================================================
+  # YAML Linting (yamllint)
+  # =============================================================================
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        name: "yaml: yamllint validate"
+        args:
+          - '--config-file=.github/pre-commit/yamllint.yaml'
+
+  # =============================================================================
+  # JSON Linting - Local (explicit validation)
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: json-validate
+        name: "json: validate syntax"
+        entry: bash -c 'for f in "$@"; do python3 -c "import json; json.load(open(\"$f\"))" || exit 1; done'
+        language: system
+        types: [json]
+
+  # =============================================================================
+  # Spell Checking (cspell) - Local, no official public hook
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: cspell
+        name: "spelling: cspell check"
+        entry: cspell lint --config .github/pre-commit/cspell.json
+        language: system
+        types: [text]
+        args:
+          - '--no-progress'
+          - '--no-summary'
+        exclude: |
+          (?x)^(
+            .*\.sql$|
+            .*\.lock$|
+            .*\.min\..*|
+            package-lock\.json$|
+            uv\.lock$
+          )$
+
+  # =============================================================================
+  # Claude Context Linting (cclint) - Local, project-specific
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: cclint
+        name: "cclint: validate claude context files"
+        entry: bash -c 'scripts/lint-context.sh'
+        language: system
+        files: |
+          (?x)^(
+            context/.*\.md|
+            \.claude/.*\.md|
+            CLAUDE\.md
+          )$
+        pass_filenames: false
+
+  # =============================================================================
+  # SQL Linting (sqlfluff)
+  # =============================================================================
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.0.0
+    hooks:
+      - id: sqlfluff-lint
+        name: "sql: sqlfluff lint"
+        args:
+          - '--config=.github/pre-commit/sqlfluff.cfg'
+
+      - id: sqlfluff-fix
+        name: "sql: sqlfluff fix"
+        args:
+          - '--config=.github/pre-commit/sqlfluff.cfg'
+          - '--force'
+        stages: [manual]
+
+  # =============================================================================
+  # Bash Linting (shellcheck)
+  # =============================================================================
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        name: "bash: shellcheck lint"
+        args:
+          - '--severity=warning'
+          - '--shell=bash'
+
+  # =============================================================================
+  # Bash Formatting (shfmt)
+  # =============================================================================
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+      - id: shfmt
+        name: "bash: shfmt check"
+        args:
+          - '-d'   # Diff mode (check only)
+          - '-i=2' # 2 space indent
+          - '-ci'  # Indent switch cases
+
+      - id: shfmt
+        name: "bash: shfmt fix"
+        args:
+          - '-w'   # Write in place
+          - '-i=2'
+          - '-ci'
+        stages: [manual]
+
+  # =============================================================================
+  # Bash Security (shellharden) - Local, no public hook
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: shellharden
+        name: "bash: shellharden check"
+        entry: shellharden --check
+        language: system
+        types: [shell]
+
+  # =============================================================================
+  # Brewfile Linting - Local, project-specific
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: brewfile-lint
+        name: "brewfile: syntax check"
+        entry: bash -c 'ruby -c brewfile >/dev/null'
+        language: system
+        files: '^brewfile$'
+        pass_filenames: false
+
+  # =============================================================================
+  # Justfile Linting - Local, project-specific
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: justfile-check
+        name: "justfile: syntax check"
+        entry: just --fmt --check --unstable
+        language: system
+        files: '^justfile$'
+        pass_filenames: false
+
+      - id: justfile-format
+        name: "justfile: format"
+        entry: just --fmt --unstable
+        language: system
+        files: '^justfile$'
+        pass_filenames: false
+        stages: [manual]
+
+  # =============================================================================
+  # Python Linting (ruff)
+  # =============================================================================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.6
+    hooks:
+      - id: ruff
+        name: "python: ruff check"
+        args:
+          - '--config=.github/pre-commit/ruff.toml'
+          - '--fix'
+          - '--exit-non-zero-on-fix'
+
+      - id: ruff-format
+        name: "python: ruff format check"
+        args:
+          - '--config=.github/pre-commit/ruff.toml'
+          - '--check'
+
+      - id: ruff-format
+        name: "python: ruff format fix"
+        args:
+          - '--config=.github/pre-commit/ruff.toml'
+        stages: [manual]
+
+  # =============================================================================
+  # JavaScript/TypeScript Linting (biome)
+  # =============================================================================
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v0.6.1
+    hooks:
+      - id: biome-check
+        name: "js/ts: biome check"
+        additional_dependencies: ['@biomejs/biome@2.0.0']
+        args:
+          - '--config-path=.github/pre-commit/biome.json'
+        exclude: |
+          (?x)^(
+            node_modules/|
+            dist/|
+            build/|
+            .*\.min\..*|
+            context/\.context/legacy/.*|
+            context/skills/.*/examples/.*
+          )$
+
+      - id: biome-format
+        name: "js/ts: biome format"
+        additional_dependencies: ['@biomejs/biome@2.0.0']
+        args:
+          - '--config-path=.github/pre-commit/biome.json'
+          - '--write'
+        exclude: |
+          (?x)^(
+            node_modules/|
+            dist/|
+            build/|
+            .*\.min\..*|
+            context/\.context/legacy/.*|
+            context/skills/.*/examples/.*
+          )$
+        stages: [manual]

@@ -105,7 +105,11 @@
     "builtins",
     "dunder",
     "getattr",
-    "pathlib"
+    "pathlib",
+    "adrienverge",
+    "lycheeverse",
+    "biomejs",
+    "astral"
   ],
   "flagWords": [],
   "overrides": [

@@ -1,0 +1,30 @@
+# yamllint configuration
+# https://yamllint.readthedocs.io/
+
+extends: default
+
+rules:
+  # Allow longer lines for documentation
+  line-length:
+    max: 120
+    level: warning
+
+  # Allow truthy values like yes/no, on/off
+  truthy: disable
+
+  # Relaxed comment spacing
+  comments:
+    min-spaces-from-content: 1
+
+  # Standard indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+
+  # Allow document start marker to be optional
+  document-start: disable
+
+  # Allow empty values
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false

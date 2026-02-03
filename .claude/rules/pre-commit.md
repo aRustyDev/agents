@@ -3,22 +3,26 @@
 Main configuration: `.pre-commit-config.yaml`
 Tool configs: `.github/pre-commit/`
 
-## Overview
+## Design Principles
 
-Pre-commit hooks run automatically on `git commit`. Each hook has a single responsibility (SRP design).
+1. **Use public hooks where available** - Pin versions with `rev` key
+2. **Explicit config paths** - Use `--config` flags to reference `.github/pre-commit/`
+3. **Local hooks only when necessary** - For tools without public pre-commit repos
+4. **Single Responsibility** - Each hook does one thing
 
 ## Configuration Structure
 
 ```
-.pre-commit-config.yaml          # Hook definitions
+.pre-commit-config.yaml          # Hook definitions (pinned versions)
 .github/pre-commit/
 ├── biome.json                   # JS/TS linting
 ├── cspell.json                  # Spell checking
 ├── ruff.toml                    # Python linting
 ├── rumdl.toml                   # Markdown linting
-└── sqlfluff.cfg                 # SQL linting
+├── sqlfluff.cfg                 # SQL linting
+└── yamllint.yaml                # YAML linting
 
-# Symlinks in root (tools that require root config)
+# Symlinks in root (tools requiring root config discovery)
 biome.json -> .github/pre-commit/biome.json
 .cspell.json -> .github/pre-commit/cspell.json
 ruff.toml -> .github/pre-commit/ruff.toml
@@ -26,43 +30,73 @@ rumdl.toml -> .github/pre-commit/rumdl.toml
 .sqlfluff -> .github/pre-commit/sqlfluff.cfg
 ```
 
-## Hook Categories
+## Hook Sources
 
-### File Safety
-- `check-added-large-files`: Prevents files >50MB (LFS prevention)
-- `detect-private-key`: Blocks accidental secret commits
+### Public Repositories (Preferred)
 
-### Markdown
-- `rumdl-check`: Lint markdown files
-- `rumdl-fix`: Auto-fix markdown (manual)
-- `lychee`: Check links in markdown
+| Repo | Rev | Hooks |
+|------|-----|-------|
+| `pre-commit/pre-commit-hooks` | v5.0.0 | check-added-large-files, trailing-whitespace, end-of-file-fixer, check-merge-conflict, check-case-conflict, detect-private-key, check-symlinks, check-executables-have-shebangs, check-json, check-yaml |
+| `astral-sh/ruff-pre-commit` | v0.9.6 | ruff, ruff-format |
+| `biomejs/pre-commit` | v0.6.1 | biome-check, biome-format |
+| `shellcheck-py/shellcheck-py` | v0.10.0.1 | shellcheck |
+| `scop/pre-commit-shfmt` | v3.10.0-1 | shfmt |
+| `adrienverge/yamllint` | v1.38.0 | yamllint |
+| `sqlfluff/sqlfluff` | 4.0.0 | sqlfluff-lint, sqlfluff-fix |
+| `lycheeverse/lychee` | lychee-v0.18.0 | lychee |
 
-### Code Quality
-- `ruff-check`: Python linting
-- `ruff-format-check`: Python formatting
-- `biome-check`: JS/TS linting
-- `shellcheck`: Bash bug detection
-- `shfmt-check`: Bash formatting
-- `shellharden`: Bash security
+### Local Hooks (No Public Repo Available)
 
-### Data Formats
-- `json-validate`: JSON syntax
-- `yamllint`: YAML validation
-- `sqlfluff-lint`: SQL linting
-- `check-json`: JSON via pre-commit-hooks
-- `check-yaml`: YAML via pre-commit-hooks
+| Hook | Tool | Reason |
+|------|------|--------|
+| rumdl-check/fix | rumdl | Rust tool, no pre-commit repo |
+| shellharden | shellharden | No official pre-commit repo |
+| cspell | cspell | No official pre-commit hook repo |
+| cclint | scripts/lint-context.sh | Project-specific |
+| brewfile-lint | ruby -c | Project-specific |
+| justfile-check/format | just | Project-specific |
+| json-validate | python3 | Explicit validation beyond check-json |
 
-### Spelling & Docs
-- `cspell`: Spell checking
-- `cclint`: Claude context validation
+## Explicit Config Paths
 
-### Build Files
-- `brewfile-lint`: Brewfile syntax
-- `justfile-check`: Justfile syntax
+All hooks use explicit `--config` flags where supported:
 
-### Whitespace
-- `trailing-whitespace`: Remove trailing spaces
-- `end-of-file-fixer`: Ensure final newline
+```yaml
+# Ruff
+args: ['--config=.github/pre-commit/ruff.toml']
+
+# Biome
+args: ['--config-path=.github/pre-commit/biome.json']
+
+# Yamllint
+args: ['--config-file=.github/pre-commit/yamllint.yaml']
+
+# SQLFluff
+args: ['--config=.github/pre-commit/sqlfluff.cfg']
+
+# CSpell
+entry: cspell lint --config .github/pre-commit/cspell.json
+
+# Rumdl
+entry: rumdl check --config .github/pre-commit/rumdl.toml
+```
+
+## Version Pinning
+
+Always pin versions to ensure reproducible builds:
+
+```yaml
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.9.6  # Pin specific version
+  hooks:
+    - id: ruff
+```
+
+Update versions with:
+
+```bash
+pre-commit autoupdate
+```
 
 ## Running Hooks
 
@@ -74,27 +108,13 @@ pre-commit install
 pre-commit run --all-files
 
 # Run specific hook
-pre-commit run ruff-check --all-files
+pre-commit run ruff --all-files
 
 # Run manual stage hooks
 pre-commit run --hook-stage manual --all-files
 
 # Skip hooks on commit
 git commit --no-verify -m "message"
-```
-
-## Adding New Hooks
-
-Edit `.pre-commit-config.yaml`:
-
-```yaml
-- repo: local
-  hooks:
-    - id: my-hook
-      name: "category: description"
-      entry: command
-      language: system
-      types: [filetype]  # or files: 'pattern'
 ```
 
 ## Stages
@@ -105,17 +125,51 @@ Edit `.pre-commit-config.yaml`:
 | `manual` | Explicitly only | Fix/format commands |
 | `pre-push` | On push | Slower checks |
 
+## Adding New Hooks
+
+1. **Check for public hook repo first** - Search GitHub for `<tool>-pre-commit` or check tool's repo for `.pre-commit-hooks.yaml`
+2. **Pin the version** - Use latest stable release tag
+3. **Use explicit config path** - Reference `.github/pre-commit/<config>`
+4. **Fall back to local** - Only if no public repo exists
+
+Example adding a new public hook:
+
+```yaml
+- repo: https://github.com/example/tool-pre-commit
+  rev: v1.2.3
+  hooks:
+    - id: tool-check
+      name: "category: tool check"
+      args:
+        - '--config=.github/pre-commit/tool.config'
+```
+
+Example adding a local hook:
+
+```yaml
+- repo: local
+  hooks:
+    - id: my-hook
+      name: "category: description"
+      entry: tool --config .github/pre-commit/tool.config
+      language: system
+      types: [filetype]
+```
+
 ## Troubleshooting
 
 ```bash
 # Clear cache
 pre-commit clean
 
-# Update hooks
+# Update hooks to latest versions
 pre-commit autoupdate
 
 # Verbose output
 pre-commit run --verbose
+
+# Run with specific files
+pre-commit run --files path/to/file.py
 ```
 
 ## Related Rules
@@ -127,3 +181,4 @@ pre-commit run --verbose
 - `pre-commit-spelling.md`: CSpell configuration
 - `pre-commit-sql.md`: SQLFluff configuration
 - `pre-commit-yaml.md`: Yamllint configuration
+- `claude-hooks.md`: Real-time Claude Code linting hooks
