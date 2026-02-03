@@ -9,7 +9,8 @@ brew "jq"
 brew "uv"
 
 # Container runtime
-cask "docker"              # Docker Desktop (includes docker-compose)
+cask "orbstack"
+# cask "docker"              # Docker Desktop (includes docker-compose)
 
 # AI/ML tools
 brew "ollama", restart_service: :changed
