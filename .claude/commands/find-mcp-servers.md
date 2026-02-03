@@ -1,6 +1,6 @@
 ---
 description: Find MCP servers (or a suite of servers) matching a stated purpose using cache-first research
-argument-hint: "<purpose>" [--refresh] [--top N]
+argument-hint: '"<purpose>" [--refresh] [--top N]'
 allowed-tools: Read, Write, Bash(sqlite3:*), Bash(mkdir:*), Grep, Glob, Task, AskUserQuestion
 ---
 

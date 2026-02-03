@@ -1,0 +1,31 @@
+# rumdl configuration
+# https://github.com/slint-ui/rumdl
+
+[global]
+# Line length for MD013
+line-length = 120
+
+# Disabled rules
+disable = [
+    "MD013",  # Line length - too restrictive for documentation
+    "MD041",  # First line should be heading (frontmatter is common)
+    "MD033",  # Allow inline HTML
+    "MD057",  # Disable relative link checking
+    "MD032",  # Blank lines around lists - too strict for our docs
+    "MD040",  # Code blocks should have language - many shell examples don't need it
+]
+
+# Files to exclude
+exclude = [
+    "context/.context/legacy/**",
+    ".data/**",
+    "node_modules/**",
+    "dist/**",
+    "*.min.*",
+]
+
+# Per-file rule ignores
+[per-file-ignores]
+"docs/**/*.md" = ["MD013"]
+"context/agents/*.md" = ["MD013", "MD040"]
+".claude/**/*.md" = ["MD013", "MD040"]
