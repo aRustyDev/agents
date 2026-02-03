@@ -55,10 +55,10 @@ Plugin: <parent plugin name>
 
 ### Step 1: Read Cache
 
-Query the local SQLite cache for known slugs:
+Query the knowledge graph for known MCP server slugs:
 
 ```bash
-sqlite3 .data/mcp/registry-cache.db "SELECT slug FROM mcp_servers;"
+sqlite3 .data/mcp/knowledge-graph.db "SELECT slug FROM entities WHERE entity_type = 'mcp_server';"
 ```
 
 Store the result set for dedup in later steps.
@@ -100,22 +100,61 @@ Use WebSearch with `site:<registry> <keyword> MCP server` queries. Run tier sear
 ### Step 3: Deduplicate
 
 For each result:
-1. Generate a slug: lowercase, strip `mcp-server-` prefix, collapse hyphens
-2. Check against known slugs from Step 1
-3. Skip if already cached
+
+**Slug normalization algorithm:**
+
+1. Lowercase entire string
+2. Strip prefixes: `mcp-server-`, `mcp-`, `server-`
+3. Strip suffixes: `-mcp`, `-server`, `-mcp-server`
+4. Replace non-alphanumeric characters with hyphens, collapse consecutive hyphens
+5. Trim leading/trailing hyphens
+6. If result matches an existing slug, restore `mcp-` prefix
+7. If still ambiguous, append `-<owner>` (e.g., `code-index-mcp-viperjuice`)
+
+**Cross-registry deduplication:**
+
+Before inserting, check for near-matches:
+
+```bash
+sqlite3 -json .data/mcp/knowledge-graph.db "
+  SELECT e.slug, e.name, ext.repository
+  FROM entities e
+  LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id
+  WHERE e.entity_type = 'mcp_server'
+    AND (e.slug LIKE '%<core-slug>%' OR e.name LIKE '%<server-name>%');
+"
+```
+
+If a match shares the same `repository` URL, skip it as a duplicate. Only insert if no existing record points to the same repo.
+
+**Then:**
+
+- Check the normalized slug against known slugs from Step 1
+- Skip if already cached or deduplicated above
 
 ### Step 4: Insert New Discoveries
 
-For each new server, insert a minimal record:
+For each new server, insert a minimal record into the knowledge graph:
 
 ```bash
-sqlite3 .data/mcp/registry-cache.db "INSERT OR IGNORE INTO mcp_servers (name, slug, source_registry, source_url) VALUES ('<name>', '<slug>', '<registry>', '<url>');"
+# Insert entity (skip if slug exists)
+sqlite3 .data/mcp/knowledge-graph.db "
+  INSERT OR IGNORE INTO entities (entity_type, slug, name, content, created_at, updated_at)
+  VALUES ('mcp_server', '<slug>', '<name>', '', datetime('now'), datetime('now'));
+"
+
+# Insert extension record
+sqlite3 .data/mcp/knowledge-graph.db "
+  INSERT OR IGNORE INTO mcp_servers_ext (entity_id, source_registry, source_url, discovered_at)
+  SELECT id, '<registry>', '<url>', datetime('now')
+  FROM entities WHERE slug = '<slug>' AND entity_type = 'mcp_server';
+"
 ```
 
-### Step 5: Dump Cache
+### Step 5: Dump Knowledge Graph
 
 ```bash
-sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
+just kg-dump
 ```
 
 ## Model

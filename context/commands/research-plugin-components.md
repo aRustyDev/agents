@@ -50,15 +50,15 @@ For each skill in the brainstorm, spawn a `plugin-skill-researcher` agent (haiku
 #### MCP Servers (parallel, one per server)
 
 For each MCP server in the brainstorm, spawn a `plugin-mcp-researcher` agent (haiku):
-- Query local SQLite+FTS5 cache first (`.data/mcp/registry-cache.db`)
+- Query knowledge graph first (`.data/mcp/knowledge-graph.db`)
 - On cache miss, the researcher spawns `mcp-registry-scanner` (haiku) for remote discovery
-- For promising new finds, spawns `mcp-server-profiler` (sonnet) to enrich cache records
-- Cache is dumped to `.data/mcp/registry-cache.sql` after any changes
+- For promising new finds, spawns `mcp-server-profiler` (sonnet) to enrich records
+- Knowledge graph is dumped via `just kg-dump` after any changes
 
-Ensure the cache DB is initialized before spawning researchers:
+Ensure the knowledge graph is initialized before spawning researchers:
 ```bash
-if [ ! -f .data/mcp/registry-cache.db ]; then
-  just mcp-cache-load
+if [ ! -f .data/mcp/knowledge-graph.db ]; then
+  just kg-init && just kg-load
 fi
 ```
 

@@ -907,25 +907,26 @@ kg-rebuild:
     @just kg-dump
     @echo "✓ Knowledge graph rebuilt"
 
-# MCP registry cache management
+# MCP server queries (data lives in knowledge-graph.db)
 [group('mcp')]
-mcp-cache-load:
-    @mkdir -p .data/mcp
-    @sqlite3 .data/mcp/registry-cache.db < .data/mcp/registry-cache.sql
-    @echo "✓ MCP registry cache loaded"
+mcp-stats:
+    @sqlite3 .data/mcp/knowledge-graph.db "SELECT count(*) || ' servers, ' || count(DISTINCT source_registry) || ' registries' FROM v_mcp_servers;"
 
 [group('mcp')]
-mcp-cache-dump:
-    @sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
-    @echo "✓ MCP registry cache dumped to .data/mcp/registry-cache.sql"
+mcp-search query:
+    @sqlite3 -header -column .data/mcp/knowledge-graph.db "SELECT e.name, e.content as description, ext.install_method, ext.source_registry FROM entities e LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id WHERE e.entity_type = 'mcp_server' AND (e.name LIKE '%{{ query }}%' OR e.content LIKE '%{{ query }}%') LIMIT 20;"
 
 [group('mcp')]
-mcp-cache-stats:
-    @sqlite3 .data/mcp/registry-cache.db "SELECT count(*) || ' servers, ' || count(DISTINCT source_registry) || ' registries' FROM mcp_servers;"
+mcp-list:
+    @sqlite3 -header -column .data/mcp/knowledge-graph.db "SELECT name, tool_count, install_method, stars FROM v_mcp_servers ORDER BY stars DESC NULLS LAST LIMIT 20;"
 
 [group('mcp')]
-mcp-cache-search query:
-    @sqlite3 -header -column .data/mcp/registry-cache.db "SELECT name, description, install_method, source_registry FROM mcp_servers_fts WHERE mcp_servers_fts MATCH '{{ query }}' LIMIT 20;"
+mcp-show slug:
+    @sqlite3 -header -column .data/mcp/knowledge-graph.db "SELECT * FROM v_mcp_servers WHERE slug = '{{ slug }}';"
+
+[group('mcp')]
+mcp-tools slug:
+    @sqlite3 -header -column .data/mcp/knowledge-graph.db "SELECT t.name, t.description FROM mcp_server_tools t JOIN entities e ON t.server_id = e.id WHERE e.slug = '{{ slug }}';"
 
 opencode:
     echo "TODO: Setup repo for OpenCode integration, using .ai/* contents"
@@ -942,8 +943,8 @@ windsurf:
 cursor:
     echo "TODO: Setup repo for cursor agent integration, using .ai/* contents"
 
-mcp-tools:
-    echo "TODO: Setup mcp-tools for repo"
+mcp-setup:
+    echo "TODO: Setup MCP servers for repo"
 
 sitemap root:
     echo "TODO: Generate sitemap for repo"

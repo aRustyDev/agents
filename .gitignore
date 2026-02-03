@@ -8,9 +8,6 @@ dist/
 # Temporary files
 temp.md
 
-# MCP registry cache (binary DB)
-.data/mcp/registry-cache.db
-
 # cclint symlinks (created by scripts/lint-context.sh)
 .claude/agents/_context-agents
 .claude/commands/_context-commands
@@ -18,3 +15,11 @@ temp.md
 __pycache__/
 *.egg-info
 htmlcov/
+.venv/
+
+*.db
+
+# devrag
+.claude_consciousness.m8
+models/
+documents/

@@ -7,11 +7,11 @@ tools: Bash, Read, Grep, Task
 
 # Plugin MCP Researcher
 
-Cache-first MCP server research agent. Queries the local SQLite+FTS5 cache before hitting remote registries.
+Cache-first MCP server research agent. Queries the local knowledge graph before hitting remote registries.
 
 ## Overview
 
-Searches for MCP servers matching a plugin need. Uses a local cache (`.data/mcp/registry-cache.db`) as the primary source, only spawning remote discovery when cache results are insufficient. Designed to run as multiple parallel instances — one per MCP need from a brainstorm document.
+Searches for MCP servers matching a plugin need. Uses the unified knowledge graph (`.data/mcp/knowledge-graph.db`) as the primary source, only spawning remote discovery when cache results are insufficient. Designed to run as multiple parallel instances — one per MCP need from a brainstorm document.
 
 ## Capabilities
 
@@ -60,23 +60,40 @@ Plugin: <parent plugin name>
 
 ## Workflow
 
-### Step 1: Initialize Cache
+### Step 1: Initialize Knowledge Graph
 
-Ensure the cache DB exists:
+Ensure the knowledge graph exists:
 
 ```bash
-if [ ! -f .data/mcp/registry-cache.db ]; then
-  mkdir -p .data/mcp
-  sqlite3 .data/mcp/registry-cache.db < .data/mcp/registry-cache.sql
+if [ ! -f .data/mcp/knowledge-graph.db ]; then
+  just kg-init
+  just kg-load
 fi
 ```
 
-### Step 2: Search Local Cache (FTS)
+### Step 2: Search Local Knowledge Graph
 
-Query the FTS index for the need's keywords:
+Query for MCP servers matching the need's keywords:
 
 ```bash
-sqlite3 -json .data/mcp/registry-cache.db "SELECT s.* FROM mcp_servers s JOIN mcp_servers_fts f ON s.id = f.rowid WHERE mcp_servers_fts MATCH '<keywords>' LIMIT 10;"
+sqlite3 -json .data/mcp/knowledge-graph.db "
+  SELECT * FROM v_mcp_servers
+  WHERE name LIKE '%<keyword>%' OR content LIKE '%<keyword>%'
+  ORDER BY stars DESC NULLS LAST
+  LIMIT 10;
+"
+```
+
+Or use FTS on the entities table:
+
+```bash
+sqlite3 -json .data/mcp/knowledge-graph.db "
+  SELECT e.*, ext.* FROM entities e
+  JOIN entities_fts f ON e.id = f.rowid
+  LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id
+  WHERE e.entity_type = 'mcp_server' AND entities_fts MATCH '<keywords>'
+  LIMIT 10;
+"
 ```
 
 Also search local MCP configs:
@@ -126,12 +143,12 @@ For each match:
 - **extend** if coverage >= 50% (fork or wrap)
 - **create** if no match >= 50% coverage
 
-### Step 7: Dump Cache
+### Step 7: Dump Knowledge Graph
 
 If any cache modifications were made (via scanner/profiler):
 
 ```bash
-sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
+just kg-dump
 ```
 
 ## Model

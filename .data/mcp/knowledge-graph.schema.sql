@@ -1,6 +1,8 @@
 -- Knowledge Graph Schema
--- Version: 1.0.0
+-- Version: 1.1.0
 -- See: docs/src/adr/001-primary-store.md
+--
+-- v1.1.0: Merged registry-cache fields into mcp_servers_ext and mcp_server_assessments
 
 -- =============================================================================
 -- CORE ENTITY STORAGE
@@ -37,12 +39,19 @@ CREATE TABLE IF NOT EXISTS mcp_servers_ext (
   repository TEXT,
   homepage TEXT,
   language TEXT,
-  transport TEXT,             -- 'stdio', 'sse', 'http-stream'
+  transport TEXT,             -- 'stdio', 'sse', 'http-stream', 'multi'
   stars INTEGER,
   last_updated TEXT,
   pricing TEXT,               -- 'free', 'paid', 'freemium'
+  pricing_notes TEXT,         -- details on tiers/limits
   source_registry TEXT,
-  source_url TEXT
+  source_url TEXT,
+  -- v1.1.0: Fields merged from registry-cache
+  dockerized INTEGER DEFAULT 0,  -- 0=no, 1=yes, 2=docker-only
+  locale TEXT DEFAULT 'en',      -- ISO 639-1 codes, comma-sep
+  config_schema TEXT,            -- JSON: server's configuration/env schema
+  discovered_at TEXT,
+  refreshed_at TEXT
 );
 
 -- Skill specific fields
@@ -97,27 +106,39 @@ CREATE TABLE IF NOT EXISTS mcp_server_deps (
   id INTEGER PRIMARY KEY,
   server_id INTEGER REFERENCES entities(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  kind TEXT,                  -- 'runtime', 'dev', 'peer', 'optional'
+  kind TEXT,                  -- 'binary', 'api', 'service', 'library', 'runtime'
   required INTEGER DEFAULT 1,
   version_constraint TEXT,
-  notes TEXT,
+  notes TEXT,                 -- e.g., "needs BRAVE_API_KEY env var"
   UNIQUE(server_id, name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_deps_server ON mcp_server_deps(server_id);
 
--- Assessments of MCP servers for specific domains
+-- Assessments of MCP servers (domain relevance + code quality)
 CREATE TABLE IF NOT EXISTS mcp_server_assessments (
   id INTEGER PRIMARY KEY,
   server_id INTEGER REFERENCES entities(id) ON DELETE CASCADE,
-  domain TEXT NOT NULL,
+  -- Domain relevance (optional, for use-case specific assessments)
+  domain TEXT,                    -- NULL for global assessments
   relevance_score REAL,
   coverage_pct REAL,
-  recommendation TEXT,        -- 'reuse', 'extend', 'create'
+  recommendation TEXT,            -- 'reuse', 'extend', 'create'
   notes TEXT,
+  -- v1.1.0: Code quality fields merged from registry-cache
+  has_unit_tests INTEGER DEFAULT 0,
+  has_integration_tests INTEGER DEFAULT 0,
+  has_e2e_tests INTEGER DEFAULT 0,
+  test_coverage_pct REAL,         -- 0.0-100.0 if measurable
+  test_robustness TEXT,           -- summary assessment of test quality
+  codebase_ast TEXT,              -- JSON: simplified AST / structure map
+  codebase_index TEXT,            -- JSON: file index with line counts, exports
+  codebase_summary TEXT,          -- prose summary of architecture
   assessed_at TEXT DEFAULT (datetime('now')),
   UNIQUE(server_id, domain)
 );
+
+CREATE INDEX IF NOT EXISTS idx_assessments_server ON mcp_server_assessments(server_id);
 
 -- =============================================================================
 -- CHUNKING AND EMBEDDINGS
@@ -242,8 +263,16 @@ SELECT
   ext.stars,
   ext.last_updated,
   ext.pricing,
+  ext.pricing_notes,
   ext.source_registry,
-  ext.source_url
+  ext.source_url,
+  ext.dockerized,
+  ext.locale,
+  ext.config_schema,
+  ext.discovered_at,
+  ext.refreshed_at,
+  (SELECT COUNT(*) FROM mcp_server_tools t WHERE t.server_id = e.id) AS tool_count,
+  (SELECT COUNT(*) FROM mcp_server_deps d WHERE d.server_id = e.id) AS dep_count
 FROM entities e
 LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id
 WHERE e.entity_type = 'mcp_server';

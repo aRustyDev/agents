@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Bash(sqlite3:*), Bash(mkdir:*), Grep, Glob, Task, As
 
 # Find MCP Servers
 
-Search for MCP servers matching a given purpose. Queries the unified knowledge graph first, then discovers and profiles new servers from remote registries on cache miss.
+Search for MCP servers matching a given purpose. Queries the local SQLite+FTS5 cache first, then discovers and profiles new servers from remote registries on cache miss.
 
 ## Arguments
 
@@ -20,14 +20,14 @@ Printed to conversation. Optionally written to `.plans/mcp-research/<slugified-p
 
 ## Workflow
 
-### Step 1: Initialize Knowledge Graph
+### Step 1: Initialize Cache
 
-Ensure the knowledge graph exists:
+Ensure the SQLite cache exists:
 
 ```bash
 if [ ! -f .data/mcp/knowledge-graph.db ]; then
-  just kg-init
-  just kg-load
+  mkdir -p .data/mcp
+  sqlite3 .data/mcp/knowledge-graph.db < .data/mcp/knowledge-graph.sql
 fi
 ```
 
@@ -47,21 +47,18 @@ Parse the purpose string into search keywords:
 
 **Example:** `"static analysis and linting for Python"` → `static OR analysis OR linting OR python`
 
-### Step 3: Search Knowledge Graph
+### Step 3: Search Local Cache
 
-Query for MCP servers:
+Query the FTS index:
 
 ```bash
 sqlite3 -json .data/mcp/knowledge-graph.db "
-  SELECT e.id, e.name, e.slug, e.content as description,
-         json_extract(e.metadata, '$.features') as features,
-         ext.install_method, ext.install_command, ext.repository,
-         ext.stars, ext.last_updated, ext.language, ext.refreshed_at
-  FROM entities e
-  LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id
-  WHERE e.entity_type = 'mcp_server'
-    AND (e.name LIKE '%<keyword>%' OR e.content LIKE '%<keyword>%')
-  ORDER BY ext.stars DESC NULLS LAST
+  SELECT s.id, s.name, s.slug, s.description, s.features, s.install_method,
+         s.install_command, s.repository, s.stars, s.last_updated, s.language
+  FROM mcp_servers s
+  JOIN mcp_servers_fts f ON s.id = f.rowid
+  WHERE mcp_servers_fts MATCH '<keywords>'
+  ORDER BY rank
   LIMIT 20;
 "
 ```
@@ -143,8 +140,7 @@ For the top N results, query the tools table:
 sqlite3 -json .data/mcp/knowledge-graph.db "
   SELECT t.name, t.description
   FROM mcp_server_tools t
-  JOIN entities e ON t.server_id = e.id
-  WHERE e.slug = '<slug>' AND e.entity_type = 'mcp_server';
+  WHERE t.server_id = <id>;
 "
 ```
 
@@ -197,12 +193,12 @@ Use AskUserQuestion to ask what the user wants to do:
 3. **Install one** — Show install instructions for a specific server
 4. **Done** — End
 
-### Step 10: Dump Knowledge Graph
+### Step 10: Dump Cache
 
 If any cache modifications were made:
 
 ```bash
-just kg-dump
+sqlite3 .data/mcp/knowledge-graph.db .dump > .data/mcp/knowledge-graph.sql
 ```
 
 ## Examples

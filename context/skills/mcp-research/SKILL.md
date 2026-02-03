@@ -50,46 +50,65 @@ Guide for discovering, profiling, and evaluating MCP servers using the local SQL
 | `mcp-server-profiler` | agent | sonnet | Deep enrichment — fetches README, extracts tools, updates cache |
 | `/find-mcp-servers` | command | — | User-facing slash command for server discovery |
 
-### Cache Layer
+### Storage Layer
+
+MCP server data lives in the unified knowledge graph:
 
 ```
-.data/mcp/registry-cache.db   ← SQLite+FTS5 (gitignored)
-.data/mcp/registry-cache.sql  ← text dump (version controlled)
+.data/mcp/knowledge-graph.db   ← SQLite + sqlite-vec (gitignored)
+.data/mcp/knowledge-graph.sql  ← SQL dump (version controlled)
 ```
 
 **Tables:**
 
 | Table | Purpose |
 |-------|---------|
-| `mcp_servers` | Core server records (name, slug, description, install, stars, etc.) |
-| `mcp_servers_fts` | FTS5 virtual table over name, description, features |
+| `entities` | Core records with `entity_type = 'mcp_server'` |
+| `mcp_servers_ext` | MCP-specific fields (install, repo, transport, etc.) |
 | `mcp_server_tools` | Tools exposed by each server |
 | `mcp_server_deps` | Dependencies required by each server |
-| `mcp_server_assessments` | Quality/relevance assessments per server per domain |
+| `mcp_server_assessments` | Quality/relevance assessments per server |
+| `v_mcp_servers` | Unified view joining entities + mcp_servers_ext |
 
-**Cache management:**
+**Management commands:**
 
 ```bash
-just mcp-cache-load    # Load DB from SQL dump
-just mcp-cache-dump    # Dump DB to SQL file
-just mcp-cache-stats   # Show server/tool counts
-just mcp-cache-search "query"  # FTS5 search
+just mcp-stats          # Show server/registry counts
+just mcp-search "query" # Search servers by name/description
+just mcp-list           # List top servers by stars
+just mcp-show <slug>    # Show server details
+just mcp-tools <slug>   # Show server's tools
+just kg-dump            # Dump entire knowledge graph
 ```
 
 ## Workflow: Discovering Servers
 
 ### Step 1: Query Local Cache
 
-Always check the cache first. Build an FTS5 MATCH query from the purpose keywords:
+Always check the cache first. Use FTS5 or LIKE queries on the knowledge graph:
 
 ```bash
-sqlite3 -json .data/mcp/registry-cache.db "
-  SELECT s.id, s.name, s.slug, s.description, s.features,
-         s.install_method, s.install_command, s.repository, s.stars
-  FROM mcp_servers s
-  JOIN mcp_servers_fts f ON s.id = f.rowid
-  WHERE mcp_servers_fts MATCH '<keyword1> OR <keyword2>'
+sqlite3 -json .data/mcp/knowledge-graph.db "
+  SELECT e.id, e.name, e.slug, e.content as description,
+         ext.install_method, ext.install_command, ext.repository, ext.stars,
+         json_extract(e.metadata, '$.features') as features
+  FROM entities e
+  JOIN entities_fts f ON e.id = f.rowid
+  LEFT JOIN mcp_servers_ext ext ON e.id = ext.entity_id
+  WHERE e.entity_type = 'mcp_server'
+    AND entities_fts MATCH '<keyword1> OR <keyword2>'
   ORDER BY rank
+  LIMIT 20;
+"
+```
+
+Or use the convenience view:
+
+```bash
+sqlite3 -json .data/mcp/knowledge-graph.db "
+  SELECT * FROM v_mcp_servers
+  WHERE name LIKE '%<keyword>%' OR content LIKE '%<keyword>%'
+  ORDER BY stars DESC NULLS LAST
   LIMIT 20;
 "
 ```
@@ -145,7 +164,7 @@ Score matches using weighted criteria:
 
 When you need to deeply research one specific server:
 
-1. Check if it exists in cache: `sqlite3 .data/mcp/registry-cache.db "SELECT * FROM mcp_servers WHERE slug='<slug>';"`
+1. Check if it exists in cache: `sqlite3 .data/mcp/knowledge-graph.db "SELECT * FROM mcp_servers WHERE slug='<slug>';"`
 2. If not cached, insert a minimal record first
 3. Spawn `mcp-server-profiler` with the slug
 4. The profiler will:
@@ -165,8 +184,8 @@ When bulk-loading servers from `settings/mcp/*.yaml`:
 #   - slug (normalized from name)
 #   - source_registry (from YAML source field)
 #   - source_url (from YAML url field)
-# Then dump cache
-sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
+# Then dump knowledge graph
+just kg-dump
 ```
 
 ## Registry Reference
@@ -194,58 +213,88 @@ See `reference/registries.yaml` for the full list of 24+ MCP server registries o
 
 The profiler agent needs to fetch web content (READMEs, registry pages) and convert to markdown. Available methods in priority order:
 
-### 1. GitHub API (preferred for GitHub repos)
+Use this 9-tier fallback chain in order:
+
+### 1. gh api (preferred for GitHub repos)
 
 ```bash
-# Raw README — already markdown, no conversion needed
 gh api repos/<owner>/<repo>/readme --jq '.content' | base64 -d
-
-# Or via raw URL
-curl -sL https://raw.githubusercontent.com/<owner>/<repo>/main/README.md
 ```
 
-### 2. WebSearch (always available)
+### 2. crawl4ai-mcp
 
-Use `site:<domain> <server-name>` queries to find registry pages. WebSearch results include summaries that often contain the key metadata.
+If the crawl4ai MCP server is connected, use it for JS-rendered pages.
 
-### 3. WebFetch (when available)
+### 3. trafilatura
+
+```bash
+trafilatura -u <url>
+```
+
+Clean text extraction CLI. Works well for static pages and documentation sites.
+
+### 4. WebSearch
+
+Use `site:<domain> <server-name>` queries to find registry pages. Results include summaries with key metadata.
+
+### 5. WebFetch
 
 Fetches URL content and converts HTML to markdown. Works for static pages. May be auto-denied in background subagents.
 
-### 4. Firecrawl MCP (when credits available)
-
-Most capable option — handles JS-rendered pages, returns clean markdown. Use `firecrawl_scrape` with `formats: ["markdown"]`. Falls back to other methods when credits are exhausted.
-
-### 5. CLI Fallbacks
-
-When MCP tools and WebFetch are unavailable:
+### 6. Jina Reader
 
 ```bash
-# curl + pandoc (if installed)
-curl -sL <url> | pandoc -f html -t markdown --wrap=none
-
-# Python markdownify (if installed)
-curl -sL <url> | python3 -c "import sys; from markdownify import markdownify; print(markdownify(sys.stdin.read()))"
-
-# Jina Reader API (free tier)
 curl -sL "https://r.jina.ai/<url>"
 ```
+
+Free tier API for converting web pages to markdown.
+
+### 7. firecrawl
+
+`firecrawl_scrape` with `formats: ["markdown"]`. Handles JS-rendered pages. Use when credits are available.
+
+### 8. markdownify
+
+```bash
+curl -sL <url> | python3 -c "import sys; from markdownify import markdownify; print(markdownify(sys.stdin.read()))"
+```
+
+### 9. html2text
+
+```bash
+curl -sL <url> | html2text
+```
+
+Last resort — basic HTML-to-text conversion.
 
 ## Common Patterns
 
 ### Inserting a new server
 
 ```sql
-INSERT INTO mcp_servers (name, slug, source_registry, source_url)
-VALUES ('<name>', '<slug>', '<registry>', '<url>');
+-- First insert into entities
+INSERT INTO entities (entity_type, slug, name, content, metadata)
+VALUES ('mcp_server', '<slug>', '<name>', '<description>',
+        json_object('features', '<comma,separated,tags>'));
+
+-- Then insert into mcp_servers_ext
+INSERT INTO mcp_servers_ext (entity_id, source_registry, source_url, discovered_at)
+SELECT id, '<registry>', '<url>', datetime('now')
+FROM entities WHERE slug = '<slug>' AND entity_type = 'mcp_server';
 ```
 
 ### Updating after profiling
 
 ```sql
-UPDATE mcp_servers SET
-  description = '<desc>',
-  features = '<comma,separated,tags>',
+-- Update entity content
+UPDATE entities SET
+  content = '<description>',
+  metadata = json_set(metadata, '$.features', '<comma,separated,tags>'),
+  updated_at = datetime('now')
+WHERE slug = '<slug>' AND entity_type = 'mcp_server';
+
+-- Update extension fields
+UPDATE mcp_servers_ext SET
   install_method = '<brew|npx|pip|docker|manual>',
   install_command = '<command>',
   repository = '<url>',
@@ -253,7 +302,7 @@ UPDATE mcp_servers SET
   stars = <N>,
   last_updated = '<ISO date>',
   refreshed_at = datetime('now')
-WHERE slug = '<slug>';
+WHERE entity_id = (SELECT id FROM entities WHERE slug = '<slug>' AND entity_type = 'mcp_server');
 ```
 
 ### Inserting tools
@@ -261,28 +310,28 @@ WHERE slug = '<slug>';
 ```sql
 INSERT INTO mcp_server_tools (server_id, name, description)
 SELECT id, '<tool_name>', '<tool_description>'
-FROM mcp_servers WHERE slug = '<slug>';
+FROM entities WHERE slug = '<slug>' AND entity_type = 'mcp_server';
 ```
 
 ## Troubleshooting
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| FTS returns no results | Keywords too specific or DB empty | Use broader terms, check `just mcp-cache-stats` |
+| FTS returns no results | Keywords too specific or DB empty | Use broader terms, check `just mcp-stats` |
 | Profiler can't fetch README | WebFetch/firecrawl denied in subagent | Fall back to `gh api` or WebSearch |
 | Firecrawl credits exhausted | API quota hit | Use `gh api`, WebSearch, or CLI fallbacks |
-| Duplicate slugs on insert | Server already cached | Use `INSERT OR IGNORE` or check before inserting |
+| Duplicate slugs on insert | Server already exists | Use `INSERT OR IGNORE` or check before inserting |
 | DB locked errors | Concurrent writes from parallel agents | Run profilers sequentially or use WAL mode |
-| Cache not persisted | Forgot to dump after changes | Run `just mcp-cache-dump` |
+| Changes not persisted | Forgot to dump after changes | Run `just kg-dump` |
 
 ## Checklist
 
-- [ ] Cache initialized (`just mcp-cache-load`)
-- [ ] FTS query built from purpose keywords
+- [ ] Knowledge graph initialized (`just kg-init`)
+- [ ] FTS/LIKE query built from purpose keywords
 - [ ] Cache checked before any remote calls
 - [ ] Scanner spawned only on cache miss
 - [ ] Profilers run in parallel (max 5)
-- [ ] Cache dumped after modifications (`just mcp-cache-dump`)
+- [ ] Knowledge graph dumped after modifications (`just kg-dump`)
 - [ ] Results ranked by weighted criteria
 - [ ] Tools fetched for top results
 
