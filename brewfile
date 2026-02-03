@@ -18,3 +18,35 @@ brew "ollama", restart_service: :changed
 # MCP servers
 brew "smart-tree"
 brew "devrag"
+
+# Pre-commit and linting
+brew "pre-commit"
+
+# Markdown linting
+brew "rumdl"                   # Fast markdown linter (Rust)
+brew "lychee"                  # Link checker (Rust)
+
+# Spell checking
+brew "cspell"                  # Code spell checker
+
+# Shell linting
+brew "shellcheck"              # Shell script static analysis
+brew "shfmt"                   # Shell script formatter
+brew "shellharden"             # Shell script security hardening
+
+# JSON/YAML linting
+brew "jsonlint"                # JSON linter
+brew "yamllint"                # YAML linter
+
+# SQL linting
+brew "sqlfluff"                # SQL linter and formatter
+
+# Brewfile linting
+brew "brew-gem"                # For brewfile linting via bundler
+
+# Python linting
+brew "ruff"                    # Fast Python linter (Rust)
+
+# JavaScript/TypeScript linting
+brew "biome"                   # Fast JS/TS linter and formatter (Rust)
+brew "node"                    # Required for eslint fallback
