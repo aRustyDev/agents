@@ -783,6 +783,26 @@ list-plugins:
       echo "  $name$installed"
     done
 
+# MCP registry cache management
+[group('mcp')]
+mcp-cache-load:
+    @mkdir -p .data/mcp
+    @sqlite3 .data/mcp/registry-cache.db < .data/mcp/registry-cache.sql
+    @echo "✓ MCP registry cache loaded"
+
+[group('mcp')]
+mcp-cache-dump:
+    @sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
+    @echo "✓ MCP registry cache dumped to .data/mcp/registry-cache.sql"
+
+[group('mcp')]
+mcp-cache-stats:
+    @sqlite3 .data/mcp/registry-cache.db "SELECT count(*) || ' servers, ' || count(DISTINCT source_registry) || ' registries' FROM mcp_servers;"
+
+[group('mcp')]
+mcp-cache-search query:
+    @sqlite3 -header -column .data/mcp/registry-cache.db "SELECT name, description, install_method, source_registry FROM mcp_servers_fts WHERE mcp_servers_fts MATCH '{{ query }}' LIMIT 20;"
+
 opencode:
     echo "TODO: Setup repo for OpenCode integration, using .ai/* contents"
 
