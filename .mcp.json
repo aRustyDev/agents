@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "crawl4ai": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/walksoda/crawl-mcp",
+        "crawl-mcp"
+      ]
+    },
+    "markdownify": {
+      "command": "node",
+      "args": [
+        "${HOME}/.local/share/mcp/markdownify-mcp/dist/index.js"
+      ]
+    },
+    "smart-tree": {
+      "command": "st",
+      "args": ["--mcp"]
+    },
+    "text-editor": {
+      "command": "uvx",
+      "args": ["mcp-text-editor"]
+    },
+    "mindmap": {
+      "command": "uvx",
+      "args": ["mindmap-mcp-server", "--return-type", "filePath"]
+    },
+    "markmap": {
+      "command": "npx",
+      "args": ["-y", "@jinzcdev/markmap-mcp-server"]
+    },
+    "devrag": {
+      "command": "devrag",
+      "args": []
+    }
+  }
+}

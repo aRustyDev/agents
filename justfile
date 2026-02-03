@@ -2,6 +2,31 @@
 
 CLAUDE_DIR := env("HOME") / ".claude"
 
+# Install project dependencies (idempotent)
+[group('install')]
+init: _init-brew _init-python _init-ollama _init-db
+    @echo "✓ Project initialized"
+
+[private]
+_init-brew:
+    @echo "Installing Homebrew dependencies..."
+    @brew bundle --quiet
+
+[private]
+_init-python:
+    @echo "Installing Python dependencies..."
+    @uv sync --quiet
+
+[private]
+_init-ollama:
+    @echo "Ensuring Ollama embedding model..."
+    @ollama list | grep -q "nomic-embed-text" || ollama pull nomic-embed-text
+
+[private]
+_init-db:
+    @echo "Initializing knowledge graph database..."
+    @just kg-init
+
 # Install Claude Code components to ~/.claude/
 [group('install')]
 install target='all':
@@ -782,6 +807,89 @@ list-plugins:
       [ -f "{{ CLAUDE_DIR }}/plugins/$name.installed" ] && installed=" [installed]"
       echo "  $name$installed"
     done
+
+# Knowledge graph operations
+
+# Initialize knowledge graph database
+[group('kg')]
+kg-init:
+    @uv run python scripts/init-db.py
+
+# Ingest all context files into knowledge graph
+[group('kg')]
+kg-ingest:
+    @uv run python scripts/embed.py ingest --all
+
+# Check for stale entities
+[group('kg')]
+kg-check:
+    @uv run python scripts/embed.py check
+
+# Semantic search
+[group('kg')]
+kg-search query:
+    @uv run python scripts/embed.py search "{{ query }}"
+
+# Find similar entities
+[group('kg')]
+kg-similar entity:
+    @uv run python scripts/embed.py similar "{{ entity }}"
+
+# Compute similarity cache
+[group('kg')]
+kg-similarity:
+    @uv run python scripts/embed.py similarity
+
+# Watch for changes and auto-embed
+[group('kg')]
+kg-watch:
+    @uv run python scripts/watch-embed.py
+
+# Dump knowledge graph to SQL
+[group('kg')]
+kg-dump:
+    @uv run python scripts/embed.py dump
+
+# Load knowledge graph from SQL dump
+[group('kg')]
+kg-load:
+    @uv run python scripts/init-db.py --load
+
+# Show knowledge graph statistics
+[group('kg')]
+kg-stats:
+    @uv run python scripts/kg-stats.py
+
+# Force re-embed all entities
+[group('kg')]
+kg-rebuild:
+    @echo "Rebuilding knowledge graph..."
+    @rm -f .data/mcp/knowledge-graph.db
+    @just kg-init
+    @just kg-ingest
+    @just kg-similarity
+    @just kg-dump
+    @echo "✓ Knowledge graph rebuilt"
+
+# MCP registry cache management
+[group('mcp')]
+mcp-cache-load:
+    @mkdir -p .data/mcp
+    @sqlite3 .data/mcp/registry-cache.db < .data/mcp/registry-cache.sql
+    @echo "✓ MCP registry cache loaded"
+
+[group('mcp')]
+mcp-cache-dump:
+    @sqlite3 .data/mcp/registry-cache.db .dump > .data/mcp/registry-cache.sql
+    @echo "✓ MCP registry cache dumped to .data/mcp/registry-cache.sql"
+
+[group('mcp')]
+mcp-cache-stats:
+    @sqlite3 .data/mcp/registry-cache.db "SELECT count(*) || ' servers, ' || count(DISTINCT source_registry) || ' registries' FROM mcp_servers;"
+
+[group('mcp')]
+mcp-cache-search query:
+    @sqlite3 -header -column .data/mcp/registry-cache.db "SELECT name, description, install_method, source_registry FROM mcp_servers_fts WHERE mcp_servers_fts MATCH '{{ query }}' LIMIT 20;"
 
 opencode:
     echo "TODO: Setup repo for OpenCode integration, using .ai/* contents"

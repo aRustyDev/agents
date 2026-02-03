@@ -8,6 +8,13 @@ dist/
 # Temporary files
 temp.md
 
+# MCP registry cache (binary DB)
+.data/mcp/registry-cache.db
+
+# cclint symlinks (created by scripts/lint-context.sh)
+.claude/agents/_context-agents
+.claude/commands/_context-commands
+
 __pycache__/
 *.egg-info
 htmlcov/

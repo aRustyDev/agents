@@ -1,0 +1,77 @@
+# MCP Server Registries
+# Organized by search priority tier for the mcp-registry-scanner agent.
+# Tier 1: Always search. Tier 2: Search on cache miss. Tier 3: Fallback.
+
+tier-1:
+  - url: https://smithery.ai/
+    name: Smithery
+    notes: Curated registry with install commands and verified servers
+  - url: https://registry.modelcontextprotocol.io
+    name: Official MCP Registry
+    notes: Anthropic-maintained official registry
+  - url: https://glama.ai/mcp/servers
+    name: Glama
+    notes: Detailed server profiles with tool listings
+  - url: https://www.pulsemcp.com
+    name: PulseMCP
+    notes: Community-curated with categories
+  - url: https://mcp.so/
+    name: MCP.so
+    notes: Search-focused directory
+  - url: https://github.com/topics/mcp-server
+    name: GitHub Topics
+    notes: Use gh search repos --topic mcp-server <keyword>
+
+tier-2:
+  - url: https://mcpservers.org/
+    name: MCP Servers
+    notes: Large directory, source for settings/mcp YAML files
+  - url: https://mcpdb.org/
+    name: MCPDB
+    notes: Database-style directory
+  - url: https://mcp-get.com/
+    name: MCP Get
+    notes: npm-style registry with install commands
+  - url: https://opentools.com/registry
+    name: OpenTools
+    notes: Cross-tool registry
+  - url: https://cursor.directory/mcp
+    name: Cursor Directory
+    notes: Cursor-focused but broadly useful
+  - url: https://lobehub.com
+    name: LobeHub
+    notes: Large MCP server catalog with detailed docs
+
+tier-3:
+  - url: https://himcp.ai/
+    name: HiMCP
+  - url: https://mcpmarket.com/
+    name: MCP Market
+  - url: https://portkey.ai/mcp-servers
+    name: Portkey
+  - url: https://cline.bot/mcp-marketplace
+    name: Cline Marketplace
+  - url: https://apitracker.io/mcp-servers
+    name: API Tracker
+  - url: https://www.mcpserver.directory/
+    name: MCP Server Directory
+  - url: https://mastra.ai/mcp-registry-registry
+    name: Mastra
+  - url: https://www.spekter.io/
+    name: Spekter
+  - url: https://machalliance.org/mach-alliance-mcp-registry
+    name: MACH Alliance
+  - url: https://www.reddit.com/r/mcp/
+    name: Reddit r/mcp
+    notes: Community discussion, not a formal registry
+  - url: https://github.com/punkpeye/awesome-mcp-servers
+    name: Awesome MCP Servers
+    notes: Curated awesome-list on GitHub
+  - url: https://github.com/modelcontextprotocol/servers
+    name: MCP Reference Servers
+    notes: Official reference implementations
+  - url: https://www.aixploria.com/en/list-best-mcp-servers-directory-ai/
+    name: AIXploria
+  - url: https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-registry
+    name: GitHub Copilot MCP Docs
+    notes: Documentation, not a registry
