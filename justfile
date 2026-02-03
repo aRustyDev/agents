@@ -1,3 +1,4 @@
+set unstable := true
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"
@@ -874,15 +875,21 @@ kg-similarity:
 kg-watch:
     @"{{which("uv")}}" run python scripts/watch-embed.py
 
-# Dump knowledge graph to SQL
+# Dump knowledge graph to SQL (essential tables only, ~40MB)
 [group('kg')]
 kg-dump:
-    @"{{which("uv")}}" run python scripts/embed.py dump
+    @"{{which("uv")}}" run python scripts/init-db.py --dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
     @"{{which("uv")}}" run python scripts/init-db.py --load
+
+# Rebuild vector embeddings from existing chunks (after loading from dump)
+[group('kg')]
+kg-rebuild-embeddings:
+    @"{{which("uv")}}" run python scripts/embed.py rebuild-embeddings
+    @just kg-similarity
 
 # Show knowledge graph statistics
 [group('kg')]

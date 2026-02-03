@@ -77,7 +77,7 @@ class SentenceTransformerEmbedder:
         return embeddings.tolist()
 
 
-def get_embedder(model: str = 'nomic-embed-text', fallback: bool = True) -> Embedder:
+def get_embedder(model: str = 'st:all-MiniLM-L6-v2', fallback: bool = True) -> Embedder:
     """Get an embedder instance.
 
     Args:

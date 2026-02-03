@@ -116,7 +116,7 @@ def process_file_change(path: str):
 def main():
     parser = argparse.ArgumentParser(description='Watch and auto-embed context files')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be processed')
-    parser.add_argument('--model', default='nomic-embed-text', help='Embedding model')
+    parser.add_argument('--model', default='st:all-MiniLM-L6-v2', help='Embedding model (use st: prefix for sentence-transformers)')
     args = parser.parse_args()
 
     # Directories to watch

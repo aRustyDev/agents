@@ -120,7 +120,15 @@ def ingest_file(
     # Start transaction
     if existing:
         entity_id = existing[0]
-        # Delete old chunks and embeddings
+        # Delete old vectors first (vec_chunks is a virtual table, no cascade)
+        conn.execute('''
+            DELETE FROM vec_chunks WHERE embedding_id IN (
+                SELECT em.id FROM embedding_meta em
+                JOIN chunks c ON em.chunk_id = c.id
+                WHERE c.entity_id = ?
+            )
+        ''', (entity_id,))
+        # Delete old chunks (cascades to embedding_meta)
         conn.execute('DELETE FROM chunks WHERE entity_id = ?', (entity_id,))
         # Update entity
         conn.execute('''
@@ -417,21 +425,59 @@ def cmd_similar(args):
     conn.close()
 
 
+def cmd_rebuild_embeddings(args):
+    """Rebuild vec_chunks from existing chunks (after loading from dump).
+
+    This regenerates vector embeddings for all chunks that have embedding_meta
+    records but no corresponding vec_chunks entries.
+    """
+    conn = get_connection()
+    embedder = get_embedder(args.model)
+
+    # Find chunks that need embeddings (have embedding_meta but no vec_chunks)
+    # Also handle case where vec_chunks table is empty/missing
+    orphaned = conn.execute('''
+        SELECT em.id, em.chunk_id, c.chunk_text
+        FROM embedding_meta em
+        JOIN chunks c ON em.chunk_id = c.id
+        WHERE em.id NOT IN (SELECT embedding_id FROM vec_chunks)
+        ORDER BY em.id
+    ''').fetchall()
+
+    if not orphaned:
+        print("All embeddings are up to date")
+        return
+
+    print(f"Rebuilding {len(orphaned)} embeddings...")
+
+    batch_size = 100
+    for i in range(0, len(orphaned), batch_size):
+        batch = orphaned[i:i+batch_size]
+        texts = [row[2] for row in batch]
+        embeddings = embedder.embed(texts)
+
+        for (emb_id, chunk_id, _), embedding in zip(batch, embeddings):
+            conn.execute(
+                'INSERT INTO vec_chunks (embedding_id, embedding) VALUES (?, ?)',
+                (emb_id, serialize_embedding(embedding))
+            )
+
+        conn.commit()
+        print(f"  Processed {min(i+batch_size, len(orphaned))}/{len(orphaned)}")
+
+    print(f"✓ Rebuilt {len(orphaned)} embeddings")
+    conn.close()
+
+
 def cmd_dump(args):
-    """Dump database to SQL."""
-    import subprocess
-    result = subprocess.run(
-        ['sqlite3', str(DB_PATH), '.dump'],
-        capture_output=True,
-        text=True
-    )
-    DUMP_PATH.write_text(result.stdout)
-    print(f"Database dumped to {DUMP_PATH}")
+    """Dump database to SQL (delegates to init-db.py)."""
+    from init_db import dump_database
+    dump_database()
 
 
 def main():
     parser = argparse.ArgumentParser(description='Knowledge graph embedding CLI')
-    parser.add_argument('--model', default='nomic-embed-text', help='Embedding model')
+    parser.add_argument('--model', default='st:all-MiniLM-L6-v2', help='Embedding model (use st: prefix for sentence-transformers)')
     subparsers = parser.add_subparsers(dest='command', required=True)
 
     # ingest
@@ -463,6 +509,10 @@ def main():
     p_similar.add_argument('entity', help='Entity slug')
     p_similar.add_argument('--limit', type=int, default=10, help='Max results')
     p_similar.set_defaults(func=cmd_similar)
+
+    # rebuild-embeddings
+    p_rebuild = subparsers.add_parser('rebuild-embeddings', help='Rebuild vec_chunks from existing chunks')
+    p_rebuild.set_defaults(func=cmd_rebuild_embeddings)
 
     # dump
     p_dump = subparsers.add_parser('dump', help='Dump database to SQL')
