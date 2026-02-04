@@ -1,0 +1,34 @@
+# Common Lisp Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: common_lisp
+display_name: Common Lisp
+tier: 3
+
+family:
+  primary: lisp
+  subtype: classic-lisp
+
+key_characteristics:
+  - "Homoiconicity (code as data)"
+  - "Powerful macro system"
+  - "CLOS (multiple inheritance, multiple dispatch)"
+  - "Condition system (restartable exceptions)"
+  - "Lisp-2 (separate function/value namespaces)"
+
+clojure_differences:
+  - "Lisp-2 vs Lisp-1"
+  - "Default mutable vs immutable"
+  - "CLOS vs protocols/records"
+  - "Native vs JVM"
+
+conversion_notes:
+  - "Lisp-2 → Lisp-1 function/value distinction"
+  - "CLOS → protocols or interfaces"
+  - "Condition system → try/catch"
+  - "defmacro → target macro system"
+  - "Dynamic variables → explicit state"
+
+sources:
+  - url: "http://www.lispworks.com/documentation/HyperSpec/"
+    description: "Common Lisp HyperSpec"

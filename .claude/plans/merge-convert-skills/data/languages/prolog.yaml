@@ -1,0 +1,41 @@
+# Prolog Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: prolog
+display_name: Prolog
+tier: 3
+
+family:
+  primary: logic
+  subtype: horn-clause
+
+key_characteristics:
+  - "Declarative programming"
+  - "Unification (pattern matching++)"
+  - "Automatic backtracking"
+  - "Logic variables"
+  - "Definite clause grammars (DCG)"
+
+implementations:
+  - name: "SWI-Prolog"
+    note: "Most popular, extensive libraries"
+  - name: "GNU Prolog"
+    note: "Native compilation"
+  - name: "Scryer Prolog"
+    note: "Modern Rust implementation"
+
+conversion_notes:
+  - "Backtracking → generators or search"
+  - "Unification → pattern matching (limited)"
+  - "Logic variables → explicit state threading"
+  - "Cut → explicit control flow"
+  - "DCGs → parser combinators"
+  - "Fundamentally different paradigm"
+
+paradigm_notes:
+  description: "Logic programming differs fundamentally from imperative and functional paradigms"
+  conversion_approach: "Often requires complete redesign rather than translation"
+
+sources:
+  - url: "https://www.swi-prolog.org/pldoc/"
+    description: "SWI-Prolog Documentation"

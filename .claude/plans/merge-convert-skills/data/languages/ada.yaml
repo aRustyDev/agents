@@ -1,0 +1,38 @@
+# Ada Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: ada
+display_name: Ada
+tier: 3
+
+family:
+  primary: procedural
+  subtype: safety-critical
+
+key_characteristics:
+  - "Strong static typing with range constraints"
+  - "Built-in concurrency (tasks, protected objects)"
+  - "Exception handling"
+  - "Contract-based programming"
+  - "SPARK subset for formal verification"
+
+versions:
+  - name: "Ada 83"
+    note: "Original standard"
+  - name: "Ada 95"
+    note: "OOP, protected types"
+  - name: "Ada 2012"
+    note: "Contracts, iterators"
+  - name: "Ada 2022"
+    note: "Parallel blocks"
+
+conversion_notes:
+  - "Task types → threads/actors"
+  - "Protected types → synchronized structures"
+  - "Package specs → interfaces"
+  - "Subtypes → refinement types or validation"
+  - "Pragmas → compiler annotations"
+
+sources:
+  - url: "http://www.ada-auth.org/standards/rm12_w_tc1/html/RM-TOC.html"
+    description: "Ada Reference Manual"

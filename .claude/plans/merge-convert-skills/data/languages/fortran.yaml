@@ -1,0 +1,36 @@
+# Fortran Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: fortran
+display_name: Fortran
+tier: 3
+
+family:
+  primary: procedural
+  subtype: scientific
+
+key_characteristics:
+  - "First-class array operations"
+  - "Column-major array storage"
+  - "Highly optimized compilers"
+  - "Coarray Fortran for parallelism"
+  - "70+ years of legacy code"
+
+versions:
+  - name: "FORTRAN 77"
+    note: "Fixed-form, structured"
+  - name: "Fortran 90"
+    note: "Free-form, modules"
+  - name: "Fortran 2018"
+    note: "Enhanced parallelism"
+
+conversion_notes:
+  - "Array indexing starts at 1"
+  - "Column-major → row-major conversion"
+  - "COMMON blocks → modules"
+  - "Implicit typing → explicit"
+  - "Numerical precision critical"
+
+sources:
+  - url: "https://fortran-lang.org/"
+    description: "Fortran-lang"

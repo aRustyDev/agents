@@ -1,0 +1,28 @@
+# COBOL Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: cobol
+display_name: COBOL
+tier: 3
+
+family:
+  primary: procedural
+  subtype: business
+
+key_characteristics:
+  - "Verbose English-like syntax"
+  - "Fixed-point decimal arithmetic"
+  - "Record-oriented data structures"
+  - "Division-based program structure"
+  - "Massive legacy codebase (220B+ lines)"
+
+conversion_notes:
+  - "Preserve decimal precision"
+  - "File/record handling → streams"
+  - "PERFORM loops → for/while"
+  - "COPYBOOK → modules/imports"
+  - "Batch processing patterns"
+
+sources:
+  - url: "https://www.ibm.com/docs/en/cobol-zos"
+    description: "IBM COBOL Documentation"

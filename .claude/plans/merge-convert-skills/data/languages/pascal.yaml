@@ -1,0 +1,37 @@
+# Pascal Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: pascal
+display_name: Pascal
+tier: 3
+
+family:
+  primary: procedural
+  subtype: educational
+
+key_characteristics:
+  - "Strong static typing"
+  - "Structured programming"
+  - "Nested procedures with lexical scoping"
+  - "Record types"
+  - "Explicit pointer allocation"
+
+dialects:
+  - name: "Standard Pascal"
+    note: "ISO 7185, minimal"
+  - name: "Turbo Pascal"
+    note: "Borland extensions"
+  - name: "Object Pascal"
+    note: "OOP, Delphi"
+  - name: "Free Pascal"
+    note: "Open source"
+
+conversion_notes:
+  - "begin/end → braces/indentation"
+  - "Procedure/function → unified functions"
+  - "Variant records → tagged unions"
+  - "Units → modules"
+
+sources:
+  - url: "https://www.freepascal.org/docs.html"
+    description: "Free Pascal Documentation"

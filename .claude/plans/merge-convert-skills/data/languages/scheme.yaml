@@ -1,0 +1,42 @@
+# Scheme Language Profile (Minimal)
+# Generated: 2024-02-04
+
+language: scheme
+display_name: Scheme
+tier: 3
+
+family:
+  primary: lisp
+  subtype: minimal-lisp
+
+key_characteristics:
+  - "Minimalist design"
+  - "Lisp-1 (unified namespace)"
+  - "First-class continuations (call/cc)"
+  - "Guaranteed tail call optimization"
+  - "Hygienic macros"
+  - "Lexical scoping"
+
+standards:
+  - name: "R5RS"
+    note: "Classic, widely implemented"
+  - name: "R6RS"
+    note: "Larger, modules"
+  - name: "R7RS-small"
+    note: "Modern minimal"
+
+common_lisp_differences:
+  - "Lisp-1 vs Lisp-2"
+  - "Minimal vs large"
+  - "First-class continuations"
+  - "Guaranteed TCO"
+
+conversion_notes:
+  - "call/cc → limited patterns"
+  - "Hygienic macros → different macro systems"
+  - "Guaranteed TCO → trampolining or loops"
+  - "Multiple implementations vary"
+
+sources:
+  - url: "https://small.r7rs.org/"
+    description: "R7RS Specification"
