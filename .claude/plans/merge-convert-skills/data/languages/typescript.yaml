@@ -1,0 +1,111 @@
+# TypeScript Language Profile
+# Generated: 2024-02-04
+
+language: typescript
+display_name: TypeScript
+version: "5.3"
+version_date: "2023-11"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: dynamic
+  secondary: [gradual-typing]
+  subtype: web
+
+popularity:
+  tiobe_rank: 49
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 73%
+  stackoverflow_year: 2023
+  github_repos: "3M+"
+
+features:
+  typing:
+    strength: gradual
+    inference: bidirectional
+    generics: bounded
+    nullability: optional
+    strict_null_checks: true
+    structural_typing: true
+
+  memory:
+    model: gc
+    gc_type: "JavaScript engine GC"
+    mutability: default-mutable
+    allocation: heap
+    readonly_modifier: true
+
+  control:
+    structured: [if-else, for, while, switch, try-catch]
+    effects: exceptions
+    async: async-await
+    async_runtime: "JavaScript Promises"
+
+  data:
+    primitives: [number, string, boolean, bigint, symbol, null, undefined]
+    composites: [arrays, tuples, objects, classes, interfaces]
+    collections: [Array, Map, Set, WeakMap, WeakSet]
+    abstraction: [interfaces, type aliases, classes, modules]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: decorators
+    type_level_computation: true
+
+ecosystem:
+  package_manager: [npm, pnpm, yarn, bun]
+  build_system: [tsc, esbuild, swc, vite]
+  lsp: [typescript-language-server]
+  formatter: [prettier, biome]
+  linter: [eslint, biome]
+  repl: [ts-node, tsx, bun]
+  test_framework: [jest, vitest, mocha]
+
+syntax:
+  function_def: "function name(params: T): R { } | (params: T): R => { }"
+  async_def: "async function name(params: T): Promise<R> { }"
+  type_def: "interface Name { } | type Name = { }"
+  module_def: "// file-based ES modules"
+  import: "import { item } from 'module' | import type { T } from 'module'"
+  error_handling: "try { } catch (e) { } finally { }"
+  type_guard: "function isT(x: unknown): x is T { }"
+
+semantic_gaps:
+  - description: "Types erased at runtime"
+    severity: moderate
+    workaround: "Use type guards, zod/io-ts for runtime validation"
+  - description: "any bypasses type checking"
+    severity: minor
+    workaround: "Use unknown instead, enable noImplicitAny"
+  - description: "No pattern matching"
+    severity: moderate
+    workaround: "Use discriminated unions + switch"
+  - description: "Null vs undefined distinction"
+    severity: minor
+    workaround: "Use strictNullChecks, prefer undefined"
+  - description: "No true immutability"
+    severity: minor
+    workaround: "Use readonly modifier, as const"
+
+skill_coverage:
+  as_source: 2
+  as_target: 1
+  source_skills:
+    - typescript-golang
+    - typescript-rust
+  target_skills:
+    - python-typescript
+
+compiles_to:
+  - language: javascript
+    targets: [ES3, ES5, ES6, ES2015, ES2016, ES2017, ES2018, ES2019, ES2020, ES2021, ES2022, ESNext]
+
+sources:
+  - url: "https://www.typescriptlang.org/docs/handbook/"
+    description: "TypeScript Handbook"
+  - url: "https://www.typescriptlang.org/docs/"
+    description: "TypeScript Documentation"
+  - url: "https://github.com/microsoft/TypeScript"
+    description: "TypeScript GitHub Repository"

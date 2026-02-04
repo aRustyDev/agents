@@ -1,0 +1,144 @@
+# Python Language Profile
+# Generated: 2024-02-04
+
+language: python
+display_name: Python
+version: "3.12"
+version_date: "2023-10"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: dynamic
+  secondary: [gradual-typing]
+  subtype: scripting
+
+popularity:
+  tiobe_rank: 1
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 48%
+  stackoverflow_year: 2023
+  github_repos: "4.5M+"
+
+features:
+  typing:
+    strength: dynamic
+    inference: none
+    generics: runtime
+    nullability: nullable
+    gradual_typing: true
+    type_hints: "PEP 484+"
+
+  memory:
+    model: gc
+    gc_type: "reference counting + cycle collector"
+    mutability: default-mutable
+    allocation: heap
+
+  control:
+    structured: [if-elif-else, for, while, try-except, match-case, with]
+    effects: exceptions
+    async: async-await
+    async_runtime: asyncio
+
+  data:
+    primitives: [int, float, bool, str, bytes, None]
+    composites: [list, tuple, dict, set, frozenset, dataclass]
+    collections: [deque, Counter, OrderedDict, defaultdict]
+    abstraction: [classes, modules, protocols]
+
+  meta:
+    macros: none
+    reflection: full
+    codegen: [decorators, metaclasses]
+
+ecosystem:
+  package_manager: [pip, uv, poetry]
+  build_system: [setuptools, hatch, flit]
+  lsp: [pylsp, pyright]
+  formatter: [black, ruff]
+  linter: [ruff, flake8, pylint]
+  repl: [python, ipython, jupyter]
+  test_framework: [pytest, unittest]
+
+syntax:
+  function_def: "def name(params) -> ReturnType:"
+  async_def: "async def name(params) -> ReturnType:"
+  type_def: "@dataclass class Name: | class Name(Protocol):"
+  module_def: "# file-based modules"
+  import: "from package import module | import package"
+  error_handling: "try: ... except E as e: ... finally: ..."
+  pattern_matching: "match x: case pattern: ..."
+
+semantic_gaps:
+  - description: "No static type enforcement"
+    severity: moderate
+    workaround: "Use mypy/pyright for static analysis"
+  - description: "GIL limits true parallelism"
+    severity: moderate
+    workaround: "Use multiprocessing or async for I/O"
+  - description: "No tail call optimization"
+    severity: minor
+    workaround: "Use iteration instead of recursion"
+  - description: "Mutable default arguments"
+    severity: minor
+    workaround: "Use None default, assign in function"
+
+skill_coverage:
+  as_source: 11
+  as_target: 0
+  source_skills:
+    - python-clojure
+    - python-elixir
+    - python-elm
+    - python-erlang
+    - python-fsharp
+    - python-golang
+    - python-haskell
+    - python-roc
+    - python-rust
+    - python-scala
+    - python-typescript
+
+version_history:
+  - version: "2.7"
+    release_date: "2010-07"
+    status: legacy
+    conversion_notes:
+      - "print statement vs function"
+      - "unicode vs str handling"
+      - "/ integer division"
+      - "dict.keys() returns list"
+
+  - version: "3.6"
+    release_date: "2016-12"
+    status: baseline_modern
+    conversion_notes:
+      - "f-strings introduced"
+      - "async/await stabilized"
+      - "type hints expanded (PEP 526)"
+      - "dict maintains insertion order"
+
+  - version: "3.10"
+    release_date: "2021-10"
+    status: current_reference
+    conversion_notes:
+      - "Pattern matching (match/case)"
+      - "Union types X | Y syntax"
+      - "ParamSpec for typing"
+
+  - version: "3.12"
+    release_date: "2023-10"
+    status: latest_stable
+    conversion_notes:
+      - "Type parameter syntax (PEP 695)"
+      - "f-string improvements"
+      - "Per-interpreter GIL (PEP 684)"
+
+sources:
+  - url: "https://docs.python.org/3/reference/"
+    description: "Python Language Reference"
+  - url: "https://docs.python.org/3/library/"
+    description: "Python Standard Library"
+  - url: "https://peps.python.org/"
+    description: "Python Enhancement Proposals"
