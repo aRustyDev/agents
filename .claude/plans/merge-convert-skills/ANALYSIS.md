@@ -386,6 +386,68 @@ For `python → roc` conversion:
 4. Apply `convert-patterns/type-mappings` (dynamic → static)
 5. Synthesize using `convert-synthesize-roc`
 
+## 6. Post-Merge Analysis (49 Skills)
+
+After Phase 1 merge, the landscape changed significantly:
+
+### Skill Distribution by Family
+
+| Family | As Source | As Target | Key Languages |
+|--------|-----------|-----------|---------------|
+| ML-FP | 5 langs, 12 skills | 5 targets, 29 skills | haskell, elm, roc, fsharp, scala |
+| BEAM | 2 langs, 10 skills | 2 targets, 6 skills | erlang, elixir |
+| Dynamic | 2 langs, 13 skills | 2 targets, 2 skills | python, typescript |
+| Systems | 4 langs, 5 skills | 4 targets, 11 skills | rust, c, cpp, golang |
+| LISP | 1 lang, 7 skills | 1 target, 1 skill | clojure |
+| JVM-OOP | 1 lang, 3 skills | 0 targets | java |
+| Apple | 1 lang, 1 skill | 1 target, 1 skill | objc→swift |
+
+### Target Synthesis Similarity Scores
+
+These scores indicate how similar all "convert-*-{target}" skills are. Higher = more shared template potential.
+
+| Target | Similarity | Sources | Template Potential |
+|--------|------------|---------|-------------------|
+| clojure | 1.000 | 1 | N/A (single source) |
+| erlang | 0.846 | 4 | ★★★ High |
+| elm | 0.846 | 3 | ★★★ High |
+| haskell | 0.841 | 6 | ★★★ High |
+| cpp | 0.829 | 2 | ★★★ High |
+| golang | 0.826 | 2 | ★★★ High |
+| scala | 0.822 | 8 | ★★★ High |
+| rust | 0.802 | 6 | ★★ Medium |
+| roc | 0.788 | 7 | ★★ Medium |
+| fsharp | 0.780 | 5 | ★★ Medium |
+| elixir | 0.722 | 2 | ★ Lower |
+
+### Cross-Family Coverage
+
+```
+Within-family conversions: 17
+Cross-family conversions:  32
+
+Cross-family breakdown:
+  beam → ml-fp:     9 skills (dense coverage)
+  lisp → ml-fp:     5 skills
+  dynamic → ml-fp:  5 skills
+  dynamic → systems: 4 skills
+  jvm-oop → systems: 3 skills
+  dynamic → beam:   2 skills
+  lisp → beam:      2 skills
+  dynamic → lisp:   1 skill
+  ml-fp → beam:     1 skill
+```
+
+### Key Observations
+
+1. **Python is the universal source** — 11 targets, touches all families
+2. **Scala is the universal target** — 8 sources, highest cross-family coverage
+3. **Rust is the systems-family hub** — 6 sources converge here
+4. **ML-FP forms a dense cluster** — High internal connectivity
+5. **Gaps exist**: No jvm-oop targets, limited apple coverage
+
+---
+
 ## Appendix: Raw Data
 
 ### A. All Bidirectional Pairs
