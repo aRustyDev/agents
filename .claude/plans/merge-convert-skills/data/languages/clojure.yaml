@@ -1,0 +1,136 @@
+# Clojure Language Profile
+# Generated: 2024-02-04
+
+language: clojure
+display_name: Clojure
+version: "1.12"
+version_date: "2024-02"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: lisp
+  secondary: [fp]
+  subtype: modern-lisp
+
+popularity:
+  tiobe_rank: 45
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 62%
+  stackoverflow_year: 2023
+  github_repos: "150K+"
+
+features:
+  typing:
+    strength: dynamic
+    inference: none
+    generics: runtime
+    nullability: nullable
+    spec: true
+    type_hints: true
+
+  memory:
+    model: gc
+    gc_type: "JVM garbage collection"
+    mutability: default-immutable
+    allocation: persistent-data-structures
+    stm: true
+
+  control:
+    structured: [if, cond, case, when, loop/recur]
+    effects: exceptions
+    async: core.async
+
+  data:
+    primitives: [numbers, strings, characters, keywords, symbols, booleans, nil]
+    composites: [lists, vectors, maps, sets]
+    collections: [persistent, lazy-sequences]
+    abstraction: [protocols, multimethods, namespaces]
+
+  meta:
+    macros: first-class
+    reflection: runtime
+    codegen: macros
+
+ecosystem:
+  package_manager: [Leiningen, deps.edn]
+  build_system: [Leiningen, tools.deps]
+  lsp: [clojure-lsp]
+  formatter: [cljfmt, zprint]
+  linter: [clj-kondo]
+  repl: [built-in]
+  test_framework: [clojure.test]
+
+syntax:
+  function_def: "(defn name [params] body)"
+  async_def: "(go (>! ch value)) ; core.async"
+  type_def: "(defrecord Name [field1 field2]) | (defprotocol Name (method [this]))"
+  module_def: "(ns namespace.name (:require [...]))"
+  import: "(:require [ns :as alias]) | (:import [java.util Date])"
+  error_handling: "(try body (catch Exception e handler) (finally cleanup))"
+  pattern_matching: "(match [x] [pattern] action) ; with core.match"
+
+semantic_gaps:
+  - description: "No static types"
+    severity: moderate
+    workaround: "Use spec, Schema, or Typed Clojure"
+  - description: "JVM startup time"
+    severity: moderate
+    workaround: "GraalVM native-image, keep REPL running"
+  - description: "Stack not tail-call optimized"
+    severity: minor
+    workaround: "Use loop/recur, trampoline"
+  - description: "No pattern matching built-in"
+    severity: minor
+    workaround: "Use core.match library"
+
+skill_coverage:
+  as_source: 7
+  as_target: 1
+  source_skills:
+    - clojure-elixir
+    - clojure-elm
+    - clojure-erlang
+    - clojure-fsharp
+    - clojure-haskell
+    - clojure-roc
+    - clojure-scala
+  target_skills:
+    - python-clojure
+
+lisp_features:
+  homoiconic: true
+  reader_macros: true
+  quasiquoting: true
+  code_as_data: true
+
+concurrency_model:
+  type: stm
+  primitives:
+    - name: atom
+      description: "Synchronous, uncoordinated state"
+    - name: ref
+      description: "Synchronous, coordinated state (STM)"
+    - name: agent
+      description: "Asynchronous, uncoordinated state"
+    - name: var
+      description: "Thread-local state"
+  channels:
+    library: core.async
+    type: csp
+
+compiles_to:
+  - language: jvm
+    targets: [JVM bytecode]
+  - language: javascript
+    targets: [ClojureScript]
+  - language: dotnet
+    targets: [ClojureCLR]
+
+sources:
+  - url: "https://clojure.org/reference/"
+    description: "Clojure Reference"
+  - url: "https://clojure.org/guides/"
+    description: "Clojure Guides"
+  - url: "https://clojuredocs.org/"
+    description: "ClojureDocs"
