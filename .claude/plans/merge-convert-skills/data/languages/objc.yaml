@@ -1,0 +1,111 @@
+# Objective-C Language Profile
+# Generated: 2024-02-04
+
+language: objc
+display_name: Objective-C
+version: "Modern (ARC)"
+version_date: "2011"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: apple
+  secondary: [oop]
+  subtype: dynamic-dispatch
+
+popularity:
+  tiobe_rank: 25
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 24%
+  stackoverflow_year: 2022
+  github_repos: "300K+"
+
+features:
+  typing:
+    strength: weak
+    inference: none
+    generics: lightweight
+    nullability: nullable
+    dynamic_typing: true
+    id_type: true
+
+  memory:
+    model: arc
+    gc_type: "Automatic Reference Counting"
+    mutability: default-mutable
+    allocation: heap
+
+  control:
+    structured: [if-else, for, while, switch, @try/@catch/@finally]
+    effects: exceptions
+    async: gcd
+
+  data:
+    primitives: [C primitives, BOOL, NSInteger, CGFloat]
+    composites: [classes, structs, blocks]
+    collections: [NSArray, NSDictionary, NSSet]
+    abstraction: [protocols, categories, class-clusters]
+
+  meta:
+    macros: preprocessor
+    reflection: full-runtime
+    codegen: [method-swizzling, dynamic-class-creation]
+
+ecosystem:
+  package_manager: [CocoaPods, Carthage, SPM]
+  build_system: [Xcode]
+  lsp: [SourceKit-LSP]
+  formatter: [clang-format]
+  linter: [OCLint]
+  repl: []
+  test_framework: [XCTest]
+
+syntax:
+  function_def: "- (ReturnType)name:(ParamType)param { body }"
+  async_def: "dispatch_async(queue, ^{ ... });"
+  type_def: "@interface Name : Super @property ... @end"
+  module_def: "@import Module; // modules"
+  import: "#import <Header.h> | @import Module;"
+  error_handling: "NSError ** pattern | @try/@catch"
+  pattern_matching: "switch (value) { case CONST: ...; break; }"
+
+semantic_gaps:
+  - description: "Dynamic typing risks"
+    severity: high
+    workaround: "Use nullability annotations, Swift interop"
+  - description: "No namespaces"
+    severity: moderate
+    workaround: "Use class prefixes (NS, UI, etc.)"
+  - description: "Header/implementation split"
+    severity: moderate
+    workaround: "Use categories, migrate to Swift"
+  - description: "Verbose syntax"
+    severity: moderate
+    workaround: "Use modern features, migrate to Swift"
+
+skill_coverage:
+  as_source: 1
+  as_target: 0
+  source_skills:
+    - objc-swift
+  target_skills: []
+
+runtime_features:
+  message_passing: true
+  method_swizzling: true
+  isa_swizzling: true
+  dynamic_class_creation: true
+  method_forwarding: true
+  kvc_kvo: true
+
+compiles_to:
+  - language: native
+    targets: [LLVM, Apple platforms]
+
+sources:
+  - url: "https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/"
+    description: "Objective-C Programming Language"
+  - url: "https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/"
+    description: "Objective-C Runtime Programming Guide"
+  - url: "https://developer.apple.com/documentation/"
+    description: "Apple Developer Documentation"

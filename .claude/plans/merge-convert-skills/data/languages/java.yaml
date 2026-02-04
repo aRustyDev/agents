@@ -1,0 +1,147 @@
+# Java Language Profile
+# Generated: 2024-02-04
+
+language: java
+display_name: Java
+version: "21"
+version_date: "2023-09"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: managed-oop
+  secondary: []
+  subtype: enterprise
+
+popularity:
+  tiobe_rank: 4
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 35%
+  stackoverflow_year: 2023
+  github_repos: "3M+"
+
+features:
+  typing:
+    strength: strong
+    inference: limited
+    generics: type-erasure
+    nullability: nullable
+    sealed_types: true
+    records: true
+
+  memory:
+    model: gc
+    gc_type: "JVM garbage collection"
+    mutability: default-mutable
+    allocation: heap
+
+  control:
+    structured: [if-else, for, while, switch, try-catch]
+    effects: exceptions
+    async: CompletableFuture
+
+  data:
+    primitives: [byte, short, int, long, float, double, boolean, char]
+    composites: [classes, records, arrays, enums]
+    collections: [List, Set, Map, Queue]
+    abstraction: [classes, interfaces, packages, modules]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: annotation-processors
+
+ecosystem:
+  package_manager: [Maven, Gradle]
+  build_system: [Maven, Gradle, Bazel]
+  lsp: [Eclipse JDT LS]
+  formatter: [google-java-format]
+  linter: [SpotBugs, Error Prone]
+  repl: [JShell]
+  test_framework: [JUnit, TestNG]
+
+syntax:
+  function_def: "public ReturnType name(ParamType param) { body }"
+  async_def: "public CompletableFuture<T> name() { return ...; }"
+  type_def: "public class Name { } | public record Name(...) { } | public interface Name { }"
+  module_def: "module name { requires ...; exports ...; }"
+  import: "import package.Class; | import package.*;"
+  error_handling: "try { } catch (Exception e) { } finally { }"
+  pattern_matching: "switch (obj) { case Type t -> ...; }"
+
+semantic_gaps:
+  - description: "Null pointer exceptions"
+    severity: high
+    workaround: "Use Optional, @Nullable annotations"
+  - description: "Checked exceptions verbosity"
+    severity: moderate
+    workaround: "Use unchecked exceptions, RuntimeException"
+  - description: "Type erasure limits"
+    severity: moderate
+    workaround: "Use class tokens, consider Kotlin"
+  - description: "Verbosity (pre-records)"
+    severity: minor
+    workaround: "Use records (Java 14+), Lombok"
+
+version_history:
+  - version: "8"
+    release_date: "2014-03"
+    status: legacy_lts
+    conversion_notes:
+      - "Lambdas and functional interfaces"
+      - "Stream API"
+      - "Optional"
+      - "Default methods in interfaces"
+      - "Method references"
+
+  - version: "11"
+    release_date: "2018-09"
+    status: lts
+    conversion_notes:
+      - "var for local variables"
+      - "HTTP Client API"
+      - "Collection factory methods (List.of)"
+      - "String improvements"
+
+  - version: "17"
+    release_date: "2021-09"
+    status: lts
+    conversion_notes:
+      - "Sealed classes"
+      - "Pattern matching for instanceof"
+      - "Records"
+      - "Text blocks"
+      - "Switch expressions"
+
+  - version: "21"
+    release_date: "2023-09"
+    status: latest_lts
+    conversion_notes:
+      - "Virtual threads"
+      - "Record patterns"
+      - "Pattern matching for switch"
+      - "Sequenced collections"
+      - "String templates (preview)"
+
+skill_coverage:
+  as_source: 3
+  as_target: 0
+  source_skills:
+    - java-c
+    - java-cpp
+    - java-rust
+  target_skills: []
+
+compiles_to:
+  - language: jvm
+    targets: [JVM bytecode]
+  - language: native
+    targets: [GraalVM native-image]
+
+sources:
+  - url: "https://docs.oracle.com/javase/specs/"
+    description: "Java Language Specification"
+  - url: "https://docs.oracle.com/en/java/javase/"
+    description: "Java SE Documentation"
+  - url: "https://openjdk.org/jeps/"
+    description: "OpenJDK JEPs"

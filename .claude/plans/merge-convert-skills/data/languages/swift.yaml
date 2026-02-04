@@ -1,0 +1,104 @@
+# Swift Language Profile
+# Generated: 2024-02-04
+
+language: swift
+display_name: Swift
+version: "5.9"
+version_date: "2023-09"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: apple
+  secondary: [ml-fp]
+  subtype: protocol-oriented
+
+popularity:
+  tiobe_rank: 15
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 55%
+  stackoverflow_year: 2023
+  github_repos: "500K+"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: bounded
+    nullability: explicit
+    optionals: true
+    protocols: true
+
+  memory:
+    model: arc
+    gc_type: "Automatic Reference Counting"
+    mutability: default-immutable
+    allocation: value-stack
+    copy_on_write: true
+
+  control:
+    structured: [if-else, for-in, while, switch, guard]
+    effects: throws
+    async: async-await
+
+  data:
+    primitives: [Int, Double, Float, Bool, Character, String]
+    composites: [struct, class, enum, tuple]
+    collections: [Array, Dictionary, Set]
+    abstraction: [protocols, extensions, modules]
+
+  meta:
+    macros: compile-time
+    reflection: limited
+    codegen: [macros, result-builders]
+
+ecosystem:
+  package_manager: [Swift Package Manager]
+  build_system: [Xcode, SwiftPM]
+  lsp: [SourceKit-LSP]
+  formatter: [swift-format]
+  linter: [SwiftLint]
+  repl: [swift]
+  test_framework: [XCTest]
+
+syntax:
+  function_def: "func name(param: Type) -> ReturnType { body }"
+  async_def: "func name() async throws -> Type { ... }"
+  type_def: "struct Name { } | class Name { } | enum Name { case ... }"
+  module_def: "// file-based, implicit module"
+  import: "import Module | import struct Module.Type"
+  error_handling: "try { } catch { } | Result<Success, Failure>"
+  pattern_matching: "switch value { case pattern: ... }"
+
+semantic_gaps:
+  - description: "Apple platform bias"
+    severity: moderate
+    workaround: "Use SwiftPM for cross-platform"
+  - description: "ARC retain cycles"
+    severity: moderate
+    workaround: "Use weak/unowned references"
+  - description: "No full reflection"
+    severity: minor
+    workaround: "Use Mirror for limited reflection"
+  - description: "Rapid language evolution"
+    severity: minor
+    workaround: "Pin Swift version, follow proposals"
+
+skill_coverage:
+  as_source: 0
+  as_target: 1
+  source_skills: []
+  target_skills:
+    - objc-swift
+
+compiles_to:
+  - language: native
+    targets: [LLVM, Apple platforms, Linux, Windows]
+
+sources:
+  - url: "https://docs.swift.org/swift-book/"
+    description: "Swift Programming Language"
+  - url: "https://swift.org/documentation/api-design-guidelines/"
+    description: "Swift API Design Guidelines"
+  - url: "https://github.com/apple/swift-evolution"
+    description: "Swift Evolution"
