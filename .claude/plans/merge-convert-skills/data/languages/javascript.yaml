@@ -1,0 +1,107 @@
+# JavaScript Language Profile
+# Generated: 2024-02-04
+
+language: javascript
+display_name: JavaScript
+version: "ES2023"
+version_date: "2023-06"
+last_updated: "2024-02"
+tier: 2
+
+family:
+  primary: dynamic
+  secondary: []
+  subtype: web
+
+popularity:
+  tiobe_rank: 6
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 40%
+  stackoverflow_year: 2023
+  github_repos: "5M+"
+
+features:
+  typing:
+    strength: weak
+    inference: none
+    generics: none
+    nullability: nullable
+    coercion: true
+
+  memory:
+    model: gc
+    gc_type: "engine GC (V8, SpiderMonkey, JSC)"
+    mutability: default-mutable
+    allocation: heap
+
+  control:
+    structured: [if-else, for, while, switch, try-catch]
+    effects: exceptions
+    async: promises
+
+  data:
+    primitives: [number, string, boolean, bigint, symbol, null, undefined]
+    composites: [objects, arrays, functions, classes]
+    collections: [Array, Map, Set, WeakMap, WeakSet]
+    abstraction: [prototypes, classes, modules]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: [eval, Proxy]
+
+ecosystem:
+  package_manager: [npm, pnpm, yarn, bun]
+  build_system: [webpack, vite, esbuild, rollup]
+  lsp: [typescript-language-server]
+  formatter: [prettier, biome]
+  linter: [eslint, biome]
+  repl: [node, deno, bun, browser console]
+  test_framework: [jest, vitest, mocha]
+
+syntax:
+  function_def: "function name(params) { } | (params) => { }"
+  async_def: "async function name() { } | async () => { }"
+  type_def: "class Name { } | // no native types"
+  module_def: "// file-based ES modules"
+  import: "import { item } from 'module' | require('module')"
+  error_handling: "try { } catch (e) { } finally { }"
+  pattern_matching: "// none - use switch or if chains"
+
+semantic_gaps:
+  - description: "No static types"
+    severity: high
+    workaround: "Use TypeScript"
+  - description: "Type coercion surprises"
+    severity: moderate
+    workaround: "Use === instead of =="
+  - description: "this binding confusion"
+    severity: moderate
+    workaround: "Arrow functions, explicit binding"
+  - description: "null vs undefined"
+    severity: minor
+    workaround: "Use ?? operator"
+
+skill_coverage:
+  as_source: 0
+  as_target: 0
+  source_skills: []
+  target_skills: []
+  note: "Not in current convert-* skills. TypeScript serves as typed alternative."
+
+compiles_to:
+  - language: bytecode
+    targets: [V8, SpiderMonkey, JavaScriptCore]
+
+typescript_relationship:
+  compile_target: true
+  type_erasure: true
+  note: "TypeScript compiles to JavaScript"
+
+sources:
+  - url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+    description: "MDN Web Docs"
+  - url: "https://tc39.es/ecma262/"
+    description: "ECMAScript Specification"
+  - url: "https://github.com/tc39/proposals"
+    description: "TC39 Proposals"

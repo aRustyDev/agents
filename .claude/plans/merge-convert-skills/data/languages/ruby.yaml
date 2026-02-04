@@ -1,0 +1,111 @@
+# Ruby Language Profile
+# Generated: 2024-02-04
+
+language: ruby
+display_name: Ruby
+version: "3.3"
+version_date: "2023-12"
+last_updated: "2024-02"
+tier: 2
+
+family:
+  primary: dynamic
+  secondary: []
+  subtype: scripting
+
+popularity:
+  tiobe_rank: 16
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 41%
+  stackoverflow_year: 2023
+  github_repos: "1M+"
+
+features:
+  typing:
+    strength: dynamic
+    inference: none
+    generics: none
+    nullability: nullable
+    rbs_types: true
+    duck_typing: true
+
+  memory:
+    model: gc
+    gc_type: "mark-and-sweep + generational"
+    mutability: default-mutable
+    allocation: heap
+
+  control:
+    structured: [if-else, unless, case-when, while, until, begin-rescue]
+    effects: exceptions
+    async: fiber
+
+  data:
+    primitives: [Integer, Float, String, Symbol, TrueClass, FalseClass, NilClass]
+    composites: [Array, Hash, Struct, Class]
+    collections: [Array, Hash, Set, Range]
+    abstraction: [classes, modules, mixins]
+
+  meta:
+    macros: method-level
+    reflection: full
+    codegen: [eval, define_method]
+
+ecosystem:
+  package_manager: [RubyGems, Bundler]
+  build_system: [Rake]
+  lsp: [Solargraph, ruby-lsp]
+  formatter: [RuboCop]
+  linter: [RuboCop]
+  repl: [irb, pry]
+  test_framework: [RSpec, Minitest]
+
+syntax:
+  function_def: "def name(param, keyword:) ... end"
+  async_def: "Fiber.new { ... } | Thread.new { ... }"
+  type_def: "class Name ... end | Struct.new(:field)"
+  module_def: "module Name ... end"
+  import: "require 'gem' | require_relative 'file'"
+  error_handling: "begin ... rescue Error => e ... ensure ... end"
+  pattern_matching: "case value in { key: } ... end"
+
+semantic_gaps:
+  - description: "No static types"
+    severity: moderate
+    workaround: "Use RBS, Sorbet"
+  - description: "GIL limits parallelism"
+    severity: moderate
+    workaround: "Use Ractor (Ruby 3+), multiprocessing"
+  - description: "Slow startup"
+    severity: moderate
+    workaround: "Use bootsnap, YJIT"
+  - description: "Metaprogramming can obscure"
+    severity: minor
+    workaround: "Follow conventions, document"
+
+skill_coverage:
+  as_source: 0
+  as_target: 0
+  source_skills: []
+  target_skills: []
+  note: "Not in current convert-* skills. Important for Rails ecosystem."
+
+concurrency_model:
+  gil: true
+  ractor: true
+  fibers: true
+  threads: true
+
+compiles_to:
+  - language: bytecode
+    targets: [YARV]
+  - language: native
+    targets: [TruffleRuby, mruby]
+
+sources:
+  - url: "https://www.ruby-lang.org/en/documentation/"
+    description: "Ruby Documentation"
+  - url: "https://ruby-doc.org/"
+    description: "Ruby Reference"
+  - url: "https://rubygems.org/"
+    description: "RubyGems"

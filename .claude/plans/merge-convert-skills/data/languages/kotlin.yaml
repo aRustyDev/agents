@@ -1,0 +1,104 @@
+# Kotlin Language Profile
+# Generated: 2024-02-04
+
+language: kotlin
+display_name: Kotlin
+version: "2.0"
+version_date: "2024-05"
+last_updated: "2024-02"
+tier: 2
+
+family:
+  primary: managed-oop
+  secondary: [ml-fp]
+  subtype: modern-jvm
+
+popularity:
+  tiobe_rank: 18
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 63%
+  stackoverflow_year: 2023
+  github_repos: "400K+"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: bounded
+    nullability: explicit
+    smart_casts: true
+    reified: true
+
+  memory:
+    model: gc
+    gc_type: "JVM garbage collection"
+    mutability: choice
+    allocation: heap
+
+  control:
+    structured: [if-else, when, for, while, try-catch]
+    effects: exceptions
+    async: coroutines
+
+  data:
+    primitives: [Int, Long, Float, Double, Boolean, Char, Byte, Short]
+    composites: [data class, class, sealed class, enum class, object]
+    collections: [List, Set, Map, MutableList]
+    abstraction: [interfaces, abstract classes, packages]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: annotation-processors
+
+ecosystem:
+  package_manager: [Gradle, Maven]
+  build_system: [Gradle]
+  lsp: [Kotlin Language Server]
+  formatter: [ktlint, detekt]
+  linter: [detekt]
+  repl: [kotlin, ki]
+  test_framework: [JUnit, Kotest]
+
+syntax:
+  function_def: "fun name(param: Type): ReturnType = body"
+  async_def: "suspend fun name(): Type { ... }"
+  type_def: "data class Name(...) | sealed class Name | interface Name"
+  module_def: "package name"
+  import: "import package.Class | import package.*"
+  error_handling: "try { } catch (e: Type) { } finally { }"
+  pattern_matching: "when (value) { is Type -> ...; else -> ... }"
+
+semantic_gaps:
+  - description: "JVM-only features for full Kotlin"
+    severity: moderate
+    workaround: "Use Kotlin Multiplatform"
+  - description: "No union types"
+    severity: minor
+    workaround: "Use sealed classes"
+  - description: "Gradle complexity"
+    severity: moderate
+    workaround: "Use Kotlin DSL, convention plugins"
+
+skill_coverage:
+  as_source: 0
+  as_target: 0
+  source_skills: []
+  target_skills: []
+  note: "Not in current convert-* skills. Natural Java migration target."
+
+compiles_to:
+  - language: jvm
+    targets: [JVM bytecode]
+  - language: javascript
+    targets: [Kotlin/JS]
+  - language: native
+    targets: [Kotlin/Native via LLVM]
+
+sources:
+  - url: "https://kotlinlang.org/docs/"
+    description: "Kotlin Documentation"
+  - url: "https://kotlinlang.org/spec/"
+    description: "Kotlin Language Specification"
+  - url: "https://kotlinlang.org/docs/coroutines-guide.html"
+    description: "Kotlin Coroutines Guide"

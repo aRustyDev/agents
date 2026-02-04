@@ -1,0 +1,105 @@
+# Gleam Language Profile
+# Generated: 2024-02-04
+
+language: gleam
+display_name: Gleam
+version: "1.0"
+version_date: "2024-03"
+last_updated: "2024-02"
+tier: 2
+
+family:
+  primary: beam
+  secondary: [ml-fp]
+  subtype: typed-beam
+
+popularity:
+  tiobe_rank: null
+  tiobe_date: "2024-01"
+  stackoverflow_loved: null
+  stackoverflow_year: null
+  github_repos: "10K+"
+  note: "Growing rapidly, 1.0 released 2024"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: parametric
+    nullability: explicit
+    exhaustive_patterns: true
+
+  memory:
+    model: gc
+    gc_type: "BEAM per-process GC"
+    mutability: immutable
+    allocation: per-process-heap
+
+  control:
+    structured: [case, if]
+    effects: result-type
+    async: beam-processes
+
+  data:
+    primitives: [Int, Float, Bool, String, BitArray]
+    composites: [tuples, custom types, records]
+    collections: [List, Dict, Set]
+    abstraction: [modules, opaque types]
+
+  meta:
+    macros: none
+    reflection: none
+    codegen: none
+
+ecosystem:
+  package_manager: [gleam]
+  build_system: [gleam build]
+  lsp: [gleam lsp]
+  formatter: [gleam format]
+  linter: []
+  repl: []
+  test_framework: [gleeunit]
+
+syntax:
+  function_def: "pub fn name(param: Type) -> ReturnType { body }"
+  async_def: "// BEAM processes, no special syntax"
+  type_def: "pub type Name { Constructor(field: Type) }"
+  module_def: "// file-based modules"
+  import: "import module | import module.{item}"
+  error_handling: "Result(value, error) | use <- result.try()"
+  pattern_matching: "case value { Pattern -> body }"
+
+semantic_gaps:
+  - description: "No macros"
+    severity: minor
+    workaround: "Use code generation, FFI to Elixir"
+  - description: "No interactive REPL"
+    severity: minor
+    workaround: "Use gleam run for scripts"
+  - description: "Smaller ecosystem"
+    severity: moderate
+    workaround: "Use Erlang/Elixir libraries via FFI"
+  - description: "No type classes"
+    severity: moderate
+    workaround: "Use module patterns"
+
+skill_coverage:
+  as_source: 0
+  as_target: 0
+  source_skills: []
+  target_skills: []
+  note: "Not in current convert-* skills. Natural typed BEAM target."
+
+compiles_to:
+  - language: beam
+    targets: [BEAM bytecode]
+  - language: javascript
+    targets: [JavaScript]
+
+sources:
+  - url: "https://gleam.run/documentation/"
+    description: "Gleam Documentation"
+  - url: "https://tour.gleam.run/"
+    description: "Gleam Language Tour"
+  - url: "https://hexdocs.pm/gleam_stdlib/"
+    description: "Gleam Standard Library"

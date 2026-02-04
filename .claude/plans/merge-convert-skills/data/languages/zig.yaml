@@ -1,0 +1,118 @@
+# Zig Language Profile
+# Generated: 2024-02-04
+
+language: zig
+display_name: Zig
+version: "0.11"
+version_date: "2023-08"
+last_updated: "2024-02"
+tier: 2
+
+family:
+  primary: systems
+  secondary: []
+  subtype: explicit
+
+popularity:
+  tiobe_rank: 46
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 73%
+  stackoverflow_year: 2023
+  github_repos: "50K+"
+
+features:
+  typing:
+    strength: strong
+    inference: limited
+    generics: comptime
+    nullability: explicit
+    no_hidden_control_flow: true
+
+  memory:
+    model: manual
+    gc_type: "none"
+    mutability: default-immutable
+    allocation: explicit-allocators
+    no_hidden_allocations: true
+
+  control:
+    structured: [if-else, for, while, switch]
+    effects: error-unions
+    async: stackless-coroutines
+
+  data:
+    primitives: [i8-i128, u8-u128, f16-f128, bool, void, noreturn]
+    composites: [struct, enum, union, array, slice]
+    collections: [arrays, slices]
+    abstraction: [comptime functions, opaque types]
+
+  meta:
+    macros: none
+    reflection: comptime
+    codegen: comptime
+
+ecosystem:
+  package_manager: [zig]
+  build_system: [zig build]
+  lsp: [zls]
+  formatter: [zig fmt]
+  linter: []
+  repl: []
+  test_framework: [built-in]
+
+syntax:
+  function_def: "fn name(param: Type) ReturnType { body }"
+  async_def: "// stackless coroutines (unstable)"
+  type_def: "const Name = struct { field: Type };"
+  module_def: "// file-based"
+  import: "@import(\"module\") | @cImport({ @cInclude(\"header.h\"); })"
+  error_handling: "ErrorUnion!Type | try | catch"
+  pattern_matching: "switch (value) { .variant => |v| body }"
+
+semantic_gaps:
+  - description: "Pre-1.0, API may change"
+    severity: high
+    workaround: "Track releases, pin versions"
+  - description: "Smaller ecosystem"
+    severity: moderate
+    workaround: "Use C libraries, build own"
+  - description: "No runtime polymorphism"
+    severity: minor
+    workaround: "Use tagged unions, comptime"
+  - description: "Manual memory management"
+    severity: moderate
+    workaround: "Use arena allocators, defer"
+
+skill_coverage:
+  as_source: 0
+  as_target: 0
+  source_skills: []
+  target_skills: []
+  note: "Not in current convert-* skills. Natural C modernization target."
+
+design_principles:
+  - "No hidden memory allocations"
+  - "No hidden control flow"
+  - "No operator overloading"
+  - "Compile-time evaluation (comptime)"
+  - "Seamless C interop"
+
+compiles_to:
+  - language: native
+    targets: [LLVM, multiple architectures]
+  - language: c
+    targets: [C source code]
+
+c_interop:
+  seamless: true
+  cimport: true
+  link_c_libraries: true
+  calling_convention: c
+
+sources:
+  - url: "https://ziglang.org/documentation/master/"
+    description: "Zig Language Reference"
+  - url: "https://ziglang.org/documentation/master/std/"
+    description: "Zig Standard Library"
+  - url: "https://zig.guide/"
+    description: "Zig Guide"
