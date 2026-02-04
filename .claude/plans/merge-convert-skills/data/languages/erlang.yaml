@@ -1,0 +1,134 @@
+# Erlang Language Profile
+# Generated: 2024-02-04
+
+language: erlang
+display_name: Erlang
+version: "26.0"
+version_date: "2023-05"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: beam
+  secondary: [fp]
+  subtype: otp
+
+popularity:
+  tiobe_rank: 50
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 48%
+  stackoverflow_year: 2022
+  github_repos: "100K+"
+
+features:
+  typing:
+    strength: dynamic
+    inference: none
+    generics: runtime
+    nullability: explicit
+    specs: true
+    dialyzer: true
+
+  memory:
+    model: gc
+    gc_type: "per-process generational"
+    mutability: immutable
+    allocation: per-process-heap
+    process_isolation: true
+    single_assignment: true
+
+  control:
+    structured: [if, case, receive, try-catch]
+    effects: tagged-tuples
+    async: processes
+
+  data:
+    primitives: [integers, floats, atoms]
+    composites: [tuples, lists, maps, records, binaries]
+    collections: [lists, maps, sets]
+    abstraction: [modules, behaviours]
+
+  meta:
+    macros: preprocessor
+    reflection: runtime
+    codegen: hot-code-reload
+
+ecosystem:
+  package_manager: [Hex, rebar3]
+  build_system: [rebar3, erlang.mk]
+  lsp: [erlang_ls]
+  formatter: [erlfmt]
+  linter: [elvis]
+  repl: [erl]
+  test_framework: [EUnit, Common Test]
+
+syntax:
+  function_def: "name(Param) -> body."
+  async_def: "spawn(fun() -> ... end) | spawn(Module, Function, Args)"
+  type_def: "-record(name, {field1, field2 = default})."
+  module_def: "-module(name). -export([func/arity])."
+  import: "-import(module, [func/arity])."
+  error_handling: "{ok, Value} | {error, Reason} | try/catch"
+  pattern_matching: "case Value of Pattern -> body end"
+
+semantic_gaps:
+  - description: "No static types"
+    severity: moderate
+    workaround: "Use Dialyzer, specs"
+  - description: "Prolog-inspired syntax unfamiliar"
+    severity: moderate
+    workaround: "Learn idioms, reference docs"
+  - description: "Records are compile-time only"
+    severity: minor
+    workaround: "Use maps for dynamic structures"
+  - description: "Syntax can be terse"
+    severity: moderate
+    workaround: "Use Elixir for friendlier syntax"
+
+skill_coverage:
+  as_source: 4
+  as_target: 4
+  source_skills:
+    - erlang-fsharp
+    - erlang-haskell
+    - erlang-roc
+    - erlang-scala
+  target_skills:
+    - python-erlang
+    - clojure-erlang
+    - elixir-erlang
+    - elm-erlang
+
+concurrency_model:
+  type: actor
+  primitives:
+    - name: process
+      description: "Lightweight isolated process (can have millions)"
+    - name: message
+      description: "Async message passing (send, receive)"
+    - name: link
+      description: "Bidirectional failure propagation"
+    - name: monitor
+      description: "Unidirectional process monitoring"
+  otp_behaviours:
+    - gen_server
+    - gen_statem
+    - gen_event
+    - supervisor
+  patterns:
+    - "Let it crash"
+    - "Supervision trees"
+    - "Hot code reloading"
+    - "Distribution"
+
+compiles_to:
+  - language: beam
+    targets: [BEAM bytecode]
+
+sources:
+  - url: "https://www.erlang.org/doc/"
+    description: "Erlang Documentation"
+  - url: "https://www.erlang.org/doc/design_principles/"
+    description: "OTP Design Principles"
+  - url: "https://learnyousomeerlang.com/"
+    description: "Learn You Some Erlang"

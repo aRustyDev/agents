@@ -1,0 +1,128 @@
+# Elixir Language Profile
+# Generated: 2024-02-04
+
+language: elixir
+display_name: Elixir
+version: "1.15"
+version_date: "2023-06"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: beam
+  secondary: [fp]
+  subtype: macro-enabled
+
+popularity:
+  tiobe_rank: 33
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 73%
+  stackoverflow_year: 2023
+  github_repos: "200K+"
+
+features:
+  typing:
+    strength: dynamic
+    inference: none
+    generics: runtime
+    nullability: nullable
+    typespecs: true
+    dialyzer: true
+
+  memory:
+    model: gc
+    gc_type: "per-process garbage collection"
+    mutability: immutable
+    allocation: per-process-heap
+    process_isolation: true
+
+  control:
+    structured: [if-else, case, cond, with]
+    effects: tagged-tuples
+    async: processes
+
+  data:
+    primitives: [integers, floats, atoms, booleans]
+    composites: [tuples, lists, maps, structs, keyword lists]
+    collections: [List, Map, MapSet, Range]
+    abstraction: [modules, protocols, behaviours]
+
+  meta:
+    macros: hygienic
+    reflection: runtime
+    codegen: macros
+
+ecosystem:
+  package_manager: [Hex, Mix]
+  build_system: [Mix]
+  lsp: [ElixirLS, lexical]
+  formatter: [mix format]
+  linter: [Credo]
+  repl: [IEx]
+  test_framework: [ExUnit]
+
+syntax:
+  function_def: "def name(param) do ... end"
+  async_def: "spawn(fn -> ... end) | Task.async(fn -> ... end)"
+  type_def: "defstruct [:field1, :field2] | @type t :: %__MODULE__{}"
+  module_def: "defmodule Name do ... end"
+  import: "import Module | alias Module | use Module"
+  error_handling: "{:ok, value} | {:error, reason} | with clause"
+  pattern_matching: "case value do pattern -> body end"
+
+semantic_gaps:
+  - description: "No static types"
+    severity: moderate
+    workaround: "Use Dialyzer, typespecs"
+  - description: "Immutable only (no local mutation)"
+    severity: minor
+    workaround: "Use recursion, comprehensions"
+  - description: "OTP learning curve"
+    severity: moderate
+    workaround: "Start with Task, GenServer basics"
+  - description: "No lazy evaluation by default"
+    severity: minor
+    workaround: "Use Stream module"
+
+skill_coverage:
+  as_source: 6
+  as_target: 2
+  source_skills:
+    - elixir-elm
+    - elixir-erlang
+    - elixir-fsharp
+    - elixir-haskell
+    - elixir-roc
+    - elixir-scala
+  target_skills:
+    - python-elixir
+    - clojure-elixir
+
+concurrency_model:
+  type: actor
+  primitives:
+    - name: process
+      description: "Lightweight isolated process"
+    - name: message
+      description: "Async message passing"
+    - name: GenServer
+      description: "Generic server behaviour"
+    - name: Supervisor
+      description: "Process supervisor"
+  patterns:
+    - "Supervision trees"
+    - "GenServer state machines"
+    - "Task async/await"
+    - "Agent state management"
+
+compiles_to:
+  - language: beam
+    targets: [BEAM bytecode]
+
+sources:
+  - url: "https://hexdocs.pm/elixir/"
+    description: "Elixir Documentation"
+  - url: "https://elixir-lang.org/getting-started/"
+    description: "Elixir Getting Started"
+  - url: "https://hex.pm/"
+    description: "Hex Package Manager"
