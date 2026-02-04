@@ -1,0 +1,262 @@
+# Language Tier Prioritization
+# Task: ai-p28.2
+# Generated: 2024-02-04
+
+prioritization_criteria:
+  tier_1:
+    - "Language appears in existing convert-* skills"
+    - "Has patterns in data/patterns.db"
+  tier_2:
+    - "High-value language not in current skills"
+    - "Popular or strategically important"
+  tier_3:
+    - "Historically significant"
+    - "Niche or legacy use cases"
+
+# =============================================================================
+# TIER 1: Languages in existing convert-* skills (17 languages)
+# Full profiles with ecosystem, syntax patterns, semantic gaps
+# =============================================================================
+tier_1:
+  # Dynamic Family (2)
+  dynamic:
+    - language: python
+      skills_as_source: 11
+      skills_as_target: 0
+      patterns: 1653
+      version_history: true  # 2.7, 3.6, 3.10+
+      priority: 1
+      rationale: "Most common source language, critical for all conversions"
+
+    - language: typescript
+      skills_as_source: 2
+      skills_as_target: 1
+      patterns: 411
+      version_history: false
+      priority: 2
+      rationale: "Web ecosystem, gradual typing showcase"
+
+  # ML-FP Family (5)
+  ml_fp:
+    - language: scala
+      skills_as_source: 0
+      skills_as_target: 8
+      patterns: 1051
+      version_history: false
+      priority: 3
+      rationale: "Most common target, hybrid FP showcase"
+
+    - language: haskell
+      skills_as_source: 2
+      skills_as_target: 6
+      patterns: 1040
+      version_history: false
+      priority: 4
+      rationale: "Pure FP reference, type system benchmark"
+
+    - language: roc
+      skills_as_source: 1
+      skills_as_target: 7
+      patterns: 1091
+      version_history: false
+      priority: 5
+      rationale: "Modern FP, no exceptions, platform effects"
+
+    - language: fsharp
+      skills_as_source: 3
+      skills_as_target: 5
+      patterns: 941
+      version_history: false
+      priority: 6
+      rationale: ".NET ecosystem, hybrid FP"
+
+    - language: elm
+      skills_as_source: 5
+      skills_as_target: 3
+      patterns: 792
+      version_history: false
+      priority: 7
+      rationale: "Pure FP for web, no runtime exceptions"
+
+  # Systems Family (4)
+  systems:
+    - language: rust
+      skills_as_source: 0
+      skills_as_target: 6
+      patterns: 958
+      version_history: false
+      priority: 8
+      rationale: "Ownership model showcase, memory safety"
+
+    - language: c
+      skills_as_source: 2
+      skills_as_target: 1
+      patterns: 346
+      version_history: true  # C89, C99, C11, C23
+      priority: 9
+      rationale: "Foundation language, FFI baseline"
+
+    - language: cpp
+      skills_as_source: 1
+      skills_as_target: 2
+      patterns: 268
+      version_history: true  # C++11, C++17, C++20, C++23
+      priority: 10
+      rationale: "Complex type system, template metaprogramming"
+
+    - language: golang
+      skills_as_source: 1
+      skills_as_target: 2
+      patterns: 229
+      version_history: false
+      priority: 11
+      rationale: "GC-based systems language, simplicity focus"
+
+  # BEAM Family (2)
+  beam:
+    - language: elixir
+      skills_as_source: 6
+      skills_as_target: 2
+      patterns: 1088
+      version_history: false
+      priority: 12
+      rationale: "Modern BEAM, macro system, Phoenix"
+
+    - language: erlang
+      skills_as_source: 4
+      skills_as_target: 4
+      patterns: 697
+      version_history: false
+      priority: 13
+      rationale: "OTP patterns, actor model reference"
+
+  # LISP Family (1)
+  lisp:
+    - language: clojure
+      skills_as_source: 7
+      skills_as_target: 1
+      patterns: 1148
+      version_history: false
+      priority: 14
+      rationale: "Modern LISP, JVM interop, persistent data"
+
+  # Managed-OOP Family (1)
+  managed_oop:
+    - language: java
+      skills_as_source: 3
+      skills_as_target: 0
+      patterns: 447
+      version_history: true  # 8, 11, 17, 21
+      priority: 15
+      rationale: "Enterprise baseline, records/patterns evolution"
+
+  # Apple Family (2)
+  apple:
+    - language: swift
+      skills_as_source: 0
+      skills_as_target: 1
+      patterns: 193
+      version_history: false
+      priority: 16
+      rationale: "Modern Apple, protocol-oriented"
+
+    - language: objc
+      skills_as_source: 1
+      skills_as_target: 0
+      patterns: 193
+      version_history: false
+      priority: 17
+      rationale: "Legacy Apple, runtime messaging"
+
+# =============================================================================
+# TIER 2: High-value additions (5 languages)
+# Full profiles, not in current skills but strategically important
+# =============================================================================
+tier_2:
+  - language: javascript
+    family: dynamic
+    priority: 18
+    rationale: "Web ubiquity, TypeScript compile target, runtime for TS"
+    note: "NOT in current convert-* skills despite plan assumption"
+
+  - language: kotlin
+    family: managed_oop
+    priority: 19
+    rationale: "Modern JVM, Android primary, Java interop"
+
+  - language: gleam
+    family: beam
+    priority: 20
+    rationale: "Typed BEAM, growing ecosystem, Rust tooling"
+
+  - language: ruby
+    family: dynamic
+    priority: 21
+    rationale: "Rails ecosystem, metaprogramming, DSL patterns"
+
+  - language: zig
+    family: systems
+    priority: 22
+    rationale: "Modern systems, C interop, no hidden control flow"
+
+# =============================================================================
+# TIER 3: Minimal profiles (7 languages)
+# Name, family, key characteristics only
+# =============================================================================
+tier_3:
+  - language: cobol
+    family: procedural
+    note: "Business/financial legacy systems"
+
+  - language: fortran
+    family: procedural
+    note: "Scientific computing, HPC"
+
+  - language: pascal
+    family: procedural
+    note: "Educational, Delphi lineage"
+
+  - language: ada
+    family: procedural
+    note: "Safety-critical systems, aerospace"
+
+  - language: common_lisp
+    family: lisp
+    note: "Classic LISP, CLOS, conditions"
+
+  - language: scheme
+    family: lisp
+    note: "Minimal LISP, continuations, R7RS"
+
+  - language: prolog
+    family: logic
+    note: "Logic programming, unification, backtracking"
+
+# =============================================================================
+# Summary
+# =============================================================================
+summary:
+  tier_1_count: 17
+  tier_2_count: 5
+  tier_3_count: 7
+  total: 29
+
+  full_profiles: 22  # Tier 1 + Tier 2
+  minimal_profiles: 7  # Tier 3
+
+  version_history_languages:
+    - python   # 2.7, 3.6, 3.10+
+    - java     # 8, 11, 17, 21
+    - c        # C89, C99, C11, C23
+    - cpp      # C++11, C++17, C++20, C++23
+
+  family_coverage:
+    dynamic: 3        # python, typescript, javascript, ruby
+    ml_fp: 5          # scala, haskell, roc, fsharp, elm
+    systems: 5        # rust, c, cpp, golang, zig
+    beam: 3           # elixir, erlang, gleam
+    lisp: 3           # clojure, common_lisp, scheme
+    managed_oop: 2    # java, kotlin
+    apple: 2          # swift, objc
+    procedural: 3     # cobol, fortran, pascal, ada (Tier 3)
+    logic: 1          # prolog (Tier 3)
