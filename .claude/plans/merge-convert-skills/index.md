@@ -19,8 +19,8 @@ Multi-phase plan for consolidating convert-* skills and designing an Intermediat
 
 | Phase | Status | Progress |
 |-------|--------|----------|
-| Phase 0: Pattern Extraction | Not Started | 0% |
-| Phase 1: Language Families | Not Started | 0% |
+| Phase 0: Pattern Extraction | **Complete** | 100% |
+| Phase 1: Language Families | **Complete** | 100% |
 | Phase 2: Language Survey | Not Started | 0% |
 | Phase 3: Semantic Gaps | Not Started | 0% |
 | Phase 4: IR Schema Design | Not Started | 0% |
@@ -34,15 +34,15 @@ Multi-phase plan for consolidating convert-* skills and designing an Intermediat
 
 | Phase | Goal | Depends On | Effort |
 |-------|------|------------|--------|
-| [Phase 0](phase/0-pattern-extraction.md) | Extract patterns from existing 49 convert-* skills | — | 2-3 days |
-| [Phase 1](phase/1-language-families.md) | Comprehensive taxonomy of language families | — | 3-5 days |
-| [Phase 2](phase/2-language-survey.md) | Catalog languages with family classification | Phase 1 | 5-7 days |
-| [Phase 3](phase/3-semantic-gaps.md) | Identify and classify conversion challenges | 0, 1, 2 | 2-3 days |
+| [Phase 0](phase/0-pattern-extraction.md) | Extract patterns from existing 49 convert-* skills | — | ~~2-3 days~~ ✓ |
+| [Phase 1](phase/1-language-families.md) | Comprehensive taxonomy of language families | — | ~~3-5 days~~ ✓ |
+| [Phase 2](phase/2-language-survey.md) | Catalog languages with family classification | Phase 0, 1 | 10-14 days |
+| [Phase 3](phase/3-semantic-gaps.md) | Identify and classify conversion challenges | Phase 0, 1, 2 | 2-3 days |
 | [Phase 4](phase/4-ir-schema-design.md) | Design the multi-layer IR architecture | Phase 3 | 5-7 days |
 | [Phase 5](phase/5-validation-tooling.md) | Verify IR design and build tools | Phase 4 | 7-10 days |
 | [Phase 6](phase/6-consolidation.md) | Merge insights into unified IR and skill architecture | Phase 5 | 3-5 days |
 
-Total estimated effort: 4-6 weeks
+Total estimated effort: 5-7 weeks
 
 ## Directory Structure
 
@@ -129,6 +129,7 @@ context/skills/
 
 ## Next Actions
 
-1. [ ] Create SQLite database with schema
-2. [ ] Start Phase 0: Extract patterns from existing convert-* skills
-3. [ ] Start Phase 1 (parallel): Research language families
+1. [x] ~~Create SQLite database with schema~~ (data/patterns.db)
+2. [x] ~~Phase 0: Extract patterns from existing convert-* skills~~ (7,195 patterns)
+3. [x] ~~Phase 1: Research language families~~ (13 families documented)
+4. [ ] **Start Phase 2: Language Survey** (22 full + 7 minimal profiles)
