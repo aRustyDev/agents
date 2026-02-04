@@ -1,0 +1,340 @@
+# Language Version Policy
+# Task: ai-p28.3
+# Generated: 2024-02-04
+
+# =============================================================================
+# Policy Overview
+# =============================================================================
+policy:
+  description: |
+    Version policy defines which language versions to document in profiles.
+    Focus is on conversion-relevant changes, not exhaustive changelogs.
+
+  principles:
+    - "Document breaking changes that affect code conversion"
+    - "Track type system evolution (generics, pattern matching, etc.)"
+    - "Note syntax changes that require different IR patterns"
+    - "Ignore minor releases unless conversion-impacting"
+
+# =============================================================================
+# Version Policy by Language Category
+# =============================================================================
+categories:
+  major_languages:
+    description: "Include historical versions with breaking changes"
+    languages: [python, java, c, cpp]
+    policy: "Document all major versions with conversion-relevant changes"
+
+  other_tier_1:
+    description: "Latest stable version only"
+    languages: [typescript, scala, haskell, roc, fsharp, elm, rust, golang,
+                elixir, erlang, clojure, swift, objc]
+    policy: "Document current stable release, note significant upcoming changes"
+
+  tier_2:
+    description: "Latest stable version only"
+    languages: [javascript, kotlin, gleam, ruby, zig]
+    policy: "Document current stable release"
+
+  tier_3:
+    description: "Representative version"
+    languages: [cobol, fortran, pascal, ada, common_lisp, scheme, prolog]
+    policy: "Document most commonly used or standardized version"
+
+# =============================================================================
+# Major Language Version Details
+# =============================================================================
+version_history:
+  python:
+    versions:
+      - version: "2.7"
+        release_date: "2010-07"
+        end_of_life: "2020-01"
+        conversion_notes:
+          - "print statement vs function"
+          - "unicode handling (str vs unicode)"
+          - "integer division (/ vs //)"
+          - "dict.keys() returns list not view"
+        status: legacy
+
+      - version: "3.6"
+        release_date: "2016-12"
+        conversion_notes:
+          - "f-strings introduced"
+          - "async/await syntax stabilized"
+          - "type hints expanded (PEP 526)"
+          - "dict maintains insertion order"
+        status: baseline_modern
+
+      - version: "3.10"
+        release_date: "2021-10"
+        conversion_notes:
+          - "Pattern matching (match/case)"
+          - "Structural pattern matching"
+          - "Union types X | Y syntax"
+          - "ParamSpec for typing"
+        status: current_reference
+
+      - version: "3.12"
+        release_date: "2023-10"
+        conversion_notes:
+          - "Type parameter syntax (PEP 695)"
+          - "f-string improvements"
+          - "Per-interpreter GIL (PEP 684)"
+        status: latest_stable
+
+  java:
+    versions:
+      - version: "8"
+        release_date: "2014-03"
+        conversion_notes:
+          - "Lambda expressions"
+          - "Stream API"
+          - "Optional<T>"
+          - "Default interface methods"
+          - "Method references"
+        status: legacy_lts
+
+      - version: "11"
+        release_date: "2018-09"
+        conversion_notes:
+          - "var keyword (local type inference)"
+          - "HTTP client API"
+          - "String methods (isBlank, lines, strip)"
+        status: lts
+
+      - version: "17"
+        release_date: "2021-09"
+        conversion_notes:
+          - "Sealed classes"
+          - "Pattern matching for instanceof"
+          - "Records (data classes)"
+          - "Text blocks"
+        status: current_lts
+
+      - version: "21"
+        release_date: "2023-09"
+        conversion_notes:
+          - "Virtual threads (Project Loom)"
+          - "Pattern matching for switch"
+          - "Record patterns"
+          - "Sequenced collections"
+        status: latest_lts
+
+  c:
+    versions:
+      - version: "C89"
+        standard: "ANSI C / ISO C90"
+        conversion_notes:
+          - "Function prototypes required"
+          - "No // comments"
+          - "No variable declarations mid-block"
+          - "No designated initializers"
+        status: legacy_baseline
+
+      - version: "C99"
+        standard: "ISO/IEC 9899:1999"
+        conversion_notes:
+          - "// comments allowed"
+          - "Variable-length arrays (VLA)"
+          - "Designated initializers"
+          - "inline functions"
+          - "bool type (<stdbool.h>)"
+          - "Variable declarations anywhere"
+        status: widely_supported
+
+      - version: "C11"
+        standard: "ISO/IEC 9899:2011"
+        conversion_notes:
+          - "Multithreading (<threads.h>)"
+          - "_Atomic types"
+          - "_Generic selections"
+          - "Anonymous structs/unions"
+          - "static_assert"
+        status: modern_baseline
+
+      - version: "C23"
+        standard: "ISO/IEC 9899:2024"
+        conversion_notes:
+          - "typeof operator"
+          - "nullptr constant"
+          - "Digit separators"
+          - "Binary literals"
+          - "constexpr"
+          - "Improved attributes"
+        status: latest_standard
+
+  cpp:
+    versions:
+      - version: "C++11"
+        standard: "ISO/IEC 14882:2011"
+        conversion_notes:
+          - "auto keyword"
+          - "Range-based for"
+          - "Lambda expressions"
+          - "Move semantics (rvalue refs)"
+          - "nullptr"
+          - "Smart pointers (unique_ptr, shared_ptr)"
+          - "Variadic templates"
+        status: modern_baseline
+
+      - version: "C++17"
+        standard: "ISO/IEC 14882:2017"
+        conversion_notes:
+          - "Structured bindings"
+          - "if constexpr"
+          - "std::optional, std::variant"
+          - "Fold expressions"
+          - "Class template argument deduction"
+          - "Filesystem library"
+        status: widely_adopted
+
+      - version: "C++20"
+        standard: "ISO/IEC 14882:2020"
+        conversion_notes:
+          - "Concepts"
+          - "Ranges library"
+          - "Coroutines"
+          - "Modules"
+          - "Three-way comparison (<=>) "
+          - "consteval, constinit"
+        status: current_modern
+
+      - version: "C++23"
+        standard: "ISO/IEC 14882:2024"
+        conversion_notes:
+          - "std::expected"
+          - "Deducing this"
+          - "std::print"
+          - "Multidimensional subscript"
+          - "Improved ranges"
+        status: latest_standard
+
+# =============================================================================
+# Other Tier 1 - Current Versions
+# =============================================================================
+current_versions:
+  typescript:
+    version: "5.3"
+    release_date: "2023-11"
+    note: "Import attributes, narrowing improvements"
+
+  scala:
+    version: "3.4"
+    release_date: "2024-01"
+    note: "Scala 3 (Dotty) is current; Scala 2.13 for legacy"
+
+  haskell:
+    version: "GHC 9.8"
+    release_date: "2023-10"
+    note: "GHC2021 language edition"
+
+  roc:
+    version: "0.0.x"
+    release_date: "2024"
+    note: "Pre-1.0, rapidly evolving"
+
+  fsharp:
+    version: "8.0"
+    release_date: "2023-11"
+    note: "Ships with .NET 8"
+
+  elm:
+    version: "0.19.1"
+    release_date: "2019-10"
+    note: "Stable, infrequent releases"
+
+  rust:
+    version: "1.75"
+    release_date: "2023-12"
+    note: "6-week release cycle, edition system (2021)"
+
+  golang:
+    version: "1.22"
+    release_date: "2024-02"
+    note: "Range over integers, improved tooling"
+
+  elixir:
+    version: "1.16"
+    release_date: "2023-12"
+    note: "Requires Erlang/OTP 24+"
+
+  erlang:
+    version: "OTP 26"
+    release_date: "2023-05"
+    note: "Maps improvements, JIT compiler"
+
+  clojure:
+    version: "1.11"
+    release_date: "2022-03"
+    note: "Stable, conservative evolution"
+
+  swift:
+    version: "5.9"
+    release_date: "2023-09"
+    note: "Macros, parameter packs"
+
+  objc:
+    version: "2.0"
+    release_date: "2007"
+    note: "Stable since Modern Objective-C (2012)"
+
+# =============================================================================
+# Tier 2 - Current Versions
+# =============================================================================
+tier_2_versions:
+  javascript:
+    version: "ES2023"
+    note: "ECMAScript 2023, Array findLast, Hashbang"
+
+  kotlin:
+    version: "1.9"
+    release_date: "2023-07"
+    note: "K2 compiler preview"
+
+  gleam:
+    version: "1.0"
+    release_date: "2024-03"
+    note: "First stable release"
+
+  ruby:
+    version: "3.3"
+    release_date: "2023-12"
+    note: "YJIT improvements, Prism parser"
+
+  zig:
+    version: "0.13"
+    release_date: "2024"
+    note: "Pre-1.0, self-hosted compiler"
+
+# =============================================================================
+# Tier 3 - Representative Versions
+# =============================================================================
+tier_3_versions:
+  cobol:
+    version: "COBOL-85"
+    note: "ISO 1985, also COBOL 2002/2014 exist"
+
+  fortran:
+    version: "Fortran 2018"
+    note: "ISO/IEC 1539-1:2018"
+
+  pascal:
+    version: "ISO 7185"
+    note: "Also Free Pascal, Delphi variants"
+
+  ada:
+    version: "Ada 2012"
+    note: "ISO/IEC 8652:2012"
+
+  common_lisp:
+    version: "ANSI CL"
+    note: "ANSI X3.226-1994"
+
+  scheme:
+    version: "R7RS"
+    note: "R7RS-small (2013)"
+
+  prolog:
+    version: "ISO Prolog"
+    note: "ISO/IEC 13211-1:1995"

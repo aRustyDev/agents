@@ -1,0 +1,290 @@
+# Language Profile Data Sources
+# Task: ai-p28.4
+# Generated: 2024-02-04
+
+# =============================================================================
+# Source Categories
+# =============================================================================
+source_categories:
+  official:
+    description: "Language specification, reference documentation"
+    priority: 1
+    required: true
+
+  secondary:
+    description: "Implementation docs, community resources"
+    priority: 2
+    required: false
+
+  metrics:
+    description: "Popularity, usage statistics"
+    priority: 3
+    required: true
+    freshness: "snapshot with date"
+
+# =============================================================================
+# Profile Field Sources
+# =============================================================================
+field_sources:
+  type_system:
+    primary: "Official language specification"
+    secondary: "Language reference documentation"
+    fields:
+      - strength
+      - inference
+      - generics
+      - nullability
+
+  memory_model:
+    primary: "Language spec / runtime documentation"
+    secondary: "Implementation notes, GC documentation"
+    fields:
+      - management
+      - mutability
+      - allocation
+      - lifetime_tracking
+
+  syntax_patterns:
+    primary: "Official grammar / BNF"
+    secondary: "Parser implementations, language tour"
+    fields:
+      - function_def
+      - type_def
+      - module_def
+      - import
+      - error_handling
+      - async_def
+
+  ecosystem:
+    primary: "Official package registry"
+    secondary: "GitHub statistics, community surveys"
+    fields:
+      - package_manager
+      - build_system
+      - lsp
+      - formatter
+      - linter
+      - repl
+
+  popularity:
+    primary: "TIOBE Index (monthly)"
+    secondary: "Stack Overflow Survey (annual)"
+    tertiary: "GitHub statistics"
+    fields:
+      - tiobe_rank
+      - stackoverflow_loved
+      - github_repos
+    freshness_policy: "Include snapshot_date in profile"
+
+# =============================================================================
+# Official Sources by Language
+# =============================================================================
+language_sources:
+  # Dynamic Family
+  python:
+    specification: "https://docs.python.org/3/reference/"
+    reference: "https://docs.python.org/3/"
+    pep_index: "https://peps.python.org/"
+    type_hints: "https://docs.python.org/3/library/typing.html"
+    ecosystem: "https://pypi.org/"
+
+  typescript:
+    specification: "https://www.typescriptlang.org/docs/handbook/"
+    reference: "https://www.typescriptlang.org/docs/"
+    type_system: "https://www.typescriptlang.org/docs/handbook/2/types-from-types.html"
+    ecosystem: "https://www.npmjs.com/"
+
+  javascript:
+    specification: "https://tc39.es/ecma262/"
+    reference: "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+    proposals: "https://github.com/tc39/proposals"
+    ecosystem: "https://www.npmjs.com/"
+
+  # ML-FP Family
+  scala:
+    specification: "https://docs.scala-lang.org/scala3/reference/"
+    reference: "https://docs.scala-lang.org/"
+    scala2_spec: "https://www.scala-lang.org/files/archive/spec/2.13/"
+    ecosystem: "https://central.sonatype.com/"
+
+  haskell:
+    specification: "https://www.haskell.org/onlinereport/haskell2010/"
+    ghc_manual: "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/"
+    reference: "https://wiki.haskell.org/"
+    ecosystem: "https://hackage.haskell.org/"
+
+  roc:
+    reference: "https://www.roc-lang.org/docs"
+    tutorial: "https://www.roc-lang.org/tutorial"
+    note: "Pre-1.0, docs evolving rapidly"
+
+  fsharp:
+    specification: "https://fsharp.org/specs/language-spec/"
+    reference: "https://learn.microsoft.com/en-us/dotnet/fsharp/"
+    ecosystem: "https://www.nuget.org/"
+
+  elm:
+    reference: "https://guide.elm-lang.org/"
+    syntax: "https://elm-lang.org/docs/syntax"
+    ecosystem: "https://package.elm-lang.org/"
+
+  # Systems Family
+  rust:
+    specification: "https://doc.rust-lang.org/reference/"
+    book: "https://doc.rust-lang.org/book/"
+    nomicon: "https://doc.rust-lang.org/nomicon/"
+    ecosystem: "https://crates.io/"
+
+  c:
+    specification: "ISO/IEC 9899:2018 (C17)"
+    reference: "https://en.cppreference.com/w/c"
+    draft_c23: "https://www.open-std.org/jtc1/sc22/wg14/"
+
+  cpp:
+    specification: "ISO/IEC 14882:2020 (C++20)"
+    reference: "https://en.cppreference.com/w/cpp"
+    isocpp: "https://isocpp.org/"
+    draft: "https://eel.is/c++draft/"
+
+  golang:
+    specification: "https://go.dev/ref/spec"
+    reference: "https://go.dev/doc/"
+    effective_go: "https://go.dev/doc/effective_go"
+    ecosystem: "https://pkg.go.dev/"
+
+  zig:
+    reference: "https://ziglang.org/documentation/master/"
+    std_lib: "https://ziglang.org/documentation/master/std/"
+
+  # BEAM Family
+  elixir:
+    reference: "https://hexdocs.pm/elixir/"
+    guides: "https://elixir-lang.org/getting-started/"
+    ecosystem: "https://hex.pm/"
+
+  erlang:
+    reference: "https://www.erlang.org/doc/"
+    otp: "https://www.erlang.org/doc/design_principles/"
+    ecosystem: "https://hex.pm/"
+
+  gleam:
+    reference: "https://gleam.run/documentation/"
+    book: "https://gleam.run/book/"
+    ecosystem: "https://hex.pm/"
+
+  # LISP Family
+  clojure:
+    reference: "https://clojure.org/reference/"
+    guides: "https://clojure.org/guides/"
+    spec: "https://clojure.org/about/spec"
+    ecosystem: "https://clojars.org/"
+
+  common_lisp:
+    specification: "http://www.lispworks.com/documentation/HyperSpec/"
+    ecosystem: "https://www.quicklisp.org/"
+
+  scheme:
+    specification: "https://small.r7rs.org/"
+    r6rs: "http://www.r6rs.org/"
+
+  # Managed-OOP Family
+  java:
+    specification: "https://docs.oracle.com/javase/specs/"
+    reference: "https://docs.oracle.com/en/java/javase/"
+    jeps: "https://openjdk.org/jeps/"
+    ecosystem: "https://central.sonatype.com/"
+
+  kotlin:
+    specification: "https://kotlinlang.org/spec/"
+    reference: "https://kotlinlang.org/docs/"
+    ecosystem: "https://central.sonatype.com/"
+
+  # Apple Family
+  swift:
+    book: "https://docs.swift.org/swift-book/"
+    reference: "https://developer.apple.com/documentation/swift"
+    evolution: "https://github.com/apple/swift-evolution"
+
+  objc:
+    reference: "https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/"
+    runtime: "https://developer.apple.com/documentation/objectivec"
+
+  # Logic Family
+  prolog:
+    iso_spec: "ISO/IEC 13211-1:1995"
+    swi_prolog: "https://www.swi-prolog.org/pldoc/"
+
+# =============================================================================
+# Popularity/Metrics Sources
+# =============================================================================
+metrics_sources:
+  tiobe:
+    url: "https://www.tiobe.com/tiobe-index/"
+    update_frequency: "monthly"
+    metric: "Programming language popularity index"
+    methodology: "Search engine query volume"
+
+  stackoverflow_survey:
+    url: "https://survey.stackoverflow.co/"
+    update_frequency: "annual"
+    metrics:
+      - "Most loved languages"
+      - "Most wanted languages"
+      - "Most used languages"
+
+  github_octoverse:
+    url: "https://github.blog/news-insights/octoverse/"
+    update_frequency: "annual"
+    metrics:
+      - "Top languages by repository count"
+      - "Fastest growing languages"
+
+  redmonk:
+    url: "https://redmonk.com/sogrady/category/programming-languages/"
+    update_frequency: "quarterly"
+    methodology: "GitHub + Stack Overflow correlation"
+
+  pypl:
+    url: "https://pypl.github.io/PYPL.html"
+    update_frequency: "monthly"
+    methodology: "Google Trends for language tutorials"
+
+# =============================================================================
+# Source Attribution Template
+# =============================================================================
+attribution_template:
+  required_fields:
+    - url
+    - description
+    - accessed_date
+
+  example: |
+    sources:
+      - url: "https://doc.rust-lang.org/reference/"
+        description: "Official Rust Reference"
+        accessed: "2024-02"
+      - url: "https://doc.rust-lang.org/book/"
+        description: "The Rust Programming Language"
+        accessed: "2024-02"
+
+# =============================================================================
+# Freshness Policy
+# =============================================================================
+freshness_policy:
+  popularity_metrics:
+    requirement: "Include snapshot date in profile"
+    format: "YYYY-MM"
+    example: |
+      popularity:
+        tiobe_rank: 17
+        tiobe_date: "2024-01"
+        stackoverflow_loved: 87%
+        stackoverflow_year: 2023
+
+  version_info:
+    requirement: "Document version and release date"
+    format: "version: X.Y, version_date: YYYY-MM"
+
+  profile_metadata:
+    requirement: "Track last update date"
+    field: "last_updated: YYYY-MM"
