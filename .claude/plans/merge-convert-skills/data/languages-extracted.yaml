@@ -1,0 +1,207 @@
+# Languages Extracted from Phase 0
+# Source: data/patterns.db
+# Generated: 2024-02-04
+
+extraction_summary:
+  total_languages: 17
+  total_skills: 49
+  total_patterns: 7195
+
+# Languages found in existing convert-* skills
+tier_1_languages:
+  # Source-only languages (appear as source but not target)
+  source_only:
+    - python     # 11 skills as source
+    - java       # 3 skills as source
+    - objc       # 1 skill as source
+
+  # Target-only languages (appear as target but not source)
+  target_only:
+    - scala      # 8 skills as target
+    - rust       # 6 skills as target
+    - swift      # 1 skill as target
+
+  # Bidirectional languages (appear as both source and target)
+  bidirectional:
+    - clojure    # 7 source, 1 target
+    - elixir     # 6 source, 2 target
+    - elm        # 5 source, 3 target
+    - erlang     # 4 source, 4 target
+    - fsharp     # 3 source, 5 target
+    - haskell    # 2 source, 6 target
+    - typescript # 2 source, 1 target
+    - c          # 2 source, 1 target
+    - cpp        # 1 source, 2 target
+    - golang     # 1 source, 2 target
+    - roc        # 1 source, 7 target
+
+# Detailed coverage by language
+language_coverage:
+  python:
+    as_source: 11
+    as_target: 0
+    source_patterns: 1653
+    family: dynamic
+    note: "Most common source language"
+
+  clojure:
+    as_source: 7
+    as_target: 1
+    source_patterns: 981
+    target_patterns: 167
+    family: lisp
+
+  elixir:
+    as_source: 6
+    as_target: 2
+    source_patterns: 732
+    target_patterns: 356
+    family: beam
+
+  elm:
+    as_source: 5
+    as_target: 3
+    source_patterns: 451
+    target_patterns: 341
+    family: ml-fp
+    subtype: pure
+
+  erlang:
+    as_source: 4
+    as_target: 4
+    source_patterns: 295
+    target_patterns: 402
+    family: beam
+
+  scala:
+    as_source: 0
+    as_target: 8
+    target_patterns: 1051
+    family: ml-fp
+    subtype: hybrid
+    note: "Most common target language"
+
+  roc:
+    as_source: 1
+    as_target: 7
+    source_patterns: 145
+    target_patterns: 946
+    family: ml-fp
+    subtype: hybrid
+
+  rust:
+    as_source: 0
+    as_target: 6
+    target_patterns: 958
+    family: systems
+    subtype: ownership
+
+  haskell:
+    as_source: 2
+    as_target: 6
+    source_patterns: 244
+    target_patterns: 796
+    family: ml-fp
+    subtype: pure
+
+  fsharp:
+    as_source: 3
+    as_target: 5
+    source_patterns: 456
+    target_patterns: 485
+    family: ml-fp
+    subtype: hybrid
+
+  java:
+    as_source: 3
+    as_target: 0
+    source_patterns: 447
+    family: managed-oop
+
+  typescript:
+    as_source: 2
+    as_target: 1
+    source_patterns: 263
+    target_patterns: 148
+    family: dynamic
+    secondary_family: gradual-typing
+
+  c:
+    as_source: 2
+    as_target: 1
+    source_patterns: 202
+    target_patterns: 144
+    family: systems
+    subtype: manual
+
+  cpp:
+    as_source: 1
+    as_target: 2
+    source_patterns: 114
+    target_patterns: 154
+    family: systems
+    subtype: manual
+
+  golang:
+    as_source: 1
+    as_target: 2
+    source_patterns: 97
+    target_patterns: 132
+    family: systems
+    note: "GC-based systems language"
+
+  objc:
+    as_source: 1
+    as_target: 0
+    source_patterns: 193
+    family: apple
+    subtype: legacy
+
+  swift:
+    as_source: 0
+    as_target: 1
+    target_patterns: 193
+    family: apple
+    subtype: modern
+
+# Languages NOT in current skills (planned for Tier 1/2)
+not_in_current_skills:
+  tier_1_planned:
+    - javascript  # Listed in plan but no convert-* skill exists
+
+  tier_2:
+    - kotlin      # Managed-OOP, Android
+    - gleam       # BEAM, typed
+    - zig         # Systems, modern
+    - ruby        # Dynamic, Rails
+
+# Family distribution
+family_distribution:
+  ml-fp:
+    count: 5
+    languages: [haskell, elm, roc, fsharp, scala]
+  dynamic:
+    count: 2
+    languages: [python, typescript]
+  beam:
+    count: 2
+    languages: [erlang, elixir]
+  systems:
+    count: 4
+    languages: [rust, c, cpp, golang]
+  lisp:
+    count: 1
+    languages: [clojure]
+  managed-oop:
+    count: 1
+    languages: [java]
+  apple:
+    count: 2
+    languages: [objc, swift]
+
+# Validation notes
+validation:
+  - "JavaScript is NOT in current convert-* skills (plan needs update)"
+  - "Actual Tier 1 count: 17 languages (not 18)"
+  - "All 17 languages verified against patterns.db"
+  - "Family assignments cross-referenced with taxonomy.yaml"

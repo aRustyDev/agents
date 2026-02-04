@@ -59,15 +59,17 @@ ORDER BY language;
 
 ### 2.1 Language Prioritization
 
-```
-Tier 1 (Must Have): Languages in existing convert-* skills (18 languages)
-  Source languages: python, typescript, javascript, java, c, cpp, golang
-  Target languages: rust, haskell, elm, roc, fsharp, scala
-  BEAM family: erlang, elixir
-  LISP family: clojure
-  Apple family: objc, swift
+Based on extraction from `data/patterns.db` (Task 2.0):
 
-Tier 2 (Should Have): High-value additions (4 languages)
+```
+Tier 1 (Must Have): Languages in existing convert-* skills (17 languages)
+  Source-heavy: python (11), clojure (7), elixir (6), elm (5), java (3)
+  Target-heavy: scala (8), roc (7), rust (6), haskell (6), fsharp (5)
+  Balanced: erlang (4/4), typescript (2/1), c (2/1), cpp (1/2), golang (1/2)
+  Apple family: objc (source), swift (target)
+
+Tier 2 (Should Have): High-value additions (5 languages)
+  - javascript (Dynamic, web - NOT in current skills but high value)
   - kotlin (Managed-OOP, Android)
   - gleam (BEAM, typed)
   - zig (Systems, modern)
@@ -440,12 +442,11 @@ CREATE TABLE language_relationships (
 
 ## Languages to Profile
 
-### Tier 1: Full Profiles (18 languages)
+### Tier 1: Full Profiles (17 languages)
 
 **Dynamic Family:**
 
 - [ ] python (+ version history: 2.7, 3.6, 3.10)
-- [ ] javascript
 - [ ] typescript
 
 **ML-FP Family:**
@@ -481,8 +482,9 @@ CREATE TABLE language_relationships (
 - [ ] objc
 - [ ] swift
 
-### Tier 2: Full Profiles (4 languages)
+### Tier 2: Full Profiles (5 languages)
 
+- [ ] javascript (high-value, not in current skills)
 - [ ] kotlin
 - [ ] gleam
 - [ ] zig
@@ -500,8 +502,8 @@ CREATE TABLE language_relationships (
 
 ## Success Criteria
 
-- [ ] All 18 Tier 1 languages profiled with full template
-- [ ] All 4 Tier 2 languages profiled with full template
+- [ ] All 17 Tier 1 languages profiled with full template
+- [ ] All 5 Tier 2 languages profiled with full template
 - [ ] All 7 Tier 3 languages profiled with minimal template
 - [ ] Version history documented for major languages (Python, Java, C, C++)
 - [ ] Coverage gap analysis complete (referencing Phase 0 data)
@@ -515,10 +517,10 @@ CREATE TABLE language_relationships (
 
 | Task | Effort | Notes |
 |------|--------|-------|
-| 2.0 Extract languages | 0.5 days | SQL queries on patterns.db |
+| 2.0 Extract languages | 0.5 days | SQL queries on patterns.db ✓ |
 | 2.1-2.3 Setup & data sources | 1 day | Establish templates, sources |
-| 2.4 Tier 1 profiles (18) | 6 days | ~3 profiles/day |
-| 2.5 Tier 2 profiles (4) | 1.5 days | ~3 profiles/day |
+| 2.4 Tier 1 profiles (17) | 5.5 days | ~3 profiles/day |
+| 2.5 Tier 2 profiles (5) | 2 days | ~3 profiles/day |
 | 2.6 Tier 3 minimal (7) | 1 day | ~7 minimal/day |
 | 2.7 Coverage analysis | 1 day | Query Phase 0, build matrix |
 | SQL schema & data load | 1 day | Extend schema, populate |
