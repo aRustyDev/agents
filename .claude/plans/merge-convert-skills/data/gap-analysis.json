@@ -1,0 +1,2587 @@
+{
+  "summary": {
+    "total_gaps": 320,
+    "by_type": {
+      "negative": {
+        "count": 29,
+        "by_severity": {
+          "medium": 29
+        }
+      },
+      "human_decision": {
+        "count": 183,
+        "by_severity": {
+          "medium": 183
+        }
+      },
+      "lossy": {
+        "count": 108,
+        "by_severity": {
+          "medium": 108
+        }
+      }
+    }
+  },
+  "gaps": [
+    {
+      "gap_type": "negative",
+      "description": "Forgetting to Use `nullptr` Instead of `NULL`",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "cpp",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Use-After-Free",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Assuming Dynamic Typing",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elm",
+      "mitigation": "Treating Elm like dynamically-typed Clojure\n\n```elm\n-- \u274c WRONG: Can't have heterogeneous lists\nusers = [ { name = \"Alice\" }, { name = \"Bob\", age = 30 } ]\n-- ERROR: Record fields must match\n\n-- \u2713 CORRECT: Define explicit type with Maybe for optional fields\ntype alias User =\n    { name : String\n    , age : Maybe Int\n    }\n\nusers =\n    [ { name = \"Alice\", age = Nothing }\n    , { name = \"Bob\", age = Just 30 }\n    ]\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Atom Table Exhaustion",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Dynamic Type Assumptions \u2192 Static Type Requirements",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "Clojure allows heterogeneous collections; Haskell requires homogeneous types.\n\n```clojure\n;; Clojure: Mixed types OK\n(def mixed [1 \"two\" :three 4.0])\n```\n\n```haskell\n-- Haskell: Need sum type for mixed\ndata Value\n    = IntVal Int\n    | StringVal String\n    | KeywordVal String\n    | DoubleVal Double\n\nmixed :: [Value]\nmixed = [IntVal 1, StringVal \"two\", KeywordVal \"three\", DoubleVal 4.0]\n```\n\n**Fix:** Use algebraic data types (ADTs) to represent variants."
+    },
+    {
+      "gap_type": "negative",
+      "description": "Overusing Rc/Arc (Avoid C++ shared_ptr Mindset)",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": "Prefer borrowing or single ownership:\n\n```rust\n// Good: Use Box for owned children\nstruct Node {\n    value: i32,\n    children: Vec<Box<Node>>,\n}\n\n// Or borrow when possible\nfn process_nodes(nodes: &[Node]) {\n    // Work with borrowed references\n}\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Expecting Runtime Dynamism",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "String vs Binary Confusion",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": "Always translate Elixir `\"strings\"` to Erlang binaries `<<\"strings\">>`.\n\n---"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Process-Based Thinking in Pure Code",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "roc",
+      "mitigation": "```roc\n# \u2713 Use explicit state passing\nState : I64\n\nincrement : State -> State\nincrement = \\count -> count + 1\n\n# State is passed explicitly, not hidden in process\n# Platform provides state management if needed\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Dynamic Typing \u2192 Static Typing",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "scala",
+      "mitigation": "Use sealed trait ADT for type safety.\n\n```scala\nsealed trait Data\ncase class IntData(value: Int) extends Data\ncase class StringData(value: String) extends Data\ncase class ListData[A](values: List[A]) extends Data\n\ndef process(data: Data): Int = data match {\n  case IntData(x) => x * 2\n  case StringData(x) => x.length\n  case ListData(xs) => xs.length\n}\n```\n\n---"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Assuming Compile-Time Safety",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "Use dialyzer for static analysis, embrace let-it-crash philosophy with supervision."
+    },
+    {
+      "gap_type": "negative",
+      "description": "Assuming Elm's Simplicity Limits Apply",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "- Use type classes for polymorphism (Eq, Show, Functor, etc.)\n- Leverage lazy evaluation (but beware space leaks)\n- Use advanced type system features when beneficial (GADTs, type families)"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Forgetting Type Signatures",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": ": Always write top-level type signatures.\n\n```haskell\n-- Bad: Type defaulting may surprise you\ndivide x y = x / y\n\n-- Good: Explicit constraints\ndivide :: Double -> Double -> Double\ndivide x y = x / y\n```\n\n---"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Confusing Either Direction",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": "F#'s Result has Ok/Error, Haskell's Either has Left/Right\n\n```haskell\n-- WRONG: Thinking Right is error\nvalidate x = if x > 0 then Left x else Right \"Error\"\n\n-- CORRECT: Right is success, Left is error\nvalidate x = if x > 0 then Right x else Left \"Error\"\n```\n\n**Fix:** Remember: \"Right is right (correct)\""
+    },
+    {
+      "gap_type": "negative",
+      "description": "PascalCase vs camelCase",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "F# uses PascalCase for everything, Scala uses camelCase for members.\n\n```fsharp\n// F# style\ntype Person = {\n    FirstName: string\n    LastName: string\n}\n\nlet GetFullName person = $\"{person.FirstName} {person.LastName}\"\n```\n\n**Fix:** Follow Scala conventions\n\n```scala\n// Scala style\ncase class Person(\n  firstName: String,  // camelCase\n  lastName: String\n)\n\ndef getFullName(person: Person): String = s\"${person.firstName} ${person.lastName}\"\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Trying to Return Borrowed References Without Lifetimes",
+      "severity": "medium",
+      "source_lang": "golang",
+      "target_lang": "rust",
+      "mitigation": "```rust\n// Return owned value instead:\nfn get_data() -> Data {\n    Data::new()\n}\n\n// Or use Box for heap allocation:\nfn get_data() -> Box<Data> {\n    Box::new(Data::new())\n}\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Lazy vs Strict - Infinite Lists",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": "Direct translation of lazy infinite structures\n\n```haskell\n-- Haskell: Works fine\nnaturals = [0..]\nevens = filter even naturals\n```\n\n```roc\n# Roc: Would hang forever!\n# naturals = List.range { start: At 0, end: At maxI64 }  # Too large\n# evens = List.keepIf naturals Num.isEven  # Never completes\n```\n\n**Fix:** Use finite ranges or iterators\n```roc\n# Generate finite range\nnaturals = List.range { start: At 0, end: Before 1000 }\nevens = List.keepIf naturals Num.isEven\n\n# Or use stream/iterator pattern (if platform provides)\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Assuming Lazy Evaluation",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "Use `LazyList` for potentially infinite sequences, `lazy val` for deferred computation."
+    },
+    {
+      "gap_type": "negative",
+      "description": "Object Slicing",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "cpp",
+      "mitigation": "```cpp\nclass Base {\npublic:\n    virtual void print() { std::cout << \"Base\\n\"; }\n};\n\nclass Derived : public Base {\n    int extra;\npublic:\n    void print() override { std::cout << \"Derived\\n\"; }\n};\n\nvoid process(Base obj) {  // Takes by value - SLICING!\n    obj.print();  // Always prints \"Base\"\n}\n\nDerived d;\nprocess(d);  // Derived object sliced to Base\n```\n\n**Fix:**\n```cpp\nvoid process(const Base& obj) {  // Take by reference\n    obj.print();  // Polymorphic behavior\n}\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Force Unwrapping Optionals",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "Crashes when value is nil\n\n**Objective-C:**\n```objc\n// Nil messaging is safe\nNSString *name = [user name];  // Returns nil if user is nil\nNSString *upper = [name uppercaseString];  // Returns nil if name is nil\n```\n\n**Swift (bad):**\n```swift\nlet name = user!.name  // Crashes if user is nil\nlet upper = name!.uppercased()  // Crashes if name is nil\n```\n\n**Swift (good):**\n```swift\nguard let user = user else { return }\nlet name = user.name\nlet upper = name?.uppercased() ?? \"\"\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Mutable State \u2192 Immutable Data",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "```clojure\n;; Rebind with new value\n(def items (conj items 4))  ; Now items is [1 2 3 4]\n\n;; Or use atoms for mutable state\n(def items (atom [1 2 3]))\n(swap! items conj 4)\n(println @items)  ; [1 2 3 4]\n\n;; Or work with local bindings\n(let [items [1 2 3]\n      items (conj items 4)\n      items (conj items 5)]\n  (println items))  ; [1 2 3 4 5]\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Expecting Mutable State",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elixir",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Forgetting About Laziness",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "```haskell\nimport Control.DeepSeq (force)\n\n-- Force strict evaluation when needed\nprocessData :: [Int] -> [Int]\nprocessData items = force results\n  where\n    results = map expensiveFunc items\n\n-- Or use strict versions\nimport qualified Data.Map.Strict as M\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Arbitrary Precision Integer Overflow",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "```rust\n// Use appropriate size or BigInt\nuse num_bigint::BigInt;\nuse num_traits::pow::Pow;\n\nlet x = BigInt::from(10).pow(100_u32);  // No overflow\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Mutability Assumptions",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Python `None` \u2192 TypeScript `null` vs `undefined`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "Choose a convention:\n- Use `null` for explicit \"not found\" cases\n- Use `undefined` for optional/uninitialized values\n- Or stick to one consistently (prefer `undefined` for simplicity)"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Assuming Immutability is Enforced",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "scala",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "negative",
+      "description": "Ignoring Error Returns",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "```go\n// \u2713 Always check errors\nuser, err := FetchUser(\"123\")\nif err != nil {\n    return fmt.Errorf(\"failed to fetch user: %w\", err)\n}\nfmt.Println(user.Name)\n```"
+    },
+    {
+      "gap_type": "negative",
+      "description": "Over-cloning to Satisfy Borrow Checker",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "Learn to work with references. Clone only when you truly need owned data."
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "cpp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C language fundamentals",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "cpp",
+      "mitigation": "lang-c-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C++ language fundamentals",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "cpp",
+      "mitigation": "lang-cpp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (C++ \u2192 C)",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "cpp",
+      "mitigation": "convert-cpp-c"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C language fundamentals",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "lang-c-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 C)",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "convert-rust-c"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Advanced C memory engineering",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "lang-c-memory-eng"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Advanced Rust memory engineering",
+      "severity": "medium",
+      "source_lang": "c",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-memory-eng"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript specifics - see `convert-clojurescript-*` skills",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elm",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elm",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elm",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript \u2192 Elm (similar but with JS runtime considerations)",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript to Erlang - handle as two-step: ClojureScript \u2192 Clojure \u2192 Erlang",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "fsharp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "fsharp",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "fsharp",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript \u2192 PureScript/Elm",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "dedicated frontend conversion skills"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "roc",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript frontend patterns - focus is on Clojure backend to Roc applications",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "roc",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "scala",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C++ language fundamentals",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": "lang-cpp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 C++) - see `convert-rust-cpp` (if exists)",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Advanced C++ metaprogramming (SFINAE, CRTP) - complex patterns require case-by-case analysis",
+      "severity": "medium",
+      "source_lang": "cpp",
+      "target_lang": "rust",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Server-side Elixir deployment - focus on logic portable to frontend",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Phoenix-specific patterns - Phoenix LiveView is client-server hybrid",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Phoenix-specific conversions - requires framework expertise",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "OTP distributed systems - requires architectural redesign for .NET",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "haskell",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "roc",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "scala",
+      "mitigation": "lang-elixir-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Phoenix framework specifics - see `lang-scala-play-dev` for web frameworks",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "scala",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "fsharp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "fsharp",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "fsharp",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# web frameworks in depth",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "fsharp",
+      "mitigation": "framework-specific skills"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Frontend frameworks - Elm's TEA is frontend-specific; backend alternatives vary",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "roc",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Browser-specific Elm code - Roc doesn't have DOM access",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "roc",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "scala",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ScalaJS specific patterns - see `lang-scala-js-dev` for frontend-to-frontend conversions",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "scala",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elixir conversions",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": "convert-elixir-haskell"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "roc",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": ".NET interop specifics - focus on pure functional patterns",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "roc",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Type provider advanced patterns - requires manual translation strategy",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "golang",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Go language fundamentals",
+      "severity": "medium",
+      "source_lang": "golang",
+      "target_lang": "rust",
+      "mitigation": "lang-go-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "golang",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 Go)",
+      "severity": "medium",
+      "source_lang": "golang",
+      "target_lang": "rust",
+      "mitigation": "convert-rust-golang"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Advanced type system features (GADTs, Type Families, DataKinds)",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "c",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Java language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "c",
+      "mitigation": "lang-java-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "c",
+      "mitigation": "lang-c-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (C \u2192 Java)",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "c",
+      "mitigation": "convert-c-java"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "cpp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Java language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "cpp",
+      "mitigation": "lang-java-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "C++ language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "cpp",
+      "mitigation": "lang-cpp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (C++ \u2192 Java)",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "cpp",
+      "mitigation": "convert-cpp-java"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Java language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "rust",
+      "mitigation": "lang-java-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 Java)",
+      "severity": "medium",
+      "source_lang": "java",
+      "target_lang": "rust",
+      "mitigation": "convert-rust-java"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Objective-C language fundamentals",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "lang-objc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Swift language fundamentals",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "lang-swift-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Swift \u2192 Objective-C)",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "convert-swift-objc"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "SwiftUI \u2192 UIKit migration",
+      "severity": "medium",
+      "source_lang": "objc",
+      "target_lang": "swift",
+      "mitigation": "platform-specific skills"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Clojure language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "lang-clojure-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Clojure \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "convert-clojure-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "ClojureScript",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "convert-python-clojurescript"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Elm language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": "lang-elm-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Elm \u2192 Python) - not typically needed",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Fable.Python (F# to Python via Fable) - different toolchain",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Erlang language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "lang-erlang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Erlang \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "convert-erlang-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "F# language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "lang-fsharp-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (F# \u2192 Python) - see `convert-fsharp-python` or Fable.Python transpiler",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Go language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "lang-go-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Go \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "convert-golang-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Haskell language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "lang-haskell-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Haskell \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "convert-haskell-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Web frameworks - Django/Flask \u2192 Servant/Yesod (see framework-specific guides)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Roc \u2192 Python) - not recommended",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": ""
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "convert-rust-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Scala \u2192 Python)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "convert-scala-python"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Advanced Scala libraries (Akka, Cats, ZIO)",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "specialized skills"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Python language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "lang-python-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "TypeScript language fundamentals",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "lang-typescript-patterns-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "scala",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Roc language fundamentals",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "scala",
+      "mitigation": "lang-roc-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Scala language fundamentals",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "scala",
+      "mitigation": "lang-scala-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "TypeScript language fundamentals",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "lang-typescript-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Go language fundamentals",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "lang-golang-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Go \u2192 TypeScript)",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "convert-golang-typescript"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "General conversion methodology",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "meta-convert-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "TypeScript language fundamentals",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "lang-typescript-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Rust language fundamentals",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "lang-rust-dev"
+    },
+    {
+      "gap_type": "human_decision",
+      "description": "Reverse conversion (Rust \u2192 TypeScript)",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "convert-rust-typescript"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Long` / `42` \u2192 `integer`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": "arbitrary precision in both"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer` \u2192 `Long` / `42`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "clojure",
+      "mitigation": "arbitrary precision in both"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` / `3.14` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "elixir",
+      "mitigation": "64-bit double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `Double` / `3.14`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "clojure",
+      "mitigation": "64-bit double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`42` \u2192 `42`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "erlang",
+      "mitigation": "integers (arbitrary precision in clojure \u2192 big integers in erlang)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`42` \u2192 `42`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "clojure",
+      "mitigation": "integers (arbitrary precision in clojure \u2192 big integers in erlang)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInteger` \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision integers"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`bigint` \u2192 `BigInteger`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "clojure",
+      "mitigation": "arbitrary precision integers"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigDecimal` \u2192 `decimal`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision decimals"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`decimal` \u2192 `BigDecimal`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "clojure",
+      "mitigation": "arbitrary precision decimals"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Long` \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "unbounded (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 `Long`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "clojure",
+      "mitigation": "unbounded (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "single precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "clojure",
+      "mitigation": "single precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "haskell",
+      "mitigation": "**preferred** double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "clojure",
+      "mitigation": "**preferred** double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision integers"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "clojure",
+      "mitigation": "arbitrary precision integers"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigDecimal` \u2192 `BigDecimal`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision decimals"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigDecimal` \u2192 `BigDecimal`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "clojure",
+      "mitigation": "arbitrary precision decimals"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`1` \u2192 `1`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "erlang",
+      "mitigation": "integers (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`1` \u2192 `1`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "elixir",
+      "mitigation": "integers (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float()` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": "64-bit double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float()`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "elixir",
+      "mitigation": "64-bit double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer()` (arbitrary) \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`bigint` \u2192 `integer()` (arbitrary)",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "elixir",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer()` \u2192 `Int` / `Integer`",
+      "severity": "medium",
+      "source_lang": "elixir",
+      "target_lang": "haskell",
+      "mitigation": "`int` fixed-width, `integer` arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` / `Integer` \u2192 `integer()`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "elixir",
+      "mitigation": "`int` fixed-width, `integer` arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` \u2192 `integer()`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer()` \u2192 `Int`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "elm",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `float()`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "erlang",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float()` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "elm",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "unbounded (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 `Int`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "elm",
+      "mitigation": "unbounded (arbitrary precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "single precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "elm",
+      "mitigation": "single precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "haskell",
+      "mitigation": "**preferred** double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "elm",
+      "mitigation": "**preferred** double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` \u2192 `I64` or `U64`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "roc",
+      "mitigation": "elm has arbitrary precision, roc has sized types"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`I64` or `U64` \u2192 `Int`",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "elm",
+      "mitigation": "elm has arbitrary precision, roc has sized types"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float()` \u2192 `Double` or `Float`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "haskell",
+      "mitigation": "precision choice"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` or `Float` \u2192 `float()`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "erlang",
+      "mitigation": "precision choice"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` / `double` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "haskell",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `float` / `double`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "fsharp",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`decimal` \u2192 `BigDecimal`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision decimal"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigDecimal` \u2192 `decimal`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision decimal"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`bigint` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "fsharp",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision integer"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision integer"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 N/A",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "roc",
+      "mitigation": "arbitrary precision - use fixed size or external library"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "N/A \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "haskell",
+      "mitigation": "arbitrary precision - use fixed size or external library"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "haskell",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision integer"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "haskell",
+      "mitigation": "arbitrary precision integer"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `int` / `long` / `BigInt`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "clojure",
+      "mitigation": "clojure has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` / `long` / `BigInt` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "clojure",
+      "target_lang": "python",
+      "mitigation": "clojure has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `Int`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": "elm int is javascript number (53-bit precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "python",
+      "mitigation": "elm int is javascript number (53-bit precision)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "elm",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "elm",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `integer()`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "arbitrary precision in both"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer()` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "python",
+      "mitigation": "arbitrary precision in both"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float()`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float()` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `integer()`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "both have arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`integer()` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "python",
+      "mitigation": "both have arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float()`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "erlang",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float()` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "erlang",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `int`, `int64`, `bigint`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "f# int is 32-bit, python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` (arbitrary) \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "fsharp",
+      "mitigation": "arbitrary precision (like python)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `int`, `int64`, `big.Int`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float64`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `math/big.Int`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "**python default** - arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `float64`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "golang",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `Int`, `Integer`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "int is bounded, integer is arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int`, `Integer` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "python",
+      "mitigation": "int is bounded, integer is arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `Int`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "fixed-size (usually 64-bit), can overflow"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "python",
+      "mitigation": "fixed-size (usually 64-bit), can overflow"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `Integer`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "**python default** - arbitrary precision, no overflow"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Integer` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "python",
+      "mitigation": "**python default** - arbitrary precision, no overflow"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `Double`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "ieee 754 double precision (preferred)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Double` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision (preferred)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `Float`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "haskell",
+      "mitigation": "single precision (rarely used)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Float` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "haskell",
+      "target_lang": "python",
+      "mitigation": "single precision (rarely used)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `I64` or `U64`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": "roc uses fixed-size integers; python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`I64` or `U64` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "python",
+      "mitigation": "roc uses fixed-size integers; python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `I64`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "roc",
+      "mitigation": "python has arbitrary precision; roc uses 64-bit signed"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`I64` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "roc",
+      "target_lang": "python",
+      "mitigation": "python has arbitrary precision; roc uses 64-bit signed"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `i32`, `i64`, `i128`, `num_bigint::BigInt`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`i32`, `i64`, `i128`, `num_bigint::BigInt` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "rust",
+      "target_lang": "python",
+      "mitigation": "python has arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `num_bigint::BigInt`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "**python default** - arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`num_bigint::BigInt` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "rust",
+      "target_lang": "python",
+      "mitigation": "**python default** - arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `f64`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "rust",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`f64` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "rust",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `Int`, `Long`, `BigInt`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "fixed size or arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`Int`, `Long`, `BigInt` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "python",
+      "mitigation": "fixed size or arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `BigInt`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "scala",
+      "mitigation": "arbitrary precision (like python)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`BigInt` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "scala",
+      "target_lang": "python",
+      "mitigation": "arbitrary precision (like python)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`int` \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "for arbitrary precision (use when needed)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`bigint` \u2192 `int`",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "python",
+      "mitigation": "for arbitrary precision (use when needed)"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`float` \u2192 `number`",
+      "severity": "medium",
+      "source_lang": "python",
+      "target_lang": "typescript",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`number` \u2192 `float`",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "python",
+      "mitigation": "ieee 754 double precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`number` \u2192 `int`, `int64`, `float64`",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "golang",
+      "mitigation": "specify precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`number` \u2192 `i32` / `f64`",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "specify precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`i32` / `f64` \u2192 `number`",
+      "severity": "medium",
+      "source_lang": "rust",
+      "target_lang": "typescript",
+      "mitigation": "specify precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`bigint` \u2192 `num_bigint::BigInt`",
+      "severity": "medium",
+      "source_lang": "typescript",
+      "target_lang": "rust",
+      "mitigation": "arbitrary precision"
+    },
+    {
+      "gap_type": "lossy",
+      "description": "`num_bigint::BigInt` \u2192 `bigint`",
+      "severity": "medium",
+      "source_lang": "rust",
+      "target_lang": "typescript",
+      "mitigation": "arbitrary precision"
+    }
+  ]
+}
