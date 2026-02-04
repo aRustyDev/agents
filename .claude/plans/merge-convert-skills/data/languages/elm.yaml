@@ -1,0 +1,126 @@
+# Elm Language Profile
+# Generated: 2024-02-04
+
+language: elm
+display_name: Elm
+version: "0.19.1"
+version_date: "2019-10"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: ml-fp
+  secondary: []
+  subtype: pure-web
+
+popularity:
+  tiobe_rank: null
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 68%
+  stackoverflow_year: 2022
+  github_repos: "50K+"
+
+features:
+  typing:
+    strength: strong
+    inference: global
+    generics: parametric
+    nullability: explicit
+    no_escape_hatches: true
+
+  memory:
+    model: gc
+    gc_type: "JavaScript runtime"
+    mutability: immutable
+    allocation: heap
+
+  control:
+    structured: [if-then-else, case-of]
+    effects: managed
+    async: cmd-msg
+
+  data:
+    primitives: [Int, Float, Bool, Char, String]
+    composites: [records, custom types, tuples]
+    collections: [List, Array, Dict, Set]
+    abstraction: [modules, type aliases]
+
+  meta:
+    macros: none
+    reflection: none
+    codegen: none
+
+ecosystem:
+  package_manager: [elm]
+  build_system: [elm make, elm-live]
+  lsp: [elm-language-server]
+  formatter: [elm-format]
+  linter: [elm-review]
+  repl: [elm repl]
+  test_framework: [elm-test]
+
+syntax:
+  function_def: "name : ParamType -> ReturnType\nname param = body"
+  async_def: "name : Cmd Msg  -- commands are data, not functions"
+  type_def: "type alias Name = { field : Type } | type Name = Case1 | Case2 Type"
+  module_def: "module Name exposing (..)"
+  import: "import Module exposing (item1, Type(..))"
+  error_handling: "Result error value | Maybe value"
+  pattern_matching: "case x of\n    Pattern -> body"
+
+semantic_gaps:
+  - description: "No higher-kinded types"
+    severity: moderate
+    workaround: "Use specific types, phantom types"
+  - description: "No type classes"
+    severity: moderate
+    workaround: "Use module patterns, explicit passing"
+  - description: "No custom operators"
+    severity: minor
+    workaround: "Use descriptive function names"
+  - description: "Limited JS interop (ports only)"
+    severity: moderate
+    workaround: "Design port-based architecture"
+  - description: "No native/FFI in 0.19"
+    severity: moderate
+    workaround: "Use ports or web components"
+
+skill_coverage:
+  as_source: 5
+  as_target: 3
+  source_skills:
+    - elm-erlang
+    - elm-fsharp
+    - elm-haskell
+    - elm-roc
+    - elm-scala
+  target_skills:
+    - python-elm
+    - elixir-elm
+    - clojure-elm
+
+compiles_to:
+  - language: javascript
+    targets: [JavaScript (ES5)]
+
+architecture_pattern:
+  name: "The Elm Architecture (TEA)"
+  components:
+    - name: Model
+      description: "Application state"
+    - name: Msg
+      description: "Message type for state changes"
+    - name: update
+      description: "State transition function"
+    - name: view
+      description: "Render function"
+    - name: subscriptions
+      description: "External event sources"
+
+sources:
+  - url: "https://guide.elm-lang.org/"
+    description: "Elm Guide"
+  - url: "https://elm-lang.org/docs/syntax"
+    description: "Elm Syntax Documentation"
+  - url: "https://package.elm-lang.org/"
+    description: "Elm Packages"

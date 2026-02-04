@@ -1,0 +1,114 @@
+# Scala Language Profile
+# Generated: 2024-02-04
+
+language: scala
+display_name: Scala
+version: "3.3"
+version_date: "2023-05"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: ml-fp
+  secondary: [oop]
+  subtype: hybrid
+
+popularity:
+  tiobe_rank: 32
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 53%
+  stackoverflow_year: 2023
+  github_repos: "500K+"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: bounded
+    nullability: nullable
+    variance_annotations: true
+    type_bounds: true
+
+  memory:
+    model: gc
+    gc_type: "JVM garbage collection"
+    mutability: default-immutable
+    allocation: heap
+
+  control:
+    structured: [if-else, for-comprehensions, while, try-catch, match]
+    effects: exceptions
+    async: Futures
+
+  data:
+    primitives: [Int, Long, Float, Double, Boolean, Char, Byte, Short, Unit]
+    composites: [case classes, sealed traits, tuples, enums]
+    collections: [List, Vector, Set, Map, Seq]
+    abstraction: [traits, abstract classes, objects, packages]
+
+  meta:
+    macros: compile-time
+    reflection: runtime
+    codegen: [inline, derives]
+
+ecosystem:
+  package_manager: [sbt, Mill, Maven, Gradle]
+  build_system: [sbt, Mill]
+  lsp: [Metals]
+  formatter: [scalafmt]
+  linter: [scalafix, Wartremover]
+  repl: [scala, Ammonite]
+  test_framework: [ScalaTest, MUnit, specs2]
+
+syntax:
+  function_def: "def name(params): ReturnType = body"
+  async_def: "def name(): Future[T] = { ... }"
+  type_def: "case class Name(...) | sealed trait Name"
+  module_def: "object Name { ... } | package object name { ... }"
+  import: "import package.module.{item1, item2}"
+  error_handling: "try { } catch { case e: T => } finally { }"
+  pattern_matching: "x match { case pattern => body }"
+
+semantic_gaps:
+  - description: "Null exists despite Option"
+    severity: moderate
+    workaround: "Enable strict null checking, avoid null"
+  - description: "Implicit complexity (Scala 2)"
+    severity: moderate
+    workaround: "Migrate to given/using (Scala 3)"
+  - description: "JVM startup time"
+    severity: minor
+    workaround: "GraalVM native-image, Scala Native"
+  - description: "Scala 2 vs 3 migration"
+    severity: moderate
+    workaround: "Use Scala 3 cross-building, scalafix"
+
+skill_coverage:
+  as_source: 0
+  as_target: 8
+  source_skills: []
+  target_skills:
+    - python-scala
+    - elixir-scala
+    - clojure-scala
+    - elm-scala
+    - erlang-scala
+    - fsharp-scala
+    - haskell-scala
+    - roc-scala
+
+compiles_to:
+  - language: jvm
+    targets: [JVM bytecode]
+  - language: javascript
+    targets: [Scala.js]
+  - language: native
+    targets: [Scala Native]
+
+sources:
+  - url: "https://docs.scala-lang.org/scala3/"
+    description: "Scala 3 Documentation"
+  - url: "https://docs.scala-lang.org/scala3/reference/"
+    description: "Scala 3 Reference"
+  - url: "https://www.scala-lang.org/files/archive/spec/2.13/"
+    description: "Scala 2.13 Specification"

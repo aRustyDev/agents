@@ -1,0 +1,112 @@
+# F# Language Profile
+# Generated: 2024-02-04
+
+language: fsharp
+display_name: "F#"
+version: "8.0"
+version_date: "2023-11"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: ml-fp
+  secondary: [oop]
+  subtype: hybrid
+
+popularity:
+  tiobe_rank: 70
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 63%
+  stackoverflow_year: 2023
+  github_repos: "100K+"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: bounded
+    nullability: explicit
+    type_providers: true
+    srtp: true
+
+  memory:
+    model: gc
+    gc_type: ".NET garbage collection"
+    mutability: default-immutable
+    allocation: heap
+
+  control:
+    structured: [if-else, match, for, while, try-with]
+    effects: exceptions
+    async: async-computation-expressions
+
+  data:
+    primitives: [int, float, bool, char, string, unit]
+    composites: [records, discriminated unions, tuples, structs]
+    collections: [list, array, seq, Map, Set]
+    abstraction: [modules, classes, interfaces, type providers]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: [type-providers, quotations]
+
+ecosystem:
+  package_manager: [NuGet, Paket]
+  build_system: [dotnet CLI, FAKE]
+  lsp: [Ionide, FsAutoComplete]
+  formatter: [Fantomas]
+  linter: [FSharpLint]
+  repl: [fsi]
+  test_framework: [Expecto, xUnit, NUnit]
+
+syntax:
+  function_def: "let name param1 param2 = body"
+  async_def: "let name () = async { let! x = ... return x }"
+  type_def: "type Name = { field: Type } | type Name = Case1 | Case2 of Type"
+  module_def: "module Name = ... | namespace Name"
+  import: "open Module | open type Module.Type"
+  error_handling: "try ... with | ex -> ... | finally ..."
+  pattern_matching: "match x with | pattern -> body"
+
+semantic_gaps:
+  - description: ".NET null leaks into F#"
+    severity: moderate
+    workaround: "Use Option, enable nullable reference types"
+  - description: "Mutable by default in .NET interop"
+    severity: minor
+    workaround: "Wrap in F# types, use immutable interfaces"
+  - description: "Limited higher-kinded types"
+    severity: moderate
+    workaround: "Use computation expressions, SRTP"
+  - description: "No pattern matching in lambdas"
+    severity: minor
+    workaround: "Use match expression, function keyword"
+
+skill_coverage:
+  as_source: 3
+  as_target: 5
+  source_skills:
+    - fsharp-haskell
+    - fsharp-roc
+    - fsharp-scala
+  target_skills:
+    - python-fsharp
+    - elixir-fsharp
+    - clojure-fsharp
+    - elm-fsharp
+    - erlang-fsharp
+
+compiles_to:
+  - language: dotnet-il
+    targets: [.NET IL]
+  - language: javascript
+    targets: [Fable]
+
+sources:
+  - url: "https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/"
+    description: "F# Language Reference"
+  - url: "https://fsharp.github.io/fsharp-core-docs/"
+    description: "F# Core Library Documentation"
+  - url: "https://fsharpforfunandprofit.com/"
+    description: "F# for Fun and Profit"

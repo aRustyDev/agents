@@ -1,0 +1,126 @@
+# Roc Language Profile
+# Generated: 2024-02-04
+
+language: roc
+display_name: Roc
+version: "pre-1.0 (alpha)"
+version_date: "2023"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: ml-fp
+  secondary: []
+  subtype: platform-effects
+
+popularity:
+  tiobe_rank: null
+  tiobe_date: "2024-01"
+  stackoverflow_loved: null
+  stackoverflow_year: null
+  github_repos: "5K+"
+  note: "New language, rapidly growing community"
+
+features:
+  typing:
+    strength: strong
+    inference: global
+    generics: parametric
+    nullability: explicit
+    abilities: true
+
+  memory:
+    model: gc
+    gc_type: "reference counting + cycle collection"
+    mutability: immutable
+    allocation: arena-based
+
+  control:
+    structured: [if-then-else, when-is]
+    effects: platform-managed
+    async: task-based
+
+  data:
+    primitives: [I8-I128, U8-U128, F32, F64, Bool, Str]
+    composites: [records, tags, tuples]
+    collections: [List, Dict, Set]
+    abstraction: [modules, abilities]
+
+  meta:
+    macros: none
+    reflection: none
+    codegen: none
+
+ecosystem:
+  package_manager: [roc]
+  build_system: [roc build]
+  lsp: [roc built-in]
+  formatter: [roc format]
+  linter: []
+  repl: [roc repl]
+  test_framework: [roc test]
+
+syntax:
+  function_def: "name : ParamType -> ReturnType\nname = \\param -> body"
+  async_def: "name : Task ResultType ErrorType\nname = Task.await ..."
+  type_def: "Name : { field : Type } | Name : [Tag1 Type, Tag2]"
+  module_def: "# file-based modules with interface files"
+  import: "# URL-based imports"
+  error_handling: "Result ok err = [Ok ok, Err err]"
+  pattern_matching: "when x is\n    Pattern -> body"
+
+semantic_gaps:
+  - description: "Pre-1.0, API may change"
+    severity: high
+    workaround: "Track language updates, use stable features"
+  - description: "Limited ecosystem (new language)"
+    severity: moderate
+    workaround: "Build needed libraries, use FFI"
+  - description: "No exceptions (by design)"
+    severity: minor
+    workaround: "Use Result/tags for all errors"
+  - description: "Limited platform selection"
+    severity: moderate
+    workaround: "Create custom platforms as needed"
+  - description: "Documentation still developing"
+    severity: moderate
+    workaround: "Reference source code, community Discord"
+
+skill_coverage:
+  as_source: 1
+  as_target: 7
+  source_skills:
+    - roc-scala
+  target_skills:
+    - python-roc
+    - elixir-roc
+    - clojure-roc
+    - elm-roc
+    - erlang-roc
+    - fsharp-roc
+    - haskell-roc
+
+compiles_to:
+  - language: native
+    targets: [LLVM]
+  - language: wasm
+    targets: [WebAssembly]
+
+platform_model:
+  description: "Separates pure application from effectful platform"
+  components:
+    - name: Application
+      description: "Pure code describing effects"
+    - name: Platform
+      description: "Effectful code executing effects"
+  builtin_platforms:
+    - basic-cli
+    - basic-webserver
+
+sources:
+  - url: "https://www.roc-lang.org/docs"
+    description: "Roc Documentation"
+  - url: "https://www.roc-lang.org/tutorial"
+    description: "Roc Tutorial"
+  - url: "https://www.roc-lang.org/examples"
+    description: "Roc Examples"

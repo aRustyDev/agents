@@ -1,0 +1,113 @@
+# Haskell Language Profile
+# Generated: 2024-02-04
+
+language: haskell
+display_name: Haskell
+version: "GHC 9.8"
+version_date: "2023-10"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: ml-fp
+  secondary: []
+  subtype: pure
+
+popularity:
+  tiobe_rank: 31
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 61%
+  stackoverflow_year: 2023
+  github_repos: "200K+"
+
+features:
+  typing:
+    strength: strong
+    inference: global
+    generics: higher-kinded
+    nullability: explicit
+    type_classes: true
+    gadts: true
+
+  memory:
+    model: gc
+    gc_type: "GHC runtime GC"
+    mutability: immutable
+    allocation: heap
+    lazy_evaluation: true
+
+  control:
+    structured: [guards, case, if-then-else, where, let-in]
+    effects: monadic
+    async: async-library
+
+  data:
+    primitives: [Int, Integer, Float, Double, Char, Bool]
+    composites: [algebraic data types, records, tuples]
+    collections: [List, Map, Set, Vector, Seq]
+    abstraction: [type classes, modules, newtypes]
+
+  meta:
+    macros: template-haskell
+    reflection: runtime
+    codegen: [deriving, generics]
+
+ecosystem:
+  package_manager: [Cabal, Stack]
+  build_system: [Cabal, Stack, Nix]
+  lsp: [HLS]
+  formatter: [Ormolu, Fourmolu, stylish-haskell]
+  linter: [HLint]
+  repl: [GHCi]
+  test_framework: [Hspec, Tasty, QuickCheck]
+
+syntax:
+  function_def: "name :: Type -> Type\nname arg = body"
+  async_def: "name :: IO Type\nname = do { ... }"
+  type_def: "data Name = Constructor Type | ... | newtype Name = ..."
+  module_def: "module Name where"
+  import: "import Module (item1, item2) | import qualified Module as M"
+  error_handling: "catch, try, Either e a"
+  pattern_matching: "case x of { pattern -> body }"
+
+semantic_gaps:
+  - description: "Lazy evaluation can cause space leaks"
+    severity: moderate
+    workaround: "Use strict data types, BangPatterns"
+  - description: "Partial functions (head, tail)"
+    severity: moderate
+    workaround: "Use safe alternatives, -Wincomplete-patterns"
+  - description: "String as [Char] is inefficient"
+    severity: minor
+    workaround: "Use Text or ByteString"
+  - description: "Record field name collisions"
+    severity: moderate
+    workaround: "Use DuplicateRecordFields, OverloadedRecordDot"
+
+skill_coverage:
+  as_source: 2
+  as_target: 6
+  source_skills:
+    - haskell-roc
+    - haskell-scala
+  target_skills:
+    - python-haskell
+    - elixir-haskell
+    - clojure-haskell
+    - elm-haskell
+    - erlang-haskell
+    - fsharp-haskell
+
+compiles_to:
+  - language: native
+    targets: [GHC native codegen, LLVM]
+  - language: javascript
+    targets: [GHCJS]
+
+sources:
+  - url: "https://www.haskell.org/onlinereport/haskell2010/"
+    description: "Haskell 2010 Report"
+  - url: "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/"
+    description: "GHC User's Guide"
+  - url: "https://wiki.haskell.org/"
+    description: "Haskell Wiki"
