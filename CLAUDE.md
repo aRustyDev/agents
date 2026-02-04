@@ -112,9 +112,57 @@ See `docs/src/adr/` for architecture decisions.
 | Search MCP servers | `just mcp-cache-search "query"` |
 | Semantic search | `just kg-search "query"` |
 
+## Issue Tracking with Beads
+
+This project uses [beads](https://github.com/steveyegge/beads) (`bd` CLI) as the primary issue tracker. Beads provides persistent task memory that survives conversation compaction.
+
+### Planning Workflow
+
+1. **Create Plans as Markdown** — Write detailed plans in `.claude/plans/`
+2. **Review & Refine Plans** — Use `/review-plan` to identify gaps and improvements
+3. **Convert Plans to Beads** — Use `/string-beads` to create issues with dependencies
+4. **Implement via Beads** — Work through issues using the beads session protocol
+
+### Session Protocol
+
+```bash
+bd ready              # Find unblocked work
+bd show <id>          # Get full context
+bd update <id> --status in_progress  # Start work
+# ... do work, add notes ...
+bd close <id>         # Complete task
+bd sync               # Persist to git (always at session end)
+```
+
+### When to Use Beads vs TodoWrite
+
+| Use Beads (`bd`) | Use TodoWrite |
+|------------------|---------------|
+| Multi-session work | Single-session tasks |
+| Complex dependencies | Linear execution |
+| Need context after compaction | All context in conversation |
+| Team collaboration (git sync) | Solo immediate work |
+
+**Decision test**: "Will I need this context in 2 weeks?" → YES = beads
+
+### Key Commands
+
+| Command | Purpose |
+|---------|---------|
+| `bd ready` | List unblocked work |
+| `bd create "title"` | Create new issue |
+| `bd show <id>` | View issue details |
+| `bd update <id> --status in_progress` | Start working |
+| `bd close <id>` | Complete issue |
+| `bd dep add <blocker> <blocked>` | Add dependency |
+| `bd sync` | Sync to git |
+
+See `.claude/skills/beads/` for full documentation.
+
 ## Conventions
 
 - **Brewfile**: Tool-level dependencies only (ollama, uv, yq, etc.)
 - **pyproject.toml**: Python packages (sqlite-vec, watchdog, etc.)
 - **`just init`**: Must be idempotent — safe to run multiple times
 - **SQL dumps**: `.data/**/*.sql` files are version controlled; `.db` files are gitignored
+- **Plans**: Written as markdown in `.claude/plans/`, converted to beads issues
