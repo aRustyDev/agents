@@ -1,0 +1,146 @@
+# C Language Profile
+# Generated: 2024-02-04
+
+language: c
+display_name: C
+version: "C23"
+version_date: "2023"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: systems
+  secondary: []
+  subtype: procedural
+
+popularity:
+  tiobe_rank: 2
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 33%
+  stackoverflow_year: 2023
+  github_repos: "2M+"
+
+features:
+  typing:
+    strength: weak
+    inference: none
+    generics: none
+    nullability: nullable
+    pointer_arithmetic: true
+
+  memory:
+    model: manual
+    gc_type: "none (malloc/free)"
+    mutability: default-mutable
+    allocation: explicit
+
+  control:
+    structured: [if-else, for, while, do-while, switch, goto]
+    effects: return-codes
+    async: none
+
+  data:
+    primitives: [char, short, int, long, float, double, _Bool]
+    composites: [struct, union, arrays]
+    collections: [arrays]
+    abstraction: [header files, opaque pointers]
+
+  meta:
+    macros: preprocessor
+    reflection: none
+    codegen: preprocessor
+
+ecosystem:
+  package_manager: [none, vcpkg, Conan]
+  build_system: [Make, CMake, Meson]
+  lsp: [clangd]
+  formatter: [clang-format]
+  linter: [clang-tidy, cppcheck]
+  repl: []
+  test_framework: [Unity, Check, CUnit]
+
+syntax:
+  function_def: "return_type name(param_type param) { body }"
+  async_def: "// none - use pthreads"
+  type_def: "typedef struct { field_type field; } TypeName;"
+  module_def: "// header files (.h) + source files (.c)"
+  import: "#include <header.h> | #include \"header.h\""
+  error_handling: "return codes, errno, output parameters"
+  pattern_matching: "switch (value) { case CONST: ...; break; }"
+
+semantic_gaps:
+  - description: "No memory safety"
+    severity: critical
+    workaround: "Static analyzers, sanitizers, careful review"
+  - description: "No bounds checking"
+    severity: critical
+    workaround: "Manual checks, secure functions"
+  - description: "NULL pointer risks"
+    severity: high
+    workaround: "Defensive programming, static analysis"
+  - description: "No namespaces"
+    severity: moderate
+    workaround: "Prefix conventions (lib_function)"
+  - description: "No generics"
+    severity: moderate
+    workaround: "void*, macros, code generation"
+
+version_history:
+  - version: "C89"
+    release_date: "1989"
+    status: legacy
+    conversion_notes:
+      - "K&R to ANSI function declarations"
+      - "No // comments"
+      - "No inline"
+
+  - version: "C99"
+    release_date: "1999"
+    status: common_baseline
+    conversion_notes:
+      - "// comments"
+      - "inline functions"
+      - "designated initializers"
+      - "_Bool type"
+      - "variable-length arrays (VLAs)"
+
+  - version: "C11"
+    release_date: "2011"
+    status: modern_baseline
+    conversion_notes:
+      - "_Generic type selection"
+      - "_Static_assert"
+      - "Threading support (<threads.h>)"
+      - "_Atomic qualifier"
+
+  - version: "C23"
+    release_date: "2023"
+    status: latest_stable
+    conversion_notes:
+      - "typeof operator"
+      - "constexpr objects"
+      - "#embed directive"
+      - "Improved Unicode support"
+
+skill_coverage:
+  as_source: 2
+  as_target: 1
+  source_skills:
+    - c-cpp
+    - c-rust
+  target_skills:
+    - java-c
+
+compiles_to:
+  - language: native
+    targets: [machine code for all major architectures]
+
+ffi_notes: "Universal FFI baseline - most languages interface with C ABI"
+
+sources:
+  - url: "https://www.open-std.org/jtc1/sc22/wg14/"
+    description: "C Standards Committee"
+  - url: "https://en.cppreference.com/w/c"
+    description: "C Reference"
+  - url: "https://wiki.sei.cmu.edu/confluence/display/c"
+    description: "SEI CERT C Coding Standard"

@@ -1,0 +1,111 @@
+# Rust Language Profile
+# Generated: 2024-02-04
+
+language: rust
+display_name: Rust
+version: "1.75"
+version_date: "2023-12"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: systems
+  secondary: [ml-fp]
+  subtype: ownership
+
+popularity:
+  tiobe_rank: 17
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 87%
+  stackoverflow_year: 2023
+  github_repos: "500K+"
+
+features:
+  typing:
+    strength: strong
+    inference: bidirectional
+    generics: bounded
+    nullability: explicit
+    affine_types: true
+    lifetimes: true
+
+  memory:
+    model: ownership
+    gc_type: "none (borrow checker)"
+    mutability: default-immutable
+    allocation: stack-default
+    smart_pointers: true
+
+  control:
+    structured: [if-else, loop, while, for, match]
+    effects: result-type
+    async: async-await
+
+  data:
+    primitives: [i8-i128, u8-u128, f32, f64, bool, char]
+    composites: [structs, enums, tuples]
+    collections: [Vec, HashMap, HashSet, BTreeMap, BTreeSet]
+    abstraction: [traits, modules, crates]
+
+  meta:
+    macros: procedural
+    reflection: limited
+    codegen: [derive macros, build.rs]
+
+ecosystem:
+  package_manager: [Cargo]
+  build_system: [Cargo]
+  lsp: [rust-analyzer]
+  formatter: [rustfmt]
+  linter: [clippy]
+  repl: [evcxr]
+  test_framework: [built-in]
+
+syntax:
+  function_def: "fn name(param: Type) -> ReturnType { body }"
+  async_def: "async fn name() -> Result<T, E> { ... }"
+  type_def: "struct Name { field: Type } | enum Name { Variant(Type) }"
+  module_def: "mod name { ... } | mod name; (file-based)"
+  import: "use crate::module::item | use std::collections::HashMap"
+  error_handling: "Result<T, E> with ? operator"
+  pattern_matching: "match value { Pattern => body }"
+
+semantic_gaps:
+  - description: "Steep learning curve (borrow checker)"
+    severity: high
+    workaround: "Start with owned types, learn borrowing gradually"
+  - description: "Long compile times"
+    severity: moderate
+    workaround: "Use cargo check, incremental compilation"
+  - description: "Orphan rules limit trait impls"
+    severity: moderate
+    workaround: "Newtype pattern, wrapper types"
+  - description: "Async ecosystem fragmentation"
+    severity: moderate
+    workaround: "Choose runtime (tokio/async-std) early"
+
+skill_coverage:
+  as_source: 0
+  as_target: 6
+  source_skills: []
+  target_skills:
+    - python-rust
+    - c-rust
+    - cpp-rust
+    - golang-rust
+    - java-rust
+    - typescript-rust
+
+compiles_to:
+  - language: native
+    targets: [LLVM, multiple architectures]
+  - language: wasm
+    targets: [WebAssembly]
+
+sources:
+  - url: "https://doc.rust-lang.org/book/"
+    description: "The Rust Programming Language"
+  - url: "https://doc.rust-lang.org/reference/"
+    description: "Rust Reference"
+  - url: "https://doc.rust-lang.org/nomicon/"
+    description: "Rustonomicon (unsafe Rust)"

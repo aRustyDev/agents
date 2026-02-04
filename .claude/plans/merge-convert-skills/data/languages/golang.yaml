@@ -1,0 +1,120 @@
+# Go Language Profile
+# Generated: 2024-02-04
+
+language: golang
+display_name: Go
+version: "1.22"
+version_date: "2024-02"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: systems
+  secondary: []
+  subtype: concurrent
+
+popularity:
+  tiobe_rank: 8
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 62%
+  stackoverflow_year: 2023
+  github_repos: "1M+"
+
+features:
+  typing:
+    strength: strong
+    inference: limited
+    generics: bounded
+    nullability: nullable
+    structural_typing: true
+
+  memory:
+    model: gc
+    gc_type: "concurrent, low-latency"
+    mutability: default-mutable
+    allocation: automatic
+    escape_analysis: true
+
+  control:
+    structured: [if-else, for, switch, select]
+    effects: explicit-errors
+    async: goroutines
+
+  data:
+    primitives: [bool, int types, float32, float64, complex64, complex128, string, rune]
+    composites: [structs, arrays, slices, maps]
+    collections: [slice, map]
+    abstraction: [interfaces, packages]
+
+  meta:
+    macros: none
+    reflection: runtime
+    codegen: go-generate
+
+ecosystem:
+  package_manager: [go mod]
+  build_system: [go build]
+  lsp: [gopls]
+  formatter: [gofmt]
+  linter: [golangci-lint]
+  repl: [gore]
+  test_framework: [testing]
+
+syntax:
+  function_def: "func name(param Type) ReturnType { body }"
+  async_def: "go func() { ... }() // goroutine"
+  type_def: "type Name struct { Field Type } | type Name interface { Method() }"
+  module_def: "package name"
+  import: "import \"package\" | import ( \"pkg1\"\n\"pkg2\" )"
+  error_handling: "value, err := func(); if err != nil { ... }"
+  pattern_matching: "switch v := x.(type) { case Type: ... }"
+
+semantic_gaps:
+  - description: "No sum types/enums"
+    severity: moderate
+    workaround: "Interfaces, const iota, sealed interfaces"
+  - description: "Nil interface vs nil pointer"
+    severity: moderate
+    workaround: "Careful nil checks, typed nils"
+  - description: "No immutability"
+    severity: minor
+    workaround: "Convention, unexported fields"
+  - description: "Verbose error handling"
+    severity: moderate
+    workaround: "Error wrapping, custom error types"
+
+skill_coverage:
+  as_source: 1
+  as_target: 2
+  source_skills:
+    - golang-rust
+  target_skills:
+    - python-golang
+    - typescript-golang
+
+concurrency_model:
+  type: csp
+  primitives:
+    - name: goroutine
+      description: "Lightweight thread managed by Go runtime"
+    - name: channel
+      description: "Typed conduit for communication between goroutines"
+    - name: select
+      description: "Wait on multiple channel operations"
+  patterns:
+    - "Worker pool"
+    - "Fan-in/fan-out"
+    - "Pipeline"
+    - "Context cancellation"
+
+compiles_to:
+  - language: native
+    targets: [multiple OS/arch via GOOS/GOARCH]
+
+sources:
+  - url: "https://go.dev/ref/spec"
+    description: "Go Language Specification"
+  - url: "https://go.dev/doc/effective_go"
+    description: "Effective Go"
+  - url: "https://go.dev/doc/"
+    description: "Go Documentation"

@@ -1,0 +1,147 @@
+# C++ Language Profile
+# Generated: 2024-02-04
+
+language: cpp
+display_name: "C++"
+version: "C++23"
+version_date: "2023"
+last_updated: "2024-02"
+tier: 1
+
+family:
+  primary: systems
+  secondary: [oop]
+  subtype: multi-paradigm
+
+popularity:
+  tiobe_rank: 3
+  tiobe_date: "2024-01"
+  stackoverflow_loved: 48%
+  stackoverflow_year: 2023
+  github_repos: "1.5M+"
+
+features:
+  typing:
+    strength: strong
+    inference: auto
+    generics: templates
+    nullability: nullable
+    concepts: true
+    constexpr: true
+
+  memory:
+    model: manual
+    gc_type: "none (RAII)"
+    mutability: default-mutable
+    allocation: flexible
+    smart_pointers: true
+
+  control:
+    structured: [if-else, for, while, switch, try-catch, range-for]
+    effects: exceptions
+    async: coroutines
+
+  data:
+    primitives: [bool, char, int types, float, double]
+    composites: [classes, structs, unions, arrays, tuple]
+    collections: [vector, map, set, unordered_map, array]
+    abstraction: [classes, templates, namespaces, concepts]
+
+  meta:
+    macros: preprocessor
+    reflection: limited
+    codegen: [templates, constexpr, consteval]
+
+ecosystem:
+  package_manager: [vcpkg, Conan]
+  build_system: [CMake, Meson, Bazel]
+  lsp: [clangd]
+  formatter: [clang-format]
+  linter: [clang-tidy]
+  repl: [Cling]
+  test_framework: [Google Test, Catch2]
+
+syntax:
+  function_def: "ReturnType name(ParamType param) { body }"
+  async_def: "Task<T> name() { co_await ...; co_return value; }"
+  type_def: "class Name { ... }; | struct Name { ... }; | enum class Name { ... };"
+  module_def: "namespace name { ... } | module name; (C++20)"
+  import: "#include <header> | import module; (C++20)"
+  error_handling: "try { } catch (Type& e) { } | std::expected (C++23)"
+  pattern_matching: "std::visit with lambdas | if constexpr"
+
+semantic_gaps:
+  - description: "Complex syntax and feature interactions"
+    severity: high
+    workaround: "Follow C++ Core Guidelines"
+  - description: "Long compile times (templates)"
+    severity: moderate
+    workaround: "Precompiled headers, modules, explicit instantiation"
+  - description: "ABI stability issues"
+    severity: moderate
+    workaround: "Pimpl idiom, C ABI wrappers"
+  - description: "Undefined behavior risks"
+    severity: moderate
+    workaround: "Sanitizers, static analysis"
+
+version_history:
+  - version: "C++11"
+    release_date: "2011"
+    status: modern_baseline
+    conversion_notes:
+      - "Move semantics"
+      - "auto type inference"
+      - "Lambda expressions"
+      - "Smart pointers (unique_ptr, shared_ptr)"
+      - "Range-based for"
+
+  - version: "C++17"
+    release_date: "2017"
+    status: common_modern
+    conversion_notes:
+      - "Structured bindings"
+      - "if constexpr"
+      - "std::optional, std::variant"
+      - "Fold expressions"
+
+  - version: "C++20"
+    release_date: "2020"
+    status: latest_major
+    conversion_notes:
+      - "Concepts"
+      - "Ranges"
+      - "Coroutines"
+      - "Modules"
+      - "Three-way comparison (<=>)"
+
+  - version: "C++23"
+    release_date: "2023"
+    status: latest_stable
+    conversion_notes:
+      - "std::expected"
+      - "deducing this"
+      - "import std"
+      - "std::print"
+
+skill_coverage:
+  as_source: 1
+  as_target: 2
+  source_skills:
+    - cpp-rust
+  target_skills:
+    - c-cpp
+    - java-cpp
+
+compiles_to:
+  - language: native
+    targets: [machine code for all major architectures]
+
+sources:
+  - url: "https://en.cppreference.com/w/cpp"
+    description: "C++ Reference"
+  - url: "https://isocpp.org/"
+    description: "ISO C++ Committee"
+  - url: "https://eel.is/c++draft/"
+    description: "C++ Draft Standard"
+  - url: "https://isocpp.github.io/CppCoreGuidelines/"
+    description: "C++ Core Guidelines"
