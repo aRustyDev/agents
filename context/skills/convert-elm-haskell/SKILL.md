@@ -1,11 +1,11 @@
 ---
 name: convert-elm-haskell
-description: Convert Elm code to idiomatic Haskell. Use when migrating Elm frontend code to Haskell, translating Elm patterns to idiomatic Haskell, or refactoring Elm codebases. Extends meta-convert-dev with Elm-to-Haskell specific patterns.
+description: Bidirectional conversion between Elm and Haskell. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elm↔Haskell specific patterns. Use when migrating Elm frontend code to Haskell, translating Elm patterns to idiomatic Haskell, or refactoring Elm codebases. Extends meta-convert-dev with Elm-to-Haskell specific patterns.
 ---
 
-# Convert Elm to Haskell
+# Elm ↔ Haskell Conversion
 
-Convert Elm code to idiomatic Haskell. This skill extends `meta-convert-dev` with Elm-to-Haskell specific type mappings, idiom translations, and tooling for migrating functional frontend code to backend or library code.
+Bidirectional conversion between Elm and Haskell. This skill extends `meta-convert-dev` with Elm↔Haskell specific type mappings, idiom translations, and tooling for migrating functional frontend code to backend or library code.
 
 ## This Skill Extends
 
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elm language fundamentals - see `lang-elm-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
-- Reverse conversion (Haskell → Elm) - see `convert-haskell-elm`
 - Frontend frameworks - Elm's TEA is frontend-specific; backend alternatives vary
 
 ---

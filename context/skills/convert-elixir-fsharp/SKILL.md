@@ -1,6 +1,6 @@
 ---
 name: convert-elixir-fsharp
-description: Convert Elixir code to idiomatic F#. Use when migrating Elixir projects to F#, translating BEAM actor patterns to .NET MailboxProcessor, or refactoring Elixir codebases for static typing and .NET integration. Extends meta-convert-dev with Elixir-to-F# specific patterns.
+description: Bidirectional conversion between Elixir and Fsharp. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Fsharp specific patterns.
 ---
 
 # Convert Elixir to F#
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
-- Reverse conversion (F# → Elixir) - see `convert-fsharp-elixir`
 - OTP distributed systems - requires architectural redesign for .NET
 
 ---

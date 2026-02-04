@@ -1,11 +1,11 @@
 ---
 name: convert-haskell-roc
-description: Convert Haskell code to idiomatic Roc. Use when migrating Haskell applications to Roc's platform model, translating lazy pure functional code to strict platform-based architecture, or refactoring type class based designs to ability-based patterns. Extends meta-convert-dev with Haskell-to-Roc specific patterns.
+description: Bidirectional conversion between Haskell and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Haskell↔Roc specific patterns. Use when migrating Haskell applications to Roc's platform model, translating lazy pure functional code to strict platform-based architecture, or refactoring type class based designs to ability-based patterns. Extends meta-convert-dev with Haskell-to-Roc specific patterns.
 ---
 
-# Convert Haskell to Roc
+# Haskell ↔ Roc Conversion
 
-Convert Haskell code to idiomatic Roc. This skill extends `meta-convert-dev` with Haskell-to-Roc specific type mappings, idiom translations, and tooling for translating from lazy pure functional programming to strict platform-based architecture.
+Bidirectional conversion between Haskell and Roc. This skill extends `meta-convert-dev` with Haskell↔Roc specific type mappings, idiom translations, and tooling for translating from lazy pure functional programming to strict platform-based architecture.
 
 ## This Skill Extends
 
@@ -28,7 +28,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → Haskell) - see `convert-roc-haskell`
 - Advanced type system features (GADTs, Type Families, DataKinds)
 
 ---

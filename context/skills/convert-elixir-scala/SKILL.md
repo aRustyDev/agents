@@ -1,11 +1,11 @@
 ---
 name: convert-elixir-scala
-description: Convert Elixir code to idiomatic Scala. Use when migrating Elixir/Phoenix applications to Scala, translating BEAM OTP patterns to Akka actors, or refactoring dynamic concurrency to statically-typed JVM patterns. Extends meta-convert-dev with Elixir-to-Scala specific patterns.
+description: Bidirectional conversion between Elixir and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Scala specific patterns. Use when migrating Elixir/Phoenix applications to Scala, translating BEAM OTP patterns to Akka actors, or refactoring dynamic concurrency to statically-typed JVM patterns. Extends meta-convert-dev with Elixir-to-Scala specific patterns.
 ---
 
-# Convert Elixir to Scala
+# Elixir ↔ Scala Conversion
 
-Convert Elixir code to idiomatic Scala. This skill extends `meta-convert-dev` with Elixir-to-Scala specific type mappings, idiom translations, and tooling for translating between BEAM VM's dynamic actors and JVM's statically-typed Akka actors.
+Bidirectional conversion between Elixir and Scala. This skill extends `meta-convert-dev` with Elixir↔Scala specific type mappings, idiom translations, and tooling for translating between BEAM VM's dynamic actors and JVM's statically-typed Akka actors.
 
 ## This Skill Extends
 
@@ -29,7 +29,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → Elixir) - see `convert-scala-elixir`
 - Phoenix framework specifics - see `lang-scala-play-dev` for web frameworks
 
 ---
@@ -1146,7 +1145,6 @@ val futureResponse: Future[RateLimiter.RateResponse] =
 For more examples and patterns, see:
 
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-scala-elixir` - Reverse conversion (Scala → Elixir)
 - `lang-elixir-dev` - Elixir development patterns
 - `lang-scala-dev` - Scala development patterns
 - `lang-scala-akka-dev` - Advanced Akka patterns

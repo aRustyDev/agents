@@ -1,9 +1,9 @@
 ---
 name: convert-elixir-erlang
-description: Convert Elixir code to idiomatic Erlang. Use when migrating Elixir projects to Erlang, translating Elixir patterns to Erlang idioms, or refactoring Elixir codebases to Erlang. Both run on the BEAM VM with the same OTP framework, making this conversion primarily syntactic with semantic preservation. Extends meta-convert-dev with Elixir-to-Erlang specific patterns.
+description: Bidirectional conversion between Elixir and Erlang. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Erlang specific patterns. Use when migrating Elixir projects to Erlang, translating Elixir patterns to Erlang idioms, or refactoring Elixir codebases to Erlang. Both run on the BEAM VM with the same OTP framework, making this conversion primarily syntactic with semantic preservation. Extends meta-convert-dev with Elixir-to-Erlang specific patterns.
 ---
 
-# Convert Elixir to Erlang
+# Elixir ↔ Erlang Conversion
 
 Convert Elixir code to idiomatic Erlang. Both languages run on the BEAM VM and share OTP foundations, making this conversion primarily about syntax translation while preserving the same underlying semantics and runtime behavior.
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - Erlang language fundamentals - see `lang-erlang-dev`
-- Reverse conversion (Erlang → Elixir) - see `convert-erlang-elixir`
 - Phoenix-specific conversions - requires framework expertise
 
 ---
@@ -1194,7 +1193,6 @@ check_duplicate_email(Changeset) ->
 
 For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-erlang-elixir` - Reverse conversion (Erlang → Elixir)
 - `lang-elixir-dev` - Elixir development patterns
 - `lang-erlang-dev` - Erlang development patterns
 

@@ -1,11 +1,11 @@
 ---
 name: convert-elixir-elm
-description: Convert Elixir code to idiomatic Elm. Use when migrating server-side Elixir logic to frontend applications, translating BEAM concurrency patterns to The Elm Architecture, or refactoring Elixir codebases for browser-based UI. Extends meta-convert-dev with Elixir-to-Elm specific patterns.
+description: Bidirectional conversion between Elixir and Elm. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Elm specific patterns. Use when migrating server-side Elixir logic to frontend applications, translating BEAM concurrency patterns to The Elm Architecture, or refactoring Elixir codebases for browser-based UI. Extends meta-convert-dev with Elixir-to-Elm specific patterns.
 ---
 
-# Convert Elixir to Elm
+# Elixir ↔ Elm Conversion
 
-Convert Elixir code to idiomatic Elm. This skill extends `meta-convert-dev` with Elixir-to-Elm specific type mappings, idiom translations, and architectural guidance for translating server-side BEAM code to client-side functional UI.
+Bidirectional conversion between Elixir and Elm. This skill extends `meta-convert-dev` with Elixir↔Elm specific type mappings, idiom translations, and architectural guidance for translating server-side BEAM code to client-side functional UI.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - Elm language fundamentals - see `lang-elm-dev`
-- Reverse conversion (Elm → Elixir) - see `convert-elm-elixir`
 - Server-side Elixir deployment - focus on logic portable to frontend
 - Phoenix-specific patterns - Phoenix LiveView is client-server hybrid
 

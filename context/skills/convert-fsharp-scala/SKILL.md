@@ -1,6 +1,6 @@
 ---
 name: convert-fsharp-scala
-description: Convert F# code to idiomatic Scala. Use when migrating F# projects to Scala, translating functional-first .NET patterns to JVM functional programming, or refactoring F# codebases to Scala. Extends meta-convert-dev with F#-to-Scala specific patterns for discriminated unions, computation expressions, and type providers.
+description: Bidirectional conversion between Fsharp and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Fsharp↔Scala specific patterns.
 ---
 
 # Convert F# to Scala
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → F#) - see `convert-scala-fsharp`
 - Type provider advanced patterns - requires manual translation strategy
 
 ---
@@ -1639,7 +1638,6 @@ For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
 - `lang-fsharp-dev` - F# development patterns
 - `lang-scala-dev` - Scala development patterns
-- `convert-scala-fsharp` - Reverse conversion (Scala → F#)
 
 Cross-cutting pattern skills:
 - `patterns-concurrency-dev` - Async workflows, actors, effects across languages

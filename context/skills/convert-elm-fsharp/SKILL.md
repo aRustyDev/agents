@@ -1,6 +1,6 @@
 ---
 name: convert-elm-fsharp
-description: Convert Elm code to idiomatic F#. Use when migrating Elm applications to F#, translating Elm's Model-View-Update pattern to F# patterns, or refactoring Elm codebases to leverage .NET ecosystem. Extends meta-convert-dev with Elm-to-F# specific patterns.
+description: Bidirectional conversion between Elm and Fsharp. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elm↔Fsharp specific patterns.
 ---
 
 # Convert Elm to F#
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elm language fundamentals - see `lang-elm-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
-- Reverse conversion (F# → Elm) - see `convert-fsharp-elm`
 - F# web frameworks in depth - see framework-specific skills
 
 ---

@@ -1,9 +1,9 @@
 ---
 name: convert-elm-erlang
-description: Convert Elm code to idiomatic Erlang/OTP. Use when migrating Elm frontend applications to Erlang backend services, translating Elm patterns to OTP behaviors, or refactoring functional code to BEAM VM. Extends meta-convert-dev with Elm-to-Erlang specific patterns.
+description: Bidirectional conversion between Elm and Erlang. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elm↔Erlang specific patterns.
 ---
 
-# Convert Elm to Erlang
+# Elm ↔ Erlang Conversion
 
 Convert Elm code to idiomatic Erlang/OTP. This skill extends `meta-convert-dev` with Elm-to-Erlang specific type mappings, idiom translations, and architectural patterns for moving from pure functional frontend code to fault-tolerant backend systems.
 
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elm language fundamentals - see `lang-elm-dev`
 - Erlang language fundamentals - see `lang-erlang-dev`
-- Reverse conversion (Erlang → Elm) - see `convert-erlang-elm`
 
 ---
 

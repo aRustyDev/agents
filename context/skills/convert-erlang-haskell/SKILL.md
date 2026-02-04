@@ -3,9 +3,9 @@ name: convert-erlang-haskell
 description: Translates Erlang concurrent functional code to Haskell pure functional code. Use when migrating BEAM-based systems, modernizing telecom infrastructure, or adopting stronger type systems. Extends meta-convert-dev with Erlang-to-Haskell specific patterns.
 ---
 
-# Convert Erlang to Haskell
+# Erlang ↔ Haskell Conversion
 
-Convert Erlang code to idiomatic Haskell. This skill extends `meta-convert-dev` with Erlang-to-Haskell specific type mappings, idiom translations, and concurrency patterns for translating between these functional languages with fundamentally different type systems and runtime models.
+Bidirectional conversion between Erlang and Haskell. This skill extends `meta-convert-dev` with Erlang↔Haskell specific type mappings, idiom translations, and concurrency patterns for translating between these functional languages with fundamentally different type systems and runtime models.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Erlang language fundamentals - see `lang-erlang-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
-- Reverse conversion (Haskell → Erlang) - see `convert-haskell-erlang`
 - Elixir conversions - see `convert-elixir-haskell`
 
 ---

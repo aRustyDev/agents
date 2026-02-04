@@ -1,6 +1,6 @@
 ---
 name: convert-fsharp-haskell
-description: Convert F# code to idiomatic Haskell. Use when migrating F# projects to Haskell, translating computation expressions to monadic patterns, or refactoring .NET functional code to pure functional Haskell. Extends meta-convert-dev with F#-to-Haskell specific patterns.
+description: Bidirectional conversion between Fsharp and Haskell. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Fsharp↔Haskell specific patterns.
 ---
 
 # Convert F# to Haskell
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
-- Reverse conversion (Haskell → F#) - see `convert-haskell-fsharp`
 - .NET interop specifics - focus on pure functional patterns
 
 ---

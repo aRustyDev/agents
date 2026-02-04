@@ -1,11 +1,11 @@
 ---
 name: convert-clojure-haskell
-description: Convert Clojure code to idiomatic Haskell. Use when migrating Clojure projects to Haskell, translating Clojure patterns to idiomatic Haskell, or refactoring Clojure codebases. Extends meta-convert-dev with Clojure-to-Haskell specific patterns.
+description: Bidirectional conversion between Clojure and Haskell. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Haskell specific patterns. Use when migrating Clojure projects to Haskell, translating Clojure patterns to idiomatic Haskell, or refactoring Clojure codebases. Extends meta-convert-dev with Clojure-to-Haskell specific patterns.
 ---
 
-# Convert Clojure to Haskell
+# Clojure ↔ Haskell Conversion
 
-Convert Clojure code to idiomatic Haskell. This skill extends `meta-convert-dev` with Clojure-to-Haskell specific type mappings, idiom translations, and tooling for migrating functional JVM code to native compiled Haskell.
+Bidirectional conversion between Clojure and Haskell. This skill extends `meta-convert-dev` with Clojure↔Haskell specific type mappings, idiom translations, and tooling for migrating functional JVM code to native compiled Haskell.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
-- Reverse conversion (Haskell → Clojure) - see `convert-haskell-clojure`
 - ClojureScript → PureScript/Elm - see dedicated frontend conversion skills
 
 ---

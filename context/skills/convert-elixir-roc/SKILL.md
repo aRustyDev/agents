@@ -1,11 +1,11 @@
 ---
 name: convert-elixir-roc
-description: Convert Elixir code to idiomatic Roc. Use when migrating Elixir projects to Roc, translating BEAM/OTP patterns to platform-based architecture, or refactoring Elixir codebases. Extends meta-convert-dev with Elixir-to-Roc specific patterns.
+description: Bidirectional conversion between Elixir and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Roc specific patterns. Use when migrating Elixir projects to Roc, translating BEAM/OTP patterns to platform-based architecture, or refactoring Elixir codebases. Extends meta-convert-dev with Elixir-to-Roc specific patterns.
 ---
 
-# Convert Elixir to Roc
+# Elixir ↔ Roc Conversion
 
-Convert Elixir code to idiomatic Roc. This skill extends `meta-convert-dev` with Elixir-to-Roc specific type mappings, idiom translations, and architectural patterns for moving from dynamic, actor-based concurrency to static, pure functional programming with platform-provided effects.
+Bidirectional conversion between Elixir and Roc. This skill extends `meta-convert-dev` with Elixir↔Roc specific type mappings, idiom translations, and architectural patterns for moving from dynamic, actor-based concurrency to static, pure functional programming with platform-provided effects.
 
 ## This Skill Extends
 
@@ -28,7 +28,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → Elixir) - see `convert-roc-elixir`
 
 ---
 

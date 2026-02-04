@@ -1,6 +1,6 @@
 ---
 name: convert-fsharp-roc
-description: Convert F# code to idiomatic Roc. Use when migrating F# projects to Roc, translating F# patterns to idiomatic Roc, or refactoring F# codebases. Extends meta-convert-dev with F#-to-Roc specific patterns.
+description: Bidirectional conversion between Fsharp and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Fsharp↔Roc specific patterns.
 ---
 
 # Convert F# to Roc
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → F#) - see `convert-roc-fsharp`
 
 ---
 

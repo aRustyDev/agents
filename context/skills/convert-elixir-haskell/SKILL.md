@@ -1,11 +1,11 @@
 ---
 name: convert-elixir-haskell
-description: Convert Elixir code to idiomatic Haskell. Use when migrating Elixir projects to Haskell, translating BEAM actor patterns to pure functional programming with IO monad, or refactoring dynamic OTP behaviors to static typed equivalents. Extends meta-convert-dev with Elixir-to-Haskell specific patterns.
+description: Bidirectional conversion between Elixir and Haskell. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elixir↔Haskell specific patterns. Use when migrating Elixir projects to Haskell, translating BEAM actor patterns to pure functional programming with IO monad, or refactoring dynamic OTP behaviors to static typed equivalents. Extends meta-convert-dev with Elixir-to-Haskell specific patterns.
 ---
 
-# Convert Elixir to Haskell
+# Elixir ↔ Haskell Conversion
 
-Convert Elixir code to idiomatic Haskell. This skill extends `meta-convert-dev` with Elixir-to-Haskell specific type mappings, idiom translations, and transformation strategies for moving from BEAM's actor model to pure functional programming with strong static types.
+Bidirectional conversion between Elixir and Haskell. This skill extends `meta-convert-dev` with Elixir↔Haskell specific type mappings, idiom translations, and transformation strategies for moving from BEAM's actor model to pure functional programming with strong static types.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
-- Reverse conversion (Haskell → Elixir) - see `convert-haskell-elixir`
 
 ---
 

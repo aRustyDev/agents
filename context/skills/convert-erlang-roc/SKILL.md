@@ -1,11 +1,11 @@
 ---
 name: convert-erlang-roc
-description: Convert Erlang code to idiomatic Roc. Use when migrating Erlang projects to Roc, translating BEAM/OTP patterns to functional patterns, or refactoring Erlang codebases. Extends meta-convert-dev with Erlang-to-Roc specific patterns.
+description: Bidirectional conversion between Erlang and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Erlang↔Roc specific patterns. Use when migrating Erlang projects to Roc, translating BEAM/OTP patterns to functional patterns, or refactoring Erlang codebases. Extends meta-convert-dev with Erlang-to-Roc specific patterns.
 ---
 
-# Convert Erlang to Roc
+# Erlang ↔ Roc Conversion
 
-Convert Erlang code to idiomatic Roc. This skill extends `meta-convert-dev` with Erlang-to-Roc specific type mappings, idiom translations, and architectural patterns for moving from process-based concurrency to pure functional programming.
+Bidirectional conversion between Erlang and Roc. This skill extends `meta-convert-dev` with Erlang↔Roc specific type mappings, idiom translations, and architectural patterns for moving from process-based concurrency to pure functional programming.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Erlang language fundamentals - see `lang-erlang-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → Erlang) - see `convert-roc-erlang`
 
 ---
 

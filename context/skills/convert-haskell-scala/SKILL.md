@@ -1,11 +1,11 @@
 ---
 name: convert-haskell-scala
-description: Convert Haskell code to idiomatic Scala. Use when migrating Haskell projects to Scala, translating Haskell patterns to idiomatic Scala, or refactoring Haskell codebases. Extends meta-convert-dev with Haskell-to-Scala specific patterns.
+description: Bidirectional conversion between Haskell and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Haskell↔Scala specific patterns. Use when migrating Haskell projects to Scala, translating Haskell patterns to idiomatic Scala, or refactoring Haskell codebases. Extends meta-convert-dev with Haskell-to-Scala specific patterns.
 ---
 
-# Convert Haskell to Scala
+# Haskell ↔ Scala Conversion
 
-Convert Haskell code to idiomatic Scala. This skill extends `meta-convert-dev` with Haskell-to-Scala specific type mappings, idiom translations, and tooling.
+Bidirectional conversion between Haskell and Scala. This skill extends `meta-convert-dev` with Haskell↔Scala specific type mappings, idiom translations, and tooling.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Haskell language fundamentals - see `lang-haskell-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → Haskell) - see `convert-scala-haskell`
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 name: convert-elm-scala
-description: Convert Elm code to idiomatic Scala. Use when migrating Elm frontend applications to Scala backends or full-stack Scala, translating The Elm Architecture to functional Scala patterns, or refactoring type-safe functional code from compile-time guarantees to more powerful type system features. Extends meta-convert-dev with Elm-to-Scala specific patterns.
+description: Bidirectional conversion between Elm and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elm↔Scala specific patterns. Use when migrating Elm frontend applications to Scala backends or full-stack Scala, translating The Elm Architecture to functional Scala patterns, or refactoring type-safe functional code from compile-time guarantees to more powerful type system features. Extends meta-convert-dev with Elm-to-Scala specific patterns.
 ---
 
-# Convert Elm to Scala
+# Elm ↔ Scala Conversion
 
-Convert Elm code to idiomatic Scala. This skill extends `meta-convert-dev` with Elm-to-Scala specific type mappings, idiom translations, and tooling for translating from frontend functional programming to backend/full-stack functional programming with more expressive types.
+Bidirectional conversion between Elm and Scala. This skill extends `meta-convert-dev` with Elm↔Scala specific type mappings, idiom translations, and tooling for translating from frontend functional programming to backend/full-stack functional programming with more expressive types.
 
 ## This Skill Extends
 
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elm language fundamentals - see `lang-elm-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → Elm) - see `convert-scala-elm`
 - ScalaJS specific patterns - see `lang-scala-js-dev` for frontend-to-frontend conversions
 
 ---

@@ -1,11 +1,11 @@
 ---
 name: convert-python-typescript
-description: Convert Python code to idiomatic TypeScript. Use when migrating Python projects to TypeScript, translating Pythonic patterns to TypeScript idioms, or refactoring Python codebases into TypeScript. Extends meta-convert-dev with Python-to-TypeScript specific patterns.
+description: Bidirectional conversion between Python and Typescript. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Python↔Typescript specific patterns. Use when migrating Python projects to TypeScript, translating Pythonic patterns to TypeScript idioms, or refactoring Python codebases into TypeScript. Extends meta-convert-dev with Python-to-TypeScript specific patterns.
 ---
 
-# Convert Python to TypeScript
+# Python ↔ Typescript Conversion
 
-Convert Python code to idiomatic TypeScript. This skill extends `meta-convert-dev` with Python-to-TypeScript specific type mappings, idiom translations, and tooling.
+Bidirectional conversion between Python and Typescript. This skill extends `meta-convert-dev` with Python↔Typescript specific type mappings, idiom translations, and tooling.
 
 ## This Skill Extends
 
@@ -26,7 +26,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Python language fundamentals - see `lang-python-dev`
 - TypeScript language fundamentals - see `lang-typescript-patterns-dev`
-- Reverse conversion (TypeScript → Python) - see `convert-typescript-python`
 
 ---
 
@@ -2566,7 +2565,6 @@ for (const [id, user] of users) {
 
 For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-typescript-python` - Reverse conversion (TypeScript → Python)
 - `lang-python-dev` - Python development patterns
 - `lang-typescript-patterns-dev` - TypeScript development patterns
 

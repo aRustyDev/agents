@@ -1,11 +1,11 @@
 ---
 name: convert-clojure-elm
-description: Convert Clojure code to idiomatic Elm. Use when migrating Clojure projects to Elm, translating functional patterns from JVM to browser, or building type-safe frontends from Clojure logic. Extends meta-convert-dev with Clojure-to-Elm specific patterns for handling dynamic-to-static typing, REPL-driven to TEA architecture, and side effects to managed effects.
+description: Bidirectional conversion between Clojure and Elm. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Elm specific patterns. Use when migrating Clojure projects to Elm, translating functional patterns from JVM to browser, or building type-safe frontends from Clojure logic. Extends meta-convert-dev with Clojure-to-Elm specific patterns for handling dynamic-to-static typing, REPL-driven to TEA architecture, and side effects to managed effects.
 ---
 
-# Convert Clojure to Elm
+# Clojure ↔ Elm Conversion
 
-Convert Clojure code to idiomatic Elm. This skill extends `meta-convert-dev` with Clojure-to-Elm specific type mappings, idiom translations, and architectural patterns.
+Bidirectional conversion between Clojure and Elm. This skill extends `meta-convert-dev` with Clojure↔Elm specific type mappings, idiom translations, and architectural patterns.
 
 ## This Skill Extends
 
@@ -28,7 +28,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Elm language fundamentals - see `lang-elm-dev`
-- Reverse conversion (Elm → Clojure) - see `convert-elm-clojure`
 - ClojureScript → Elm (similar but with JS runtime considerations)
 
 ---
@@ -1050,7 +1049,6 @@ main =
 
 For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-elm-clojure` - Reverse conversion (Elm → Clojure)
 - `lang-clojure-dev` - Clojure development patterns
 - `lang-elm-dev` - Elm development patterns
 

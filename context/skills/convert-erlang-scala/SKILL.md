@@ -1,9 +1,9 @@
 ---
 name: convert-erlang-scala
-description: Converts Erlang code to idiomatic Scala while preserving functional programming patterns, actor model semantics through Akka, and fault-tolerance mechanisms. Use when converting Erlang applications, libraries, OTP behaviors, or concurrent systems to Scala, including supervision trees, gen_server patterns, distributed systems, and message-passing architectures on the JVM.
+description: Bidirectional conversion between Erlang and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Erlang↔Scala specific patterns.
 ---
 
-# Erlang to Scala Conversion
+# Erlang ↔ Scala Conversion
 
 ## Overview
 

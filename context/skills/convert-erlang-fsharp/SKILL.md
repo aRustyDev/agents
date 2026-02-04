@@ -1,6 +1,6 @@
 ---
 name: convert-erlang-fsharp
-description: Converts Erlang code to idiomatic F# while preserving functional programming patterns, actor model semantics, and fault-tolerance mechanisms. Use when converting Erlang applications, libraries, OTP behaviors, or concurrent systems to F#.
+description: Bidirectional conversion between Erlang and Fsharp. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Erlang↔Fsharp specific patterns.
 ---
 
 # Erlang to F# Conversion
@@ -356,4 +356,3 @@ module MyTable =
 - `lang-erlang-dev` - Erlang development patterns
 - `lang-fsharp-dev` - F# development patterns
 - `meta-convert-dev` - General conversion methodology
-- `convert-fsharp-erlang` - Reverse conversion

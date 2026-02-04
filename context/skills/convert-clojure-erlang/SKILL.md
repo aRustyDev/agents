@@ -1,9 +1,9 @@
 ---
 name: convert-clojure-erlang
-description: Convert Clojure code to idiomatic Erlang. Use when migrating Clojure projects to Erlang, translating JVM-based functional code to BEAM, or refactoring Clojure codebases to leverage Erlang's fault tolerance and actor model. Extends meta-convert-dev with Clojure-to-Erlang specific patterns.
+description: Bidirectional conversion between Clojure and Erlang. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Erlang specific patterns. Use when migrating Clojure projects to Erlang, translating JVM-based functional code to BEAM, or refactoring Clojure codebases to leverage Erlang's fault tolerance and actor model. Extends meta-convert-dev with Clojure-to-Erlang specific patterns.
 ---
 
-# Convert Clojure to Erlang
+# Clojure ↔ Erlang Conversion
 
 Convert Clojure code to idiomatic Erlang, translating from JVM/Lisp-based functional programming to BEAM/Prolog-style functional programming with actors.
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Erlang language fundamentals - see `lang-erlang-dev`
-- Reverse conversion (Erlang → Clojure) - see `convert-erlang-clojure`
 - ClojureScript to Erlang - handle as two-step: ClojureScript → Clojure → Erlang
 
 ---

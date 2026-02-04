@@ -1,11 +1,11 @@
 ---
 name: convert-roc-scala
-description: Convert Roc code to idiomatic Scala. Use when migrating Roc projects to JVM/Scala, translating pure functional patterns to object-functional hybrid, or refactoring Roc codebases. Extends meta-convert-dev with Roc-to-Scala specific patterns.
+description: Bidirectional conversion between Roc and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Roc↔Scala specific patterns. Use when migrating Roc projects to JVM/Scala, translating pure functional patterns to object-functional hybrid, or refactoring Roc codebases. Extends meta-convert-dev with Roc-to-Scala specific patterns.
 ---
 
-# Convert Roc to Scala
+# Roc ↔ Scala Conversion
 
-Convert Roc code to idiomatic Scala. This skill extends `meta-convert-dev` with Roc-to-Scala specific type mappings, idiom translations, and architectural patterns for moving from platform-based pure functional programming to JVM-based object-functional hybrid programming.
+Bidirectional conversion between Roc and Scala. This skill extends `meta-convert-dev` with Roc↔Scala specific type mappings, idiom translations, and architectural patterns for moving from platform-based pure functional programming to JVM-based object-functional hybrid programming.
 
 ## This Skill Extends
 
@@ -28,7 +28,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Roc language fundamentals - see `lang-roc-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → Roc) - see `convert-scala-roc`
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 name: convert-elm-roc
-description: Convert Elm code to idiomatic Roc. Use when migrating Elm frontend code to Roc applications, translating browser-based Elm to platform-agnostic Roc, or refactoring Elm web applications to Roc CLI/native tools. Extends meta-convert-dev with Elm-to-Roc specific patterns.
+description: Bidirectional conversion between Elm and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Elm↔Roc specific patterns. Use when migrating Elm frontend code to Roc applications, translating browser-based Elm to platform-agnostic Roc, or refactoring Elm web applications to Roc CLI/native tools. Extends meta-convert-dev with Elm-to-Roc specific patterns.
 ---
 
-# Convert Elm to Roc
+# Elm ↔ Roc Conversion
 
-Convert Elm code to idiomatic Roc. This skill extends `meta-convert-dev` with Elm-to-Roc specific type mappings, idiom translations, and architectural patterns for moving from browser-based Elm applications to platform-agnostic Roc code.
+Bidirectional conversion between Elm and Roc. This skill extends `meta-convert-dev` with Elm↔Roc specific type mappings, idiom translations, and architectural patterns for moving from browser-based Elm applications to platform-agnostic Roc code.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Elm language fundamentals - see `lang-elm-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → Elm) - see `convert-roc-elm`
 - Browser-specific Elm code - Roc doesn't have DOM access
 
 ---
@@ -1247,7 +1246,6 @@ expect greet({ name: "Bob", age: 5 }) == "Hello, Bob! You are 5 years old."
 
 For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-roc-elm` - Reverse conversion (Roc → Elm)
 - `convert-elm-haskell` - Similar functional language conversion patterns
 - `lang-elm-dev` - Elm development patterns
 - `lang-roc-dev` - Roc development patterns

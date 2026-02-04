@@ -1,11 +1,11 @@
 ---
 name: convert-clojure-elixir
-description: Convert Clojure code to idiomatic Elixir. Use when migrating Clojure/JVM applications to Elixir/BEAM, translating functional Lisp patterns to Elixir, or refactoring immutable data processing to leverage Elixir's actor model and OTP. Extends meta-convert-dev with Clojure-to-Elixir specific patterns.
+description: Bidirectional conversion between Clojure and Elixir. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Elixir specific patterns. Use when migrating Clojure/JVM applications to Elixir/BEAM, translating functional Lisp patterns to Elixir, or refactoring immutable data processing to leverage Elixir's actor model and OTP. Extends meta-convert-dev with Clojure-to-Elixir specific patterns.
 ---
 
-# Convert Clojure to Elixir
+# Clojure ↔ Elixir Conversion
 
-Convert Clojure code to idiomatic Elixir. This skill extends `meta-convert-dev` with Clojure-to-Elixir specific type mappings, idiom translations, and tooling for translating between these two functional languages across different runtimes (JVM → BEAM).
+Bidirectional conversion between Clojure and Elixir. This skill extends `meta-convert-dev` with Clojure↔Elixir specific type mappings, idiom translations, and tooling for translating between these two functional languages across different runtimes (JVM → BEAM).
 
 ## This Skill Extends
 
@@ -28,7 +28,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Elixir language fundamentals - see `lang-elixir-dev`
-- Reverse conversion (Elixir → Clojure) - see `convert-elixir-clojure`
 - ClojureScript specifics - see `convert-clojurescript-*` skills
 
 ---

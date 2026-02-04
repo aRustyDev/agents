@@ -1,11 +1,11 @@
 ---
 name: convert-clojure-scala
-description: Convert Clojure code to idiomatic Scala. Use when migrating Clojure projects to Scala, translating Clojure patterns to idiomatic Scala, or refactoring Clojure codebases. Extends meta-convert-dev with Clojure-to-Scala specific patterns.
+description: Bidirectional conversion between Clojure and Scala. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Scala specific patterns. Use when migrating Clojure projects to Scala, translating Clojure patterns to idiomatic Scala, or refactoring Clojure codebases. Extends meta-convert-dev with Clojure-to-Scala specific patterns.
 ---
 
-# Convert Clojure to Scala
+# Clojure ↔ Scala Conversion
 
-Convert Clojure code to idiomatic Scala. This skill extends `meta-convert-dev` with Clojure-to-Scala specific type mappings, idiom translations, and tooling for converting functional code between dynamic Lisp and statically-typed hybrid FP/OOP.
+Bidirectional conversion between Clojure and Scala. This skill extends `meta-convert-dev` with Clojure↔Scala specific type mappings, idiom translations, and tooling for converting functional code between dynamic Lisp and statically-typed hybrid FP/OOP.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Scala language fundamentals - see `lang-scala-dev`
-- Reverse conversion (Scala → Clojure) - see `convert-scala-clojure`
 
 ---
 

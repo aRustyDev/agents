@@ -1,6 +1,6 @@
 ---
 name: convert-clojure-fsharp
-description: Convert Clojure code to idiomatic F#. Use when migrating Clojure projects to F#, translating Clojure patterns to idiomatic F#, or refactoring Clojure codebases to the .NET platform. Extends meta-convert-dev with Clojure-to-F# specific patterns.
+description: Bidirectional conversion between Clojure and Fsharp. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Fsharp specific patterns.
 ---
 
 # Convert Clojure to F#
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - F# language fundamentals - see `lang-fsharp-dev`
-- Reverse conversion (F# → Clojure) - see `convert-fsharp-clojure`
 
 ---
 
@@ -1137,7 +1136,6 @@ match dashboard with
 
 For more examples and patterns, see:
 - `meta-convert-dev` - Foundational patterns with cross-language examples
-- `convert-fsharp-clojure` - F# → Clojure (reverse conversion)
 - `convert-typescript-fsharp` - TypeScript → F# (similar static target)
 - `lang-clojure-dev` - Clojure development patterns
 - `lang-fsharp-dev` - F# development patterns

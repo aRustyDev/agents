@@ -1,11 +1,11 @@
 ---
 name: convert-clojure-roc
-description: Convert Clojure code to idiomatic Roc. Use when migrating Clojure applications to Roc's platform model, translating dynamic functional code to static functional style, or refactoring REPL-driven code to compile-time verified patterns. Extends meta-convert-dev with Clojure-to-Roc specific patterns.
+description: Bidirectional conversion between Clojure and Roc. Use when migrating projects between these languages in either direction. Extends meta-convert-dev with Clojure↔Roc specific patterns. Use when migrating Clojure applications to Roc's platform model, translating dynamic functional code to static functional style, or refactoring REPL-driven code to compile-time verified patterns. Extends meta-convert-dev with Clojure-to-Roc specific patterns.
 ---
 
-# Convert Clojure to Roc
+# Clojure ↔ Roc Conversion
 
-Convert Clojure code to idiomatic Roc. This skill extends `meta-convert-dev` with Clojure-to-Roc specific type mappings, idiom translations, and tooling for translating from dynamically-typed REPL-driven development to statically-typed platform-based architecture.
+Bidirectional conversion between Clojure and Roc. This skill extends `meta-convert-dev` with Clojure↔Roc specific type mappings, idiom translations, and tooling for translating from dynamically-typed REPL-driven development to statically-typed platform-based architecture.
 
 ## This Skill Extends
 
@@ -27,7 +27,6 @@ For general concepts like the Analyze → Plan → Transform → Validate workfl
 - General conversion methodology - see `meta-convert-dev`
 - Clojure language fundamentals - see `lang-clojure-dev`
 - Roc language fundamentals - see `lang-roc-dev`
-- Reverse conversion (Roc → Clojure) - see `convert-roc-clojure`
 - ClojureScript frontend patterns - focus is on Clojure backend to Roc applications
 
 ---
