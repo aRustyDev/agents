@@ -26,6 +26,7 @@ gopls
 haiku
 hashintel
 homoiconic
+homoiconicity
 justfile
 Livelocks
 lychee

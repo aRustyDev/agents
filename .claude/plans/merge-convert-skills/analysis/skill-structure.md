@@ -17,41 +17,51 @@ Analysis of convert-* skill structure based on manual sampling of 5 representati
 All sampled skills follow a consistent structure derived from `meta-convert-dev`:
 
 ### 1. YAML Frontmatter
+
 ```yaml
 ---
 name: convert-<source>-<target>
 description: <one-line description with context and use cases>
 ---
 ```
+
 - **Purpose**: Metadata for skill discovery and cataloging
 - **Pattern**: All skills include name and description
 - **Notes**: Bidirectional skills use `↔` in description
 
 ### 2. Title (H1)
+
 ```markdown
 # Convert <Source> to <Target>
-# OR
-# <Source> ↔ <Target> Conversion
+
+## OR
+
+## <Source> ↔ <Target> Conversion
 ```
+
 - **Purpose**: Human-readable title
 - **Pattern**: Bidirectional skills indicate both directions
 
 ### 3. Introduction Paragraph
+
 - **Purpose**: Brief overview of the conversion
 - **Content**: Source/target characteristics, difficulty level, key challenges
 - **Pattern**: 2-4 sentences summarizing the conversion
 
 ### 4. This Skill Extends
+
 ```markdown
 ## This Skill Extends
 
 - `meta-convert-dev` - Foundational conversion patterns (APTV workflow, testing strategies)
 ```
+
 - **Purpose**: Declares parent skill dependency
 - **Pattern**: All convert-* skills extend meta-convert-dev
 - **Content**: Reference to parent with brief description
 
 ### 5. This Skill Adds
+
 ```markdown
 ## This Skill Adds
 
@@ -60,6 +70,7 @@ description: <one-line description with context and use cases>
 - **Error handling**: Source model → Target model
 - ...
 ```
+
 - **Purpose**: Lists unique contributions of this skill
 - **Pattern**: Bulleted list with bold category labels
 - **Typical Categories**:
@@ -71,6 +82,7 @@ description: <one-line description with context and use cases>
   - Tooling differences
 
 ### 6. This Skill Does NOT Cover
+
 ```markdown
 ## This Skill Does NOT Cover
 
@@ -79,11 +91,13 @@ description: <one-line description with context and use cases>
 - <Target> language fundamentals - see `lang-<target>-dev`
 - Reverse conversion - see `convert-<target>-<source>`
 ```
+
 - **Purpose**: Explicit scope boundaries (negative patterns)
 - **Pattern**: Bulleted list with cross-references to related skills
 - **Value for IR**: Defines what the skill explicitly excludes
 
 ### 7. Quick Reference (Table)
+
 ```markdown
 ## Quick Reference
 
@@ -92,11 +106,13 @@ description: <one-line description with context and use cases>
 | `int` | `i32` | Fixed-size integer |
 | `list` | `Vec<T>` | Dynamic array |
 ```
+
 - **Purpose**: At-a-glance type mapping reference
 - **Pattern**: 3-column table (source, target, notes)
 - **Density**: 15-30 common mappings
 
 ### 8. When Converting Code
+
 ```markdown
 ## When Converting Code
 
@@ -105,26 +121,33 @@ description: <one-line description with context and use cases>
 3. **Embrace immutability** - F# defaults to immutable
 ...
 ```
+
 - **Purpose**: High-level workflow guidelines
 - **Pattern**: Numbered list with bold lead-ins
 - **Content**: Strategic advice, not tactical details
 
 ### 9. Type System Mapping
+
 ```markdown
 ## Type System Mapping
 
 ### Primitive Types
+
 | Source | Target | Notes |
 
 ### Collection Types
+
 | Source | Target | Notes |
 
 ### Composite Types
+
 | Source | Target | Notes |
 
 ### Function Types (optional)
+
 | Source | Target | Notes |
 ```
+
 - **Purpose**: Comprehensive type mapping reference
 - **Pattern**: Subsections with tables
 - **Subsections observed**:
@@ -135,19 +158,27 @@ description: <one-line description with context and use cases>
   - Generics / Type Parameters (sometimes present)
 
 ### 10. Idiom Translation
+
 ```markdown
 ## Idiom Translation
 
 ### Pattern 1: <Name>
+
 ### Pattern 2: <Name>
+
 ...
+
 ### Pattern N: <Name>
 ```
+
 OR (alternative naming):
+
 ```markdown
 ### Pillar 1: <Name>
+
 ### Pillar 2: <Name>
 ```
+
 - **Purpose**: Core transformation patterns
 - **Pattern**: Numbered patterns/pillars with consistent structure
 - **Count**: 8-10 patterns per skill
@@ -157,58 +188,75 @@ OR (alternative naming):
   - "Why this translation:" explanation
 
 ### 11. Error Handling
+
 ```markdown
 ## Error Handling
 
 ### Source Error Model
+
 ### Target Error Model
+
 ### Error Translation Patterns
 ```
+
 - **Purpose**: Error model mapping and best practices
 - **Pattern**: Comparison tables and code examples
 - **Content**: Exception types, Result/Option types, error propagation
 
 ### 12. Concurrency Patterns (if applicable)
+
 ```markdown
 ## Concurrency Patterns
 
 ### Async Model Comparison
+
 ### Threading Patterns
+
 ### Channel/Message Passing
 ```
+
 - **Purpose**: Async/concurrent code translation
 - **Pattern**: Present for languages with significant concurrency differences
 - **Content**: async/await mapping, threading models, synchronization
 
 ### 13. Memory & Ownership (for systems targets)
+
 ```markdown
 ## Memory & Ownership
 
 ### Ownership Model
+
 ### Lifetime Annotations
+
 ### Smart Pointers
 ```
+
 - **Purpose**: Memory management translation (Python→Rust, C→Rust)
 - **Pattern**: Only present when target has manual/ownership-based memory
 - **Content**: Reference semantics, borrowing, lifetimes
 
 ### 14. Common Pitfalls
+
 ```markdown
 ## Common Pitfalls
 
 ### 1. <Pitfall Name>
+
 **Problem:** Description
 **Solution:** Resolution
 
 ### 2. <Pitfall Name>
+
 ...
 ```
+
 - **Purpose**: Warn about common conversion mistakes
 - **Pattern**: Numbered sections with Problem/Solution structure
 - **Count**: 5-8 pitfalls per skill
 - **Value for IR**: Anti-patterns and negative guidance
 
 ### 15. Tooling
+
 ```markdown
 ## Tooling
 
@@ -216,27 +264,35 @@ OR (alternative naming):
 |------|---------|-------|
 | `cargo` | Build system | Replaces pip/poetry |
 ```
+
 - **Purpose**: Development tooling mapping
 - **Pattern**: Table mapping source tools to target equivalents
 - **Categories**: Build, test, format, lint, debug, REPL
 
 ### 16. Examples
+
 ```markdown
 ## Examples
 
 ### Example 1: Simple - <Description>
+
 **Before (Source):**
+
 ```<source-lang>
 ...
 ```
+
 **After (Target):**
+
 ```<target-lang>
 ...
 ```
 
 ### Example 2: Medium - <Description>
+
 ### Example 3: Complex - <Description>
-```
+
+```text
 - **Purpose**: Complete conversion examples at varying complexity
 - **Pattern**: 3 examples (Simple, Medium, Complex)
 - **Structure per example**:
@@ -258,6 +314,7 @@ Cross-cutting pattern skills:
 - `patterns-concurrency-dev`
 - `patterns-serialization-dev`
 ```
+
 - **Purpose**: Cross-references to related skills
 - **Pattern**: Bulleted lists organized by category
 - **Categories**: Parent skill, related conversions, language skills, pattern skills
@@ -288,41 +345,49 @@ Cross-cutting pattern skills:
 Based on the structure analysis, the following pattern types can be extracted:
 
 ### 1. Type Mappings
+
 - **Source**: Quick Reference, Type System Mapping sections
 - **Format**: `(source_type, target_type, notes, confidence)`
 - **Volume**: ~50-100 per skill
 
 ### 2. Idiom Patterns
+
 - **Source**: Idiom Translation section
 - **Format**: `(name, source_code, target_code, explanation, category)`
 - **Volume**: 8-10 per skill
 
 ### 3. Error Handling Patterns
+
 - **Source**: Error Handling section
 - **Format**: `(source_pattern, target_pattern, when_to_use)`
 - **Volume**: 3-5 per skill
 
 ### 4. Negative Patterns (Anti-patterns)
+
 - **Source**: Common Pitfalls, This Skill Does NOT Cover
 - **Format**: `(pitfall, problem, solution)`
 - **Volume**: 5-8 pitfalls + scope boundaries
 
 ### 5. Guidelines
+
 - **Source**: When Converting Code section
 - **Format**: `(guideline, rationale, priority)`
 - **Volume**: 5-8 per skill
 
 ### 6. Tool Recommendations
+
 - **Source**: Tooling section
 - **Format**: `(source_tool, target_tool, purpose)`
 - **Volume**: 5-10 per skill
 
 ### 7. Scope Boundaries
+
 - **Source**: This Skill Does NOT Cover
 - **Format**: `(excluded_topic, alternative_skill)`
 - **Volume**: 3-5 per skill
 
 ### 8. Cross-References
+
 - **Source**: See Also, This Skill Extends
 - **Format**: `(referenced_skill, relationship_type)`
 - **Volume**: 5-10 per skill
@@ -346,6 +411,7 @@ All skills reference `meta-convert-dev` as parent. Key patterns inherited:
 4. **Idiom patterns show both directions**: Each pattern has Elixir→Erlang and implicitly Erlang→Elixir
 
 For bidirectional skills, pattern extraction should:
+
 - Extract patterns in both directions
 - Note which patterns are symmetric vs. asymmetric
 - Track any direction-specific guidelines

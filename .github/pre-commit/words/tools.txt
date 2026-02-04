@@ -142,3 +142,13 @@ objc
 libexec
 jemalloc
 mybinary
+Akka
+ADTs
+monadic
+OTP
+GenServer
+codegen
+HKT
+interop
+asyncio
+defrecord

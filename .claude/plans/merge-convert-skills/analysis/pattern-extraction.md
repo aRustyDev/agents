@@ -49,6 +49,7 @@ Summary of patterns extracted from 49 convert-* skills.
 ## Bidirectional Detection
 
 42 of 49 skills (86%) were detected as bidirectional based on content markers:
+
 - "bidirectional" keyword
 - "both directions" phrase
 - "↔" symbol
@@ -72,15 +73,18 @@ Summary of patterns extracted from 49 convert-* skills.
 ## Extraction Quality Assessment
 
 ### High Confidence Extractions
+
 - **Type mappings**: Tables are well-structured, extraction reliable
 - **Tool recommendations**: Tables are consistent
 - **Scope boundaries**: "Does NOT Cover" sections are consistent
 
 ### Medium Confidence Extractions
+
 - **Guidelines**: "When Converting" format varies (numbered vs bulleted)
 - **Idioms**: Pattern/Pillar naming varies, code blocks not fully extracted
 
 ### Low Confidence / Underextracted
+
 - **Negative patterns**: Pitfall sections have inconsistent structure
 - **Error handling**: Not all skills have dedicated sections
 - **Concurrency**: Only present in skills with significant async differences
@@ -88,11 +92,13 @@ Summary of patterns extracted from 49 convert-* skills.
 ## Gaps Identified
 
 ### Structural Gaps
+
 1. **Code examples not extracted**: Before/After code blocks contain valuable patterns but require LLM-assisted extraction
 2. **Prose explanations**: "Why this translation" content is truncated
 3. **Nested sections**: Type System Mapping subsections partially captured
 
 ### Coverage Gaps
+
 1. **meta-convert-dev patterns**: Parent skill patterns not explicitly inherited
 2. **Cross-references**: "See Also" links not extracted
 3. **Examples section**: Simple/Medium/Complex examples not parsed
@@ -116,6 +122,7 @@ Summary of patterns extracted from 49 convert-* skills.
 ## SQL Queries
 
 ### Patterns by family transition
+
 ```sql
 SELECT
   substr(direction, 1, instr(direction, '-to-') - 1) as source,
@@ -128,6 +135,7 @@ LIMIT 20;
 ```
 
 ### Type mappings for a specific language pair
+
 ```sql
 SELECT source_pattern, target_pattern, notes
 FROM patterns
@@ -137,6 +145,7 @@ ORDER BY source_pattern;
 ```
 
 ### All negative patterns
+
 ```sql
 SELECT skill_name, source_pattern, target_pattern, notes
 FROM patterns

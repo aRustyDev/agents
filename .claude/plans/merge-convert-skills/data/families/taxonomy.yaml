@@ -1,0 +1,612 @@
+# Language Family Taxonomy
+# Phase 1.1 - Family Identification
+#
+# 13 families organized by category:
+# - 7 Paradigm families (primary classification)
+# - 4 Feature families (cross-cutting concerns)
+# - 2 Specialized families (niche paradigms)
+
+metadata:
+  version: "1.0"
+  created: "2026-02-04"
+  source: "Phase 0 pattern extraction + expert knowledge"
+  total_families: 13
+
+# =============================================================================
+# PARADIGM FAMILIES (7)
+# Primary classification based on programming model
+# =============================================================================
+
+paradigm_families:
+
+  ml-fp:
+    name: "ML/Functional"
+    category: paradigm
+    description: |
+      Languages derived from ML (Meta Language) tradition emphasizing
+      immutability, pattern matching, algebraic data types, and type inference.
+
+    subtypes:
+      pure:
+        description: "Purely functional with enforced referential transparency"
+        examples: [haskell, elm, purescript, idris]
+        distinguishing_features:
+          - No side effects in pure code
+          - Lazy evaluation (Haskell) or strict (Elm)
+          - Monadic effect handling
+
+      hybrid:
+        description: "Functional-first with escape hatches for imperative code"
+        examples: [scala, fsharp, ocaml, reasonml, roc]
+        distinguishing_features:
+          - Mutable state available but discouraged
+          - Strict evaluation
+          - OOP interop (Scala, F#)
+
+    characteristics:
+      typing: static
+      inference: global  # Hindley-Milner or bidirectional
+      generics: higher-kinded  # Most support HKT
+      memory: gc
+      evaluation: varies  # lazy (Haskell) or strict (others)
+      effects: monadic  # Or algebraic (Roc, some Haskell)
+
+    conversion_notes:
+      as_source:
+        - Type information helps target language typing
+        - Pattern matching may need restructuring
+        - Lazy evaluation requires careful handling
+      as_target:
+        - Source must be analyzed for implicit types
+        - Imperative loops → recursion/folds
+        - Null handling → Option/Maybe types
+
+    languages:
+      - name: haskell
+        subtype: pure
+        notes: "Reference pure FP language, lazy evaluation"
+      - name: elm
+        subtype: pure
+        notes: "No runtime exceptions, strict, web-focused"
+      - name: purescript
+        subtype: pure
+        notes: "Strict Haskell-like, compiles to JS"
+      - name: scala
+        subtype: hybrid
+        notes: "JVM, OOP+FP fusion, implicits"
+      - name: fsharp
+        subtype: hybrid
+        notes: ".NET, ML syntax, computation expressions"
+      - name: ocaml
+        subtype: hybrid
+        notes: "Original ML descendant, strict, modules"
+      - name: roc
+        subtype: hybrid
+        notes: "No exceptions, platforms, algebraic effects"
+
+  beam:
+    name: "BEAM/Actor"
+    category: paradigm
+    description: |
+      Languages running on the BEAM virtual machine (Erlang VM),
+      emphasizing fault tolerance, distribution, and the actor model.
+
+    subtypes:
+      core:
+        description: "Direct BEAM languages with actor primitives"
+        examples: [erlang, elixir, gleam]
+
+    characteristics:
+      typing: dynamic  # Except Gleam (static)
+      inference: none  # Except Gleam
+      generics: none  # Runtime polymorphism
+      memory: gc  # Per-process GC
+      evaluation: strict
+      effects: exceptions  # With process isolation
+      concurrency: actors  # Lightweight processes
+
+    conversion_notes:
+      as_source:
+        - Actor model rarely maps directly
+        - Process isolation → careful state handling
+        - Hot code reloading not portable
+      as_target:
+        - Need to identify natural actor boundaries
+        - State → GenServer or Agent
+        - Supervision trees for fault tolerance
+
+    languages:
+      - name: erlang
+        subtype: core
+        notes: "Original BEAM language, Prolog-like syntax"
+      - name: elixir
+        subtype: core
+        notes: "Ruby-like syntax, macros, protocols"
+      - name: gleam
+        subtype: core
+        notes: "Static types on BEAM, Rust-like syntax"
+
+  lisp:
+    name: "LISP/Homoiconic"
+    category: paradigm
+    description: |
+      Languages in the LISP tradition featuring homoiconicity (code as data),
+      powerful macro systems, and dynamic typing.
+
+    subtypes:
+      modern:
+        description: "Contemporary LISP dialects with modern tooling"
+        examples: [clojure, racket]
+      classic:
+        description: "Traditional LISP implementations"
+        examples: [common-lisp, scheme]
+
+    characteristics:
+      typing: dynamic
+      inference: none
+      generics: runtime  # Duck typing
+      memory: gc
+      evaluation: strict  # Mostly
+      effects: exceptions
+      concurrency: varies  # Clojure: STM, others: threads
+
+    conversion_notes:
+      as_source:
+        - Macros don't translate (expand first)
+        - Code-as-data patterns need restructuring
+        - Dynamic typing requires inference
+      as_target:
+        - S-expression syntax is regular
+        - Can leverage macros for DSLs
+        - Persistent data structures (Clojure)
+
+    languages:
+      - name: clojure
+        subtype: modern
+        notes: "JVM, persistent data structures, STM"
+      - name: racket
+        subtype: modern
+        notes: "Scheme descendant, language-oriented"
+      - name: common-lisp
+        subtype: classic
+        notes: "ANSI standard, CLOS, conditions"
+      - name: scheme
+        subtype: classic
+        notes: "Minimalist, hygienic macros, continuations"
+
+  systems:
+    name: "Systems"
+    category: paradigm
+    description: |
+      Languages designed for systems programming with direct hardware access,
+      manual or semi-automatic memory management, and performance focus.
+
+    subtypes:
+      ownership:
+        description: "Memory safety through ownership/borrowing"
+        examples: [rust]
+      manual:
+        description: "Manual memory management"
+        examples: [c, cpp, zig]
+
+    characteristics:
+      typing: static
+      inference: local  # Except Rust (more inference)
+      generics: parametric  # Templates (C++), generics (Rust)
+      memory: varies  # manual, ownership, RAII
+      evaluation: strict
+      effects: varies  # Exceptions (C++), Results (Rust)
+      concurrency: threads  # Plus async (Rust)
+
+    conversion_notes:
+      as_source:
+        - Manual memory → automatic requires analysis
+        - Pointer arithmetic needs abstraction
+        - Undefined behavior must be eliminated
+      as_target:
+        - Must reason about lifetimes
+        - GC'd source → explicit allocation
+        - Thread safety must be explicit
+
+    languages:
+      - name: rust
+        subtype: ownership
+        notes: "Ownership, borrowing, no GC, no null"
+      - name: c
+        subtype: manual
+        notes: "Manual everything, undefined behavior"
+      - name: cpp
+        subtype: manual
+        notes: "RAII, smart pointers, templates"
+      - name: zig
+        subtype: manual
+        notes: "No hidden control flow, comptime"
+
+  managed-oop:
+    name: "Managed OOP"
+    category: paradigm
+    description: |
+      Class-based object-oriented languages with managed memory (GC),
+      emphasizing inheritance, encapsulation, and nominal typing.
+
+    subtypes:
+      classic:
+        description: "Traditional class-based OOP"
+        examples: [java, csharp]
+      modern:
+        description: "OOP with functional features"
+        examples: [kotlin]
+
+    characteristics:
+      typing: static
+      inference: local  # var keyword
+      generics: bounded  # With erasure (Java) or reified (C#/Kotlin)
+      memory: gc
+      evaluation: strict
+      effects: exceptions  # Checked (Java) or unchecked
+      concurrency: threads  # Plus async/await
+
+    conversion_notes:
+      as_source:
+        - Class hierarchies → composition/traits
+        - Null handling varies by target
+        - Exceptions → Result types if target prefers
+      as_target:
+        - Need class structure for functional code
+        - Interfaces for protocols/traits
+        - Nullable types for Option/Maybe
+
+    languages:
+      - name: java
+        subtype: classic
+        notes: "JVM, checked exceptions, type erasure"
+      - name: csharp
+        subtype: classic
+        notes: ".NET, reified generics, LINQ"
+      - name: kotlin
+        subtype: modern
+        notes: "JVM, null safety, coroutines, extension functions"
+
+  dynamic:
+    name: "Dynamic"
+    category: paradigm
+    description: |
+      Dynamically-typed languages emphasizing flexibility, rapid development,
+      and runtime metaprogramming.
+
+    subtypes:
+      scripting:
+        description: "General-purpose scripting languages"
+        examples: [python, ruby, perl]
+      web:
+        description: "Web-focused dynamic languages"
+        examples: [javascript, php]
+
+    characteristics:
+      typing: dynamic
+      inference: none  # Runtime
+      generics: runtime  # Duck typing
+      memory: gc
+      evaluation: strict
+      effects: exceptions
+      concurrency: varies  # GIL (Python), event loop (JS)
+
+    conversion_notes:
+      as_source:
+        - Type inference required for static targets
+        - Duck typing → interfaces/protocols
+        - Monkey patching not portable
+      as_target:
+        - Lose type safety guarantees
+        - Can use dynamic features for flexibility
+        - Metaprogramming available
+
+    languages:
+      - name: python
+        subtype: scripting
+        notes: "Indentation-based, type hints (3.5+)"
+      - name: ruby
+        subtype: scripting
+        notes: "Everything is object, blocks, metaprogramming"
+      - name: javascript
+        subtype: web
+        notes: "Prototype-based, event loop, ubiquitous"
+      - name: php
+        subtype: web
+        notes: "Web-focused, gradual typing (7+)"
+
+  apple:
+    name: "Apple Platform"
+    category: paradigm
+    description: |
+      Languages designed for Apple platforms (macOS, iOS),
+      featuring reference counting and platform framework integration.
+
+    subtypes:
+      legacy:
+        description: "Objective-C and derivatives"
+        examples: [objc]
+      modern:
+        description: "Swift and modern Apple development"
+        examples: [swift]
+
+    characteristics:
+      typing: varies  # Dynamic (Obj-C) or static (Swift)
+      inference: local  # Swift
+      generics: bounded  # Swift generics, Obj-C lightweight generics
+      memory: rc  # ARC (Automatic Reference Counting)
+      evaluation: strict
+      effects: varies  # Exceptions (Obj-C) or throws (Swift)
+      concurrency: varies  # GCD, async/await (Swift 5.5+)
+
+    conversion_notes:
+      as_source:
+        - ARC → GC or ownership
+        - Obj-C message passing → method calls
+        - Swift optionals → Option/Maybe
+      as_target:
+        - Need ARC-compatible patterns
+        - Protocol-oriented design (Swift)
+        - Framework integration required
+
+    languages:
+      - name: objc
+        subtype: legacy
+        notes: "C superset, Smalltalk-like messaging, ARC"
+      - name: swift
+        subtype: modern
+        notes: "Protocol-oriented, optionals, value types"
+
+# =============================================================================
+# FEATURE FAMILIES (4)
+# Cross-cutting concerns that span paradigm families
+# =============================================================================
+
+feature_families:
+
+  gradual-typing:
+    name: "Gradual Typing"
+    category: feature
+    description: |
+      Type systems that allow mixing typed and untyped code,
+      enabling incremental adoption of static typing.
+
+    characteristics:
+      typing: gradual
+      inference: local
+      boundary: any  # Type boundary between typed/untyped
+
+    conversion_notes:
+      - Types are optional, may need inference
+      - any/unknown types mask underlying structure
+      - Strictness varies by configuration
+
+    languages:
+      - name: typescript
+        base_family: dynamic
+        notes: "JavaScript superset, structural typing"
+      - name: python
+        qualifier: "with type hints"
+        base_family: dynamic
+        notes: "PEP 484+, mypy/pyright"
+      - name: hack
+        base_family: dynamic
+        notes: "PHP derivative, Facebook"
+      - name: flow
+        base_family: dynamic
+        notes: "JavaScript type checker"
+
+  ownership:
+    name: "Ownership/Linear Types"
+    category: feature
+    description: |
+      Type systems that track resource ownership and lifetimes,
+      enabling memory safety without garbage collection.
+
+    characteristics:
+      memory: ownership
+      aliasing: restricted  # Borrowing rules
+      lifetimes: explicit  # Or inferred
+
+    conversion_notes:
+      - GC'd code → explicit ownership analysis
+      - Shared references → careful lifetime design
+      - Interior mutability patterns
+
+    languages:
+      - name: rust
+        base_family: systems
+        notes: "Ownership + borrowing, no GC"
+      - name: linear-haskell
+        base_family: ml-fp
+        notes: "Linear types extension"
+      - name: austral
+        base_family: systems
+        notes: "Linear types, capability-based"
+
+  actors:
+    name: "Actor Model"
+    category: feature
+    description: |
+      Concurrency model where actors are isolated units of computation
+      that communicate via message passing.
+
+    characteristics:
+      concurrency: actors
+      isolation: process  # Or lightweight thread
+      communication: async-messages
+
+    conversion_notes:
+      - Shared state → actor state
+      - Method calls → message sends
+      - Synchronization → supervision
+
+    languages:
+      - name: erlang
+        base_family: beam
+        notes: "Native actors (processes)"
+      - name: elixir
+        base_family: beam
+        notes: "Native actors (processes)"
+      - name: scala
+        qualifier: "with Akka"
+        base_family: ml-fp
+        notes: "Akka actor library"
+      - name: pony
+        base_family: systems
+        notes: "Reference capabilities, actors"
+
+  dependent-types:
+    name: "Dependent Types"
+    category: feature
+    description: |
+      Type systems where types can depend on values,
+      enabling proofs and very precise specifications.
+
+    characteristics:
+      typing: dependent
+      proofs: available
+      extraction: possible  # Code from proofs
+
+    conversion_notes:
+      - Proofs don't convert (informational)
+      - Refined types → runtime checks or simplify
+      - Very restrictive source requirements
+
+    languages:
+      - name: idris
+        base_family: ml-fp
+        notes: "Practical dependent types"
+      - name: agda
+        base_family: ml-fp
+        notes: "Proof assistant, total"
+      - name: coq
+        base_family: ml-fp
+        notes: "Proof assistant, extraction"
+      - name: lean
+        base_family: ml-fp
+        notes: "Theorem prover, tactics"
+
+# =============================================================================
+# SPECIALIZED FAMILIES (2)
+# Niche paradigms with unique characteristics
+# =============================================================================
+
+specialized_families:
+
+  logic:
+    name: "Logic Programming"
+    category: specialized
+    description: |
+      Languages based on formal logic, where programs are logical
+      statements and execution is logical inference.
+
+    characteristics:
+      paradigm: declarative
+      typing: dynamic  # Mostly
+      execution: unification  # Pattern matching + backtracking
+      evaluation: lazy  # Via backtracking
+
+    conversion_notes:
+      - Backtracking → explicit search
+      - Unification → pattern matching + equality
+      - Cut (!) → control flow restructuring
+
+    languages:
+      - name: prolog
+        notes: "Original logic language, SLD resolution"
+      - name: datalog
+        notes: "Restricted Prolog, databases"
+      - name: mercury
+        notes: "Typed logic language, modes"
+      - name: minikanren
+        notes: "Embedded logic DSL"
+
+  array:
+    name: "Array Programming"
+    category: specialized
+    description: |
+      Languages where operations apply to entire arrays/matrices,
+      emphasizing concise notation and implicit iteration.
+
+    characteristics:
+      paradigm: array
+      typing: dynamic
+      notation: symbolic  # APL characters or ASCII (J, K)
+      evaluation: strict
+
+    conversion_notes:
+      - Array ops → explicit loops or library calls
+      - Rank polymorphism → broadcasting rules
+      - Tacit style → explicit arguments
+
+    languages:
+      - name: apl
+        notes: "Original, special character set"
+      - name: j
+        notes: "ASCII APL descendant"
+      - name: k
+        notes: "Terse, finance-focused"
+      - name: bqn
+        notes: "Modern APL, first-class functions"
+
+# =============================================================================
+# DIMENSION REFERENCE
+# Canonical values for each classification dimension
+# =============================================================================
+
+dimensions:
+
+  typing:
+    values:
+      - dynamic: "Types checked at runtime"
+      - gradual: "Mix of static and dynamic"
+      - static: "Types checked at compile time"
+      - dependent: "Types can depend on values"
+      - untyped: "No type system (assembly)"
+
+  inference:
+    values:
+      - none: "All types must be explicit"
+      - local: "Infer within expressions/statements"
+      - global: "Hindley-Milner style whole-program"
+      - bidirectional: "Both directions of inference"
+
+  generics:
+    values:
+      - none: "No parametric polymorphism"
+      - runtime: "Duck typing / structural"
+      - parametric: "Type parameters"
+      - bounded: "Type parameters with constraints"
+      - higher-kinded: "Type constructors as parameters"
+
+  memory:
+    values:
+      - manual: "Explicit malloc/free"
+      - gc: "Garbage collection"
+      - rc: "Reference counting (manual or automatic)"
+      - ownership: "Ownership/borrowing system"
+      - region-based: "Region-based memory"
+
+  evaluation:
+    values:
+      - strict: "Arguments evaluated before call"
+      - lazy: "Arguments evaluated when needed"
+      - partial: "Mix of strict and lazy"
+
+  effects:
+    values:
+      - none: "Pure, no side effects"
+      - exceptions: "Throw/catch exceptions"
+      - results: "Return values encode errors"
+      - monadic: "Effects wrapped in monads"
+      - algebraic: "Algebraic effect handlers"
+
+  concurrency:
+    values:
+      - none: "Single-threaded only"
+      - threads: "OS threads"
+      - green-threads: "User-space threads"
+      - actors: "Message-passing actors"
+      - csp: "Communicating Sequential Processes"
+      - async: "Async/await or promises"

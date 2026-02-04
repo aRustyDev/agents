@@ -1,0 +1,673 @@
+# Family Feature Dimensions
+# Phase 1.2 - Detailed characteristics for each paradigm family
+#
+# Schema follows Phase 1 plan specification:
+# - typing: strength, inference, generics, nullability
+# - memory: model, mutability, allocation
+# - control: structured, effects, async
+# - data: primitives, composites, abstraction
+# - meta: macros, reflection, codegen
+
+metadata:
+  version: "1.0"
+  created: "2026-02-04"
+  schema_version: "phase-1.2"
+
+# =============================================================================
+# ML-FP FAMILY
+# =============================================================================
+
+ml-fp:
+  name: "ML/Functional"
+
+  typing:
+    strength: static
+    inference: global  # Hindley-Milner or bidirectional
+    generics: higher-kinded  # Most support HKT (Haskell, Scala)
+    nullability: non-null  # Option/Maybe types instead
+
+    subtype_variations:
+      pure:
+        inference: global  # Full H-M
+        generics: higher-kinded
+      hybrid:
+        inference: bidirectional  # Scala, F#
+        generics: bounded  # Some lack full HKT
+
+  memory:
+    model: gc
+    mutability: default-immutable
+    allocation: automatic  # Heap with GC
+
+    subtype_variations:
+      pure:
+        mutability: immutable  # Enforced (Haskell, Elm)
+      hybrid:
+        mutability: default-immutable  # Mutable available
+
+  control:
+    structured:
+      - if-else
+      - pattern-matching  # Primary control flow
+      - guards
+      - let-in
+    effects: monadic  # Or algebraic (Roc)
+    async: green-threads  # Or monadic IO
+
+    subtype_variations:
+      pure:
+        effects: monadic  # IO monad
+      hybrid:
+        effects: mixed  # Exceptions + Option/Result
+
+  data:
+    primitives:
+      - int  # Various sizes
+      - float
+      - bool
+      - char
+      - string
+    composites:
+      - lists  # Linked lists primary
+      - tuples
+      - records  # Product types
+      - unions  # Sum types / ADTs
+      - arrays  # Usually immutable
+    abstraction: typeclasses  # Or traits (Scala), modules (OCaml)
+
+  meta:
+    macros: varies  # None (Haskell) to procedural (Scala 3)
+    reflection: compile-time  # Type-level programming
+    codegen: derive  # Deriving instances
+
+    subtype_variations:
+      pure:
+        macros: none  # Template Haskell is optional
+        reflection: compile-time
+      hybrid:
+        macros: syntactic  # Scala macros, F# type providers
+        reflection: runtime  # JVM/.NET reflection available
+
+  sources:
+    - url: "https://www.haskell.org/documentation/"
+      description: "Haskell language documentation"
+    - url: "https://docs.scala-lang.org/"
+      description: "Scala documentation"
+    - url: "https://fsharp.org/docs/"
+      description: "F# documentation"
+
+# =============================================================================
+# BEAM FAMILY
+# =============================================================================
+
+beam:
+  name: "BEAM/Actor"
+
+  typing:
+    strength: dynamic  # Except Gleam
+    inference: none  # Runtime typing
+    generics: none  # Structural/duck typing
+    nullability: nullable  # nil/undefined
+
+    language_variations:
+      gleam:
+        strength: static
+        inference: global  # H-M style
+        generics: parametric
+        nullability: non-null  # Result types
+
+  memory:
+    model: gc  # Per-process GC
+    mutability: default-immutable  # Functional core
+    allocation: process-heap  # Each process has own heap
+
+    special_characteristics:
+      - process_isolation: true  # No shared memory
+      - gc_per_process: true  # Independent GC
+      - binary_sharing: true  # Large binaries shared
+
+  control:
+    structured:
+      - if-else
+      - case  # Pattern matching
+      - guards
+      - receive  # Actor message handling
+    effects: exceptions  # With process isolation
+    async: actors  # Native lightweight processes
+
+  data:
+    primitives:
+      - integer  # Arbitrary precision
+      - float
+      - atom
+      - binary
+      - reference
+      - pid  # Process identifier
+    composites:
+      - lists
+      - tuples
+      - maps
+      - records  # Compile-time tuples
+    abstraction: modules  # Behaviours for interfaces
+
+    special_types:
+      - atom: "Interned symbols, global atom table"
+      - pid: "Process identifier for actors"
+      - reference: "Unique values"
+      - port: "External process communication"
+
+  meta:
+    macros: syntactic  # Erlang macros, Elixir hygienic macros
+    reflection: runtime  # Module introspection
+    codegen: none  # Elixir: compile-time macros
+
+    language_variations:
+      elixir:
+        macros: hygienic  # Powerful macro system
+        codegen: macros  # Code generation via macros
+
+  sources:
+    - url: "https://www.erlang.org/docs"
+      description: "Erlang/OTP documentation"
+    - url: "https://elixir-lang.org/docs.html"
+      description: "Elixir documentation"
+    - url: "https://gleam.run/documentation/"
+      description: "Gleam documentation"
+
+# =============================================================================
+# LISP FAMILY
+# =============================================================================
+
+lisp:
+  name: "LISP/Homoiconic"
+
+  typing:
+    strength: dynamic
+    inference: none
+    generics: runtime  # Duck typing
+    nullability: nullable  # nil
+
+    language_variations:
+      typed-racket:
+        strength: gradual
+        inference: local
+
+  memory:
+    model: gc
+    mutability: varies  # Clojure immutable, CL mutable
+    allocation: automatic
+
+    language_variations:
+      clojure:
+        mutability: default-immutable  # Persistent structures
+      common-lisp:
+        mutability: default-mutable
+
+  control:
+    structured:
+      - if
+      - cond  # Multi-branch conditional
+      - case
+      - loop  # CL) or recursion (Scheme/Clojure)
+    effects: exceptions  # Conditions (CL) or exceptions
+    async: varies  # Clojure: core.async, others: threads
+
+    language_variations:
+      clojure:
+        async: csp  # core.async channels
+      common-lisp:
+        effects: conditions  # Restartable conditions
+
+  data:
+    primitives:
+      - number  # Integers, ratios, floats
+      - symbol
+      - keyword  # Clojure
+      - character
+      - string
+    composites:
+      - lists  # Fundamental
+      - vectors
+      - maps  # Hash tables
+      - sets
+    abstraction: protocols  # Clojure) or CLOS (CL)
+
+    special_characteristics:
+      - code_as_data: true  # Homoiconicity
+      - reader_macros: true  # Extend syntax
+
+  meta:
+    macros: hygienic  # Scheme) or unhygienic (CL, Clojure)
+    reflection: runtime  # Full introspection
+    codegen: macros  # Compile-time code generation
+
+    special_characteristics:
+      - homoiconicity: true
+      - reader_macros: true
+      - runtime_eval: true
+
+  sources:
+    - url: "https://clojure.org/reference"
+      description: "Clojure reference documentation"
+    - url: "http://www.lispworks.com/documentation/HyperSpec/"
+      description: "Common Lisp HyperSpec"
+
+# =============================================================================
+# SYSTEMS FAMILY
+# =============================================================================
+
+systems:
+  name: "Systems Programming"
+
+  typing:
+    strength: static
+    inference: local  # Rust has more inference
+    generics: bounded  # Templates (C++) or generics (Rust)
+    nullability: varies  # Null (C/C++) or non-null (Rust)
+
+    subtype_variations:
+      ownership:
+        inference: local  # Good local inference
+        nullability: non-null  # Option<T>
+      manual:
+        inference: none  # C) or local (C++)
+        nullability: nullable  # NULL pointers
+
+  memory:
+    model: varies
+    mutability: default-mutable
+    allocation: manual  # Or RAII/ownership
+
+    subtype_variations:
+      ownership:
+        model: ownership  # Borrow checker
+        allocation: automatic  # With lifetime tracking
+      manual:
+        model: manual
+        allocation: manual  # malloc/free or new/delete
+
+    special_characteristics:
+      - stack_allocation: true
+      - heap_control: true
+      - pointer_arithmetic: true  # Except Rust safe code
+
+  control:
+    structured:
+      - if-else
+      - loops  # for, while, loop
+      - match  # Rust) or switch (C/C++)
+      - goto  # C/C++ only
+    effects: varies
+    async: varies
+
+    subtype_variations:
+      ownership:
+        effects: results  # Result<T, E>
+        async: async-await  # async/await + futures
+      manual:
+        effects: exceptions  # C++) or return codes (C)
+        async: threads  # Or callbacks
+
+  data:
+    primitives:
+      - i8/i16/i32/i64/i128  # Sized integers
+      - u8/u16/u32/u64/u128  # Unsigned
+      - f32/f64  # IEEE floats
+      - bool
+      - char  # Unicode (Rust) or byte (C)
+    composites:
+      - arrays  # Fixed size
+      - slices  # Rust
+      - structs
+      - enums  # ADTs in Rust, C enums elsewhere
+      - unions  # Unsafe in Rust
+      - pointers  # Raw, references, smart
+    abstraction: traits  # Rust) or classes/templates (C++)
+
+    special_types:
+      - raw_pointer: "Direct memory access"
+      - reference: "Borrowed access (Rust)"
+      - smart_pointer: "RAII wrappers"
+
+  meta:
+    macros: procedural  # Rust) or text (C/C++)
+    reflection: none  # Rust) or RTTI (C++)
+    codegen: derive  # Rust) or templates (C++)
+
+    subtype_variations:
+      ownership:
+        macros: procedural  # Powerful derive macros
+        codegen: derive
+      manual:
+        macros: text  # Preprocessor
+        reflection: runtime  # RTTI in C++
+
+  sources:
+    - url: "https://doc.rust-lang.org/"
+      description: "Rust documentation"
+    - url: "https://en.cppreference.com/"
+      description: "C/C++ reference"
+
+# =============================================================================
+# MANAGED-OOP FAMILY
+# =============================================================================
+
+managed-oop:
+  name: "Managed OOP"
+
+  typing:
+    strength: static
+    inference: local  # var keyword
+    generics: bounded  # With erasure (Java) or reified (C#/Kotlin)
+    nullability: nullable  # Except Kotlin
+
+    language_variations:
+      kotlin:
+        nullability: non-null  # Nullable types explicit
+        inference: local  # Smart casts
+
+  memory:
+    model: gc  # JVM or CLR GC
+    mutability: default-mutable
+    allocation: automatic  # Heap allocation
+
+    special_characteristics:
+      - stack_allocation: false  # Primitives only
+      - value_types: true  # C# structs
+
+  control:
+    structured:
+      - if-else
+      - switch  # Or when (Kotlin)
+      - loops  # for, while, do-while
+      - try-catch-finally
+    effects: exceptions  # Checked (Java) or unchecked
+    async: async-await  # Or threads
+
+    language_variations:
+      java:
+        effects: checked-exceptions
+      csharp:
+        async: async-await  # Task-based
+      kotlin:
+        async: coroutines  # Suspend functions
+
+  data:
+    primitives:
+      - int/long/short/byte
+      - float/double
+      - boolean
+      - char
+    composites:
+      - arrays
+      - classes  # Primary abstraction
+      - interfaces
+      - enums
+      - records  # Java 16+, C# 9+
+    abstraction: classes  # Inheritance + interfaces
+
+    special_characteristics:
+      - null_reference: true
+      - boxing: true  # Primitive ↔ Object
+
+  meta:
+    macros: none
+    reflection: runtime  # Full reflection APIs
+    codegen: annotations  # Annotation processing
+
+    language_variations:
+      csharp:
+        codegen: source-generators  # Compile-time generation
+      kotlin:
+        codegen: ksp  # Kotlin Symbol Processing
+
+  sources:
+    - url: "https://docs.oracle.com/en/java/"
+      description: "Java documentation"
+    - url: "https://learn.microsoft.com/en-us/dotnet/csharp/"
+      description: "C# documentation"
+    - url: "https://kotlinlang.org/docs/"
+      description: "Kotlin documentation"
+
+# =============================================================================
+# DYNAMIC FAMILY
+# =============================================================================
+
+dynamic:
+  name: "Dynamic Languages"
+
+  typing:
+    strength: dynamic
+    inference: none  # Runtime
+    generics: runtime  # Duck typing
+    nullability: nullable  # None/null/undefined
+
+    language_variations:
+      python-typed:
+        strength: gradual
+        inference: local  # Type checker inference
+      typescript:
+        strength: gradual
+        inference: local
+        generics: bounded
+
+  memory:
+    model: gc
+    mutability: default-mutable
+    allocation: automatic
+
+  control:
+    structured:
+      - if-elif-else  # Python) or if-else (JS)
+      - for  # Iteration
+      - while
+      - try-except  # Python) or try-catch (JS)
+    effects: exceptions
+    async: varies
+
+    language_variations:
+      python:
+        async: async-await  # asyncio
+      javascript:
+        async: promises  # + async/await
+      ruby:
+        async: threads  # Or fibers
+
+  data:
+    primitives:
+      - int  # Arbitrary precision (Python) or 64-bit (JS)
+      - float
+      - bool
+      - string
+      - none/null/nil
+    composites:
+      - lists/arrays
+      - dicts/objects  # Hash maps
+      - sets
+      - tuples  # Python
+      - classes
+    abstraction: classes  # Prototype (JS) or class-based
+
+    special_characteristics:
+      - duck_typing: true
+      - monkey_patching: true
+      - dynamic_attributes: true
+
+  meta:
+    macros: none  # Metaprogramming via reflection
+    reflection: runtime  # Extensive introspection
+    codegen: decorators  # Python) or metaprogramming (Ruby)
+
+    special_characteristics:
+      - eval: true
+      - dynamic_dispatch: true
+      - metaclasses: true  # Python, Ruby
+
+  sources:
+    - url: "https://docs.python.org/"
+      description: "Python documentation"
+    - url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+      description: "JavaScript MDN"
+    - url: "https://www.typescriptlang.org/docs/"
+      description: "TypeScript documentation"
+
+# =============================================================================
+# APPLE FAMILY
+# =============================================================================
+
+apple:
+  name: "Apple Platform"
+
+  typing:
+    strength: varies
+    inference: local  # Swift
+    generics: bounded  # Swift generics
+    nullability: varies
+
+    subtype_variations:
+      legacy:
+        strength: dynamic  # Obj-C runtime
+        generics: lightweight  # Limited
+        nullability: nullable
+      modern:
+        strength: static  # Swift
+        generics: bounded
+        nullability: non-null  # Optionals explicit
+
+  memory:
+    model: rc  # ARC
+    mutability: default-mutable
+    allocation: automatic  # With ARC
+
+    special_characteristics:
+      - reference_counting: true
+      - arc: true  # Automatic Reference Counting
+      - weak_references: true
+      - unowned_references: true  # Swift
+
+  control:
+    structured:
+      - if-else
+      - switch  # Exhaustive in Swift
+      - for-in
+      - guard  # Swift early exit
+      - defer  # Swift cleanup
+    effects: varies
+    async: varies
+
+    subtype_variations:
+      legacy:
+        effects: exceptions  # @try/@catch
+        async: gcd  # Grand Central Dispatch
+      modern:
+        effects: throws  # Error protocol
+        async: async-await  # Swift 5.5+
+
+  data:
+    primitives:
+      - Int/Int8/Int16/Int32/Int64
+      - UInt/UInt8/etc
+      - Float/Double
+      - Bool
+      - Character
+    composites:
+      - Array
+      - Dictionary
+      - Set
+      - structs  # Value types in Swift
+      - classes  # Reference types
+      - enums  # Associated values in Swift
+    abstraction: protocols  # Swift) or informal protocols (Obj-C)
+
+    subtype_variations:
+      legacy:
+        composites: [NSArray, NSDictionary, NSSet, classes]
+        abstraction: protocols  # @protocol, informal
+      modern:
+        composites: [Array, Dictionary, Set, structs, classes, enums]
+        abstraction: protocols  # Protocol-oriented
+
+  meta:
+    macros: none  # Swift) or preprocessor (Obj-C)
+    reflection: runtime  # Obj-C runtime, Swift Mirror
+    codegen: property-wrappers  # Swift
+
+    subtype_variations:
+      legacy:
+        macros: text  # C preprocessor
+        reflection: runtime  # Full Obj-C runtime
+      modern:
+        macros: none  # Swift macros in 5.9+
+        codegen: property-wrappers  # @State, @Published
+
+  sources:
+    - url: "https://developer.apple.com/documentation/swift"
+      description: "Swift documentation"
+    - url: "https://developer.apple.com/documentation/objectivec"
+      description: "Objective-C documentation"
+
+# =============================================================================
+# DIMENSION VALUE REFERENCE
+# Canonical values for graduated scale (Task 1.3)
+# =============================================================================
+
+graduated_scale:
+  none: "Feature not available"
+  limited: "Basic support, significant restrictions"
+  partial: "Supported with notable gaps"
+  full: "Complete support, standard patterns"
+  native: "First-class, idiomatic support"
+
+dimension_mappings:
+  # Maps characteristic values to graduated scale for matrix generation
+
+  typing_strength:
+    dynamic: limited
+    gradual: partial
+    static: full
+    dependent: native
+
+  type_inference:
+    none: none
+    local: partial
+    global: full
+    bidirectional: native
+
+  generics:
+    none: none
+    runtime: limited
+    parametric: partial
+    bounded: full
+    higher-kinded: native
+
+  nullability:
+    nullable: none  # No null safety
+    optional: partial  # Wrapper types
+    non-null: full  # Default non-null
+
+  memory_model:
+    manual: limited  # Requires discipline
+    gc: full  # Automatic
+    rc: partial  # Cycle issues
+    ownership: native  # Compile-time safety
+
+  mutability:
+    default-mutable: none  # No immutability
+    default-immutable: partial  # Mutable available
+    immutable: full  # Enforced
+    linear: native  # Single-use
+
+  effects:
+    exceptions: limited  # Unchecked flow
+    checked-exceptions: partial  # Tracked but verbose
+    results: full  # Explicit handling
+    monadic: full  # Composable
+    algebraic: native  # Handlers
+
+  concurrency:
+    none: none
+    threads: limited  # Manual synchronization
+    async: partial  # Callback-based or await
+    green-threads: full  # Lightweight
+    actors: native  # Isolated + messages
+    csp: native  # Channels

@@ -50,6 +50,7 @@ Used semantic embeddings (nomic-embed-text) to compute cosine similarity between
 ## Merge Strategy
 
 For each pair:
+
 1. Keep the skill with the more common source language (Python preferred)
 2. Update skill metadata to indicate bidirectional capability
 3. Ensure content covers both directions

@@ -108,11 +108,9 @@ Patterns that are shared within language families but not universal:
 - `std::shared_ptr<T>` (4 patterns)
 - `nullptr` (3 patterns)
 
-
 ### Critical Gaps
 
 Conversions that cannot be performed automatically:
-
 
 ### Negative Patterns (Anti-patterns)
 
@@ -130,10 +128,14 @@ users...
 - **clojure → haskell**: Dynamic Type Assumptions → Static Type Requirements
   - Instead: Clojure allows heterogeneous collections; Haskell requires homogeneous types.
 
+```
+
 ```clojure
 ;; Clojure...
 - **cpp → rust**: Overusing Rc/Arc (Avoid C++ shared_ptr Mindset)
   - Instead: Prefer borrowing or single ownership:
+
+```
 
 ```rust
 // Good: Use Box for owned children
@@ -154,6 +156,8 @@ increment = \count -> ...
 - **elixir → scala**: Dynamic Typing → Static Typing
   - Instead: Use sealed trait ADT for type safety.
 
+```
+
 ```scala
 sealed trait Data
 case class IntData(value: Int) ext...
@@ -171,3 +175,4 @@ Based on the clustering analysis:
 
 - `pattern-clusters.json` - Full clustering data
 - `gap-analysis.json` - Full gap analysis data
+```

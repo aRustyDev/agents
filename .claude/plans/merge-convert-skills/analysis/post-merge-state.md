@@ -38,31 +38,39 @@ Analysis of the 49 convert-* skills remaining after bidirectional merge.
 ## Language Families Represented
 
 ### ML-FP Family
+
 - Haskell, Elm, OCaml, F#, Roc, Scala
 
 ### BEAM Family
+
 - Erlang, Elixir, Gleam
 
 ### Systems Family
+
 - C, C++, Rust, Go, Zig
 
 ### Managed OOP Family
+
 - Java, Kotlin, C#
 
 ### Dynamic Family
+
 - Python, JavaScript/TypeScript, Ruby
 
 ### Apple Family
+
 - Objective-C, Swift
 
 ## Coverage Gaps Identified
 
 ### Missing Conversion Directions
+
 - No rust→anything (Rust only as target)
 - No scala→anything (Scala only as target)
 - No roc→anything (Roc only as target)
 
 ### Missing Language Pairs
+
 - No Ruby conversions
 - No PHP conversions
 - Limited cross-family coverage
