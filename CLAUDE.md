@@ -45,7 +45,7 @@ uv add <package>
 uv add --dev <package>
 
 # Run a script in the venv
-uv run python scripts/embed.py
+uv run python .scripts/embed.py
 ```
 
 The `uv.lock` file is version controlled for reproducible installs.
@@ -89,7 +89,7 @@ See `docs/src/adr/` for architecture decisions.
 │   ├── rules/                  # Rule files
 │   ├── plugins/                # Plugin bundles
 │   └── output-styles/          # Output formatting styles
-├── scripts/
+├── .scripts/
 │   ├── embed.py                # Embedding CLI
 │   ├── lib/                    # Python modules
 │   └── sql/                    # SQL query files

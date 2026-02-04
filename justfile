@@ -848,58 +848,58 @@ list-plugins:
 # Initialize knowledge graph database
 [group('kg')]
 kg-init:
-    @"{{which("uv")}}" run python scripts/init-db.py
+    @"{{which("uv")}}" run python .scripts/init-db.py
 
 # Ingest all context files into knowledge graph
 [group('kg')]
 kg-ingest:
-    @"{{which("uv")}}" run python scripts/embed.py ingest --all
+    @"{{which("uv")}}" run python .scripts/embed.py ingest --all
 
 # Check for stale entities
 [group('kg')]
 kg-check:
-    @"{{which("uv")}}" run python scripts/embed.py check
+    @"{{which("uv")}}" run python .scripts/embed.py check
 
 # Semantic search
 [group('kg')]
 kg-search query:
-    @"{{which("uv")}}" run python scripts/embed.py search "{{ query }}"
+    @"{{which("uv")}}" run python .scripts/embed.py search "{{ query }}"
 
 # Find similar entities
 [group('kg')]
 kg-similar entity:
-    @"{{which("uv")}}" run python scripts/embed.py similar "{{ entity }}"
+    @"{{which("uv")}}" run python .scripts/embed.py similar "{{ entity }}"
 
 # Compute similarity cache
 [group('kg')]
 kg-similarity:
-    @"{{which("uv")}}" run python scripts/embed.py similarity
+    @"{{which("uv")}}" run python .scripts/embed.py similarity
 
 # Watch for changes and auto-embed
 [group('kg')]
 kg-watch:
-    @"{{which("uv")}}" run python scripts/watch-embed.py
+    @"{{which("uv")}}" run python .scripts/watch-embed.py
 
 # Dump knowledge graph to SQL (essential tables only, ~40MB)
 [group('kg')]
 kg-dump:
-    @"{{which("uv")}}" run python scripts/init-db.py --dump
+    @"{{which("uv")}}" run python .scripts/init-db.py --dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
-    @"{{which("uv")}}" run python scripts/init-db.py --load
+    @"{{which("uv")}}" run python .scripts/init-db.py --load
 
 # Rebuild vector embeddings from existing chunks (after loading from dump)
 [group('kg')]
 kg-rebuild-embeddings:
-    @"{{which("uv")}}" run python scripts/embed.py rebuild-embeddings
+    @"{{which("uv")}}" run python .scripts/embed.py rebuild-embeddings
     @just kg-similarity
 
 # Show knowledge graph statistics
 [group('kg')]
 kg-stats:
-    @"{{which("uv")}}" run python scripts/kg-stats.py
+    @"{{which("uv")}}" run python .scripts/kg-stats.py
 
 # Force re-embed all entities
 [group('kg')]

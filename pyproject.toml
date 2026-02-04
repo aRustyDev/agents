@@ -23,7 +23,7 @@ docling = [
 ]
 
 [project.scripts]
-embed = "scripts.embed:main"
+embed = ".scripts.embed:main"
 
 [dependency-groups]
 dev = [

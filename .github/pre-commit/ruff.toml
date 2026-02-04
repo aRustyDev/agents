@@ -41,11 +41,11 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"scripts/**/*.py" = ["T201"]  # Allow print in scripts
+".scripts/**/*.py" = ["T201"]  # Allow print in scripts
 "tests/**/*.py" = ["S101"]    # Allow assert in tests
 
 [lint.isort]
-known-first-party = ["scripts"]
+known-first-party = [".scripts"]
 
 [format]
 quote-style = "double"
