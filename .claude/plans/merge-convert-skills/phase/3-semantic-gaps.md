@@ -12,113 +12,167 @@ Create a comprehensive catalog of semantic gaps that inform IR design and help u
 - Phase 1: Language Families (family classifications)
 - Phase 2: Language Survey (language features)
 
+## Input Data Sources
+
+Phase 3 builds on existing extracted data:
+
+| Source | Location | Contents |
+|--------|----------|----------|
+| Phase 0 Gaps | `analysis/clustering-and-gaps.md` | 320 gaps (29 negative, 183 human_decision, 108 lossy) |
+| Pattern Database | `data/patterns.sql` | 7,195 pattern instances across 49 skills |
+| Language Profiles | `data/languages/*.yaml` | 29 profiles with `semantic_gaps` fields |
+| Base Schema | `data/schema.sql` | Tables: `semantic_gaps`, `gap_patterns`, `decision_points` |
+| SQL Extensions | `data/languages.sql` | Language ecosystem and relationship data |
+
+**Key insight**: Phase 0 found 0 "impossible" gaps in existing skills. Phase 3 should validate this finding and identify any impossible gaps not yet documented.
+
 ## Deliverables
 
-- [ ] `analysis/semantic-gaps.md` - Comprehensive gap analysis
-- [ ] `data/gaps.sql` - SQL dump of gap data
-- [ ] Gap severity classification guide
+- [ ] `analysis/semantic-gaps.md` - Comprehensive gap analysis with family pairs
+- [ ] `data/gaps.sql` - INSERT statements to populate existing schema tables
+- [ ] `docs/src/ir-schema/preservation-levels.md` - Preservation level definitions
+- [ ] Gap severity classification guide (in semantic-gaps.md)
+
+## Language Families (from Phase 2)
+
+Phase 3 analyzes gaps between these 9 canonical families:
+
+| Family | Languages | Key Characteristics |
+|--------|-----------|---------------------|
+| **ML-FP** | Scala, Haskell, F#, Elm, Roc, Gleam | Strong typing, immutability, ADTs |
+| **BEAM** | Elixir, Erlang | Actor model, hot code reload |
+| **LISP** | Clojure, Common Lisp, Scheme | Homoiconicity, macros |
+| **Systems** | Rust, C, C++, Go, Zig | Manual/ownership memory, low-level |
+| **Dynamic** | Python, TypeScript, JavaScript, Ruby | Runtime typing, duck typing |
+| **Managed-OOP** | Java, Kotlin | GC, class-based OOP, JVM |
+| **Apple** | Swift, Objective-C | ARC, protocols/categories |
+| **Logic** | Prolog | Unification, backtracking |
+| **Procedural** | COBOL, Fortran, Pascal, Ada | Structured, imperative |
 
 ## Tasks
 
-### 3.1 Gap Categories
+### 3.1 Classify Existing Phase 0 Gaps
 
-| Category | Description | Example | Severity |
-|----------|-------------|---------|----------|
-| **Impossible** | Cannot be translated | Dependent types → simple types | Critical |
-| **Lossy** | Information lost | Dynamic → static typing | High |
-| **Structural** | Requires restructuring | Exceptions → Results | Medium |
-| **Idiomatic** | Style difference | Loops → recursion | Low |
-| **Runtime** | Different execution model | GC → manual memory | High |
-| **Semantic** | Meaning changes | Null → Option | Medium |
+Reclassify the 320 gaps from Phase 0 into the 6-category system:
+
+| Category | Description | Example | Severity | Phase 0 Source |
+|----------|-------------|---------|----------|----------------|
+| **Impossible** | Cannot be translated | Dependent types → simple types | Critical | Validate: 0 found |
+| **Lossy** | Information lost | Dynamic → static typing | High | 108 lossy gaps |
+| **Structural** | Requires restructuring | Exceptions → Results | Medium | Extract from patterns |
+| **Idiomatic** | Style difference | Loops → recursion | Low | Extract from patterns |
+| **Runtime** | Different execution model | GC → manual memory | High | Extract from patterns |
+| **Semantic** | Meaning changes | Null → Option | Medium | 29 negative gaps |
+
+**Human decision gaps** (183): Map to appropriate category + flag `requires_human_decision: true`
 
 ### 3.2 Family Pair Analysis
 
-For each meaningful family pair, document:
+For each of the 72 directed family pairs (9 × 8), document gaps:
 
 ```yaml
 gap_analysis:
   from_family: "ml-fp"
   to_family: "systems"
+  difficulty: 4  # 1-4 scale
 
   impossible:
     - concept: "Higher-kinded types"
       reason: "No HKT support in target"
       mitigation: "Monomorphize or use trait objects"
+      ir_impact: "Layer 2 type abstractions cannot preserve HKT"
 
   lossy:
     - concept: "Type inference"
       loss: "Must add explicit type annotations"
-      automation: "Partial - can infer many cases"
+      automation: "partial"
+      source_skills: ["haskell-rust", "scala-rust"]
 
   structural:
     - concept: "Algebraic data types"
       translation: "ADT → struct + enum"
-      complexity: "Medium"
+      complexity: "medium"
+      bidirectional: false  # systems → ml-fp is different
 
   runtime:
     - concept: "Garbage collection"
       translation: "GC → ownership/borrowing"
-      complexity: "High - may require redesign"
+      complexity: "high"
+      requires_redesign: true
 ```
 
 ### 3.3 Gap Severity Matrix
 
-Create a matrix of conversion difficulty:
+Create 9×9 matrix of conversion difficulty between all families:
 
 ```
-FROM → TO       | ML-FP | BEAM | LISP | Systems | Managed | Dynamic |
-----------------|-------|------|------|---------|---------|---------|
-ML-FP           | -     | 2    | 2    | 4       | 2       | 1       |
-BEAM            | 2     | -    | 2    | 4       | 2       | 2       |
-LISP            | 2     | 2    | -    | 4       | 2       | 1       |
-Systems         | 3     | 4    | 3    | -       | 2       | 3       |
-Managed         | 2     | 3    | 2    | 3       | -       | 2       |
-Dynamic         | 2     | 2    | 1    | 4       | 2       | -       |
+FROM → TO       | ML-FP | BEAM | LISP | Systems | Dynamic | Managed | Apple | Logic | Proced |
+----------------|-------|------|------|---------|---------|---------|-------|-------|--------|
+ML-FP           | -     | 2    | 2    | 4       | 1       | 2       | 2     | 4     | 3      |
+BEAM            | 2     | -    | 2    | 4       | 2       | 2       | 3     | 3     | 3      |
+LISP            | 2     | 2    | -    | 4       | 1       | 2       | 3     | 3     | 3      |
+Systems         | 3     | 4    | 3    | -       | 3       | 2       | 2     | 4     | 2      |
+Dynamic         | 2     | 2    | 1    | 4       | -       | 2       | 2     | 3     | 2      |
+Managed         | 2     | 3    | 2    | 3       | 2       | -       | 2     | 4     | 2      |
+Apple           | 2     | 3    | 3    | 2       | 2       | 2       | -     | 4     | 2      |
+Logic           | 4     | 3    | 3    | 4       | 3       | 4       | 4     | -     | 4      |
+Procedural      | 3     | 3    | 3    | 2       | 2       | 2       | 2     | 4     | -      |
 
-Legend: 1=Easy, 2=Moderate, 3=Hard, 4=Very Hard
+Legend: 1=Easy, 2=Moderate, 3=Hard, 4=Very Hard (requires significant redesign)
 ```
 
-### 3.4 Common Gap Patterns
+### 3.4 Bidirectional Gap Analysis
 
-Document recurring gap patterns:
+Identify asymmetric gaps where A→B ≠ B→A:
+
+| Gap | A→B | B→A | Asymmetry Reason |
+|-----|-----|-----|------------------|
+| GC ↔ Ownership | Hard (restructure) | Easy (ignore ownership) | Ownership info lost going to GC |
+| Static ↔ Dynamic | Easy (erase types) | Hard (infer types) | Type info lost going to dynamic |
+| Actors ↔ Threads | Hard (restructure) | Hard (add message passing) | Different paradigms |
+| HKT ↔ No HKT | Lossy (monomorphize) | N/A (can't add) | HKT is strictly more powerful |
+
+### 3.5 Common Gap Patterns
+
+Document recurring gap patterns with from/to examples:
 
 #### Type System Gaps
 
-| Gap | From | To | Mitigation |
-|-----|------|----|-----------|
-| Dynamic → Static | Python, JS | Rust, Java | Type inference + annotations |
-| Nullable → Non-null | Java, C# | Rust, Kotlin | Wrap in Option/Optional |
-| HKT → No HKT | Haskell, Scala | Go, Rust | Monomorphize or code generation |
-| Gradual → Static | TypeScript | Java | Resolve `any` to concrete types |
+| Pattern | From | To | Example From | Example To | Mitigation |
+|---------|------|----|--------------|------------|------------|
+| Dynamic → Static | Python, JS | Rust, Java | `def f(x):` | `fn f(x: T)` | Type inference + annotations |
+| Nullable → Non-null | Java, C# | Rust, Kotlin | `String s` | `Option<String>` | Wrap in Option/Optional |
+| HKT → No HKT | Haskell, Scala | Go, Rust | `Functor f` | `FunctorInt`, `FunctorString` | Monomorphize |
+| Gradual → Static | TypeScript | Java | `any` | `Object` | Resolve to concrete types |
 
 #### Memory Model Gaps
 
-| Gap | From | To | Mitigation |
-|-----|------|----|-----------|
-| GC → Manual | Java | C | Add explicit free() calls |
-| GC → Ownership | Python | Rust | Restructure for borrowing |
-| Shared → Linear | Java | Rust | Clone or restructure |
-| Mutable → Immutable | Python | Haskell | Transform to pure functions |
+| Pattern | From | To | Example From | Example To | Mitigation |
+|---------|------|----|--------------|------------|------------|
+| GC → Manual | Java | C | `new Object()` | `malloc(); ... free();` | Add explicit free() |
+| GC → Ownership | Python | Rust | `x = obj` | `let x = obj.clone()` | Restructure for borrowing |
+| Shared → Linear | Java | Rust | `obj.method()` | `&obj` or `&mut obj` | Clone or restructure |
+| Mutable → Immutable | Python | Haskell | `x = x + 1` | `let x' = x + 1` | Transform to pure functions |
 
 #### Effect System Gaps
 
-| Gap | From | To | Mitigation |
-|-----|------|----|-----------|
-| Exceptions → Results | Java | Rust | Wrap in Result, propagate with ? |
-| Null → Option | Java | Rust | Map null checks to Option |
-| Callbacks → Async | JS | Rust | Transform callback chains |
-| Monads → Direct | Haskell | Go | Inline monadic operations |
+| Pattern | From | To | Example From | Example To | Mitigation |
+|---------|------|----|--------------|------------|------------|
+| Exceptions → Results | Java | Rust | `throw new E()` | `Err(E)` | Wrap in Result, use `?` |
+| Null → Option | Java | Rust | `if (x != null)` | `if let Some(x)` | Map null checks |
+| Callbacks → Async | JS | Rust | `f(x => ...)` | `async { f().await }` | Transform chains |
+| Monads → Direct | Haskell | Go | `do { x <- m; ... }` | `x := m(); ...` | Inline operations |
 
 #### Concurrency Gaps
 
-| Gap | From | To | Mitigation |
-|-----|------|----|-----------|
-| Actors → Threads | Erlang | Java | Use thread pools + queues |
-| Threads → Actors | Java | Erlang | Restructure around processes |
-| Green → OS threads | Go | C | May need thread pool library |
-| CSP → Async | Go | JS | Transform channels to promises |
+| Pattern | From | To | Example From | Example To | Mitigation |
+|---------|------|----|--------------|------------|------------|
+| Actors → Threads | Erlang | Java | `Pid ! msg` | `queue.put(msg)` | Thread pools + queues |
+| Threads → Actors | Java | Erlang | `synchronized` | `gen_server` | Restructure around processes |
+| Green → OS | Go | C | `go f()` | `pthread_create()` | Thread pool library |
+| CSP → Async | Go | JS | `ch <- v` | `await promise` | Transform channels to promises |
 
-### 3.5 Semantic Preservation Levels
+### 3.6 Semantic Preservation Levels
 
 Define what "correct conversion" means at each level:
 
@@ -126,99 +180,144 @@ Define what "correct conversion" means at each level:
 Level 0: Syntactically valid
   - Code compiles/parses in target language
   - May not run correctly
+  - Useful for: syntax exploration, scaffolding
 
 Level 1: Semantically equivalent
-  - Same observable behavior
-  - Same inputs produce same outputs
+  - Same observable behavior for same inputs
+  - Same outputs, same side effects
   - May not be idiomatic
+  - Useful for: correctness-critical code, formal verification
 
 Level 2: Idiomatically correct
   - Follows target language conventions
-  - Uses appropriate patterns
+  - Uses appropriate patterns and libraries
   - Readable by target language developers
+  - Useful for: maintainable production code
 
 Level 3: Optimized
   - Efficient in target language
-  - Uses target's strengths
+  - Uses target's strengths (e.g., ownership in Rust)
   - Production-ready performance
+  - Useful for: performance-critical code
 ```
 
-### 3.6 Human Decision Points
+### 3.7 Human Decision Points
 
-Catalog where human intervention is required:
+Extract from Phase 0's 183 `human_decision` gaps and catalog:
 
-| Decision Point | Options | Guidance |
-|----------------|---------|----------|
-| Error handling strategy | Exceptions vs Results | Match target idioms |
-| Null handling | Option, assertion, default | Based on semantics |
-| Concurrency model | Threads, async, actors | Based on use case |
-| Memory management | Clone, borrow, arc | Based on ownership patterns |
-| Generic instantiation | Concrete types for HKT | Case-by-case |
+| Decision Point | Options | Guidance | Automation |
+|----------------|---------|----------|------------|
+| Error handling strategy | Exceptions, Results, Panics | Match target idioms | Partial - can suggest |
+| Null handling | Option, assertion, default, sentinel | Based on nullability semantics | Partial - context needed |
+| Concurrency model | Threads, async, actors, channels | Based on use case requirements | None - architectural |
+| Memory management | Clone, borrow, Arc, raw pointer | Based on ownership patterns | Partial - lifetime analysis |
+| Generic instantiation | Concrete types for HKT | Case-by-case monomorphization | Partial - can enumerate |
+| Collection choice | Array, Vec, List, Seq | Based on access patterns | Partial - can analyze usage |
 
-## SQL Schema for Gaps
+### 3.8 Cross-Validate with Phase 2 Profiles
+
+Verify gaps align with `semantic_gaps` from language YAML profiles:
+
+```bash
+# Extract all semantic_gaps from YAML profiles
+for f in data/languages/*.yaml; do
+  yq '.semantic_gaps[]?.description' "$f"
+done | sort | uniq -c | sort -rn
+```
+
+Expected alignment:
+- Each language's `semantic_gaps` should map to family-level gaps
+- Language-specific gaps should be documented in gap patterns
+- Severity ratings should be consistent
+
+### 3.9 IR Design Implications
+
+Document how each gap category affects IR layer design:
+
+| Gap Category | IR Layer Impact | Design Consideration |
+|--------------|-----------------|----------------------|
+| Impossible | Layer 2-3 | Cannot represent; must reject or lossy-convert |
+| Lossy | Layer 2 annotations | Track lost information for warnings |
+| Structural | Layer 1-2 | IR must support both representations |
+| Idiomatic | Layer 3 | Style transforms in target-specific lowering |
+| Runtime | Layer 0-1 | May require runtime shims or redesign |
+| Semantic | Layer 2 | Semantic annotations to preserve meaning |
+
+## SQL Data Population
+
+Use existing tables from `data/schema.sql`. Generate INSERT statements:
 
 ```sql
--- Semantic gaps between families
-CREATE TABLE semantic_gaps (
-    id INTEGER PRIMARY KEY,
-    from_family_id INTEGER REFERENCES families(id),
-    to_family_id INTEGER REFERENCES families(id),
-    gap_category TEXT NOT NULL,  -- impossible, lossy, structural, idiomatic, runtime, semantic
-    concept TEXT NOT NULL,
-    description TEXT,
-    severity TEXT NOT NULL,  -- critical, high, medium, low
-    mitigation TEXT,
-    automation_level TEXT,  -- none, partial, full
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- data/gaps.sql
+-- Populates existing tables from schema.sql (lines 131-185)
+-- Do NOT recreate tables - they already exist
 
--- Gap patterns (reusable across family pairs)
-CREATE TABLE gap_patterns (
-    id INTEGER PRIMARY KEY,
-    name TEXT UNIQUE NOT NULL,
-    category TEXT NOT NULL,  -- type_system, memory, effects, concurrency
-    description TEXT,
-    from_concept TEXT NOT NULL,
-    to_concept TEXT NOT NULL,
-    mitigation_strategy TEXT,
-    example_from TEXT,
-    example_to TEXT
-);
+-- Populate semantic_gaps (family-pair gaps)
+INSERT OR REPLACE INTO semantic_gaps
+  (from_family_id, to_family_id, gap_category, concept, description, severity, mitigation, automation_level)
+VALUES
+  -- ML-FP → Systems gaps
+  ((SELECT id FROM families WHERE name='ml-fp'),
+   (SELECT id FROM families WHERE name='systems'),
+   'lossy', 'Higher-kinded types', 'HKT cannot be preserved', 'high',
+   'Monomorphize to concrete types', 'partial'),
+  -- ... more gaps
+;
 
--- Pattern applications to family pairs
-CREATE TABLE gap_pattern_applications (
-    id INTEGER PRIMARY KEY,
-    pattern_id INTEGER REFERENCES gap_patterns(id),
-    from_family_id INTEGER REFERENCES families(id),
-    to_family_id INTEGER REFERENCES families(id),
-    severity TEXT NOT NULL,
-    notes TEXT
-);
+-- Populate gap_patterns (reusable patterns)
+INSERT OR REPLACE INTO gap_patterns
+  (name, category, description, from_concept, to_concept, mitigation_strategy, example_from, example_to)
+VALUES
+  ('gc-to-ownership', 'memory', 'GC to ownership-based memory',
+   'Garbage collection', 'Ownership/borrowing', 'Restructure for single owner',
+   'x = obj', 'let x = obj;'),
+  -- ... more patterns
+;
 
--- Human decision points
-CREATE TABLE decision_points (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT,
-    options TEXT NOT NULL,  -- JSON array of options
-    guidance TEXT,
-    applicable_gaps TEXT  -- JSON array of gap IDs
-);
+-- Populate decision_points
+INSERT OR REPLACE INTO decision_points
+  (name, description, options, guidance)
+VALUES
+  ('error-handling', 'Choose error handling strategy',
+   '["exceptions", "results", "panics"]', 'Match target language idioms'),
+  -- ... more decision points
+;
 
--- Indexes
-CREATE INDEX idx_gaps_families ON semantic_gaps(from_family_id, to_family_id);
-CREATE INDEX idx_gaps_category ON semantic_gaps(gap_category);
-CREATE INDEX idx_gaps_severity ON semantic_gaps(severity);
+-- Populate family_conversion_difficulty (9x9 matrix)
+INSERT OR REPLACE INTO family_conversion_difficulty
+  (from_family_id, to_family_id, difficulty, notes)
+SELECT f1.id, f2.id,
+  CASE
+    WHEN f1.name = 'ml-fp' AND f2.name = 'systems' THEN 4
+    WHEN f1.name = 'dynamic' AND f2.name = 'ml-fp' THEN 2
+    -- ... matrix values
+  END,
+  'Generated from Phase 3 analysis'
+FROM families f1, families f2
+WHERE f1.name != f2.name;
 ```
 
 ## Success Criteria
 
-- [ ] All family pairs analyzed (at least top 6 families = 30 pairs)
-- [ ] Gap severity matrix complete
-- [ ] At least 50 gap patterns documented
-- [ ] Human decision points cataloged
-- [ ] Semantic preservation levels defined
+- [ ] All 320 Phase 0 gaps classified into 6 categories
+- [ ] 72 directed family pairs analyzed (9 families × 8 targets)
+- [ ] 9×9 gap severity matrix complete with supporting evidence
+- [ ] At least 50 gap patterns documented with from/to examples and mitigations
+- [ ] All 183 human decision gaps mapped to decision points
+- [ ] Semantic preservation levels defined with use cases
+- [ ] Cross-validation with Phase 2 YAML `semantic_gaps` complete
+- [ ] IR design implications documented for each gap category
+- [ ] `data/gaps.sql` populates existing schema tables (no DDL)
+
+## Quality Gates
+
+| Gate | Validation |
+|------|------------|
+| Gap classification | Each gap has: category, severity, mitigation |
+| Pattern completeness | Each pattern has: from/to examples, at least one mitigation |
+| Matrix consistency | Difficulty scores justified by gap counts |
+| Cross-reference | 90%+ of YAML semantic_gaps map to family gaps |
+| SQL validity | `data/gaps.sql` executes without errors on `schema.sql` |
 
 ## Effort Estimate
 
@@ -228,6 +327,6 @@ CREATE INDEX idx_gaps_severity ON semantic_gaps(severity);
 
 | File | Description |
 |------|-------------|
-| `analysis/semantic-gaps.md` | Comprehensive gap analysis |
-| `data/gaps.sql` | SQL dump of gap data |
-| `docs/src/ir-schema/preservation-levels.md` | Preservation level definitions |
+| `analysis/semantic-gaps.md` | Comprehensive gap analysis with all family pairs |
+| `data/gaps.sql` | INSERT statements for schema.sql tables |
+| `docs/src/ir-schema/preservation-levels.md` | Preservation level definitions and guidance |
