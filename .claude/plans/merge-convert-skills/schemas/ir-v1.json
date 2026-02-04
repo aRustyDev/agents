@@ -1,0 +1,1705 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ir-v1.json",
+  "title": "IR Schema v1",
+  "description": "Intermediate Representation schema for multi-layer code conversion. Supports 5 layers (0-4) from expression-level detail to structural organization.",
+  "type": "object",
+  "required": ["version", "metadata", "modules"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^ir-v[0-9]+\\.[0-9]+$",
+      "description": "Schema version in format ir-v{major}.{minor}",
+      "examples": ["ir-v1.0"]
+    },
+    "metadata": {
+      "$ref": "#/$defs/DocumentMetadata"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Module"
+      },
+      "description": "Top-level modules in this IR document"
+    },
+    "type_definitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TypeDef"
+      },
+      "description": "Shared type definitions (Layer 3)"
+    },
+    "gap_markers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/GapMarker"
+      },
+      "description": "Semantic gap markers across all layers"
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SemanticAnnotation"
+      },
+      "description": "Semantic annotations across all layers"
+    },
+    "preservation_statuses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PreservationStatus"
+      },
+      "description": "Preservation level tracking for IR units"
+    },
+    "asymmetry_info": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AsymmetryInfo"
+      },
+      "description": "Bidirectional conversion asymmetry metadata"
+    },
+    "decision_resolutions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DecisionResolution"
+      },
+      "description": "Resolved human decision points"
+    }
+  },
+  "$defs": {
+    "DocumentMetadata": {
+      "type": "object",
+      "description": "Metadata about the IR document itself",
+      "required": ["created_at"],
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "source_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "extraction_tool": {
+          "type": "string"
+        },
+        "extraction_tool_version": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Module": {
+      "type": "object",
+      "description": "Layer 4: Structural IR - Module definition",
+      "required": ["id", "name", "path", "visibility"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^mod_",
+          "description": "Unique module identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Module name"
+        },
+        "path": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Namespace path (e.g., ['std', 'collections'])"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        },
+        "imports": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Import" }
+        },
+        "exports": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Export" }
+        },
+        "definitions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Definition" }
+        },
+        "submodules": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of nested modules"
+        },
+        "extraction_scope": {
+          "$ref": "#/$defs/ExtractionScope"
+        },
+        "metadata": {
+          "$ref": "#/$defs/ModuleMetadata"
+        }
+      }
+    },
+
+    "ModuleMetadata": {
+      "type": "object",
+      "description": "Extraction provenance and context for a module",
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "description": "Original file path"
+        },
+        "source_language": {
+          "type": "string",
+          "description": "Source language identifier"
+        },
+        "extraction_version": {
+          "type": "string",
+          "description": "IR version used (e.g., ir-v1.0)"
+        },
+        "extraction_mode": {
+          "$ref": "#/$defs/ExtractionMode"
+        },
+        "source_hash": {
+          "type": "string",
+          "description": "SHA-256 of source file"
+        },
+        "extraction_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "documentation": {
+          "type": "string",
+          "description": "Module-level documentation"
+        }
+      }
+    },
+
+    "Import": {
+      "type": "object",
+      "description": "Layer 4: Import declaration",
+      "required": ["id", "module_path"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^imp_"
+        },
+        "module_path": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "imported_items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ImportedItem" }
+        },
+        "alias": {
+          "type": ["string", "null"],
+          "description": "Module alias (e.g., 'np' for numpy)"
+        },
+        "is_reexport": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+
+    "ImportedItem": {
+      "type": "object",
+      "required": ["name", "kind"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "alias": {
+          "type": ["string", "null"]
+        },
+        "kind": {
+          "$ref": "#/$defs/ImportKind"
+        }
+      }
+    },
+
+    "ImportKind": {
+      "type": "string",
+      "enum": ["type", "function", "constant", "variable", "module", "wildcard"],
+      "description": "Kind of imported item"
+    },
+
+    "Export": {
+      "type": "object",
+      "description": "Layer 4: Export declaration",
+      "required": ["id", "item"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^exp_"
+        },
+        "item": {
+          "$ref": "#/$defs/DefinitionRef"
+        },
+        "alias": {
+          "type": ["string", "null"]
+        },
+        "visibility": {
+          "$ref": "#/$defs/ExportVisibility"
+        },
+        "documentation": {
+          "type": "string"
+        }
+      }
+    },
+
+    "DefinitionRef": {
+      "type": "object",
+      "required": ["module_id", "definition_id"],
+      "properties": {
+        "module_id": {
+          "type": "string"
+        },
+        "definition_id": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Definition": {
+      "type": "object",
+      "description": "Layer 4: Definition within a module",
+      "required": ["id", "kind", "visibility"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^def_"
+        },
+        "kind": {
+          "$ref": "#/$defs/DefinitionKind"
+        },
+        "ref": {
+          "type": ["string", "null"],
+          "description": "Reference to TypeId, FunctionId, ConstantId, or VariableId"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Attribute" }
+        }
+      }
+    },
+
+    "DefinitionKind": {
+      "type": "string",
+      "enum": ["type", "function", "constant", "variable"]
+    },
+
+    "Attribute": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "arguments": {
+          "type": "array"
+        },
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Visibility": {
+      "type": "string",
+      "enum": ["public", "internal", "private", "protected", "package"]
+    },
+
+    "ExportVisibility": {
+      "type": "string",
+      "enum": ["public", "package", "internal"]
+    },
+
+    "ExtractionScope": {
+      "type": "string",
+      "enum": ["full", "partial"]
+    },
+
+    "ExtractionMode": {
+      "type": "string",
+      "enum": ["full_module", "single_function", "type_only", "signature_only"]
+    },
+
+    "TypeDef": {
+      "type": "object",
+      "description": "Layer 3: Type definition",
+      "required": ["id", "name", "kind"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^type:",
+          "description": "Unique type identifier"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/TypeKind"
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeParam" },
+          "description": "Generic type parameters"
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Constraint" },
+          "description": "Where clauses and bounds"
+        },
+        "body": {
+          "$ref": "#/$defs/TypeBody"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        }
+      }
+    },
+
+    "TypeKind": {
+      "type": "string",
+      "enum": ["struct", "enum", "class", "interface", "alias", "opaque", "primitive"],
+      "description": "Kind of type definition"
+    },
+
+    "TypeParam": {
+      "type": "object",
+      "description": "Layer 3: Generic type parameter",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "variance": {
+          "$ref": "#/$defs/Variance"
+        },
+        "bounds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" }
+        },
+        "default": {
+          "oneOf": [
+            { "$ref": "#/$defs/TypeRef" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+
+    "Variance": {
+      "type": "string",
+      "enum": ["invariant", "covariant", "contravariant"],
+      "default": "invariant"
+    },
+
+    "TypeBody": {
+      "type": "object",
+      "description": "Layer 3: Kind-specific type body content",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Field" },
+          "description": "For struct/class types"
+        },
+        "methods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Method references for struct/class"
+        },
+        "variants": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Variant" },
+          "description": "For enum types"
+        },
+        "required_methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/MethodSignature" },
+          "description": "For interface/trait types"
+        },
+        "provided_methods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Default method implementations for interface/trait"
+        },
+        "aliased_type": {
+          "$ref": "#/$defs/TypeRef",
+          "description": "For alias types"
+        }
+      }
+    },
+
+    "Field": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        },
+        "mutability": {
+          "$ref": "#/$defs/FieldMutability"
+        },
+        "default_value": {
+          "description": "Optional default value expression"
+        }
+      }
+    },
+
+    "FieldMutability": {
+      "type": "string",
+      "enum": ["mutable", "immutable", "readonly"]
+    },
+
+    "Variant": {
+      "type": "object",
+      "description": "Enum variant definition",
+      "required": ["name", "kind"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["unit", "tuple", "struct"]
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Field" },
+          "description": "For struct variants"
+        },
+        "types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" },
+          "description": "For tuple variants"
+        },
+        "discriminant": {
+          "type": ["integer", "null"],
+          "description": "Explicit discriminant value"
+        }
+      }
+    },
+
+    "MethodSignature": {
+      "type": "object",
+      "required": ["name", "params", "return_type"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Param" }
+        },
+        "return_type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "type_params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeParam" }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Effect" }
+        }
+      }
+    },
+
+    "Constraint": {
+      "type": "object",
+      "required": ["kind", "param"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["type_bound", "where_clause", "associated_type"]
+        },
+        "param": {
+          "type": "string",
+          "description": "Which type param this constrains"
+        },
+        "bound": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "associated_type": {
+          "type": "string"
+        },
+        "associated_bound": {
+          "$ref": "#/$defs/TypeRef"
+        }
+      }
+    },
+
+    "TypeRef": {
+      "type": "object",
+      "description": "Layer 3: Type reference",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/TypeRefKind"
+        },
+        "type_id": {
+          "type": "string",
+          "description": "For named/generic types"
+        },
+        "args": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" },
+          "description": "Generic arguments"
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" },
+          "description": "For function types: parameter types"
+        },
+        "return_type": {
+          "$ref": "#/$defs/TypeRef",
+          "description": "For function types"
+        },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Effect" },
+          "description": "For function types"
+        },
+        "elements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" },
+          "description": "For tuple types"
+        },
+        "members": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" },
+          "description": "For union/intersection types"
+        }
+      }
+    },
+
+    "TypeRefKind": {
+      "type": "string",
+      "enum": ["named", "generic", "function", "tuple", "union", "intersection"]
+    },
+
+    "TypeRelationship": {
+      "type": "object",
+      "description": "Layer 3: Relationship between types",
+      "required": ["from_type", "to_type", "kind"],
+      "properties": {
+        "from_type": {
+          "type": "string"
+        },
+        "to_type": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/RelationshipKind"
+        }
+      }
+    },
+
+    "RelationshipKind": {
+      "type": "string",
+      "enum": ["extends", "implements", "subtype_of", "convertible_to"]
+    },
+
+    "Function": {
+      "type": "object",
+      "description": "Layer 2: Function definition",
+      "required": ["id", "name", "params", "return_type", "effects", "visibility"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^fn:"
+        },
+        "name": {
+          "type": "string"
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Param" }
+        },
+        "return_type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "type_params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeParam" }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Effect" }
+        },
+        "body": {
+          "oneOf": [
+            { "$ref": "#/$defs/ControlFlowGraph" },
+            { "type": "null" }
+          ]
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        },
+        "receiver": {
+          "oneOf": [
+            { "$ref": "#/$defs/Receiver" },
+            { "type": "null" }
+          ]
+        },
+        "source_span": {
+          "$ref": "#/$defs/SourceSpan"
+        },
+        "annotations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SemanticAnnotation" }
+        },
+        "doc_comment": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Param": {
+      "type": "object",
+      "description": "Layer 2: Function parameter",
+      "required": ["name", "type", "mutability"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "default": {
+          "description": "Default value expression"
+        },
+        "mutability": {
+          "$ref": "#/$defs/ParamMutability"
+        },
+        "variadic": {
+          "type": "boolean",
+          "default": false
+        },
+        "annotations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SemanticAnnotation" }
+        }
+      }
+    },
+
+    "ParamMutability": {
+      "type": "string",
+      "enum": ["mutable", "immutable", "move"]
+    },
+
+    "Receiver": {
+      "type": "object",
+      "description": "Self/this parameter for methods",
+      "required": ["type", "mutability"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "mutability": {
+          "$ref": "#/$defs/ParamMutability"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Effect": {
+      "type": "object",
+      "description": "Layer 2: Computational effect annotation",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/EffectKind"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef",
+          "description": "For effects with associated types (e.g., throws(ErrorType))"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["explicit", "inferred", "default"]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+
+    "EffectKind": {
+      "type": "string",
+      "enum": ["pure", "throws", "async", "unsafe", "io", "suspends", "allocates", "captures", "mutates"]
+    },
+
+    "ControlFlowGraph": {
+      "type": "object",
+      "description": "Layer 2: Control flow graph for function body",
+      "required": ["entry", "blocks"],
+      "properties": {
+        "entry": {
+          "type": "string",
+          "description": "Entry block ID"
+        },
+        "blocks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Block" }
+        },
+        "exit": {
+          "type": ["string", "null"],
+          "description": "Exit block ID if single exit point"
+        }
+      }
+    },
+
+    "Block": {
+      "type": "object",
+      "description": "Layer 2: Basic block in CFG",
+      "required": ["id", "statements", "terminator"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "statements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Statement" }
+        },
+        "terminator": {
+          "$ref": "#/$defs/Terminator"
+        },
+        "loop_depth": {
+          "type": "integer"
+        },
+        "exception_handler": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Statement": {
+      "type": "object",
+      "description": "Non-branching instruction within a block",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["assign", "call", "alloc", "dealloc", "noop"]
+        },
+        "target": {
+          "type": "string",
+          "description": "For assign: binding ID"
+        },
+        "value": {
+          "description": "For assign: value expression"
+        },
+        "callee": {
+          "description": "For call: callee expression"
+        },
+        "arguments": {
+          "type": "array",
+          "description": "For call: argument expressions"
+        }
+      }
+    },
+
+    "Terminator": {
+      "type": "object",
+      "description": "Layer 2: Block terminator",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/TerminatorKind"
+        },
+        "value": {
+          "description": "For return: return value expression"
+        },
+        "condition": {
+          "description": "For branch: condition expression"
+        },
+        "then_block": {
+          "type": "string",
+          "description": "For branch: target when true"
+        },
+        "else_block": {
+          "type": ["string", "null"],
+          "description": "For branch: target when false"
+        },
+        "scrutinee": {
+          "description": "For switch: value being matched"
+        },
+        "arms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SwitchArm" },
+          "description": "For switch: match arms"
+        },
+        "default_block": {
+          "type": ["string", "null"],
+          "description": "For switch: default case"
+        },
+        "body": {
+          "type": "string",
+          "description": "For loop: body block ID"
+        },
+        "continue_target": {
+          "type": "string",
+          "description": "For loop: continue target"
+        },
+        "break_target": {
+          "type": "string",
+          "description": "For loop: break target"
+        },
+        "loop_kind": {
+          "type": "string",
+          "enum": ["while", "for", "loop"]
+        },
+        "try_block": {
+          "type": "string",
+          "description": "For try: try block ID"
+        },
+        "catch_blocks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CatchBlock" }
+        },
+        "finally_block": {
+          "type": ["string", "null"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "For unreachable: explanation"
+        }
+      }
+    },
+
+    "TerminatorKind": {
+      "type": "string",
+      "enum": ["return", "branch", "switch", "loop", "try", "unreachable"]
+    },
+
+    "SwitchArm": {
+      "type": "object",
+      "required": ["pattern", "target"],
+      "properties": {
+        "pattern": {
+          "$ref": "#/$defs/Pattern"
+        },
+        "guard": {
+          "description": "Optional guard expression"
+        },
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Pattern": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["literal", "variant", "constructor", "wildcard", "binding"]
+        },
+        "value": {
+          "description": "For literal patterns"
+        },
+        "type": {
+          "type": "string",
+          "description": "For variant/constructor patterns"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "bindings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "CatchBlock": {
+      "type": "object",
+      "required": ["exception_type", "handler_block"],
+      "properties": {
+        "exception_type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "binding": {
+          "type": "string"
+        },
+        "handler_block": {
+          "type": "string"
+        }
+      }
+    },
+
+    "Binding": {
+      "type": "object",
+      "description": "Layer 1: Variable binding",
+      "required": ["id", "name", "type", "mutability", "lifetime", "scope"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "mutability": {
+          "$ref": "#/$defs/Mutability"
+        },
+        "lifetime": {
+          "$ref": "#/$defs/Lifetime"
+        },
+        "value": {
+          "description": "Optional initial value expression"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "captures": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Capture" }
+        },
+        "annotations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SemanticAnnotation" }
+        }
+      }
+    },
+
+    "Mutability": {
+      "type": "string",
+      "enum": ["mutable", "immutable", "linear"],
+      "description": "Layer 1: Variable mutability"
+    },
+
+    "Lifetime": {
+      "type": "object",
+      "description": "Layer 1: Ownership and borrowing semantics",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/LifetimeKind"
+        },
+        "scope": {
+          "type": "string",
+          "description": "For scoped lifetimes"
+        },
+        "borrow_kind": {
+          "$ref": "#/$defs/BorrowKind"
+        },
+        "name": {
+          "type": "string",
+          "description": "Named lifetime (e.g., 'a)"
+        }
+      }
+    },
+
+    "LifetimeKind": {
+      "type": "string",
+      "enum": ["static", "scoped", "owned", "borrowed"]
+    },
+
+    "BorrowKind": {
+      "type": "string",
+      "enum": ["shared", "mutable", "move"]
+    },
+
+    "DataFlowNode": {
+      "type": "object",
+      "description": "Layer 1: Node in data dependency graph",
+      "required": ["id", "kind", "inputs", "outputs"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/DataFlowNodeKind"
+        },
+        "expression": {
+          "description": "Expression at this node"
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "effects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Effect" }
+        }
+      }
+    },
+
+    "DataFlowNodeKind": {
+      "type": "string",
+      "enum": ["source", "transform", "sink"]
+    },
+
+    "Transformation": {
+      "type": "object",
+      "description": "Layer 1: Functional transformation on data",
+      "required": ["kind", "input_type", "output_type"],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/TransformKind"
+        },
+        "input_type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "output_type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "function": {
+          "description": "Function or lambda for transformation"
+        }
+      }
+    },
+
+    "TransformKind": {
+      "type": "string",
+      "enum": ["map", "filter", "fold", "flat_map", "collect"]
+    },
+
+    "Capture": {
+      "type": "object",
+      "description": "Layer 1: Closure capture",
+      "required": ["binding_id", "capture_kind"],
+      "properties": {
+        "binding_id": {
+          "type": "string"
+        },
+        "capture_kind": {
+          "$ref": "#/$defs/CaptureKind"
+        },
+        "captured_type": {
+          "$ref": "#/$defs/TypeRef"
+        }
+      }
+    },
+
+    "CaptureKind": {
+      "type": "string",
+      "enum": ["by_value", "by_reference", "by_mut_ref", "by_move"]
+    },
+
+    "Expression": {
+      "type": "object",
+      "description": "Layer 0: Expression (optional layer)",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ExpressionKind"
+        },
+        "type": {
+          "$ref": "#/$defs/TypeRef"
+        },
+        "span": {
+          "$ref": "#/$defs/SourceSpan"
+        },
+        "literal_kind": {
+          "$ref": "#/$defs/LiteralKind"
+        },
+        "literal_value": {
+          "description": "For literal expressions"
+        },
+        "binding_ref": {
+          "type": "string",
+          "description": "For identifier expressions"
+        },
+        "name": {
+          "type": "string",
+          "description": "Original identifier name"
+        },
+        "callee": {
+          "$ref": "#/$defs/Expression",
+          "description": "For call expressions"
+        },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Argument" }
+        },
+        "type_arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TypeRef" }
+        },
+        "operator": {
+          "type": "string",
+          "description": "For operator expressions"
+        },
+        "operator_kind": {
+          "$ref": "#/$defs/OperatorKind"
+        },
+        "operands": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Expression" }
+        },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Param" },
+          "description": "For lambda expressions"
+        },
+        "body": {
+          "description": "For lambda expressions"
+        },
+        "captures": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Capture" }
+        },
+        "is_async": {
+          "type": "boolean"
+        },
+        "is_generator": {
+          "type": "boolean"
+        },
+        "object": {
+          "$ref": "#/$defs/Expression",
+          "description": "For member_access/index expressions"
+        },
+        "member": {
+          "type": "string"
+        },
+        "collection": {
+          "$ref": "#/$defs/Expression"
+        },
+        "index": {
+          "$ref": "#/$defs/Expression"
+        },
+        "target_type": {
+          "$ref": "#/$defs/TypeRef",
+          "description": "For cast expressions"
+        },
+        "operand": {
+          "$ref": "#/$defs/Expression",
+          "description": "For cast/await/throw expressions"
+        },
+        "condition": {
+          "$ref": "#/$defs/Expression",
+          "description": "For conditional expressions"
+        },
+        "then_expr": {
+          "$ref": "#/$defs/Expression"
+        },
+        "else_expr": {
+          "$ref": "#/$defs/Expression"
+        },
+        "elements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Expression" },
+          "description": "For tuple/array expressions"
+        },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ObjectField" },
+          "description": "For object expressions"
+        },
+        "exception": {
+          "$ref": "#/$defs/Expression",
+          "description": "For throw expressions"
+        }
+      }
+    },
+
+    "ExpressionKind": {
+      "type": "string",
+      "enum": [
+        "literal",
+        "identifier",
+        "call",
+        "operator",
+        "lambda",
+        "member_access",
+        "index",
+        "cast",
+        "conditional",
+        "tuple",
+        "array",
+        "object",
+        "await",
+        "throw"
+      ]
+    },
+
+    "LiteralKind": {
+      "type": "string",
+      "enum": [
+        "int",
+        "float",
+        "string",
+        "char",
+        "bool",
+        "null",
+        "regex",
+        "bigint",
+        "symbol",
+        "bytes",
+        "template"
+      ]
+    },
+
+    "OperatorKind": {
+      "type": "string",
+      "enum": [
+        "unary_prefix",
+        "unary_postfix",
+        "binary",
+        "comparison",
+        "assignment",
+        "ternary"
+      ]
+    },
+
+    "Argument": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "name": {
+          "type": ["string", "null"],
+          "description": "Named argument"
+        },
+        "value": {
+          "$ref": "#/$defs/Expression"
+        },
+        "spread": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+
+    "ObjectField": {
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/Expression"
+        },
+        "shorthand": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+
+    "SourceSpan": {
+      "type": "object",
+      "description": "Layer 0: Source location tracking",
+      "required": ["file", "start_line", "start_col", "end_line", "end_col"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "File path relative to project root"
+        },
+        "start_line": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-indexed starting line"
+        },
+        "start_col": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0-indexed starting column (bytes)"
+        },
+        "end_line": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-indexed ending line"
+        },
+        "end_col": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0-indexed ending column (exclusive)"
+        }
+      }
+    },
+
+    "SemanticAnnotation": {
+      "type": "object",
+      "description": "Cross-cutting: Semantic annotation for conversion metadata",
+      "required": ["id", "target", "kind", "value", "source"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string",
+          "description": "ID of annotated node (any layer)"
+        },
+        "kind": {
+          "$ref": "#/$defs/AnnotationKind"
+        },
+        "value": {
+          "description": "Kind-specific payload"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence for inferred annotations"
+        },
+        "source": {
+          "$ref": "#/$defs/AnnotationSource"
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        }
+      }
+    },
+
+    "AnnotationKind": {
+      "type": "string",
+      "description": "All 54 annotation kinds from Phase 3 gap patterns",
+      "enum": [
+        "inferred_type",
+        "nullability",
+        "hkt_specialization",
+        "gradual_type_coverage",
+        "duck_type_interface",
+        "type_alias_expansion",
+        "generic_bounds",
+        "coercion_site",
+        "type_erasure_info",
+        "phantom_type",
+        "existential_type",
+        "dependent_type_approx",
+        "refinement_type",
+        "variance_annotation",
+        "associated_type",
+        "type_family",
+        "gc_to_manual",
+        "ownership_hint",
+        "ownership_transfer",
+        "mutability_analysis",
+        "lifetime_hint",
+        "borrow_check_issue",
+        "arc_cycle_risk",
+        "stack_vs_heap",
+        "copy_vs_move",
+        "interior_mutability",
+        "pinning_required",
+        "arena_allocation",
+        "error_handling_conversion",
+        "null_to_option",
+        "checked_exception_mapping",
+        "monad_flattening",
+        "effect_inference",
+        "purity_analysis",
+        "io_boundary",
+        "resource_management",
+        "evaluation_strategy",
+        "algebraic_effect",
+        "effect_boundary",
+        "continuation_capture",
+        "concurrency_model_conversion",
+        "shared_state_analysis",
+        "lock_ordering",
+        "channel_to_async",
+        "green_thread_mapping",
+        "stm_decomposition",
+        "message_passing_pattern",
+        "race_condition_risk",
+        "supervision_conversion",
+        "async_boundary",
+        "atomicity_requirement",
+        "thread_safety",
+        "parallelism_hint",
+        "cancellation_handling"
+      ]
+    },
+
+    "AnnotationSource": {
+      "type": "string",
+      "enum": ["explicit", "inferred", "default", "test_suite", "human"]
+    },
+
+    "GapMarker": {
+      "type": "object",
+      "description": "Cross-cutting: Semantic gap marker",
+      "required": ["id", "location", "gap_type", "severity", "description", "source_concept", "preservation_level"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string",
+          "description": "Node ID where gap occurs"
+        },
+        "gap_type": {
+          "$ref": "#/$defs/GapType"
+        },
+        "gap_pattern_id": {
+          "type": ["string", "null"],
+          "description": "Reference to Phase 3 pattern (e.g., TS-001)"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source_concept": {
+          "type": "string",
+          "description": "What exists in source language"
+        },
+        "target_concept": {
+          "type": ["string", "null"],
+          "description": "Equivalent in target language (if any)"
+        },
+        "suggested_mitigations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "decision_point_id": {
+          "type": ["string", "null"],
+          "description": "Link to human decision if needed"
+        },
+        "preservation_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Max achievable preservation with this gap"
+        },
+        "automation_level": {
+          "$ref": "#/$defs/AutomationLevel"
+        },
+        "affected_layers": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 4 }
+        }
+      }
+    },
+
+    "GapType": {
+      "type": "string",
+      "description": "Category of semantic gap",
+      "enum": ["impossible", "lossy", "structural", "idiomatic", "runtime", "semantic"]
+    },
+
+    "Severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"]
+    },
+
+    "AutomationLevel": {
+      "type": "string",
+      "enum": ["none", "partial", "full"]
+    },
+
+    "PreservationStatus": {
+      "type": "object",
+      "description": "Cross-cutting: Preservation level tracking",
+      "required": ["id", "unit_id", "current_level", "max_achievable_level"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "unit_id": {
+          "type": "string",
+          "description": "IR unit being tracked"
+        },
+        "current_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "max_achievable_level": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "blocking_gaps": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "level_evidence": {
+          "$ref": "#/$defs/LevelEvidence"
+        },
+        "progression_notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "LevelEvidence": {
+      "type": "object",
+      "properties": {
+        "level_0": {
+          "type": "object",
+          "properties": {
+            "achieved": { "type": "boolean" },
+            "verified_at": { "type": "string", "format": "date-time" },
+            "verifier": { "type": "string" }
+          }
+        },
+        "level_1": {
+          "type": "object",
+          "properties": {
+            "achieved": { "type": "boolean" },
+            "test_coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+            "passing_tests": { "type": "integer" },
+            "total_tests": { "type": "integer" }
+          }
+        },
+        "level_2": {
+          "type": "object",
+          "properties": {
+            "achieved": { "type": "boolean" },
+            "lint_warnings": { "type": "integer" },
+            "style_score": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "level_3": {
+          "type": "object",
+          "properties": {
+            "achieved": { "type": "boolean" },
+            "benchmark_ratio": { "type": "number" },
+            "memory_ratio": { "type": "number" }
+          }
+        }
+      }
+    },
+
+    "AsymmetryInfo": {
+      "type": "object",
+      "description": "Cross-cutting: Bidirectional conversion asymmetry metadata",
+      "required": ["id", "source_family", "target_family"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "unit_id": {
+          "type": ["string", "null"],
+          "description": "Specific unit, or null for general"
+        },
+        "source_family": {
+          "type": "string",
+          "description": "Source language family"
+        },
+        "target_family": {
+          "type": "string",
+          "description": "Target language family"
+        },
+        "direction_difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "reverse_difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "asymmetry_ratio": {
+          "type": "number",
+          "description": "direction / reverse (>1 means forward harder)"
+        },
+        "preserved_in_reverse": {
+          "type": "boolean"
+        },
+        "key_asymmetries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AsymmetryDetail" }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+
+    "AsymmetryDetail": {
+      "type": "object",
+      "required": ["concept", "forward_action", "reverse_action", "information_flow"],
+      "properties": {
+        "concept": {
+          "type": "string"
+        },
+        "forward_action": {
+          "type": "string"
+        },
+        "reverse_action": {
+          "type": "string"
+        },
+        "information_flow": {
+          "type": "string",
+          "enum": ["gains", "loses", "preserves"]
+        }
+      }
+    },
+
+    "DecisionResolution": {
+      "type": "object",
+      "description": "Cross-cutting: Resolved human decision point",
+      "required": ["id", "unit_id", "decision_point_id", "chosen_option", "resolved_by"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "unit_id": {
+          "type": "string"
+        },
+        "decision_point_id": {
+          "type": "string",
+          "description": "DP-001, DP-002, etc."
+        },
+        "chosen_option": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "resolved_by": {
+          "type": "string",
+          "enum": ["human", "heuristic", "default"]
+        },
+        "resolved_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "For heuristic decisions"
+        },
+        "overridable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
