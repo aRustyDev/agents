@@ -41,13 +41,24 @@ Validate that the IR schema meets requirements by building a complete Python ext
 ## Deliverables
 
 - [ ] Semantic equivalence specification
-- [ ] Extractor architecture decision (custom vs hybrid)
+- [ ] Extractor architecture decision (ADR-009)
+- [ ] **Core infrastructure** (base classes for Phase 6+ reuse)
 - [ ] Python extractor producing valid IR
 - [ ] Python synthesizer generating valid code
 - [ ] IR validation tool
 - [ ] Test data in database
 - [ ] 30+ test cases
 - [ ] Validation report
+
+## Python Version Compatibility
+
+| Context | Version | Notes |
+|---------|---------|-------|
+| Source (input) | Python 3.8+ | Must handle older codebases |
+| Target (output) | Python 3.10+ | Can use pattern matching, walrus operator |
+| Tooling runtime | Python 3.11+ | For `tomllib`, performance, typing features |
+
+**Compatibility handling**: When extracting 3.8 source that uses constructs unavailable in 3.10+ (rare), emit warning but continue.
 
 ---
 
@@ -145,8 +156,186 @@ Source Code
 
 For Python MVP, use:
 - **Syntax**: `tree-sitter-python` via `tree-sitter-language-pack`
-- **Semantics**: `pyright` (LSP) or direct `ast` + `jedi` for type inference
-- **CST**: `LibCST` for round-trip preserving formatting
+- **Semantics**: See decision criteria below
+- **Formatting**: `black` for clean output (default), `LibCST` for comment preservation
+
+#### Semantic Enrichment Decision (Pyright vs Jedi)
+
+| Criterion | Use Pyright | Use Jedi |
+|-----------|-------------|----------|
+| Project has `py.typed` marker | ✓ | |
+| Type stubs available | ✓ | |
+| Need cross-file type resolution | ✓ | |
+| Simple single-file extraction | | ✓ |
+| No LSP setup available | | ✓ |
+| Performance critical (many files) | | ✓ |
+
+**Default**: Start with `jedi` for simplicity. Upgrade to `pyright` when cross-file analysis is needed.
+
+**Fallback chain**: `pyright` → `jedi` → `typing.Any` with E003 annotation.
+
+#### Formatting Strategy
+
+| Use Case | Tool | When |
+|----------|------|------|
+| Clean conversion output | `black` | Default for all synthesis |
+| Refactoring (preserve comments) | `LibCST` | When `--preserve-formatting` flag set |
+| Round-trip testing | `black` | Normalize both sides before comparison |
+
+---
+
+## Cross-File Analysis Strategy
+
+Python imports create cross-file dependencies. The extractor must handle these gracefully.
+
+### Module Resolution Approach
+
+```
+Source File
+    │
+    ▼
+[Import Parser] ──► List of imports (absolute, relative, from...import)
+    │
+    ▼
+[Module Resolver] ──► Resolved paths or "external" markers
+    │                  - Local: resolve to file path
+    │                  - Stdlib: mark as stdlib
+    │                  - Third-party: mark as external
+    ▼
+[Dependency Graph] ──► DAG of module dependencies
+    │
+    ▼
+[Extraction Order] ──► Topological sort for extraction sequence
+```
+
+### Resolution Rules
+
+| Import Type | Resolution | IR Representation |
+|-------------|------------|-------------------|
+| `import foo` (local) | Find `foo.py` or `foo/__init__.py` | Full extraction if in scope |
+| `import foo` (stdlib) | Mark as `stdlib:foo` | Reference only, no extraction |
+| `import foo` (third-party) | Mark as `external:foo` | Reference only, use type stubs if available |
+| `from . import bar` | Resolve relative to package | Full extraction |
+| `from typing import X` | Mark as `stdlib:typing` | Type reference only |
+
+### Extraction Modes
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `single` | Extract one file, imports as references | Quick testing, simple scripts |
+| `package` | Extract all files in package | Library/application conversion |
+| `project` | Extract with dependency graph | Full project migration |
+
+**Phase 5 MVP**: Implement `single` mode fully, `package` mode basic support.
+
+### Handling Unresolved Imports
+
+When an import cannot be resolved:
+1. Log warning with E004 error code
+2. Create placeholder type reference: `external:<module>.<name>`
+3. Continue extraction
+4. Include unresolved imports in IR metadata for downstream handling
+
+---
+
+## Semantic Equivalence Verification
+
+### L3 (Semantic) Verification Protocol
+
+For Phase 5 MVP, L3 equivalence means: **same observable I/O behavior**.
+
+```python
+# tools/ir-validate/semantic_equiv.py
+
+def verify_l3_equivalence(
+    original: str,
+    generated: str,
+    test_inputs: list[dict],
+    timeout_seconds: float = 5.0
+) -> EquivalenceResult:
+    """
+    Verify L3 semantic equivalence between original and generated code.
+
+    Returns:
+        EquivalenceResult with pass/fail status and details
+    """
+    results = []
+
+    for inputs in test_inputs:
+        # Execute original
+        orig_output = execute_safely(original, inputs, timeout_seconds)
+
+        # Execute generated
+        gen_output = execute_safely(generated, inputs, timeout_seconds)
+
+        # Compare outputs
+        results.append(compare_outputs(orig_output, gen_output))
+
+    return EquivalenceResult(
+        passed=all(r.matches for r in results),
+        details=results
+    )
+```
+
+### Test Input Generation
+
+Use `hypothesis` to generate test inputs:
+
+```python
+from hypothesis import given, strategies as st
+
+# Strategy for function under test
+@st.composite
+def function_inputs(draw, signature: FunctionSignature):
+    """Generate valid inputs based on function type hints."""
+    args = {}
+    for param in signature.parameters:
+        if param.type == "int":
+            args[param.name] = draw(st.integers())
+        elif param.type == "str":
+            args[param.name] = draw(st.text(max_size=100))
+        elif param.type == "list[int]":
+            args[param.name] = draw(st.lists(st.integers()))
+        # ... extend for other types
+    return args
+```
+
+### Execution Sandbox
+
+Execute code safely using `RestrictedPython` or subprocess isolation:
+
+```python
+def execute_safely(code: str, inputs: dict, timeout: float) -> ExecutionResult:
+    """Execute code in isolated subprocess with timeout."""
+    # Write code to temp file
+    # Execute via subprocess with resource limits
+    # Capture stdout, stderr, return value
+    # Handle timeout and exceptions
+    ...
+```
+
+### What L3 Equivalence Checks
+
+| Aspect | Checked | Not Checked |
+|--------|---------|-------------|
+| Return values | ✓ | |
+| Stdout output | ✓ | |
+| Side effects (files, network) | ✓ (via mocking) | |
+| Execution time | | ✓ (allowed to differ) |
+| Memory usage | | ✓ |
+| Internal variable names | | ✓ |
+| Code structure | | ✓ |
+| Comments | | ✓ |
+
+### Equivalence Test Categories
+
+| Category | Input Strategy | Expected Coverage |
+|----------|----------------|-------------------|
+| Pure functions | Random inputs via hypothesis | 95%+ |
+| I/O functions | Mocked I/O, predefined scenarios | 80%+ |
+| Stateful classes | Sequence of method calls | 75%+ |
+| Async functions | Event loop with timeouts | 70%+ |
+| Decorators | Decorated function behavior | 85%+ |
 
 ---
 
@@ -247,18 +436,129 @@ Finalize extractor approach with implementation plan.
 
 ---
 
-### 5.3 Database Query Interface
+### 5.3 Core Infrastructure
+
+Create reusable base infrastructure that Phase 6+ will extend.
+
+```python
+# tools/ir-core/base.py
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Protocol
+
+class Extractor(ABC):
+    """Base class for language-specific extractors."""
+
+    @abstractmethod
+    def extract(self, source: str, path: str, config: ExtractConfig) -> IRVersion:
+        """Extract IR from source code."""
+        ...
+
+    @abstractmethod
+    def supported_features(self) -> set[str]:
+        """Return set of supported language features."""
+        ...
+
+class Synthesizer(ABC):
+    """Base class for language-specific synthesizers."""
+
+    @abstractmethod
+    def synthesize(self, ir: IRVersion, config: SynthConfig) -> str:
+        """Generate code from IR."""
+        ...
+
+@dataclass
+class ExtractConfig:
+    """Configuration for extraction."""
+    depth: Literal["minimal", "standard", "full"] = "standard"
+    resolve_imports: bool = True
+    include_comments: bool = False
+    type_inference: Literal["none", "jedi", "pyright"] = "jedi"
+
+@dataclass
+class SynthConfig:
+    """Configuration for synthesis."""
+    target_version: str = "3.10"
+    format_style: Literal["black", "preserve"] = "black"
+    include_type_hints: bool = True
+```
+
+**Core Components**:
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `Extractor` base | `tools/ir-core/base.py` | Abstract extractor interface |
+| `Synthesizer` base | `tools/ir-core/base.py` | Abstract synthesizer interface |
+| `IRVersion` model | `tools/ir-core/models.py` | IR data structures |
+| `TreeSitterAdapter` | `tools/ir-core/treesitter.py` | Shared tree-sitter integration |
+| `SchemaValidator` | `tools/ir-core/validation.py` | JSON schema validation |
+| `GapDetector` | `tools/ir-core/gaps.py` | Gap pattern matching |
+
+**Deliverable**: `tools/ir-core/`
+
+**Acceptance**:
+- Base classes documented with docstrings
+- Type hints throughout
+- Unit tests for shared utilities
+- Phase 6 (Rust) can import and extend without modification
+
+---
+
+### 5.4 Database Query Interface
 
 Implement SQL query interface for tools.
 
 ```python
 # tools/ir-query/db.py
 class IRDatabase:
-    def get_patterns_for_language(self, lang: str) -> list[Pattern]: ...
-    def get_gap_patterns(self) -> list[GapPattern]: ...
-    def get_decision_points(self) -> list[DecisionPoint]: ...
-    def store_ir_unit(self, unit: IRUnit) -> int: ...
-    def get_gaps_for_conversion(self, source: str, target: str) -> list[Gap]: ...
+    """Query interface for convert-skills database."""
+
+    def __init__(self, db_path: str = "data/convert-skills.db"):
+        self.conn = sqlite3.connect(db_path)
+        self._cache: dict[str, Any] = {}
+
+    # Pattern queries (cached, 6273 rows)
+    def get_patterns_for_language(
+        self, lang: str, limit: int = 100, offset: int = 0
+    ) -> list[Pattern]:
+        """Get patterns with pagination for memory efficiency."""
+        ...
+
+    def get_patterns_by_type(
+        self, pattern_type: str, source_lang: str | None = None
+    ) -> list[Pattern]:
+        """Get patterns filtered by type."""
+        ...
+
+    # Gap queries (54 patterns, cacheable)
+    def get_gap_patterns(self, category: str | None = None) -> list[GapPattern]:
+        """Get gap patterns, optionally filtered by category."""
+        ...
+
+    def get_gaps_for_conversion(
+        self, source: str, target: str
+    ) -> list[SemanticGap]:
+        """Get known gaps for a language pair."""
+        ...
+
+    # Decision points (16 rows, cached on init)
+    def get_decision_points(self) -> list[DecisionPoint]:
+        """Get all decision points (cached)."""
+        ...
+
+    def get_decision_point(self, dp_id: str) -> DecisionPoint | None:
+        """Get specific decision point by ID."""
+        ...
+
+    # IR storage
+    def store_ir_unit(self, unit: IRUnit) -> int:
+        """Store extracted IR unit, return ID."""
+        ...
+
+    def get_ir_unit(self, unit_id: int) -> IRUnit | None:
+        """Retrieve stored IR unit."""
+        ...
 ```
 
 **Required Queries**:
@@ -268,56 +568,105 @@ class IRDatabase:
 SELECT pattern_type, COUNT(*) FROM ir_patterns
 WHERE source_lang = ? GROUP BY pattern_type;
 
--- Gap patterns for detection
-SELECT name, category, from_concept, to_concept
-FROM gap_patterns WHERE category = ?;
+-- Gap patterns for detection (with join to get full info)
+SELECT gp.id, gp.name, gp.category, gp.from_concept, gp.to_concept,
+       gp.severity, gp.description
+FROM gap_patterns gp
+WHERE gp.category = ? OR ? IS NULL;
 
 -- Decision points for prompting
-SELECT name, description, options, guidance
+SELECT id, name, description, options, guidance
 FROM decision_points WHERE id = ?;
+
+-- Batch pattern retrieval with pagination
+SELECT * FROM ir_patterns
+WHERE source_lang = ?
+ORDER BY id
+LIMIT ? OFFSET ?;
 ```
+
+**Performance Considerations**:
+- Cache `gap_patterns` and `decision_points` on initialization (small tables)
+- Use pagination for `ir_patterns` queries (6,273 rows)
+- Connection pooling for concurrent access
+- Prepared statements for repeated queries
 
 **Deliverable**: `tools/ir-query/`
 
 **Acceptance**:
-- All query methods implemented
+- All query methods implemented with type hints
+- Pagination for large result sets
+- Caching strategy documented
 - Tests pass against `convert-skills.db`
-- Integrated with IR extraction pipeline
+- Integrated with extractor pipeline via dependency injection
 
 ---
 
-### 5.4 Python Extractor Implementation
+### 5.5 Python Extractor Implementation
 
-Build Python source → IR extractor using hybrid approach.
+Build Python source → IR extractor using hybrid approach, extending core infrastructure.
 
 ```python
 # tools/ir-extract/python/extract.py
-class PythonExtractor:
-    def extract(self, source: str, path: str) -> IRVersion:
+from tools.ir_core.base import Extractor, ExtractConfig
+from tools.ir_core.treesitter import TreeSitterAdapter
+
+class PythonExtractor(Extractor):
+    """Python-specific extractor using tree-sitter + jedi/pyright."""
+
+    def __init__(self, db: IRDatabase):
+        self.db = db
+        self.parser = TreeSitterAdapter("python")
+        self.gap_patterns = db.get_gap_patterns()
+
+    def extract(self, source: str, path: str, config: ExtractConfig) -> IRVersion:
         # 1. Parse with tree-sitter
         tree = self.parser.parse(source.encode())
 
         # 2. Convert to generic AST
         gast = self.normalize(tree)
 
-        # 3. Enrich with type info (pyright/jedi)
-        typed_gast = self.enrich_types(gast, path)
+        # 3. Resolve imports (if enabled)
+        if config.resolve_imports:
+            imports = self.resolve_imports(gast, path)
+            gast = self.annotate_imports(gast, imports)
 
-        # 4. Generate IR layers
-        ir = self.generate_ir(typed_gast)
+        # 4. Enrich with type info (based on config)
+        typed_gast = self.enrich_types(gast, path, config.type_inference)
 
-        # 5. Validate against schema
+        # 5. Generate IR layers (based on depth)
+        ir = self.generate_ir(typed_gast, config.depth)
+
+        # 6. Detect gaps
+        ir = self.detect_gaps(ir, self.gap_patterns)
+
+        # 7. Validate against schema
         self.validate(ir)
 
         return ir
+
+    def supported_features(self) -> set[str]:
+        return {
+            "functions", "classes", "async", "decorators",
+            "comprehensions", "pattern_matching", "type_hints",
+            "dataclasses", "protocols"
+        }
 ```
+
+**Extraction Depth Configuration**:
+
+| Depth | Layers | Use Case |
+|-------|--------|----------|
+| `minimal` | 2-4 only | Quick structural analysis |
+| `standard` | 1-4 | Normal conversion (default) |
+| `full` | 0-4 | Debugging, detailed analysis |
 
 **Layers to Extract**:
 - Layer 4: Module structure, imports, exports, definitions
 - Layer 3: Type hints, dataclasses, protocols
 - Layer 2: Control flow, effects (try/except), async
 - Layer 1: Variable bindings, assignments, closures
-- Layer 0: (Optional) Expression AST for debugging
+- Layer 0: Expression AST for debugging (only with `depth=full`)
 
 **Deliverable**: `tools/ir-extract/python/`
 
@@ -330,25 +679,31 @@ class PythonExtractor:
 - Pattern matching (3.10+)
 
 **Acceptance**:
+- Extends `Extractor` base class from `ir-core`
 - Extracts 15+ test fixtures to valid IR
 - IR validates against `ir-v1.json`
-- All 5 layers populated where applicable
+- All configured layers populated
+- Gap detection integrated
 
 ---
 
-### 5.5 Python Synthesizer Implementation
+### 5.6 Python Synthesizer Implementation
 
-Build IR → Python code synthesizer.
+Build IR → Python code synthesizer, extending core infrastructure.
 
 ```python
 # tools/ir-synthesize/python/synthesize.py
-class PythonSynthesizer:
-    def synthesize(self, ir: IRVersion) -> str:
+from tools.ir_core.base import Synthesizer, SynthConfig
+
+class PythonSynthesizer(Synthesizer):
+    """Python-specific synthesizer generating Python 3.10+ code."""
+
+    def synthesize(self, ir: IRVersion, config: SynthConfig) -> str:
         # 1. Generate module structure (Layer 4)
         module = self.gen_module(ir.structural)
 
         # 2. Generate types (Layer 3)
-        types = self.gen_types(ir.types)
+        types = self.gen_types(ir.types, include_hints=config.include_type_hints)
 
         # 3. Generate functions (Layer 2)
         functions = self.gen_functions(ir.control_flow)
@@ -356,20 +711,25 @@ class PythonSynthesizer:
         # 4. Apply Python idioms
         code = self.apply_idioms(module, types, functions)
 
-        # 5. Format with black
-        return self.format(code)
+        # 5. Format based on config
+        if config.format_style == "black":
+            return self.format_with_black(code)
+        else:
+            return code  # preserve as-is
 ```
 
 **Deliverable**: `tools/ir-synthesize/python/`
 
 **Acceptance**:
+- Extends `Synthesizer` base class from `ir-core`
 - Generates valid Python 3.10+ code
 - Code passes `ruff check`
 - Type hints included where IR has type info
+- Configurable formatting (black vs preserve)
 
 ---
 
-### 5.6 IR Validation Tool
+### 5.7 IR Validation Tool
 
 Build tool to validate IR against schema and semantic rules.
 
@@ -403,7 +763,7 @@ class IRValidator:
 
 ---
 
-### 5.7 Test Suite Development
+### 5.8 Test Suite Development
 
 Build comprehensive test suite for Python tools.
 
@@ -447,7 +807,7 @@ def test_roundtrip_preserves_semantics(source: str):
 
 ---
 
-### 5.8 Round-Trip Validation
+### 5.9 Round-Trip Validation
 
 Execute round-trip tests with semantic equivalence verification.
 
@@ -471,7 +831,7 @@ Execute round-trip tests with semantic equivalence verification.
 
 ---
 
-### 5.9 Validation Report
+### 5.10 Validation Report
 
 Compile final validation report for Phase 5.
 
@@ -516,19 +876,22 @@ Compile final validation report for Phase 5.
 
 ---
 
-### 5.10 Final Review
+### 5.11 Final Review
 
 Final review of Phase 5 deliverables.
 
 **Checklist**:
-- [ ] Equivalence levels documented and formalized
-- [ ] Extractor architecture decided (ADR-009)
-- [ ] Python extractor producing valid IR
-- [ ] Python synthesizer generating valid code
-- [ ] IR validation tool working
-- [ ] 30+ test cases passing
-- [ ] 85%+ round-trip success
-- [ ] Validation report complete
+- [ ] Equivalence levels documented and formalized (5.1)
+- [ ] Extractor architecture decided (ADR-009) (5.2)
+- [ ] Core infrastructure reusable by Phase 6+ (5.3)
+- [ ] Database query interface working (5.4)
+- [ ] Python extractor producing valid IR (5.5)
+- [ ] Python synthesizer generating valid code (5.6)
+- [ ] IR validation tool working (5.7)
+- [ ] 30+ test cases passing (5.8)
+- [ ] 85%+ round-trip success (5.9)
+- [ ] Validation report complete (5.10)
+- [ ] Performance targets met
 - [ ] Infrastructure integrated (`just ir-*` commands)
 
 **Deliverable**: `analysis/phase5-review.md`
@@ -536,6 +899,7 @@ Final review of Phase 5 deliverables.
 **Acceptance**:
 - All checklist items complete
 - No blocking issues
+- Core infrastructure approved for Phase 6 use
 - Ready for Phase 6 (Rust)
 
 ---
@@ -573,8 +937,11 @@ ir-seed-db:
 
 ## Success Criteria
 
+### Functional Requirements
+
 - [ ] Equivalence levels (5) formally specified
 - [ ] Extractor architecture decided (ADR-009)
+- [ ] Core infrastructure usable by Phase 6+
 - [ ] Python extractor working (15+ fixtures)
 - [ ] Python synthesizer working
 - [ ] IR validator working
@@ -584,18 +951,39 @@ ir-seed-db:
 - [ ] Database queries integrated
 - [ ] Validation report complete
 
+### Performance Requirements
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Extraction speed | < 5 seconds for 1000 LOC | `time just ir-extract large_file.py` |
+| Synthesis speed | < 3 seconds for 1000 LOC | `time just ir-synthesize large_ir.json` |
+| Round-trip overhead | < 10 seconds for 1000 LOC | `time just ir-roundtrip large_file.py` |
+| Memory usage | < 500 MB for 10,000 LOC | `pytest --memray` |
+| Test suite runtime | < 5 minutes total | `time just ir-test` |
+
+### Quality Requirements
+
+- [ ] Code coverage > 80% for core modules
+- [ ] All public APIs documented with docstrings
+- [ ] Type hints throughout (strict mypy)
+- [ ] No ruff errors or warnings
+
 ## Effort Estimate
 
-10-14 days (reduced from original 7-10 by adding research and infrastructure tasks)
+12-16 days (increased from original 7-10 to account for core infrastructure and cross-file analysis)
 
 ## Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
 | Tree-sitter Python grammar issues | Low | Medium | Fall back to `ast` module |
-| Type inference too complex | Medium | Medium | Limit to explicit type hints |
-| Round-trip rate below 70% | Medium | High | Reduce test scope, document gaps |
-| Pyright integration complexity | Medium | Medium | Use simpler `jedi` instead |
+| Type inference too complex | Medium | Medium | Limit to explicit type hints; use fallback chain |
+| Round-trip rate below 70% | Medium | High | Reduce test scope, document gaps, focus on pure functions |
+| Pyright integration complexity | Medium | Medium | Start with jedi, upgrade when needed |
+| Cross-file resolution failures | High | High | Implement graceful degradation; mark unresolved as E004 |
+| Semantic equivalence hard to verify | Medium | High | Define testable subset; manual review for edge cases |
+| Performance degradation at scale | Medium | Medium | Add benchmarks early; optimize hot paths |
+| Core infrastructure over-engineering | Medium | Low | Start minimal; extend based on Phase 6 needs |
 
 ## Output Files
 
@@ -603,6 +991,7 @@ ir-seed-db:
 |------|-------------|
 | `docs/src/validation/equivalence-levels.md` | Equivalence taxonomy |
 | `docs/src/adr/adr-009-extractor-architecture.md` | Architecture decision |
+| `tools/ir-core/` | **Core infrastructure** (base classes, shared utilities) |
 | `tools/ir-extract/python/` | Python extractor |
 | `tools/ir-synthesize/python/` | Python synthesizer |
 | `tools/ir-validate/` | IR validation tool |
