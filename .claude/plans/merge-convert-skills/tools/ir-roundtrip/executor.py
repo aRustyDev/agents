@@ -4,11 +4,24 @@ This module provides safe execution of Python code for L3 semantic
 comparison. It uses subprocess isolation with timeouts and memory
 limits to prevent runaway code.
 
-Security measures:
-- Subprocess isolation (separate process)
-- Execution timeout (default 5 seconds)
-- Output size limits
-- No network access (not enforced by this module, but recommended)
+SECURITY WARNING:
+    This executor is designed for TRUSTED code only (e.g., test fixtures,
+    generated code from controlled sources). It does NOT provide sandbox-level
+    isolation for arbitrary untrusted code.
+
+    For untrusted code, use container isolation (Docker, gVisor) or
+    a dedicated sandbox like Firecracker, Bubblewrap, or nsjail.
+
+Security measures implemented:
+    - Subprocess isolation (separate process)
+    - Execution timeout (configurable, default 5s)
+    - Output size limits (configurable)
+    - Optional memory/CPU limits (Linux only via resource module)
+
+NOT implemented (out of scope for this module):
+    - Network isolation (use firewall rules or container network policies)
+    - Filesystem isolation (use container or chroot)
+    - System call filtering (use seccomp)
 
 Example:
     executor = SafeExecutor()
@@ -28,13 +41,50 @@ Example:
 from __future__ import annotations
 
 import json
+import platform
 import subprocess
 import sys
 import tempfile
 import textwrap
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
+
+# Resource limits only available on Unix-like systems
+try:
+    import resource
+    HAS_RESOURCE = True
+except ImportError:
+    HAS_RESOURCE = False
+
+
+# Default values for security settings
+DEFAULT_TIMEOUT_SECONDS = 5.0
+DEFAULT_MAX_OUTPUT_BYTES = 1_000_000  # 1MB
+DEFAULT_MEMORY_LIMIT_MB = 256
+
+
+@dataclass
+class ExecutorConfig:
+    """Configuration for SafeExecutor with security settings.
+
+    Attributes:
+        timeout: Maximum execution time in seconds
+        max_output_bytes: Maximum stdout/stderr size in bytes
+        memory_limit_mb: Memory limit in MB (Linux only, requires resource module)
+        enable_resource_limits: Whether to apply memory/CPU limits (Linux only)
+        trusted_mode: Explicit acknowledgment that code is trusted
+
+    Note:
+        Resource limits (memory_limit_mb) only work on Linux/Unix systems
+        with the 'resource' module available. On other platforms, these
+        limits are silently ignored.
+    """
+    timeout: float = DEFAULT_TIMEOUT_SECONDS
+    max_output_bytes: int = DEFAULT_MAX_OUTPUT_BYTES
+    memory_limit_mb: int = DEFAULT_MEMORY_LIMIT_MB
+    enable_resource_limits: bool = True
+    trusted_mode: bool = True  # Explicit acknowledgment
 
 
 class ExecutionError(Exception):
@@ -117,14 +167,24 @@ class ExecutionResult:
 class SafeExecutor:
     """Execute Python code safely in a subprocess.
 
-    This executor provides isolation for running untrusted code by:
+    This executor provides isolation for running TRUSTED code by:
     - Using subprocess isolation
     - Enforcing execution timeouts
     - Limiting output size
     - Capturing exceptions
+    - Optional resource limits (Linux only)
+
+    SECURITY NOTE:
+        This is NOT a sandbox for untrusted code. For untrusted code,
+        use container isolation (Docker, gVisor) or dedicated sandboxes.
 
     Example:
-        executor = SafeExecutor(timeout=5.0, max_output=1024*1024)
+        # Using defaults
+        executor = SafeExecutor()
+
+        # With custom configuration
+        config = ExecutorConfig(timeout=10.0, memory_limit_mb=512)
+        executor = SafeExecutor(config=config)
 
         result = executor.execute(
             code="def factorial(n): return 1 if n <= 1 else n * factorial(n-1)",
@@ -137,20 +197,77 @@ class SafeExecutor:
 
     def __init__(
         self,
-        timeout: float = 5.0,
-        max_output: int = 1024 * 1024,
+        timeout: float | None = None,
+        max_output: int | None = None,
         python_executable: str | None = None,
+        config: ExecutorConfig | None = None,
     ) -> None:
         """Initialize the executor.
 
         Args:
-            timeout: Maximum execution time in seconds
-            max_output: Maximum output size in bytes
+            timeout: Maximum execution time in seconds (deprecated, use config)
+            max_output: Maximum output size in bytes (deprecated, use config)
             python_executable: Path to Python interpreter (default: sys.executable)
+            config: ExecutorConfig with all settings (preferred)
         """
-        self.timeout = timeout
-        self.max_output = max_output
+        self.config = config or ExecutorConfig()
+
+        # Support legacy parameters for backwards compatibility
+        if timeout is not None:
+            self.config.timeout = timeout
+        if max_output is not None:
+            self.config.max_output_bytes = max_output
+
         self.python_executable = python_executable or sys.executable
+
+        # Create preexec function for resource limits (Linux only)
+        self._preexec_fn: Callable[[], None] | None = None
+        if (
+            HAS_RESOURCE
+            and self.config.enable_resource_limits
+            and platform.system() != "Windows"
+        ):
+            self._preexec_fn = self._create_preexec_fn()
+
+    # Backwards compatibility properties
+    @property
+    def timeout(self) -> float:
+        return self.config.timeout
+
+    @property
+    def max_output(self) -> int:
+        return self.config.max_output_bytes
+
+    def _create_preexec_fn(self) -> Callable[[], None]:
+        """Create a preexec function to set resource limits.
+
+        This is called in the child process before exec on Unix.
+        Returns a function that sets memory and CPU limits.
+        """
+        memory_bytes = self.config.memory_limit_mb * 1024 * 1024
+        cpu_seconds = int(self.config.timeout) + 2  # Allow extra time for cleanup
+
+        def set_limits() -> None:
+            if HAS_RESOURCE:
+                # Set address space limit (virtual memory)
+                try:
+                    resource.setrlimit(
+                        resource.RLIMIT_AS,
+                        (memory_bytes, memory_bytes)
+                    )
+                except (ValueError, OSError):
+                    pass  # May fail if already limited
+
+                # Set CPU time limit
+                try:
+                    resource.setrlimit(
+                        resource.RLIMIT_CPU,
+                        (cpu_seconds, cpu_seconds)
+                    )
+                except (ValueError, OSError):
+                    pass  # May fail if already limited
+
+        return set_limits
 
     def execute(
         self,
@@ -186,12 +303,13 @@ class SafeExecutor:
             temp_path = Path(f.name)
 
         try:
-            # Execute in subprocess
+            # Execute in subprocess with optional resource limits
             result = subprocess.run(
                 [self.python_executable, str(temp_path)],
                 capture_output=True,
                 timeout=actual_timeout,
                 text=True,
+                preexec_fn=self._preexec_fn,  # Resource limits (Linux only)
             )
 
             # Parse the output
@@ -245,8 +363,9 @@ class SafeExecutor:
             result = subprocess.run(
                 [self.python_executable, str(temp_path)],
                 capture_output=True,
-                timeout=self.timeout * max_examples / 10,  # Scale timeout
+                timeout=self.config.timeout * max_examples / 10,  # Scale timeout
                 text=True,
+                preexec_fn=self._preexec_fn,  # Resource limits (Linux only)
             )
 
             # Parse multiple results from output

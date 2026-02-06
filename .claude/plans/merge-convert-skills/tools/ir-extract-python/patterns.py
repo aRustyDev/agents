@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Iterator
 
-from ir_core.treesitter import TreeNode, SourceSpan, ParseTree
+from ir_core.treesitter import TreeNode, TSSourceSpan, ParseTree
 from ir_core.models import AutomationLevel
 
 
@@ -136,7 +136,7 @@ class Pattern:
 
     Attributes:
         kind: The pattern kind
-        span: Source location
+        span: Source location (TSSourceSpan with byte offsets)
         description: Human-readable description
         confidence: Detection confidence (0.0-1.0)
         automation_level: How automatable conversion is
@@ -144,7 +144,7 @@ class Pattern:
     """
 
     kind: PatternKind
-    span: SourceSpan
+    span: TSSourceSpan
     description: str
     confidence: float = 1.0
     automation_level: AutomationLevel = AutomationLevel.FULL

@@ -37,15 +37,18 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class SourceSpan:
-    """Source location span from tree-sitter.
+class TSSourceSpan:
+    """Tree-sitter source location span with byte offsets.
+
+    This is the raw tree-sitter span representation. Use `to_ir_span()`
+    to convert to the IR SourceSpan for serialization.
 
     Attributes:
         file: File path
         start_byte: Start byte offset
         end_byte: End byte offset
-        start_point: (row, column) start position
-        end_point: (row, column) end position
+        start_point: (row, column) start position (0-indexed)
+        end_point: (row, column) end position (0-indexed)
     """
 
     file: str
@@ -74,6 +77,25 @@ class SourceSpan:
         """0-indexed end column."""
         return self.end_point[1]
 
+    def to_ir_span(self) -> "SourceSpan":
+        """Convert to IR SourceSpan for serialization.
+
+        Returns:
+            IR SourceSpan with line/column for JSON serialization.
+        """
+        from .models import SourceSpan
+        return SourceSpan(
+            file=self.file,
+            start_line=self.start_line,
+            start_col=self.start_col,
+            end_line=self.end_line,
+            end_col=self.end_col,
+        )
+
+
+# Backwards compatibility alias
+SourceSpan = TSSourceSpan
+
 
 @dataclass
 class TreeNode:
@@ -84,7 +106,7 @@ class TreeNode:
     Attributes:
         type: Node type string
         text: Node text content
-        span: Source location
+        span: Source location (TSSourceSpan with byte offsets)
         is_named: Whether this is a named node
         is_error: Whether this is an error node
         children: Child nodes
@@ -94,7 +116,7 @@ class TreeNode:
 
     type: str
     text: str
-    span: SourceSpan
+    span: TSSourceSpan
     is_named: bool
     is_error: bool
     children: list[TreeNode] = field(default_factory=list)
@@ -183,7 +205,7 @@ class TreeNode:
         Returns:
             Wrapped TreeNode
         """
-        span = SourceSpan(
+        span = TSSourceSpan(
             file=file_path,
             start_byte=raw_node.start_byte,
             end_byte=raw_node.end_byte,
@@ -530,13 +552,13 @@ class GASTNode:
 
     Attributes:
         kind: Node type from standard categories
-        span: Source location
+        span: Source location (TSSourceSpan with byte offsets)
         children: Child nodes
         attributes: Kind-specific attributes
     """
 
     kind: str
-    span: SourceSpan
+    span: TSSourceSpan
     children: list[GASTNode] = field(default_factory=list)
     attributes: dict[str, Any] = field(default_factory=dict)
 

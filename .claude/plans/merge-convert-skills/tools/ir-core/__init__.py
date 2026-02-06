@@ -63,7 +63,8 @@ from .models import (
 )
 from .validation import SchemaValidator
 from .gaps import GapDetector
-from .treesitter import TreeSitterAdapter
+from .treesitter import TreeSitterAdapter, TSSourceSpan
+from .utils import ts_span_to_ir, generate_content_hash, compute_source_hash
 
 __version__ = "0.1.0"
 __all__ = [
@@ -83,6 +84,7 @@ __all__ = [
     "SemanticAnnotation",
     "PreservationStatus",
     "SourceSpan",
+    "TSSourceSpan",
     "TypeRef",
     # Errors
     "ExtractionError",
@@ -100,4 +102,7 @@ __all__ = [
     "SchemaValidator",
     "GapDetector",
     "TreeSitterAdapter",
+    "ts_span_to_ir",
+    "generate_content_hash",
+    "compute_source_hash",
 ]

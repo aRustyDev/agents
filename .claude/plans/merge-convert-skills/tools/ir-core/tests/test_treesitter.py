@@ -5,7 +5,8 @@ from __future__ import annotations
 import pytest
 
 from ir_core.treesitter import (
-    SourceSpan,
+    TSSourceSpan,
+    SourceSpan,  # Backwards compatibility alias
     TreeNode,
     ParseTree,
     TreeSitterAdapter,
@@ -13,14 +14,15 @@ from ir_core.treesitter import (
     GASTKind,
     ASTNormalizer,
 )
+from ir_core.models import SourceSpan as IRSourceSpan
 
 
-class TestSourceSpan:
-    """Tests for SourceSpan."""
+class TestTSSourceSpan:
+    """Tests for TSSourceSpan (tree-sitter source span)."""
 
     def test_create_span(self) -> None:
-        """Test creating a SourceSpan."""
-        span = SourceSpan(
+        """Test creating a TSSourceSpan."""
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=10,
@@ -39,7 +41,7 @@ class TestTreeNode:
 
     def test_create_node(self) -> None:
         """Test creating a TreeNode."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=10,
@@ -59,7 +61,7 @@ class TestTreeNode:
 
     def test_node_with_children(self) -> None:
         """Test TreeNode with children."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=20,
@@ -88,7 +90,7 @@ class TestTreeNode:
 
     def test_named_children(self) -> None:
         """Test filtering named children."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=20,
@@ -113,7 +115,7 @@ class TestTreeNode:
 
     def test_find_first(self) -> None:
         """Test find_first method."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=20,
@@ -138,7 +140,7 @@ class TestTreeNode:
 
     def test_find_all(self) -> None:
         """Test find_all method."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=20,
@@ -178,12 +180,50 @@ class TestTreeSitterAdapter:
         assert "unsupported" in str(exc_info.value).lower()
 
 
+class TestTSSourceSpanToIR:
+    """Tests for TSSourceSpan.to_ir_span() conversion."""
+
+    def test_to_ir_span(self) -> None:
+        """Test converting TSSourceSpan to IR SourceSpan."""
+        ts_span = TSSourceSpan(
+            file="test.py",
+            start_byte=0,
+            end_byte=50,
+            start_point=(2, 4),  # 0-indexed: line 3, column 5
+            end_point=(5, 10),    # 0-indexed: line 6, column 11
+        )
+
+        ir_span = ts_span.to_ir_span()
+
+        # IR spans are 1-indexed for lines
+        assert ir_span.file == "test.py"
+        assert ir_span.start_line == 3  # 2 + 1 = 3
+        assert ir_span.start_col == 4
+        assert ir_span.end_line == 6    # 5 + 1 = 6
+        assert ir_span.end_col == 10
+
+        # Verify it's an IR SourceSpan (Pydantic model)
+        assert isinstance(ir_span, IRSourceSpan)
+
+    def test_backwards_compatibility_alias(self) -> None:
+        """Test that SourceSpan alias still works."""
+        # SourceSpan should be an alias for TSSourceSpan
+        span = SourceSpan(
+            file="test.py",
+            start_byte=0,
+            end_byte=10,
+            start_point=(0, 0),
+            end_point=(0, 10),
+        )
+        assert isinstance(span, TSSourceSpan)
+
+
 class TestGASTNode:
     """Tests for Generic AST nodes."""
 
     def test_create_gast_node(self) -> None:
         """Test creating a GAST node."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=10,
@@ -205,7 +245,7 @@ class TestGASTNode:
 
     def test_set_attr(self) -> None:
         """Test setting attributes."""
-        span = SourceSpan(
+        span = TSSourceSpan(
             file="test.py",
             start_byte=0,
             end_byte=10,

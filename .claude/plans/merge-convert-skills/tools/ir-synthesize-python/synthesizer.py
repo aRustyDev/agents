@@ -74,6 +74,7 @@ class SynthesisContext:
         imports_needed: Set of imports that need to be added
         gaps: List of gaps encountered during synthesis
         type_map: Mapping of IR type IDs to Python type names
+        use_future_annotations: Whether to use `from __future__ import annotations`
     """
 
     ir: IRVersion
@@ -82,6 +83,33 @@ class SynthesisContext:
     imports_needed: set[str]
     gaps: list[GapMarker]
     type_map: dict[str, str]
+    use_future_annotations: bool = True
+
+    @property
+    def target_version(self) -> tuple[int, int]:
+        """Parse target Python version from config.
+
+        Returns:
+            Tuple of (major, minor) version numbers.
+            Defaults to (3, 10) if not specified.
+        """
+        if self.config.target_version:
+            try:
+                parts = self.config.target_version.split(".")
+                return (int(parts[0]), int(parts[1]) if len(parts) > 1 else 0)
+            except (ValueError, IndexError):
+                pass
+        return (3, 10)  # Default to Python 3.10
+
+    @property
+    def supports_pep604_union(self) -> bool:
+        """Whether X | Y union syntax is supported (Python 3.10+)."""
+        return self.target_version >= (3, 10)
+
+    @property
+    def supports_builtin_generics(self) -> bool:
+        """Whether list[T] syntax is supported (Python 3.9+)."""
+        return self.target_version >= (3, 9)
 
 
 @register_synthesizer("python")

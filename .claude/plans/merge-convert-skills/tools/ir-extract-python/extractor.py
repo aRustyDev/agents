@@ -20,9 +20,12 @@ Example:
 from __future__ import annotations
 
 import hashlib
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from ir_core.base import (
     Extractor,
@@ -84,7 +87,7 @@ from ir_core.treesitter import (
     TreeSitterAdapter,
     TreeNode,
     ParseTree,
-    SourceSpan,
+    TSSourceSpan,
     GASTNode,
     GASTKind,
 )
@@ -92,17 +95,6 @@ from ir_core.treesitter import (
 from .parser import PythonParser
 from .semantic import SemanticEnricher
 from .patterns import PythonPatternMatcher, Pattern, PatternKind
-
-
-def _source_span_to_ir(span: SourceSpan) -> IRSourceSpan:
-    """Convert tree-sitter SourceSpan to IR SourceSpan."""
-    return IRSourceSpan(
-        file=span.file,
-        start_line=span.start_line,
-        start_col=span.start_col,
-        end_line=span.end_line,
-        end_col=span.end_col,
-    )
 
 
 @register_extractor("python")
@@ -372,9 +364,14 @@ class PythonExtractor(Extractor):
             else:
                 # Use jedi for basic type inference
                 enriched = self.enricher.enrich_with_jedi(source, path)
-        except Exception:
-            # Graceful degradation: continue without semantic info
-            pass
+        except Exception as e:
+            # Graceful degradation: continue without semantic info but log the failure
+            logger.warning(
+                "Semantic enrichment failed for %s: %s",
+                path,
+                str(e),
+                exc_info=True,
+            )
 
         return enriched
 
@@ -619,7 +616,7 @@ class PythonExtractor(Extractor):
             params=type_params,
             body=type_body,
             visibility=Visibility.PUBLIC if not class_name.startswith("_") else Visibility.PRIVATE,
-            span=_source_span_to_ir(class_node.span),
+            span=class_node.span.to_ir_span(),
             annotations=[],
         )
 
@@ -716,7 +713,7 @@ class PythonExtractor(Extractor):
             body=cfg,
             visibility=visibility,
             receiver=receiver,
-            span=_source_span_to_ir(func_node.span),
+            span=func_node.span.to_ir_span(),
             doc_comment=doc_comment,
         )
 

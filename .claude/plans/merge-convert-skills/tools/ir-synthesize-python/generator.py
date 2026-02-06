@@ -205,6 +205,11 @@ class PythonCodeGenerator:
     ) -> str:
         """Generate a type annotation from a TypeRef.
 
+        Respects target Python version from context:
+        - Python 3.9+: Use list[T], dict[K, V] (builtin generics)
+        - Python 3.10+: Use X | Y syntax for unions
+        - Older versions: Use typing.List, typing.Dict, typing.Union
+
         Args:
             type_ref: TypeRef to convert
             context: Synthesis context
@@ -220,9 +225,18 @@ class PythonCodeGenerator:
                 args = ", ".join(
                     self.gen_type_annotation(arg, context) for arg in type_ref.args
                 )
-                # Use modern syntax for Python 3.9+
-                if base in ("list", "dict", "set", "tuple", "frozenset"):
-                    return f"{base}[{args}]"
+                # Check Python version for builtin generics
+                builtin_generics = ("list", "dict", "set", "tuple", "frozenset")
+                if base in builtin_generics:
+                    if context.supports_builtin_generics:
+                        return f"{base}[{args}]"
+                    else:
+                        # Use typing module for older Python
+                        typing_name = base.capitalize()
+                        if base == "frozenset":
+                            typing_name = "FrozenSet"
+                        context.imports_needed.add(f"typing.{typing_name}")
+                        return f"{typing_name}[{args}]"
                 return f"{base}[{args}]"
 
             return base
@@ -247,13 +261,21 @@ class PythonCodeGenerator:
             elements = ", ".join(
                 self.gen_type_annotation(e, context) for e in type_ref.elements
             )
-            return f"tuple[{elements}]"
+            if context.supports_builtin_generics:
+                return f"tuple[{elements}]"
+            else:
+                context.imports_needed.add("typing.Tuple")
+                return f"Tuple[{elements}]"
 
         elif type_ref.kind == TypeRefKind.UNION:
-            members = " | ".join(
+            member_strs = [
                 self.gen_type_annotation(m, context) for m in type_ref.members
-            )
-            return members
+            ]
+            if context.supports_pep604_union:
+                return " | ".join(member_strs)
+            else:
+                context.imports_needed.add("typing.Union")
+                return f"Union[{', '.join(member_strs)}]"
 
         elif type_ref.kind == TypeRefKind.INTERSECTION:
             # Python doesn't have intersection types natively
@@ -834,33 +856,47 @@ class PythonCodeGenerator:
         ]
 
         # Map operator names to Python operators
+        # See: https://docs.python.org/3/library/operator.html
         op_map = {
+            # Arithmetic operators
             "add": "+",
             "sub": "-",
             "mul": "*",
             "div": "/",
+            "truediv": "/",
             "floordiv": "//",
             "mod": "%",
             "pow": "**",
+            "matmul": "@",
+            "neg": "-",
+            "pos": "+",
+            # Comparison operators
             "eq": "==",
             "ne": "!=",
             "lt": "<",
             "le": "<=",
             "gt": ">",
             "ge": ">=",
+            # Logical operators
             "and": "and",
             "or": "or",
             "not": "not",
+            # Identity operators
             "is": "is",
             "is_not": "is not",
+            # Membership operators
             "in": "in",
             "not_in": "not in",
+            # Bitwise operators
             "bitand": "&",
             "bitor": "|",
             "bitxor": "^",
             "bitnot": "~",
+            "invert": "~",
             "lshift": "<<",
             "rshift": ">>",
+            # Assignment expression (Python 3.8+)
+            "walrus": ":=",
         }
 
         py_op = op_map.get(op, op)

@@ -22,7 +22,7 @@ from ir_core.treesitter import (
     TreeSitterAdapter,
     TreeNode,
     ParseTree,
-    SourceSpan,
+    TSSourceSpan,
     QueryMatch,
     GASTNode,
     GASTKind,
