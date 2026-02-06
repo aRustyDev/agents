@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ir-synthesize-rust"
+version = "0.1.0"
+description = "IR to Rust source code synthesizer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "AI Context Library" }]
+
+dependencies = [
+    "ir-core",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.8",
+    "ruff>=0.2",
+]
+
+[project.scripts]
+ir-synthesize-rust = "ir_synthesize_rust.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ir_synthesize_rust"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v", "--cov=ir_synthesize_rust", "--cov-report=term-missing"]
