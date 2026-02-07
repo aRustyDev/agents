@@ -18,7 +18,9 @@ import pytest
 TOOLS_DIR = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(TOOLS_DIR / "ir-core"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-extract-python"))
+sys.path.insert(0, str(TOOLS_DIR / "ir-extract-rust"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-python"))
+sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-rust"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-roundtrip"))
 
@@ -33,18 +35,10 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests requiring full toolchain"
-    )
-    config.addinivalue_line(
-        "markers", "l1: marks tests for L1 (syntactic) comparison"
-    )
-    config.addinivalue_line(
-        "markers", "l2: marks tests for L2 (operational) comparison"
-    )
-    config.addinivalue_line(
-        "markers", "l3: marks tests for L3 (semantic) comparison"
-    )
+    config.addinivalue_line("markers", "integration: marks tests requiring full toolchain")
+    config.addinivalue_line("markers", "l1: marks tests for L1 (syntactic) comparison")
+    config.addinivalue_line("markers", "l2: marks tests for L2 (operational) comparison")
+    config.addinivalue_line("markers", "l3: marks tests for L3 (semantic) comparison")
 
 
 # =============================================================================
@@ -265,6 +259,7 @@ def has_extractor() -> bool:
     """Check if extractor is available."""
     try:
         from ir_extract_python import PythonExtractor
+
         return True
     except ImportError:
         return False
@@ -275,6 +270,7 @@ def has_synthesizer() -> bool:
     """Check if synthesizer is available."""
     try:
         from ir_synthesize_python import PythonSynthesizer
+
         return True
     except ImportError:
         return False
@@ -284,6 +280,26 @@ def has_synthesizer() -> bool:
 def has_full_toolchain(has_extractor: bool, has_synthesizer: bool) -> bool:
     """Check if full toolchain is available."""
     return has_extractor and has_synthesizer
+
+
+def _check_extractor_available() -> bool:
+    """Check if extractor is importable."""
+    try:
+        from ir_extract_python import PythonExtractor
+
+        return True
+    except ImportError:
+        return False
+
+
+def _check_synthesizer_available() -> bool:
+    """Check if synthesizer is importable."""
+    try:
+        from ir_synthesize_python import PythonSynthesizer
+
+        return True
+    except ImportError:
+        return False
 
 
 # Skip markers based on toolchain availability
@@ -301,21 +317,3 @@ requires_full_toolchain = pytest.mark.skipif(
     not (_check_extractor_available() and _check_synthesizer_available()),
     reason="Full toolchain not available",
 )
-
-
-def _check_extractor_available() -> bool:
-    """Check if extractor is importable."""
-    try:
-        from ir_extract_python import PythonExtractor
-        return True
-    except ImportError:
-        return False
-
-
-def _check_synthesizer_available() -> bool:
-    """Check if synthesizer is importable."""
-    try:
-        from ir_synthesize_python import PythonSynthesizer
-        return True
-    except ImportError:
-        return False

@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
-# Import IR core
-from ir_core.models import IRVersion, TypeDef, TypeKind, FunctionDef, Parameter
+import pytest
 from ir_core.base import ExtractConfig, SynthConfig
+
+# Import IR core
+from ir_core.models import IRVersion, TypeDef, TypeKind
+from ir_extract_python import PythonExtractor
 
 # Import extractors and synthesizers
 from ir_extract_roc import RocExtractor
-from ir_synthesize_roc import RocSynthesizer
-from ir_extract_python import PythonExtractor
 from ir_synthesize_python import PythonSynthesizer
-
+from ir_synthesize_roc import RocSynthesizer
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 
@@ -32,11 +32,9 @@ class TestRocExtraction:
         """Create extraction config."""
         return ExtractConfig()
 
-    def test_extract_pure_functions(
-        self, extractor: RocExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_pure_functions(self, extractor: RocExtractor, config: ExtractConfig) -> None:
         """Test extraction of pure functions."""
-        source = '''
+        source = """
 module [double, add]
 
 double : I64 -> I64
@@ -46,7 +44,7 @@ double = \\n ->
 add : I64, I64 -> I64
 add = \\a, b ->
     a + b
-'''
+"""
         ir = extractor.extract(source, "test.roc", config)
 
         assert ir.source_language == "roc"
@@ -58,11 +56,9 @@ add = \\a, b ->
         assert double_fn.return_type == "I64"
         assert len(double_fn.parameters) == 1
 
-    def test_extract_record_types(
-        self, extractor: RocExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_record_types(self, extractor: RocExtractor, config: ExtractConfig) -> None:
         """Test extraction of record types."""
-        source = '''
+        source = """
 module [User, createUser]
 
 User : {
@@ -74,7 +70,7 @@ User : {
 createUser : U64, Str, Str -> User
 createUser = \\id, name, email ->
     { id, name, email }
-'''
+"""
         ir = extractor.extract(source, "test.roc", config)
 
         # Find User type
@@ -82,17 +78,15 @@ createUser = \\id, name, email ->
         assert user_type is not None
         assert user_type.kind == TypeKind.STRUCT
 
-    def test_extract_tag_unions(
-        self, extractor: RocExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_tag_unions(self, extractor: RocExtractor, config: ExtractConfig) -> None:
         """Test extraction of tag unions."""
-        source = '''
+        source = """
 module [Status, Color]
 
 Status : [Pending, Active, Complete, Error Str]
 
 Color : [Red, Green, Blue]
-'''
+"""
         ir = extractor.extract(source, "test.roc", config)
 
         # Find Status type
@@ -100,11 +94,9 @@ Color : [Red, Green, Blue]
         assert status_type is not None
         assert status_type.kind == TypeKind.ENUM
 
-    def test_extract_pattern_matching(
-        self, extractor: RocExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_pattern_matching(self, extractor: RocExtractor, config: ExtractConfig) -> None:
         """Test extraction of pattern matching."""
-        source = '''
+        source = """
 module [describe]
 
 describe : I64 -> Str
@@ -113,7 +105,7 @@ describe = \\n ->
         0 -> "zero"
         1 -> "one"
         _ -> "many"
-'''
+"""
         ir = extractor.extract(source, "test.roc", config)
 
         describe_fn = next((f for f in ir.functions if f.name == "describe"), None)
@@ -157,9 +149,7 @@ class TestRocSynthesis:
         assert "I64" in code
         assert "->" in code
 
-    def test_synthesize_record_type(
-        self, synthesizer: RocSynthesizer, config: SynthConfig
-    ) -> None:
+    def test_synthesize_record_type(self, synthesizer: RocSynthesizer, config: SynthConfig) -> None:
         """Test synthesis of record type."""
         ir = IRVersion(
             version="ir-v1.0",
@@ -184,9 +174,7 @@ class TestRocSynthesis:
         assert "name : Str" in code
         assert "age : I64" in code
 
-    def test_synthesize_tag_union(
-        self, synthesizer: RocSynthesizer, config: SynthConfig
-    ) -> None:
+    def test_synthesize_tag_union(self, synthesizer: RocSynthesizer, config: SynthConfig) -> None:
         """Test synthesis of tag union."""
         ir = IRVersion(
             version="ir-v1.0",
@@ -230,10 +218,10 @@ class TestPythonToRocConversion:
         self, py_extractor: PythonExtractor, roc_synthesizer: RocSynthesizer
     ) -> None:
         """Test converting simple Python function to Roc."""
-        python_code = '''
+        python_code = """
 def double(n: int) -> int:
     return n * 2
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -247,7 +235,7 @@ def double(n: int) -> int:
         self, py_extractor: PythonExtractor, roc_synthesizer: RocSynthesizer
     ) -> None:
         """Test converting Python dataclass to Roc record."""
-        python_code = '''
+        python_code = """
 from dataclasses import dataclass
 
 @dataclass
@@ -255,7 +243,7 @@ class User:
     id: int
     name: str
     email: str
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -269,12 +257,12 @@ class User:
         self, py_extractor: PythonExtractor, roc_synthesizer: RocSynthesizer
     ) -> None:
         """Test that Python exceptions are flagged as gaps."""
-        python_code = '''
+        python_code = """
 def divide(a: int, b: int) -> int:
     if b == 0:
         raise ValueError("Division by zero")
     return a // b
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -303,13 +291,13 @@ class TestRocToPythonConversion:
         self, roc_extractor: RocExtractor, py_synthesizer: PythonSynthesizer
     ) -> None:
         """Test converting Roc pure function to Python."""
-        roc_code = '''
+        roc_code = """
 module [double]
 
 double : I64 -> I64
 double = \\n ->
     n * 2
-'''
+"""
         extract_config = ExtractConfig()
         ir = roc_extractor.extract(roc_code, "test.roc", extract_config)
 
@@ -323,7 +311,7 @@ double = \\n ->
         self, roc_extractor: RocExtractor, py_synthesizer: PythonSynthesizer
     ) -> None:
         """Test converting Roc record to Python dataclass."""
-        roc_code = '''
+        roc_code = """
 module [User]
 
 User : {
@@ -331,7 +319,7 @@ User : {
     name : Str,
     email : Str,
 }
-'''
+"""
         extract_config = ExtractConfig()
         ir = roc_extractor.extract(roc_code, "test.roc", extract_config)
 
@@ -359,13 +347,13 @@ class TestRocRoundTrip:
         self, extractor: RocExtractor, synthesizer: RocSynthesizer
     ) -> None:
         """Test Roc -> IR -> Roc round-trip."""
-        original = '''
+        original = """
 module [double]
 
 double : I64 -> I64
 double = \\n ->
     n * 2
-'''
+"""
         # Extract
         extract_config = ExtractConfig()
         ir = extractor.extract(original, "test.roc", extract_config)
@@ -382,11 +370,11 @@ double = \\n ->
         self, extractor: RocExtractor, synthesizer: RocSynthesizer
     ) -> None:
         """Test record type round-trip."""
-        original = '''
+        original = """
 module [Point]
 
 Point : { x : I64, y : I64 }
-'''
+"""
         extract_config = ExtractConfig()
         ir = extractor.extract(original, "test.roc", extract_config)
 
@@ -425,9 +413,7 @@ class TestFixtureFiles:
         assert ir.source_language == "roc"
         assert len(ir.functions) > 0
 
-    def test_extract_records_fixture(
-        self, extractor: RocExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_records_fixture(self, extractor: RocExtractor, config: ExtractConfig) -> None:
         """Test extraction from records.roc fixture."""
         fixture_path = FIXTURES_DIR / "roc" / "types" / "records.roc"
         if not fixture_path.exists():

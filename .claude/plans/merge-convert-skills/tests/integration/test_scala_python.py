@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
-from ir_core.models import IRVersion, TypeDef, TypeKind, FunctionDef, Parameter
+import pytest
 from ir_core.base import ExtractConfig, SynthConfig
-
-from ir_extract_scala import ScalaExtractor
-from ir_synthesize_scala import ScalaSynthesizer
+from ir_core.models import IRVersion, TypeDef, TypeKind
 from ir_extract_python import PythonExtractor
+from ir_extract_scala import ScalaExtractor
 from ir_synthesize_python import PythonSynthesizer
-
+from ir_synthesize_scala import ScalaSynthesizer
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 
@@ -28,13 +26,11 @@ class TestScalaExtraction:
     def config(self) -> ExtractConfig:
         return ExtractConfig()
 
-    def test_extract_case_class(
-        self, extractor: ScalaExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_case_class(self, extractor: ScalaExtractor, config: ExtractConfig) -> None:
         """Test extraction of case class."""
-        source = '''
+        source = """
 case class Point(x: Int, y: Int)
-'''
+"""
         ir = extractor.extract(source, "test.scala", config)
 
         assert ir.source_language == "scala"
@@ -44,15 +40,13 @@ case class Point(x: Int, y: Int)
         assert point is not None
         assert point.kind == TypeKind.STRUCT
 
-    def test_extract_trait(
-        self, extractor: ScalaExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_trait(self, extractor: ScalaExtractor, config: ExtractConfig) -> None:
         """Test extraction of trait."""
-        source = '''
+        source = """
 trait Greeting {
   def greet(name: String): String
 }
-'''
+"""
         ir = extractor.extract(source, "test.scala", config)
 
         assert len(ir.types) >= 1
@@ -60,15 +54,13 @@ trait Greeting {
         assert greeting is not None
         assert greeting.kind == TypeKind.INTERFACE
 
-    def test_extract_hkt(
-        self, extractor: ScalaExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_hkt(self, extractor: ScalaExtractor, config: ExtractConfig) -> None:
         """Test extraction of higher-kinded type."""
-        source = '''
+        source = """
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
 }
-'''
+"""
         ir = extractor.extract(source, "test.scala", config)
 
         functor = next((t for t in ir.types if t.name == "Functor"), None)
@@ -78,11 +70,9 @@ trait Functor[F[_]] {
         hkt_annotations = [a for a in ir.annotations if a.kind == "SC-001"]
         assert len(hkt_annotations) > 0
 
-    def test_extract_variance(
-        self, extractor: ScalaExtractor, config: ExtractConfig
-    ) -> None:
+    def test_extract_variance(self, extractor: ScalaExtractor, config: ExtractConfig) -> None:
         """Test extraction of variance annotations."""
-        source = '''
+        source = """
 trait Producer[+T] {
   def produce: T
 }
@@ -90,7 +80,7 @@ trait Producer[+T] {
 trait Consumer[-T] {
   def consume(t: T): Unit
 }
-'''
+"""
         ir = extractor.extract(source, "test.scala", config)
 
         # Check for variance annotations
@@ -119,14 +109,16 @@ class TestScalaSynthesis:
             source_path="test.py",
         )
 
-        ir.types.append(TypeDef(
-            name="User",
-            kind=TypeKind.STRUCT,
-            properties=[
-                {"name": "name", "type": "String"},
-                {"name": "age", "type": "Int"},
-            ],
-        ))
+        ir.types.append(
+            TypeDef(
+                name="User",
+                kind=TypeKind.STRUCT,
+                properties=[
+                    {"name": "name", "type": "String"},
+                    {"name": "age", "type": "Int"},
+                ],
+            )
+        )
 
         code = synthesizer.synthesize(ir, config)
 
@@ -134,9 +126,7 @@ class TestScalaSynthesis:
         assert "name: String" in code
         assert "age: Int" in code
 
-    def test_synthesize_trait(
-        self, synthesizer: ScalaSynthesizer, config: SynthConfig
-    ) -> None:
+    def test_synthesize_trait(self, synthesizer: ScalaSynthesizer, config: SynthConfig) -> None:
         """Test synthesis of trait."""
         ir = IRVersion(
             version="ir-v1.0",
@@ -144,22 +134,20 @@ class TestScalaSynthesis:
             source_path="test.py",
         )
 
-        ir.types.append(TypeDef(
-            name="Printable",
-            kind=TypeKind.INTERFACE,
-            methods=[
-                {"name": "print", "return_type": "String"}
-            ],
-        ))
+        ir.types.append(
+            TypeDef(
+                name="Printable",
+                kind=TypeKind.INTERFACE,
+                methods=[{"name": "print", "return_type": "String"}],
+            )
+        )
 
         code = synthesizer.synthesize(ir, config)
 
         assert "trait Printable" in code
         assert "def print" in code
 
-    def test_synthesize_function(
-        self, synthesizer: ScalaSynthesizer, config: SynthConfig
-    ) -> None:
+    def test_synthesize_function(self, synthesizer: ScalaSynthesizer, config: SynthConfig) -> None:
         """Test synthesis of function."""
         ir = IRVersion(
             version="ir-v1.0",
@@ -167,11 +155,13 @@ class TestScalaSynthesis:
             source_path="test.py",
         )
 
-        ir.functions.append(FunctionDef(
-            name="double",
-            parameters=[Parameter(name="n", type_annotation="Int")],
-            return_type="Int",
-        ))
+        ir.functions.append(
+            FunctionDef(
+                name="double",
+                parameters=[Parameter(name="n", type_annotation="Int")],
+                return_type="Int",
+            )
+        )
 
         code = synthesizer.synthesize(ir, config)
 
@@ -195,7 +185,7 @@ class TestPythonToScalaConversion:
         self, py_extractor: PythonExtractor, scala_synthesizer: ScalaSynthesizer
     ) -> None:
         """Test converting Python dataclass to Scala case class."""
-        python_code = '''
+        python_code = """
 from dataclasses import dataclass
 
 @dataclass
@@ -203,7 +193,7 @@ class User:
     id: int
     name: str
     email: str
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -216,10 +206,10 @@ class User:
         self, py_extractor: PythonExtractor, scala_synthesizer: ScalaSynthesizer
     ) -> None:
         """Test converting Python function to Scala."""
-        python_code = '''
+        python_code = """
 def double(n: int) -> int:
     return n * 2
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -233,12 +223,12 @@ def double(n: int) -> int:
         self, py_extractor: PythonExtractor, scala_synthesizer: ScalaSynthesizer
     ) -> None:
         """Test that Python-specific patterns are flagged."""
-        python_code = '''
+        python_code = """
 def dynamic_function(x):
     if isinstance(x, int):
         return x * 2
     return str(x)
-'''
+"""
         extract_config = ExtractConfig()
         ir = py_extractor.extract(python_code, "test.py", extract_config)
 
@@ -263,9 +253,9 @@ class TestScalaToPythonConversion:
         self, scala_extractor: ScalaExtractor, py_synthesizer: PythonSynthesizer
     ) -> None:
         """Test converting Scala case class to Python."""
-        scala_code = '''
+        scala_code = """
 case class Point(x: Int, y: Int)
-'''
+"""
         extract_config = ExtractConfig()
         ir = scala_extractor.extract(scala_code, "test.scala", extract_config)
 

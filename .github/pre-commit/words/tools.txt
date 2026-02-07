@@ -152,3 +152,7 @@ HKT
 interop
 asyncio
 defrecord
+kinded
+pytestmark
+rlib
+addinivalue
