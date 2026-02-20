@@ -785,8 +785,26 @@ build-plugin name:
     if [ ! -f "$SOURCES" ]; then
       echo "Error: $SOURCES not found"; exit 1
     fi
+
+    # Check for stale sources before building
+    echo "Checking source hashes..."
+    verify_exit=0
+    "{{ which("uv") }}" run python .scripts/plugin-hash.py --verify-sources "$PLUGIN_DIR" || verify_exit=$?
+    if [ "$verify_exit" -eq 1 ]; then
+      echo ""
+      echo "✗ Build aborted: stale or missing sources detected"
+      echo "  Run 'just plugin-verify-sources {{ name }}' for details"
+      exit 1
+    elif [ "$verify_exit" -eq 2 ]; then
+      echo ""
+      echo "⚠ Warning: Plugin uses legacy format without hashes"
+      echo "  Consider upgrading to extended format for hash verification"
+      echo ""
+    fi
+
     # Copy each source component into the plugin directory
-    jq -r '.sources | to_entries[] | "\(.key)\t\(.value)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
+    # Handle both legacy format (string path) and extended format (object with source field)
+    jq -r '.sources | to_entries[] | "\(.key)\t\(if .value | type == "string" then .value else .value.source end)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
       target="$PLUGIN_DIR/$local_path"
       mkdir -p "$(dirname "$target")"
       if [ -d "$source_path" ]; then
