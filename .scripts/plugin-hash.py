@@ -179,6 +179,51 @@ def verify_sources(plugin_dir: Path) -> list[SourceStatus]:
     return results
 
 
+def update_source_hash(plugin_dir: Path, local_path: str) -> str:
+    """
+    Update the hash for a specific source in plugin.sources.json.
+
+    Returns the new hash.
+    """
+    sources_file = plugin_dir / ".claude-plugin" / "plugin.sources.json"
+
+    if not sources_file.exists():
+        raise ValueError(f"No plugin.sources.json found at {sources_file}")
+
+    with sources_file.open() as f:
+        data = json.load(f)
+
+    sources = data.get("sources", {})
+    if local_path not in sources:
+        raise ValueError(f"Component '{local_path}' not found in plugin.sources.json")
+
+    source_def = sources[local_path]
+
+    # Get source path from either format
+    if isinstance(source_def, str):
+        source_path = source_def
+        # Convert to extended format
+        sources[local_path] = {"source": source_path}
+        source_def = sources[local_path]
+    else:
+        source_path = source_def.get("source", "")
+
+    # Compute new hash
+    source = Path(source_path)
+    if not source.exists():
+        raise ValueError(f"Source path does not exist: {source_path}")
+
+    new_hash = compute_hash(source)
+    source_def["hash"] = format_hash(new_hash)
+
+    # Write back
+    with sources_file.open("w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+
+    return new_hash
+
+
 def _print_verify_sources_json(results: list[SourceStatus]) -> None:
     """Print verify-sources results in JSON format."""
     output = [
@@ -215,12 +260,85 @@ def _print_verify_sources_text(results: list[SourceStatus], plugin_name: str) ->
     return 0
 
 
+def _prompt_choice(valid_choices: dict[str, str]) -> str:
+    """Prompt user for choice. Returns the action key (u/s/a) or raises KeyboardInterrupt."""
+    choice_str = ", ".join(f"[{k.upper()}]{v}" for k, v in valid_choices.items())
+    while True:
+        choice = input(f"  {choice_str}? ").strip().lower()
+        if choice in valid_choices or choice in [v.lower() for v in valid_choices.values()]:
+            return choice[0]  # Return first letter
+        print(f"  Invalid choice. Enter {', '.join(valid_choices.keys()).upper()}.")
+
+
+def _handle_stale_source(plugin_dir: Path, r: SourceStatus) -> tuple[str, bool]:
+    """Handle a stale source. Returns (action, updated)."""
+    print(f"\n⚠ Stale: {r.local_path}")
+    print(f"  Source: {r.source_path}")
+    print(f"  Expected: {format_hash(r.expected_hash) if r.expected_hash else 'none'}")
+    print(f"  Actual:   {format_hash(r.actual_hash) if r.actual_hash else 'none'}")
+
+    choice = _prompt_choice({"u": "pdate hash", "s": "kip component", "a": "bort build"})
+    if choice == "u":
+        update_source_hash(plugin_dir, r.local_path)
+        print(f"  ✓ Hash updated for {r.local_path}")
+        return "continue", True
+    if choice == "s":
+        print(f"  → Skipping {r.local_path}")
+        return "skip", False
+    return "abort", False
+
+
+def _handle_missing_source(r: SourceStatus) -> str:
+    """Handle a missing source. Returns 'skip' or 'abort'."""
+    print(f"\n✗ Missing: {r.local_path}")
+    print(f"  Source: {r.source_path}")
+
+    choice = _prompt_choice({"s": "kip component", "a": "bort build"})
+    if choice == "s":
+        print(f"  → Skipping {r.local_path}")
+        return "skip"
+    return "abort"
+
+
+def _handle_interactive_verify(
+    plugin_dir: Path, results: list[SourceStatus]
+) -> tuple[int, list[str]]:
+    """Handle interactive verification with prompts. Returns (exit_code, skip_list)."""
+    skip_list: list[str] = []
+    updated = False
+
+    for r in results:
+        if r.status == "stale":
+            action, was_updated = _handle_stale_source(plugin_dir, r)
+            updated = updated or was_updated
+            if action == "skip":
+                skip_list.append(r.local_path)
+            elif action == "abort":
+                return 1, []
+        elif r.status == "missing":
+            action = _handle_missing_source(r)
+            if action == "skip":
+                skip_list.append(r.local_path)
+            elif action == "abort":
+                return 1, []
+
+    if updated:
+        print("\n✓ plugin.sources.json updated")
+
+    return 0, skip_list
+
+
 def _handle_verify_sources(args: argparse.Namespace) -> int:
     """Handle --verify-sources mode. Returns exit code."""
     results = verify_sources(args.verify_sources)
     if args.json:
         _print_verify_sources_json(results)
         return 0
+    if args.interactive:
+        exit_code, skip_list = _handle_interactive_verify(args.verify_sources, results)
+        if skip_list:
+            print(f"\nSkipped: {', '.join(skip_list)}")
+        return exit_code
     return _print_verify_sources_text(results, args.verify_sources.name)
 
 
@@ -270,6 +388,15 @@ Examples:
     parser.add_argument(
         "--json", action="store_true", help="Output in JSON format (for --verify-sources)"
     )
+    parser.add_argument(
+        "--interactive", "-i", action="store_true", help="Interactive mode for stale sources"
+    )
+    parser.add_argument(
+        "--update-hash",
+        type=str,
+        metavar="COMPONENT",
+        help="Update hash for a specific component (requires --verify-sources)",
+    )
     return parser
 
 
@@ -278,6 +405,14 @@ def main():
     args = parser.parse_args()
 
     try:
+        # Update hash for single component
+        if args.update_hash:
+            if not args.verify_sources:
+                parser.error("--update-hash requires --verify-sources")
+            new_hash = update_source_hash(args.verify_sources, args.update_hash)
+            print(f"✓ Updated {args.update_hash}: {format_hash(new_hash)}")
+            sys.exit(0)
+
         if args.verify_sources:
             sys.exit(_handle_verify_sources(args))
 

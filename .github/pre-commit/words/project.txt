@@ -39,6 +39,7 @@ myproject
 nomic
 ollama
 orbstack
+pdate
 pentesting
 pkgmgr
 polyrepo

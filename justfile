@@ -789,11 +789,10 @@ build-plugin name:
     # Check for stale sources before building
     echo "Checking source hashes..."
     verify_exit=0
-    "{{ which("uv") }}" run python .scripts/plugin-hash.py --verify-sources "$PLUGIN_DIR" || verify_exit=$?
+    "{{ which("uv") }}" run python .scripts/plugin-hash.py --verify-sources "$PLUGIN_DIR" --interactive || verify_exit=$?
     if [ "$verify_exit" -eq 1 ]; then
       echo ""
-      echo "✗ Build aborted: stale or missing sources detected"
-      echo "  Run 'just plugin-verify-sources {{ name }}' for details"
+      echo "✗ Build aborted"
       exit 1
     elif [ "$verify_exit" -eq 2 ]; then
       echo ""
