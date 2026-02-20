@@ -1,7 +1,7 @@
 ---
 description: Create plugin directory structure from template using roadmap data
 argument-hint: <plugin-name> <roadmap-path>
-allowed-tools: Read, Write, Bash(mkdir:*), Bash(cp:*), Bash(ls:*), Glob
+allowed-tools: Read, Write, Edit, Bash(mkdir:*), Bash(cp:*), Bash(ls:*), Glob
 ---
 
 # Scaffold Plugin
@@ -156,7 +156,30 @@ See `.plans/plugins/<plugin-name>/roadmap.md` for the full development plan.
 
 Write to `context/plugins/<plugin-name>/README.md`.
 
-### Step 9: Report
+### Step 9: Add to Marketplace
+
+Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
+
+```json
+{
+  "name": "<plugin-name>",
+  "source": "./context/plugins/<plugin-name>",
+  "description": "<purpose from brainstorm>",
+  "version": "0.1.0",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev"
+  },
+  "keywords": ["<keywords from brainstorm>"],
+  "license": "MIT",
+  "homepage": "https://docs.arusty.dev/ai/plugins/<plugin-name>",
+  "repository": "https://github.com/aRustyDev/ai.git"
+}
+```
+
+**Important:** This step ensures the plugin is discoverable and version-tracked centrally.
+
+### Step 10: Report
 
 ```
 ## Plugin Scaffolded
@@ -165,6 +188,7 @@ Write to `context/plugins/<plugin-name>/README.md`.
 |-------|-------|
 | Plugin | <name> |
 | Location | context/plugins/<name>/ |
+| Marketplace | .claude-plugin/marketplace.json |
 | Files generated | plugin.json, plugin.sources.json, .mcp.json, .lsp.json, brewfile, README.md |
 
 **Next step**: `/generate-plugin-issues .plans/plugins/<name>/roadmap.md`
