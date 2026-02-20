@@ -1,6 +1,6 @@
 {
   "name": "browser-extension-dev",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
   "author": {
     "name": "Adam Smith",

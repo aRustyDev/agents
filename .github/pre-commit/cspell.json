@@ -39,6 +39,8 @@
     "*.sql",
     "*.tex",
     "*.toml",
+    "*.jsonl",
+    ".beads/**",
     ".data/**",
     "dist/**",
     "build/**",
