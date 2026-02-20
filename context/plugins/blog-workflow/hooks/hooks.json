@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "frontmatter-validator": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/posts/**/*.md",
+      "command": "python3 -c \"import sys,yaml; yaml.safe_load(open(sys.argv[1]).read().split('---')[1])\" $TOOL_INPUT_FILE_PATH",
+      "description": "Validate YAML frontmatter in blog posts"
+    },
+    "link-checker": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/posts/**/*.md",
+      "command": "lychee --no-progress $TOOL_INPUT_FILE_PATH",
+      "description": "Check links in blog posts using lychee"
+    },
+    "code-block-linter": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/posts/**/*.md",
+      "command": "grep -E '^```$' $TOOL_INPUT_FILE_PATH && echo 'Warning: code block without language tag'",
+      "description": "Ensure code blocks have language tags"
+    }
+  }
+}

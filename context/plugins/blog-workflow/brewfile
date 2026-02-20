@@ -1,0 +1,7 @@
+# blog-workflow dependencies
+
+# Link checking
+brew "lychee"          # Fast link checker for markdown files
+
+# Markdown processing (optional)
+# brew "pandoc"        # Document conversion if needed

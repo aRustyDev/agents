@@ -1,0 +1,31 @@
+{
+  "name": "blog-workflow",
+  "version": "0.1.0",
+  "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev",
+    "url": "https://im.arusty.dev"
+  },
+  "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
+  "repository": "https://github.com/aRustyDev/ai.git",
+  "license": "MIT",
+  "keywords": [
+    "blog",
+    "technical-writing",
+    "content-creation",
+    "markdown",
+    "seo",
+    "tutorials",
+    "research",
+    "workflow"
+  ],
+
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json",
+  "outputStyles": "./styles/",
+  "lspServers": "./.lsp.json"
+}

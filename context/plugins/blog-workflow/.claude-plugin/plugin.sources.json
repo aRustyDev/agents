@@ -1,0 +1,26 @@
+{
+  "$schema": "Plugin source mapping — maps extension sources for reuse/extend",
+  "sources": [
+    {
+      "name": "research-synthesizer",
+      "type": "agent",
+      "action": "extend",
+      "base": "context/agents/research-analyst.md",
+      "gap": "Adapt for blog research: topic focus, source gathering for posts"
+    },
+    {
+      "name": "technical-editor",
+      "type": "agent",
+      "action": "extend",
+      "base": "context/agents/technical-writer.md",
+      "gap": "Focus on blog editing: clarity, style consistency, readability"
+    },
+    {
+      "name": "link-checker",
+      "type": "hook",
+      "action": "reuse",
+      "base": ".pre-commit-config.yaml (lychee)",
+      "note": "Adapt lychee link validation for blog post hooks"
+    }
+  ]
+}
