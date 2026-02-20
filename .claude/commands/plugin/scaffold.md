@@ -54,13 +54,14 @@ Read the template `context/plugins/.template/.claude-plugin/plugin.json` and pop
   "agents": [],
   "skills": [],
   "mcpServers": "./.mcp.json",
-  "outputStyles": [],
+  "outputStyles": ["../../output-styles/feedback-submission.md"],
   "lspServers": "./.lsp.json"
 }
 ```
 
 **Important:**
-- Use **empty arrays** for commands, agents, skills, outputStyles (NOT directory paths)
+- Use **empty arrays** for commands, agents, skills (NOT directory paths)
+- Always include `feedback-submission.md` in outputStyles for consistent feedback formatting
 - Do NOT include `"hooks"` field — `hooks/hooks.json` is auto-loaded by Claude Code
 - Populate arrays with explicit file paths as components are added
 

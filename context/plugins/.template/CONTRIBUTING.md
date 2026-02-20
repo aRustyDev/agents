@@ -12,8 +12,16 @@ Thank you for your interest in contributing to this plugin!
 
 ### Suggesting Features
 
-1. Start a [discussion](https://github.com/aRustyDev/ai/discussions) for larger features
+1. Start a [discussion](https://github.com/aRustyDev/ai/discussions/categories/ideas) for larger features
 2. Get feedback from maintainers before implementing
+
+### Sharing Success Stories
+
+Built something great with this plugin? Share it with the community!
+
+1. Post in [Show and Tell](https://github.com/aRustyDev/ai/discussions/categories/show-and-tell)
+2. Include what you accomplished and how the plugin helped
+3. Share tips for others
 
 ### Submitting Changes
 

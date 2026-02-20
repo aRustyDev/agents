@@ -16,6 +16,6 @@
   "agents": [],
   "skills": [],
   "mcpServers": "./.mcp.json",
-  "outputStyles": [],
+  "outputStyles": ["../../output-styles/feedback-submission.md"],
   "lspServers": "./.lsp.json"
 }

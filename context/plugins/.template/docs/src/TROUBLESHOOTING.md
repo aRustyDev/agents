@@ -87,7 +87,7 @@ tail -f ~/.claude/logs/mcp-<server-name>.log
 If you can't resolve your issue:
 
 1. **Search existing issues**: [GitHub Issues](https://github.com/aRustyDev/ai/issues?q=is%3Aissue+label%3Abug)
-2. **Ask in Discussions**: [GitHub Discussions](https://github.com/aRustyDev/ai/discussions)
+2. **Ask in Discussions**: [GitHub Discussions Q&A](https://github.com/aRustyDev/ai/discussions/categories/q-a)
 3. **Report a bug**: [Bug Report](https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml)
 
 When reporting, include:
@@ -95,3 +95,12 @@ When reporting, include:
 - Steps to reproduce
 - Expected vs actual behavior
 - Environment details (OS, Claude Code version)
+
+## Share Your Success
+
+Had a great experience with this plugin? We'd love to hear about it!
+
+- **Share a success story**: [Show and Tell](https://github.com/aRustyDev/ai/discussions/categories/show-and-tell)
+- **Suggest improvements**: [Ideas](https://github.com/aRustyDev/ai/discussions/categories/ideas)
+
+Use the `/feedback` command or the `feedback-submission` output style to format your feedback.
