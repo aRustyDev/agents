@@ -1,6 +1,6 @@
 ---
 description: Synchronize issues with git remote
-argument-hint: [--dry-run] [--message] [--status] [--merge]
+argument-hint: "[--dry-run] [--message] [--status] [--merge]"
 ---
 
 Synchronize issues with git remote in a single operation.

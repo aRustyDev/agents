@@ -1,6 +1,6 @@
 ---
 description: Manage background sync daemon
-argument-hint: [start] [stop] [status]
+argument-hint: "[start] [stop] [status]"
 ---
 
 Manage the per-project background daemon that handles database connections and syncs with git.

@@ -1,6 +1,6 @@
 ---
 description: Manage dependencies between issues
-argument-hint: [command] [from-id] [to-id]
+argument-hint: "<command> <from-id> <to-id>"
 ---
 
 Manage dependencies between beads issues.
@@ -42,6 +42,7 @@ Manage dependencies between beads issues.
 The `--format mermaid` option outputs the dependency tree as a Mermaid.js flowchart:
 
 **Example:**
+
 ```bash
 bd dep tree bd-1 --format mermaid
 ```

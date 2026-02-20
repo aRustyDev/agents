@@ -1,6 +1,6 @@
 ---
 description: Import issues from JSONL format
-argument-hint: [-i input-file]
+argument-hint: "[-i input-file]"
 ---
 
 Import issues from JSON Lines format (one JSON object per line).

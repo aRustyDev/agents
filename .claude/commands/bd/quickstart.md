@@ -1,6 +1,6 @@
 ---
 description: Quick start guide for bd workflows (deprecated)
-argument-hint: []
+argument-hint: ""
 ---
 
 **Note:** The `bd quickstart` command is deprecated. See [docs/QUICKSTART.md](../docs/QUICKSTART.md) instead.
