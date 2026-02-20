@@ -31,4 +31,3 @@ class MyPythonTool < Formula
     assert_match "my-python-tool #{version}", shell_output("#{bin}/my-python-tool --help")
   end
 end
-

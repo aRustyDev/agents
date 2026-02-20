@@ -31,4 +31,3 @@ class MyTool < Formula
     assert_match "my-tool version #{version}", shell_output("#{bin}/my-tool --help")
   end
 end
-

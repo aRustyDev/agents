@@ -35,4 +35,3 @@ class MyDaemon < Formula
     EOS
   end
 end
-
