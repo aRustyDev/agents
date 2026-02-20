@@ -1,12 +1,68 @@
 {
   "lspServers": {
     "manifest-lsp": {
-      "status": "planned",
-      "description": "Schema validation, autocomplete, diagnostics for manifest.json across browsers"
+      "status": "active",
+      "description": "Schema validation, autocomplete, diagnostics for manifest.json across browsers",
+      "server": "vscode-json-languageserver",
+      "install": "npm install -g vscode-json-languageserver",
+      "config": {
+        "json.schemas": [
+          {
+            "fileMatch": ["manifest.json"],
+            "url": "https://json.schemastore.org/chrome-manifest.json"
+          },
+          {
+            "fileMatch": ["manifest.json"],
+            "url": "https://json.schemastore.org/webextension.json"
+          }
+        ]
+      },
+      "docs": "https://github.com/microsoft/vscode/tree/main/extensions/json-language-features/server"
     },
     "web-ext-types-lsp": {
-      "status": "planned",
-      "description": "Type hints for browser.* and chrome.* APIs with cross-browser info"
+      "status": "active",
+      "description": "Type hints for browser.* and chrome.* APIs with cross-browser info",
+      "server": "typescript-language-server",
+      "install": "npm install -g typescript typescript-language-server",
+      "dependencies": {
+        "webextension-polyfill-types": "npm:@anthropic-ai/anthropic-sdk-types/webextension-polyfill",
+        "chrome-types": "npm:@anthropic-ai/anthropic-sdk-types/chrome"
+      },
+      "config": {
+        "compilerOptions": {
+          "types": ["webextension-polyfill", "chrome"]
+        }
+      },
+      "note": "Types are bundled with WXT framework; standalone projects should install type packages",
+      "docs": "https://www.npmjs.com/package/typescript-language-server"
+    }
+  },
+  "schemaAssociations": {
+    "manifest.json": [
+      {
+        "name": "Chrome Extension Manifest",
+        "url": "https://json.schemastore.org/chrome-manifest.json",
+        "description": "Chrome extension manifest.json schema (MV2 and MV3)"
+      },
+      {
+        "name": "WebExtension Manifest",
+        "url": "https://json.schemastore.org/webextension.json",
+        "description": "Cross-browser WebExtension manifest schema"
+      }
+    ]
+  },
+  "typeDefinitions": {
+    "webextension-polyfill": {
+      "package": "@anthropic-ai/anthropic-sdk-types/webextension-polyfill",
+      "description": "TypeScript types for browser.* APIs (Firefox-style)",
+      "install": "npm install --save-dev @anthropic-ai/anthropic-sdk-types/webextension-polyfill",
+      "alternative": "Bundled with WXT framework"
+    },
+    "chrome": {
+      "package": "@anthropic-ai/anthropic-sdk-types/chrome",
+      "description": "TypeScript types for chrome.* APIs",
+      "install": "npm install --save-dev @anthropic-ai/anthropic-sdk-types/chrome",
+      "alternative": "Bundled with WXT framework"
     }
   }
 }

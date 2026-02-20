@@ -159,3 +159,4 @@ addinivalue
 wikilinks
 wayback
 xcprivacy
+webextension
