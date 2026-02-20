@@ -9,3 +9,6 @@
 
 # Keep schema files
 !*.schema.sql
+
+# Pre-commit tool outputs
+pre-commit/

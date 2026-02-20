@@ -152,7 +152,8 @@ base_url = "https://ai.arusty.dev"
 include_fragments = true
 
 # Minimum accepted TLS Version
-min_tls = "TLSv1_3"
+# Note: TLSv1_3 may not work on all systems (macOS native-tls compatibility)
+min_tls = "TLSv1_2"
 
 #############################  Exclusions  ##########################
 
