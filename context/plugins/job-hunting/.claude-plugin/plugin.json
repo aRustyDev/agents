@@ -1,18 +1,27 @@
 {
-  "name": "mcp-builder",
-  "version": "1.0.0",
-  "description": "Generate high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP), Node/TypeScript (MCP SDK), or Rust (MCP SDK).",
+  "name": "job-hunting",
+  "version": "0.1.0",
+  "description": "Comprehensive job hunting toolkit — analyze job descriptions, extract resume bullets from career history, identify skill gaps, tailor applications, and research employers with salary data.",
   "author": {
     "name": "Adam Smith",
     "email": "developer@gh.arusty.dev",
     "url": "https://im.arusty.dev"
   },
-  "homepage": "https://docs.arusty.dev/ai/plugins/mcp-builder",
+  "homepage": "https://docs.arusty.dev/ai/plugins/job-hunting",
   "repository": "https://github.com/aRustyDev/ai.git",
   "license": "MIT",
-  "keywords": ["keyword1", "keyword2"],
+  "keywords": [
+    "job-hunting",
+    "resume",
+    "job-search",
+    "career",
+    "job-description",
+    "cover-letter",
+    "ats",
+    "salary-research"
+  ],
 
-  "commands": ["./../../commands/special.md"],
+  "commands": "./commands/",
   "agents": "./agents/",
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json",

@@ -18,6 +18,48 @@
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/homebrew-dev",
       "repository": "https://github.com/aRustyDev/ai.git"
+    },
+    {
+      "name": "browser-extension-dev",
+      "source": "./context/plugins/browser-extension-dev",
+      "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": ["browser-extension", "wxt", "manifest-v3", "cross-browser", "firefox", "chrome", "safari", "wasm"],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/browser-extension-dev",
+      "repository": "https://github.com/aRustyDev/ai.git"
+    },
+    {
+      "name": "blog-workflow",
+      "source": "./context/plugins/blog-workflow",
+      "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": ["blog", "technical-writing", "content-creation", "markdown", "seo", "tutorials", "workflow"],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
+      "repository": "https://github.com/aRustyDev/ai.git"
+    },
+    {
+      "name": "job-hunting",
+      "source": "./context/plugins/job-hunting",
+      "description": "Comprehensive job hunting toolkit — analyze job descriptions, extract resume bullets from career history, identify skill gaps, tailor applications, and research employers with salary data.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": ["job-hunting", "resume", "job-search", "career", "job-description", "cover-letter", "ats"],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/job-hunting",
+      "repository": "https://github.com/aRustyDev/ai.git"
     }
   ]
 }
