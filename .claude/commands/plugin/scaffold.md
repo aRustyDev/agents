@@ -166,6 +166,18 @@ Update template placeholders in documentation files:
 3. **docs/src/USAGE.md**: Replace `<plugin-name>` and `<command-N>` placeholders
 4. **docs/src/TROUBLESHOOTING.md**: Replace `<plugin-name>` placeholders
 
+#### Feedback Infrastructure (Auto-Configured)
+
+The following feedback mechanisms are automatically set up:
+
+| File | Feedback Feature |
+|------|------------------|
+| `plugin.json` | References `feedback-submission.md` output style |
+| `TROUBLESHOOTING.md` | "Getting Help" links to bug reports, "Share Your Success" links to discussions |
+| `CONTRIBUTING.md` | "Sharing Success Stories" section with Show and Tell link |
+
+**Verify** these links are correct and add plugin-specific feedback guidance if needed (e.g., common issues, success story examples).
+
 ### Step 10: Add to Marketplace
 
 Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
@@ -207,6 +219,7 @@ Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
 | Configuration | plugin.json, plugin.sources.json, .mcp.json, .lsp.json, brewfile |
 | Documentation | README.md, CHANGELOG.md, CONTRIBUTING.md |
 | Docs Book | docs/src/USAGE.md, docs/src/TROUBLESHOOTING.md, docs/src/SUMMARY.md |
+| Feedback | feedback-submission.md (referenced), bug/feature/success story links |
 
 **Next step**: `/generate-plugin-issues .plans/plugins/<name>/roadmap.md`
 ```
