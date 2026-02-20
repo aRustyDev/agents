@@ -9,6 +9,23 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
       "description": "Chromium-focused browser automation fallback"
+    },
+    "wasm-bindgen": {
+      "command": "cargo",
+      "args": [
+        "run",
+        "--manifest-path",
+        "${HOME}/.local/share/mcp/wasm-bindgen-mcp/Cargo.toml",
+        "--",
+        "--target-dir",
+        ".output/wasm"
+      ],
+      "env": {
+        "WASM_PACK_PATH": "wasm-pack",
+        "WASM_TARGET": "web",
+        "WASM_EXTENSION_MODE": "true"
+      },
+      "description": "WASM build integration for browser extensions using wasm-pack and wasm-bindgen"
     }
   }
 }
