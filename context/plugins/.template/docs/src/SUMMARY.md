@@ -1,3 +1,4 @@
 # Summary
 
-- [Chapter 1](./chapter_1.md)
+- [Usage](./USAGE.md)
+- [Troubleshooting](./TROUBLESHOOTING.md)

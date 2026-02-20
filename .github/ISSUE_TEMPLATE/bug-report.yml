@@ -1,0 +1,105 @@
+name: Bug Report
+description: Report a bug in a plugin, skill, command, or other component
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Bug
+        Help us improve by reporting issues you encounter with plugins, skills, commands, or other components.
+
+  - type: dropdown
+    id: component-type
+    attributes:
+      label: Component Type
+      description: What type of component is affected?
+      options:
+        - Plugin
+        - Skill
+        - Command
+        - Agent
+        - MCP Server
+        - Output Style
+        - Hook
+        - Rule
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: component-name
+    attributes:
+      label: Component Name
+      description: Name of the affected component
+      placeholder: "homebrew-dev, pkgmgr-homebrew-formula-dev, /scaffold-plugin"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Component version (check plugin.json or SKILL.md frontmatter)
+      placeholder: "1.0.0"
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the bug
+      placeholder: |
+        1. Run `/scaffold-plugin my-plugin`
+        2. Observe error in output
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include error messages if any.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical - Completely blocks usage
+        - High - Major functionality broken
+        - Medium - Workaround available
+        - Low - Minor inconvenience
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Your environment details
+      placeholder: |
+        - OS: macOS 14.0
+        - Claude Code version: 1.0.0
+        - Shell: zsh 5.9
+      render: markdown
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+        - label: I have tested with the latest version of the component
+        - label: I have included all relevant error messages and logs

@@ -156,7 +156,16 @@ See `.plans/plugins/<plugin-name>/roadmap.md` for the full development plan.
 
 Write to `context/plugins/<plugin-name>/README.md`.
 
-### Step 9: Add to Marketplace
+### Step 9: Customize Documentation
+
+Update template placeholders in documentation files:
+
+1. **CHANGELOG.md**: Replace `<plugin-name>` with actual plugin name in version links
+2. **CONTRIBUTING.md**: Replace `<plugin-name>` placeholders
+3. **docs/src/USAGE.md**: Replace `<plugin-name>` and `<command-N>` placeholders
+4. **docs/src/TROUBLESHOOTING.md**: Replace `<plugin-name>` placeholders
+
+### Step 10: Add to Marketplace
 
 Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
 
@@ -179,7 +188,7 @@ Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
 
 **Important:** This step ensures the plugin is discoverable and version-tracked centrally.
 
-### Step 10: Report
+### Step 11: Report
 
 ```
 ## Plugin Scaffolded
@@ -189,7 +198,14 @@ Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
 | Plugin | <name> |
 | Location | context/plugins/<name>/ |
 | Marketplace | .claude-plugin/marketplace.json |
-| Files generated | plugin.json, plugin.sources.json, .mcp.json, .lsp.json, brewfile, README.md |
+
+### Generated Files
+
+| Category | Files |
+|----------|-------|
+| Configuration | plugin.json, plugin.sources.json, .mcp.json, .lsp.json, brewfile |
+| Documentation | README.md, CHANGELOG.md, CONTRIBUTING.md |
+| Docs Book | docs/src/USAGE.md, docs/src/TROUBLESHOOTING.md, docs/src/SUMMARY.md |
 
 **Next step**: `/generate-plugin-issues .plans/plugins/<name>/roadmap.md`
 ```

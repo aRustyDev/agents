@@ -1,0 +1,88 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for a component
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Request a Feature
+        Suggest new functionality or improvements to existing components.
+
+  - type: dropdown
+    id: component-type
+    attributes:
+      label: Component Type
+      description: What type of component should this feature be added to?
+      options:
+        - Plugin
+        - Skill
+        - Command
+        - Agent
+        - MCP Server
+        - Output Style
+        - Hook
+        - Rule
+        - New Component Type
+        - Infrastructure/Tooling
+    validations:
+      required: true
+
+  - type: input
+    id: component-name
+    attributes:
+      label: Component Name
+      description: Name of the component to enhance (or "New" for new components)
+      placeholder: "homebrew-dev, /scaffold-plugin, New"
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe the problem you're trying to solve or the workflow you want to improve
+      placeholder: |
+        As a developer working on Terraform modules, I want to...
+        so that I can...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How do you envision this feature working?
+      placeholder: |
+        Add a new `/terraform-validate` command that:
+        1. Runs `terraform validate`
+        2. Parses errors and suggests fixes
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches have you considered?
+      placeholder: |
+        - Using a generic validation command (less specific)
+        - Manual validation (more tedious)
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Would significantly improve my workflow
+        - Critical for my use case
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues and discussions to avoid duplicates
+        - label: I have checked that this feature doesn't already exist
+        - label: I am willing to help implement this feature (optional)
