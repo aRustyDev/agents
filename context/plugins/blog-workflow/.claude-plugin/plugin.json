@@ -1,6 +1,6 @@
 {
   "name": "blog-workflow",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
   "author": {
     "name": "Adam Smith",
@@ -43,8 +43,7 @@
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/",
-    "../../output-styles/feedback-submission.md"
+    "./styles/"
   ],
   "lspServers": "./.lsp.json"
 }

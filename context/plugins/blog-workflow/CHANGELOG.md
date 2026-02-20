@@ -7,19 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Initial plugin structure
+## [1.0.6] - 2026-02-20
 
 ### Changed
 
-### Deprecated
+- Migrated plugin.sources.json to extended format with content-addressed hashing
+- Internalized feedback-submission.md output style (previously external reference)
+- Added SHA256 hash verification for shared components
 
-### Removed
+## [1.0.5] - 2026-02-19
 
-### Fixed
+### Added
 
-### Security
+- Initial plugin structure
 
 ## [0.1.0] - YYYY-MM-DD
 
