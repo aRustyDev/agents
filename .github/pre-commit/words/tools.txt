@@ -161,3 +161,4 @@ wayback
 xcprivacy
 webextension
 parallelizable
+webstore

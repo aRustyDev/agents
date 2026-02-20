@@ -26,6 +26,18 @@
         "WASM_EXTENSION_MODE": "true"
       },
       "description": "WASM build integration for browser extensions using wasm-pack and wasm-bindgen"
+    },
+    "browser-store-api": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-browser-store-api"],
+      "env": {
+        "AMO_API_KEY": "${AMO_API_KEY}",
+        "AMO_API_SECRET": "${AMO_API_SECRET}",
+        "CHROME_WEBSTORE_CLIENT_ID": "${CHROME_WEBSTORE_CLIENT_ID}",
+        "CHROME_WEBSTORE_CLIENT_SECRET": "${CHROME_WEBSTORE_CLIENT_SECRET}",
+        "CHROME_WEBSTORE_REFRESH_TOKEN": "${CHROME_WEBSTORE_REFRESH_TOKEN}"
+      },
+      "description": "Query browser extension store APIs for version info, compatibility checks, and submission status"
     }
   }
 }
