@@ -1,14 +1,15 @@
+---
+paths:
+  - "context/plugins/**/.claude-plugin/plugin.json"
+---
+
 # Plugin Version Sync
 
-When editing any plugin's `plugin.json` file, you MUST keep versions synchronized.
+When editing a plugin's `plugin.json` file, you MUST keep versions synchronized.
 
 ## Rule
 
-If you modify a `version` field in any file matching:
-
-- `context/plugins/*/. claude-plugin/plugin.json`
-
-You MUST also update the corresponding version in:
+When you modify the `version` field in this file, you MUST also update the corresponding version in:
 
 - `.claude-plugin/marketplace.json`
 
