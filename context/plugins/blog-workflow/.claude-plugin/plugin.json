@@ -20,7 +20,6 @@
     "research",
     "workflow"
   ],
-
   "commands": [
     "./commands/draft-post.md",
     "./commands/gather-resources.md",
@@ -43,6 +42,9 @@
     "./skills/technical-writing-style/SKILL.md"
   ],
   "mcpServers": "./.mcp.json",
-  "outputStyles": "./styles/",
+  "outputStyles": [
+    "./styles/",
+    "../../output-styles/feedback-submission.md"
+  ],
   "lspServers": "./.lsp.json"
 }

@@ -1,4 +1,5 @@
 set unstable := true
+
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"
@@ -843,63 +844,177 @@ list-plugins:
       echo "  $name$installed"
     done
 
+# Add feedback infrastructure to an existing plugin (non-destructive)
+[group('plugins')]
+add-feedback-infra name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PLUGIN_DIR="context/plugins/{{ name }}"
+    TEMPLATE_DIR="context/plugins/.template"
+
+    if [ ! -d "$PLUGIN_DIR" ]; then
+      echo "Error: Plugin directory $PLUGIN_DIR not found"; exit 1
+    fi
+
+    if [ "{{ name }}" = ".template" ]; then
+      echo "Error: Cannot retrofit .template itself"; exit 1
+    fi
+
+    echo "Adding feedback infrastructure to {{ name }}..."
+    added=()
+
+    # Create docs directory if needed
+    mkdir -p "$PLUGIN_DIR/docs/src"
+
+    # Copy feedback-related files (non-destructive)
+    for file in CHANGELOG.md CONTRIBUTING.md docs/src/TROUBLESHOOTING.md docs/src/USAGE.md; do
+      src="$TEMPLATE_DIR/$file"
+      dest="$PLUGIN_DIR/$file"
+      if [ ! -f "$dest" ]; then
+        cp "$src" "$dest"
+        # Replace <plugin-name> placeholder with actual name
+        sed -i '' "s/<plugin-name>/{{ name }}/g" "$dest"
+        added+=("$file")
+        echo "  + $file"
+      else
+        echo "  - $file (exists, skipped)"
+      fi
+    done
+
+    # Update plugin.json to include feedback-submission.md in outputStyles
+    PLUGIN_JSON="$PLUGIN_DIR/.claude-plugin/plugin.json"
+    if [ -f "$PLUGIN_JSON" ]; then
+      if ! grep -q "feedback-submission.md" "$PLUGIN_JSON"; then
+        # Check if outputStyles exists and its type
+        if grep -q '"outputStyles"' "$PLUGIN_JSON"; then
+          if jq -e '.outputStyles | type == "array"' "$PLUGIN_JSON" > /dev/null 2>&1; then
+            # It's an array, append to it
+            jq '.outputStyles += ["../../output-styles/feedback-submission.md"]' "$PLUGIN_JSON" > "$PLUGIN_JSON.tmp"
+            mv "$PLUGIN_JSON.tmp" "$PLUGIN_JSON"
+            added+=("plugin.json (outputStyles updated)")
+            echo "  + plugin.json (outputStyles updated)"
+          elif jq -e '.outputStyles | type == "string"' "$PLUGIN_JSON" > /dev/null 2>&1; then
+            # It's a string (directory path), convert to array with both
+            existing=$(jq -r '.outputStyles' "$PLUGIN_JSON")
+            jq --arg existing "$existing" '.outputStyles = [$existing, "../../output-styles/feedback-submission.md"]' "$PLUGIN_JSON" > "$PLUGIN_JSON.tmp"
+            mv "$PLUGIN_JSON.tmp" "$PLUGIN_JSON"
+            added+=("plugin.json (outputStyles converted to array)")
+            echo "  + plugin.json (outputStyles converted to array)"
+          fi
+        else
+          # Add outputStyles field
+          jq '. + {"outputStyles": ["../../output-styles/feedback-submission.md"]}' "$PLUGIN_JSON" > "$PLUGIN_JSON.tmp"
+          mv "$PLUGIN_JSON.tmp" "$PLUGIN_JSON"
+          added+=("plugin.json (outputStyles added)")
+          echo "  + plugin.json (outputStyles added)"
+        fi
+      else
+        echo "  - plugin.json (feedback-submission.md already referenced)"
+      fi
+    fi
+
+    # Generate CHANGELOG from git history if plugin has commits
+    CHANGELOG="$PLUGIN_DIR/CHANGELOG.md"
+    if [ ${#added[@]} -gt 0 ] && [[ " ${added[*]} " =~ " CHANGELOG.md " ]]; then
+      # Check for plugin-specific git history
+      plugin_commits=$(git log --oneline -- "$PLUGIN_DIR" 2>/dev/null | head -20 || true)
+      if [ -n "$plugin_commits" ]; then
+        # Enhance CHANGELOG with git history
+        echo "" >> "$CHANGELOG"
+        echo "## Git History" >> "$CHANGELOG"
+        echo "" >> "$CHANGELOG"
+        echo "\`\`\`" >> "$CHANGELOG"
+        echo "$plugin_commits" >> "$CHANGELOG"
+        echo "\`\`\`" >> "$CHANGELOG"
+        echo "  + CHANGELOG.md (enhanced with git history)"
+      fi
+    fi
+
+    # Report
+    if [ ${#added[@]} -gt 0 ]; then
+      echo ""
+      echo "✓ Feedback infrastructure added to {{ name }}"
+      echo "  Files added/updated: ${#added[@]}"
+    else
+      echo ""
+      echo "✓ {{ name }} already has feedback infrastructure"
+    fi
+
+# Add feedback infrastructure to all existing plugins
+[group('plugins')]
+add-feedback-infra-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Adding feedback infrastructure to all plugins..."
+    echo ""
+    for d in context/plugins/*/; do
+      name=$(basename "$d")
+      [ "$name" = ".template" ] && continue
+      [ "$name" = "TODO.md" ] && continue
+      [ ! -d "$d" ] && continue
+      echo "=== $name ==="
+      just add-feedback-infra "$name"
+      echo ""
+    done
+    echo "✓ All plugins updated"
+
 # Knowledge graph operations
 
 # Initialize knowledge graph database
 [group('kg')]
 kg-init:
-    @"{{which("uv")}}" run python .scripts/init-db.py
+    @"{{ which("uv") }}" run python .scripts/init-db.py
 
 # Ingest all context files into knowledge graph
 [group('kg')]
 kg-ingest:
-    @"{{which("uv")}}" run python .scripts/embed.py ingest --all
+    @"{{ which("uv") }}" run python .scripts/embed.py ingest --all
 
 # Check for stale entities
 [group('kg')]
 kg-check:
-    @"{{which("uv")}}" run python .scripts/embed.py check
+    @"{{ which("uv") }}" run python .scripts/embed.py check
 
 # Semantic search
 [group('kg')]
 kg-search query:
-    @"{{which("uv")}}" run python .scripts/embed.py search "{{ query }}"
+    @"{{ which("uv") }}" run python .scripts/embed.py search "{{ query }}"
 
 # Find similar entities
 [group('kg')]
 kg-similar entity:
-    @"{{which("uv")}}" run python .scripts/embed.py similar "{{ entity }}"
+    @"{{ which("uv") }}" run python .scripts/embed.py similar "{{ entity }}"
 
 # Compute similarity cache
 [group('kg')]
 kg-similarity:
-    @"{{which("uv")}}" run python .scripts/embed.py similarity
+    @"{{ which("uv") }}" run python .scripts/embed.py similarity
 
 # Watch for changes and auto-embed
 [group('kg')]
 kg-watch:
-    @"{{which("uv")}}" run python .scripts/watch-embed.py
+    @"{{ which("uv") }}" run python .scripts/watch-embed.py
 
 # Dump knowledge graph to SQL (essential tables only, ~40MB)
 [group('kg')]
 kg-dump:
-    @"{{which("uv")}}" run python .scripts/init-db.py --dump
+    @"{{ which("uv") }}" run python .scripts/init-db.py --dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
-    @"{{which("uv")}}" run python .scripts/init-db.py --load
+    @"{{ which("uv") }}" run python .scripts/init-db.py --load
 
 # Rebuild vector embeddings from existing chunks (after loading from dump)
 [group('kg')]
 kg-rebuild-embeddings:
-    @"{{which("uv")}}" run python .scripts/embed.py rebuild-embeddings
+    @"{{ which("uv") }}" run python .scripts/embed.py rebuild-embeddings
     @just kg-similarity
 
 # Show knowledge graph statistics
 [group('kg')]
 kg-stats:
-    @"{{which("uv")}}" run python .scripts/kg-stats.py
+    @"{{ which("uv") }}" run python .scripts/kg-stats.py
 
 # Force re-embed all entities
 [group('kg')]

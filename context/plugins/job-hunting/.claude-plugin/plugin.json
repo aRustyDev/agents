@@ -20,7 +20,6 @@
     "ats",
     "salary-research"
   ],
-
   "commands": [
     "./commands/job-history-bullets.md",
     "./commands/job-history-explore.md",
@@ -43,6 +42,9 @@
     "./skills/resume-formatting/SKILL.md"
   ],
   "mcpServers": "./.mcp.json",
-  "outputStyles": "./styles/",
+  "outputStyles": [
+    "./styles/",
+    "../../output-styles/feedback-submission.md"
+  ],
   "lspServers": "./.lsp.json"
 }

@@ -44,6 +44,9 @@
     "./skills/wxt-framework-patterns/SKILL.md"
   ],
   "mcpServers": "./.mcp.json",
-  "outputStyles": "./styles/",
+  "outputStyles": [
+    "./styles/",
+    "../../output-styles/feedback-submission.md"
+  ],
   "lspServers": "./.lsp.json"
 }
