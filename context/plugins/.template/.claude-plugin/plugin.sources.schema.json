@@ -42,8 +42,45 @@
                 "description": "ISO 8601 timestamp when component was forked"
               }
             },
-            "required": ["source", "hash"],
+            "required": ["source"],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Planning format for components to create/extend from external sources",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["reuse", "extend", "create"],
+                "description": "Action type for this component"
+              },
+              "base": {
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } }
+                ],
+                "description": "External source URL(s) to extend from"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Implementation notes for this component"
+              },
+              "package": {
+                "type": "string",
+                "description": "Package name for MCP servers"
+              },
+              "install": {
+                "type": "string",
+                "description": "Installation command for MCP servers"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "description": "Placeholder hash (not verified for planning format)"
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": true
           }
         ]
       }

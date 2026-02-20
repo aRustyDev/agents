@@ -78,3 +78,8 @@ wronghash
 yamllint
 wshobson
 blencorp
+Manim
+tenequm
+pproenca
+yamadashy
+Wassette

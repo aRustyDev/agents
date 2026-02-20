@@ -42,3 +42,13 @@ See `.plans/plugins/browser-extension-dev/roadmap.md` for:
 - Effort estimates
 - External dependencies
 - Implementation order
+
+## Additional Work
+
+- Break skills up into smaller, more manageable pieces
+- Style skills in a progressive manner
+- Include rules/context docs to direct consumers how to structure the plugin directory
+- Include CI pipeline templates for relevant GitHub Actions
+- Include scripts for project setup/init; ie things to get the development environment set up
+- Include directions for deciding if the extension should have its own repo or not
+- Include directions for what/how to document the extension

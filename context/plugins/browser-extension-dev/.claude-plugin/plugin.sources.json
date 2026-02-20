@@ -1,5 +1,5 @@
 {
-  "$schema": "Plugin source mapping — maps external sources for reuse/extend components",
+  "$schema": "Plugin source mapping \u2014 maps external sources for reuse/extend components",
   "sources": {
     "skills/wxt-framework-patterns": {
       "type": "extend",
@@ -7,37 +7,44 @@
         "https://github.com/tenequm/claude-plugins/tree/main/chrome-extension-wxt",
         "https://github.com/pproenca/dot-skills/tree/master/skills/.experimental/wxt-browser-extensions"
       ],
-      "notes": "Merge general WXT guide with 49 hardening rules; add Firefox/Safari specifics"
+      "notes": "Merge general WXT guide with 49 hardening rules; add Firefox/Safari specifics",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "skills/cross-browser-compatibility": {
       "type": "extend",
       "base": "https://github.com/yamadashy/repomix/tree/main/.claude/skills/browser-extension-developer",
-      "notes": "Expand beyond GitHub button; add API polyfills, feature detection tables"
+      "notes": "Expand beyond GitHub button; add API polyfills, feature detection tables",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "skills/wasm-architecture-decision": {
       "type": "extend",
       "base": "https://github.com/rand/cc-polymath (discover-wasm gateway)",
-      "notes": "Extract browser-specific WASM loading patterns; add decision framework"
+      "notes": "Extract browser-specific WASM loading patterns; add decision framework",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "skills/manifest-v3-reference": {
       "type": "extend",
       "base": "https://github.com/tenequm/claude-plugins/tree/main/chrome-extension-wxt/references",
-      "notes": "Expand MV3 APIs; add Firefox MV2 fallbacks, Safari differences"
+      "notes": "Expand MV3 APIs; add Firefox MV2 fallbacks, Safari differences",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "mcp/playwright": {
       "type": "reuse",
       "package": "@playwright/mcp",
-      "install": "npx @playwright/mcp@latest"
+      "install": "npx @playwright/mcp@latest",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "mcp/puppeteer": {
       "type": "reuse",
       "package": "@modelcontextprotocol/server-puppeteer",
-      "install": "npx @modelcontextprotocol/server-puppeteer"
+      "install": "npx @modelcontextprotocol/server-puppeteer",
+      "hash": "sha256:326e893a0e4a0ea99d16a300823cf09a8a348dc39a9cc14d686c40eb165565d4"
     },
     "mcp/wasm-bindgen": {
       "type": "extend",
       "base": "https://github.com/AzureCoreSU/wassette",
-      "notes": "Adapt for browser extension WASM workflows"
+      "notes": "Adapt for browser extension WASM workflows",
+      "hash": "sha256:f7db2ac420257b54d2ac5b8263f8acef3aec619312f9bb3468389bd0158261ee"
     }
   }
 }
