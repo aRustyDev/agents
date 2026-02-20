@@ -1,6 +1,6 @@
 {
   "name": "browser-extension-dev",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
   "author": {
     "name": "Adam Smith",
@@ -21,9 +21,28 @@
     "webassembly",
     "wasm"
   ],
-  "commands": "./commands/",
-  "agents": "./agents/",
-  "skills": "./skills/",
+  "commands": [
+    "./commands/add-wasm-module.md",
+    "./commands/create-extension.md",
+    "./commands/validate-extension.md"
+  ],
+  "agents": [
+    "./agents/extension-architect.md",
+    "./agents/extension-debugger.md",
+    "./agents/store-submission-reviewer.md",
+    "./agents/wasm-integration-advisor.md"
+  ],
+  "skills": [
+    "./skills/browser-store-apis/SKILL.md",
+    "./skills/cross-browser-compatibility/SKILL.md",
+    "./skills/extension-anti-patterns/SKILL.md",
+    "./skills/extension-security/SKILL.md",
+    "./skills/extension-store-submission/SKILL.md",
+    "./skills/manifest-v3-reference/SKILL.md",
+    "./skills/wasm-architecture-decision/SKILL.md",
+    "./skills/wasm-extension-integration/SKILL.md",
+    "./skills/wxt-framework-patterns/SKILL.md"
+  ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": "./styles/",

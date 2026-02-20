@@ -1,6 +1,6 @@
 {
   "name": "blog-workflow",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
   "author": {
     "name": "Adam Smith",
@@ -21,9 +21,27 @@
     "workflow"
   ],
 
-  "commands": "./commands/",
-  "agents": "./agents/",
-  "skills": "./skills/",
+  "commands": [
+    "./commands/draft-post.md",
+    "./commands/gather-resources.md",
+    "./commands/outline-post.md",
+    "./commands/publish-prep.md",
+    "./commands/refine-research-plan.md",
+    "./commands/research-topic.md",
+    "./commands/seo-pass.md",
+    "./commands/series-plan.md"
+  ],
+  "agents": [
+    "./agents/research-synthesizer.md",
+    "./agents/series-architect.md",
+    "./agents/technical-editor.md"
+  ],
+  "skills": [
+    "./skills/code-example-best-practices/SKILL.md",
+    "./skills/content-structure-patterns/SKILL.md",
+    "./skills/seo-for-developers/SKILL.md",
+    "./skills/technical-writing-style/SKILL.md"
+  ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": "./styles/",

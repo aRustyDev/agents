@@ -1,6 +1,6 @@
 {
   "name": "job-hunting",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Comprehensive job hunting toolkit — analyze job descriptions, extract resume bullets from career history, identify skill gaps, tailor applications, and research employers with salary data.",
   "author": {
     "name": "Adam Smith",
@@ -21,9 +21,27 @@
     "salary-research"
   ],
 
-  "commands": "./commands/",
-  "agents": "./agents/",
-  "skills": "./skills/",
+  "commands": [
+    "./commands/job-history-bullets.md",
+    "./commands/job-history-explore.md",
+    "./commands/job-history-refine.md",
+    "./commands/job-hunt-plugin-setup.md",
+    "./commands/job-role-analyze-fit.md",
+    "./commands/job-role-define-perfect.md",
+    "./commands/job-role-get-description.md",
+    "./commands/job-role-parse-description.md",
+    "./commands/resume-extract-data.md"
+  ],
+  "agents": [],
+  "skills": [
+    "./skills/cover-letter-writing/SKILL.md",
+    "./skills/job-description-analysis/SKILL.md",
+    "./skills/job-requirement-analysis/SKILL.md",
+    "./skills/job-searching/SKILL.md",
+    "./skills/research-employer/SKILL.md",
+    "./skills/resume-content/SKILL.md",
+    "./skills/resume-formatting/SKILL.md"
+  ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": "./styles/",
