@@ -76,3 +76,5 @@ worktree
 worktrees
 wronghash
 yamllint
+wshobson
+blencorp
