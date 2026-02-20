@@ -7,12 +7,12 @@
   "dictionaryDefinitions": [
     {
       "name": "project-words",
-      "path": "words/project.txt",
+      "path": "${cwd}/.github/pre-commit/words/project.txt",
       "addWords": true
     },
     {
       "name": "tools-words",
-      "path": "words/tools.txt",
+      "path": "${cwd}/.github/pre-commit/words/tools.txt",
       "addWords": true
     }
   ],

@@ -2,7 +2,7 @@
 
 Configuration: `.github/pre-commit/cspell.json`
 Dictionaries: `.github/pre-commit/words/*.txt`
-Public hook: `https://github.com/streetsidesoftware/cspell-cli` (v9.6.0)
+Hook: Local (uses system-installed cspell for consistent dictionary resolution)
 
 ## When to Modify
 
@@ -45,14 +45,14 @@ echo "domain-term-1" > .github/pre-commit/words/domain.txt
 echo "domain-term-2" >> .github/pre-commit/words/domain.txt
 ```
 
-2. Register it in `cspell.json`:
+2. Register it in `cspell.json` using `${cwd}` for consistent path resolution:
 
 ```json
 {
   "dictionaryDefinitions": [
     {
       "name": "domain-words",
-      "path": ".github/pre-commit/words/domain.txt",
+      "path": "${cwd}/.github/pre-commit/words/domain.txt",
       "addWords": true
     }
   ],
@@ -73,7 +73,7 @@ Define custom dictionaries:
   "dictionaryDefinitions": [
     {
       "name": "project-words",
-      "path": ".github/pre-commit/words/project.txt",
+      "path": "${cwd}/.github/pre-commit/words/project.txt",
       "addWords": true
     }
   ]
@@ -83,8 +83,10 @@ Define custom dictionaries:
 | Field | Description |
 |-------|-------------|
 | `name` | Dictionary identifier (used in `dictionaries` array) |
-| `path` | Path to word list file (relative to config) |
+| `path` | Path to word list file (use `${cwd}` for project root) |
 | `addWords` | Allow adding words via `cspell --words` |
+
+**Important:** Dictionary paths use `${cwd}` to reference the project root, ensuring consistent resolution regardless of where cspell is invoked from.
 
 ### Built-in Dictionaries
 
@@ -135,16 +137,27 @@ The config includes these built-in dictionaries:
 
 ## Pre-commit Hook
 
+Using a local hook for consistent dictionary path resolution:
+
 ```yaml
-- repo: https://github.com/streetsidesoftware/cspell-cli
-  rev: v9.6.0
+- repo: local
   hooks:
     - id: cspell
-      args:
-        - '--config=.github/pre-commit/cspell.json'
-        - '--no-progress'
-        - '--no-summary'
+      name: "spelling: cspell check"
+      entry: cspell lint --config .github/pre-commit/cspell.json --no-progress --no-summary
+      language: system
+      types: [text]
+      exclude: |
+        (?x)^(
+          .*\.sql$|
+          .*\.lock$|
+          .*\.tex$|
+          context/\.context/.*|
+          context/skills/.*/assets/.*
+        )$
 ```
+
+The local hook uses the system-installed cspell. Dictionary paths use `${cwd}` for consistent resolution.
 
 ## Running Manually
 
