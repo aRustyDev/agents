@@ -1,0 +1,31 @@
+{
+  "name": "browser-extension-dev",
+  "version": "0.1.0",
+  "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev",
+    "url": "https://im.arusty.dev"
+  },
+  "homepage": "https://docs.arusty.dev/ai/plugins/browser-extension-dev",
+  "repository": "https://github.com/aRustyDev/ai.git",
+  "license": "MIT",
+  "keywords": [
+    "browser-extension",
+    "wxt",
+    "manifest-v3",
+    "cross-browser",
+    "firefox",
+    "chrome",
+    "safari",
+    "webassembly",
+    "wasm"
+  ],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json",
+  "outputStyles": "./styles/",
+  "lspServers": "./.lsp.json"
+}

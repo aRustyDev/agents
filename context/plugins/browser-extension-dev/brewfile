@@ -1,0 +1,15 @@
+# browser-extension-dev dependencies
+
+# Browser extension development tools
+brew "web-ext"               # Mozilla web-ext CLI for extension validation and packaging
+
+# WASM toolchain (for WASM integration features)
+brew "rustup"                # Rust toolchain manager (for wasm-pack, wasm-bindgen)
+brew "wasmtime"              # WASM runtime for testing
+
+# Node.js (for WXT framework)
+brew "node"                  # Node.js runtime
+brew "pnpm"                  # Fast package manager (WXT default)
+
+# Optional: Browser automation
+# Playwright browsers installed via: npx playwright install

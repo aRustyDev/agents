@@ -1,0 +1,12 @@
+{
+  "lspServers": {
+    "manifest-lsp": {
+      "status": "planned",
+      "description": "Schema validation, autocomplete, diagnostics for manifest.json across browsers"
+    },
+    "web-ext-types-lsp": {
+      "status": "planned",
+      "description": "Type hints for browser.* and chrome.* APIs with cross-browser info"
+    }
+  }
+}

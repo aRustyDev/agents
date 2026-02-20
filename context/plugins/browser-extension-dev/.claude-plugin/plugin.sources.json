@@ -1,0 +1,43 @@
+{
+  "$schema": "Plugin source mapping — maps external sources for reuse/extend components",
+  "sources": {
+    "skills/wxt-framework-patterns": {
+      "type": "extend",
+      "base": [
+        "https://github.com/tenequm/claude-plugins/tree/main/chrome-extension-wxt",
+        "https://github.com/pproenca/dot-skills/tree/master/skills/.experimental/wxt-browser-extensions"
+      ],
+      "notes": "Merge general WXT guide with 49 hardening rules; add Firefox/Safari specifics"
+    },
+    "skills/cross-browser-compatibility": {
+      "type": "extend",
+      "base": "https://github.com/yamadashy/repomix/tree/main/.claude/skills/browser-extension-developer",
+      "notes": "Expand beyond GitHub button; add API polyfills, feature detection tables"
+    },
+    "skills/wasm-architecture-decision": {
+      "type": "extend",
+      "base": "https://github.com/rand/cc-polymath (discover-wasm gateway)",
+      "notes": "Extract browser-specific WASM loading patterns; add decision framework"
+    },
+    "skills/manifest-v3-reference": {
+      "type": "extend",
+      "base": "https://github.com/tenequm/claude-plugins/tree/main/chrome-extension-wxt/references",
+      "notes": "Expand MV3 APIs; add Firefox MV2 fallbacks, Safari differences"
+    },
+    "mcp/playwright": {
+      "type": "reuse",
+      "package": "@playwright/mcp",
+      "install": "npx @playwright/mcp@latest"
+    },
+    "mcp/puppeteer": {
+      "type": "reuse",
+      "package": "@modelcontextprotocol/server-puppeteer",
+      "install": "npx @modelcontextprotocol/server-puppeteer"
+    },
+    "mcp/wasm-bindgen": {
+      "type": "extend",
+      "base": "https://github.com/AzureCoreSU/wassette",
+      "notes": "Adapt for browser extension WASM workflows"
+    }
+  }
+}

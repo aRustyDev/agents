@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "manifest-validator": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/manifest.json",
+      "command": "web-ext lint --source-dir $(dirname $TOOL_INPUT_FILE_PATH)",
+      "description": "Validate manifest.json on save using web-ext CLI"
+    },
+    "extension-linter": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/entrypoints/**/*.ts",
+      "command": "eslint --config .eslintrc.json $TOOL_INPUT_FILE_PATH",
+      "description": "Lint extension code for deprecated APIs and security issues"
+    },
+    "wasm-build-check": {
+      "status": "planned",
+      "trigger": "PostToolUse",
+      "matcher": "Write|Edit",
+      "pattern": "**/*.rs",
+      "command": "wasm-pack build --target web",
+      "description": "Verify WASM builds succeed after Rust changes"
+    }
+  }
+}
