@@ -23,7 +23,7 @@ Structured workflow for creating technical blog posts from research through publ
 
 ## Workflow Pipeline
 
-```
+```text
 /research-topic
       │
       ▼

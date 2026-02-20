@@ -1,7 +1,7 @@
 {
   "hooks": {
     "frontmatter-validator": {
-      "status": "planned",
+      "status": "active",
       "trigger": "PostToolUse",
       "matcher": "Write|Edit",
       "pattern": "**/posts/**/*.md",

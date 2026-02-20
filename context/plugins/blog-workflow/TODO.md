@@ -34,6 +34,7 @@
 ## Implementation Notes
 
 See `.plans/plugins/blog-workflow/roadmap.md` for:
+
 - Dependency graph
 - Effort estimates
 - Implementation order
