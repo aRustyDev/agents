@@ -7,12 +7,18 @@ Usage:
     uv run python .scripts/build-plugin.py check <name>
     uv run python .scripts/build-plugin.py update <name>
     uv run python .scripts/build-plugin.py hash <path>
+    uv run python .scripts/build-plugin.py check-all
+    uv run python .scripts/build-plugin.py build-all [options]
+    uv run python .scripts/build-plugin.py update-all
 
 Commands:
-    build   Build a plugin (copy sources, verify hashes)
-    check   Verify plugin hashes without building
-    update  Update all hashes in plugin.sources.json
-    hash    Compute hash for a file or directory
+    build       Build a plugin (copy sources, verify hashes)
+    check       Verify plugin hashes without building
+    update      Update all hashes in plugin.sources.json
+    hash        Compute hash for a file or directory
+    check-all   Check all plugins
+    build-all   Build all plugins
+    update-all  Update all plugin hashes
 """
 
 from __future__ import annotations
@@ -215,6 +221,22 @@ class Plugin:
             forked = source_def.get("forked", False)
             forked_at = source_def.get("forked_at")
 
+            # Check for planning format (has type/base but no source)
+            if not source_path and source_def.get("type"):
+                forked = True  # Treat planning entries as forked (skip verification)
+
+        # Skip if source path is empty (planning format)
+        if not source_path:
+            return SourceStatus(
+                local_path=local_path,
+                source_path=source_path,
+                expected_hash=expected_hash,
+                actual_hash=None,
+                forked=forked,
+                forked_at=forked_at,
+                missing=False,  # Not missing, just planning
+            )
+
         source = Path(source_path)
         if not source.exists():
             return SourceStatus(
@@ -241,6 +263,9 @@ class Plugin:
         """Verify all sources."""
         data = self.load_sources()
         sources = data.get("sources", {})
+        # Handle list format (planning/roadmap) vs dict format (build)
+        if isinstance(sources, list):
+            return []  # Skip planning format, not buildable
         return [self.get_source_status(lp, sd) for lp, sd in sources.items()]
 
     def update_hash(self, local_path: str) -> str:
@@ -426,6 +451,27 @@ def cmd_build(args: argparse.Namespace) -> int:
     return 0 if result.success else 1
 
 
+def _source_to_dict(s: SourceStatus) -> dict:
+    """Convert SourceStatus to dict for JSON output."""
+    return {
+        "local_path": s.local_path,
+        "source_path": s.source_path,
+        "status": s.status,
+        "expected_hash": format_hash(s.expected_hash) if s.expected_hash else None,
+        "actual_hash": format_hash(s.actual_hash) if s.actual_hash else None,
+        "forked": s.forked,
+        "forked_at": s.forked_at,
+    }
+
+
+def _count_statuses(sources: list[SourceStatus]) -> dict[str, int]:
+    """Count sources by status."""
+    counts: dict[str, int] = {}
+    for s in sources:
+        counts[s.status] = counts.get(s.status, 0) + 1
+    return counts
+
+
 def cmd_check(args: argparse.Namespace) -> int:
     """Check command."""
     plugin = Plugin(args.name)
@@ -434,14 +480,33 @@ def cmd_check(args: argparse.Namespace) -> int:
         return 1
 
     sources = plugin.verify_sources()
+    counts = _count_statuses(sources)
 
+    # JSON output mode
+    if getattr(args, "json", False):
+        output = {
+            "plugin": plugin.name,
+            "sources": [_source_to_dict(s) for s in sources],
+            "summary": counts,
+            "ok": not (counts.get("stale", 0) or counts.get("missing", 0)),
+        }
+        print(json.dumps(output, indent=2))
+        return 0 if output["ok"] else 1
+
+    # Text output
     print(f"Plugin: {plugin.name}\n")
     for s in sources:
-        print(f"  {s.icon} {s.local_path} ({s.status})")
-
-    counts = {}
-    for s in sources:
-        counts[s.status] = counts.get(s.status, 0) + 1
+        if getattr(args, "verbose", False):
+            print(f"  {s.icon} {s.local_path} ({s.status})")
+            print(f"      Source: {s.source_path}")
+            if s.expected_hash:
+                print(f"      Expected: {format_hash(s.expected_hash)}")
+            if s.actual_hash:
+                print(f"      Actual:   {format_hash(s.actual_hash)}")
+            if s.forked_at:
+                print(f"      Forked at: {s.forked_at}")
+        else:
+            print(f"  {s.icon} {s.local_path} ({s.status})")
 
     print(
         f"\nSummary: {counts.get('fresh', 0)} fresh, {counts.get('stale', 0)} stale, "
@@ -452,7 +517,7 @@ def cmd_check(args: argparse.Namespace) -> int:
     if counts.get("stale", 0) or counts.get("missing", 0):
         return 1
     if counts.get("no-hash", 0):
-        print("\n⚠ Warning: Plugin uses legacy format without hashes")
+        print("\n Warning: Plugin uses legacy format without hashes")
         return 0
     return 0
 
@@ -489,6 +554,138 @@ def cmd_hash(args: argparse.Namespace) -> int:
     return 0
 
 
+def list_plugins() -> list[str]:
+    """List all plugins with plugin.sources.json."""
+    plugins = []
+    for plugin_dir in PLUGINS_DIR.iterdir():
+        if plugin_dir.is_dir() and not plugin_dir.name.startswith("."):
+            sources_file = plugin_dir / ".claude-plugin" / "plugin.sources.json"
+            if sources_file.exists():
+                plugins.append(plugin_dir.name)
+    return sorted(plugins)
+
+
+def cmd_check_all(args: argparse.Namespace) -> int:
+    """Check all plugins."""
+    plugins = list_plugins()
+    if not plugins:
+        if getattr(args, "json", False):
+            print(json.dumps({"plugins": [], "ok": True}))
+        else:
+            print("No plugins found")
+        return 0
+
+    results = []
+    failed = []
+
+    for name in plugins:
+        plugin = Plugin(name)
+        sources = plugin.verify_sources()
+        counts = _count_statuses(sources)
+
+        stale = counts.get("stale", 0)
+        missing = counts.get("missing", 0)
+        fresh = counts.get("fresh", 0)
+        total = len(sources)
+        ok = not (stale or missing)
+
+        results.append(
+            {
+                "name": name,
+                "fresh": fresh,
+                "stale": stale,
+                "missing": missing,
+                "forked": counts.get("forked", 0),
+                "no_hash": counts.get("no-hash", 0),
+                "total": total,
+                "ok": ok,
+            }
+        )
+        if not ok:
+            failed.append(name)
+
+    # JSON output mode
+    if getattr(args, "json", False):
+        output = {
+            "plugins": results,
+            "summary": {
+                "total": len(plugins),
+                "ok": len(plugins) - len(failed),
+                "failed": len(failed),
+            },
+            "failed": failed,
+            "ok": len(failed) == 0,
+        }
+        print(json.dumps(output, indent=2))
+        return 0 if output["ok"] else 1
+
+    # Text output
+    print(f"Checking {len(plugins)} plugins...\n")
+    for r in results:
+        if r["ok"]:
+            print(f"  ✓ {r['name']}: {r['fresh']}/{r['total']} fresh")
+        else:
+            print(
+                f"  ✗ {r['name']}: {r['fresh']}/{r['total']} fresh, "
+                f"{r['stale']} stale, {r['missing']} missing"
+            )
+
+    print(f"\n{'✗' if failed else '✓'} {len(plugins) - len(failed)}/{len(plugins)} plugins OK")
+    if failed:
+        print(f"\nFailed: {', '.join(failed)}")
+        return 1
+    return 0
+
+
+def cmd_build_all(args: argparse.Namespace) -> int:
+    """Build all plugins."""
+    plugins = list_plugins()
+    if not plugins:
+        print("No plugins found")
+        return 0
+
+    print(f"Building {len(plugins)} plugins...\n")
+    failed = []
+
+    for name in plugins:
+        plugin = Plugin(name)
+        result = plugin.build(
+            force=args.force,
+            check_only=args.check_only,
+            update_hashes=args.update_hashes,
+            interactive=False,
+        )
+        if result.success:
+            print(f"  ✓ {name}: {len(result.copied)} copied, {len(result.updated)} updated")
+        else:
+            print(f"  ✗ {name}: {result.errors[0] if result.errors else 'unknown error'}")
+            failed.append(name)
+
+    print(f"\n{'✗' if failed else '✓'} {len(plugins) - len(failed)}/{len(plugins)} plugins built")
+    if failed:
+        print(f"\nFailed: {', '.join(failed)}")
+        return 1
+    return 0
+
+
+def cmd_update_all(_args: argparse.Namespace) -> int:
+    """Update all plugins."""
+    plugins = list_plugins()
+    if not plugins:
+        print("No plugins found")
+        return 0
+
+    print(f"Updating {len(plugins)} plugins...\n")
+
+    for name in plugins:
+        plugin = Plugin(name)
+        updated = plugin.update_all_hashes()
+        print(f"  ✓ {name}: {len(updated)} hashes updated")
+
+    print(f"\n✓ {len(plugins)} plugins updated")
+    return 0
+
+
 # =============================================================================
 # Main
 # =============================================================================
@@ -517,6 +714,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     # check command
     check_parser = subparsers.add_parser("check", help="Verify plugin hashes")
     check_parser.add_argument("name", help="Plugin name")
+    check_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
+    check_parser.add_argument("--verbose", "-v", action="store_true", help="Show hash details")
     check_parser.set_defaults(func=cmd_check)
 
     # update command
@@ -529,6 +728,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     hash_parser.add_argument("path", help="File or directory to hash")
     hash_parser.add_argument("--hex-only", action="store_true", help="Output hex only, no prefix")
     hash_parser.set_defaults(func=cmd_hash)
+
+    # check-all command
+    check_all_parser = subparsers.add_parser("check-all", help="Check all plugins")
+    check_all_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
+    check_all_parser.set_defaults(func=cmd_check_all)
+
+    # build-all command
+    build_all_parser = subparsers.add_parser("build-all", help="Build all plugins")
+    build_all_parser.add_argument(
+        "--force", "-f", action="store_true", help="Force rebuild, update hashes"
+    )
+    build_all_parser.add_argument(
+        "--check-only", "-c", action="store_true", help="Verify hashes only"
+    )
+    build_all_parser.add_argument(
+        "--update-hashes", "-u", action="store_true", help="Update hashes without prompting"
+    )
+    build_all_parser.set_defaults(func=cmd_build_all)
+
+    # update-all command
+    update_all_parser = subparsers.add_parser("update-all", help="Update all plugin hashes")
+    update_all_parser.set_defaults(func=cmd_update_all)
 
     args = parser.parse_args(argv)
     return args.func(args)

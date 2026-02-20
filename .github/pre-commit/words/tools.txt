@@ -162,3 +162,4 @@ xcprivacy
 webextension
 parallelizable
 webstore
+capsys

@@ -218,12 +218,116 @@ To fork a component for plugin-specific customization:
 
 ### Available Commands
 
+#### Single Plugin Commands
+
 | Command | Purpose |
 |---------|---------|
 | `just plugin-check <name>` | Verify hashes (exit 0=fresh, 1=stale) |
 | `just plugin-update <name>` | Recompute all hashes and rebuild |
 | `just plugin-hash <path>` | Compute hash for any file/directory |
 | `just build-plugin <name>` | Build with interactive stale handling |
+
+#### Batch Commands
+
+| Command | Purpose |
+|---------|---------|
+| `just plugin-check-all` | Check all plugins (for CI) |
+| `just plugin-build-all` | Build all plugins |
+| `just plugin-update-all` | Update all plugin hashes |
+
+#### Python CLI (Direct Access)
+
+The Python CLI provides additional flags:
+
+```bash
+# Single plugin operations
+uv run python .scripts/build-plugin.py check <name> [--json] [--verbose]
+uv run python .scripts/build-plugin.py build <name> [--force] [--check-only] [--update-hashes]
+uv run python .scripts/build-plugin.py update <name>
+uv run python .scripts/build-plugin.py hash <path> [--hex-only]
+
+# Batch operations
+uv run python .scripts/build-plugin.py check-all [--json]
+uv run python .scripts/build-plugin.py build-all [--force] [--check-only] [--update-hashes]
+uv run python .scripts/build-plugin.py update-all
+```
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output in JSON format (for programmatic use) |
+| `--verbose` | Show hash details for each component |
+| `--force` | Force rebuild, update hashes |
+| `--check-only` | Verify hashes without copying files |
+| `--update-hashes` | Update hashes without prompting |
+| `--hex-only` | Output hash without sha256: prefix |
+
+#### Migration Commands
+
+Dedicated tools for migrating plugins to the extended format:
+
+```bash
+# Check migration status of all plugins
+just migrate-check
+
+# Migrate a single plugin
+just migrate-plugin <name>
+
+# Migrate all plugins
+just migrate-all-plugins [--dry-run]
+```
+
+The migration script:
+1. Converts legacy string paths to object format
+2. Computes SHA256 hashes for all sources
+3. Preserves forked status and other metadata
+
+### CI Integration
+
+Plugin validation runs automatically on push/PR when plugin-related files change:
+
+```yaml
+# .github/workflows/plugin-validation.yml
+- name: Validate all plugins
+  run: uv run python .scripts/build-plugin.py check-all
+
+- name: Build all plugins (check-only)
+  run: uv run python .scripts/build-plugin.py build-all --check-only
+```
+
+### Planning Format
+
+For plugins that reference external sources (not yet implemented), use the planning format:
+
+```json
+{
+  "sources": {
+    "skills/some-feature": {
+      "type": "extend",
+      "base": "https://github.com/example/plugin/tree/main/skills/feature",
+      "notes": "Adapt for specific use case"
+    },
+    "mcp/some-server": {
+      "type": "reuse",
+      "package": "@example/mcp-server",
+      "install": "npx @example/mcp-server"
+    }
+  }
+}
+```
+
+Planning format components are treated as "forked" (skipped from hash verification).
+
+## Migration Status
+
+As of Phase 4 completion:
+
+| Status | Count | Description |
+|--------|-------|-------------|
+| Extended | 17 | Buildable with hash verification |
+| Planning | 1 | Uses external sources (browser-extension-dev) |
+| Empty | 2 | No shared components (cad-dev, job-hunting) |
+
+All 18 plugins now pass `just plugin-check-all`.
 
 ## References
 
