@@ -958,6 +958,28 @@ add-feedback-infra-all:
     done
     echo "✓ All plugins updated"
 
+# Compute content-addressed hash for a file or directory
+[group('plugins')]
+plugin-hash path:
+    @"{{ which("uv") }}" run python .scripts/plugin-hash.py "{{ path }}"
+
+# Verify a component hash matches expected value
+[group('plugins')]
+plugin-hash-verify path expected:
+    @"{{ which("uv") }}" run python .scripts/plugin-hash.py "{{ path }}" --verify "{{ expected }}"
+
+# Verify all sources in a plugin's plugin.sources.json (exit 0=ok, 1=stale, 2=no-hash warning)
+[group('plugins')]
+plugin-verify-sources name:
+    #!/usr/bin/env bash
+    "{{ which("uv") }}" run python .scripts/plugin-hash.py --verify-sources "context/plugins/{{ name }}"
+    exit_code=$?
+    if [ $exit_code -eq 2 ]; then
+      echo "⚠ Warning: Plugin uses legacy format without hashes"
+      exit 0
+    fi
+    exit $exit_code
+
 # Knowledge graph operations
 
 # Initialize knowledge graph database

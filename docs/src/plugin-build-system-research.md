@@ -93,9 +93,23 @@ Current plugin architecture has two pain points:
 
 ### Extended `plugin.sources.json`
 
+**JSON Schema**: `context/plugins/.template/.claude-plugin/plugin.sources.schema.json`
+
+#### Legacy Format (deprecated)
+
 ```json
 {
-  "$schema": "Plugin source mapping with content hashes",
+  "sources": {
+    "commands/add-formula.md": "context/commands/add-formula.md"
+  }
+}
+```
+
+#### Extended Format (recommended)
+
+```json
+{
+  "$schema": "./plugin.sources.schema.json",
   "sources": {
     "commands/add-formula.md": {
       "source": "context/commands/add-formula.md",
