@@ -997,6 +997,40 @@ plugin-verify-sources name:
     fi
     exit $exit_code
 
+# Check plugin sources without prompts (for CI) — exit 0=fresh, 1=stale/missing
+[group('plugins')]
+plugin-check name:
+    #!/usr/bin/env bash
+    "{{ which("uv") }}" run python .scripts/plugin-hash.py --verify-sources "context/plugins/{{ name }}"
+    exit_code=$?
+    if [ $exit_code -eq 2 ]; then
+      echo ""
+      echo "⚠ Warning: Plugin uses legacy format without hashes"
+      exit 0
+    fi
+    exit $exit_code
+
+# Update all source hashes in plugin.sources.json and rebuild
+[group('plugins')]
+plugin-update name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PLUGIN_DIR="context/plugins/{{ name }}"
+    SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
+    if [ ! -f "$SOURCES" ]; then
+      echo "Error: $SOURCES not found"; exit 1
+    fi
+    echo "Updating hashes for {{ name }}..."
+    # Update hash for each source component
+    jq -r '.sources | to_entries[] | .key' "$SOURCES" | while read -r local_path; do
+      "{{ which("uv") }}" run python .scripts/plugin-hash.py \
+        --verify-sources "$PLUGIN_DIR" \
+        --update-hash "$local_path" || true
+    done
+    echo "✓ Hashes updated"
+    echo ""
+    just build-plugin "{{ name }}"
+
 # Knowledge graph operations
 
 # Initialize knowledge graph database
