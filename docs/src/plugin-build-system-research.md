@@ -55,6 +55,7 @@ Current plugin architecture has two pain points:
 **Decision**: Content-based hashing (like lockfiles).
 
 **Rationale**:
+
 - Reproducible builds without managing semver for every component
 - Similar to Go's `go.sum`, npm's `package-lock.json`, Nix store
 - Hash changes automatically when content changes
@@ -126,7 +127,7 @@ Current plugin architecture has two pain points:
 
 ### Build Workflow
 
-```
+```text
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
 │ plugin.sources  │────▶│ just build   │────▶│ Self-contained  │
 │ .json (refs)    │     │ -plugin      │     │ plugin dir      │
@@ -149,6 +150,80 @@ Current plugin architecture has two pain points:
 | Nix | Content-addressed store | Hash-based immutable artifacts |
 | Cargo | Cargo.toml + Cargo.lock | Workspace with shared deps |
 | Homebrew | Formula with bottle hashes | Pre-built artifacts with verification |
+
+## Migration Guide
+
+### Migrating a Plugin to Extended Format
+
+1. **Check current status**:
+
+   ```bash
+   just plugin-check <plugin-name>
+   ```
+
+   If you see `no-hash` status, the plugin uses legacy format.
+
+2. **Update all hashes**:
+
+   ```bash
+   just plugin-update <plugin-name>
+   ```
+
+   This converts legacy format to extended format and computes SHA256 hashes.
+
+3. **Verify migration**:
+
+   ```bash
+   just plugin-check <plugin-name>
+   ```
+
+   All components should show `fresh` status.
+
+4. **Commit the changes**:
+
+   ```bash
+   git add context/plugins/<name>/.claude-plugin/plugin.sources.json
+   git commit -m "feat: migrate <name> plugin to extended format"
+   ```
+
+### Handling Stale Sources
+
+When `build-plugin` detects stale sources, it prompts for each:
+
+| Choice | Action |
+|--------|--------|
+| `U` | Update hash in plugin.sources.json to match current source |
+| `S` | Skip copying this component (useful for local modifications) |
+| `A` | Abort the build |
+
+### Forking Components
+
+To fork a component for plugin-specific customization:
+
+1. Copy the source into the plugin directory
+2. Edit `plugin.sources.json` to add `"forked": true`:
+
+   ```json
+   {
+     "commands/custom.md": {
+       "source": "context/commands/original.md",
+       "hash": "sha256:...",
+       "forked": true,
+       "forked_at": "2026-02-20T12:00:00Z"
+     }
+   }
+   ```
+
+3. Forked components are always treated as fresh (hash not verified)
+
+### Available Commands
+
+| Command | Purpose |
+|---------|---------|
+| `just plugin-check <name>` | Verify hashes (exit 0=fresh, 1=stale) |
+| `just plugin-update <name>` | Recompute all hashes and rebuild |
+| `just plugin-hash <path>` | Compute hash for any file/directory |
+| `just build-plugin <name>` | Build with interactive stale handling |
 
 ## References
 
