@@ -1,6 +1,6 @@
 {
   "name": "job-hunting",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Comprehensive job hunting toolkit — analyze job descriptions, extract resume bullets from career history, identify skill gaps, tailor applications, and research employers with salary data.",
   "author": {
     "name": "Adam Smith",
@@ -42,7 +42,6 @@
     "./skills/resume-content/SKILL.md",
     "./skills/resume-formatting/SKILL.md"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": "./styles/",
   "lspServers": "./.lsp.json"

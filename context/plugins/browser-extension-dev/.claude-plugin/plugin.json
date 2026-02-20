@@ -1,6 +1,6 @@
 {
   "name": "browser-extension-dev",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
   "author": {
     "name": "Adam Smith",
@@ -43,7 +43,6 @@
     "./skills/wasm-extension-integration/SKILL.md",
     "./skills/wxt-framework-patterns/SKILL.md"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": "./styles/",
   "lspServers": "./.lsp.json"
