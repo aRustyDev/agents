@@ -160,3 +160,4 @@ wikilinks
 wayback
 xcprivacy
 webextension
+parallelizable
