@@ -1,50 +1,31 @@
 {
   "hooks": {
-    "manifest-validator": {
-      "status": "active",
-      "trigger": "PostToolUse",
-      "matcher": "Write|Edit",
-      "pattern": "**/manifest.json",
-      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */manifest.json) DIR=$(dirname \"$FILE\"); if command -v web-ext >/dev/null 2>&1; then web-ext lint --source-dir \"$DIR\" --warnings-as-errors=false 2>&1 | head -30 && echo \"✓ manifest validated\"; else echo \"⚠ web-ext not installed, skipping validation\"; fi;; esac; true'",
-      "timeout": 20,
-      "description": "Validate manifest.json on save using web-ext CLI. Catches manifest errors, permission issues, and cross-browser incompatibilities.",
-      "install": "npm install -g web-ext",
-      "docs": "https://extensionworkshop.com/documentation/develop/web-ext-command-reference/#web-ext-lint"
-    },
-    "extension-linter": {
-      "status": "active",
-      "trigger": "PostToolUse",
-      "matcher": "Write|Edit",
-      "pattern": "**/entrypoints/**/*.{ts,tsx,js,jsx}",
-      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */entrypoints/*.ts|*/entrypoints/*.tsx|*/entrypoints/*.js|*/entrypoints/*.jsx) if command -v eslint >/dev/null 2>&1; then eslint --no-error-on-unmatched-pattern --max-warnings 10 \"$FILE\" 2>&1 | head -20 && echo \"✓ extension linted\"; elif command -v biome >/dev/null 2>&1; then biome check \"$FILE\" 2>&1 | head -20 && echo \"✓ extension linted (biome)\"; else echo \"⚠ No linter found (eslint or biome)\"; fi;; esac; true'",
-      "timeout": 15,
-      "description": "Lint extension entrypoint code for deprecated APIs, security issues, and best practices.",
-      "install": "npm install -D eslint @anthropic-ai/anthropic-sdk-eslint/webextensions",
-      "docs": "https://github.com/AntSim/anthropic-ai-eslint-plugin-webextensions",
-      "checks": [
-        "Deprecated API usage (browserAction vs action)",
-        "Unsafe eval() or new Function()",
-        "Missing error handling on API calls",
-        "Sync storage access patterns",
-        "Content script isolation issues"
-      ]
-    },
-    "wasm-build-check": {
-      "status": "active",
-      "trigger": "PostToolUse",
-      "matcher": "Write|Edit",
-      "pattern": "**/wasm/**/*.rs",
-      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */wasm/*/*.rs) WASM_DIR=$(echo \"$FILE\" | sed \"s|/src/.*||\" | sed \"s|/tests/.*||\"); if [ -f \"$WASM_DIR/Cargo.toml\" ]; then if command -v wasm-pack >/dev/null 2>&1; then cd \"$WASM_DIR\" && wasm-pack build --target web --dev 2>&1 | tail -10 && echo \"✓ WASM build succeeded\"; else echo \"⚠ wasm-pack not installed, skipping build check\"; fi; fi;; esac; true'",
-      "timeout": 60,
-      "description": "Verify WASM builds succeed after Rust changes in wasm/ directories.",
-      "install": "cargo install wasm-pack",
-      "docs": "https://rustwasm.github.io/wasm-pack/",
-      "checks": [
-        "Cargo.toml validity",
-        "wasm-bindgen compatibility",
-        "Build errors and warnings",
-        "Missing dependencies"
-      ]
-    }
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */manifest.json) DIR=$(dirname \"$FILE\"); if command -v web-ext >/dev/null 2>&1; then web-ext lint --source-dir \"$DIR\" --warnings-as-errors=false 2>&1 | head -30 && echo \"✓ manifest validated\"; else echo \"⚠ web-ext not installed\"; fi;; esac; true'",
+            "timeout": 20
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */entrypoints/*.ts|*/entrypoints/*.tsx|*/entrypoints/*.js|*/entrypoints/*.jsx) if command -v biome >/dev/null 2>&1; then biome check \"$FILE\" 2>&1 | head -20 && echo \"✓ extension linted\"; fi;; esac; true'",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */wasm/*/*.rs) WASM_DIR=$(echo \"$FILE\" | sed \"s|/src/.*||\" | sed \"s|/tests/.*||\"); if [ -f \"$WASM_DIR/Cargo.toml\" ] && command -v wasm-pack >/dev/null 2>&1; then cd \"$WASM_DIR\" && wasm-pack build --target web --dev 2>&1 | tail -10 && echo \"✓ WASM build succeeded\"; fi;; esac; true'",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+  "_comments": {
+    "manifest-validator": "Validate manifest.json using web-ext CLI (npm install -g web-ext)",
+    "extension-linter": "Lint extension entrypoint code with biome",
+    "wasm-build-check": "Verify WASM builds succeed after Rust changes (cargo install wasm-pack)"
   }
 }
