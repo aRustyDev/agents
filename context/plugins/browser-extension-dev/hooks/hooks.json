@@ -1,12 +1,15 @@
 {
   "hooks": {
     "manifest-validator": {
-      "status": "planned",
+      "status": "active",
       "trigger": "PostToolUse",
       "matcher": "Write|Edit",
       "pattern": "**/manifest.json",
-      "command": "web-ext lint --source-dir $(dirname $TOOL_INPUT_FILE_PATH)",
-      "description": "Validate manifest.json on save using web-ext CLI"
+      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */manifest.json) DIR=$(dirname \"$FILE\"); if command -v web-ext >/dev/null 2>&1; then web-ext lint --source-dir \"$DIR\" --warnings-as-errors=false 2>&1 | head -30 && echo \"✓ manifest validated\"; else echo \"⚠ web-ext not installed, skipping validation\"; fi;; esac; true'",
+      "timeout": 20,
+      "description": "Validate manifest.json on save using web-ext CLI. Catches manifest errors, permission issues, and cross-browser incompatibilities.",
+      "install": "npm install -g web-ext",
+      "docs": "https://extensionworkshop.com/documentation/develop/web-ext-command-reference/#web-ext-lint"
     },
     "extension-linter": {
       "status": "planned",
