@@ -18,6 +18,7 @@ from ir_core.models import GapMarker, GapSeverity, IRVersion, TypeKind
 
 from ir_synthesize_typescript.formatter import PrettierFormatter, SimpleFormatter
 from ir_synthesize_typescript.generator import GeneratorConfig, TypeScriptCodeGenerator
+from ir_synthesize_typescript.linter import ESLinter, LintResult
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,9 @@ class TypeScriptSynthesizer(Synthesizer):
         self._generator: TypeScriptCodeGenerator | None = None
         self._formatter: PrettierFormatter | None = None
         self._simple_formatter: SimpleFormatter | None = None
+        self._linter: ESLinter | None = None
         self.last_gaps: list[GapMarker] = []
+        self.last_lint_result: LintResult | None = None
 
     def synthesize(self, ir: IRVersion, config: SynthConfig) -> str:
         """Synthesize TypeScript code from IR.
@@ -244,8 +247,89 @@ class TypeScriptSynthesizer(Synthesizer):
         func_lines = sum(5 + len(f.parameters) for f in ir.functions)
 
         return {
-            "estimated_lines": type_lines + func_lines + len(ir.types) + len(ir.functions),
+            "estimated_lines": type_lines
+            + func_lines
+            + len(ir.types)
+            + len(ir.functions),
             "type_count": len(ir.types),
             "function_count": len(ir.functions),
             "estimated_complexity": "medium" if len(ir.types) > 10 else "low",
         }
+
+    def lint(
+        self,
+        code: str,
+        strict: bool = False,
+        rules: dict[str, Any] | None = None,
+    ) -> LintResult:
+        """Lint synthesized TypeScript code.
+
+        Args:
+            code: TypeScript source code
+            strict: Use strict rule set
+            rules: Custom ESLint rules
+
+        Returns:
+            LintResult with issues found
+        """
+        if self._linter is None or rules is not None:
+            self._linter = ESLinter(rules=rules, strict=strict)
+
+        self.last_lint_result = self._linter.lint(code)
+        return self.last_lint_result
+
+    def lint_and_fix(
+        self,
+        code: str,
+        strict: bool = False,
+        rules: dict[str, Any] | None = None,
+    ) -> tuple[str, LintResult]:
+        """Lint and fix TypeScript code.
+
+        Args:
+            code: TypeScript source code
+            strict: Use strict rule set
+            rules: Custom ESLint rules
+
+        Returns:
+            Tuple of (fixed_code, LintResult)
+        """
+        if self._linter is None or rules is not None:
+            self._linter = ESLinter(rules=rules, strict=strict)
+
+        fixed_code, lint_result = self._linter.fix(code)
+        self.last_lint_result = lint_result
+        return fixed_code, lint_result
+
+    def synthesize_and_lint(
+        self,
+        ir: IRVersion,
+        config: SynthConfig,
+        lint_strict: bool = False,
+        lint_fix: bool = False,
+    ) -> tuple[str, LintResult | None]:
+        """Synthesize TypeScript code and lint it.
+
+        Args:
+            ir: IRVersion containing the layers to synthesize
+            config: Synthesis configuration
+            lint_strict: Use strict linting rules
+            lint_fix: Apply automatic fixes
+
+        Returns:
+            Tuple of (code, lint_result)
+        """
+        code = self.synthesize(ir, config)
+
+        if lint_fix:
+            code, lint_result = self.lint_and_fix(code, strict=lint_strict)
+        else:
+            lint_result = self.lint(code, strict=lint_strict)
+
+        return code, lint_result
+
+    def is_linter_available(self) -> bool:
+        """Check if ESLint is available."""
+        if self._linter is None:
+            self._linter = ESLinter()
+        return self._linter.is_available()

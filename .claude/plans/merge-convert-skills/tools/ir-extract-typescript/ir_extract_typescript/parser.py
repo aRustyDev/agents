@@ -9,7 +9,10 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ir_extract_typescript.jsdoc import JSDocComment
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,7 @@ class TSProperty:
     visibility: Visibility = Visibility.PUBLIC
     static: bool = False
     computed: bool = False  # [key: string]: T
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -71,6 +75,7 @@ class TSMethod:
     async_: bool = False
     generator: bool = False
     abstract: bool = False
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -99,6 +104,7 @@ class TSInterface:
     declared: bool = False  # declare interface
     line: int = 0
     column: int = 0
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -112,6 +118,7 @@ class TSTypeAlias:
     declared: bool = False
     line: int = 0
     column: int = 0
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -133,6 +140,7 @@ class TSEnum:
     declared: bool = False
     line: int = 0
     column: int = 0
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -152,6 +160,7 @@ class TSClass:
     declared: bool = False
     line: int = 0
     column: int = 0
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -169,6 +178,7 @@ class TSFunction:
     arrow: bool = False
     line: int = 0
     column: int = 0
+    jsdoc: JSDocComment | None = None
 
 
 @dataclass
@@ -223,6 +233,22 @@ class TypeScriptParser:
                 "Install with: pip install tree-sitter tree-sitter-language-pack"
             ) from e
 
+    def _get_preceding_jsdoc(self, line: int) -> JSDocComment | None:
+        """Find JSDoc comment immediately preceding a declaration.
+
+        Args:
+            line: Line number of the declaration (1-indexed)
+
+        Returns:
+            JSDoc comment if found
+        """
+        from ir_extract_typescript.jsdoc import get_preceding_jsdoc
+
+        if not hasattr(self, "_jsdoc_comments") or not hasattr(self, "_source"):
+            return None
+
+        return get_preceding_jsdoc(self._source, line, self._jsdoc_comments)
+
     def parse(self, source: str) -> dict[str, Any]:
         """Parse TypeScript source and return structured data.
 
@@ -233,6 +259,12 @@ class TypeScriptParser:
             Dictionary with parsed information
         """
         self._ensure_initialized()
+
+        # Extract JSDoc comments first
+        from ir_extract_typescript.jsdoc import extract_jsdoc_from_source
+
+        self._jsdoc_comments = extract_jsdoc_from_source(source)
+        self._source = source
 
         tree = self._parser.parse(source.encode("utf-8"))
         root = tree.root_node
@@ -247,6 +279,7 @@ class TypeScriptParser:
             "exports": [],
             "variables": [],
             "errors": [],
+            "jsdoc_comments": self._jsdoc_comments,
         }
 
         # Check for parse errors
@@ -311,17 +344,11 @@ class TypeScriptParser:
             # declare module, declare namespace, etc.
             self._extract_ambient(node, source, result)
 
-    def _extract_export(
-        self, node: Any, source: str, result: dict[str, Any]
-    ) -> None:
+    def _extract_export(self, node: Any, source: str, result: dict[str, Any]) -> None:
         """Extract exported declaration."""
         # Check for export default
-        is_default = any(
-            child.type == "default" for child in node.children
-        )
-        is_type_export = any(
-            child.type == "type" for child in node.children
-        )
+        is_default = any(child.type == "default" for child in node.children)
+        is_type_export = any(child.type == "type" for child in node.children)
 
         for child in node.children:
             if child.type == "interface_declaration":
@@ -396,14 +423,10 @@ class TypeScriptParser:
                         name, alias = self._parse_import_specifier(spec, source)
                         import_obj.named_imports.append((name, alias))
 
-    def _parse_import_specifier(
-        self, node: Any, source: str
-    ) -> tuple[str, str | None]:
+    def _parse_import_specifier(self, node: Any, source: str) -> tuple[str, str | None]:
         """Parse import specifier to get name and optional alias."""
         identifiers = [
-            self._get_text(c, source)
-            for c in node.children
-            if c.type == "identifier"
+            self._get_text(c, source) for c in node.children if c.type == "identifier"
         ]
         if len(identifiers) == 2:
             return identifiers[0], identifiers[1]
@@ -411,15 +434,15 @@ class TypeScriptParser:
             return identifiers[0], None
         return "", None
 
-    def _parse_interface(
-        self, node: Any, source: str, exported: bool
-    ) -> TSInterface:
+    def _parse_interface(self, node: Any, source: str, exported: bool) -> TSInterface:
         """Parse an interface declaration."""
+        line = node.start_point[0] + 1
         iface = TSInterface(
             name="",
             exported=exported,
-            line=node.start_point[0] + 1,
+            line=line,
             column=node.start_point[1],
+            jsdoc=self._get_preceding_jsdoc(line),
         )
 
         for child in node.children:
@@ -434,9 +457,7 @@ class TypeScriptParser:
 
         return iface
 
-    def _parse_type_parameters(
-        self, node: Any, source: str
-    ) -> list[TSTypeParameter]:
+    def _parse_type_parameters(self, node: Any, source: str) -> list[TSTypeParameter]:
         """Parse type parameters (generics)."""
         params = []
         for child in node.children:
@@ -472,9 +493,7 @@ class TypeScriptParser:
                 extends.append(self._get_text(child, source))
         return extends
 
-    def _parse_object_type(
-        self, node: Any, source: str, iface: TSInterface
-    ) -> None:
+    def _parse_object_type(self, node: Any, source: str, iface: TSInterface) -> None:
         """Parse object type body (interface properties and methods)."""
         for child in node.children:
             if child.type == "property_signature":
@@ -523,9 +542,7 @@ class TypeScriptParser:
 
         return method
 
-    def _parse_index_signature(
-        self, node: Any, source: str
-    ) -> tuple[str, str] | None:
+    def _parse_index_signature(self, node: Any, source: str) -> tuple[str, str] | None:
         """Parse an index signature [key: type]: value."""
         key_type = None
         value_type = None
@@ -564,9 +581,7 @@ class TypeScriptParser:
                 return self._get_text(child, source)
         return ""
 
-    def _parse_formal_parameters(
-        self, node: Any, source: str
-    ) -> list[TSParameter]:
+    def _parse_formal_parameters(self, node: Any, source: str) -> list[TSParameter]:
         """Parse formal parameters."""
         params = []
         for child in node.children:
@@ -600,15 +615,15 @@ class TypeScriptParser:
 
         return param
 
-    def _parse_type_alias(
-        self, node: Any, source: str, exported: bool
-    ) -> TSTypeAlias:
+    def _parse_type_alias(self, node: Any, source: str, exported: bool) -> TSTypeAlias:
         """Parse a type alias declaration."""
+        line = node.start_point[0] + 1
         alias = TSTypeAlias(
             name="",
             exported=exported,
-            line=node.start_point[0] + 1,
+            line=line,
             column=node.start_point[1],
+            jsdoc=self._get_preceding_jsdoc(line),
         )
 
         for child in node.children:
@@ -624,11 +639,13 @@ class TypeScriptParser:
 
     def _parse_enum(self, node: Any, source: str, exported: bool) -> TSEnum:
         """Parse an enum declaration."""
+        line = node.start_point[0] + 1
         enum = TSEnum(
             name="",
             exported=exported,
-            line=node.start_point[0] + 1,
+            line=line,
             column=node.start_point[1],
+            jsdoc=self._get_preceding_jsdoc(line),
         )
 
         for child in node.children:
@@ -661,11 +678,13 @@ class TypeScriptParser:
 
     def _parse_class(self, node: Any, source: str, exported: bool) -> TSClass:
         """Parse a class declaration."""
+        line = node.start_point[0] + 1
         cls = TSClass(
             name="",
             exported=exported,
-            line=node.start_point[0] + 1,
+            line=line,
             column=node.start_point[1],
+            jsdoc=self._get_preceding_jsdoc(line),
         )
 
         for child in node.children:
@@ -684,9 +703,7 @@ class TypeScriptParser:
 
         return cls
 
-    def _parse_class_heritage(
-        self, node: Any, source: str, cls: TSClass
-    ) -> None:
+    def _parse_class_heritage(self, node: Any, source: str, cls: TSClass) -> None:
         """Parse class heritage (extends, implements)."""
         for child in node.children:
             if child.type == "extends_clause":
@@ -754,15 +771,15 @@ class TypeScriptParser:
 
         return method
 
-    def _parse_function(
-        self, node: Any, source: str, exported: bool
-    ) -> TSFunction:
+    def _parse_function(self, node: Any, source: str, exported: bool) -> TSFunction:
         """Parse a function declaration."""
+        line = node.start_point[0] + 1
         func = TSFunction(
             name="",
             exported=exported,
-            line=node.start_point[0] + 1,
+            line=line,
             column=node.start_point[1],
+            jsdoc=self._get_preceding_jsdoc(line),
         )
 
         for child in node.children:
@@ -804,9 +821,7 @@ class TypeScriptParser:
                         }
                     )
 
-    def _extract_ambient(
-        self, node: Any, source: str, result: dict[str, Any]
-    ) -> None:
+    def _extract_ambient(self, node: Any, source: str, result: dict[str, Any]) -> None:
         """Extract ambient declarations (declare keyword)."""
         for child in node.children:
             if child.type == "interface_declaration":

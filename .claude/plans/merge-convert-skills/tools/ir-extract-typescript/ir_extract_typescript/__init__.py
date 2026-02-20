@@ -8,6 +8,7 @@ with special handling for TypeScript-specific concepts:
 - Generic constraints and variance
 - Interface and type alias definitions
 - Decorators and access modifiers
+- JSDoc documentation and type annotations
 
 Example:
     from ir_extract_typescript import TypeScriptExtractor
@@ -18,9 +19,33 @@ Example:
 
     for func in ir.functions:
         print(f"Function: {func.name}")
+        if hasattr(func, 'documentation'):
+            print(f"  Description: {func.documentation.get('description')}")
 """
 
 from ir_extract_typescript.extractor import TypeScriptExtractor
+from ir_extract_typescript.jsdoc import (
+    JSDocComment,
+    JSDocExample,
+    JSDocParam,
+    JSDocParser,
+    JSDocReturns,
+    JSDocTemplate,
+    JSDocTypedef,
+    extract_jsdoc_from_source,
+    get_preceding_jsdoc,
+)
 
-__all__ = ["TypeScriptExtractor"]
+__all__ = [
+    "TypeScriptExtractor",
+    "JSDocComment",
+    "JSDocExample",
+    "JSDocParam",
+    "JSDocParser",
+    "JSDocReturns",
+    "JSDocTemplate",
+    "JSDocTypedef",
+    "extract_jsdoc_from_source",
+    "get_preceding_jsdoc",
+]
 __version__ = "0.1.0"

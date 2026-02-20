@@ -69,3 +69,4 @@ Wextra
 worktree
 worktrees
 yamllint
+pytestmark

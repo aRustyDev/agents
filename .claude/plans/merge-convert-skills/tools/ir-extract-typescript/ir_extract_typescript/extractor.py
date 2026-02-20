@@ -26,6 +26,7 @@ from ir_core.models import (
     TypeKind,
 )
 
+from ir_extract_typescript.jsdoc import JSDocComment
 from ir_extract_typescript.parser import (
     TSClass,
     TSEnum,
@@ -57,9 +58,7 @@ class TypeScriptExtractor(Extractor):
         self._parser = TypeScriptParser()
         self._type_analyzer = TypeAnalyzer()
 
-    def extract(
-        self, source: str, path: str, config: ExtractConfig
-    ) -> IRVersion:
+    def extract(self, source: str, path: str, config: ExtractConfig) -> IRVersion:
         """Extract IR from TypeScript source code.
 
         Args:
@@ -134,8 +133,7 @@ class TypeScriptExtractor(Extractor):
                 import_info["default"] = imp.default_import
             if imp.named_imports:
                 import_info["named"] = [
-                    {"name": name, "alias": alias}
-                    for name, alias in imp.named_imports
+                    {"name": name, "alias": alias} for name, alias in imp.named_imports
                 ]
             if imp.namespace_import:
                 import_info["namespace"] = imp.namespace_import
@@ -206,6 +204,94 @@ class TypeScriptExtractor(Extractor):
 
         return types
 
+    def _extract_jsdoc_documentation(
+        self, jsdoc: JSDocComment | None
+    ) -> dict[str, Any]:
+        """Extract documentation information from JSDoc.
+
+        Args:
+            jsdoc: Parsed JSDoc comment
+
+        Returns:
+            Dictionary with documentation fields
+        """
+        if not jsdoc:
+            return {}
+
+        result: dict[str, Any] = {}
+
+        if jsdoc.description:
+            result["description"] = jsdoc.description
+
+        if jsdoc.examples:
+            result["examples"] = [
+                {"code": ex.code, "caption": ex.caption} for ex in jsdoc.examples
+            ]
+
+        if jsdoc.deprecated is not None:
+            result["deprecated"] = True
+            if jsdoc.deprecated:
+                result["deprecation_message"] = jsdoc.deprecated
+
+        if jsdoc.see_also:
+            result["see_also"] = jsdoc.see_also
+
+        if jsdoc.since:
+            result["since"] = jsdoc.since
+
+        if jsdoc.author:
+            result["author"] = jsdoc.author
+
+        if jsdoc.throws:
+            result["throws"] = [
+                {"type": t[0], "description": t[1]} for t in jsdoc.throws
+            ]
+
+        return result
+
+    def _extract_jsdoc_params(
+        self, jsdoc: JSDocComment | None
+    ) -> dict[str, dict[str, Any]]:
+        """Extract parameter documentation from JSDoc.
+
+        Args:
+            jsdoc: Parsed JSDoc comment
+
+        Returns:
+            Dictionary mapping param name to documentation
+        """
+        if not jsdoc:
+            return {}
+
+        return {
+            param.name: {
+                "description": param.description,
+                "type": param.type_annotation,
+                "optional": param.optional,
+                "default": param.default_value,
+            }
+            for param in jsdoc.params
+        }
+
+    def _extract_jsdoc_returns(
+        self, jsdoc: JSDocComment | None
+    ) -> dict[str, Any] | None:
+        """Extract return type documentation from JSDoc.
+
+        Args:
+            jsdoc: Parsed JSDoc comment
+
+        Returns:
+            Dictionary with return documentation
+        """
+        if not jsdoc or not jsdoc.returns:
+            return None
+
+        return {
+            "type": jsdoc.returns.type_annotation,
+            "description": jsdoc.returns.description,
+        }
+
     def _convert_interface(self, iface: TSInterface) -> TypeDef:
         """Convert TSInterface to TypeDef."""
         type_def = TypeDef(
@@ -214,6 +300,11 @@ class TypeScriptExtractor(Extractor):
             line=iface.line,
             column=iface.column,
         )
+
+        # Add JSDoc documentation
+        doc_info = self._extract_jsdoc_documentation(iface.jsdoc)
+        if doc_info:
+            type_def.documentation = doc_info
 
         # Type parameters
         for param in iface.type_params:
@@ -266,6 +357,11 @@ class TypeScriptExtractor(Extractor):
             column=alias.column,
         )
 
+        # Add JSDoc documentation
+        doc_info = self._extract_jsdoc_documentation(alias.jsdoc)
+        if doc_info:
+            type_def.documentation = doc_info
+
         # Type parameters
         for param in alias.type_params:
             type_def.type_params.append(
@@ -303,10 +399,13 @@ class TypeScriptExtractor(Extractor):
             column=enum.column,
         )
 
+        # Add JSDoc documentation
+        doc_info = self._extract_jsdoc_documentation(enum.jsdoc)
+        if doc_info:
+            type_def.documentation = doc_info
+
         for member in enum.members:
-            type_def.enum_members.append(
-                {"name": member.name, "value": member.value}
-            )
+            type_def.enum_members.append({"name": member.name, "value": member.value})
 
         type_def.const_enum = enum.const
         type_def.visibility = "public" if enum.exported else "internal"
@@ -321,6 +420,11 @@ class TypeScriptExtractor(Extractor):
             line=cls.line,
             column=cls.column,
         )
+
+        # Add JSDoc documentation
+        doc_info = self._extract_jsdoc_documentation(cls.jsdoc)
+        if doc_info:
+            type_def.documentation = doc_info
 
         # Type parameters
         for param in cls.type_params:
@@ -419,8 +523,17 @@ class TypeScriptExtractor(Extractor):
                 column=func.column,
             )
 
+            # Add JSDoc documentation
+            doc_info = self._extract_jsdoc_documentation(func.jsdoc)
+            if doc_info:
+                func_def.documentation = doc_info
+
+            # Get parameter documentation from JSDoc
+            param_docs = self._extract_jsdoc_params(func.jsdoc)
+
             # Parameters
             for param in func.parameters:
+                param_doc = param_docs.get(param.name, {})
                 func_def.parameters.append(
                     Parameter(
                         name=param.name,
@@ -428,11 +541,17 @@ class TypeScriptExtractor(Extractor):
                         optional=param.optional,
                         rest=param.rest,
                         default_value=param.default_value,
+                        description=param_doc.get("description"),
                     )
                 )
 
-            # Return type
+            # Return type (prefer TypeScript annotation, fall back to JSDoc)
             func_def.return_type = func.return_type
+            returns_doc = self._extract_jsdoc_returns(func.jsdoc)
+            if returns_doc:
+                func_def.return_description = returns_doc.get("description")
+                if not func_def.return_type and returns_doc.get("type"):
+                    func_def.return_type = returns_doc["type"]
 
             # Type parameters
             for param in func.type_params:
@@ -444,9 +563,9 @@ class TypeScriptExtractor(Extractor):
                     }
                 )
 
-            # Async/generator
-            func_def.async_ = func.async_
-            func_def.generator = func.generator
+            # Async/generator (check JSDoc too)
+            func_def.async_ = func.async_ or (func.jsdoc and func.jsdoc.async_)
+            func_def.generator = func.generator or (func.jsdoc and func.jsdoc.generator)
 
             # Visibility
             func_def.visibility = "public" if func.exported else "internal"
@@ -497,11 +616,79 @@ class TypeScriptExtractor(Extractor):
                     )
                 )
 
+        # TS-015: JSDoc documentation
+        self._add_jsdoc_annotations(parsed, ir, annotations)
+
         return annotations
 
-    def _detect_gaps(
-        self, parsed: dict[str, Any], ir: IRVersion
-    ) -> list[GapMarker]:
+    def _add_jsdoc_annotations(
+        self,
+        parsed: dict[str, Any],
+        ir: IRVersion,
+        annotations: list[SemanticAnnotation],
+    ) -> None:
+        """Add annotations for JSDoc documentation."""
+        # Annotate deprecated items
+        for i, type_def in enumerate(ir.types):
+            if hasattr(type_def, "documentation"):
+                doc = getattr(type_def, "documentation", {})
+                if doc.get("deprecated"):
+                    annotations.append(
+                        SemanticAnnotation(
+                            kind="TS-015",
+                            target=f"type:{i}",
+                            value={
+                                "deprecated": True,
+                                "message": doc.get("deprecation_message", ""),
+                            },
+                            description=f"Type '{type_def.name}' is deprecated",
+                        )
+                    )
+
+        for i, func in enumerate(ir.functions):
+            if hasattr(func, "documentation"):
+                doc = getattr(func, "documentation", {})
+                if doc.get("deprecated"):
+                    annotations.append(
+                        SemanticAnnotation(
+                            kind="TS-015",
+                            target=f"function:{i}",
+                            value={
+                                "deprecated": True,
+                                "message": doc.get("deprecation_message", ""),
+                            },
+                            description=f"Function '{func.name}' is deprecated",
+                        )
+                    )
+
+        # Annotate JSDoc type definitions (from @typedef)
+        for _, jsdoc in parsed.get("jsdoc_comments", []):
+            if jsdoc.typedef:
+                annotations.append(
+                    SemanticAnnotation(
+                        kind="TS-016",
+                        target=f"jsdoc_typedef:{jsdoc.typedef.name}",
+                        value={
+                            "name": jsdoc.typedef.name,
+                            "type": jsdoc.typedef.type_annotation,
+                        },
+                        description=f"JSDoc typedef '{jsdoc.typedef.name}'",
+                    )
+                )
+
+            if jsdoc.callback:
+                annotations.append(
+                    SemanticAnnotation(
+                        kind="TS-017",
+                        target=f"jsdoc_callback:{jsdoc.callback.name}",
+                        value={
+                            "name": jsdoc.callback.name,
+                        },
+                        description=f"JSDoc callback '{jsdoc.callback.name}'",
+                    )
+                )
+
+    def _detect_gaps(self, parsed: dict[str, Any], ir: IRVersion) -> list[GapMarker]:
         """Detect semantic gaps in the extracted IR."""
         gaps = []
 
