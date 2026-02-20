@@ -14,11 +14,11 @@ if str(_agents_dir) not in sys.path:
 
 # Re-export shared utilities
 from skill_agents_common.session import (
-    generate_session_id,
+    create_session_from_pr,
+    extract_linked_issues,
     find_session_by_issue,
     find_session_by_pr,
-    extract_linked_issues,
-    create_session_from_pr,
+    generate_session_id,
 )
 
 # Local imports

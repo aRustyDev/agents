@@ -34,7 +34,7 @@ from src.config import load_config
 from src.models import Stage
 from src.orchestrator import Orchestrator
 from src.parse import parse_args, parse_stages
-from src.review import batch_review, review_single_skill, get_skill_path_from_issue
+from src.review import batch_review, get_skill_path_from_issue, review_single_skill
 from src.session import list_sessions, resume_session
 
 
@@ -43,9 +43,7 @@ def main():
 
     # Load config
     agent_dir = Path(__file__).parent
-    config_path = (
-        Path(args.config) if args.config else agent_dir / "data" / "config.json"
-    )
+    config_path = Path(args.config) if args.config else agent_dir / "data" / "config.json"
     config = load_config(config_path)
 
     if args.dry_run:
@@ -94,24 +92,19 @@ def main():
         # Get skill path - either from args or extract from issue title
         skill_path = args.skill
         if not skill_path:
-            skill_path = get_skill_path_from_issue(
-                config.repo_owner,
-                config.repo_name,
-                args.issue
-            )
+            skill_path = get_skill_path_from_issue(config.repo_owner, config.repo_name, args.issue)
             if not skill_path:
                 print(
                     f"Error: Could not extract skill path from issue #{args.issue}. "
                     "Use --skill to specify explicitly.",
-                    file=sys.stderr
+                    file=sys.stderr,
                 )
                 sys.exit(1)
             if args.verbose:
                 print(f"Extracted skill path: {skill_path}")
 
         result = review_single_skill(
-            orchestrator, skill_path, args.issue, stages, args.verbose,
-            force_recreate=args.force
+            orchestrator, skill_path, args.issue, stages, args.verbose, force_recreate=args.force
         )
 
         if args.cleanup and result.stage == Stage.COMPLETE:

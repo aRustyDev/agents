@@ -4,26 +4,26 @@
 Stage 10 tests for git worktree and GitHub API operations.
 """
 
-import pytest
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch, MagicMock
-import sys
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from github_pr import RateLimitError, parse_rate_limit_error
 from worktree import (
-    create_worktree,
-    verify_worktree_clean,
-    get_worktree_info,
-    remove_worktree,
-    worktree_context,
     WorktreeError,
     WorktreeInfo,
+    create_worktree,
+    get_worktree_info,
+    remove_worktree,
+    verify_worktree_clean,
+    worktree_context,
 )
-from github_pr import parse_rate_limit_error, RateLimitError
-
 
 # =============================================================================
 # Worktree Tests
@@ -183,7 +183,7 @@ class TestWorktreeContext:
                     "feature/test",
                     Path("/tmp/worktrees"),
                     cleanup=False,
-                ) as wt_path:
+                ):
                     pass
 
                 mock_remove.assert_not_called()

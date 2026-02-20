@@ -9,7 +9,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-
 # Path to graphql directory relative to this file
 GRAPHQL_DIR = Path(__file__).parent.parent / "data" / "graphql"
 
@@ -34,8 +33,7 @@ def load_query(name: str) -> str:
 
 
 def execute_query(
-    name: str,
-    variables: dict[str, Any] | None = None
+    name: str, variables: dict[str, Any] | None = None
 ) -> tuple[bool, dict[str, Any] | None]:
     """Execute a GraphQL query via gh CLI.
 
@@ -51,8 +49,7 @@ def execute_query(
 
 
 def execute_raw_query(
-    query: str,
-    variables: dict[str, Any] | None = None
+    query: str, variables: dict[str, Any] | None = None
 ) -> tuple[bool, dict[str, Any] | None]:
     """Execute a raw GraphQL query string via gh CLI.
 
@@ -72,7 +69,7 @@ def execute_raw_query(
             else:
                 cmd.extend(["-f", f"{key}={value}"])
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
     if result.returncode != 0:
         return False, None

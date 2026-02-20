@@ -1,11 +1,9 @@
 """Tests for github_pr module."""
 
 import json
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
@@ -13,20 +11,15 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.github_pr import (
-    PRDetails,
-    Review,
-    Comment,
-    ReviewThread,
     PendingFeedback,
+    ReviewThread,
+    find_prs_with_feedback,
+    get_pending_feedback,
     get_pr_details,
     get_pr_reviews,
-    get_pr_comments,
     get_review_threads,
-    get_pending_feedback,
     infer_skill_from_files,
-    find_prs_with_feedback,
 )
-
 
 # --- Test Data ---
 

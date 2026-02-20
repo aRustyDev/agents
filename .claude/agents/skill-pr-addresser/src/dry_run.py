@@ -5,10 +5,6 @@ Stage 10 implementation: Preview pipeline stages without making changes.
 """
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .filter import FilteredFeedback
 
 
 @dataclass
@@ -39,34 +35,42 @@ class DryRunSummary:
         ]
 
         if self.consolidation_summary:
-            lines.extend([
-                "=== Consolidation ===",
-                f"  Action Groups: {len(self.consolidation_summary.get('action_groups', []))}",
-            ])
+            lines.extend(
+                [
+                    "=== Consolidation ===",
+                    f"  Action Groups: {len(self.consolidation_summary.get('action_groups', []))}",
+                ]
+            )
             for group in self.consolidation_summary.get("action_groups", []):
                 lines.append(
                     f"    - {group['id']}: {group['type']} ({group['location_count']} locations)"
                 )
 
-            lines.extend([
-                f"  Guidance: {len(self.consolidation_summary.get('guidance', []))} items",
-                "",
-            ])
+            lines.extend(
+                [
+                    f"  Guidance: {len(self.consolidation_summary.get('guidance', []))} items",
+                    "",
+                ]
+            )
 
         if self.plan_summary:
-            lines.extend([
-                "=== Execution Plan ===",
-            ])
+            lines.extend(
+                [
+                    "=== Execution Plan ===",
+                ]
+            )
             for i, step in enumerate(self.plan_summary.get("steps", []), 1):
                 lines.append(
                     f"  {i}. [{step['priority']}] {step['group_id']}: {step['description']}"
                 )
 
-            lines.extend([
-                "",
-                f"Would address {self.plan_summary.get('total_items', 0)} feedback items "
-                f"in {len(self.plan_summary.get('steps', []))} action groups.",
-            ])
+            lines.extend(
+                [
+                    "",
+                    f"Would address {self.plan_summary.get('total_items', 0)} feedback items "
+                    f"in {len(self.plan_summary.get('steps', []))} action groups.",
+                ]
+            )
 
         lines.append("")
         lines.append("No changes made (dry run).")
@@ -180,10 +184,12 @@ class DryRunMode:
             **details: Action-specific details
         """
         if self.enabled:
-            self._actions.append({
-                "type": action_type,
-                **details,
-            })
+            self._actions.append(
+                {
+                    "type": action_type,
+                    **details,
+                }
+            )
 
     @property
     def recorded_actions(self) -> list[dict]:

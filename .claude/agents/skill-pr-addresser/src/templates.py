@@ -8,7 +8,6 @@ from pathlib import Path
 
 import chevron
 
-
 log = logging.getLogger(__name__)
 
 
@@ -50,11 +49,11 @@ def _fallback_template(template_name: str, data: dict) -> str:
         Basic formatted string
     """
     if template_name == "iteration_comment":
-        return f"""## Addressing Iteration {data.get('iteration', '?')}
+        return f"""## Addressing Iteration {data.get("iteration", "?")}
 
-**Feedback items:** {data.get('feedback_count', 0)}
-**Addressed:** {data.get('addressed_count', 0)}
-**Skipped:** {data.get('skipped_count', 0)}
+**Feedback items:** {data.get("feedback_count", 0)}
+**Addressed:** {data.get("addressed_count", 0)}
+**Skipped:** {data.get("skipped_count", 0)}
 
 {_format_commit_info(data)}
 
@@ -63,8 +62,8 @@ def _fallback_template(template_name: str, data: dict) -> str:
 """
 
     if template_name == "ready_comment":
-        reviewers = data.get('reviewers', [])
-        mentions = ' '.join(f'@{r}' for r in reviewers)
+        reviewers = data.get("reviewers", [])
+        mentions = " ".join(f"@{r}" for r in reviewers)
         return f"""## Ready for Re-Review
 
 All feedback has been addressed. {mentions}
@@ -76,8 +75,8 @@ Please re-review this PR when convenient.
 """
 
     if template_name == "skipped_feedback":
-        skipped = data.get('skipped', [])
-        items = '\n'.join(f"- **{s.get('id')}**: {s.get('reason')}" for s in skipped)
+        skipped = data.get("skipped", [])
+        items = "\n".join(f"- **{s.get('id')}**: {s.get('reason')}" for s in skipped)
         return f"""## Feedback Not Addressed
 
 The following items could not be addressed automatically:
@@ -94,17 +93,17 @@ The following items could not be addressed automatically:
 
 def _format_commit_info(data: dict) -> str:
     """Format commit information for iteration comment."""
-    commit_sha = data.get('commit_sha')
+    commit_sha = data.get("commit_sha")
     if not commit_sha:
         return "*No changes committed*"
 
-    commit_short = data.get('commit_short', commit_sha[:8])
-    files = data.get('files_modified', [])
-    lines_added = data.get('lines_added', 0)
-    lines_removed = data.get('lines_removed', 0)
+    commit_short = data.get("commit_short", commit_sha[:8])
+    files = data.get("files_modified", [])
+    lines_added = data.get("lines_added", 0)
+    lines_removed = data.get("lines_removed", 0)
 
     return f"""**Commit:** `{commit_short}`
-**Files modified:** {', '.join(files) if files else 'none'}
+**Files modified:** {", ".join(files) if files else "none"}
 **Lines:** +{lines_added} / -{lines_removed}"""
 
 
@@ -131,11 +130,15 @@ def format_summary_comment(
         Formatted markdown comment
     """
     total_addressed = sum(
-        len(r.get("addressed_locations", [])) if isinstance(r, dict) else len(getattr(r, "addressed_locations", []))
+        len(r.get("addressed_locations", []))
+        if isinstance(r, dict)
+        else len(getattr(r, "addressed_locations", []))
         for r in fix_results
     )
     threads_resolved = sum(
-        len(r.get("addressed_thread_ids", [])) if isinstance(r, dict) else len(getattr(r, "addressed_thread_ids", []))
+        len(r.get("addressed_thread_ids", []))
+        if isinstance(r, dict)
+        else len(getattr(r, "addressed_thread_ids", []))
         for r in fix_results
     )
 
@@ -147,12 +150,14 @@ def format_summary_comment(
     ]
 
     if fix_results:
-        lines.extend([
-            "### Changes Made",
-            "",
-            "| Action Group | Status | Locations | Threads |",
-            "|--------------|--------|-----------|---------|",
-        ])
+        lines.extend(
+            [
+                "### Changes Made",
+                "",
+                "| Action Group | Status | Locations | Threads |",
+                "|--------------|--------|-----------|---------|",
+            ]
+        )
 
         for result in fix_results:
             if isinstance(result, dict):
@@ -177,18 +182,18 @@ def format_summary_comment(
             else:
                 status = "✅ Complete"
 
-            lines.append(
-                f"| {group_id} | {status} | {addressed_locs} | {addressed_threads} |"
-            )
+            lines.append(f"| {group_id} | {status} | {addressed_locs} | {addressed_threads} |")
 
         lines.append("")
 
-    lines.extend([
-        "---",
-        f"📊 **Summary**: {total_addressed} locations addressed, {threads_resolved} threads resolved",
-        "",
-        "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
-    ])
+    lines.extend(
+        [
+            "---",
+            f"📊 **Summary**: {total_addressed} locations addressed, {threads_resolved} threads resolved",
+            "",
+            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -293,10 +298,12 @@ def format_partial_progress_comment(
     ]
 
     if pending_groups:
-        lines.extend([
-            "### Pending Groups",
-            "",
-        ])
+        lines.extend(
+            [
+                "### Pending Groups",
+                "",
+            ]
+        )
         for group_id in pending_groups[:5]:  # Limit to 5
             lines.append(f"- {group_id}")
 
@@ -305,11 +312,13 @@ def format_partial_progress_comment(
 
         lines.append("")
 
-    lines.extend([
-        "The addresser will resume from here on the next run.",
-        "",
-        "---",
-        "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
-    ])
+    lines.extend(
+        [
+            "The addresser will resume from here on the next run.",
+            "",
+            "---",
+            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
+        ]
+    )
 
     return "\n".join(lines)

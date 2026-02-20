@@ -5,11 +5,11 @@ Falls back to no-op when OTEL is not available or disabled.
 """
 
 import logging
-import os
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Generator
+from typing import Any
 
 log = logging.getLogger(__name__)
 

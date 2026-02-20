@@ -1,20 +1,19 @@
 """Tests for discovery module."""
 
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
 if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
-from src.discovery import discover, DiscoveryContext
-from src.github_pr import PRDetails, Review, Comment, ReviewThread, PendingFeedback
-from src.exceptions import PRNotFoundError, PRClosedError, NoFeedbackError
-
+from src.discovery import DiscoveryContext, discover
+from src.exceptions import NoFeedbackError, PRClosedError, PRNotFoundError
+from src.github_pr import PendingFeedback, PRDetails, Review, ReviewThread
 
 # --- Fixtures ---
 
@@ -111,9 +110,7 @@ class TestDiscoverPRNotFound:
 class TestDiscoverPRClosed:
     """Tests for closed/merged PR scenario."""
 
-    def test_raises_when_pr_is_merged(
-        self, mock_pr_details, tmp_sessions_dir, tmp_worktree_base
-    ):
+    def test_raises_when_pr_is_merged(self, mock_pr_details, tmp_sessions_dir, tmp_worktree_base):
         """Should raise PRClosedError when PR is merged."""
         mock_pr_details.state = "MERGED"
 
@@ -129,9 +126,7 @@ class TestDiscoverPRClosed:
                 )
             assert "merged" in str(exc_info.value).lower()
 
-    def test_raises_when_pr_is_closed(
-        self, mock_pr_details, tmp_sessions_dir, tmp_worktree_base
-    ):
+    def test_raises_when_pr_is_closed(self, mock_pr_details, tmp_sessions_dir, tmp_worktree_base):
         """Should raise PRClosedError when PR is closed."""
         mock_pr_details.state = "CLOSED"
 
@@ -216,9 +211,7 @@ class TestDiscoverNoFeedback:
 class TestDiscoverContext:
     """Tests for DiscoveryContext properties."""
 
-    def test_feedback_count(
-        self, mock_pr_details, mock_blocking_review, mock_unresolved_thread
-    ):
+    def test_feedback_count(self, mock_pr_details, mock_blocking_review, mock_unresolved_thread):
         """Should correctly count total feedback items."""
         ctx = DiscoveryContext(
             pr=mock_pr_details,
@@ -239,9 +232,7 @@ class TestDiscoverContext:
         )
         assert ctx.blocking_reviewers == ["reviewer1"]
 
-    def test_needs_changes_with_blocking_reviews(
-        self, mock_pr_details, mock_blocking_review
-    ):
+    def test_needs_changes_with_blocking_reviews(self, mock_pr_details, mock_blocking_review):
         """Should return True when blocking reviews exist."""
         ctx = DiscoveryContext(
             pr=mock_pr_details,
@@ -251,9 +242,7 @@ class TestDiscoverContext:
         )
         assert ctx.needs_changes is True
 
-    def test_needs_changes_with_unresolved_threads(
-        self, mock_pr_details, mock_unresolved_thread
-    ):
+    def test_needs_changes_with_unresolved_threads(self, mock_pr_details, mock_unresolved_thread):
         """Should return True when unresolved threads exist."""
         ctx = DiscoveryContext(
             pr=mock_pr_details,

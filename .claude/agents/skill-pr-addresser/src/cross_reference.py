@@ -9,8 +9,8 @@ import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .models import ReviewFeedback, ThreadFeedback
     from .filter import FilteredFeedback
+    from .models import ReviewFeedback, ThreadFeedback
 
 
 def extract_line_references(text: str) -> list[int]:
@@ -126,8 +126,7 @@ def link_reviews_to_threads(
             elif referenced_files and thread.path:
                 # Check if thread path matches any referenced file
                 path_match = any(
-                    thread.path.endswith(f) or f in thread.path
-                    for f in referenced_files
+                    thread.path.endswith(f) or f in thread.path for f in referenced_files
                 )
                 if path_match and thread.line and thread.line in referenced_lines:
                     if thread.id not in related_threads:

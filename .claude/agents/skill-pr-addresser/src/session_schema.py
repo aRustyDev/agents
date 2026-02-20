@@ -6,7 +6,7 @@ for delta detection (#796).
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -84,17 +84,9 @@ class FeedbackState:
     @classmethod
     def from_dict(cls, data: dict) -> "FeedbackState":
         return cls(
-            addressed={
-                k: AddressedItem.from_dict(v)
-                for k, v in data.get("addressed", {}).items()
-            },
-            threads={
-                k: ThreadState.from_dict(v)
-                for k, v in data.get("threads", {}).items()
-            },
-            last_run=datetime.fromisoformat(data["last_run"])
-            if data.get("last_run")
-            else None,
+            addressed={k: AddressedItem.from_dict(v) for k, v in data.get("addressed", {}).items()},
+            threads={k: ThreadState.from_dict(v) for k, v in data.get("threads", {}).items()},
+            last_run=datetime.fromisoformat(data["last_run"]) if data.get("last_run") else None,
         )
 
     @classmethod
@@ -120,7 +112,7 @@ class FeedbackState:
         self.addressed[item_id] = AddressedItem(
             id=item_id,
             content_hash=content_hash,
-            addressed_at=datetime.now(timezone.utc),
+            addressed_at=datetime.now(UTC),
             addressed_in_commit=commit_sha,
             iteration=iteration,
         )
@@ -128,15 +120,13 @@ class FeedbackState:
     def update_thread(self, thread_id: str, processed_comment_ids: list[str]):
         """Update thread state with processed comments."""
         existing = self.threads.get(thread_id)
-        all_processed = (
-            existing.comments_processed if existing else []
-        ) + processed_comment_ids
+        all_processed = (existing.comments_processed if existing else []) + processed_comment_ids
 
         self.threads[thread_id] = ThreadState(
             thread_id=thread_id,
             last_seen_comment_id=processed_comment_ids[-1] if processed_comment_ids else None,
             comments_processed=list(set(all_processed)),
-            last_processed_at=datetime.now(timezone.utc),
+            last_processed_at=datetime.now(UTC),
         )
 
     def was_addressed(self, item_id: str) -> bool:
@@ -155,9 +145,7 @@ class FeedbackState:
             return self.addressed[item_id].addressed_in_commit
         return None
 
-    def get_unprocessed_comments(
-        self, thread_id: str, all_comment_ids: list[str]
-    ) -> list[str]:
+    def get_unprocessed_comments(self, thread_id: str, all_comment_ids: list[str]) -> list[str]:
         """Get comment IDs that haven't been processed yet."""
         if thread_id not in self.threads:
             return all_comment_ids
@@ -167,7 +155,7 @@ class FeedbackState:
 
     def record_run(self):
         """Record that a run was completed."""
-        self.last_run = datetime.now(timezone.utc)
+        self.last_run = datetime.now(UTC)
 
     @property
     def addressed_count(self) -> int:

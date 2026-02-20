@@ -6,11 +6,10 @@ via content hashing for #796.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal, Protocol, runtime_checkable
 
 from .hashing import hash_content
-
 
 # =============================================================================
 # Feedback Protocol
@@ -93,11 +92,9 @@ class ReviewFeedback:
         """Create from GitHub API response."""
         submitted_at_str = data.get("submittedAt", "")
         if submitted_at_str:
-            submitted_at = datetime.fromisoformat(
-                submitted_at_str.replace("Z", "+00:00")
-            )
+            submitted_at = datetime.fromisoformat(submitted_at_str.replace("Z", "+00:00"))
         else:
-            submitted_at = datetime.now(timezone.utc)
+            submitted_at = datetime.now(UTC)
 
         return cls(
             id=data["id"],
@@ -156,11 +153,9 @@ class CommentFeedback:
         """Create from GitHub API response."""
         created_at_str = data.get("createdAt", "")
         if created_at_str:
-            created_at = datetime.fromisoformat(
-                created_at_str.replace("Z", "+00:00")
-            )
+            created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
         else:
-            created_at = datetime.now(timezone.utc)
+            created_at = datetime.now(UTC)
 
         return cls(
             id=data["id"],
@@ -188,9 +183,7 @@ class ThreadComment:
         self.content_hash = hash_content(self.body)
         # Detect if this comment signals resolution
         resolution_phrases = ["done", "fixed", "addressed", "resolved", "will do"]
-        self.is_resolution_signal = any(
-            p in self.body.lower() for p in resolution_phrases
-        )
+        self.is_resolution_signal = any(p in self.body.lower() for p in resolution_phrases)
 
     @property
     def content(self) -> str:
@@ -267,10 +260,7 @@ class ThreadFeedback:
         return False
 
     def is_resolved_by(self, response: Feedback) -> bool:
-        return (
-            self.has_author_resolution(response.author)
-            or self.has_reviewer_withdrawal()
-        )
+        return self.has_author_resolution(response.author) or self.has_reviewer_withdrawal()
 
     @classmethod
     def from_github(cls, data: dict) -> "ThreadFeedback":
@@ -284,11 +274,9 @@ class ThreadFeedback:
 
             created_at_str = c.get("createdAt", "")
             if created_at_str:
-                created_at = datetime.fromisoformat(
-                    created_at_str.replace("Z", "+00:00")
-                )
+                created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
             else:
-                created_at = datetime.now(timezone.utc)
+                created_at = datetime.now(UTC)
 
             comments.append(
                 ThreadComment(

@@ -8,9 +8,7 @@ from .models import Stage
 def get_current_user() -> str | None:
     """Get the current GitHub username."""
     result = subprocess.run(
-        ["gh", "api", "user", "--jq", ".login"],
-        capture_output=True,
-        text=True
+        ["gh", "api", "user", "--jq", ".login"], capture_output=True, text=True, check=False
     )
     if result.returncode == 0:
         return result.stdout.strip()
@@ -29,9 +27,7 @@ def parse_args():
     mode_group.add_argument(
         "--batch", action="store_true", help="Batch mode - review all matching issues"
     )
-    mode_group.add_argument(
-        "--list-sessions", action="store_true", help="List all sessions"
-    )
+    mode_group.add_argument("--list-sessions", action="store_true", help="List all sessions")
 
     # Options
     parser.add_argument("--issue", type=int, help="GitHub issue number to link")
@@ -48,21 +44,19 @@ def parse_args():
     )
     parser.add_argument("--stages", help="Comma-separated list of stages to run")
     parser.add_argument("--only", help="Run only a specific sub-agent (for testing)")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Don't make actual changes"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Don't make actual changes")
     parser.add_argument(
         "--max-parallel",
         type=int,
         default=None,
         help="Maximum parallel reviews (batch mode). Uses config.max_parallel if not specified.",
     )
+    parser.add_argument("--cleanup", action="store_true", help="Clean up worktree after completion")
     parser.add_argument(
-        "--cleanup", action="store_true", help="Clean up worktree after completion"
-    )
-    parser.add_argument(
-        "--force", "-f", action="store_true",
-        help="Force recreate branch if it already exists (deletes existing branch)"
+        "--force",
+        "-f",
+        action="store_true",
+        help="Force recreate branch if it already exists (deletes existing branch)",
     )
     parser.add_argument("--config", help="Path to config file")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")

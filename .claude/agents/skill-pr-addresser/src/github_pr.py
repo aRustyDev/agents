@@ -7,9 +7,9 @@ import json
 import re
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 # Add parent directory to path for shared library import
 _agents_dir = Path(__file__).parent.parent.parent
@@ -195,6 +195,7 @@ def get_pr_details(owner: str, repo: str, pr_number: int) -> PRDetails | None:
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -242,6 +243,7 @@ def get_pr_reviews(owner: str, repo: str, pr_number: int) -> list[Review]:
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -289,6 +291,7 @@ def get_pr_comments(owner: str, repo: str, pr_number: int) -> list[Comment]:
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -368,6 +371,7 @@ def get_review_threads(owner: str, repo: str, pr_number: int) -> list[ReviewThre
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -449,9 +453,7 @@ class PendingFeedback:
         )
 
 
-def get_pending_feedback(
-    owner: str, repo: str, pr_number: int
-) -> PendingFeedback:
+def get_pending_feedback(owner: str, repo: str, pr_number: int) -> PendingFeedback:
     """Get all pending feedback that needs addressing.
 
     Categorizes feedback:
@@ -495,9 +497,7 @@ def get_pending_feedback(
             result.pending_comments.append(c)
 
     # Filter threads to unresolved, non-outdated
-    result.unresolved_threads = [
-        t for t in threads if not t.is_resolved and not t.is_outdated
-    ]
+    result.unresolved_threads = [t for t in threads if not t.is_resolved and not t.is_outdated]
 
     return result
 
@@ -544,6 +544,7 @@ def add_pr_comment(owner: str, repo: str, pr_number: int, body: str) -> str | No
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -553,9 +554,7 @@ def add_pr_comment(owner: str, repo: str, pr_number: int, body: str) -> str | No
     return result.stdout.strip() if result.stdout else None
 
 
-def request_rereview(
-    owner: str, repo: str, pr_number: int, reviewers: list[str]
-) -> bool:
+def request_rereview(owner: str, repo: str, pr_number: int, reviewers: list[str]) -> bool:
     """Request re-review from specified reviewers.
 
     Args:
@@ -584,6 +583,7 @@ def request_rereview(
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     return result.returncode == 0
@@ -628,7 +628,7 @@ def find_prs_with_feedback(
         for label in labels:
             args.extend(["--label", label])
 
-    result = subprocess.run(args, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True, check=False)
 
     if result.returncode != 0:
         return []
@@ -756,6 +756,7 @@ def resolve_thread(owner: str, repo: str, thread_id: str) -> bool:
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -794,6 +795,7 @@ def unresolve_thread(owner: str, repo: str, thread_id: str) -> bool:
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     return result.returncode == 0
@@ -865,6 +867,7 @@ def resolve_thread_with_retry(
             ],
             capture_output=True,
             text=True,
+            check=False,
         )
 
         if result.returncode == 0:
@@ -882,9 +885,7 @@ def resolve_thread_with_retry(
                 on_rate_limit(retry_after)
 
             if attempt < max_retries - 1:
-                log.warning(
-                    f"Rate limited, waiting {retry_after}s (attempt {attempt + 1})"
-                )
+                log.warning(f"Rate limited, waiting {retry_after}s (attempt {attempt + 1})")
                 time.sleep(retry_after)
                 continue
 
@@ -947,6 +948,7 @@ def update_project_status(
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:

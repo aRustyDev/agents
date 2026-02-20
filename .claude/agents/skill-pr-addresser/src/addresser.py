@@ -24,19 +24,17 @@ from skill_agents_common.models import Stage
 
 from .costs import CallCost, SessionCosts, format_cost
 from .discovery import DiscoveryContext
-from .exceptions import ConflictError, IterationLimitError
+from .exceptions import ConflictError
 from .feedback import (
     AnalysisResult,
     FixResult,
-    SubstantiveCheckResult,
     analyze_feedback,
     check_substantive_feedback,
     fix_with_escalation,
 )
 from .github_pr import add_pr_comment, request_rereview
 from .templates import render_template
-from .tracing import span, record_iteration, traced
-
+from .tracing import record_iteration, span, traced
 
 log = logging.getLogger(__name__)
 
@@ -243,9 +241,7 @@ class Addresser:
 
             if fix_result.addressed:
                 try:
-                    commit_sha = self._commit_changes(
-                        ctx, iteration, fix_result
-                    )
+                    commit_sha = self._commit_changes(ctx, iteration, fix_result)
                     if commit_sha:
                         self._push_changes(ctx)
                         pushed = True
@@ -297,7 +293,9 @@ class Addresser:
 
             # Log iteration cost
             if iteration_costs:
-                log.info(f"Iteration {iteration} cost: {format_cost(iteration_result.iteration_cost)}")
+                log.info(
+                    f"Iteration {iteration} cost: {format_cost(iteration_result.iteration_cost)}"
+                )
 
             # Check if we're done
             if fix_result.success_rate >= 0.9:
@@ -371,6 +369,7 @@ class Addresser:
             cwd=worktree_path,
             capture_output=True,
             text=True,
+            check=False,
         )
 
         if not status_result.stdout.strip():
@@ -395,7 +394,7 @@ class Addresser:
 
 ### Changed
 - Addressed {len(fix_result.addressed)} feedback items: {addressed_summary}
-- Modified files: {', '.join(fix_result.files_modified)}
+- Modified files: {", ".join(fix_result.files_modified)}
 
 ### Stats
 - Lines added: +{fix_result.lines_added}
@@ -412,6 +411,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
             cwd=worktree_path,
             capture_output=True,
             text=True,
+            check=False,
         )
 
         if result.returncode != 0:
@@ -426,6 +426,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
             cwd=worktree_path,
             capture_output=True,
             text=True,
+            check=False,
         )
 
         return sha_result.stdout.strip() if sha_result.returncode == 0 else None
@@ -450,6 +451,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
             cwd=worktree_path,
             capture_output=True,
             text=True,
+            check=False,
         )
 
         if result.returncode == 0:
@@ -465,16 +467,21 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
                 cwd=worktree_path,
                 capture_output=True,
                 text=True,
+                check=False,
             )
 
             if pull_result.returncode != 0:
-                if "conflict" in pull_result.stderr.lower() or "conflict" in pull_result.stdout.lower():
+                if (
+                    "conflict" in pull_result.stderr.lower()
+                    or "conflict" in pull_result.stdout.lower()
+                ):
                     log.error(f"Rebase conflict: {pull_result.stderr}")
                     # Abort the rebase
                     subprocess.run(
                         ["git", "rebase", "--abort"],
                         cwd=worktree_path,
                         capture_output=True,
+                        check=False,
                     )
                     raise ConflictError(f"Rebase conflict during pull: {pull_result.stderr}")
                 log.error(f"Pull failed: {pull_result.stderr}")
@@ -486,6 +493,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
                 cwd=worktree_path,
                 capture_output=True,
                 text=True,
+                check=False,
             )
 
             if retry_result.returncode != 0:
@@ -540,9 +548,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
 
         body = render_template(self.agent_dir / "templates", "iteration_comment", template_data)
 
-        return add_pr_comment(
-            self.owner, self.repo, ctx.pr_number, body
-        )
+        return add_pr_comment(self.owner, self.repo, ctx.pr_number, body)
 
     def _request_rereview(self, ctx: DiscoveryContext) -> bool:
         """Request re-review from blocking reviewers.
@@ -569,9 +575,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
         add_pr_comment(self.owner, self.repo, ctx.pr_number, body)
 
         # Request re-review
-        success = request_rereview(
-            self.owner, self.repo, ctx.pr_number, ctx.blocking_reviewers
-        )
+        success = request_rereview(self.owner, self.repo, ctx.pr_number, ctx.blocking_reviewers)
 
         if success:
             log.info(f"Requested re-review from: {', '.join(ctx.blocking_reviewers)}")

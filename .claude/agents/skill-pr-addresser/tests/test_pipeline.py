@@ -5,21 +5,17 @@ Stage 12 tests for the main orchestration pipeline.
 Note: The Pipeline class uses relative imports so we test through the app or mocks.
 """
 
-import pytest
-from datetime import datetime, timezone
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock, patch, PropertyMock
-import sys
 
 # Add agent directory to path for imports
 _agent_dir = Path(__file__).parent.parent
 if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
-from src.hooks import HookContext, HookRegistry, PIPELINE_HOOKS
+from src.hooks import PIPELINE_HOOKS, HookContext, HookRegistry
 from src.locking import LockError
-
 
 # =============================================================================
 # Pipeline Data Classes (tested through direct construction)
@@ -229,9 +225,12 @@ class TestPipelineFlowMocked:
             list(registry.run(f"post_{stage}", None, ctx))
 
         expected = [
-            "pre_discovery", "post_discovery",
-            "pre_filter", "post_filter",
-            "pre_consolidate", "post_consolidate",
+            "pre_discovery",
+            "post_discovery",
+            "pre_filter",
+            "post_filter",
+            "pre_consolidate",
+            "post_consolidate",
         ]
         assert stages_run == expected
 
@@ -246,6 +245,7 @@ class TestPipelineFlowMocked:
         def track(name):
             def _track(pipeline, ctx):
                 order.append(name)
+
             return _track
 
         registry.register("pre_iteration", track("iter_start"))
@@ -413,6 +413,7 @@ class TestPipelineStateManagement:
 
             try:
                 import json
+
                 json.loads((pr_dir / "state.json").read_text())
                 assert False, "Should have raised"
             except json.JSONDecodeError:
@@ -427,14 +428,13 @@ class TestPipelineStateManagement:
 class TestPipelineLocking:
     def test_lock_error_import(self):
         """LockError should be importable."""
-        from src.locking import LockError
 
         err = LockError("Already locked")
         assert "Already locked" in str(err)
 
     def test_session_lock_import(self):
         """Session lock should be importable."""
-        from src.locking import session_lock, SessionLock
+        from src.locking import SessionLock
 
         with TemporaryDirectory() as tmpdir:
             sessions_dir = Path(tmpdir)

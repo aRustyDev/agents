@@ -43,6 +43,34 @@ ignore = [
 [lint.per-file-ignores]
 ".scripts/**/*.py" = ["T201"]  # Allow print in scripts
 "tests/**/*.py" = ["S101"]    # Allow assert in tests
+# Agent code has dynamic imports and internal patterns
+".claude/agents/**/*.py" = [
+    "ARG001", # Unused function args (hook signatures)
+    "ARG002", # Unused method args (interface compliance)
+    "ARG003", # Unused class method args (API compatibility)
+    "ARG005", # Unused lambda args (pybars API)
+    "B007",   # Unused loop var (iteration-only loops)
+    "B011",   # assert False (test validation)
+    "B904",   # raise from (exception chaining optional)
+    "C416",   # Unnecessary comprehension (clarity)
+    "E402",   # Import order (dynamic sys.path)
+    "PLR0912", # Too many branches
+    "PLR0915", # Too many statements (complex pipelines)
+    "PLW0603", # Global statement (debug config)
+    "PLW2901", # Loop variable overwritten
+    "PTH123", # Path.open style
+    "RUF001", # Ambiguous unicode (intentional regex)
+    "RUF005", # Iterable unpacking style
+    "RUF012", # Mutable class attrs (cement framework)
+    "RUF022", # __all__ sorting
+    "SIM102", # Nested if (readability)
+    "SIM103", # Return condition (readability)
+    "SIM105", # contextlib.suppress (explicit try/except)
+    "SIM115", # Context manager for files (intentional fd mgmt)
+    "SIM117", # Multiple with (test fixtures)
+    "UP038",  # isinstance union style
+]
+".claude/agents/**/tests/*.py" = ["S101"]  # Allow assert in tests
 
 [lint.isort]
 known-first-party = [".scripts"]

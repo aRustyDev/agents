@@ -39,10 +39,7 @@ def list_sessions(sessions_dir: Path) -> list[dict]:
     return sessions
 
 
-def find_session_by_issue(
-    sessions_dir: Path,
-    issue_number: int
-) -> AgentSession | None:
+def find_session_by_issue(sessions_dir: Path, issue_number: int) -> AgentSession | None:
     """Find a session by its linked issue number.
 
     Used by skill-pr-addresser to find the original skill-reviewer session.
@@ -69,10 +66,7 @@ def find_session_by_issue(
     return None
 
 
-def find_session_by_pr(
-    sessions_dir: Path,
-    pr_number: int
-) -> AgentSession | None:
+def find_session_by_pr(sessions_dir: Path, pr_number: int) -> AgentSession | None:
     """Find a session by its PR number.
 
     Args:

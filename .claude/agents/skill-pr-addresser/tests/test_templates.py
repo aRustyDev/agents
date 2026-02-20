@@ -1,9 +1,9 @@
 """Tests for the templates module."""
 
-import pytest
+import sys
 from pathlib import Path
 
-import sys
+import pytest
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
@@ -11,15 +11,14 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.templates import (
-    render_template,
     _fallback_template,
-    format_summary_comment,
-    format_iteration_limit_comment,
     format_error_comment,
+    format_iteration_limit_comment,
     format_no_feedback_comment,
     format_partial_progress_comment,
+    format_summary_comment,
+    render_template,
 )
-
 
 # --- Fixtures ---
 
@@ -49,13 +48,9 @@ class TestRenderTemplate:
     def test_renders_template_with_list(self, templates_dir):
         """Should render templates with list iteration (Mustache syntax)."""
         # Mustache uses {{#items}}...{{/items}}, not {{#each items}}
-        (templates_dir / "list.hbs").write_text(
-            "{{#items}}- {{.}}\n{{/items}}"
-        )
+        (templates_dir / "list.hbs").write_text("{{#items}}- {{.}}\n{{/items}}")
 
-        result = render_template(
-            templates_dir, "list", {"items": ["one", "two", "three"]}
-        )
+        result = render_template(templates_dir, "list", {"items": ["one", "two", "three"]})
 
         assert "- one" in result
         assert "- two" in result
@@ -64,9 +59,7 @@ class TestRenderTemplate:
     def test_renders_template_with_conditionals(self, templates_dir):
         """Should handle conditionals (Mustache syntax)."""
         # Mustache uses {{#show}}...{{/show}}, not {{#if show}}
-        (templates_dir / "cond.hbs").write_text(
-            "{{#show}}visible{{/show}}{{^show}}hidden{{/show}}"
-        )
+        (templates_dir / "cond.hbs").write_text("{{#show}}visible{{/show}}{{^show}}hidden{{/show}}")
 
         result_true = render_template(templates_dir, "cond", {"show": True})
         result_false = render_template(templates_dir, "cond", {"show": False})

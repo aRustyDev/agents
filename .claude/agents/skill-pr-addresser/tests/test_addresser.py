@@ -1,18 +1,17 @@
 """Tests for the Addresser orchestration module."""
 
-import json
-import subprocess
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
 if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
+from skill_agents_common.models import AgentSession, Stage
 from src.addresser import (
     Addresser,
     AddressingResult,
@@ -20,10 +19,8 @@ from src.addresser import (
 )
 from src.costs import CallCost
 from src.discovery import DiscoveryContext
-from src.github_pr import PRDetails, Review, ReviewThread
-from src.feedback import AnalysisResult, FixResult, FeedbackItem
-from skill_agents_common.models import AgentSession, Stage
-
+from src.feedback import AnalysisResult, FeedbackItem, FixResult
+from src.github_pr import PRDetails, Review
 
 # --- Fixtures ---
 
@@ -243,9 +240,7 @@ class TestAddresser:
         assert result.total_addressed == 0
         assert result.iterations_run == 0
 
-    def test_address_fixes_feedback_items(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_address_fixes_feedback_items(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should fix feedback items and commit changes."""
         mock_analysis = AnalysisResult(
             feedback_items=[
@@ -290,8 +285,12 @@ class TestAddresser:
             total_cost=0.0045,
         )
 
-        with patch("src.addresser.analyze_feedback", return_value=(mock_analysis, mock_analysis_cost)):
-            with patch("src.addresser.fix_with_escalation", return_value=(mock_fix_result, [mock_fix_cost])):
+        with patch(
+            "src.addresser.analyze_feedback", return_value=(mock_analysis, mock_analysis_cost)
+        ):
+            with patch(
+                "src.addresser.fix_with_escalation", return_value=(mock_fix_result, [mock_fix_cost])
+            ):
                 with patch.object(Addresser, "_commit_changes", return_value="abc123"):
                     with patch.object(Addresser, "_push_changes", return_value=True):
                         with patch.object(Addresser, "_add_iteration_comment", return_value="url"):
@@ -303,9 +302,7 @@ class TestAddresser:
                                     repo="ai",
                                 )
 
-                                result = addresser.address(
-                                    mock_discovery_context, max_iterations=3
-                                )
+                                result = addresser.address(mock_discovery_context, max_iterations=3)
 
         assert result.success is True
         assert result.total_addressed == 1
@@ -360,8 +357,12 @@ class TestAddresser:
             total_cost=0.0007,
         )
 
-        with patch("src.addresser.analyze_feedback", return_value=(mock_analysis, mock_analysis_cost)):
-            with patch("src.addresser.fix_with_escalation", return_value=(mock_fix_result, [mock_fix_cost])):
+        with patch(
+            "src.addresser.analyze_feedback", return_value=(mock_analysis, mock_analysis_cost)
+        ):
+            with patch(
+                "src.addresser.fix_with_escalation", return_value=(mock_fix_result, [mock_fix_cost])
+            ):
                 with patch.object(Addresser, "_commit_changes", return_value="abc123"):
                     with patch.object(Addresser, "_push_changes", return_value=True):
                         with patch.object(Addresser, "_add_iteration_comment", return_value=None):
@@ -373,9 +374,7 @@ class TestAddresser:
                                     repo="ai",
                                 )
 
-                                result = addresser.address(
-                                    mock_discovery_context, max_iterations=3
-                                )
+                                result = addresser.address(mock_discovery_context, max_iterations=3)
 
         # Should stop after 1 iteration due to high success rate
         assert result.iterations_run == 1
@@ -386,9 +385,7 @@ class TestAddresser:
 class TestAddresserCommit:
     """Tests for Addresser commit functionality."""
 
-    def test_commit_changes_creates_commit(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_commit_changes_creates_commit(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should create a commit with changes."""
         # Create a file in the worktree
         worktree_path = Path(mock_discovery_context.worktree.path)
@@ -407,9 +404,7 @@ class TestAddresserCommit:
             if cmd[1] == "status":
                 result.returncode = 0
                 result.stdout = "M SKILL.md\n"
-            elif cmd[1] == "add":
-                result.returncode = 0
-            elif cmd[1] == "commit":
+            elif cmd[1] == "add" or cmd[1] == "commit":
                 result.returncode = 0
             elif cmd[1] == "rev-parse":
                 result.returncode = 0
@@ -456,9 +451,7 @@ class TestAddresserCommit:
 class TestAddresserPush:
     """Tests for Addresser push functionality."""
 
-    def test_push_changes_succeeds(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_push_changes_succeeds(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should push changes successfully."""
         mock_result = MagicMock()
         mock_result.returncode = 0
@@ -475,9 +468,7 @@ class TestAddresserPush:
 
         assert success is True
 
-    def test_push_changes_fails(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_push_changes_fails(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should handle push failure."""
         mock_result = MagicMock()
         mock_result.returncode = 1
@@ -499,9 +490,7 @@ class TestAddresserPush:
 class TestAddresserComments:
     """Tests for Addresser comment functionality."""
 
-    def test_add_iteration_comment(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_add_iteration_comment(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should add an iteration comment."""
         mock_analysis = AnalysisResult(
             feedback_items=[],
@@ -528,9 +517,7 @@ class TestAddresserComments:
 
         assert url == "https://github.com/comment"
 
-    def test_request_rereview(
-        self, agent_dir, sessions_dir, mock_discovery_context
-    ):
+    def test_request_rereview(self, agent_dir, sessions_dir, mock_discovery_context):
         """Should request re-review from blocking reviewers."""
         with patch("src.addresser.add_pr_comment", return_value="url"):
             with patch("src.addresser.request_rereview", return_value=True) as mock_rereview:
@@ -544,6 +531,4 @@ class TestAddresserComments:
                 success = addresser._request_rereview(mock_discovery_context)
 
         assert success is True
-        mock_rereview.assert_called_once_with(
-            "aRustyDev", "ai", 795, ["reviewer1"]
-        )
+        mock_rereview.assert_called_once_with("aRustyDev", "ai", 795, ["reviewer1"])

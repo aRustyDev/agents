@@ -14,37 +14,33 @@ Each stage has pre_/post_ hooks for extensibility.
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
 
 from .commit import create_iteration_commit, push_changes
-from .consolidate import consolidate_feedback, ConsolidationResult
-from .discovery import discover, DiscoveryContext
-from .dry_run import DryRunMode, DryRunSummary
-from .filter import filter_feedback, FilterResult
-from .fix import fix_action_group, FixGroupResult
+from .consolidate import ConsolidationResult, consolidate_feedback
+from .discovery import DiscoveryContext, discover
+from .dry_run import DryRunMode
+from .filter import FilterResult, filter_feedback
+from .fix import FixGroupResult, fix_action_group
 from .github_pr import (
     add_pr_comment,
     request_rereview,
     resolve_addressed_threads,
 )
 from .hooks import (
+    PIPELINE_HOOKS,
     HookContext,
     HookRegistry,
-    PIPELINE_HOOKS,
     run_hook,
 )
 from .location_progress import PRLocationProgress
-from .locking import session_lock, LockError
-from .models import ActionGroup, FeedbackItem
-from .planner import create_execution_plan, ExecutionPlan
+from .locking import LockError, session_lock
+from .models import FeedbackItem
+from .planner import ExecutionPlan, create_execution_plan
 from .templates import (
-    format_summary_comment,
-    format_iteration_limit_comment,
     format_error_comment,
     format_no_feedback_comment,
-    format_partial_progress_comment,
+    format_summary_comment,
 )
 
 log = logging.getLogger(__name__)
@@ -237,7 +233,7 @@ class Pipeline:
 
         try:
             # Acquire session lock
-            with session_lock(self.sessions_dir, pr_number) as lock:
+            with session_lock(self.sessions_dir, pr_number):
                 log.info(f"Acquired lock for PR #{pr_number}")
 
                 # Run the pipeline
@@ -388,7 +384,6 @@ class Pipeline:
         iteration: int,
     ) -> IterationResult:
         """Run a single addressing iteration."""
-        import time
 
         result = IterationResult(iteration=iteration)
         hook_ctx = HookContext(
@@ -536,8 +531,7 @@ class Pipeline:
 
             duration = (time.perf_counter() - start) * 1000
             log.debug(
-                f"Consolidation: {len(consolidation.action_groups)} groups "
-                f"({duration:.0f}ms)"
+                f"Consolidation: {len(consolidation.action_groups)} groups ({duration:.0f}ms)"
             )
 
             return consolidation

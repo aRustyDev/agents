@@ -1,9 +1,7 @@
 """Tests for the costs module."""
 
-import pytest
-from pathlib import Path
-
 import sys
+from pathlib import Path
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
@@ -13,11 +11,11 @@ if str(_agent_dir) not in sys.path:
 from src.costs import (
     CallCost,
     SessionCosts,
-    get_model_pricing,
     estimate_call_cost,
     estimate_pr_cost,
     format_cost,
     get_cost_summary,
+    get_model_pricing,
 )
 
 

@@ -4,11 +4,11 @@
 Stage 11 tests for pipeline hook system.
 """
 
-import pytest
-from datetime import datetime, timezone
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-import sys
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -16,22 +16,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from hooks import (
     PIPELINE_HOOKS,
     HookContext,
-    HookResult,
     HookRegistry,
-    define_pipeline_hooks,
-    run_hook,
-    log_stage_start,
-    log_stage_end,
+    HookResult,
     check_cancelled,
-    rate_limit_handler,
+    define_pipeline_hooks,
     error_handler,
-    register_logging_hooks,
+    get_default_hooks,
+    get_hook_definitions,
+    log_stage_end,
+    log_stage_start,
+    rate_limit_handler,
     register_cancellation_hooks,
     register_error_handlers,
-    get_hook_definitions,
-    get_default_hooks,
+    register_logging_hooks,
+    run_hook,
 )
-
 
 # =============================================================================
 # HookContext Tests

@@ -6,11 +6,7 @@ This enables resumption from partial completion within an iteration.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -40,7 +36,7 @@ class AddressedLocation:
         if isinstance(addressed_at, str):
             addressed_at = datetime.fromisoformat(addressed_at)
         else:
-            addressed_at = datetime.now(timezone.utc)
+            addressed_at = datetime.now(UTC)
 
         return cls(
             file=data["file"],
@@ -83,9 +79,7 @@ class ActionGroupProgress:
 
     def has_location(self, file: str, line: int | None) -> bool:
         """Check if location was already addressed."""
-        return any(
-            loc.file == file and loc.line == line for loc in self.addressed_locations
-        )
+        return any(loc.file == file and loc.line == line for loc in self.addressed_locations)
 
     def add_location(
         self,
@@ -100,7 +94,7 @@ class ActionGroupProgress:
                 file=file,
                 line=line,
                 thread_id=thread_id,
-                addressed_at=datetime.now(timezone.utc),
+                addressed_at=datetime.now(UTC),
                 commit_sha=commit_sha,
             )
         )
@@ -135,8 +129,7 @@ class ActionGroupProgress:
             group_id=data["group_id"],
             total_locations=data["total_locations"],
             addressed_locations=[
-                AddressedLocation.from_dict(loc)
-                for loc in data.get("addressed_locations", [])
+                AddressedLocation.from_dict(loc) for loc in data.get("addressed_locations", [])
             ],
         )
 
@@ -184,7 +177,7 @@ class IterationProgress:
 
     def complete(self) -> None:
         """Mark iteration as completed."""
-        self.completed_at = datetime.now(timezone.utc)
+        self.completed_at = datetime.now(UTC)
 
     def to_dict(self) -> dict:
         """Serialize to dictionary."""
@@ -202,7 +195,7 @@ class IterationProgress:
         if isinstance(started_at, str):
             started_at = datetime.fromisoformat(started_at)
         else:
-            started_at = datetime.now(timezone.utc)
+            started_at = datetime.now(UTC)
 
         completed_at = data.get("completed_at")
         if isinstance(completed_at, str):
@@ -214,10 +207,7 @@ class IterationProgress:
             iteration=data["iteration"],
             started_at=started_at,
             completed_at=completed_at,
-            groups={
-                k: ActionGroupProgress.from_dict(v)
-                for k, v in data.get("groups", {}).items()
-            },
+            groups={k: ActionGroupProgress.from_dict(v) for k, v in data.get("groups", {}).items()},
         )
 
 
@@ -247,7 +237,7 @@ class PRLocationProgress:
         """Start a new iteration."""
         iteration = IterationProgress(
             iteration=self.last_iteration_number + 1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         self.iterations.append(iteration)
         return iteration
@@ -271,7 +261,5 @@ class PRLocationProgress:
         """Deserialize from dictionary."""
         return cls(
             pr_number=data["pr_number"],
-            iterations=[
-                IterationProgress.from_dict(it) for it in data.get("iterations", [])
-            ],
+            iterations=[IterationProgress.from_dict(it) for it in data.get("iterations", [])],
         )

@@ -4,7 +4,7 @@ Writes progress to a JSON file that can be watched from another terminal.
 """
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -13,6 +13,7 @@ from typing import Any
 @dataclass
 class SessionProgress:
     """Progress for a single session."""
+
     session_id: str
     issue_number: int
     skill_path: str
@@ -28,6 +29,7 @@ class SessionProgress:
 @dataclass
 class BatchProgress:
     """Progress for a batch run."""
+
     batch_id: str
     started_at: str
     total_issues: int = 0
@@ -66,12 +68,7 @@ class ProgressTracker:
         self._save()
         return self._progress
 
-    def start_session(
-        self,
-        session_id: str,
-        issue_number: int,
-        skill_path: str
-    ) -> SessionProgress:
+    def start_session(self, session_id: str, issue_number: int, skill_path: str) -> SessionProgress:
         """Start a new session within the batch."""
         session = SessionProgress(
             session_id=session_id,
@@ -98,7 +95,7 @@ class ProgressTracker:
         status: str | None = None,
         pr_url: str | None = None,
         error: str | None = None,
-        cost: float | None = None
+        cost: float | None = None,
     ):
         """Update session progress."""
         if not self._progress:
@@ -176,7 +173,8 @@ class ProgressTracker:
             "pending": self._progress.pending,
             "progress_pct": (
                 self._progress.completed / self._progress.total_issues * 100
-                if self._progress.total_issues > 0 else 0
+                if self._progress.total_issues > 0
+                else 0
             ),
             "actual_cost": f"${self._progress.actual_cost:.2f}",
             "current_sessions": [

@@ -9,15 +9,16 @@ Example:
 Shared by skill-reviewer and skill-pr-addresser agents.
 """
 
-import subprocess
 import shutil
-from pathlib import Path
+import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
 class WorktreeInfo:
     """Information about a git worktree."""
+
     path: Path
     branch: str
     commit: str | None = None
@@ -26,16 +27,20 @@ class WorktreeInfo:
 
 class WorktreeError(Exception):
     """Error during worktree operations."""
+
     pass
 
 
 class BranchExistsError(WorktreeError):
     """Branch already exists."""
+
     def __init__(self, branch_name: str, has_remote: bool = False):
         self.branch_name = branch_name
         self.has_remote = has_remote
-        super().__init__(f"Branch '{branch_name}' already exists" +
-                        (" (and pushed to remote)" if has_remote else ""))
+        super().__init__(
+            f"Branch '{branch_name}' already exists"
+            + (" (and pushed to remote)" if has_remote else "")
+        )
 
 
 def get_project_id(repo_path: Path) -> str | None:
@@ -56,7 +61,8 @@ def get_project_id(repo_path: Path) -> str | None:
         ["git", "config", "--get", "project.id"],
         cwd=repo_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
     if result.returncode == 0 and result.stdout.strip():
         return result.stdout.strip()
@@ -66,7 +72,8 @@ def get_project_id(repo_path: Path) -> str | None:
         ["git", "notes", "--ref=project.id", "show", "HEAD"],
         cwd=repo_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
     if result.returncode == 0 and result.stdout.strip():
         return result.stdout.strip()
@@ -85,18 +92,12 @@ def set_project_id(repo_path: Path, project_id: str) -> bool:
         True if successful
     """
     result = subprocess.run(
-        ["git", "config", "project.id", project_id],
-        cwd=repo_path,
-        capture_output=True
+        ["git", "config", "project.id", project_id], cwd=repo_path, capture_output=True, check=False
     )
     return result.returncode == 0
 
 
-def get_worktree_path(
-    worktree_base: Path,
-    project_id: str | None,
-    identifier: str
-) -> Path:
+def get_worktree_path(worktree_base: Path, project_id: str | None, identifier: str) -> Path:
     """Get the worktree path following the standard pattern.
 
     Pattern: <worktree_base>/<project_id>/<identifier>/
@@ -129,7 +130,8 @@ def branch_exists(repo_path: Path, branch_name: str) -> tuple[bool, bool]:
     local_result = subprocess.run(
         ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch_name}"],
         cwd=repo_path,
-        capture_output=True
+        capture_output=True,
+        check=False,
     )
     exists_locally = local_result.returncode == 0
 
@@ -138,7 +140,8 @@ def branch_exists(repo_path: Path, branch_name: str) -> tuple[bool, bool]:
         ["git", "ls-remote", "--heads", "origin", branch_name],
         cwd=repo_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
     exists_remotely = bool(remote_result.stdout.strip())
 
@@ -158,16 +161,15 @@ def delete_branch(repo_path: Path, branch_name: str, delete_remote: bool = False
     """
     # Delete local branch
     result = subprocess.run(
-        ["git", "branch", "-D", branch_name],
-        cwd=repo_path,
-        capture_output=True
+        ["git", "branch", "-D", branch_name], cwd=repo_path, capture_output=True, check=False
     )
 
     if delete_remote:
         subprocess.run(
             ["git", "push", "origin", "--delete", branch_name],
             cwd=repo_path,
-            capture_output=True
+            capture_output=True,
+            check=False,
         )
 
     return result.returncode == 0
@@ -179,7 +181,7 @@ def create_worktree(
     branch_name: str,
     base_branch: str = "main",
     identifier: str | None = None,
-    force_recreate: bool = False
+    force_recreate: bool = False,
 ) -> WorktreeInfo:
     """Create a new git worktree for isolated work.
 
@@ -214,12 +216,7 @@ def create_worktree(
         remove_worktree(repo_path, worktree_path)
 
     # Fetch latest from origin
-    subprocess.run(
-        ["git", "fetch", "origin"],
-        cwd=repo_path,
-        check=True,
-        capture_output=True
-    )
+    subprocess.run(["git", "fetch", "origin"], cwd=repo_path, check=True, capture_output=True)
 
     # Check if branch already exists
     exists_locally, exists_remotely = branch_exists(repo_path, branch_name)
@@ -237,23 +234,17 @@ def create_worktree(
         cwd=repo_path,
         check=True,
         capture_output=True,
-        text=True
+        text=True,
     )
 
     # Get current commit
     commit_result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=worktree_path,
-        capture_output=True,
-        text=True
+        ["git", "rev-parse", "HEAD"], cwd=worktree_path, capture_output=True, text=True, check=False
     )
     commit = commit_result.stdout.strip() if commit_result.returncode == 0 else None
 
     return WorktreeInfo(
-        path=worktree_path,
-        branch=branch_name,
-        commit=commit,
-        project_id=project_id
+        path=worktree_path, branch=branch_name, commit=commit, project_id=project_id
     )
 
 
@@ -268,7 +259,8 @@ def remove_worktree(repo_path: Path, worktree_path: Path):
     result = subprocess.run(
         ["git", "worktree", "remove", "--force", str(worktree_path)],
         cwd=repo_path,
-        capture_output=True
+        capture_output=True,
+        check=False,
     )
 
     # If that fails, manually clean up
@@ -277,9 +269,7 @@ def remove_worktree(repo_path: Path, worktree_path: Path):
 
         # Prune worktree references
         subprocess.run(
-            ["git", "worktree", "prune"],
-            cwd=repo_path,
-            capture_output=True
+            ["git", "worktree", "prune"], cwd=repo_path, capture_output=True, check=False
         )
 
 
@@ -296,7 +286,8 @@ def list_worktrees(repo_path: Path) -> list[WorktreeInfo]:
         ["git", "worktree", "list", "--porcelain"],
         cwd=repo_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -308,11 +299,13 @@ def list_worktrees(repo_path: Path) -> list[WorktreeInfo]:
     for line in result.stdout.strip().split("\n"):
         if not line:
             if current:
-                worktrees.append(WorktreeInfo(
-                    path=Path(current.get("worktree", "")),
-                    branch=current.get("branch", "").replace("refs/heads/", ""),
-                    commit=current.get("HEAD")
-                ))
+                worktrees.append(
+                    WorktreeInfo(
+                        path=Path(current.get("worktree", "")),
+                        branch=current.get("branch", "").replace("refs/heads/", ""),
+                        commit=current.get("HEAD"),
+                    )
+                )
                 current = {}
         elif line.startswith("worktree "):
             current["worktree"] = line[9:]
@@ -323,11 +316,13 @@ def list_worktrees(repo_path: Path) -> list[WorktreeInfo]:
 
     # Don't forget the last one
     if current:
-        worktrees.append(WorktreeInfo(
-            path=Path(current.get("worktree", "")),
-            branch=current.get("branch", "").replace("refs/heads/", ""),
-            commit=current.get("HEAD")
-        ))
+        worktrees.append(
+            WorktreeInfo(
+                path=Path(current.get("worktree", "")),
+                branch=current.get("branch", "").replace("refs/heads/", ""),
+                commit=current.get("HEAD"),
+            )
+        )
 
     return worktrees
 
@@ -346,7 +341,8 @@ def get_worktree_status(worktree_path: Path) -> dict:
         ["git", "status", "--porcelain"],
         cwd=worktree_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     # Get diff stats
@@ -354,7 +350,8 @@ def get_worktree_status(worktree_path: Path) -> dict:
         ["git", "diff", "--stat", "HEAD"],
         cwd=worktree_path,
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     # Count changes
@@ -364,7 +361,7 @@ def get_worktree_status(worktree_path: Path) -> dict:
         "files_changed": len([line for line in lines if line]),
         "status_lines": lines,
         "diff_stat": diff_result.stdout.strip() if diff_result.returncode == 0 else "",
-        "clean": len(lines) == 0 or (len(lines) == 1 and lines[0] == "")
+        "clean": len(lines) == 0 or (len(lines) == 1 and lines[0] == ""),
     }
 
 
@@ -428,7 +425,8 @@ def get_or_create_worktree(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"],
                 cwd=worktree_path,
                 capture_output=True,
-                text=True
+                text=True,
+                check=False,
             )
             if result.returncode == 0:
                 current_branch = result.stdout.strip()
@@ -436,15 +434,13 @@ def get_or_create_worktree(
                     ["git", "rev-parse", "HEAD"],
                     cwd=worktree_path,
                     capture_output=True,
-                    text=True
+                    text=True,
+                    check=False,
                 )
                 commit = commit_result.stdout.strip() if commit_result.returncode == 0 else None
 
                 return WorktreeInfo(
-                    path=worktree_path,
-                    branch=current_branch,
-                    commit=commit,
-                    project_id=project_id
+                    path=worktree_path, branch=current_branch, commit=commit, project_id=project_id
                 )
 
     # Check if branch exists on remote (for recreating worktree from PR branch)
@@ -453,41 +449,46 @@ def get_or_create_worktree(
     if exists_remotely:
         # Fetch and checkout existing remote branch
         subprocess.run(
-            ["git", "fetch", "origin", branch_name],
-            cwd=repo_path,
-            capture_output=True
+            ["git", "fetch", "origin", branch_name], cwd=repo_path, capture_output=True, check=False
         )
 
         # Create worktree with --track to properly set up tracking branch
         worktree_path.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(
-            ["git", "worktree", "add", "--track", "-b", branch_name,
-             str(worktree_path), f"origin/{branch_name}"],
+            [
+                "git",
+                "worktree",
+                "add",
+                "--track",
+                "-b",
+                branch_name,
+                str(worktree_path),
+                f"origin/{branch_name}",
+            ],
             cwd=repo_path,
             check=True,
-            capture_output=True
+            capture_output=True,
         )
 
         # Set upstream tracking
         subprocess.run(
             ["git", "branch", "--set-upstream-to", f"origin/{branch_name}", branch_name],
             cwd=worktree_path,
-            capture_output=True
+            capture_output=True,
+            check=False,
         )
 
         commit_result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=worktree_path,
             capture_output=True,
-            text=True
+            text=True,
+            check=False,
         )
         commit = commit_result.stdout.strip() if commit_result.returncode == 0 else None
 
         return WorktreeInfo(
-            path=worktree_path,
-            branch=branch_name,
-            commit=commit,
-            project_id=project_id
+            path=worktree_path, branch=branch_name, commit=commit, project_id=project_id
         )
 
     # Create new worktree
@@ -497,5 +498,5 @@ def get_or_create_worktree(
         branch_name=branch_name,
         base_branch=base_branch,
         identifier=identifier,
-        force_recreate=False
+        force_recreate=False,
     )

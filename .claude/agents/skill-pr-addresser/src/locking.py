@@ -9,12 +9,12 @@ import json
 import os
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Generator
+    from collections.abc import Generator
 
 
 class LockError(Exception):
@@ -74,7 +74,7 @@ class SessionLock:
             pr_number=pr_number,
             lock_file=lock_file,
             holder_pid=os.getpid(),
-            acquired_at=datetime.now(timezone.utc),
+            acquired_at=datetime.now(UTC),
         )
         lock._fd = fd
 
@@ -173,9 +173,7 @@ def force_unlock(
     if holder_pid and not force:
         try:
             os.kill(holder_pid, 0)  # Signal 0 = check if running
-            return False, (
-                f"PID {holder_pid} is still running. Use force=True to override."
-            )
+            return False, (f"PID {holder_pid} is still running. Use force=True to override.")
         except OSError:
             pass  # Process not running, safe to unlock
 

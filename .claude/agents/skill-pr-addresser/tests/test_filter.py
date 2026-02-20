@@ -4,11 +4,10 @@
 Stage 9 tests for delta detection.
 """
 
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import MagicMock
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import MagicMock
 
 # Add agent directory to path for imports
 _agent_dir = Path(__file__).parent.parent
@@ -16,20 +15,20 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.filter import (
-    filter_feedback,
     FilteredFeedback,
     FilteredThread,
-    _is_new_or_changed,
     _get_new_thread_comments,
+    _is_new_or_changed,
+    filter_feedback,
 )
-from src.session_schema import FeedbackState, AddressedItem, ThreadState
 from src.models import (
-    ReviewFeedback,
     CommentFeedback,
-    ThreadFeedback,
-    ThreadComment,
     RawFeedback,
+    ReviewFeedback,
+    ThreadComment,
+    ThreadFeedback,
 )
+from src.session_schema import AddressedItem, FeedbackState, ThreadState
 
 
 class MockSession:
@@ -52,7 +51,7 @@ class TestIsNewOrChanged:
             state="CHANGES_REQUESTED",
             body="Fix this",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         state = FeedbackState()
         assert _is_new_or_changed(item, state) is True
@@ -64,7 +63,7 @@ class TestIsNewOrChanged:
             state="CHANGES_REQUESTED",
             body="Fix this",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         state = FeedbackState()
         state.mark_addressed("R_123", item.content_hash, "abc123", 1)
@@ -77,13 +76,13 @@ class TestIsNewOrChanged:
             state="CHANGES_REQUESTED",
             body="Fix this - UPDATED",  # Changed content
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         state = FeedbackState()
         state.addressed["R_123"] = AddressedItem(
             id="R_123",
             content_hash="sha256:oldhash",  # Old hash
-            addressed_at=datetime.now(timezone.utc),
+            addressed_at=datetime.now(UTC),
             addressed_in_commit="abc123",
             iteration=1,
         )
@@ -95,7 +94,7 @@ class TestIsNewOrChanged:
             id="IC_123",
             body="Please add tests",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         state = FeedbackState()
         assert _is_new_or_changed(item, state) is True
@@ -124,7 +123,7 @@ class TestGetNewThreadComments:
                     id=cid,
                     body=body,
                     author=author,
-                    created_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(UTC),
                 )
                 for cid, body, author in comments
             ],
@@ -132,25 +131,29 @@ class TestGetNewThreadComments:
 
     def test_all_new_when_no_state(self):
         """All comments are new when no thread state exists."""
-        thread = self._make_thread([
-            ("c1", "Fix this", "reviewer"),
-            ("c2", "Done", "author"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "Fix this", "reviewer"),
+                ("c2", "Done", "author"),
+            ]
+        )
         result = _get_new_thread_comments(thread, None, "author")
         assert len(result) == 2
 
     def test_filters_processed_comments(self):
         """Should exclude already processed comments."""
-        thread = self._make_thread([
-            ("c1", "Fix this", "reviewer"),
-            ("c2", "Working on it", "author"),
-            ("c3", "Done!", "author"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "Fix this", "reviewer"),
+                ("c2", "Working on it", "author"),
+                ("c3", "Done!", "author"),
+            ]
+        )
         state = ThreadState(
             thread_id="PRRT_123",
             last_seen_comment_id="c1",
             comments_processed=["c1"],
-            last_processed_at=datetime.now(timezone.utc),
+            last_processed_at=datetime.now(UTC),
         )
         result = _get_new_thread_comments(thread, state, "author")
         assert len(result) == 2
@@ -159,14 +162,16 @@ class TestGetNewThreadComments:
 
     def test_empty_when_all_processed(self):
         """Should return empty when all comments processed."""
-        thread = self._make_thread([
-            ("c1", "Fix this", "reviewer"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "Fix this", "reviewer"),
+            ]
+        )
         state = ThreadState(
             thread_id="PRRT_123",
             last_seen_comment_id="c1",
             comments_processed=["c1"],
-            last_processed_at=datetime.now(timezone.utc),
+            last_processed_at=datetime.now(UTC),
         )
         result = _get_new_thread_comments(thread, state, "author")
         assert len(result) == 0
@@ -193,7 +198,7 @@ class TestFilterFeedback:
                             id="c1",
                             body="Fix this",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         )
                     ],
                 )
@@ -220,7 +225,7 @@ class TestFilterFeedback:
                             id="c1",
                             body="Fix this",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         )
                     ],
                 )
@@ -247,13 +252,13 @@ class TestFilterFeedback:
                             id="c1",
                             body="Fix this",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                         ThreadComment(
                             id="c2",
                             body="New reply",
                             author="someone",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                     ],
                 )
@@ -268,7 +273,7 @@ class TestFilterFeedback:
                     "thread_id": "PRRT_123",
                     "comments_processed": ["c1"],
                     "last_seen_comment_id": "c1",
-                    "last_processed_at": datetime.now(timezone.utc).isoformat(),
+                    "last_processed_at": datetime.now(UTC).isoformat(),
                 }
             },
             "last_run": None,
@@ -294,13 +299,13 @@ class TestFilterFeedback:
                             id="c1",
                             body="Fix this",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                         ThreadComment(
                             id="c2",
                             body="Done!",
                             author="pr_author",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                     ],
                 )
@@ -327,13 +332,13 @@ class TestFilterFeedback:
                             id="c1",
                             body="Fix this",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                         ThreadComment(
                             id="c2",
                             body="Actually, never mind",
                             author="reviewer",
-                            created_at=datetime.now(timezone.utc),
+                            created_at=datetime.now(UTC),
                         ),
                     ],
                 )
@@ -387,7 +392,7 @@ class TestFilteredThread:
                     id="c1",
                     body="Fix this",
                     author="reviewer",
-                    created_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(UTC),
                 ),
             ],
         )

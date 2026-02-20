@@ -1,23 +1,15 @@
 """Main orchestrator for skill review pipeline."""
 
-import subprocess
 import json
-import os
-import time
 import re
-from datetime import datetime
+import subprocess
+import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
-from .models import (
-    AgentSession,
-    SubagentConfig,
-    SubagentResult,
-    Model,
-    Stage
-)
 from .config import PipelineConfig, load_config
 from .headers import create_subagent_headers
+from .models import AgentSession, Model, Stage, SubagentConfig, SubagentResult
 from .pipeline import DeterministicPipeline, PipelineContext
 from .worktree import get_worktree_status
 
@@ -48,9 +40,7 @@ class Orchestrator:
     def _find_repo_root(self) -> Path:
         """Find the git repository root."""
         result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True,
-            text=True
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
             return Path(result.stdout.strip())
@@ -71,7 +61,7 @@ class Orchestrator:
         task: str,
         session: AgentSession,
         model_override: Model | None = None,
-        working_dir: Path | None = None
+        working_dir: Path | None = None,
     ) -> SubagentResult:
         """Execute a sub-agent with given task.
 
@@ -102,10 +92,13 @@ class Orchestrator:
         # Build CLI command
         cmd = [
             "claude",
-            "--model", model.value,
+            "--model",
+            model.value,
             "--print",
-            "--output-format", "json",  # Get token usage in response
-            "-p", full_prompt,
+            "--output-format",
+            "json",  # Get token usage in response
+            "-p",
+            full_prompt,
         ]
 
         if config.allowed_tools:
@@ -113,8 +106,7 @@ class Orchestrator:
 
         # Determine working directory
         cwd = working_dir or (
-            Path(session.worktree_path) if session.worktree_path
-            else self.repo_path
+            Path(session.worktree_path) if session.worktree_path else self.repo_path
         )
 
         # Create headers for sub-agent tracking (content-based UUIDs)
@@ -131,7 +123,8 @@ class Orchestrator:
                 env=env,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minute timeout
+                timeout=600,
+                check=False,  # 10 minute timeout
             )
 
             duration = time.time() - start_time
@@ -141,7 +134,6 @@ class Orchestrator:
             # Parse JSON response from claude CLI
             input_tokens = 0
             output_tokens = 0
-            actual_cost = 0.0
             text_output = raw_output
             parsed = None
 
@@ -153,12 +145,12 @@ class Orchestrator:
                 # Extract token usage
                 usage = response.get("usage", {})
                 input_tokens = (
-                    usage.get("input_tokens", 0) +
-                    usage.get("cache_creation_input_tokens", 0) +
-                    usage.get("cache_read_input_tokens", 0)
+                    usage.get("input_tokens", 0)
+                    + usage.get("cache_creation_input_tokens", 0)
+                    + usage.get("cache_read_input_tokens", 0)
                 )
                 output_tokens = usage.get("output_tokens", 0)
-                actual_cost = response.get("total_cost_usd", 0.0)
+                response.get("total_cost_usd", 0.0)
 
                 # Try to extract structured JSON from the result text
                 parsed = self._extract_json(text_output)
@@ -177,7 +169,7 @@ class Orchestrator:
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 parsed_output=parsed,
-                error=error
+                error=error,
             )
 
         except subprocess.TimeoutExpired:
@@ -187,7 +179,7 @@ class Orchestrator:
                 output="",
                 exit_code=-1,
                 duration_seconds=600,
-                error="Sub-agent timed out after 10 minutes"
+                error="Sub-agent timed out after 10 minutes",
             )
         except Exception as e:
             return SubagentResult(
@@ -196,15 +188,15 @@ class Orchestrator:
                 output="",
                 exit_code=-1,
                 duration_seconds=time.time() - start_time,
-                error=str(e)
+                error=str(e),
             )
 
     def _extract_json(self, text: str) -> dict | None:
         """Extract JSON from sub-agent output."""
         # Try to find JSON block
         json_patterns = [
-            r'```json\s*(.*?)\s*```',  # Markdown code block
-            r'\{[^{}]*\}',  # Simple object
+            r"```json\s*(.*?)\s*```",  # Markdown code block
+            r"\{[^{}]*\}",  # Simple object
         ]
 
         for pattern in json_patterns:
@@ -247,12 +239,12 @@ class Orchestrator:
             Updated session
         """
         all_stages = [
-            Stage.SETUP,              # Deterministic: worktree, estimate, status update
-            Stage.VALIDATION,         # LLM: validator sub-agent
+            Stage.SETUP,  # Deterministic: worktree, estimate, status update
+            Stage.VALIDATION,  # LLM: validator sub-agent
             Stage.COMPLEXITY_ASSESSMENT,  # LLM: complexity-assessor sub-agent
-            Stage.ANALYSIS,           # LLM: analyzer sub-agent
-            Stage.FIXING,             # LLM: fixer sub-agent
-            Stage.TEARDOWN,           # Deterministic: commit, push, PR, status update
+            Stage.ANALYSIS,  # LLM: analyzer sub-agent
+            Stage.FIXING,  # LLM: fixer sub-agent
+            Stage.TEARDOWN,  # Deterministic: commit, push, PR, status update
         ]
 
         stages_to_run = stages or all_stages
@@ -308,12 +300,7 @@ class Orchestrator:
 
         return session
 
-    def _run_setup(
-        self,
-        session: AgentSession,
-        ctx: PipelineContext,
-        force_recreate: bool = False
-    ):
+    def _run_setup(self, session: AgentSession, ctx: PipelineContext, force_recreate: bool = False):
         """Run deterministic setup (worktree, status update, token estimate)."""
         session.update_stage(Stage.SETUP)
 
@@ -341,7 +328,7 @@ class Orchestrator:
         result = self.run_subagent(
             "validator",
             f"Validate skill at {session.skill_path}. Check pillar coverage and token budget.",
-            session
+            session,
         )
 
         session.add_result(result)
@@ -362,7 +349,7 @@ class Orchestrator:
 Validation output:
 {json.dumps(validation_results, indent=2)}
 """,
-            session
+            session,
         )
 
         session.add_result(result)
@@ -390,7 +377,7 @@ Validation output:
 Identify all gaps and create detailed improvement plan.
 """,
             session,
-            model_override=model
+            model_override=model,
         )
 
         session.add_result(result)
@@ -411,7 +398,7 @@ Analysis plan:
 Work in the worktree at {session.worktree_path}.
 Stage changes but don't commit yet.
 """,
-            session
+            session,
         )
 
         session.add_result(result)
@@ -429,9 +416,9 @@ Stage changes but don't commit yet.
         # Sync context with session
         if session.worktree_path:
             from .worktree import WorktreeInfo
+
             ctx.worktree = WorktreeInfo(
-                path=Path(session.worktree_path),
-                branch=session.branch_name or ""
+                path=Path(session.worktree_path), branch=session.branch_name or ""
             )
             ctx.branch_name = session.branch_name
 
@@ -450,8 +437,7 @@ Stage changes but don't commit yet.
             parsed = fixer_result["parsed"]
             results["files_modified"] = len(parsed.get("files_modified", []))
             results["lines_added"] = sum(
-                c.get("lines_added", 0)
-                for c in parsed.get("changes_summary", [])
+                c.get("lines_added", 0) for c in parsed.get("changes_summary", [])
             )
             for change in parsed.get("changes_summary", []):
                 if change.get("action") == "created":
@@ -475,7 +461,5 @@ Stage changes but don't commit yet.
         """Clean up resources after session completes."""
         if session.worktree_path:
             from .worktree import remove_worktree
-            remove_worktree(
-                self.repo_path,
-                Path(session.worktree_path)
-            )
+
+            remove_worktree(self.repo_path, Path(session.worktree_path))

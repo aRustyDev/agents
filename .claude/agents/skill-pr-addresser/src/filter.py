@@ -12,11 +12,11 @@ from .session_schema import FeedbackState, ThreadState
 
 if TYPE_CHECKING:
     from .models import (
-        ReviewFeedback,
         CommentFeedback,
-        ThreadFeedback,
-        ThreadComment,
         RawFeedback,
+        ReviewFeedback,
+        ThreadComment,
+        ThreadFeedback,
     )
 
 
@@ -162,8 +162,7 @@ def filter_feedback(
         if new_comments:
             # Check for author response or reviewer withdrawal
             has_author_response = any(
-                c.author == pr_author and c.is_resolution_signal
-                for c in new_comments
+                c.author == pr_author and c.is_resolution_signal for c in new_comments
             )
 
             # Skip if reviewer withdrew

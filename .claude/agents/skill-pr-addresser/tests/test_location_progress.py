@@ -4,21 +4,19 @@
 Stage 10 tests for partial addressing support.
 """
 
-import pytest
-from datetime import datetime, timezone
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from location_progress import (
-    AddressedLocation,
     ActionGroupProgress,
+    AddressedLocation,
     IterationProgress,
     PRLocationProgress,
 )
-
 
 # =============================================================================
 # AddressedLocation Tests
@@ -32,7 +30,7 @@ class TestAddressedLocation:
             file="SKILL.md",
             line=42,
             thread_id="PRRT_123",
-            addressed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            addressed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
             commit_sha="abc123",
         )
 
@@ -162,7 +160,7 @@ class TestIterationProgress:
         """Should get existing or create new group."""
         progress = IterationProgress(
             iteration=1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
 
         group1 = progress.get_or_create_group("g1", 3)
@@ -178,7 +176,7 @@ class TestIterationProgress:
         """Should check if all groups complete."""
         progress = IterationProgress(
             iteration=1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
 
         group1 = progress.get_or_create_group("g1", 1)
@@ -196,7 +194,7 @@ class TestIterationProgress:
         """Should aggregate counts across groups."""
         progress = IterationProgress(
             iteration=1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
 
         group1 = progress.get_or_create_group("g1", 3)
@@ -212,7 +210,7 @@ class TestIterationProgress:
         """Should mark as completed."""
         progress = IterationProgress(
             iteration=1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         assert progress.completed_at is None
 
@@ -223,7 +221,7 @@ class TestIterationProgress:
         """Should serialize and deserialize correctly."""
         progress = IterationProgress(
             iteration=1,
-            started_at=datetime.now(timezone.utc),
+            started_at=datetime.now(UTC),
         )
         group = progress.get_or_create_group("g1", 2)
         group.add_location("a.md", 1, None, "abc")

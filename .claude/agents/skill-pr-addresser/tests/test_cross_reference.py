@@ -4,10 +4,8 @@
 Stage 9 tests for linking reviews to threads.
 """
 
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import MagicMock
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Add agent directory to path for imports
@@ -16,16 +14,15 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.cross_reference import (
-    extract_line_references,
+    _are_similar,
     extract_file_references,
+    extract_line_references,
+    find_duplicate_feedback,
     link_reviews_to_threads,
     mark_linked_threads,
-    find_duplicate_feedback,
-    _are_similar,
 )
-from src.models import ReviewFeedback, ThreadFeedback, ThreadComment
 from src.filter import FilteredFeedback, FilteredThread
-
+from src.models import ReviewFeedback, ThreadComment, ThreadFeedback
 
 # =============================================================================
 # extract_line_references Tests
@@ -128,12 +125,10 @@ class TestLinkReviewsToThreads:
             state="CHANGES_REQUESTED",
             body=body,
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
 
-    def _make_thread(
-        self, id: str, path: str = "SKILL.md", line: int = 42
-    ) -> ThreadFeedback:
+    def _make_thread(self, id: str, path: str = "SKILL.md", line: int = 42) -> ThreadFeedback:
         """Helper to create thread."""
         return ThreadFeedback(
             id=id,
@@ -146,7 +141,7 @@ class TestLinkReviewsToThreads:
                     id=f"{id}_c1",
                     body="Comment",
                     author="reviewer",
-                    created_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(UTC),
                 )
             ],
         )
@@ -214,7 +209,7 @@ class TestMarkLinkedThreads:
                     id="c1",
                     body="Fix",
                     author="reviewer",
-                    created_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(UTC),
                 )
             ],
         )
@@ -237,9 +232,7 @@ class TestMarkLinkedThreads:
             is_outdated=False,
             comments=[],
         )
-        filtered = FilteredFeedback(
-            threads=[FilteredThread(thread=thread, new_comments=[])]
-        )
+        filtered = FilteredFeedback(threads=[FilteredThread(thread=thread, new_comments=[])])
         links = {"R_1": ["T_2"]}  # Different thread
 
         mark_linked_threads(filtered, links)
@@ -260,14 +253,14 @@ class TestFindDuplicateFeedback:
             state="CHANGES_REQUESTED",
             body="Please add more tests for this function",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         r2 = ReviewFeedback(
             id="R_2",
             state="CHANGES_REQUESTED",
             body="Please add more tests for this function please",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         filtered = FilteredFeedback(reviews=[r1, r2])
 
@@ -281,10 +274,13 @@ class TestAreSimilar:
     def test_similar_texts(self):
         """Should detect similar texts (>80% word overlap)."""
         # 9/11 ≈ 81.8% overlap (exceeds 80% threshold)
-        assert _are_similar(
-            "Please add more tests for this function in the code",
-            "Please add more tests for this function in the module"
-        ) is True
+        assert (
+            _are_similar(
+                "Please add more tests for this function in the code",
+                "Please add more tests for this function in the module",
+            )
+            is True
+        )
 
     def test_different_texts(self):
         """Should detect different texts."""

@@ -5,15 +5,16 @@ Stage 10 tests for concurrent run prevention.
 """
 
 import os
-import pytest
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import sys
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from locking import SessionLock, session_lock, LockError, force_unlock
+from locking import LockError, SessionLock, force_unlock, session_lock
 
 
 class TestSessionLock:
@@ -73,7 +74,7 @@ class TestSessionLock:
             sessions_dir = Path(tmpdir)
 
             with pytest.raises(ValueError):
-                with session_lock(sessions_dir, 795) as lock:
+                with session_lock(sessions_dir, 795):
                     assert (sessions_dir / ".lock-pr-795").exists()
                     raise ValueError("test error")
 

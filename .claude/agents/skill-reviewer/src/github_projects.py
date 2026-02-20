@@ -9,6 +9,7 @@ from .graphql import execute_query
 @dataclass
 class ProjectItem:
     """A GitHub project item (issue linked to a project)."""
+
     item_id: str
     issue_number: int
     title: str
@@ -21,6 +22,7 @@ class ProjectItem:
 @dataclass
 class ProjectField:
     """A GitHub project field definition."""
+
     id: str
     name: str
     field_type: str  # SingleSelect, Text, Number, Date, etc.
@@ -38,10 +40,7 @@ def get_project_id(owner: str, project_number: int) -> str | None:
         Project node ID or None
     """
     # Try user project first
-    success, data = execute_query(
-        "get-user-project",
-        {"owner": owner, "number": project_number}
-    )
+    success, data = execute_query("get-user-project", {"owner": owner, "number": project_number})
 
     if success and data:
         try:
@@ -50,10 +49,7 @@ def get_project_id(owner: str, project_number: int) -> str | None:
             pass
 
     # Try organization project
-    success, data = execute_query(
-        "get-org-project",
-        {"owner": owner, "number": project_number}
-    )
+    success, data = execute_query("get-org-project", {"owner": owner, "number": project_number})
 
     if success and data:
         try:
@@ -73,10 +69,7 @@ def get_project_fields(project_id: str) -> list[ProjectField]:
     Returns:
         List of ProjectField objects
     """
-    success, data = execute_query(
-        "get-project-fields",
-        {"projectId": project_id}
-    )
+    success, data = execute_query("get-project-fields", {"projectId": project_id})
 
     if not success or not data:
         return []
@@ -87,12 +80,14 @@ def get_project_fields(project_id: str) -> list[ProjectField]:
         for node in data["data"]["node"]["fields"]["nodes"]:
             if not node:
                 continue
-            fields.append(ProjectField(
-                id=node["id"],
-                name=node["name"],
-                field_type=node.get("dataType", "Unknown"),
-                options=node.get("options")
-            ))
+            fields.append(
+                ProjectField(
+                    id=node["id"],
+                    name=node["name"],
+                    field_type=node.get("dataType", "Unknown"),
+                    options=node.get("options"),
+                )
+            )
     except (KeyError, TypeError):
         pass
 
@@ -116,10 +111,7 @@ def get_status_field(project_id: str) -> ProjectField | None:
 
 
 def get_issue_project_item(
-    project_id: str,
-    issue_number: int,
-    owner: str,
-    repo: str
+    project_id: str, issue_number: int, owner: str, repo: str
 ) -> ProjectItem | None:
     """Get project item for an issue.
 
@@ -134,22 +126,19 @@ def get_issue_project_item(
     """
     # First get the issue node ID
     issue_result = subprocess.run(
-        ["gh", "api", f"/repos/{owner}/{repo}/issues/{issue_number}",
-         "--jq", ".node_id"],
+        ["gh", "api", f"/repos/{owner}/{repo}/issues/{issue_number}", "--jq", ".node_id"],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if issue_result.returncode != 0:
         return None
 
-    issue_node_id = issue_result.stdout.strip()
+    issue_result.stdout.strip()
 
     # Query project items
-    success, data = execute_query(
-        "get-project-items",
-        {"projectId": project_id}
-    )
+    success, data = execute_query("get-project-items", {"projectId": project_id})
 
     if not success or not data:
         return None
@@ -173,7 +162,7 @@ def get_issue_project_item(
                     status=status,
                     assignees=[a["login"] for a in item["content"]["assignees"]["nodes"]],
                     created_at=item["content"]["createdAt"],
-                    updated_at=item["content"]["updatedAt"]
+                    updated_at=item["content"]["updatedAt"],
                 )
     except (KeyError, TypeError):
         pass
@@ -182,10 +171,7 @@ def get_issue_project_item(
 
 
 def update_project_item_status(
-    project_id: str,
-    item_id: str,
-    status_field_id: str,
-    status_option_id: str
+    project_id: str, item_id: str, status_field_id: str, status_option_id: str
 ) -> bool:
     """Update the status of a project item.
 
@@ -204,8 +190,8 @@ def update_project_item_status(
             "projectId": project_id,
             "itemId": item_id,
             "fieldId": status_field_id,
-            "optionId": status_option_id
-        }
+            "optionId": status_option_id,
+        },
     )
 
     return success
@@ -217,7 +203,7 @@ def find_backlog_issues(
     repo: str,
     status_name: str = "Backlog",
     assignee: str | None = None,
-    labels: list[str] | None = None
+    labels: list[str] | None = None,
 ) -> list[ProjectItem]:
     """Find issues in a specific project status.
 
@@ -232,10 +218,7 @@ def find_backlog_issues(
     Returns:
         List of ProjectItem, sorted by created_at (oldest first)
     """
-    success, data = execute_query(
-        "get-project-items",
-        {"projectId": project_id}
-    )
+    success, data = execute_query("get-project-items", {"projectId": project_id})
 
     if not success or not data:
         return []
@@ -281,15 +264,17 @@ def find_backlog_issues(
                 if not all(lbl in issue_labels for lbl in labels):
                     continue
 
-            items.append(ProjectItem(
-                item_id=item["id"],
-                issue_number=content["number"],
-                title=content["title"],
-                status=status,
-                assignees=assignees,
-                created_at=content["createdAt"],
-                updated_at=content["updatedAt"]
-            ))
+            items.append(
+                ProjectItem(
+                    item_id=item["id"],
+                    issue_number=content["number"],
+                    title=content["title"],
+                    status=status,
+                    assignees=assignees,
+                    created_at=content["createdAt"],
+                    updated_at=content["updatedAt"],
+                )
+            )
     except (KeyError, TypeError) as e:
         print(f"Error parsing project items: {e}")
 
@@ -320,11 +305,7 @@ def get_status_option_id(status_field: ProjectField, status_name: str) -> str | 
 
 
 def set_issue_status(
-    owner: str,
-    repo: str,
-    project_number: int,
-    issue_number: int,
-    new_status: str
+    owner: str, repo: str, project_number: int, issue_number: int, new_status: str
 ) -> bool:
     """Convenience function to set an issue's project status.
 
@@ -359,9 +340,4 @@ def set_issue_status(
         return False
 
     # Update status
-    return update_project_item_status(
-        project_id,
-        item.item_id,
-        status_field.id,
-        option_id
-    )
+    return update_project_item_status(project_id, item.item_id, status_field.id, option_id)

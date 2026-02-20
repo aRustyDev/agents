@@ -9,12 +9,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from .costs import CallCost
 from .feedback import (
     ActionGroup,
     AnalysisResult,
+)
+from .feedback import (
     analyze_feedback as _analyze_feedback,
 )
-from .costs import CallCost
 
 if TYPE_CHECKING:
     from .filter import FilteredFeedback
@@ -65,6 +67,7 @@ class ConsolidationResult:
             # Import here to avoid circular dependency
             try:
                 from .models import TokenUsage
+
                 token_usage = TokenUsage(
                     input_tokens=0,  # Cost estimate doesn't have token breakdown
                     output_tokens=0,
@@ -119,10 +122,10 @@ def consolidate_feedback(
         pr=ctx.pr_info,
         pr_number=ctx.pr_info.pr_number,
         skill_path=ctx.skill_path,
-        blocking_reviews=filtered.reviews if hasattr(filtered, 'reviews') else [],
+        blocking_reviews=filtered.reviews if hasattr(filtered, "reviews") else [],
         actionable_reviews=[],
-        actionable_comments=filtered.comments if hasattr(filtered, 'comments') else [],
-        unresolved_threads=filtered.threads if hasattr(filtered, 'threads') else [],
+        actionable_comments=filtered.comments if hasattr(filtered, "comments") else [],
+        unresolved_threads=filtered.threads if hasattr(filtered, "threads") else [],
     )
 
     # Call the existing analyze_feedback
@@ -150,7 +153,7 @@ def _build_consolidation_prompt(
     import json
 
     lines = [
-        f"## PR Information",
+        "## PR Information",
         f"- PR Number: {ctx.pr_info.pr_number}",
         f"- Skill: {ctx.skill_path}",
         "",
@@ -158,19 +161,21 @@ def _build_consolidation_prompt(
     ]
 
     # Add reviews
-    if hasattr(filtered, 'reviews') and filtered.reviews:
+    if hasattr(filtered, "reviews") and filtered.reviews:
         lines.append(f"\n### Reviews ({len(filtered.reviews)})")
         for review in filtered.reviews:
-            lines.append(f"- {review.author}: {review.body[:200] if review.body else '(no body)'}...")
+            lines.append(
+                f"- {review.author}: {review.body[:200] if review.body else '(no body)'}..."
+            )
 
     # Add comments
-    if hasattr(filtered, 'comments') and filtered.comments:
+    if hasattr(filtered, "comments") and filtered.comments:
         lines.append(f"\n### Comments ({len(filtered.comments)})")
         for comment in filtered.comments:
             lines.append(f"- {comment.author}: {comment.body[:200]}...")
 
     # Add threads
-    if hasattr(filtered, 'threads') and filtered.threads:
+    if hasattr(filtered, "threads") and filtered.threads:
         lines.append(f"\n### Review Threads ({len(filtered.threads)})")
         for thread in filtered.threads:
             lines.append(f"- {thread.path}:{thread.line}")

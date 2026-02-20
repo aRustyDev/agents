@@ -4,11 +4,11 @@ import re
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from .github_projects import get_project_id, find_backlog_issues
+from .github_projects import find_backlog_issues, get_project_id
 from .models import AgentSession, Stage
 from .orchestrator import Orchestrator
-from .session import generate_session_id
 from .progress import ProgressTracker
+from .session import generate_session_id
 
 
 def extract_skill_path(title: str) -> str | None:
@@ -25,7 +25,7 @@ def extract_skill_path(title: str) -> str | None:
     """
     # Format: [skill-name] description
     if title.startswith("[") and "]" in title:
-        skill_name = title[1:title.index("]")]
+        skill_name = title[1 : title.index("]")]
         return f"components/skills/{skill_name}"
 
     # Format: refine(skills): skill-name or review(skills): skill-name
@@ -37,11 +37,7 @@ def extract_skill_path(title: str) -> str | None:
     return None
 
 
-def get_skill_path_from_issue(
-    owner: str,
-    repo: str,
-    issue_number: int
-) -> str | None:
+def get_skill_path_from_issue(owner: str, repo: str, issue_number: int) -> str | None:
     """Fetch issue title and extract skill path.
 
     Args:
@@ -53,12 +49,21 @@ def get_skill_path_from_issue(
         Skill path or None if extraction fails
     """
     result = subprocess.run(
-        ["gh", "issue", "view", str(issue_number),
-         "--repo", f"{owner}/{repo}",
-         "--json", "title",
-         "--jq", ".title"],
+        [
+            "gh",
+            "issue",
+            "view",
+            str(issue_number),
+            "--repo",
+            f"{owner}/{repo}",
+            "--json",
+            "title",
+            "--jq",
+            ".title",
+        ],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -119,10 +124,7 @@ def batch_review(
     # Initialize progress tracker
     progress_file = orchestrator.data_dir / "progress.json"
     tracker = ProgressTracker(progress_file)
-    tracker.start_batch(
-        batch_id=generate_session_id(),
-        total_issues=len(issues)
-    )
+    tracker.start_batch(batch_id=generate_session_id(), total_issues=len(issues))
 
     results = []
 
@@ -299,9 +301,7 @@ def review_single_skill(
     if verbose:
         print(f"\nSession {session.session_id} complete")
         print(f"  Stage: {result.stage.value}")
-        print(
-            f"  Tokens: {result.total_input_tokens} in / {result.total_output_tokens} out"
-        )
+        print(f"  Tokens: {result.total_input_tokens} in / {result.total_output_tokens} out")
         print(f"  Est. Cost: ${result.estimated_cost_usd:.4f}")
         if result.errors:
             print(f"  Errors: {len(result.errors)}")

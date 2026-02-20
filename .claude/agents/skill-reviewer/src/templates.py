@@ -10,12 +10,14 @@ from typing import Any
 # Try to import pybars3, fall back to chevron (mustache)
 try:
     import pybars
+
     HAS_PYBARS = True
 except ImportError:
     HAS_PYBARS = False
 
 try:
     import chevron
+
     HAS_CHEVRON = True
 except ImportError:
     HAS_CHEVRON = False
@@ -154,7 +156,6 @@ Closes #{{closes}}
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 """,
-
     "pr_body": """## Summary
 
 {{#each summary}}
@@ -200,7 +201,6 @@ Closes #{{this}}
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 """,
-
     "issue_comment_start": """## Skill Review Started
 
 **Session**: `{{session_id}}`
@@ -217,7 +217,6 @@ Closes #{{this}}
 ### Status
 🔄 Review in progress...
 """,
-
     "issue_comment_complete": """## Skill Review Complete
 
 **Session**: `{{session_id}}`
@@ -237,7 +236,6 @@ Closes #{{this}}
 - Output: {{actual_output}} tokens
 - Actual cost: ${{actual_cost}}
 """,
-
     "validation_summary": """## Validation Results
 
 **Skill**: `{{skill_path}}`

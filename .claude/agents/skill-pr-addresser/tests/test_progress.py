@@ -1,9 +1,7 @@
 """Tests for the progress module."""
 
-import pytest
-from pathlib import Path
-
 import sys
+from pathlib import Path
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
@@ -11,10 +9,10 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.progress import (
-    PRStatus,
-    PRProgress,
     BatchProgress,
     ProgressTracker,
+    PRProgress,
+    PRStatus,
 )
 
 

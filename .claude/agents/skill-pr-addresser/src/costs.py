@@ -212,17 +212,13 @@ def estimate_pr_cost(
     for _ in range(num_iterations):
         # Analysis call
         analysis_model = (
-            "claude-3-5-haiku-20241022"
-            if use_haiku_for_analysis
-            else "claude-sonnet-4-20250514"
+            "claude-3-5-haiku-20241022" if use_haiku_for_analysis else "claude-sonnet-4-20250514"
         )
         total += estimate_call_cost("feedback-analyzer", analysis_model).total_cost
 
         # Fix call
         fix_model = (
-            "claude-sonnet-4-20250514"
-            if use_sonnet_for_fixes
-            else "claude-3-5-haiku-20241022"
+            "claude-sonnet-4-20250514" if use_sonnet_for_fixes else "claude-3-5-haiku-20241022"
         )
         total += estimate_call_cost("feedback-fixer", fix_model).total_cost
 

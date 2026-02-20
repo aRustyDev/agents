@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Generator
+    from collections.abc import Generator
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ def create_worktree(
         ["git", "-C", str(repo_path), "worktree", "add", str(worktree_path), branch],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -96,6 +97,7 @@ def verify_worktree_clean(worktree_path: Path) -> bool:
         ["git", "-C", str(worktree_path), "status", "--porcelain"],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     return result.returncode == 0 and not result.stdout.strip()
@@ -115,6 +117,7 @@ def get_worktree_info(worktree_path: Path) -> WorktreeInfo:
         ["git", "-C", str(worktree_path), "branch", "--show-current"],
         capture_output=True,
         text=True,
+        check=False,
     )
     branch = branch_result.stdout.strip()
 
@@ -123,6 +126,7 @@ def get_worktree_info(worktree_path: Path) -> WorktreeInfo:
         ["git", "-C", str(worktree_path), "rev-parse", "HEAD"],
         capture_output=True,
         text=True,
+        check=False,
     )
     commit = commit_result.stdout.strip()[:8]
 
@@ -149,7 +153,7 @@ def remove_worktree(repo_path: Path, worktree_path: Path, force: bool = False) -
     if force:
         args.append("--force")
 
-    result = subprocess.run(args, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True, check=False)
 
     if result.returncode == 0:
         log.info(f"Removed worktree: {worktree_path}")
@@ -170,6 +174,7 @@ def list_worktrees(repo_path: Path) -> list[WorktreeInfo]:
         ["git", "-C", str(repo_path), "worktree", "list", "--porcelain"],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -216,6 +221,7 @@ def prune_worktrees(repo_path: Path) -> None:
     subprocess.run(
         ["git", "-C", str(repo_path), "worktree", "prune"],
         capture_output=True,
+        check=False,
     )
     log.info("Pruned stale worktrees")
 
@@ -260,6 +266,7 @@ def sync_worktree(worktree_path: Path, remote: str = "origin") -> bool:
         ["git", "-C", str(worktree_path), "pull", remote],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -288,7 +295,7 @@ def push_worktree(
     if force:
         args.append("--force-with-lease")
 
-    result = subprocess.run(args, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True, check=False)
 
     if result.returncode != 0:
         log.warning(f"Failed to push worktree: {result.stderr}")

@@ -50,9 +50,10 @@ References
 - https://docs.builtoncement.com/core-foundation/hooks
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Callable
+from datetime import UTC, datetime
+from typing import Any
 
 # Hook names for each pipeline stage
 PIPELINE_HOOKS = [
@@ -119,7 +120,7 @@ class HookContext:
 
     def record_timestamp(self, event: str) -> None:
         """Record a timestamp for an event."""
-        self.metadata["timestamps"][event] = datetime.now(timezone.utc).isoformat()
+        self.metadata["timestamps"][event] = datetime.now(UTC).isoformat()
 
     def get_timestamp(self, event: str) -> str | None:
         """Get the timestamp for an event."""
@@ -328,8 +329,7 @@ def log_stage_start(app, context: HookContext) -> None:
     Register to pre_* hooks for debugging.
     """
     app.log.debug(
-        f"[Stage] {context.stage} starting "
-        f"(PR #{context.pr_number}, iteration {context.iteration})"
+        f"[Stage] {context.stage} starting (PR #{context.pr_number}, iteration {context.iteration})"
     )
     context.record_timestamp(f"{context.stage}_start")
 

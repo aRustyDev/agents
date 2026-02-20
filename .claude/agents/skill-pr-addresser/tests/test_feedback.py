@@ -1,37 +1,35 @@
 """Tests for feedback analysis and fixing module."""
 
 import json
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
 if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
-from src.feedback import (
-    FeedbackItem,
-    Location,
-    ActionGroup,
-    ExecutionStep,
-    AnalysisResult,
-    FixResult,
-    run_subagent,
-    analyze_feedback,
-    fix_feedback,
-    fix_action_group,
-    fix_batch,
-    fix_all_batches,
-    fix_with_escalation,
-    _extract_json,
-)
+from skill_agents_common.models import Model
 from src.discovery import DiscoveryContext
+from src.feedback import (
+    ActionGroup,
+    AnalysisResult,
+    ExecutionStep,
+    FeedbackItem,
+    FixResult,
+    Location,
+    _extract_json,
+    analyze_feedback,
+    fix_action_group,
+    fix_all_batches,
+    fix_feedback,
+    fix_with_escalation,
+    run_subagent,
+)
 from src.github_pr import PRDetails, Review, ReviewThread
-from skill_agents_common.models import Model, SubagentResult
-
 
 # --- Fixtures ---
 
@@ -357,9 +355,7 @@ class TestAnalyzeFeedback:
 class TestFixFeedback:
     """Tests for fix_feedback function."""
 
-    def test_fixes_actionable_items(
-        self, agent_dir, mock_discovery_context, mock_analysis_result
-    ):
+    def test_fixes_actionable_items(self, agent_dir, mock_discovery_context, mock_analysis_result):
         """Should fix actionable feedback items."""
         mock_response = {
             "result": json.dumps(
@@ -388,9 +384,7 @@ class TestFixFeedback:
         assert result.lines_added == 15
         assert cost is not None
 
-    def test_returns_empty_for_no_actionable(
-        self, agent_dir, mock_discovery_context
-    ):
+    def test_returns_empty_for_no_actionable(self, agent_dir, mock_discovery_context):
         """Should return empty result if no actionable items."""
         empty_analysis = AnalysisResult(
             feedback_items=[],
@@ -414,9 +408,7 @@ class TestFixFeedback:
 class TestFixWithEscalation:
     """Tests for fix_with_escalation function."""
 
-    def test_uses_haiku_for_simple_nitpicks(
-        self, agent_dir, mock_discovery_context
-    ):
+    def test_uses_haiku_for_simple_nitpicks(self, agent_dir, mock_discovery_context):
         """Should use Haiku for simple nitpick-only fixes."""
         simple_analysis = AnalysisResult(
             feedback_items=[
@@ -624,27 +616,29 @@ class TestAnalyzeFeedbackNewFormat:
     def test_parses_action_groups(self, agent_dir, mock_discovery_context):
         """Should parse action groups from analyzer output."""
         mock_response = {
-            "result": json.dumps({
-                "guidance": ["Use progressive disclosure"],
-                "action_groups": [
-                    {
-                        "id": "group-1",
-                        "action": "move_to_examples",
-                        "description": "Move code to examples/",
-                        "locations": [
-                            {"file": "SKILL.md", "line": 239, "thread_id": "t1"},
-                        ],
-                        "priority": "high",
-                        "type": "change_request",
-                    }
-                ],
-                "execution_plan": [
-                    {"order": 1, "group_id": "group-1", "rationale": "First"},
-                ],
-                "blocking_reviews": ["reviewer1"],
-                "approved_by": [],
-                "summary": "Consolidated feedback",
-            })
+            "result": json.dumps(
+                {
+                    "guidance": ["Use progressive disclosure"],
+                    "action_groups": [
+                        {
+                            "id": "group-1",
+                            "action": "move_to_examples",
+                            "description": "Move code to examples/",
+                            "locations": [
+                                {"file": "SKILL.md", "line": 239, "thread_id": "t1"},
+                            ],
+                            "priority": "high",
+                            "type": "change_request",
+                        }
+                    ],
+                    "execution_plan": [
+                        {"order": 1, "group_id": "group-1", "rationale": "First"},
+                    ],
+                    "blocking_reviews": ["reviewer1"],
+                    "approved_by": [],
+                    "summary": "Consolidated feedback",
+                }
+            )
         }
 
         mock_result = MagicMock()
@@ -680,13 +674,17 @@ class TestFixActionGroup:
         guidance = ["Follow progressive disclosure"]
 
         mock_response = {
-            "result": json.dumps({
-                "addressed": [{"id": "group-1", "action": "Moved 2 code blocks", "locations_fixed": 2}],
-                "skipped": [],
-                "files_modified": ["SKILL.md", "examples/tracing.ts"],
-                "lines_added": 50,
-                "lines_removed": 80,
-            })
+            "result": json.dumps(
+                {
+                    "addressed": [
+                        {"id": "group-1", "action": "Moved 2 code blocks", "locations_fixed": 2}
+                    ],
+                    "skipped": [],
+                    "files_modified": ["SKILL.md", "examples/tracing.ts"],
+                    "lines_added": 50,
+                    "lines_removed": 80,
+                }
+            )
         }
 
         mock_result = MagicMock()
@@ -729,13 +727,15 @@ class TestFixAllBatches:
         )
 
         mock_response = {
-            "result": json.dumps({
-                "addressed": [{"id": "group-x", "action": "Fixed"}],
-                "skipped": [],
-                "files_modified": ["SKILL.md"],
-                "lines_added": 10,
-                "lines_removed": 20,
-            })
+            "result": json.dumps(
+                {
+                    "addressed": [{"id": "group-x", "action": "Fixed"}],
+                    "skipped": [],
+                    "files_modified": ["SKILL.md"],
+                    "lines_added": 10,
+                    "lines_removed": 20,
+                }
+            )
         }
 
         mock_result = MagicMock()

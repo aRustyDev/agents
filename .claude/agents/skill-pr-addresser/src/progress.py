@@ -7,8 +7,8 @@ import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -152,9 +152,7 @@ class ProgressTracker:
         Args:
             pr_numbers: List of PR numbers to track
         """
-        self.batch = BatchProgress(
-            prs=[PRProgress(pr_number=n) for n in pr_numbers]
-        )
+        self.batch = BatchProgress(prs=[PRProgress(pr_number=n) for n in pr_numbers])
         self._save()
         log.info(f"Started tracking batch of {len(pr_numbers)} PRs")
 
@@ -291,9 +289,7 @@ class ProgressTracker:
 
         try:
             self.data_dir.mkdir(parents=True, exist_ok=True)
-            self.progress_file.write_text(
-                json.dumps(self.batch.to_dict(), indent=2)
-            )
+            self.progress_file.write_text(json.dumps(self.batch.to_dict(), indent=2))
         except Exception as e:
             log.warning(f"Failed to save progress: {e}")
 

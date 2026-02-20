@@ -1,9 +1,9 @@
 """Tests for the tracing module."""
 
-import pytest
+import sys
 from pathlib import Path
 
-import sys
+import pytest
 
 # Add agent directory to path
 _agent_dir = Path(__file__).parent.parent
@@ -11,16 +11,15 @@ if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
 from src.tracing import (
+    OTEL_AVAILABLE,
     TracingConfig,
+    add_event,
     init_tracing,
-    get_tracer,
+    record_iteration,
+    record_subagent_call,
+    set_attribute,
     span,
     traced,
-    add_event,
-    set_attribute,
-    record_subagent_call,
-    record_iteration,
-    OTEL_AVAILABLE,
 )
 
 
@@ -87,7 +86,7 @@ class TestSpanContextManager:
 
     def test_handles_attributes(self):
         """Should not crash with attributes when tracer disabled."""
-        with span("test-span", attributes={"key": "value"}) as s:
+        with span("test-span", attributes={"key": "value"}):
             # Should work without error
             pass
 

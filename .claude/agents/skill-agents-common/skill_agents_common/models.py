@@ -1,15 +1,16 @@
 """Data models shared by skill-reviewer and skill-pr-addresser agents."""
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
-import json
 
 
 class Model(Enum):
     """Available Claude models."""
+
     HAIKU_35 = "claude-3-5-haiku-20241022"
     SONNET_4 = "claude-sonnet-4-20250514"
     OPUS_45 = "claude-opus-4-5-20251101"
@@ -27,6 +28,7 @@ class Model(Enum):
 
 class Stage(Enum):
     """Pipeline stages."""
+
     INIT = "init"
     SETUP = "setup"
     VALIDATION = "validation"
@@ -41,6 +43,7 @@ class Stage(Enum):
 @dataclass
 class SubagentConfig:
     """Configuration for a sub-agent."""
+
     name: str
     description: str
     model: str  # String to allow "dynamic"
@@ -55,6 +58,7 @@ class SubagentConfig:
     def load(cls, config_path: Path) -> "SubagentConfig":
         """Load config from YAML file."""
         import yaml
+
         with open(config_path) as f:
             data = yaml.safe_load(f)
         return cls(**data)
@@ -72,6 +76,7 @@ class SubagentConfig:
 @dataclass
 class SubagentResult:
     """Result from a sub-agent execution."""
+
     name: str
     model: Model | None
     output: str
@@ -91,6 +96,7 @@ class SubagentResult:
 @dataclass
 class AgentSession:
     """Shared context across all sub-agents in a pipeline run."""
+
     session_id: str
     skill_path: str
     issue_number: int
@@ -155,8 +161,10 @@ class AgentSession:
 
         if result.model in pricing:
             input_rate, output_rate = pricing[result.model]
-            cost = (result.input_tokens * input_rate / 1_000_000 +
-                    result.output_tokens * output_rate / 1_000_000)
+            cost = (
+                result.input_tokens * input_rate / 1_000_000
+                + result.output_tokens * output_rate / 1_000_000
+            )
             self.estimated_cost_usd += cost
 
     def add_error(self, error: str):
@@ -210,11 +218,11 @@ class AgentSession:
 - Session ID: {self.session_id}
 - Skill: {self.skill_path}
 - Issue: #{self.issue_number}
-- PR: #{self.pr_number or 'None'}
+- PR: #{self.pr_number or "None"}
 - Repository: {self.repo_owner}/{self.repo_name}
 - Current Stage: {self.stage.value}
-- Worktree: {self.worktree_path or 'Not created'}
-- Branch: {self.branch_name or 'Not created'}
+- Worktree: {self.worktree_path or "Not created"}
+- Branch: {self.branch_name or "Not created"}
 
 ## Previous Results
 {json.dumps(self.results, indent=2)}

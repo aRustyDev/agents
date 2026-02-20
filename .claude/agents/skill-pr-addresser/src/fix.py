@@ -6,23 +6,30 @@ with the interface expected by stages 8-13.
 """
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import TYPE_CHECKING
 
+from .costs import CallCost
 from .feedback import (
     ActionGroup,
     FixResult,
+)
+from .feedback import (
     fix_action_group as _fix_action_group,
-    fix_batch as _fix_batch,
+)
+from .feedback import (
     fix_all_batches as _fix_all_batches,
+)
+from .feedback import (
+    fix_batch as _fix_batch,
+)
+from .feedback import (
     fix_with_escalation as _fix_with_escalation,
 )
-from .costs import CallCost
 
 if TYPE_CHECKING:
+    from .models import AddressedLocation, TokenUsage
     from .pipeline import PipelineContext
     from .planner import PlanStep
-    from .models import AddressedLocation, TokenUsage
 
 
 @dataclass
@@ -107,6 +114,7 @@ class FixStepResult:
         if cost:
             try:
                 from .models import TokenUsage
+
                 token_usage = TokenUsage(
                     input_tokens=0,
                     output_tokens=0,
@@ -169,7 +177,7 @@ def fix_action_group(
     )
 
     # Get guidance from consolidation result if available
-    guidance = ctx.guidance if hasattr(ctx, 'guidance') else []
+    guidance = ctx.guidance if hasattr(ctx, "guidance") else []
 
     # Call the existing fix function
     result, cost = _fix_action_group(
@@ -212,9 +220,9 @@ def run_fixer_for_locations(
         description=group.description,
         locations=[
             Location(
-                file=loc.file if hasattr(loc, 'file') else loc.get("file", ""),
-                line=loc.line if hasattr(loc, 'line') else loc.get("line"),
-                thread_id=loc.thread_id if hasattr(loc, 'thread_id') else loc.get("thread_id"),
+                file=loc.file if hasattr(loc, "file") else loc.get("file", ""),
+                line=loc.line if hasattr(loc, "line") else loc.get("line"),
+                thread_id=loc.thread_id if hasattr(loc, "thread_id") else loc.get("thread_id"),
             )
             for loc in pending_locations
         ],
@@ -237,7 +245,7 @@ def run_fixer_for_locations(
     )
 
     # Get guidance
-    guidance = ctx.guidance if hasattr(ctx, 'guidance') else []
+    guidance = ctx.guidance if hasattr(ctx, "guidance") else []
 
     # Call the existing fix function
     result, cost = _fix_action_group(
@@ -261,13 +269,13 @@ def _find_group(ctx: "PipelineContext", group_id: str) -> ActionGroup | None:
         ActionGroup if found, None otherwise
     """
     # Check consolidated result if available
-    if hasattr(ctx, 'consolidation') and ctx.consolidation:
+    if hasattr(ctx, "consolidation") and ctx.consolidation:
         for group in ctx.consolidation.action_groups:
             if group.id == group_id:
                 return group
 
     # Check analysis result if available
-    if hasattr(ctx, 'analysis') and ctx.analysis:
+    if hasattr(ctx, "analysis") and ctx.analysis:
         for group in ctx.analysis.action_groups:
             if group.id == group_id:
                 return group

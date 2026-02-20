@@ -28,28 +28,28 @@ from typing import Any
 from .config import PipelineConfig
 from .github_ops import (
     Issue,
-    get_issue_details,
     add_issue_comment,
-    update_pr_from_issue,
+    get_issue_details,
     mark_pr_ready,
+    update_pr_from_issue,
 )
 from .github_projects import (
+    ProjectItem,
+    find_backlog_issues,
+    get_issue_project_item,
     get_project_id,
     get_status_field,
     get_status_option_id,
-    find_backlog_issues,
-    get_issue_project_item,
     update_project_item_status,
-    ProjectItem,
 )
-from .tokens import estimate_tokens, TokenEstimate
 from .templates import render_inline
+from .tokens import TokenEstimate, estimate_tokens
 from .worktree import (
-    create_worktree,
-    remove_worktree,
-    get_worktree_status,
-    WorktreeInfo,
     BranchExistsError,
+    WorktreeInfo,
+    create_worktree,
+    get_worktree_status,
+    remove_worktree,
 )
 
 
@@ -109,9 +109,7 @@ class DeterministicPipeline:
     # =========================================================================
 
     def find_next_issue(
-        self,
-        labels: list[str] | None = None,
-        assignee: str | None = None
+        self, labels: list[str] | None = None, assignee: str | None = None
     ) -> ProjectItem | None:
         """Find the oldest backlog issue matching criteria.
 
@@ -135,7 +133,7 @@ class DeterministicPipeline:
             repo=self.config.repo_name,
             status_name=self.config.backlog_status,
             assignee=assignee,
-            labels=labels or self.config.review_labels
+            labels=labels or self.config.review_labels,
         )
 
         if not issues:
@@ -145,9 +143,7 @@ class DeterministicPipeline:
         return issues[0]
 
     def get_backlog_count(
-        self,
-        labels: list[str] | None = None,
-        assignee: str | None = None
+        self, labels: list[str] | None = None, assignee: str | None = None
     ) -> int:
         """Get count of backlog issues matching criteria."""
         if self.config.project_number is None:
@@ -163,7 +159,7 @@ class DeterministicPipeline:
             repo=self.config.repo_name,
             status_name=self.config.backlog_status,
             assignee=assignee,
-            labels=labels or self.config.review_labels
+            labels=labels or self.config.review_labels,
         )
 
         return len(issues)
@@ -204,10 +200,7 @@ class DeterministicPipeline:
     def _set_status_via_project(self, ctx: PipelineContext, status_name: str) -> bool:
         """Set status via GitHub Projects."""
         if not ctx.project_id:
-            ctx.project_id = get_project_id(
-                self.config.repo_owner,
-                self.config.project_number
-            )
+            ctx.project_id = get_project_id(self.config.repo_owner, self.config.project_number)
 
         if not ctx.project_id:
             ctx.add_error(f"Could not find project {self.config.project_number}")
@@ -230,10 +223,7 @@ class DeterministicPipeline:
         # Get project item
         if not ctx.project_item:
             ctx.project_item = get_issue_project_item(
-                ctx.project_id,
-                ctx.issue_number,
-                self.config.repo_owner,
-                self.config.repo_name
+                ctx.project_id, ctx.issue_number, self.config.repo_owner, self.config.repo_name
             )
 
         if not ctx.project_item:
@@ -242,19 +232,24 @@ class DeterministicPipeline:
 
         # Update status
         return update_project_item_status(
-            ctx.project_id,
-            ctx.project_item.item_id,
-            status_field.id,
-            option_id
+            ctx.project_id, ctx.project_item.item_id, status_field.id, option_id
         )
 
     def _set_status_via_labels(self, ctx: PipelineContext, label: str) -> bool:
         """Set status via labels (fallback)."""
         result = subprocess.run(
-            ["gh", "issue", "edit", str(ctx.issue_number),
-             "--repo", f"{self.config.repo_owner}/{self.config.repo_name}",
-             "--add-label", label],
-            capture_output=True
+            [
+                "gh",
+                "issue",
+                "edit",
+                str(ctx.issue_number),
+                "--repo",
+                f"{self.config.repo_owner}/{self.config.repo_name}",
+                "--add-label",
+                label,
+            ],
+            capture_output=True,
+            check=False,
         )
         return result.returncode == 0
 
@@ -262,11 +257,7 @@ class DeterministicPipeline:
     # Worktree Management
     # =========================================================================
 
-    def create_worktree(
-        self,
-        ctx: PipelineContext,
-        force_recreate: bool = False
-    ) -> bool:
+    def create_worktree(self, ctx: PipelineContext, force_recreate: bool = False) -> bool:
         """Create worktree for the review.
 
         Args:
@@ -287,7 +278,7 @@ class DeterministicPipeline:
                 branch_name=branch_name,
                 base_branch=self.config.base_branch,
                 identifier=identifier,
-                force_recreate=force_recreate
+                force_recreate=force_recreate,
             )
 
             ctx.worktree = worktree
@@ -296,11 +287,11 @@ class DeterministicPipeline:
 
         except BranchExistsError as e:
             ctx.add_error(
-                f"Branch '{e.branch_name}' already exists" +
-                (" (pushed to remote)" if e.has_remote else "") +
-                ". Use --force to recreate, or manually delete with: " +
-                f"git branch -D {e.branch_name}" +
-                (f" && git push origin --delete {e.branch_name}" if e.has_remote else "")
+                f"Branch '{e.branch_name}' already exists"
+                + (" (pushed to remote)" if e.has_remote else "")
+                + ". Use --force to recreate, or manually delete with: "
+                + f"git branch -D {e.branch_name}"
+                + (f" && git push origin --delete {e.branch_name}" if e.has_remote else "")
             )
             return False
 
@@ -382,27 +373,25 @@ class DeterministicPipeline:
         if not ctx.token_estimate:
             self.estimate_tokens(ctx)
 
-        comment = render_inline("issue_comment_start", {
-            "session_id": ctx.session_id,
-            "started_at": ctx.started_at.isoformat() if ctx.started_at else datetime.utcnow().isoformat(),
-            "skill_path": ctx.skill_path,
-            "estimated_input": f"{ctx.token_estimate.estimated_total_tokens:,}",
-            "estimated_output": f"{ctx.token_estimate.fixing_output:,}",
-            "estimated_cost": f"{ctx.token_estimate.cost_mixed:.4f}",
-        })
-
-        return add_issue_comment(
-            self.config.repo_owner,
-            self.config.repo_name,
-            ctx.issue_number,
-            comment
+        comment = render_inline(
+            "issue_comment_start",
+            {
+                "session_id": ctx.session_id,
+                "started_at": ctx.started_at.isoformat()
+                if ctx.started_at
+                else datetime.utcnow().isoformat(),
+                "skill_path": ctx.skill_path,
+                "estimated_input": f"{ctx.token_estimate.estimated_total_tokens:,}",
+                "estimated_output": f"{ctx.token_estimate.fixing_output:,}",
+                "estimated_cost": f"{ctx.token_estimate.cost_mixed:.4f}",
+            },
         )
 
-    def post_complete_comment(
-        self,
-        ctx: PipelineContext,
-        results: dict[str, Any]
-    ) -> bool:
+        return add_issue_comment(
+            self.config.repo_owner, self.config.repo_name, ctx.issue_number, comment
+        )
+
+    def post_complete_comment(self, ctx: PipelineContext, results: dict[str, Any]) -> bool:
         """Post a comment indicating review is complete.
 
         Args:
@@ -417,24 +406,24 @@ class DeterministicPipeline:
             delta = ctx.completed_at - ctx.started_at
             duration = f"{int(delta.total_seconds() // 60)}m {int(delta.total_seconds() % 60)}s"
 
-        comment = render_inline("issue_comment_complete", {
-            "session_id": ctx.session_id,
-            "duration": duration,
-            "pillars_before": results.get("pillars_before", "?"),
-            "pillars_after": results.get("pillars_after", "?"),
-            "lines_added": results.get("lines_added", 0),
-            "files_modified": results.get("files_modified", 0),
-            "pr_url": ctx.pr_url or "N/A",
-            "actual_input": results.get("total_input_tokens", 0),
-            "actual_output": results.get("total_output_tokens", 0),
-            "actual_cost": f"{results.get('total_cost', 0):.4f}",
-        })
+        comment = render_inline(
+            "issue_comment_complete",
+            {
+                "session_id": ctx.session_id,
+                "duration": duration,
+                "pillars_before": results.get("pillars_before", "?"),
+                "pillars_after": results.get("pillars_after", "?"),
+                "lines_added": results.get("lines_added", 0),
+                "files_modified": results.get("files_modified", 0),
+                "pr_url": ctx.pr_url or "N/A",
+                "actual_input": results.get("total_input_tokens", 0),
+                "actual_output": results.get("total_output_tokens", 0),
+                "actual_cost": f"{results.get('total_cost', 0):.4f}",
+            },
+        )
 
         return add_issue_comment(
-            self.config.repo_owner,
-            self.config.repo_name,
-            ctx.issue_number,
-            comment
+            self.config.repo_owner, self.config.repo_name, ctx.issue_number, comment
         )
 
     # =========================================================================
@@ -457,9 +446,7 @@ class DeterministicPipeline:
 
         # Stage all changes
         result = subprocess.run(
-            ["git", "add", "."],
-            cwd=ctx.worktree.path,
-            capture_output=True
+            ["git", "add", "."], cwd=ctx.worktree.path, capture_output=True, check=False
         )
         if result.returncode != 0:
             ctx.add_error("Failed to stage changes")
@@ -469,7 +456,8 @@ class DeterministicPipeline:
         result = subprocess.run(
             ["git", "commit", "-m", message],
             cwd=ctx.worktree.path,
-            capture_output=True
+            capture_output=True,
+            check=False,
         )
         if result.returncode != 0:
             # Check if nothing to commit
@@ -498,7 +486,8 @@ class DeterministicPipeline:
         result = subprocess.run(
             ["git", "push", "-u", "origin", ctx.branch_name],
             cwd=ctx.worktree.path,
-            capture_output=True
+            capture_output=True,
+            check=False,
         )
         if result.returncode != 0:
             ctx.add_error("Failed to push branch")
@@ -510,12 +499,7 @@ class DeterministicPipeline:
     # PR Creation
     # =========================================================================
 
-    def create_draft_pr(
-        self,
-        ctx: PipelineContext,
-        title: str,
-        body: str
-    ) -> bool:
+    def create_draft_pr(self, ctx: PipelineContext, title: str, body: str) -> bool:
         """Create a draft pull request.
 
         Args:
@@ -536,15 +520,25 @@ class DeterministicPipeline:
 
         # Create PR (gh pr create outputs the PR URL on success)
         result = subprocess.run(
-            ["gh", "pr", "create",
-             "--repo", f"{self.config.repo_owner}/{self.config.repo_name}",
-             "--title", title,
-             "--body", body,
-             "--head", ctx.branch_name,
-             "--base", self.config.base_branch,
-             "--draft"],
+            [
+                "gh",
+                "pr",
+                "create",
+                "--repo",
+                f"{self.config.repo_owner}/{self.config.repo_name}",
+                "--title",
+                title,
+                "--body",
+                body,
+                "--head",
+                ctx.branch_name,
+                "--base",
+                self.config.base_branch,
+                "--draft",
+            ],
             capture_output=True,
-            text=True
+            text=True,
+            check=False,
         )
 
         if result.returncode != 0:
@@ -556,7 +550,7 @@ class DeterministicPipeline:
         if pr_url and "github.com" in pr_url:
             ctx.pr_url = pr_url
             # Extract PR number from URL (e.g., https://github.com/owner/repo/pull/123)
-            match = re.search(r'/pull/(\d+)', pr_url)
+            match = re.search(r"/pull/(\d+)", pr_url)
             if match:
                 ctx.pr_number = int(match.group(1))
             return True
@@ -590,9 +584,7 @@ class DeterministicPipeline:
 
         # 1. Get issue details
         ctx.issue = get_issue_details(
-            self.config.repo_owner,
-            self.config.repo_name,
-            ctx.issue_number
+            self.config.repo_owner, self.config.repo_name, ctx.issue_number
         )
         if not ctx.issue:
             ctx.add_error(f"Issue #{ctx.issue_number} not found")
@@ -621,12 +613,7 @@ class DeterministicPipeline:
 
         return True
 
-    def teardown(
-        self,
-        ctx: PipelineContext,
-        results: dict[str, Any],
-        success: bool
-    ) -> bool:
+    def teardown(self, ctx: PipelineContext, results: dict[str, Any], success: bool) -> bool:
         """Run all deterministic teardown steps.
 
         This includes:
@@ -659,21 +646,24 @@ class DeterministicPipeline:
                     self.config.repo_owner,
                     self.config.repo_name,
                     ctx.issue_number,
-                    f"## Review Failed\n\nSession: `{ctx.session_id}`\n\nErrors:\n" +
-                    "\n".join(f"- {e}" for e in (ctx.errors or ["Unknown error"]))
+                    f"## Review Failed\n\nSession: `{ctx.session_id}`\n\nErrors:\n"
+                    + "\n".join(f"- {e}" for e in (ctx.errors or ["Unknown error"])),
                 )
             return False
 
         # 1. Commit changes
-        commit_msg = render_inline("commit_message", {
-            "type": "feat",
-            "scope": Path(ctx.skill_path).name,
-            "description": results.get("description", "improve skill documentation"),
-            "added": results.get("added", []),
-            "changed": results.get("changed", []),
-            "fixed": results.get("fixed", []),
-            "closes": ctx.issue_number,
-        })
+        commit_msg = render_inline(
+            "commit_message",
+            {
+                "type": "feat",
+                "scope": Path(ctx.skill_path).name,
+                "description": results.get("description", "improve skill documentation"),
+                "added": results.get("added", []),
+                "changed": results.get("changed", []),
+                "fixed": results.get("fixed", []),
+                "closes": ctx.issue_number,
+            },
+        )
 
         if not self.config.dry_run:
             if not self.commit_changes(ctx, commit_msg):
@@ -687,18 +677,21 @@ class DeterministicPipeline:
                 teardown_success = False
 
         # 3. Create draft PR (only if push succeeded)
-        pr_body = render_inline("pr_body", {
-            "summary": results.get("summary", ["Improved skill documentation"]),
-            "added": results.get("added", []),
-            "changed": results.get("changed", []),
-            "issues": [ctx.issue_number],
-        })
+        pr_body = render_inline(
+            "pr_body",
+            {
+                "summary": results.get("summary", ["Improved skill documentation"]),
+                "added": results.get("added", []),
+                "changed": results.get("changed", []),
+                "issues": [ctx.issue_number],
+            },
+        )
 
         if not self.config.dry_run and teardown_success:
             if not self.create_draft_pr(
                 ctx,
                 f"feat({Path(ctx.skill_path).name}): {results.get('description', 'improve documentation')}",
-                pr_body
+                pr_body,
             ):
                 # PR creation failed - log error but continue to post comment
                 ctx.add_error("Failed to create PR")
@@ -707,10 +700,7 @@ class DeterministicPipeline:
         # 3b. Copy labels, milestone, and project from issue to PR
         if not self.config.dry_run and ctx.pr_number and ctx.issue:
             if not update_pr_from_issue(
-                self.config.repo_owner,
-                self.config.repo_name,
-                ctx.pr_number,
-                ctx.issue
+                self.config.repo_owner, self.config.repo_name, ctx.pr_number, ctx.issue
             ):
                 ctx.add_error("Failed to copy issue properties to PR")
                 # Non-fatal, continue
@@ -721,11 +711,7 @@ class DeterministicPipeline:
 
         # 5. Mark PR as ready for review (if teardown succeeded)
         if not self.config.dry_run and ctx.pr_number and teardown_success:
-            if not mark_pr_ready(
-                self.config.repo_owner,
-                self.config.repo_name,
-                ctx.pr_number
-            ):
+            if not mark_pr_ready(self.config.repo_owner, self.config.repo_name, ctx.pr_number):
                 ctx.add_error("Failed to mark PR as ready")
                 # Non-fatal, continue
 

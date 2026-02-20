@@ -21,12 +21,13 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-
 # Namespace UUID for generating reproducible UUIDs
 NAMESPACE_AGENT = uuid.UUID("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
 
 
-def hash_directory(directory: Path, extensions: tuple[str, ...] = (".py", ".md", ".yml", ".yaml")) -> str:
+def hash_directory(
+    directory: Path, extensions: tuple[str, ...] = (".py", ".md", ".yml", ".yaml")
+) -> str:
     """Generate a hash of all relevant files in a directory.
 
     Args:
@@ -77,6 +78,7 @@ def generate_subagent_uuid(subagent_dir: Path) -> str:
 @dataclass
 class AgentHeaders:
     """Headers for agent/sub-agent tracking."""
+
     agent_id: str
     subagent_id: str | None = None
 
@@ -145,6 +147,5 @@ def create_subagent_headers(agent_dir: Path, subagent_name: str) -> AgentHeaders
     """
     subagent_dir = agent_dir / "subagents" / subagent_name
     return AgentHeaders(
-        agent_id=generate_agent_uuid(agent_dir),
-        subagent_id=generate_subagent_uuid(subagent_dir)
+        agent_id=generate_agent_uuid(agent_dir), subagent_id=generate_subagent_uuid(subagent_dir)
     )

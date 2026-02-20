@@ -11,16 +11,15 @@ _agents_dir = Path(__file__).parent.parent.parent
 if str(_agents_dir) not in sys.path:
     sys.path.insert(0, str(_agents_dir))
 
-from skill_agents_common.models import Stage
 
 from .addresser import Addresser
-from .costs import format_cost, estimate_pr_cost
-from .discovery import discover, DiscoveryContext
+from .costs import format_cost
+from .discovery import discover
 from .exceptions import (
-    PRNotFoundError,
-    PRClosedError,
-    NoFeedbackError,
     AddresserError,
+    NoFeedbackError,
+    PRClosedError,
+    PRNotFoundError,
 )
 from .ext_toml import TomlConfigHandler
 from .github_pr import find_prs_with_feedback
@@ -101,6 +100,7 @@ class Base(Controller):
     def address(self):
         """Address review feedback on a PR."""
         import logging
+
         from .feedback import set_debug_mode
 
         pr_number = self.app.pargs.pr_number
@@ -118,7 +118,9 @@ class Base(Controller):
             if interactive:
                 self.app.log.info("[DEBUG] Interactive mode: sub-agents will run in TUI")
                 self.app.log.warning("[DEBUG] Workflow will NOT complete in interactive mode")
-                self.app.log.warning("[DEBUG] Use --stream instead for debugging with workflow completion")
+                self.app.log.warning(
+                    "[DEBUG] Use --stream instead for debugging with workflow completion"
+                )
             if stream:
                 self.app.log.info("[DEBUG] Stream mode: sub-agent output will be shown")
 

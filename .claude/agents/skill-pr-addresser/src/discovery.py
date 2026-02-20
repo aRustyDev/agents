@@ -15,29 +15,26 @@ if str(_agents_dir) not in sys.path:
 
 from skill_agents_common.models import AgentSession
 from skill_agents_common.session import (
+    create_session_from_pr,
     extract_linked_issues,
     find_session_by_issue,
     find_session_by_pr,
-    create_session_from_pr,
-    generate_session_id,
 )
-from skill_agents_common.worktree import get_or_create_worktree, WorktreeInfo
+from skill_agents_common.worktree import WorktreeInfo, get_or_create_worktree
 
-from .exceptions import PRNotFoundError, PRClosedError, NoFeedbackError
+from .exceptions import NoFeedbackError, PRClosedError, PRNotFoundError
 from .github_pr import (
-    PRDetails,
-    PendingFeedback,
-    Review,
     Comment,
+    PRDetails,
+    Review,
     ReviewThread,
+    get_pending_feedback,
+    get_pr_comments,
     get_pr_details,
     get_pr_reviews,
-    get_pr_comments,
     get_review_threads,
-    get_pending_feedback,
     infer_skill_from_files,
 )
-
 
 # Stage 7.5 interface aliases for compatibility with stages 8-13
 # These re-export github_pr functions with the interface names expected by the plan
@@ -138,6 +135,7 @@ def discover_pr_info(pr_number: int, owner: str, repo: str) -> "PRInfo":
     pr = get_pr_details(owner, repo, pr_number)
     if not pr:
         from .exceptions import PRNotFoundError
+
         raise PRNotFoundError(f"PR #{pr_number} does not exist")
 
     return PRInfo(
@@ -148,7 +146,7 @@ def discover_pr_info(pr_number: int, owner: str, repo: str) -> "PRInfo":
         branch=pr.branch,
         base_branch=pr.base_branch,
         title=pr.title,
-        worktree_path=Path("."),  # Placeholder, set by caller
+        worktree_path=Path(),  # Placeholder, set by caller
     )
 
 

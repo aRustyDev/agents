@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import toml
-from cement.core.config import ConfigHandler
 from cement.ext.ext_configparser import ConfigParserConfigHandler
 
 
@@ -33,7 +32,7 @@ class TomlConfigHandler(ConfigParserConfigHandler):
         if not path.exists():
             return {}
 
-        with open(path, "r") as f:
+        with open(path) as f:
             return toml.load(f)
 
     def parse_file(self, file_path: str) -> bool:

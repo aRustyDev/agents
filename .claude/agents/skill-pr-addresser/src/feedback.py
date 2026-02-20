@@ -10,14 +10,12 @@ import json
 import logging
 import os
 import re
-import select
 import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Thread
-from queue import Queue, Empty
 
 import yaml
 
@@ -26,12 +24,12 @@ _agents_dir = Path(__file__).parent.parent.parent
 if str(_agents_dir) not in sys.path:
     sys.path.insert(0, str(_agents_dir))
 
-from skill_agents_common.models import Model, SubagentConfig, SubagentResult
+from skill_agents_common.models import Model, SubagentResult
 
+from .costs import CallCost, estimate_call_cost
 from .discovery import DiscoveryContext
-from .github_pr import Review, Comment
-from .tracing import span, record_subagent_call
-from .costs import estimate_call_cost, CallCost
+from .github_pr import Comment, Review
+from .tracing import record_subagent_call, span
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +42,7 @@ class DebugConfig:
     - interactive: Run in TUI mode (no --print flag)
     - verbose: Stream output in real-time while capturing
     """
+
     interactive: bool = False
     verbose: bool = False
 
@@ -166,8 +165,7 @@ class AnalysisResult:
             return any(g.type == "change_request" for g in self.action_groups)
         # Fallback to legacy format
         return any(
-            item.type == "change_request" and not item.resolved
-            for item in self.feedback_items
+            item.type == "change_request" and not item.resolved for item in self.feedback_items
         )
 
     @property
@@ -178,10 +176,7 @@ class AnalysisResult:
 
         # Build order map
         order_map = {step.group_id: step.order for step in self.execution_plan}
-        return sorted(
-            self.action_groups,
-            key=lambda g: order_map.get(g.id, 999)
-        )
+        return sorted(self.action_groups, key=lambda g: order_map.get(g.id, 999))
 
     def get_batch(self, batch_num: int, batch_size: int = 3) -> list[ActionGroup]:
         """Get a batch of action groups for processing.
@@ -348,6 +343,7 @@ def run_subagent(
                     cmd,
                     cwd=working_dir,
                     timeout=config.get("timeout", 600),
+                    check=False,
                 )
                 duration = time.time() - start_time
 
@@ -374,7 +370,6 @@ def run_subagent(
             # Verbose mode: stream output while capturing
             elif debug_config.verbose:
                 output_lines: list[str] = []
-                stderr_lines: list[str] = []
 
                 proc = subprocess.Popen(
                     cmd,
@@ -441,6 +436,7 @@ def run_subagent(
                     capture_output=True,
                     text=True,
                     timeout=config.get("timeout", 600),
+                    check=False,
                 )
 
                 duration = time.time() - start_time
@@ -812,9 +808,7 @@ Work in the current directory (this is a git worktree).
     parsed = result.parsed_output
     if not parsed:
         log.warning(f"Could not parse fix result for group '{group.id}'")
-        return FixResult(
-            skipped=[{"id": group.id, "reason": "Could not parse fixer output"}]
-        ), cost
+        return FixResult(skipped=[{"id": group.id, "reason": "Could not parse fixer output"}]), cost
 
     return FixResult(
         addressed=parsed.get("addressed", []),
@@ -857,9 +851,7 @@ def fix_batch(
     costs: list[CallCost] = []
 
     for group in batch:
-        result, cost = fix_action_group(
-            agent_dir, ctx, group, analysis.guidance, model
-        )
+        result, cost = fix_action_group(agent_dir, ctx, group, analysis.guidance, model)
         if cost:
             costs.append(cost)
 
@@ -908,9 +900,7 @@ def fix_all_batches(
     all_costs: list[CallCost] = []
 
     for batch_num in range(analysis.batch_count):
-        result, costs = fix_batch(
-            agent_dir, ctx, analysis, batch_num, batch_size, model
-        )
+        result, costs = fix_batch(agent_dir, ctx, analysis, batch_num, batch_size, model)
         all_costs.extend(costs)
 
         # Combine results
@@ -1011,8 +1001,7 @@ Work in the current directory (this is a git worktree).
         log.error(f"Feedback fixing failed: {result.error}")
         return FixResult(
             skipped=[
-                {"id": item.id, "reason": f"Fixer failed: {result.error}"}
-                for item in items_to_fix
+                {"id": item.id, "reason": f"Fixer failed: {result.error}"} for item in items_to_fix
             ]
         ), cost
 
@@ -1021,8 +1010,7 @@ Work in the current directory (this is a git worktree).
         log.warning("Could not parse fix result output")
         return FixResult(
             skipped=[
-                {"id": item.id, "reason": "Could not parse fixer output"}
-                for item in items_to_fix
+                {"id": item.id, "reason": "Could not parse fixer output"} for item in items_to_fix
             ]
         ), cost
 
@@ -1059,19 +1047,13 @@ def fix_with_escalation(
 
     if analysis.action_groups:
         # New format: check if all groups are low priority nitpicks
-        is_simple = (
-            len(analysis.action_groups) <= 2
-            and all(g.type == "nitpick" or g.priority == "low" for g in analysis.action_groups)
+        is_simple = len(analysis.action_groups) <= 2 and all(
+            g.type == "nitpick" or g.priority == "low" for g in analysis.action_groups
         )
     elif analysis.feedback_items:
         # Legacy format: check for simple nitpicks
-        is_simple = (
-            analysis.actionable_count <= 2
-            and all(
-                item.type == "nitpick"
-                for item in analysis.feedback_items
-                if not item.resolved
-            )
+        is_simple = analysis.actionable_count <= 2 and all(
+            item.type == "nitpick" for item in analysis.feedback_items if not item.resolved
         )
 
     # Try Haiku first for simple fixes
@@ -1124,21 +1106,25 @@ def check_substantive_feedback(
     items_to_check = []
 
     for review in pending_reviews:
-        items_to_check.append({
-            "id": review.id or f"review-{review.author}-{review.submitted_at}",
-            "type": "review",
-            "author": review.author,
-            "state": review.state,
-            "body": review.body or "",
-        })
+        items_to_check.append(
+            {
+                "id": review.id or f"review-{review.author}-{review.submitted_at}",
+                "type": "review",
+                "author": review.author,
+                "state": review.state,
+                "body": review.body or "",
+            }
+        )
 
     for comment in pending_comments:
-        items_to_check.append({
-            "id": comment.id,
-            "type": "comment",
-            "author": comment.author,
-            "body": comment.body,
-        })
+        items_to_check.append(
+            {
+                "id": comment.id,
+                "type": "comment",
+                "author": comment.author,
+                "body": comment.body,
+            }
+        )
 
     task = f"""Evaluate whether each of the following feedback items contains substantive actionable feedback.
 
@@ -1150,9 +1136,7 @@ Classify each item as either "substantive" (requires code changes) or "not_subst
 
     # Run the substantive checker sub-agent
     # Note: working_dir isn't really needed since we're not doing file ops
-    result, cost = run_subagent(
-        agent_dir, "substantive-checker", task, agent_dir
-    )
+    result, cost = run_subagent(agent_dir, "substantive-checker", task, agent_dir)
 
     if not result.success:
         log.warning(f"Substantive check failed: {result.error}")
@@ -1171,12 +1155,8 @@ Classify each item as either "substantive" (requires code changes) or "not_subst
         ), cost
 
     # Parse results and match back to original objects
-    substantive_ids = {
-        item.get("id") for item in parsed.get("substantive", [])
-    }
-    not_substantive_ids = [
-        item.get("id") for item in parsed.get("not_substantive", [])
-    ]
+    substantive_ids = {item.get("id") for item in parsed.get("substantive", [])}
+    not_substantive_ids = [item.get("id") for item in parsed.get("not_substantive", [])]
 
     # Filter reviews
     substantive_reviews = []

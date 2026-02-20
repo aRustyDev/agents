@@ -1,13 +1,14 @@
 """GitHub operations shared by skill-reviewer and skill-pr-addresser agents."""
 
-import subprocess
 import json
+import subprocess
 from dataclasses import dataclass
 
 
 @dataclass
 class Issue:
     """GitHub issue data."""
+
     number: int
     title: str
     state: str
@@ -21,6 +22,7 @@ class Issue:
 @dataclass
 class PullRequest:
     """GitHub pull request data."""
+
     number: int
     title: str
     url: str
@@ -29,11 +31,7 @@ class PullRequest:
 
 
 def find_review_issues(
-    owner: str,
-    repo: str,
-    labels: list[str],
-    state: str = "open",
-    limit: int = 100
+    owner: str, repo: str, labels: list[str], state: str = "open", limit: int = 100
 ) -> list[Issue]:
     """Find issues matching review criteria.
 
@@ -50,14 +48,23 @@ def find_review_issues(
     label_args = [f"--label={label}" for label in labels]
 
     result = subprocess.run(
-        ["gh", "issue", "list",
-         "--repo", f"{owner}/{repo}",
-         "--state", state,
-         "--limit", str(limit),
-         "--json", "number,title,state,labels,body,url",
-         *label_args],
+        [
+            "gh",
+            "issue",
+            "list",
+            "--repo",
+            f"{owner}/{repo}",
+            "--state",
+            state,
+            "--limit",
+            str(limit),
+            "--json",
+            "number,title,state,labels,body,url",
+            *label_args,
+        ],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -71,7 +78,7 @@ def find_review_issues(
             state=i["state"],
             labels=[label["name"] for label in i.get("labels", [])],
             body=i.get("body"),
-            url=i.get("url")
+            url=i.get("url"),
         )
         for i in issues
     ]
@@ -82,7 +89,7 @@ def update_issue_labels(
     repo: str,
     issue_number: int,
     add_labels: list[str] | None = None,
-    remove_labels: list[str] | None = None
+    remove_labels: list[str] | None = None,
 ) -> bool:
     """Update labels on an issue.
 
@@ -101,32 +108,43 @@ def update_issue_labels(
     if add_labels:
         for label in add_labels:
             result = subprocess.run(
-                ["gh", "issue", "edit", str(issue_number),
-                 "--repo", f"{owner}/{repo}",
-                 "--add-label", label],
-                capture_output=True
+                [
+                    "gh",
+                    "issue",
+                    "edit",
+                    str(issue_number),
+                    "--repo",
+                    f"{owner}/{repo}",
+                    "--add-label",
+                    label,
+                ],
+                capture_output=True,
+                check=False,
             )
             success = success and result.returncode == 0
 
     if remove_labels:
         for label in remove_labels:
             subprocess.run(
-                ["gh", "issue", "edit", str(issue_number),
-                 "--repo", f"{owner}/{repo}",
-                 "--remove-label", label],
-                capture_output=True
+                [
+                    "gh",
+                    "issue",
+                    "edit",
+                    str(issue_number),
+                    "--repo",
+                    f"{owner}/{repo}",
+                    "--remove-label",
+                    label,
+                ],
+                capture_output=True,
+                check=False,
             )
             # Don't fail if label wasn't present
 
     return success
 
 
-def add_issue_comment(
-    owner: str,
-    repo: str,
-    issue_number: int,
-    body: str
-) -> bool:
+def add_issue_comment(owner: str, repo: str, issue_number: int, body: str) -> bool:
     """Add a comment to an issue or PR.
 
     Args:
@@ -139,23 +157,16 @@ def add_issue_comment(
         True if successful
     """
     result = subprocess.run(
-        ["gh", "issue", "comment", str(issue_number),
-         "--repo", f"{owner}/{repo}",
-         "--body", body],
-        capture_output=True
+        ["gh", "issue", "comment", str(issue_number), "--repo", f"{owner}/{repo}", "--body", body],
+        capture_output=True,
+        check=False,
     )
 
     return result.returncode == 0
 
 
 def create_pull_request(
-    owner: str,
-    repo: str,
-    title: str,
-    body: str,
-    head: str,
-    base: str = "main",
-    draft: bool = True
+    owner: str, repo: str, title: str, body: str, head: str, base: str = "main", draft: bool = True
 ) -> PullRequest | None:
     """Create a pull request.
 
@@ -172,12 +183,19 @@ def create_pull_request(
         PullRequest if created, None on failure
     """
     cmd = [
-        "gh", "pr", "create",
-        "--repo", f"{owner}/{repo}",
-        "--title", title,
-        "--body", body,
-        "--head", head,
-        "--base", base,
+        "gh",
+        "pr",
+        "create",
+        "--repo",
+        f"{owner}/{repo}",
+        "--title",
+        title,
+        "--body",
+        body,
+        "--head",
+        head,
+        "--base",
+        base,
     ]
 
     if draft:
@@ -186,7 +204,8 @@ def create_pull_request(
     result = subprocess.run(
         cmd + ["--json", "number,title,url,state,headRefName"],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -198,16 +217,11 @@ def create_pull_request(
         title=data["title"],
         url=data["url"],
         state=data["state"],
-        branch=data["headRefName"]
+        branch=data["headRefName"],
     )
 
 
-def close_issue(
-    owner: str,
-    repo: str,
-    issue_number: int,
-    reason: str = "completed"
-) -> bool:
+def close_issue(owner: str, repo: str, issue_number: int, reason: str = "completed") -> bool:
     """Close an issue.
 
     Args:
@@ -220,20 +234,24 @@ def close_issue(
         True if successful
     """
     result = subprocess.run(
-        ["gh", "issue", "close", str(issue_number),
-         "--repo", f"{owner}/{repo}",
-         "--reason", reason],
-        capture_output=True
+        [
+            "gh",
+            "issue",
+            "close",
+            str(issue_number),
+            "--repo",
+            f"{owner}/{repo}",
+            "--reason",
+            reason,
+        ],
+        capture_output=True,
+        check=False,
     )
 
     return result.returncode == 0
 
 
-def get_issue_details(
-    owner: str,
-    repo: str,
-    issue_number: int
-) -> Issue | None:
+def get_issue_details(owner: str, repo: str, issue_number: int) -> Issue | None:
     """Get details of a specific issue.
 
     Args:
@@ -245,11 +263,19 @@ def get_issue_details(
         Issue if found, None otherwise
     """
     result = subprocess.run(
-        ["gh", "issue", "view", str(issue_number),
-         "--repo", f"{owner}/{repo}",
-         "--json", "number,title,state,labels,body,url,milestone,projectItems"],
+        [
+            "gh",
+            "issue",
+            "view",
+            str(issue_number),
+            "--repo",
+            f"{owner}/{repo}",
+            "--json",
+            "number,title,state,labels,body,url,milestone,projectItems",
+        ],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -275,7 +301,7 @@ def get_issue_details(
         body=data.get("body"),
         url=data.get("url"),
         milestone=milestone,
-        project_title=project_title
+        project_title=project_title,
     )
 
 
@@ -283,12 +309,8 @@ def get_issue_details(
 # PR Operations
 # =============================================================================
 
-def update_pr_from_issue(
-    owner: str,
-    repo: str,
-    pr_number: int,
-    issue: Issue
-) -> bool:
+
+def update_pr_from_issue(owner: str, repo: str, pr_number: int, issue: Issue) -> bool:
     """Copy labels, milestone, and project from issue to PR.
 
     Args:
@@ -317,17 +339,13 @@ def update_pr_from_issue(
 
     # Execute if we have anything to add
     if len(cmd) > 5:  # More than just the base command
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         return result.returncode == 0
 
     return True
 
 
-def mark_pr_ready(
-    owner: str,
-    repo: str,
-    pr_number: int
-) -> bool:
+def mark_pr_ready(owner: str, repo: str, pr_number: int) -> bool:
     """Mark a draft PR as ready for review.
 
     Args:
@@ -339,18 +357,14 @@ def mark_pr_ready(
         True if successful
     """
     result = subprocess.run(
-        ["gh", "pr", "ready", str(pr_number),
-         "--repo", f"{owner}/{repo}"],
-        capture_output=True
+        ["gh", "pr", "ready", str(pr_number), "--repo", f"{owner}/{repo}"],
+        capture_output=True,
+        check=False,
     )
     return result.returncode == 0
 
 
-def get_pr_review_status(
-    owner: str,
-    repo: str,
-    pr_number: int
-) -> dict:
+def get_pr_review_status(owner: str, repo: str, pr_number: int) -> dict:
     """Get the review status of a PR.
 
     Args:
@@ -362,11 +376,19 @@ def get_pr_review_status(
         Dict with review information
     """
     result = subprocess.run(
-        ["gh", "pr", "view", str(pr_number),
-         "--repo", f"{owner}/{repo}",
-         "--json", "reviewDecision,reviews,isDraft,state"],
+        [
+            "gh",
+            "pr",
+            "view",
+            str(pr_number),
+            "--repo",
+            f"{owner}/{repo}",
+            "--json",
+            "reviewDecision,reviews,isDraft,state",
+        ],
         capture_output=True,
-        text=True
+        text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -378,21 +400,13 @@ def get_pr_review_status(
         "state": data.get("state", "UNKNOWN"),
         "review_decision": data.get("reviewDecision"),
         "reviews": [
-            {
-                "author": r.get("author", {}).get("login"),
-                "state": r.get("state")
-            }
+            {"author": r.get("author", {}).get("login"), "state": r.get("state")}
             for r in data.get("reviews", [])
-        ]
+        ],
     }
 
 
-def request_rereview(
-    owner: str,
-    repo: str,
-    pr_number: int,
-    reviewers: list[str]
-) -> bool:
+def request_rereview(owner: str, repo: str, pr_number: int, reviewers: list[str]) -> bool:
     """Request re-review from specified reviewers.
 
     Args:
@@ -411,5 +425,5 @@ def request_rereview(
     for reviewer in reviewers:
         cmd.extend(["--add-reviewer", reviewer])
 
-    result = subprocess.run(cmd, capture_output=True)
+    result = subprocess.run(cmd, capture_output=True, check=False)
     return result.returncode == 0

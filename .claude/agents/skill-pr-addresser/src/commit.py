@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 class ConflictError(Exception):
     """Raised when a git conflict is detected."""
+
     pass
 
 
@@ -57,6 +58,7 @@ def commit_and_push(
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if not status_result.stdout.strip():
@@ -83,9 +85,7 @@ def commit_and_push(
         total_lines_removed += result.lines_removed
 
     # Build addressed summary
-    addressed_summary = ", ".join(
-        item.get("id", "unknown")[:20] for item in all_addressed[:5]
-    )
+    addressed_summary = ", ".join(item.get("id", "unknown")[:20] for item in all_addressed[:5])
     if len(all_addressed) > 5:
         addressed_summary += f", ... (+{len(all_addressed) - 5} more)"
 
@@ -114,6 +114,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -127,6 +128,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if sha_result.returncode != 0:
@@ -142,6 +144,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
             cwd=worktree_path,
             capture_output=True,
             text=True,
+            check=False,
         )
         branch = branch_result.stdout.strip()
 
@@ -150,6 +153,7 @@ Co-Authored-By: Claude Sonnet 4 <noreply@anthropic.com>
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if push_result.returncode != 0:
@@ -181,6 +185,7 @@ def _pull_and_retry_push(worktree_path: Path, branch: str) -> None:
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if pull_result.returncode != 0:
@@ -190,6 +195,7 @@ def _pull_and_retry_push(worktree_path: Path, branch: str) -> None:
                 ["git", "rebase", "--abort"],
                 cwd=worktree_path,
                 capture_output=True,
+                check=False,
             )
             raise ConflictError(f"Rebase conflict: {pull_result.stderr}")
         raise RuntimeError(f"Pull failed: {pull_result.stderr}")
@@ -200,6 +206,7 @@ def _pull_and_retry_push(worktree_path: Path, branch: str) -> None:
         cwd=worktree_path,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if retry_result.returncode != 0:
@@ -289,6 +296,7 @@ def post_pr_comment(
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:
@@ -343,6 +351,7 @@ Reached maximum iterations ({iterations}). Some feedback may require manual atte
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode != 0:

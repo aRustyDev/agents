@@ -11,6 +11,7 @@ from .models import Model
 @dataclass
 class TokenEstimate:
     """Estimated token usage for a skill review."""
+
     skill_path: str
 
     # File metrics
@@ -53,7 +54,7 @@ def count_tokens_approx(text: str) -> int:
     More accurate would be to use tiktoken, but this is faster.
     """
     # Remove excessive whitespace
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     # Rough approximation
     return len(text) // 4
 
@@ -92,12 +93,14 @@ def analyze_skill_files(skill_path: Path) -> dict[str, Any]:
             lines = len(content.splitlines())
             chars = len(content)
 
-            metrics["files"].append({
-                "path": str(file_path.relative_to(skill_path)),
-                "lines": lines,
-                "chars": chars,
-                "tokens": count_tokens_approx(content),
-            })
+            metrics["files"].append(
+                {
+                    "path": str(file_path.relative_to(skill_path)),
+                    "lines": lines,
+                    "chars": chars,
+                    "tokens": count_tokens_approx(content),
+                }
+            )
 
             metrics["total_lines"] += lines
             metrics["total_chars"] += chars
@@ -108,7 +111,7 @@ def analyze_skill_files(skill_path: Path) -> dict[str, Any]:
             elif file_path.suffix == ".md":
                 metrics["reference_chars"] += chars
 
-        except (UnicodeDecodeError, IOError):
+        except (OSError, UnicodeDecodeError):
             continue
 
     return metrics
@@ -141,7 +144,9 @@ def estimate_tokens(skill_path: Path) -> TokenEstimate:
     complexity_output = 300
 
     # Analysis stage: read all content + validation + complexity
-    analysis_input = skill_tokens + reference_tokens + validation_output + complexity_output + context_overhead
+    analysis_input = (
+        skill_tokens + reference_tokens + validation_output + complexity_output + context_overhead
+    )
     # Output: detailed improvement plan
     analysis_output = min(skill_tokens, 5000)  # Proportional to skill size
 
@@ -160,21 +165,21 @@ def estimate_tokens(skill_path: Path) -> TokenEstimate:
 
     # Totals
     total_input = (
-        validation_input +
-        complexity_input +
-        analysis_input +
-        fixing_input +
-        pr_input +
-        github_input * 2  # Start and end
+        validation_input
+        + complexity_input
+        + analysis_input
+        + fixing_input
+        + pr_input
+        + github_input * 2  # Start and end
     )
 
     total_output = (
-        validation_output +
-        complexity_output +
-        analysis_output +
-        fixing_output +
-        pr_output +
-        github_output * 2
+        validation_output
+        + complexity_output
+        + analysis_output
+        + fixing_output
+        + pr_output
+        + github_output * 2
     )
 
     # Cost calculations
@@ -205,9 +210,9 @@ def estimate_tokens(skill_path: Path) -> TokenEstimate:
     opus_output = analysis_output
 
     cost_mixed = (
-        calc_cost(Model.HAIKU_35, haiku_input, haiku_output) +
-        calc_cost(Model.SONNET_4, sonnet_input, sonnet_output) +
-        calc_cost(Model.OPUS_45, opus_input, opus_output)
+        calc_cost(Model.HAIKU_35, haiku_input, haiku_output)
+        + calc_cost(Model.SONNET_4, sonnet_input, sonnet_output)
+        + calc_cost(Model.OPUS_45, opus_input, opus_output)
     )
 
     return TokenEstimate(
@@ -249,8 +254,12 @@ def estimate_batch(skill_paths: list[Path]) -> dict[str, Any]:
         "total_cost_sonnet": sum(e.cost_sonnet for e in estimates),
         "total_cost_opus": sum(e.cost_opus for e in estimates),
         "total_cost_mixed": sum(e.cost_mixed for e in estimates),
-        "avg_tokens_per_skill": sum(e.estimated_total_tokens for e in estimates) / len(estimates) if estimates else 0,
-        "avg_cost_per_skill": sum(e.cost_mixed for e in estimates) / len(estimates) if estimates else 0,
+        "avg_tokens_per_skill": sum(e.estimated_total_tokens for e in estimates) / len(estimates)
+        if estimates
+        else 0,
+        "avg_cost_per_skill": sum(e.cost_mixed for e in estimates) / len(estimates)
+        if estimates
+        else 0,
         "estimates": estimates,
     }
 

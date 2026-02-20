@@ -4,33 +4,30 @@
 Stage 8 tests for #796: detect updated comments after addressing.
 """
 
-import pytest
-from datetime import datetime, timezone
-from unittest.mock import MagicMock
-
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import MagicMock
 
 # Add agent directory to path for imports
 _agent_dir = Path(__file__).parent.parent
 if str(_agent_dir) not in sys.path:
     sys.path.insert(0, str(_agent_dir))
 
-from src.hashing import hash_content, hashes_match, hash_lines
+from src.hashing import hash_content, hash_lines, hashes_match
 from src.models import (
-    ReviewFeedback,
+    ActionGroup,
+    AddressedLocation,
     CommentFeedback,
+    FixResult,
+    Location,
+    RawFeedback,
+    ReviewFeedback,
     ThreadComment,
     ThreadFeedback,
     TokenUsage,
-    Location,
-    ActionGroup,
-    AddressedLocation,
-    FixResult,
-    RawFeedback,
 )
-from src.session_schema import AddressedItem, ThreadState, FeedbackState
-
+from src.session_schema import AddressedItem, FeedbackState, ThreadState
 
 # =============================================================================
 # Hashing Tests
@@ -89,7 +86,7 @@ class TestReviewFeedback:
             state="CHANGES_REQUESTED",
             body="Please fix this",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         assert review.content_hash.startswith("sha256:")
         assert review.content == "Please fix this"
@@ -101,13 +98,13 @@ class TestReviewFeedback:
             state="COMMENTED",
             body="Test body",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         assert review.content == review.body
 
     def test_created_at_property(self):
         """created_at property should return submitted_at."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         review = ReviewFeedback(
             id="R_123",
             state="COMMENTED",
@@ -124,14 +121,14 @@ class TestReviewFeedback:
             state="CHANGES_REQUESTED",
             body="Fix this",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         other = ReviewFeedback(
             id="R_456",
             state="APPROVED",
             body="Looks good",
             author="reviewer",
-            submitted_at=datetime.now(timezone.utc),
+            submitted_at=datetime.now(UTC),
         )
         assert not review.is_resolved_by(other)
 
@@ -162,13 +159,13 @@ class TestCommentFeedback:
             id="IC_123",
             body="Please add tests",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         response = CommentFeedback(
             id="IC_456",
             body="Never mind, I see you already have them",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         assert comment.is_resolved_by(response)
 
@@ -178,7 +175,7 @@ class TestCommentFeedback:
             id="IC_123",
             body="Add tests",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
 
         phrases = ["ignore", "looks good now", "resolved", "my mistake", "disregard"]
@@ -187,7 +184,7 @@ class TestCommentFeedback:
                 id="IC_456",
                 body=f"Oh, {phrase}!",
                 author="reviewer",
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
             )
             assert comment.is_resolved_by(response), f"Should resolve with '{phrase}'"
 
@@ -197,13 +194,13 @@ class TestCommentFeedback:
             id="IC_123",
             body="Add tests",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         response = CommentFeedback(
             id="IC_456",
             body="Never mind",
             author="other_user",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         assert not comment.is_resolved_by(response)
 
@@ -213,7 +210,7 @@ class TestCommentFeedback:
             id="IC_123",
             body="Test",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             reactions={"thumbsUp": 1, "thumbsDown": 0},
         )
         assert comment.has_acknowledgment_reaction("anyone")
@@ -222,7 +219,7 @@ class TestCommentFeedback:
             id="IC_456",
             body="Test",
             author="reviewer",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             reactions={},
         )
         assert not comment_no_reaction.has_acknowledgment_reaction("anyone")
@@ -247,7 +244,7 @@ class TestThreadFeedback:
                     id=cid,
                     body=body,
                     author=author,
-                    created_at=datetime.now(timezone.utc),
+                    created_at=datetime.now(UTC),
                 )
                 for cid, body, author in comments
             ],
@@ -255,36 +252,44 @@ class TestThreadFeedback:
 
     def test_has_author_resolution(self):
         """Should detect PR author resolution signal."""
-        thread = self._make_thread([
-            ("c1", "Fix this typo", "reviewer"),
-            ("c2", "Done!", "pr_author"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "Fix this typo", "reviewer"),
+                ("c2", "Done!", "pr_author"),
+            ]
+        )
         assert thread.has_author_resolution("pr_author")
 
     def test_has_author_resolution_with_variations(self):
         """Should detect various resolution phrases."""
         for phrase in ["done", "fixed", "addressed", "resolved", "will do"]:
-            thread = self._make_thread([
-                ("c1", "Fix this", "reviewer"),
-                ("c2", phrase, "pr_author"),
-            ])
+            thread = self._make_thread(
+                [
+                    ("c1", "Fix this", "reviewer"),
+                    ("c2", phrase, "pr_author"),
+                ]
+            )
             assert thread.has_author_resolution("pr_author"), f"Should detect '{phrase}'"
 
     def test_has_reviewer_withdrawal(self):
         """Should detect reviewer withdrawal."""
-        thread = self._make_thread([
-            ("c1", "Fix this", "reviewer"),
-            ("c2", "Actually, never mind", "reviewer"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "Fix this", "reviewer"),
+                ("c2", "Actually, never mind", "reviewer"),
+            ]
+        )
         assert thread.has_reviewer_withdrawal()
 
     def test_get_new_comments_since(self):
         """Should return comments after specified ID."""
-        thread = self._make_thread([
-            ("c1", "First", "reviewer"),
-            ("c2", "Second", "author"),
-            ("c3", "Third", "reviewer"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "First", "reviewer"),
+                ("c2", "Second", "author"),
+                ("c3", "Third", "reviewer"),
+            ]
+        )
         new = thread.get_new_comments_since("c1")
         assert len(new) == 2
         assert new[0].id == "c2"
@@ -292,10 +297,12 @@ class TestThreadFeedback:
 
     def test_get_new_comments_since_none(self):
         """Should return all comments when last_seen is None."""
-        thread = self._make_thread([
-            ("c1", "First", "reviewer"),
-            ("c2", "Second", "author"),
-        ])
+        thread = self._make_thread(
+            [
+                ("c1", "First", "reviewer"),
+                ("c2", "Second", "author"),
+            ]
+        )
         new = thread.get_new_comments_since(None)
         assert len(new) == 2
 
@@ -420,7 +427,7 @@ class TestFixResult:
                     file="SKILL.md",
                     line=42,
                     thread_id="T_1",
-                    addressed_at=datetime.now(timezone.utc),
+                    addressed_at=datetime.now(UTC),
                     commit_sha="abc123",
                 )
             ],
@@ -485,7 +492,7 @@ class TestAddressedItem:
         item = AddressedItem(
             id="item_1",
             content_hash="sha256:abc123",
-            addressed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            addressed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
             addressed_in_commit="commit123",
             iteration=1,
         )
@@ -504,7 +511,7 @@ class TestThreadState:
             thread_id="T_1",
             last_seen_comment_id="c_3",
             comments_processed=["c_1", "c_2", "c_3"],
-            last_processed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
+            last_processed_at=datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC),
         )
         data = state.to_dict()
         restored = ThreadState.from_dict(data)
