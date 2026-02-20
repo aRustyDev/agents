@@ -228,7 +228,10 @@ module.exports.SCHEMA = {
       },
       allOf: [
         {
-          if: { properties: { strategy: { const: ':page_match' } }, required: ['strategy'] },
+          if: {
+            properties: { strategy: { const: ':page_match' } },
+            required: ['strategy'],
+          },
           then: { required: ['regex'] },
         },
       ],
@@ -322,7 +325,10 @@ module.exports.SCHEMA = {
           description: 'Patch fetched from a URL',
           properties: {
             url: { $ref: '#/$defs/url-pattern', description: 'Patch file URL' },
-            sha256: { $ref: '#/$defs/sha256-hash', description: 'Patch file SHA-256' },
+            sha256: {
+              $ref: '#/$defs/sha256-hash',
+              description: 'Patch file SHA-256',
+            },
           },
           required: ['url', 'sha256'],
           additionalProperties: false,
@@ -516,11 +522,17 @@ module.exports.SCHEMA = {
       required: ['run'],
       allOf: [
         {
-          if: { properties: { run_type: { const: ':interval' } }, required: ['run_type'] },
+          if: {
+            properties: { run_type: { const: ':interval' } },
+            required: ['run_type'],
+          },
           then: { required: ['interval'] },
         },
         {
-          if: { properties: { run_type: { const: ':cron' } }, required: ['run_type'] },
+          if: {
+            properties: { run_type: { const: ':cron' } },
+            required: ['run_type'],
+          },
           then: { required: ['cron'] },
         },
       ],
@@ -794,6 +806,354 @@ module.exports.SCHEMA = {
       additionalProperties: false,
     },
 
+    'install-make': {
+      title: 'Make Install Configuration',
+      description: 'Install config for Makefile-based formulas',
+      $comment: 'Ruby DSL: system "make", "install"',
+      type: 'object',
+      properties: {
+        make_args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Extra arguments to make',
+          examples: [['CC=#{ENV.cc}', 'PREFIX=#{prefix}']],
+        },
+        make_targets: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Make targets to build before install',
+          default: ['all'],
+          examples: [['all']],
+        },
+        install_target: {
+          type: 'string',
+          description: 'Make install target',
+          default: 'install',
+          examples: ['install'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-custom': {
+      title: 'Custom Install Configuration',
+      description: 'Install config for formulas with non-standard build systems',
+      $comment: 'Ruby DSL: custom install block',
+      type: 'object',
+      properties: {
+        commands: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Sequence of Ruby DSL commands for the install block',
+          examples: [['system "make"', 'bin.install "mybinary"']],
+        },
+      },
+      required: ['commands'],
+      additionalProperties: false,
+    },
+
+    'install-swift': {
+      title: 'Swift Install Configuration',
+      description: 'Install config for Swift formulas',
+      $comment: 'Ruby DSL: swift build',
+      type: 'object',
+      properties: {
+        configuration: {
+          type: 'string',
+          description: 'Build configuration',
+          enum: ['release', 'debug'],
+          default: 'release',
+          examples: ['release'],
+        },
+        static_linking: {
+          type: 'boolean',
+          description: 'Use static linking',
+          default: true,
+        },
+        build_args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional swift build arguments',
+          examples: [['--disable-sandbox']],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-elixir': {
+      title: 'Elixir Install Configuration',
+      description: 'Install config for Elixir/Mix formulas',
+      $comment: 'Ruby DSL: mix escript.build',
+      type: 'object',
+      properties: {
+        mix_env: {
+          type: 'string',
+          description: 'MIX_ENV value',
+          default: 'prod',
+          examples: ['prod'],
+        },
+        build_type: {
+          type: 'string',
+          description: 'Build output type',
+          enum: ['escript', 'release'],
+          default: 'escript',
+          examples: ['escript'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-haskell': {
+      title: 'Haskell Install Configuration',
+      description: 'Install config for Haskell formulas',
+      $comment: 'Ruby DSL: cabal v2-install or stack',
+      type: 'object',
+      properties: {
+        build_system: {
+          type: 'string',
+          description: 'Haskell build system',
+          enum: ['cabal', 'stack'],
+          default: 'cabal',
+          examples: ['cabal', 'stack'],
+        },
+        flags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Cabal flags or Stack arguments',
+          examples: [['-f', 'threaded']],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-kotlin': {
+      title: 'Kotlin Install Configuration',
+      description: 'Install config for Kotlin/Gradle formulas',
+      $comment: 'Ruby DSL: gradle installDist',
+      type: 'object',
+      properties: {
+        gradle_task: {
+          type: 'string',
+          description: 'Gradle task to run',
+          default: 'installDist',
+          examples: ['installDist', 'shadowJar'],
+        },
+        java_version: {
+          type: 'string',
+          description: 'Java version dependency',
+          default: 'openjdk',
+          examples: ['openjdk', 'openjdk@17'],
+        },
+        wrapper_name: {
+          type: 'string',
+          description: 'Name for the shell wrapper script',
+          examples: ['mytool'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-scala': {
+      title: 'Scala Install Configuration',
+      description: 'Install config for Scala/sbt formulas',
+      $comment: 'Ruby DSL: sbt assembly',
+      type: 'object',
+      properties: {
+        sbt_task: {
+          type: 'string',
+          description: 'sbt task to run',
+          default: 'assembly',
+          examples: ['assembly', 'universal:packageBin'],
+        },
+        java_version: {
+          type: 'string',
+          description: 'Java version dependency',
+          default: 'openjdk',
+          examples: ['openjdk', 'openjdk@17'],
+        },
+        wrapper_name: {
+          type: 'string',
+          description: 'Name for the shell wrapper script',
+          examples: ['mytool'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-erlang-app': {
+      title: 'Erlang Application Install Configuration',
+      description: 'Install config for Erlang/rebar3 formulas',
+      $comment: 'Ruby DSL: rebar3 escriptize',
+      type: 'object',
+      properties: {
+        build_type: {
+          type: 'string',
+          description: 'Build output type',
+          enum: ['escript', 'release'],
+          default: 'escript',
+          examples: ['escript'],
+        },
+        rebar3_args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional rebar3 arguments',
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-ocaml': {
+      title: 'OCaml Install Configuration',
+      description: 'Install config for OCaml formulas',
+      $comment: 'Ruby DSL: dune build',
+      type: 'object',
+      properties: {
+        build_system: {
+          type: 'string',
+          description: 'OCaml build system',
+          enum: ['dune', 'opam'],
+          default: 'dune',
+          examples: ['dune', 'opam'],
+        },
+        dune_args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional dune arguments',
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-nim': {
+      title: 'Nim Install Configuration',
+      description: 'Install config for Nim formulas',
+      $comment: 'Ruby DSL: nimble build',
+      type: 'object',
+      properties: {
+        nimble_args: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Additional nimble build arguments',
+          examples: [['-y', '--verbose']],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-dart': {
+      title: 'Dart Install Configuration',
+      description: 'Install config for Dart formulas',
+      $comment: 'Ruby DSL: dart compile exe',
+      type: 'object',
+      properties: {
+        compile_target: {
+          type: 'string',
+          description: 'Dart compile target type',
+          enum: ['exe', 'aot-snapshot', 'kernel'],
+          default: 'exe',
+          examples: ['exe'],
+        },
+        source_file: {
+          type: 'string',
+          description: 'Main Dart file to compile',
+          default: 'bin/main.dart',
+          examples: ['bin/main.dart'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-gleam': {
+      title: 'Gleam Install Configuration',
+      description: 'Install config for Gleam formulas',
+      $comment: 'Ruby DSL: gleam export erlang-shipment',
+      type: 'object',
+      properties: {
+        export_type: {
+          type: 'string',
+          description: 'Gleam export type',
+          enum: ['erlang-shipment', 'hex-tarball'],
+          default: 'erlang-shipment',
+          examples: ['erlang-shipment'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-roc': {
+      title: 'Roc Install Configuration',
+      description: 'Install config for Roc formulas',
+      $comment: 'Ruby DSL: roc build --optimize',
+      type: 'object',
+      properties: {
+        optimize: {
+          type: 'boolean',
+          description: 'Enable optimized build',
+          default: true,
+        },
+        source_file: {
+          type: 'string',
+          description: 'Main Roc source file',
+          default: 'main.roc',
+          examples: ['main.roc', 'src/main.roc'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-julia': {
+      title: 'Julia Install Configuration',
+      description: 'Install config for Julia formulas',
+      $comment: 'Ruby DSL: write script wrapper',
+      type: 'object',
+      properties: {
+        script_path: {
+          type: 'string',
+          description: 'Path to main Julia script',
+          default: 'src/main.jl',
+          examples: ['src/main.jl', 'bin/main.jl'],
+        },
+        depot_path: {
+          type: 'string',
+          description: 'Julia depot path for packages',
+          default: '#{libexec}/julia',
+          examples: ['#{libexec}/julia'],
+        },
+      },
+      additionalProperties: false,
+    },
+
+    'install-dotnet': {
+      title: '.NET Install Configuration',
+      description: 'Install config for .NET (C#/F#) formulas',
+      $comment: 'Ruby DSL: dotnet publish',
+      type: 'object',
+      properties: {
+        project: {
+          type: 'string',
+          description: 'Project or solution file to build',
+          examples: ['src/MyApp/MyApp.csproj', 'MyApp.sln'],
+        },
+        configuration: {
+          type: 'string',
+          description: 'Build configuration',
+          default: 'Release',
+          examples: ['Release'],
+        },
+        self_contained: {
+          type: 'boolean',
+          description: 'Publish as self-contained',
+          default: false,
+        },
+        framework: {
+          type: 'string',
+          description: 'Target framework',
+          examples: ['net8.0', 'net9.0'],
+        },
+      },
+      additionalProperties: false,
+    },
+
     // ─── Main formula definition ───────────────────────────────────────
 
     formula: {
@@ -869,6 +1229,19 @@ module.exports.SCHEMA = {
             'zig',
             'make',
             'custom',
+            'swift',
+            'elixir',
+            'haskell',
+            'kotlin',
+            'scala',
+            'erlang',
+            'ocaml',
+            'nim',
+            'dart',
+            'gleam',
+            'roc',
+            'julia',
+            'dotnet',
           ],
           examples: ['go', 'rust', 'python'],
         },
@@ -1029,65 +1402,242 @@ module.exports.SCHEMA = {
       // Language dispatch + dependentSchemas
       allOf: [
         {
-          if: { properties: { language: { const: 'go' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'go' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-go' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'rust' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'rust' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-rust' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'python' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'python' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-python' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'nodejs' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'nodejs' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-nodejs' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'cmake' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'cmake' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-cmake' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'autotools' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'autotools' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-autotools' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'meson' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'meson' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-meson' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'java' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'java' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-java' } },
             required: ['install'],
           },
         },
         {
-          if: { properties: { language: { const: 'zig' } }, required: ['language'] },
+          if: {
+            properties: { language: { const: 'zig' } },
+            required: ['language'],
+          },
           then: {
             properties: { install: { $ref: '#/$defs/install-zig' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'make' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-make' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'custom' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-custom' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'swift' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-swift' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'elixir' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-elixir' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'haskell' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-haskell' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'kotlin' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-kotlin' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'scala' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-scala' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'erlang' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-erlang-app' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'ocaml' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-ocaml' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'nim' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-nim' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'dart' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-dart' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'gleam' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-gleam' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'roc' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-roc' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'julia' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-julia' } },
+            required: ['install'],
+          },
+        },
+        {
+          if: {
+            properties: { language: { const: 'dotnet' } },
+            required: ['language'],
+          },
+          then: {
+            properties: { install: { $ref: '#/$defs/install-dotnet' } },
             required: ['install'],
           },
         },

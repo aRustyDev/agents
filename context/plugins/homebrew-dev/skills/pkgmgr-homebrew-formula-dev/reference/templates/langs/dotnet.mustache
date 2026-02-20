@@ -1,0 +1,2 @@
+    system "dotnet", "publish"{{#project}}, "{{project}}"{{/project}}, "-c", "{{#configuration}}{{configuration}}{{/configuration}}{{^configuration}}Release{{/configuration}}", "-o", "#{libexec}"{{#framework}}, "--framework", "{{framework}}"{{/framework}}{{#self_contained}}, "--self-contained"{{/self_contained}}
+    (bin/"{{formula_name}}").write_env_script libexec/"{{formula_name}}", DOTNET_ROOT: Formula["dotnet"].opt_libexec

@@ -36,6 +36,8 @@ depends_on "python@3.12"
 
 ### Install Block
 
+**Standard pattern (with resource blocks):**
+
 ```text
 include Language::Python::Virtualenv
 
@@ -45,6 +47,51 @@ end
 ```
 
 - `virtualenv_install_with_resources` creates a venv, installs resource blocks, then installs the formula
+- Requires `resource` blocks for all pip dependencies (generate with `brew update-python-resources`)
+
+**Alternative pattern (install from PyPI - recommended when no resource blocks):**
+
+```text
+include Language::Python::Virtualenv
+
+def install
+  venv = virtualenv_create(libexec, "python3.14")
+  venv.pip_install "package-name==#{version}"
+  bin.install_symlink Dir[libexec/"bin/tool"]
+end
+```
+
+- Installs from PyPI with proper dependency resolution
+- No resource blocks needed, but less reproducible builds
+- **Important:** Check if PyPI package name differs from repo name (e.g., `ktool` → `k2l`)
+
+**Alternative pattern (build from source - may have issues):**
+
+```text
+include Language::Python::Virtualenv
+
+def install
+  venv = virtualenv_create(libexec, "python3.14")
+  venv.pip_install buildpath
+  bin.install_symlink Dir[libexec/"bin/tool"]
+end
+```
+
+- Builds from the downloaded source tarball
+- **Warning:** May not reliably resolve dependencies with some build backends (hatchling, etc.)
+- **Important:** Use `venv.pip_install`, NOT `system libexec/"bin/pip"` — the latter doesn't work
+
+**With setuptools dependency (for packages using pkg_resources):**
+
+```text
+def install
+  venv = virtualenv_create(libexec, "python3.14")
+  venv.pip_install "setuptools"
+  venv.pip_install buildpath
+  bin.install_symlink Dir[libexec/"bin/tool"]
+end
+```
+
 - Check `pyproject.toml`, `setup.py`, or `setup.cfg` for the project's build system
 
 ### JSON Schema Fields (`install-python`)
@@ -91,6 +138,7 @@ my-tool = "my_package.cli:main"
 - **Missing resources:** Python dependencies must be declared as `resource` blocks — they're not auto-resolved
 - **Version pinning:** Use the exact source tarball versions that match the project's requirements
 - **Site packages:** Set `site_packages: true` only when the formula needs access to Homebrew-installed Python packages
+- **buildpath not resolving deps:** Some build backends (hatchling, poetry) may not properly resolve dependencies when using `venv.pip_install buildpath`. If you see `ModuleNotFoundError` at runtime, switch to `venv.pip_install "package==#{version}"` to install from PyPI instead
 
 ### Reference
 

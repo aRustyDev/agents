@@ -1,0 +1,13 @@
+    {{#build_system_is_maven}}
+    system "mvn", "package", "-DskipTests"
+    {{/build_system_is_maven}}
+    {{#build_system_is_gradle}}
+    system "gradle", "build", "-x", "test"
+    {{/build_system_is_gradle}}
+    {{#build_system_is_ant}}
+    system "ant", "jar"
+    {{/build_system_is_ant}}
+    {{#jar_path}}
+    libexec.install "{{jar_path}}"
+    bin.write_jar_script libexec/"{{jar_path}}", "{{wrapper_name}}"
+    {{/jar_path}}

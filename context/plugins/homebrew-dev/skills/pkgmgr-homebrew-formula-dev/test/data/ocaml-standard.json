@@ -1,0 +1,28 @@
+{
+  "formulas": [
+    {
+      "name": "my-ocaml-tool",
+      "desc": "An OCaml CLI tool",
+      "homepage": "https://github.com/example/my-ocaml-tool",
+      "url": "https://github.com/example/my-ocaml-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "ISC",
+      "language": "ocaml",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "ocaml", "type": ":build" },
+        { "name": "dune", "type": ":build" }
+      ],
+      "install": {
+        "build_system": "dune"
+      },
+      "test": {
+        "command": "system bin/\"my-ocaml-tool\", \"--version\"",
+        "expected_output": "my-ocaml-tool"
+      }
+    }
+  ]
+}

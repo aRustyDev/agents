@@ -1,0 +1,2 @@
+    system "swift", "build", "-c", "{{#configuration}}{{configuration}}{{/configuration}}{{^configuration}}release{{/configuration}}"{{#build_args}}, "{{.}}"{{/build_args}}
+    bin.install ".build/{{#configuration}}{{configuration}}{{/configuration}}{{^configuration}}release{{/configuration}}/{{formula_name}}"

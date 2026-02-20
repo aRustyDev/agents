@@ -1,0 +1,6 @@
+    system "gradle", "{{#gradle_task}}{{gradle_task}}{{/gradle_task}}{{^gradle_task}}installDist{{/gradle_task}}"
+    libexec.install Dir["build/install/*/lib"]
+    libexec.install Dir["build/install/*/bin"]
+    {{#wrapper_name}}
+    (bin/"{{wrapper_name}}").write_env_script libexec/"bin/{{wrapper_name}}", JAVA_HOME: Formula["{{#java_version}}{{java_version}}{{/java_version}}{{^java_version}}openjdk{{/java_version}}"].opt_prefix
+    {{/wrapper_name}}

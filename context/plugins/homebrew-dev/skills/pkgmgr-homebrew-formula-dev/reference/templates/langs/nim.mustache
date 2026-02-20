@@ -1,0 +1,2 @@
+    system "nimble", "build", "-y"{{#nimble_args}}, "{{.}}"{{/nimble_args}}
+    bin.install "{{formula_name}}"

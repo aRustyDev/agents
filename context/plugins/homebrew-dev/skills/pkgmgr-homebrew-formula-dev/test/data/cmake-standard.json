@@ -1,0 +1,25 @@
+{
+  "formulas": [
+    {
+      "name": "my-cmake-tool",
+      "desc": "A CMake-based CLI tool",
+      "homepage": "https://github.com/example/my-cmake-tool",
+      "url": "https://github.com/example/my-cmake-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "BSD-3-Clause",
+      "language": "cmake",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "cmake", "type": ":build" }
+      ],
+      "install": {},
+      "test": {
+        "command": "system bin/\"my-cmake-tool\", \"--version\"",
+        "expected_output": "my-cmake-tool"
+      }
+    }
+  ]
+}

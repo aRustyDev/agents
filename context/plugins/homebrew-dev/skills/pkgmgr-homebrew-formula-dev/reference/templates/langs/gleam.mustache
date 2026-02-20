@@ -1,0 +1,3 @@
+    system "gleam", "export", "erlang-shipment"
+    libexec.install Dir["build/erlang-shipment/*"]
+    bin.write_env_script libexec/"entrypoint.sh", PATH: "#{Formula["erlang"].opt_bin}:$PATH"

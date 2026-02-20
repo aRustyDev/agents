@@ -1,0 +1,30 @@
+{
+  "formulas": [
+    {
+      "name": "my-java-tool",
+      "desc": "A Java CLI tool",
+      "homepage": "https://github.com/example/my-java-tool",
+      "url": "https://github.com/example/my-java-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "Apache-2.0",
+      "language": "java",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "dependencies": [
+        { "name": "maven", "type": ":build" },
+        { "name": "openjdk" }
+      ],
+      "install": {
+        "build_system": "maven",
+        "jar_path": "target/my-java-tool.jar",
+        "wrapper_name": "my-java-tool"
+      },
+      "test": {
+        "command": "system bin/\"my-java-tool\", \"--version\"",
+        "expected_output": "my-java-tool"
+      }
+    }
+  ]
+}

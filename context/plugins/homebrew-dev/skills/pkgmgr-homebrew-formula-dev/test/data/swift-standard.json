@@ -1,0 +1,24 @@
+{
+  "formulas": [
+    {
+      "name": "my-swift-tool",
+      "desc": "A Swift CLI tool",
+      "homepage": "https://github.com/example/my-swift-tool",
+      "url": "https://github.com/example/my-swift-tool/archive/refs/tags/v1.0.0.tar.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "license": "MIT",
+      "language": "swift",
+      "livecheck": {
+        "url": ":stable",
+        "strategy": ":github_latest"
+      },
+      "install": {
+        "configuration": "release"
+      },
+      "test": {
+        "command": "system bin/\"my-swift-tool\", \"--version\"",
+        "expected_output": "my-swift-tool"
+      }
+    }
+  ]
+}
