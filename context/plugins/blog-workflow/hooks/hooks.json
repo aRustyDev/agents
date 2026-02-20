@@ -17,7 +17,7 @@
       "description": "Check links in blog posts using lychee"
     },
     "code-block-linter": {
-      "status": "planned",
+      "status": "active",
       "trigger": "PostToolUse",
       "matcher": "Write|Edit",
       "pattern": "**/posts/**/*.md",
