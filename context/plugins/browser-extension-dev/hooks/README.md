@@ -14,6 +14,9 @@ npm install -g web-ext
 
 # ESLint for code linting (or use biome)
 npm install -D eslint eslint-plugin-webextensions
+
+# wasm-pack for WASM build verification
+cargo install wasm-pack
 ```
 
 ### Enable Hooks
@@ -99,13 +102,36 @@ Lints extension entrypoint code for deprecated APIs, security issues, and best p
 npm install -D eslint eslint-plugin-webextensions
 ```
 
-### wasm-build-check (Planned)
+### wasm-build-check (Active)
 
-**Status:** Planned
+**Status:** Active
 **Trigger:** PostToolUse on Write|Edit
-**Pattern:** `**/*.rs`
+**Pattern:** `**/wasm/**/*.rs`
 
-Verifies WASM builds succeed after Rust changes.
+Verifies WASM builds succeed after Rust changes in `wasm/` directories.
+
+**Checks for:**
+
+- Cargo.toml validity
+- wasm-bindgen compatibility
+- Build errors and warnings
+- Missing dependencies
+
+**Example output:**
+
+```text
+   Compiling extension-wasm v0.1.0
+    Finished dev target in 2.34s
+✓ WASM build succeeded
+```
+
+**Graceful degradation:** If `wasm-pack` is not installed, prints a warning and skips the build check.
+
+**Installation:**
+
+```bash
+cargo install wasm-pack
+```
 
 ## Hook Format
 

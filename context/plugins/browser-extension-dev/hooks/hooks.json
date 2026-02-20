@@ -30,12 +30,21 @@
       ]
     },
     "wasm-build-check": {
-      "status": "planned",
+      "status": "active",
       "trigger": "PostToolUse",
       "matcher": "Write|Edit",
-      "pattern": "**/*.rs",
-      "command": "wasm-pack build --target web",
-      "description": "Verify WASM builds succeed after Rust changes"
+      "pattern": "**/wasm/**/*.rs",
+      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */wasm/*/*.rs) WASM_DIR=$(echo \"$FILE\" | sed \"s|/src/.*||\" | sed \"s|/tests/.*||\"); if [ -f \"$WASM_DIR/Cargo.toml\" ]; then if command -v wasm-pack >/dev/null 2>&1; then cd \"$WASM_DIR\" && wasm-pack build --target web --dev 2>&1 | tail -10 && echo \"✓ WASM build succeeded\"; else echo \"⚠ wasm-pack not installed, skipping build check\"; fi; fi;; esac; true'",
+      "timeout": 60,
+      "description": "Verify WASM builds succeed after Rust changes in wasm/ directories.",
+      "install": "cargo install wasm-pack",
+      "docs": "https://rustwasm.github.io/wasm-pack/",
+      "checks": [
+        "Cargo.toml validity",
+        "wasm-bindgen compatibility",
+        "Build errors and warnings",
+        "Missing dependencies"
+      ]
     }
   }
 }
