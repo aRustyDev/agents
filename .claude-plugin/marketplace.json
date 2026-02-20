@@ -28,7 +28,16 @@
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
       },
-      "keywords": ["browser-extension", "wxt", "manifest-v3", "cross-browser", "firefox", "chrome", "safari", "wasm"],
+      "keywords": [
+        "browser-extension",
+        "wxt",
+        "manifest-v3",
+        "cross-browser",
+        "firefox",
+        "chrome",
+        "safari",
+        "wasm"
+      ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/browser-extension-dev",
       "repository": "https://github.com/aRustyDev/ai.git"
@@ -37,12 +46,20 @@
       "name": "blog-workflow",
       "source": "./context/plugins/blog-workflow",
       "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
       },
-      "keywords": ["blog", "technical-writing", "content-creation", "markdown", "seo", "tutorials", "workflow"],
+      "keywords": [
+        "blog",
+        "technical-writing",
+        "content-creation",
+        "markdown",
+        "seo",
+        "tutorials",
+        "workflow"
+      ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
       "repository": "https://github.com/aRustyDev/ai.git"
@@ -56,7 +73,15 @@
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
       },
-      "keywords": ["job-hunting", "resume", "job-search", "career", "job-description", "cover-letter", "ats"],
+      "keywords": [
+        "job-hunting",
+        "resume",
+        "job-search",
+        "career",
+        "job-description",
+        "cover-letter",
+        "ats"
+      ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/job-hunting",
       "repository": "https://github.com/aRustyDev/ai.git"
