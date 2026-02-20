@@ -1,10 +1,25 @@
 {
-  "$schema": "Plugin source mapping — maps local paths to repo source paths",
+  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
   "sources": {
-    "commands/add-formula.md": "context/commands/add-formula.md",
-    "commands/validate-formula.md": "context/commands/validate-formula.md",
-    "commands/batch-formulas.md": "context/commands/batch-formulas.md",
-    "agents/homebrew-expert.md": "context/agents/homebrew-expert.md",
-    "skills/pkgmgr-homebrew-formula-dev": "context/skills/pkgmgr-homebrew-formula-dev"
+    "commands/add-formula.md": {
+      "source": "context/commands/add-formula.md",
+      "hash": "sha256:4501741ed27b4f5a05fd819b7890cf42b74422a3d2613f9324946fdfc3d9f84c"
+    },
+    "commands/validate-formula.md": {
+      "source": "context/commands/validate-formula.md",
+      "hash": "sha256:cb237887abe9ad3c1c14af3549da51f57cb069c38fd05568446bb5d5c01456f2"
+    },
+    "commands/batch-formulas.md": {
+      "source": "context/commands/batch-formulas.md",
+      "hash": "sha256:f283b8e34fe2086a90cafaac89344b200951de8d03cd48c7c31d73b3f4a01aea"
+    },
+    "agents/homebrew-expert.md": {
+      "source": "context/agents/homebrew-expert.md",
+      "hash": "sha256:c26c11632e6bfe3722f9919d0c343d7e2c2fddd234e6c93ccdb87e7997073531"
+    },
+    "skills/pkgmgr-homebrew-formula-dev": {
+      "source": "context/skills/pkgmgr-homebrew-formula-dev",
+      "hash": "sha256:5476d4399297910089b4bc217ebfd337c1272c3b568ea08971c7e1b688a43235"
+    }
   }
 }
