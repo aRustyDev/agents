@@ -23,7 +23,7 @@
       "name": "browser-extension-dev",
       "source": "./context/plugins/browser-extension-dev",
       "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
-      "version": "0.1.0",
+      "version": "0.3.0",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
@@ -46,7 +46,7 @@
       "name": "blog-workflow",
       "source": "./context/plugins/blog-workflow",
       "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
