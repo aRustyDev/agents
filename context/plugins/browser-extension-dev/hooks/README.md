@@ -11,6 +11,9 @@ Install the required tools:
 ```bash
 # web-ext for manifest validation
 npm install -g web-ext
+
+# ESLint for code linting (or use biome)
+npm install -D eslint eslint-plugin-webextensions
 ```
 
 ### Enable Hooks
@@ -62,13 +65,39 @@ Validation warnings:
 
 **Graceful degradation:** If `web-ext` is not installed, the hook prints a warning and continues without blocking.
 
-### extension-linter (Planned)
+### extension-linter (Active)
 
-**Status:** Planned
+**Status:** Active
 **Trigger:** PostToolUse on Write|Edit
-**Pattern:** `**/entrypoints/**/*.ts`
+**Pattern:** `**/entrypoints/**/*.{ts,tsx,js,jsx}`
 
-Lints extension TypeScript code for deprecated APIs and security issues.
+Lints extension entrypoint code for deprecated APIs, security issues, and best practices.
+
+**Checks for:**
+
+- Deprecated API usage (`browserAction` vs `action`)
+- Unsafe `eval()` or `new Function()`
+- Missing error handling on API calls
+- Sync storage access patterns
+- Content script isolation issues
+
+**Example output:**
+
+```text
+/path/to/entrypoints/background.ts
+  12:5  warning  Prefer 'browser.action' over deprecated 'browser.browserAction'
+  45:3  error    Avoid using eval()
+
+✓ extension linted
+```
+
+**Graceful degradation:** Falls back to Biome if ESLint not installed. If neither is available, prints a warning.
+
+**Installation:**
+
+```bash
+npm install -D eslint eslint-plugin-webextensions
+```
 
 ### wasm-build-check (Planned)
 

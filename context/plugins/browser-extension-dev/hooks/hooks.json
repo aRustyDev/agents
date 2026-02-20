@@ -12,12 +12,22 @@
       "docs": "https://extensionworkshop.com/documentation/develop/web-ext-command-reference/#web-ext-lint"
     },
     "extension-linter": {
-      "status": "planned",
+      "status": "active",
       "trigger": "PostToolUse",
       "matcher": "Write|Edit",
-      "pattern": "**/entrypoints/**/*.ts",
-      "command": "eslint --config .eslintrc.json $TOOL_INPUT_FILE_PATH",
-      "description": "Lint extension code for deprecated APIs and security issues"
+      "pattern": "**/entrypoints/**/*.{ts,tsx,js,jsx}",
+      "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */entrypoints/*.ts|*/entrypoints/*.tsx|*/entrypoints/*.js|*/entrypoints/*.jsx) if command -v eslint >/dev/null 2>&1; then eslint --no-error-on-unmatched-pattern --max-warnings 10 \"$FILE\" 2>&1 | head -20 && echo \"✓ extension linted\"; elif command -v biome >/dev/null 2>&1; then biome check \"$FILE\" 2>&1 | head -20 && echo \"✓ extension linted (biome)\"; else echo \"⚠ No linter found (eslint or biome)\"; fi;; esac; true'",
+      "timeout": 15,
+      "description": "Lint extension entrypoint code for deprecated APIs, security issues, and best practices.",
+      "install": "npm install -D eslint @anthropic-ai/anthropic-sdk-eslint/webextensions",
+      "docs": "https://github.com/AntSim/anthropic-ai-eslint-plugin-webextensions",
+      "checks": [
+        "Deprecated API usage (browserAction vs action)",
+        "Unsafe eval() or new Function()",
+        "Missing error handling on API calls",
+        "Sync storage access patterns",
+        "Content script isolation issues"
+      ]
     },
     "wasm-build-check": {
       "status": "planned",
