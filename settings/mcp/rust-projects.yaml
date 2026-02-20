@@ -1,0 +1,46 @@
+---
+servers:
+  - https://github.com/seemethere/cargo-mcp
+  - https://mcpservers.org/servers/SignalWhisperer/cargo-mcp
+  - https://mcpservers.org/servers/elchika-inc/cargo-package-readme-mcp-server
+  - https://mcpservers.org/servers/pato/crates-mcp
+
+goals:
+  - README Extraction: Retrieve complete README content and documentation from Rust crates
+  - Package Information: Access detailed package metadata, dependencies, and version information
+  - Crate Search: Search for Rust crates with filtering and sorting capabilities
+  - GitHub Integration: Automatic fallback to GitHub repositories for additional documentation
+  - Smart Caching: Built-in caching system for improved performance and reduced API calls
+  - Error Handling: Comprehensive error handling with detailed error messages
+  - Build Tools:
+      - check: Analyze code without producing executables
+      - build: Compile the current package
+      - clippy: Run Clippy lints on the current package
+      - fmt: Format Rust code using rustfmt
+  - Execution Tools:
+      - run: Run a binary or example of the local package
+      - test: Run unit and integration tests
+      - bench: Run benchmarks
+  - Dependency Management:
+      - add: Add dependencies to a Cargo.toml manifest file
+      - remove: Remove dependencies from a Cargo.toml manifest file
+      - update: Update dependencies as recorded in the local lock file
+      - tree: Display a tree visualization of a dependency graph
+  - Project Management:
+      - new: Create a new cargo package at
+      - init: Create a new cargo package in an existing directory
+      - clean: Remove artifacts that cargo has generated in the past
+      - doc: Build this package's and its dependencies' documentation
+  - Registry Operations:
+      - search: Search packages/crates in crates.io
+          - search by name
+      - info: Display information about a package/crate in the registry
+      - install: Install a Rust binary
+      - uninstall: Remove a Rust binary
+      - docs: Get docs from docs.rs
+  - Utility Tools:
+      - metadata: Output the resolved dependencies of a package in machine-readable format
+      - version: Show version information for cargo and rust
+
+# https://mcpservers.org/servers/smogili1/loop_mcp
+# https://mcpservers.org/servers/wink-/pz-mcp-server

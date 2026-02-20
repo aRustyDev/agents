@@ -1,0 +1,7 @@
+brew "repomix"
+brew "joshrotenberg/brew/adrs"
+brew "ntfy"
+brew "meilisearch"
+brew "beads"
+brew "dolt"
+brew "ekphos"

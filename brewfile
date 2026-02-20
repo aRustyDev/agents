@@ -4,6 +4,8 @@ tap "arustydev/tap"
 brew "just"
 brew "yq"
 brew "jq"
+brew "dolt"
+brew "beads"
 
 # Python package manager (fast, Rust-based)
 brew "uv"

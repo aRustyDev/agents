@@ -1031,6 +1031,36 @@ plugin-update name:
     echo ""
     just build-plugin "{{ name }}"
 
+# Check all plugins (for CI)
+[group('plugins')]
+plugin-check-all:
+    @"{{ which("uv") }}" run python .scripts/build-plugin.py check-all
+
+# Build all plugins
+[group('plugins')]
+plugin-build-all *args='':
+    @"{{ which("uv") }}" run python .scripts/build-plugin.py build-all {{ args }}
+
+# Update all plugin hashes
+[group('plugins')]
+plugin-update-all:
+    @"{{ which("uv") }}" run python .scripts/build-plugin.py update-all
+
+# Check migration status of all plugins
+[group('plugins')]
+migrate-check:
+    @"{{ which("uv") }}" run python .scripts/migrate-plugin-sources.py --check
+
+# Migrate a single plugin to extended format
+[group('plugins')]
+migrate-plugin name:
+    @"{{ which("uv") }}" run python .scripts/migrate-plugin-sources.py "context/plugins/{{ name }}"
+
+# Migrate all plugins to extended format
+[group('plugins')]
+migrate-all-plugins *args='':
+    @"{{ which("uv") }}" run python .scripts/migrate-plugin-sources.py --all {{ args }}
+
 # Knowledge graph operations
 
 # Initialize knowledge graph database

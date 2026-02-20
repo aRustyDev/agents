@@ -6,7 +6,13 @@ freecad:
   - url: https://mcpservers.org/servers/github-com-neka-nat-freecad-mcp
     desc: ""
     name: github-com-neka-nat-freecad-mcp
+  - url: https://mcpservers.org/servers/rishigundakaram/cadquery-mcp-server
+    desc: ""
+    name: rishigundakaram/cadquery-mcp-server
 shape-modeling:
   - url: https://mcpservers.org/servers/rajgandhi1/shapebridge.git
     desc: ""
     name: rajgandhi1/shapebridge.git
+  - url: https://mcpservers.org/servers/lxy2109/instant-meshes-mcp
+    desc: ""
+    name: lxy2109/instant-meshes-mcp

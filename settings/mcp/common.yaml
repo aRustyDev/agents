@@ -373,6 +373,10 @@ search:
   - url: https://mcpservers.org/servers/damionrashford/rivalsearchmcp
     desc: ""
     name: damionrashford/rivalsearchmcp
+  - url: https://mcpservers.org/servers/jddunn/tenets
+    desc: ""
+    name: jddunn/tenets
+
 research:
   - url: https://mcpservers.org/servers/Ragha02/Deep-research-mcp
     desc: ""
@@ -596,9 +600,6 @@ docker:
   - url: https://mcpservers.org/servers/crunchloop/mcp-devcontainers
     desc: ""
     name: crunchloop/mcp-devcontainers
-  - url: https://mcpservers.org/servers/phildougherty/mcp-compose
-    desc: ""
-    name: phildougherty/mcp-compose
 git:
   - url: https://mcpservers.org/servers/Mubashwer/git-mob-mcp-server
     desc: ""
@@ -977,6 +978,12 @@ utilities:
   - url: https://mcpservers.org/servers/very99/text-master-mcp
     desc: ""
     name: very99/text-master-mcp
+  - url: https://mcpservers.org/servers/phildougherty/mcp-compose
+    desc: ""
+    name: phildougherty/mcp-compose
+  - url: https://mcpservers.org/servers/docs-devcycle-com-cli-mcp-mcp-getting-started
+    desc: ""
+    name: docs-devcycle-com-cli-mcp-mcp-getting-started
 
 data:
   - url: https://mcpservers.org/servers/databutton/databutton-mcp
