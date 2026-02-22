@@ -45,7 +45,9 @@
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/",
+    "./styles/browser-compatibility-matrix.md",
+    "./styles/extension-architecture-diagram.md",
+    "./styles/wasm-decision-report.md",
     "../../output-styles/feedback-submission.md"
   ],
   "lspServers": "./.lsp.json"

@@ -43,7 +43,6 @@
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/",
     "../../output-styles/feedback-submission.md"
   ],
   "lspServers": "./.lsp.json"

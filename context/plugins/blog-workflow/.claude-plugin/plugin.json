@@ -43,7 +43,11 @@
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/"
+    "./styles/deep-dive-format.md",
+    "./styles/dev-journal-format.md",
+    "./styles/feedback-submission.md",
+    "./styles/research-summary-format.md",
+    "./styles/tutorial-format.md"
   ],
   "lspServers": "./.lsp.json"
 }
