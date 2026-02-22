@@ -118,3 +118,10 @@ subviews
 xcrun
 BLAS
 LAPACK
+cupertino
+mihaelamj
+Sundell
+mcpxcodebuild
+simctl
+xcodeproj
+appstore

@@ -1,0 +1,15 @@
+# swiftui-dev plugin dependencies
+
+# MCP Server Dependencies
+tap "mihaelamj/tap"
+brew "cupertino"          # Apple documentation MCP server
+brew "uv"                 # Python package runner for xcodebuild MCP
+cask "docker"             # Required for xcodeproj-mcp-server
+
+# Development Tools
+brew "swiftlint"          # Swift linting (used by ios-mcp-code-quality-server)
+brew "swiftformat"        # Swift formatting
+brew "xcbeautify"         # Xcode build output formatter
+
+# Node.js (for npx-based MCP servers)
+brew "node"
