@@ -24,21 +24,30 @@
   ],
   "commands": [
     "./commands/extract-tokens.md",
-    "./commands/generate-component.md"
+    "./commands/generate-component.md",
+    "./commands/sync-design-system.md",
+    "./commands/export-assets.md"
   ],
   "agents": [
-    "./agents/design-translator.md"
+    "./agents/design-translator.md",
+    "./agents/design-system-architect.md"
   ],
   "skills": [
     "./skills/design-tokens-extraction/SKILL.md",
     "./skills/design-to-swiftui/SKILL.md",
-    "./skills/design-system-management/SKILL.md"
+    "./skills/design-system-management/SKILL.md",
+    "./skills/design-to-react/SKILL.md",
+    "./skills/design-to-flutter/SKILL.md",
+    "./skills/design-to-tailwind/SKILL.md"
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
     "./styles/feedback-submission.md",
     "./styles/design-token-json.md",
-    "./styles/design-token-swift.md"
+    "./styles/design-token-swift.md",
+    "./styles/design-token-css.md",
+    "./styles/design-token-tailwind.md",
+    "./styles/component-spec.md"
   ],
   "lspServers": "./.lsp.json"
 }

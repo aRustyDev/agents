@@ -131,3 +131,4 @@ iconify
 Iconify
 svgo
 DTCG
+Riverpod
