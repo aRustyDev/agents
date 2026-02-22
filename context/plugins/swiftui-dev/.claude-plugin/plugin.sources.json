@@ -1,0 +1,17 @@
+{
+  "$schema": "./plugin.sources.schema.json",
+  "sources": {
+    "skills/lang-swift-dev": {
+      "source": "context/skills/lang-swift-dev/SKILL.md",
+      "hash": "sha256:964e09bc408c52c70ffbc99884131a0c6065a2455aefef0294a30b74bc104d1b"
+    },
+    "skills/lang-swift-library-dev": {
+      "source": "context/skills/lang-swift-library-dev/SKILL.md",
+      "hash": "sha256:9e430c9a50782c6059657560f6e58c9e1811022c155659854d6106dee5f0e441"
+    },
+    "agents/swift-expert": {
+      "source": "context/agents/swift-expert.md",
+      "hash": "sha256:25894f75a6aab611d676c796bde1266267c6f1a068d3f5bbd90b3017c3aaa530"
+    }
+  }
+}

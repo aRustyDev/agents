@@ -1,0 +1,48 @@
+{
+  "name": "swiftui-dev",
+  "version": "0.1.0",
+  "description": "Comprehensive SwiftUI development support for UI testing, integration testing, data-driven apps, and interactive development practices",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev",
+    "url": "https://im.arusty.dev"
+  },
+  "homepage": "https://docs.arusty.dev/ai/plugins/swiftui-dev",
+  "repository": "https://github.com/aRustyDev/ai.git",
+  "license": "MIT",
+  "keywords": [
+    "swiftui",
+    "ios",
+    "macos",
+    "swift",
+    "xcode",
+    "xctest",
+    "duckdb",
+    "swift-charts",
+    "data-analytics"
+  ],
+
+  "commands": [
+    "./commands/create-swiftui-view.md",
+    "./commands/create-viewmodel.md",
+    "./commands/create-xctest.md",
+    "./commands/create-swift-package.md"
+  ],
+  "agents": [
+    "./agents/swiftui-architect.md"
+  ],
+  "skills": [
+    "./skills/swiftui-architecture/SKILL.md",
+    "./skills/swiftui-data-flow/SKILL.md",
+    "./skills/swiftui-testing/SKILL.md",
+    "./skills/duckdb-swift/SKILL.md",
+    "./skills/swift-charts/SKILL.md"
+  ],
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json",
+  "outputStyles": [
+    "./styles/",
+    "../../output-styles/feedback-submission.md"
+  ],
+  "lspServers": "./.lsp.json"
+}
