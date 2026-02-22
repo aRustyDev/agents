@@ -1,5 +1,9 @@
 # swiftui-dev plugin dependencies
 
+# Design Tool Integration (for handoff workflows)
+# sketch-context-mcp: npx sketch-context-mcp (requires Sketch app)
+# penpot-mcp: requires manual setup, see https://github.com/penpot/penpot-mcp
+
 # MCP Server Dependencies
 tap "mihaelamj/tap"
 brew "cupertino"          # Apple documentation MCP server

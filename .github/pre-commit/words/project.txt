@@ -125,3 +125,5 @@ mcpxcodebuild
 simctl
 xcodeproj
 appstore
+penpot
+Penpot
