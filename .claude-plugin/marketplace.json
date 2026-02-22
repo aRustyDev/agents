@@ -85,6 +85,30 @@
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/job-hunting",
       "repository": "https://github.com/aRustyDev/ai.git"
+    },
+    {
+      "name": "swiftui-dev",
+      "source": "./context/plugins/swiftui-dev",
+      "description": "Comprehensive SwiftUI development support for UI testing, integration testing, data-driven apps, and interactive development practices.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": [
+        "swiftui",
+        "ios",
+        "macos",
+        "swift",
+        "xcode",
+        "xctest",
+        "duckdb",
+        "swift-charts",
+        "data-analytics"
+      ],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/swiftui-dev",
+      "repository": "https://github.com/aRustyDev/ai.git"
     }
   ]
 }
