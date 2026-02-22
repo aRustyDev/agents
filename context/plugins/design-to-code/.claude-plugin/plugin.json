@@ -1,6 +1,6 @@
 {
   "name": "design-to-code",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Bridge design tools and code generation, enabling seamless translation of design files into production-ready UI code across multiple frameworks.",
   "author": {
     "name": "Adam Smith",

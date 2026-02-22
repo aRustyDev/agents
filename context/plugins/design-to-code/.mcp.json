@@ -4,11 +4,18 @@
       "command": "npx",
       "args": ["-y", "mcp-remote", "http://localhost:31126/mcp", "--allow-http"]
     },
+    "penpot-plugin": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:4401/mcp", "--allow-http"],
+      "_comment": "Official Penpot MCP - requires: 1) clone penpot/penpot repo, 2) cd mcp && npm run bootstrap, 3) browser plugin connected"
+    },
     "penpot": {
-      "command": "node",
-      "args": ["${HOME}/.local/share/penpot-mcp/dist/index.js"],
+      "command": "uvx",
+      "args": ["penpot-mcp"],
       "env": {
-        "PENPOT_MCP_PORT": "4401"
+        "PENPOT_API_URL": "http://localhost:9001/api",
+        "PENPOT_USERNAME": "demo@example.com",
+        "PENPOT_PASSWORD": "123123123"
       }
     },
     "iconify": {
