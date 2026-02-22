@@ -41,7 +41,8 @@
   "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/",
+    "./styles/swift-code.md",
+    "./styles/swiftui-view.md",
     "../../output-styles/feedback-submission.md"
   ],
   "lspServers": "./.lsp.json"
