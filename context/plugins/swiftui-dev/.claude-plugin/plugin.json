@@ -40,7 +40,6 @@
     "./skills/duckdb-swift/SKILL.md",
     "./skills/swift-charts/SKILL.md"
   ],
-  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "outputStyles": [
     "./styles/swift-code.md",

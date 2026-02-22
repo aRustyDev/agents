@@ -2,34 +2,23 @@
   "mcpServers": {
     "cupertino": {
       "command": "cupertino",
-      "args": ["serve"],
-      "description": "Offline Apple documentation (300K+ pages), HIG, Swift Evolution proposals",
-      "tier": "core",
-      "setup": "brew tap mihaelamj/tap && brew install cupertino && cupertino setup"
+      "args": ["serve"]
     },
     "swift-patterns": {
       "command": "npx",
-      "args": ["-y", "swift-patterns-mcp@latest"],
-      "description": "SwiftUI best practices from Sundell, SwiftLee, Point-Free, Nil Coalescing",
-      "tier": "core"
+      "args": ["-y", "swift-patterns-mcp@latest"]
     },
     "xcodebuild": {
       "command": "uvx",
-      "args": ["mcpxcodebuild"],
-      "description": "Build and test iOS Xcode projects via LLM",
-      "tier": "core"
+      "args": ["mcpxcodebuild"]
     },
     "simctl": {
       "command": "npx",
-      "args": ["-y", "simctl-mcp"],
-      "description": "iOS Simulator control: boot, apps, permissions, screenshots, push notifications",
-      "tier": "core"
+      "args": ["-y", "simctl-mcp"]
     },
     "apple-hig": {
       "command": "npx",
-      "args": ["-y", "apple-dev-mcp"],
-      "description": "Apple Human Interface Guidelines + API documentation search",
-      "tier": "enhanced"
+      "args": ["-y", "apple-dev-mcp"]
     },
     "xcodeproj": {
       "command": "docker",
@@ -38,22 +27,16 @@
         "-v", "${workspaceFolder}:/workspace",
         "ghcr.io/giginet/xcodeproj-mcp-server:latest",
         "/workspace"
-      ],
-      "description": "Programmatic .xcodeproj manipulation: targets, files, build settings, packages",
-      "tier": "enhanced",
-      "requires": "docker"
+      ]
     },
     "app-store-connect": {
       "command": "npx",
       "args": ["-y", "appstore-connect-mcp-server"],
-      "description": "App Store Connect: metadata, beta testing, analytics, releases",
-      "tier": "optional",
       "env": {
         "APP_STORE_CONNECT_KEY_ID": "${APP_STORE_CONNECT_KEY_ID}",
         "APP_STORE_CONNECT_ISSUER_ID": "${APP_STORE_CONNECT_ISSUER_ID}",
         "APP_STORE_CONNECT_P8_PATH": "${APP_STORE_CONNECT_P8_PATH}"
-      },
-      "setup": "Requires App Store Connect API key from https://appstoreconnect.apple.com/access/api"
+      }
     }
   }
 }
