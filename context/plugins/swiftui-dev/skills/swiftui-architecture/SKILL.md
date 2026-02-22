@@ -171,31 +171,102 @@ struct ItemListView: View {
 
 ## File Organization
 
+### Feature-Based Structure (Recommended)
+
 ```text
 MyApp/
 ├── App/
-│   ├── MyApp.swift
-│   └── AppDelegate.swift
-├── Features/
-│   ├── Items/
+│   ├── MyApp.swift              # @main entry point
+│   ├── AppDelegate.swift        # UIKit lifecycle (if needed)
+│   └── AppState.swift           # Global @Observable state
+│
+├── Features/                    # Feature modules
+│   ├── Home/
 │   │   ├── Views/
-│   │   │   ├── ItemListView.swift
-│   │   │   └── ItemDetailView.swift
+│   │   │   ├── HomeView.swift
+│   │   │   └── HomeCard.swift
 │   │   ├── ViewModels/
-│   │   │   └── ItemViewModel.swift
+│   │   │   └── HomeViewModel.swift
 │   │   └── Models/
-│   │       └── Item.swift
+│   │       └── HomeItem.swift
+│   │
+│   ├── Profile/
+│   │   ├── Views/
+│   │   ├── ViewModels/
+│   │   └── Models/
+│   │
 │   └── Settings/
 │       └── ...
-├── Core/
+│
+├── Core/                        # Shared infrastructure
 │   ├── Repositories/
 │   │   └── ItemRepository.swift
 │   ├── Services/
-│   │   └── NetworkService.swift
+│   │   ├── Network/
+│   │   │   ├── APIClient.swift
+│   │   │   ├── Endpoints.swift
+│   │   │   └── NetworkError.swift
+│   │   └── Persistence/
+│   │       ├── DatabaseManager.swift
+│   │       └── KeychainService.swift
 │   └── Extensions/
-│       └── View+Extensions.swift
-└── Resources/
-    └── Assets.xcassets
+│       ├── View+Extensions.swift
+│       └── Date+Extensions.swift
+│
+├── Shared/                      # Reusable UI components
+│   ├── Components/
+│   │   ├── LoadingView.swift
+│   │   ├── ErrorView.swift
+│   │   └── AsyncButton.swift
+│   ├── Modifiers/
+│   │   ├── CardStyle.swift
+│   │   └── ShimmerEffect.swift
+│   └── Styles/
+│       └── ButtonStyles.swift
+│
+├── Utilities/                   # Helpers and constants
+│   ├── Constants.swift
+│   ├── Logger.swift
+│   └── Formatters.swift
+│
+├── Resources/
+│   ├── Assets.xcassets          # Images and colors
+│   ├── Localizable.xcstrings    # Localized strings (Xcode 15+)
+│   └── Fonts/                   # Custom fonts
+│       └── CustomFont.ttf
+│
+└── Tests/
+    ├── UnitTests/
+    │   ├── ViewModels/
+    │   │   └── HomeViewModelTests.swift
+    │   └── Services/
+    │       └── APIClientTests.swift
+    └── UITests/
+        ├── HomeUITests.swift
+        └── Helpers/
+            └── XCUIApplication+Extensions.swift
+```
+
+### Swift Package Structure
+
+```text
+MyAppPackage/
+├── Package.swift
+├── Sources/
+│   ├── MyApp/                   # Main app target
+│   │   └── MyApp.swift
+│   ├── Features/                # Feature library
+│   │   ├── Home/
+│   │   └── Profile/
+│   ├── Core/                    # Core library
+│   │   ├── Networking/
+│   │   └── Persistence/
+│   └── SharedUI/                # UI components library
+│       ├── Components/
+│       └── Modifiers/
+└── Tests/
+    ├── CoreTests/
+    └── FeaturesTests/
 ```
 
 ## Best Practices
@@ -209,5 +280,7 @@ MyApp/
 ## Related Skills
 
 - swiftui-data-flow: State management details
+- swiftui-components: UI elements and layouts
+- swiftui-gestures: User interactions
 - swiftui-testing: Testing these patterns
 - swift-concurrency: Async/await patterns
