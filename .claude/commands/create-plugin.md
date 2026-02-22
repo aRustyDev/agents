@@ -92,7 +92,36 @@ Create the plugin directory structure:
 
 Output: `context/plugins/<plugin-name>/`
 
-### Phase 5: Generate Issues
+### Phase 5: Register in Marketplace
+
+Add the plugin to `.claude-plugin/marketplace.json`:
+
+1. Read the generated `context/plugins/<plugin-name>/.claude-plugin/plugin.json`
+2. Read the existing `.claude-plugin/marketplace.json`
+3. Add a new entry to the `plugins` array:
+
+```json
+{
+  "name": "<plugin-name>",
+  "source": "./context/plugins/<plugin-name>",
+  "description": "<description from plugin.json>",
+  "version": "<version from plugin.json>",
+  "author": {
+    "name": "<author.name from plugin.json>",
+    "email": "<author.email from plugin.json>"
+  },
+  "keywords": ["<keywords from plugin.json>"],
+  "license": "MIT",
+  "homepage": "https://docs.arusty.dev/ai/plugins/<plugin-name>",
+  "repository": "https://github.com/aRustyDev/ai.git"
+}
+```
+
+4. Write the updated marketplace.json
+
+**Note:** This step ensures the plugin is discoverable in the marketplace registry.
+
+### Phase 6: Generate Issues
 
 Create beads issues for extend/create work:
 
@@ -102,7 +131,7 @@ Create beads issues for extend/create work:
 
 Pass `--dry-run` if `--dry-run-issues` was set.
 
-### Phase 6: Final Report
+### Phase 7: Final Report
 
 ```
 ## Plugin Created: <name>
@@ -115,6 +144,7 @@ Pass `--dry-run` if `--dry-run-issues` was set.
 | Research | .plans/plugins/<name>/research.md |
 | Roadmap | .plans/plugins/<name>/roadmap.md |
 | Plugin | context/plugins/<name>/ |
+| Marketplace | .claude-plugin/marketplace.json (entry added) |
 | Issues | N created (or "dry run") |
 
 ### Component Summary
@@ -158,4 +188,5 @@ The plugin includes built-in feedback mechanisms:
 | 2 | `/research-plugin-components` | Yes (`--skip-research`) |
 | 3 | `/plan-plugin-roadmap` | No |
 | 4 | `/scaffold-plugin` | User can stop after roadmap |
-| 5 | `/generate-plugin-issues` | User can stop after scaffold |
+| 5 | Marketplace registration | No (automatic after scaffold) |
+| 6 | `/generate-plugin-issues` | User can stop after scaffold |
