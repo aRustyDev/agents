@@ -4,7 +4,7 @@ Place skill directories here. Each skill should have a `SKILL.md` file.
 
 ## Structure
 
-```
+```text
 skills/
 └── my-skill/
     ├── SKILL.md      # Main skill definition

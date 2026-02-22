@@ -22,12 +22,23 @@
     "design-system",
     "code-generation"
   ],
-  "commands": [],
-  "agents": [],
-  "skills": [],
+  "commands": [
+    "./commands/extract-tokens.md",
+    "./commands/generate-component.md"
+  ],
+  "agents": [
+    "./agents/design-translator.md"
+  ],
+  "skills": [
+    "./skills/design-tokens-extraction/SKILL.md",
+    "./skills/design-to-swiftui/SKILL.md",
+    "./skills/design-system-management/SKILL.md"
+  ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
-    "./styles/feedback-submission.md"
+    "./styles/feedback-submission.md",
+    "./styles/design-token-json.md",
+    "./styles/design-token-swift.md"
   ],
   "lspServers": "./.lsp.json"
 }
