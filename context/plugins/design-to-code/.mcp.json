@@ -11,13 +11,6 @@
         "PENPOT_MCP_PORT": "4401"
       }
     },
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/figma-mcp-server"],
-      "env": {
-        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
-      }
-    },
     "iconify": {
       "command": "npx",
       "args": ["-y", "iconify-mcp-server@latest"]
