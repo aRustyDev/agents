@@ -44,7 +44,7 @@
   "outputStyles": [
     "./styles/swift-code.md",
     "./styles/swiftui-view.md",
-    "../../output-styles/feedback-submission.md"
+    "./styles/feedback-submission.md"
   ],
   "lspServers": "./.lsp.json"
 }
