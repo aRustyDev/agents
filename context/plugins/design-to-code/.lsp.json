@@ -1,0 +1,9 @@
+{
+  "lspServers": {
+    "design-tokens": {
+      "command": "npx",
+      "args": ["-y", "design-tokens-language-server", "--stdio"],
+      "filetypes": ["json", "jsonc"]
+    }
+  }
+}

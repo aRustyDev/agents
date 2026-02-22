@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "sketch-context": {
+      "command": "npx",
+      "args": ["-y", "sketch-context-mcp"]
+    },
+    "penpot": {
+      "command": "node",
+      "args": ["${HOME}/.local/share/penpot-mcp/dist/index.js"],
+      "env": {
+        "PENPOT_MCP_PORT": "4401"
+      }
+    },
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/figma-mcp-server"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      }
+    },
+    "iconify": {
+      "command": "npx",
+      "args": ["-y", "iconify-mcp-server@latest"]
+    }
+  }
+}

@@ -109,6 +109,31 @@
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/swiftui-dev",
       "repository": "https://github.com/aRustyDev/ai.git"
+    },
+    {
+      "name": "design-to-code",
+      "source": "./context/plugins/design-to-code",
+      "description": "Bridge design tools and code generation, enabling seamless translation of design files into production-ready UI code across multiple frameworks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Adam Smith",
+        "email": "developer@gh.arusty.dev"
+      },
+      "keywords": [
+        "design-tokens",
+        "figma",
+        "sketch",
+        "penpot",
+        "swiftui",
+        "react",
+        "flutter",
+        "tailwind",
+        "design-system",
+        "code-generation"
+      ],
+      "license": "MIT",
+      "homepage": "https://docs.arusty.dev/ai/plugins/design-to-code",
+      "repository": "https://github.com/aRustyDev/ai.git"
     }
   ]
 }

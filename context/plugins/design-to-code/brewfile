@@ -1,0 +1,14 @@
+# design-to-code plugin dependencies
+
+# Node.js (for npx-based MCP servers)
+brew "node"
+
+# MCP Server Dependencies
+# sketch-context-mcp: npx sketch-context-mcp (requires Sketch app)
+# penpot-mcp: requires manual setup, see https://github.com/penpot/penpot-mcp
+# figma-mcp: requires Figma access token
+# iconify-mcp: npx iconify-mcp-server@latest
+
+# Optional: Image optimization tools
+brew "imagemagick"    # Image processing for asset optimization
+brew "svgo"           # SVG optimization

@@ -127,3 +127,6 @@ xcodeproj
 appstore
 penpot
 Penpot
+iconify
+Iconify
+svgo

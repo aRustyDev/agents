@@ -1,0 +1,33 @@
+{
+  "name": "design-to-code",
+  "version": "0.1.0",
+  "description": "Bridge design tools and code generation, enabling seamless translation of design files into production-ready UI code across multiple frameworks.",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev",
+    "url": "https://im.arusty.dev"
+  },
+  "homepage": "https://docs.arusty.dev/ai/plugins/design-to-code",
+  "repository": "https://github.com/aRustyDev/ai.git",
+  "license": "MIT",
+  "keywords": [
+    "design-tokens",
+    "figma",
+    "sketch",
+    "penpot",
+    "swiftui",
+    "react",
+    "flutter",
+    "tailwind",
+    "design-system",
+    "code-generation"
+  ],
+  "commands": [],
+  "agents": [],
+  "skills": [],
+  "mcpServers": "./.mcp.json",
+  "outputStyles": [
+    "./styles/feedback-submission.md"
+  ],
+  "lspServers": "./.lsp.json"
+}
