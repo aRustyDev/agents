@@ -90,7 +90,7 @@
       "name": "swiftui-dev",
       "source": "./context/plugins/swiftui-dev",
       "description": "Comprehensive SwiftUI development support for UI testing, integration testing, data-driven apps, and interactive development practices.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
