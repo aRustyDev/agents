@@ -26,11 +26,13 @@
     "./commands/extract-tokens.md",
     "./commands/generate-component.md",
     "./commands/sync-design-system.md",
-    "./commands/export-assets.md"
+    "./commands/export-assets.md",
+    "./commands/compare-design.md"
   ],
   "agents": [
     "./agents/design-translator.md",
-    "./agents/design-system-architect.md"
+    "./agents/design-system-architect.md",
+    "./agents/asset-pipeline.md"
   ],
   "skills": [
     "./skills/design-tokens-extraction/SKILL.md",
@@ -38,7 +40,9 @@
     "./skills/design-system-management/SKILL.md",
     "./skills/design-to-react/SKILL.md",
     "./skills/design-to-flutter/SKILL.md",
-    "./skills/design-to-tailwind/SKILL.md"
+    "./skills/design-to-tailwind/SKILL.md",
+    "./skills/asset-optimization/SKILL.md",
+    "./skills/accessibility-audit/SKILL.md"
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [
