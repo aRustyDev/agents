@@ -1,14 +1,16 @@
 {
-  "PostToolUse": [
-    {
-      "matcher": "Write|Edit|MultiEdit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *design-tokens*.json|*tokens.json) python3 -c \"import json,sys; data=json.load(open(sys.argv[1])); tokens=[k for k in data if not k.startswith(chr(36))] if isinstance(data,dict) else []; print(f\\\"✓ Valid design tokens: {len(tokens)} root keys\\\") if tokens else print(\\\"⚠ No tokens found\\\")\" \"$FILE\" 2>/dev/null || echo \"✓ Token file saved\";; esac; true'",
-          "timeout": 5
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *design-tokens*.json|*tokens.json) python3 -c \"import json,sys; data=json.load(open(sys.argv[1])); tokens=[k for k in data if not k.startswith(chr(36))] if isinstance(data,dict) else []; print(f\\\"✓ Valid design tokens: {len(tokens)} root keys\\\") if tokens else print(\\\"⚠ No tokens found\\\")\" \"$FILE\" 2>/dev/null || echo \"✓ Token file saved\";; esac; true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }
