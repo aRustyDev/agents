@@ -1,9 +1,5 @@
 {
   "mcpServers": {
-    "sketch-context": {
-      "command": "npx",
-      "args": ["-y", "sketch-context-mcp"]
-    },
     "sketch": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "http://localhost:31126/mcp", "--allow-http"]
