@@ -114,7 +114,7 @@
       "name": "design-to-code",
       "source": "./context/plugins/design-to-code",
       "description": "Bridge design tools and code generation, enabling seamless translation of design files into production-ready UI code across multiple frameworks.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
