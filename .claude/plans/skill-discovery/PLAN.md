@@ -6,6 +6,40 @@
 
 Survey and inventory **all Claude Code component registries** across 8 categories to build a unified discovery index.
 
+## Quick Start
+
+1. **Verify tools are installed:**
+
+   ```bash
+   gh --version          # GitHub CLI for repo/code search
+   just --version        # Task runner
+   ```
+
+2. **Initialize project:**
+
+   ```bash
+   just init             # Install deps, init knowledge graph
+   ```
+
+3. **Begin Phase 0:**
+   - Read [phase/0-baseline-and-matrix.md](phase/0-baseline-and-matrix.md)
+   - Create search term matrix
+   - Document baseline inventory
+
+## Prerequisites
+
+| Tool | Purpose | Install |
+|------|---------|---------|
+| `gh` | GitHub API access | `brew install gh` |
+| `just` | Task runner | `brew install just` |
+| `uv` | Python package manager | `brew install uv` |
+| `sqlite3` | Database CLI | Built-in on macOS |
+
+MCP servers (optional, for enhanced crawling):
+
+- `crawl4ai` — JS-rendered pages
+- `firecrawl` — Large-scale crawling
+
 ## Goals
 
 1. **Inventory all registries** — Independent sites + GitHub repos for each component type
@@ -31,7 +65,7 @@ Survey and inventory **all Claude Code component registries** across 8 categorie
 
 ## Directory Structure
 
-```
+```text
 skill-discovery/
 ├── PLAN.md                          # This file (source of truth)
 ├── analysis/
@@ -186,6 +220,39 @@ Each phase creates checkpoints for recovery:
 | 5 | `component-index.db` | Rebuild from YAML results |
 | 6 | `analysis/results/validation.yaml` | Rerun validation queries |
 
+## Phase Dependency Diagram
+
+```text
+                            ┌─────────────────────────────────────────┐
+                            │           PARALLEL EXECUTION            │
+                            └─────────────────────────────────────────┘
+
+Phase 0                Phase 1                 Phase 2                      Phase 3         Phase 5         Phase 6
+Baseline               Tools                   Component Discovery          Plugins         Aggregation     Validation
+────────               ─────                   ───────────────────          ───────         ───────────     ──────────
+
+┌────────┐           ┌────────┐           ┌──────────────────────┐       ┌────────┐       ┌────────┐       ┌────────┐
+│   P0   │──────────▶│   P1   │──────────▶│ P2.1 Skills          │──────▶│   P3   │──────▶│   P5   │──────▶│   P6   │
+│ Matrix │           │ Tools  │           │ P2.2 Agents          │       │Plugins │       │ Index  │       │Validate│
+│Baseline│           │Compare │           │ P2.3 Commands        │       │        │       │        │       │        │
+└────────┘           └────────┘           │ P2.4 Rules      ─────┼───┐   └────────┘       └────────┘       └────────┘
+                                          │ P2.5 Prompts         │   │       ▲               ▲
+  0.5 day              1 day              │ P2.6 Hooks           │   │       │               │
+                                          │ P2.7 MCP             │   │       │               │
+                                          └──────────────────────┘   │       │               │
+                                                                     │       │               │
+                                            2 days (parallel)        │       │               │
+                                                                     │   ┌───┴────┐         │
+                                                                     └──▶│   P4   │─────────┘
+                                                                         │API Docs│
+                                                                         └────────┘
+                                                                           1 day
+                                                                        (parallel)
+```
+
+**Critical Path:** P0 → P1 → P2 → P3 → P5 → P6 (6 days)
+**With Parallelization:** P4 runs alongside P3 (saves 1 day) → **7 days total**
+
 ## Execution Timeline
 
 | Phase | Duration | Dependencies | Parallelizable |
@@ -202,14 +269,19 @@ Each phase creates checkpoints for recovery:
 
 ## Success Criteria
 
-- [ ] Search term matrix covers all 8 categories
-- [ ] Tool comparison identifies best tools per source
-- [ ] All 8 component types have registry/repo listings
-- [ ] API documentation for 80%+ of independent sites
-- [ ] robots.txt and rate limits documented
-- [ ] Unified index searchable in <100ms
-- [ ] 80% recall on baseline components
-- [ ] Plugin bundling relationships captured
+| Phase | Criterion | Target |
+|-------|-----------|--------|
+| P0 | Search term matrix covers all 8 categories | 8/8 |
+| P1 | Tool comparison identifies best tools per source | 3+ tools evaluated |
+| P2 | All base component types have registry/repo listings | 7/7 types |
+| P3 | Plugin registries discovered and analyzed | 5+ registries |
+| P4 | API documentation for independent sites | 80%+ coverage |
+| P4 | robots.txt and rate limits documented | 100% of sites |
+| P5 | Unified index searchable | <100ms queries |
+| P6 | Recall on baseline components | ≥80% |
+| P6 | Plugin bundling relationships captured | Yes |
+
+**Done when:** All P6 criteria pass and `analysis/reports/ecosystem-survey.md` is complete.
 
 ## Ownership
 
