@@ -74,7 +74,20 @@ Phase 0 establishes ground truth for validating skill discovery in later phases.
 | Deliverable | Path | Status |
 |-------------|------|--------|
 | Baseline skills YAML | `phase-0/baseline-skills.yaml` | ✅ Created |
+| Registry inventory | `phase-0/registries.yaml` | ✅ Created (user-provided) |
 | Phase 0 report | `phase-0/report.md` | ✅ Created |
+
+## Methodology Gap (Corrected)
+
+**Error:** Initial automated search incorrectly concluded registries don't exist.
+
+**Root cause:** Searched GitHub repos but never verified registry URLs directly
+with WebFetch or WebSearch.
+
+**Fix applied:**
+- Added `registries.yaml` with 12 verified skill registries
+- Updated research-plan.md Phase 1 with correct registry list
+- Added methodology note: "ALWAYS verify URLs directly"
 
 ## Success Gates
 
@@ -86,9 +99,10 @@ Phase 0 establishes ground truth for validating skill discovery in later phases.
 ## Insights for Later Phases
 
 ### Phase 1 (Registries)
-- No dedicated skill registry found (ccpm, claude-plugins.dev not verified)
-- npm search for `claude-code-skill` packages should be explored
-- GitHub remains the primary distribution channel
+- **12 skill registries verified** (ccpm, claude-plugins.dev, skillsmp, etc.)
+- skillsmp.com indexes 2000+ skills - largest search engine
+- Multiple marketplace-style registries with search APIs
+- npm/PyPI/crates.io should also be searched for packaged skills
 
 ### Phase 2 (GitHub Search)
 - File patterns: `SKILL.md`, `.claude-plugin/plugin.json`

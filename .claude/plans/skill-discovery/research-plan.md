@@ -50,22 +50,40 @@ baseline_skills:
 
 ## Phase 1: Registry Discovery
 
-### 1.1 Known/Suspected Registries
+> **Methodology Note:** ALWAYS verify registry URLs directly with WebFetch before
+> concluding they don't exist. GitHub search alone is insufficient.
 
-| Registry | URL | Status | API Pattern | Notes |
-|----------|-----|--------|-------------|-------|
-| ccpm | TBD | Unknown | `/api/v1/skills`, `/search?q=` | Claude Code Package Manager (if exists) |
-| claude-plugins.dev | <https://claude-plugins.dev> | Unknown | `/api/plugins`, `/api/skills` | Community plugin registry |
-| npmjs.com | <https://npmjs.com> | Active | `/-/v1/search?text=` | Search for `claude-code-skill`, `claude-skill` |
-| Smithery | <https://smithery.ai> | Active | `/api/servers` | MCP servers (may have companion skills) |
+### 1.1 Verified Skill Registries
 
-### 1.2 Research Tasks
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| skillsmp | <https://skillsmp.com/> | Active | 2000+ skills, largest search engine |
+| ccpm | <https://ccpm.dev/> | Active | Claude Code Package Manager |
+| claude-plugins.dev | <https://claude-plugins.dev/> | Active | Community plugin registry |
+| agentskills.best | <https://agentskills.best/> | Active | Enterprise-grade, quality-controlled |
+| claudeskillsmarket | <https://claudeskillsmarket.com/> | Active | Community-powered registry |
+| claudecodemarketplace | <https://claudecodemarketplace.com/> | Active | Plugins + Agent Skills hub |
+| mcpservers.org/skills | <https://mcpservers.org/claude-skills> | Active | MCP-integrated skills |
+| atcyrus | <https://www.atcyrus.com/skills> | Active | DevOps, security, docs skills |
+| awesome-claude-code.com | <https://awesome-claude-code.com/> | Active | Web-based curated list |
+| awesomeclaude.ai | <https://awesomeclaude.ai/> | Active | AI-focused aggregator |
 
-- [ ] Verify ccpm registry exists and document API
-- [ ] Explore claude-plugins.dev structure and API
-- [ ] Search npm for Claude Code skill packages
-- [ ] Check if PyPI has Claude Code skill packages
-- [ ] Search crates.io for Rust-based skill tools
+### 1.2 Package Manager Registries
+
+| Registry | URL | Search Pattern | Notes |
+|----------|-----|----------------|-------|
+| npm | <https://npmjs.com> | `claude-code-skill`, `claude-skill` | JS/TS skills |
+| PyPI | <https://pypi.org> | `claude-skill`, `claude-code` | Python skills |
+| crates.io | <https://crates.io> | `claude` | Rust-based tools |
+| Smithery | <https://smithery.ai> | MCP servers | Companion skills |
+
+### 1.3 Research Tasks
+
+- [ ] Fetch each registry homepage and document API patterns
+- [ ] Test search functionality on each registry
+- [ ] Document authentication requirements (if any)
+- [ ] Identify rate limits per registry
+- [ ] Search npm/PyPI/crates.io for skill packages
 
 ### 1.3 Rate Limit Strategy
 
