@@ -1,0 +1,110 @@
+# Registry Probe: skillsmp.com
+# Experiment: exp-002-registry-probe
+# Executed: 2026-03-08
+
+result:
+  experiment_id: "exp-002-registry-probe"
+  registry: "skillsmp"
+  url: "https://skillsmp.com/"
+  probed_at: "2026-03-08T12:30:00Z"
+
+  homepage:
+    status: 403
+    error: "Bot protection (Cloudflare)"
+    content_type: "text/html"
+    js_rendered: true
+    notes: "WebFetch blocked - requires browser or API access"
+
+  api:
+    available: true
+    auth_required: true
+    auth_type: "Bearer token"
+    credential_source: "op://Developer/skillsmp/credential"
+
+    endpoints_tested:
+      - path: "/api/v1/skills/search"
+        method: "GET"
+        params: ["q", "limit", "page"]
+        status: "working"
+        response_format: "JSON"
+        sample_response:
+          success: true
+          data:
+            skills: "[array of skill objects]"
+            pagination:
+              page: 1
+              limit: 10
+              total: "<varies by query>"
+              hasNext: true
+          meta:
+            requestId: "<uuid>"
+            responseTimeMs: 170
+
+      - path: "/api/v1/skills/ai-search"
+        method: "GET"
+        params: ["q"]
+        status: "not_tested"
+        notes: "Semantic search endpoint - requires further testing"
+
+      - path: "/api/v1/skills"
+        method: "GET"
+        status: "404"
+        notes: "Listing endpoint does not exist"
+
+    skill_object_schema:
+      id: "string (unique identifier)"
+      name: "string (skill name)"
+      author: "string (GitHub username)"
+      description: "string (skill description)"
+      githubUrl: "string (source repo path)"
+      skillUrl: "string (skillsmp page URL)"
+      stars: "number (GitHub stars)"
+      updatedAt: "string (unix timestamp)"
+
+    rate_limits:
+      documented: "unknown"
+      observed: "no rate limiting hit during testing"
+
+  robots_txt:
+    exists: "unknown"
+    notes: "Cannot fetch due to bot protection"
+
+  search:
+    web_ui: true
+    api: true
+    test_query: "typescript"
+    results_count: 11
+    result_format: "JSON"
+    relevance: "high"
+
+  content_stats:
+    claimed_total: "2000+ (from external sources)"
+    verified_total: "unknown (no listing endpoint)"
+    sample_results: 10
+    notes: "Search returns paginated results; no way to enumerate all"
+
+  assessment:
+    crawlable: false
+    api_usable: true
+    recommended_tool: "API via curl with Bearer auth"
+    access_method: |
+      SKILLSMP_KEY=$(op read "op://Developer/skillsmp/credential")
+      curl -X GET "https://skillsmp.com/api/v1/skills/search?q=TERM&limit=N" \
+        -H "Authorization: Bearer $SKILLSMP_KEY"
+
+    strengths:
+      - "Fast API response (~170ms)"
+      - "Structured JSON output"
+      - "Includes GitHub metadata (stars, URL)"
+      - "Semantic search available"
+
+    limitations:
+      - "No enumeration endpoint"
+      - "Total count not reliably available"
+      - "Requires API key"
+
+  priority: "high"
+  notes: |
+    Largest skill registry (claimed 2000+).
+    API works well for keyword search.
+    Essential for Phase 2 skill discovery.

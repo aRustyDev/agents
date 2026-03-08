@@ -1,0 +1,142 @@
+# Tool Comparison Results: WebFetch
+# Experiment: exp-001-tool-comparison
+# Executed: 2026-03-08
+
+result:
+  experiment_id: "exp-001-tool-comparison"
+  tool: "WebFetch"
+  timestamp: "2026-03-08T12:00:00Z"
+
+  queries:
+    - id: "registry-skillsmp"
+      url: "https://skillsmp.com/"
+      response_time_ms: ~2000
+      success: false
+      error: "HTTP 403 Forbidden"
+      notes: "Bot protection - requires JavaScript rendering or different user-agent"
+
+    - id: "registry-mcp-so"
+      url: "https://mcp.so/"
+      response_time_ms: ~1500
+      success: true
+      error: null
+      content_extracted:
+        title: "MCP Servers"
+        has_search: true
+        server_count: 18283
+        features: ["search", "categories", "tags"]
+      notes: "Successfully fetched - large MCP registry"
+
+    - id: "registry-mcpservers-org"
+      url: "https://mcpservers.org/"
+      response_time_ms: ~1200
+      success: true
+      error: null
+      content_extracted:
+        title: "Awesome MCP Servers"
+        has_search: true
+        server_count: "30+"
+        categories: ["Featured", "Official", "Search", "Web Scraping", "Communication", "Productivity", "Development", "Database"]
+      notes: "Successfully fetched - curated directory"
+
+    - id: "registry-glama"
+      url: "https://glama.ai/mcp/servers"
+      response_time_ms: ~1800
+      success: true
+      error: null
+      content_extracted:
+        title: "Popular MCP Servers | Glama"
+        has_search: true
+        server_count: 18438
+        categories: "120+"
+        has_api: true
+      notes: "Successfully fetched - large registry with API"
+
+    - id: "registry-claudemarketplaces"
+      url: "https://claudemarketplaces.com/"
+      response_time_ms: ~1400
+      success: true
+      error: null
+      content_extracted:
+        title: "Claude Code Plugin Marketplace"
+        has_search: true
+        plugin_count: "100+"
+        aggregates_from: ["anthropics/claude-code", "wshobson/agents", "henkisdabro/claudecode-marketplace"]
+      notes: "Successfully fetched - aggregator marketplace"
+
+    - id: "registry-buildwithclaude"
+      url: "https://buildwithclaude.com/"
+      response_time_ms: ~1300
+      success: true
+      error: null
+      content_extracted:
+        title: "Build with Claude - Plugin Marketplace"
+        has_search: true
+        counts:
+          plugins: 52
+          skills: 115
+          subagents: 117
+          commands: 175
+          hooks: 28
+        total: 487
+      notes: "Successfully fetched - comprehensive categorized marketplace"
+
+    - id: "registry-agentskills-best"
+      url: "https://agentskills.best/"
+      response_time_ms: ~1100
+      success: true
+      error: null
+      content_extracted:
+        title: "AgentSkills.best - Master Claude Agent Skills"
+        has_search: true
+        skill_count: "12+ curated"
+        features: ["filters by use case", "complexity", "platform"]
+      notes: "Successfully fetched - curated quality-focused"
+
+    - id: "registry-awesome-claude-code"
+      url: "https://awesome-claude-code.com/"
+      response_time_ms: ~1000
+      success: true
+      error: null
+      content_extracted:
+        title: "Awesome Claude Code"
+        has_search: true
+        entry_count: 30
+        categories: ["Agents", "Vibe-coding apps", "Agent interfaces", "Tools and MCP servers", "Workflows"]
+      notes: "Successfully fetched - curated directory"
+
+    - id: "registry-awesomeclaude-ai"
+      url: "https://awesomeclaude.ai/"
+      response_time_ms: ~1200
+      success: true
+      error: null
+      content_extracted:
+        title: "Claude AI Resources Directory - Awesome Claude"
+        has_search: true
+        categories: ["Official Resources", "Claude Code & MCP", "Community Lists", "Extensions", "Applications", "Educational", "Community"]
+      notes: "Successfully fetched - comprehensive resource directory"
+
+  summary:
+    total_urls: 9
+    successful: 8
+    failed: 1
+    avg_response_time_ms: ~1389
+    success_rate: "89%"
+
+  assessment:
+    strengths:
+      - "Direct page content extraction"
+      - "Works for most static/SSR sites"
+      - "Can extract structured info with prompts"
+      - "Good for detailed registry analysis"
+    weaknesses:
+      - "Blocked by bot protection (403s)"
+      - "Cannot handle JS-rendered SPAs"
+      - "One URL at a time"
+    blocked_by:
+      - "skillsmp.com"  # Requires JS/different approach
+    best_for:
+      - "Registry homepage analysis"
+      - "robots.txt fetching"
+      - "Static content extraction"
+    recommendation: "SECONDARY tool for registry content analysis (fallback to crawl4ai for blocked sites)"

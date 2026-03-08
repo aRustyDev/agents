@@ -1,0 +1,220 @@
+# Registry Probe Results Summary
+# Experiment: exp-002-registry-probe
+# Executed: 2026-03-08
+
+result:
+  experiment_id: "exp-002-registry-probe"
+  timestamp: "2026-03-08T12:00:00Z"
+  registries_probed: 10
+
+  # ============================================
+  # MCP REGISTRIES
+  # ============================================
+  mcp_registries:
+    - name: "mcp.so"
+      url: "https://mcp.so/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          js_rendered: false
+        content:
+          server_count: 18283
+          description: "Third-party MCP marketplace"
+        robots_txt:
+          exists: true
+          disallows: ["/*?*q=", "/privacy-policy", "/terms-of-service"]
+          crawl_friendly: true
+        api:
+          available: false
+          docs_url: null
+      recommended_tool: "WebFetch"
+      priority: "high"
+
+    - name: "glama.ai"
+      url: "https://glama.ai/mcp/servers"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          has_filters: true
+          js_rendered: false
+        content:
+          server_count: 18438
+          categories: "120+"
+        robots_txt:
+          exists: true
+          disallows: ["/settings/", "/inspect/", "/admin/", "/oauth/", "/test/"]
+          sitemap: "https://glama.ai/sitemap.xml"
+          crawl_friendly: true
+        api:
+          available: true
+          docs_url: "https://glama.ai/mcp-api"
+      recommended_tool: "WebFetch + API"
+      priority: "high"
+
+    - name: "mcpservers.org"
+      url: "https://mcpservers.org/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          js_rendered: false
+        content:
+          server_count: "30+ featured"
+          categories: ["Official", "Search", "Web Scraping", "Communication", "Productivity", "Development", "Database"]
+        api:
+          available: false
+      recommended_tool: "WebFetch"
+      priority: "high"
+
+    - name: "smithery.ai"
+      url: "https://smithery.ai/"
+      status: "not_probed"
+      notes: "Requires separate probe - known MCP registry"
+      priority: "high"
+
+  # ============================================
+  # SKILL/PLUGIN MARKETPLACES
+  # ============================================
+  skill_marketplaces:
+    - name: "skillsmp.com"
+      url: "https://skillsmp.com/"
+      status: "blocked"
+      probe_results:
+        homepage:
+          status: 403
+          error: "Bot protection"
+          js_rendered: true
+        content:
+          server_count: "2000+ (from external sources)"
+      recommended_tool: "crawl4ai or browser automation"
+      priority: "high"
+      notes: "Largest skill registry - needs alternative approach"
+
+    - name: "claudemarketplaces.com"
+      url: "https://claudemarketplaces.com/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          js_rendered: false
+        content:
+          plugin_count: "100+"
+          aggregates_from:
+            - "anthropics/claude-code (13 plugins)"
+            - "wshobson/agents (73 plugins)"
+            - "henkisdabro/claudecode-marketplace (27 plugins)"
+        api:
+          available: false
+      recommended_tool: "WebFetch"
+      priority: "medium"
+
+    - name: "buildwithclaude.com"
+      url: "https://buildwithclaude.com/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          js_rendered: false
+        content:
+          counts:
+            plugins: 52
+            skills: 115
+            subagents: 117
+            commands: 175
+            hooks: 28
+          total: 487
+        api:
+          available: false
+          install_via: "/plugin marketplace add davepoon/buildwithclaude"
+      recommended_tool: "WebFetch"
+      priority: "high"
+      notes: "Well-categorized, comprehensive coverage of all component types"
+
+    - name: "agentskills.best"
+      url: "https://agentskills.best/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          has_filters: true
+        content:
+          skill_count: "12+ curated"
+          focus: "Production-ready, quality-controlled"
+        api:
+          available: false
+      recommended_tool: "WebFetch"
+      priority: "medium"
+
+  # ============================================
+  # CURATED DIRECTORIES
+  # ============================================
+  curated_directories:
+    - name: "awesome-claude-code.com"
+      url: "https://awesome-claude-code.com/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+          has_filters: true
+        content:
+          entry_count: 30
+          categories: ["Agents", "Vibe-coding apps", "Agent interfaces", "Tools/MCP", "Workflows"]
+      recommended_tool: "WebFetch"
+      priority: "medium"
+
+    - name: "awesomeclaude.ai"
+      url: "https://awesomeclaude.ai/"
+      status: "accessible"
+      probe_results:
+        homepage:
+          status: 200
+          has_search: true
+        content:
+          categories: 7
+          scope: "Comprehensive Claude AI resources"
+      recommended_tool: "WebFetch"
+      priority: "medium"
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  summary:
+    total_probed: 10
+    accessible: 9
+    blocked: 1
+    has_search: 9
+    has_api: 1
+    has_robots_txt: 2
+
+    by_tool_recommendation:
+      WebFetch: 8
+      "WebFetch + API": 1
+      crawl4ai: 1
+
+    estimated_total_components:
+      mcp_servers: "18000+" # mcp.so and glama.ai overlap
+      skills: "2500+"
+      plugins: "200+"
+      subagents: "200+"
+      commands: "175+"
+      hooks: "30+"
+
+    high_priority_for_phase2:
+      - "skillsmp.com (2000+ skills, needs crawl4ai)"
+      - "buildwithclaude.com (487 components, well-categorized)"
+      - "glama.ai (18k+ MCP, has API)"
+      - "mcp.so (18k+ MCP, searchable)"
+
+    blocked_registries:
+      - name: "skillsmp.com"
+        reason: "Bot protection (403)"
+        mitigation: "Use crawl4ai with JS rendering"

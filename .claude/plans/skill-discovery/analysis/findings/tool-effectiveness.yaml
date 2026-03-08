@@ -1,0 +1,176 @@
+# Finding: Tool Effectiveness by Source Type
+# Phase 1 Analysis
+# Created: 2026-03-08
+
+finding:
+  id: "finding-001-tool-effectiveness"
+  title: "Best search tools by source type"
+  created: "2026-03-08"
+  confidence: "high"
+
+  experiment_ids:
+    - "exp-001-tool-comparison"
+    - "exp-002-registry-probe"
+
+  # ============================================
+  # CLAIM
+  # ============================================
+  claim: |
+    Different tools excel at different source types:
+    - GitHub CLI (gh) is best for repository/code search
+    - WebSearch is best for registry discovery
+    - WebFetch is best for accessible registry content
+    - API access is required for protected registries (skillsmp)
+
+  # ============================================
+  # SUPPORTING DATA
+  # ============================================
+  supporting_data:
+    websearch:
+      - source: "analysis/results/tool-comparison-websearch.yaml"
+        data_point: "avg relevance: 4.75/5 across 4 queries"
+      - source: "analysis/results/tool-comparison-websearch.yaml"
+        data_point: "found 10 results per query, ~1.3s response"
+
+    github_cli:
+      - source: "analysis/results/tool-comparison-ghapi.yaml"
+        data_point: "returns structured JSON with star counts"
+      - source: "analysis/results/tool-comparison-ghapi.yaml"
+        data_point: "repo search: 5/5 relevance, code search unscoped: 2/5"
+
+    webfetch:
+      - source: "analysis/results/tool-comparison-webfetch.yaml"
+        data_point: "89% success rate (8/9 registries accessible)"
+      - source: "analysis/results/tool-comparison-webfetch.yaml"
+        data_point: "blocked by: skillsmp.com (403)"
+
+    api_access:
+      - source: "analysis/results/registry-probe-skillsmp.yaml"
+        data_point: "API works with Bearer auth, 170ms response"
+
+  # ============================================
+  # RECOMMENDATIONS
+  # ============================================
+  recommendations:
+    by_source_type:
+      github_repositories:
+        primary: "gh search repos"
+        secondary: "WebSearch site:github.com"
+        notes: |
+          Use gh for structured JSON output with stars/metadata.
+          Avoid unscoped code search (high false positive rate).
+          Scope code search to known repos: gh search code --repo owner/repo
+
+      web_registries:
+        primary: "WebFetch"
+        secondary: "WebSearch"
+        fallback: "API if available"
+        notes: |
+          WebFetch works for most registries (9/10 tested).
+          For 403 responses, check for API access.
+          If no API, use Playwright browser automation.
+
+      skill_marketplaces:
+        skillsmp:
+          tool: "API (curl with Bearer)"
+          access: "op://Developer/skillsmp/credential"
+          notes: "Largest registry - API essential"
+        buildwithclaude:
+          tool: "WebFetch"
+          notes: "Well-categorized, 487 components"
+        claudemarketplaces:
+          tool: "WebFetch"
+          notes: "Aggregator of multiple sources"
+
+      mcp_registries:
+        mcp_so:
+          tool: "WebFetch"
+          notes: "18k+ servers, searchable"
+        glama:
+          tool: "WebFetch + API"
+          notes: "18k+ servers, has API docs"
+        mcpservers_org:
+          tool: "WebFetch"
+          notes: "Curated directory"
+
+    workflow:
+      step_1: "Use WebSearch to discover new registries"
+      step_2: "Use gh api for GitHub repository enumeration"
+      step_3: "Use WebFetch to probe registry content"
+      step_4: "Check for API access if WebFetch blocked (403)"
+      step_5: "Use Playwright as last resort for JS-heavy sites"
+
+  # ============================================
+  # TOOL MATRIX
+  # ============================================
+  tool_matrix:
+    - source_type: "GitHub repos"
+      primary_tool: "gh search repos"
+      strengths: "Structured JSON, stars, pagination"
+      limitations: "GitHub only"
+
+    - source_type: "GitHub code"
+      primary_tool: "gh search code --repo"
+      strengths: "Find files in known repos"
+      limitations: "Unscoped search has noise"
+
+    - source_type: "Web registries"
+      primary_tool: "WebFetch"
+      strengths: "Direct content extraction"
+      limitations: "Blocked by bot protection"
+
+    - source_type: "Registry discovery"
+      primary_tool: "WebSearch"
+      strengths: "Fast, broad coverage"
+      limitations: "Limited to ~10 results"
+
+    - source_type: "Protected registries"
+      primary_tool: "API (if available)"
+      strengths: "Reliable, structured"
+      limitations: "Requires credentials"
+
+    - source_type: "JS-rendered sites"
+      primary_tool: "Playwright"
+      strengths: "Full browser rendering"
+      limitations: "Slower, more complex"
+
+  # ============================================
+  # BLOCKED REGISTRIES
+  # ============================================
+  blocked_registries:
+    - name: "skillsmp.com"
+      issue: "Cloudflare bot protection (403)"
+      resolution: "API access with Bearer token"
+      resolved: true
+
+  # ============================================
+  # SUMMARY FOR PHASE 2
+  # ============================================
+  phase_2_approach:
+    github_discovery:
+      tool: "gh search repos"
+      queries:
+        - '"claude skill" OR "claude-skill"'
+        - '"awesome-claude"'
+        - 'topic:claude-skills'
+        - 'topic:mcp-server'
+
+    registry_enumeration:
+      skillsmp:
+        method: "API search with category terms"
+        command: |
+          SKILLSMP_KEY=$(op read "op://Developer/skillsmp/credential")
+          curl -X GET "https://skillsmp.com/api/v1/skills/search?q=TERM&limit=100" \
+            -H "Authorization: Bearer $SKILLSMP_KEY"
+
+      buildwithclaude:
+        method: "WebFetch category pages"
+
+      mcp_registries:
+        method: "WebFetch + sitemap if available"
+
+    new_registry_discovery:
+      method: "WebSearch for emerging registries"
+      queries:
+        - '"claude skill" marketplace 2026'
+        - '"mcp server" registry new'

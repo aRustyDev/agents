@@ -1,0 +1,106 @@
+# Tool Comparison Results: WebSearch
+# Experiment: exp-001-tool-comparison
+# Executed: 2026-03-08
+
+result:
+  experiment_id: "exp-001-tool-comparison"
+  tool: "WebSearch"
+  timestamp: "2026-03-08T12:00:00Z"
+
+  queries:
+    - id: "q1-github-skills"
+      query: '"claude skill" site:github.com'
+      response_time_ms: ~1500
+      items_found: 10
+      rate_limited: false
+      error: null
+      relevance_score: 5
+      sample_results:
+        - url: "https://github.com/anthropics/skills"
+          title: "Official Anthropic skills repository"
+          relevant: true
+        - url: "https://github.com/ComposioHQ/awesome-claude-skills"
+          title: "Curated list of Claude Skills"
+          relevant: true
+        - url: "https://github.com/alirezarezvani/claude-skills"
+          title: "169 production-ready skills"
+          relevant: true
+      notes: "Excellent results - found official and top community repos"
+
+    - id: "q2-awesome-lists"
+      query: '"awesome-claude" skills'
+      response_time_ms: ~1200
+      items_found: 10
+      rate_limited: false
+      error: null
+      relevance_score: 5
+      sample_results:
+        - url: "https://github.com/ComposioHQ/awesome-claude-skills"
+          title: "Curated list (41k stars)"
+          relevant: true
+        - url: "https://awesomeclaude.ai/awesome-claude-skills"
+          title: "Visual directory"
+          relevant: true
+        - url: "https://github.com/sickn33/antigravity-awesome-skills"
+          title: "1000+ Agentic Skills collection"
+          relevant: true
+      notes: "Found multiple awesome-* repos and curated sites"
+
+    - id: "q3-mcp-servers"
+      query: '"mcp server" claude registry'
+      response_time_ms: ~1300
+      items_found: 10
+      rate_limited: false
+      error: null
+      relevance_score: 4
+      sample_results:
+        - url: "https://github.com/modelcontextprotocol/servers"
+          title: "Official MCP servers repo"
+          relevant: true
+        - url: "https://support.claude.com/..."
+          title: "Claude help center - MCP servers"
+          relevant: true
+      notes: "Found official resources but also some noise (issues, feature requests)"
+
+    - id: "q5-plugin-marketplace"
+      query: '"claude plugin" marketplace'
+      response_time_ms: ~1100
+      items_found: 10
+      rate_limited: false
+      error: null
+      relevance_score: 5
+      sample_results:
+        - url: "https://code.claude.com/docs/en/discover-plugins"
+          title: "Official plugin discovery docs"
+          relevant: true
+        - url: "https://claudemarketplaces.com/"
+          title: "Claude Code Plugin Marketplace"
+          relevant: true
+        - url: "https://buildwithclaude.com/"
+          title: "Build with Claude - Plugin Marketplace"
+          relevant: true
+      notes: "Excellent - found official docs and key marketplaces"
+
+  summary:
+    total_queries: 4
+    avg_response_time_ms: ~1275
+    avg_results_count: 10
+    avg_relevance_score: 4.75
+    rate_limits_hit: 0
+    errors: 0
+
+  assessment:
+    strengths:
+      - "Fast response times (~1-2 seconds)"
+      - "High relevance for skill/plugin discovery"
+      - "Finds both GitHub and independent sites"
+      - "Good for general web discovery"
+    weaknesses:
+      - "Limited to ~10 results per query"
+      - "Cannot search within file contents"
+      - "May include noise (issues, discussions)"
+    best_for:
+      - "Registry discovery"
+      - "Finding curated lists"
+      - "General skill/plugin search"
+    recommendation: "PRIMARY tool for web registry discovery"

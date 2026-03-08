@@ -1,0 +1,97 @@
+# Tool Comparison Results: GitHub API (gh)
+# Experiment: exp-001-tool-comparison
+# Executed: 2026-03-08
+
+result:
+  experiment_id: "exp-001-tool-comparison"
+  tool: "gh api (GitHub CLI)"
+  timestamp: "2026-03-08T12:00:00Z"
+
+  queries:
+    - id: "q1-repo-search"
+      query: 'gh search repos "claude skill"'
+      response_time_ms: ~800
+      items_found: 20
+      rate_limited: false
+      error: null
+      relevance_score: 5
+      sample_results:
+        - repo: "ComposioHQ/awesome-claude-skills"
+          stars: 41937
+          description: "A curated list of awesome Claude Skills"
+          relevant: true
+        - repo: "travisvn/awesome-claude-skills"
+          stars: 8450
+          description: "Curated list for Claude Code"
+          relevant: true
+        - repo: "Jeffallan/claude-skills"
+          stars: 5702
+          description: "66 Specialized Skills for Full-Stack Developers"
+          relevant: true
+      notes: "Excellent - returns structured JSON with star counts, enables sorting"
+
+    - id: "q4-code-search-skillmd"
+      query: 'gh search code "filename:SKILL.md"'
+      response_time_ms: ~1200
+      items_found: 30
+      rate_limited: false
+      error: null
+      relevance_score: 2
+      sample_results:
+        - repo: "jkitchin/litdb"
+          path: "SKILL.md"
+          relevant: false  # Not a Claude skill
+        - repo: "luofengmacheng/algorithms"
+          path: "skill.md"
+          relevant: false  # General skill notes
+      notes: "Many false positives - 'SKILL.md' is too generic without Claude context"
+
+    - id: "q4-code-search-skillmd-scoped"
+      query: 'gh search code "SKILL.md" --repo anthropics/skills'
+      response_time_ms: ~600
+      items_found: 10
+      rate_limited: false
+      error: null
+      relevance_score: 5
+      sample_results:
+        - repo: "anthropics/skills"
+          path: "skills/skill-creator/SKILL.md"
+          relevant: true
+      notes: "Scoped search works well - finds actual skill files in known repos"
+
+  summary:
+    total_queries: 3
+    avg_response_time_ms: ~867
+    avg_results_count: 20
+    avg_relevance_score: 4.0
+    rate_limits_hit: 0
+    errors: 0
+
+  assessment:
+    strengths:
+      - "Structured JSON output (parseable)"
+      - "Returns star counts, descriptions"
+      - "Can search code contents"
+      - "Supports scoped searches (--repo)"
+      - "Fast response times"
+      - "Higher result limits (20-30)"
+    weaknesses:
+      - "Code search without scope has high false positive rate"
+      - "Requires authentication (gh auth)"
+      - "Cannot search non-GitHub sources"
+    best_for:
+      - "Repository discovery with metadata"
+      - "Finding popular skill collections (by stars)"
+      - "Scoped code search within known repos"
+      - "Programmatic enumeration"
+    recommendation: "PRIMARY tool for GitHub repository/code search"
+
+  github_specific_queries:
+    recommended:
+      - 'gh search repos "claude skill" --sort stars --json name,url,stargazersCount'
+      - 'gh search repos "awesome-claude" --json name,description,stargazersCount'
+      - 'gh search code "SKILL.md" --repo anthropics/skills'
+      - 'gh api /repos/{owner}/{repo}/contents/skills'
+    avoid:
+      - 'gh search code "SKILL.md"'  # Too many false positives
+      - 'gh search code "skill"'  # Too generic

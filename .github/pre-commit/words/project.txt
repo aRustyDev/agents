@@ -24,6 +24,7 @@ cclint
 ccpm
 CHANGEME
 cicd
+claudecode
 claudecodemarketplace
 claudekit
 claudemarketplaces
@@ -34,8 +35,10 @@ codebases
 codecov
 codegraph
 Composio
+crawlable
 cspell
 cupertino
+davepoon
 devrag
 dsgvo
 DTCG
@@ -56,6 +59,7 @@ GRDB
 groue
 haiku
 hashintel
+henkisdabro
 hesreallyhim
 homoiconic
 homoiconicity
@@ -63,11 +67,14 @@ iannuttall
 iconify
 Iconify
 Jeffallan
+jkitchin
 jqueryscript
 justfile
 lackeyjb
 LAPACK
+litdb
 Livelocks
+luofengmacheng
 lychee
 Manim
 markdownify
@@ -124,6 +131,7 @@ shellcheck
 shellharden
 shfmt
 simctl
+skillmd
 skillsmp
 smithery
 sonnet
@@ -160,6 +168,7 @@ ViewModel
 vijaythecoder
 voltagent
 Wassette
+webfetch
 websearch
 Wextra
 worktree

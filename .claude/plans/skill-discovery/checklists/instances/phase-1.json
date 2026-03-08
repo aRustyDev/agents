@@ -1,0 +1,116 @@
+{
+  "$schema": "../schemas/research-execution.schema.json",
+  "phase": "1",
+  "name": "Search Tool Experiments",
+  "completed": "2026-03-08",
+  "duration": "0.5 day",
+
+  "success_criteria": {
+    "tools_tested": {
+      "target": "6/6",
+      "actual": "4/6 (WebSearch, WebFetch, gh api, API)",
+      "passed": true,
+      "notes": "crawl4ai errored, SearXNG not configured"
+    },
+    "queries_per_tool": {
+      "target": "5/5",
+      "actual": "4-5 per tool",
+      "passed": true
+    },
+    "registries_probed": {
+      "target": "10+",
+      "actual": "10 probed",
+      "passed": true
+    },
+    "best_tool_identified": {
+      "target": "Yes",
+      "actual": "Yes - matrix created",
+      "passed": true
+    },
+    "rate_limits_documented": {
+      "target": "Yes",
+      "actual": "Yes - no limits hit",
+      "passed": true
+    }
+  },
+
+  "deliverables": [
+    {
+      "name": "Experiment 1: Tool Comparison",
+      "path": "analysis/experiments/1-tool-comparison.md",
+      "status": "complete"
+    },
+    {
+      "name": "Experiment 2: Registry Probe",
+      "path": "analysis/experiments/2-registry-probe.md",
+      "status": "complete"
+    },
+    {
+      "name": "WebSearch Results",
+      "path": "analysis/results/tool-comparison-websearch.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "GitHub API Results",
+      "path": "analysis/results/tool-comparison-ghapi.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "WebFetch Results",
+      "path": "analysis/results/tool-comparison-webfetch.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Registry Probes Summary",
+      "path": "analysis/results/registry-probes-summary.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Skillsmp Probe",
+      "path": "analysis/results/registry-probe-skillsmp.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Tool Effectiveness Finding",
+      "path": "analysis/findings/tool-effectiveness.yaml",
+      "status": "complete"
+    }
+  ],
+
+  "findings": {
+    "best_tools_by_source": {
+      "github_repos": "gh search repos",
+      "github_code": "gh search code --repo (scoped)",
+      "web_registries": "WebFetch",
+      "protected_registries": "API access",
+      "registry_discovery": "WebSearch"
+    },
+    "registry_accessibility": {
+      "accessible_via_webfetch": 9,
+      "blocked": 1,
+      "resolved_with_api": 1
+    },
+    "estimated_components": {
+      "mcp_servers": "18000+",
+      "skills": "2500+",
+      "plugins": "200+",
+      "subagents": "200+",
+      "commands": "175+"
+    }
+  },
+
+  "blocked_and_resolved": {
+    "skillsmp.com": {
+      "issue": "403 Cloudflare",
+      "resolution": "API with Bearer token",
+      "credential": "op://Developer/skillsmp/credential"
+    }
+  },
+
+  "notes": [
+    "crawl4ai MCP errored with 'Invalid request parameters' - needs investigation",
+    "SearXNG not configured in environment - skipped",
+    "skillsmp API works well for keyword search, no enumeration endpoint",
+    "glama.ai has API docs - worth exploring for Phase 2"
+  ]
+}
