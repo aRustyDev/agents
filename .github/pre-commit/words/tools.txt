@@ -164,3 +164,5 @@ parallelizable
 webstore
 capsys
 Rubo
+glab
+firecrawl
