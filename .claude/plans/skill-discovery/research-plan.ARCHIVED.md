@@ -1,5 +1,13 @@
 # Claude Code Component Discovery Research Plan
 
+> **ARCHIVED** — This document has been superseded by the restructured plan.
+> See [PLAN.md](PLAN.md) for the current source of truth.
+>
+> This file is retained for historical context and the detailed registry/repo listings
+> which informed the new structure.
+
+---
+
 ## Goal
 
 Survey and inventory **all Claude Code component registries** across 8 categories:
