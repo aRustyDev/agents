@@ -1,573 +1,655 @@
-# Skill Discovery Research Plan
+# Claude Code Component Discovery Research Plan
 
 ## Goal
 
-Identify and document all available methods for discovering Claude Code skills from community sources, including registries, GitHub patterns, and web crawling strategies.
+Survey and inventory **all Claude Code component registries** across 8 categories:
+
+1. **Skills** — Domain knowledge and procedures
+2. **Agents** — Specialized subagents for complex tasks
+3. **Commands** — Slash commands (user-invoked workflows)
+4. **Rules** — Behavioral constraints and guidelines
+5. **Prompts** — Reusable prompt templates
+6. **Hooks** — Lifecycle interceptors
+7. **MCP Servers** — External tool integrations
+8. **Plugins** — Packages bundling multiple component types
+
+For each independent website registry, document:
+
+- API endpoints and documentation
+- Crawling/scraping restrictions (robots.txt, ToS, rate limits)
+- Search functionality and query patterns
 
 ## Ownership
 
 **Executor:** Single agent/developer
 **Stakeholder:** Plugin ecosystem maintainers
 
----
+## Key Insight: Plugin Dependency Order
 
-## Phase 0: Baseline Creation
+Plugins are **packages that bundle** Skills, Rules, Commands, Agents, Hooks, and MCP configs.
+Therefore: **Discover base components FIRST, then Plugins LAST**.
 
-> **Purpose:** Establish ground truth for validation
-
-### 0.1 Manual Skill Curation
-
-Manually identify and document 20+ known community skills as baseline:
-
-| Source | Expected Count | Method |
-|--------|----------------|--------|
-| This repo (`context/skills/`) | 10+ | Local inventory |
-| awesome-claude-code repo | 5+ | Manual review |
-| Known community repos | 5+ | Manual search |
-
-### 0.2 Baseline Schema
-
-```yaml
-baseline_skills:
-  - name: "skill-name"
-    source_url: "https://github.com/..."
-    category: "cli-tools|languages|frameworks|workflows"
-    quality: "high|medium|low"
-    last_verified: "2024-01-01"
+```text
+┌─────────────────────────────────────────────────────────┐
+│                      PLUGINS                            │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
+│  │ Skills  │ │ Agents  │ │Commands │ │  Rules  │       │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐                   │
+│  │ Prompts │ │  Hooks  │ │   MCP   │                   │
+│  └─────────┘ └─────────┘ └─────────┘                   │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 0.3 Deliverables
+---
 
-- `baseline-skills.yaml` - Curated list of known skills
-- Baseline count for validation metrics
+## Phase 0: Search Term Matrix & Baseline
 
-### 0.4 Success Gate
+> **Purpose:** Establish systematic search vocabulary and ground truth
 
-- [ ] 20+ skills documented with URLs
-- [ ] Categories assigned to all skills
+### 0.1 Search Term Matrix
+
+Build a matrix of search terms for comprehensive coverage:
+
+| Concept | Primary Terms | Synonyms | Narrower Terms | Broader Terms |
+|---------|---------------|----------|----------------|---------------|
+| **Skills** | `claude skill`, `agent skill` | `capability`, `knowledge module` | `SKILL.md`, `skill-creator` | `claude code`, `ai assistant` |
+| **Agents** | `claude agent`, `subagent` | `specialist`, `expert agent` | `agent.md`, `subagent-type` | `agentic`, `orchestrator` |
+| **Commands** | `slash command`, `claude command` | `workflow`, `action` | `/command`, `commands/` | `cli`, `interface` |
+| **Rules** | `claude rules`, `RULES.md` | `constraints`, `guidelines` | `behavioral rules`, `guardrails` | `safety`, `policy` |
+| **Prompts** | `claude prompt`, `prompt template` | `instruction`, `system prompt` | `CLAUDE.md`, `prompts/` | `llm prompt`, `ai prompt` |
+| **Hooks** | `claude hooks`, `lifecycle hook` | `interceptor`, `callback` | `pre-commit hook`, `post-tool hook` | `automation`, `trigger` |
+| **MCP** | `mcp server`, `model context protocol` | `tool server`, `integration` | `mcp.json`, `mcpServers` | `api`, `connector` |
+| **Plugins** | `claude plugin`, `claude code plugin` | `extension`, `package`, `addon` | `plugin.json`, `.claude-plugin` | `marketplace`, `registry` |
+
+### 0.2 Boolean Query Patterns
+
+For each search engine, construct queries using:
+
+```text
+# AND patterns
+"claude code" AND skill
+"claude" AND "agent" AND "subagent"
+
+# OR patterns (synonyms)
+(skill OR capability OR "knowledge module") AND claude
+
+# Exclusion patterns
+"claude skill" NOT "anthropic employee" NOT "job posting"
+
+# Site-specific
+site:github.com "claude skill" SKILL.md
+site:dev.to "claude code" tutorial
+```
+
+### 0.3 Baseline Inventory
+
+Document known components per category from this repo:
+
+| Category | Local Path | Expected Count |
+|----------|------------|----------------|
+| Skills | `context/skills/` | 100+ |
+| Agents | `context/agents/` | 10+ |
+| Commands | `context/commands/` | 20+ |
+| Rules | `context/rules/` | 5+ |
+| Prompts | `context/output-styles/` | 10+ |
+| Hooks | `context/hooks/` | 5+ |
+| MCP | `settings/mcp/` | 10+ |
+| Plugins | `context/plugins/` | 6 |
+
+### 0.4 Deliverables
+
+- `phase-0/search-term-matrix.yaml` — Complete matrix with all terms
+- `phase-0/boolean-queries.md` — Query templates per search engine
+- `phase-0/baseline-inventory.yaml` — Local component counts
+
+### 0.5 Success Gate
+
+- [ ] Matrix covers all 8 categories
+- [ ] 5+ synonyms per category identified
+- [ ] Local baseline documented
 
 ---
 
-## Phase 1: Registry Discovery
+## Phase 1: Search Tool Experiments
 
-> **Methodology Note:** ALWAYS verify registry URLs directly with WebFetch before
-> concluding they don't exist. GitHub search alone is insufficient.
+> **Purpose:** Compare search tools to determine effectiveness per source type
 
-### 1.1 Verified Skill Registries
+### 1.1 Tools Under Test
+
+| Tool | Type | Best For | Cost |
+|------|------|----------|------|
+| `WebSearch` | Claude native | Quick web search | Free (API) |
+| `WebFetch` | Claude native | Static page scraping | Free (API) |
+| `gh api` | GitHub CLI | Repo/code search | Free (auth) |
+| `crawl4ai` MCP | JS-rendered | SPAs, dynamic content | Free |
+| `firecrawl` MCP | Batch crawl | Large-scale scraping | $ |
+| Serper API | Google wrapper | Broad web search | $ |
+| SearXNG | Meta-search | Privacy, aggregation | Self-host |
+| DuckDuckGo | Direct search | No tracking | Free |
+
+### 1.2 Experiment Design
+
+For each tool, run the **same 5 test queries** and measure:
+
+| Metric | Definition |
+|--------|------------|
+| **Recall** | % of known baseline items found |
+| **Precision** | % of results that are actual components |
+| **Latency** | Time to complete query |
+| **Rate Limit** | Requests before throttling |
+| **Coverage** | Unique sources discovered |
+
+**Test Queries:**
+
+1. `"claude code skill" site:github.com`
+2. `"awesome-claude" skills`
+3. `mcp server claude`
+4. `"SKILL.md" claude`
+5. `claude plugin marketplace`
+
+### 1.3 Experiment Matrix
+
+| Query | WebSearch | WebFetch | gh api | crawl4ai | firecrawl | Serper |
+|-------|-----------|----------|--------|----------|-----------|--------|
+| Q1 | — | — | — | — | — | — |
+| Q2 | — | — | — | — | — | — |
+| Q3 | — | — | — | — | — | — |
+| Q4 | — | — | — | — | — | — |
+| Q5 | — | — | — | — | — | — |
+
+Fill with: ✓ (found), ✗ (missed), ⚠ (partial), ⏱ (rate limited)
+
+### 1.4 Deliverables
+
+- `phase-1/tool-experiment-results.yaml` — Raw results per tool
+- `phase-1/tool-comparison-report.md` — Analysis and recommendations
+- `phase-1/recommended-tools.yaml` — Best tool per source type
+
+### 1.5 Success Gate
+
+- [ ] All 6 tools tested with 5 queries each
+- [ ] Best tool identified per source type
+- [ ] Rate limits documented
+
+---
+
+## Phase 2: Component Discovery (Repeatable Template)
+
+> **Purpose:** Discover registries and repos for each component type
+
+This phase repeats for **each of the 7 base component types** (Skills, Agents, Commands, Rules, Prompts, Hooks, MCP). Use the same template structure.
+
+### Template: Component Type Discovery
+
+#### 2.X.1 Independent Site Registries
+
+| Registry | URL | Status | API Docs | robots.txt | Rate Limit |
+|----------|-----|--------|----------|------------|------------|
+| [name] | [url] | Active/Unknown | [url] | Allow/Disallow | [limit] |
+
+**Research Tasks:**
+
+- [ ] Fetch homepage and verify active
+- [ ] Check `/docs/api`, `/api/v1`, `/swagger` for API docs
+- [ ] Fetch `robots.txt` and document restrictions
+- [ ] Test search functionality
+- [ ] Document authentication requirements
+- [ ] Check ToS for scraping policy
+
+#### 2.X.2 GitHub Repository Collections
+
+| Repository | URL | Stars | Component Count | Last Updated |
+|------------|-----|-------|-----------------|--------------|
+| [name] | [url] | [n] | [n] | [date] |
+
+**Research Tasks:**
+
+- [ ] Search GitHub for `awesome-*` repos
+- [ ] Search for repos with relevant topics
+- [ ] Check repo structure for component files
+- [ ] Document README for component listings
+
+#### 2.X.3 Package Manager Search
+
+| Registry | Search Terms | Results |
+|----------|--------------|---------|
+| npm | `claude-[type]` | [n] |
+| PyPI | `claude-[type]` | [n] |
+| crates.io | `claude-[type]` | [n] |
+
+#### 2.X.4 Deliverables
+
+- `phase-2/[type]/registries.yaml`
+- `phase-2/[type]/github-repos.yaml`
+- `phase-2/[type]/api-docs.md`
+
+---
+
+## Phase 2.1: Skills Discovery
+
+### 2.1.1 Independent Site Registries
+
+| Registry | URL | Status | API Docs | Notes |
+|----------|-----|--------|----------|-------|
+| skillsmp | <https://skillsmp.com/> | Active | <https://skillsmp.com/docs/api> | 2000+ skills, largest |
+| ccpm | <https://ccpm.dev/> | Active | TBD | Claude Code Package Manager |
+| claude-plugins.dev | <https://claude-plugins.dev/> | Active | TBD | Community registry |
+| agentskills.best | <https://agentskills.best/> | Active | TBD | Enterprise-grade |
+| claudeskillsmarket | <https://claudeskillsmarket.com/> | Active | TBD | Community-powered |
+| claudecodemarketplace | <https://claudecodemarketplace.com/> | Active | TBD | Plugins + Skills |
+| mcpservers.org/skills | <https://mcpservers.org/claude-skills> | Active | TBD | MCP-integrated |
+| atcyrus | <https://www.atcyrus.com/skills> | Active | TBD | DevOps, security |
+| awesome-claude-code.com | <https://awesome-claude-code.com/> | Active | TBD | Web curated list |
+| awesomeclaude.ai | <https://awesomeclaude.ai/> | Active | TBD | AI aggregator |
+| lobehub | <https://lobehub.com/> | Active | TBD | Skills registry |
+| notion-skills | <https://notion.so/notiondevs/Notion-Skills-for-Claude-28da4445d27180c7af1df7d8615723d0> | Active | TBD | Notion integration |
+
+**Research Tasks:**
+
+- [ ] Fetch `https://skillsmp.com/docs/api` and document endpoints
+- [ ] Check robots.txt for each registry
+- [ ] Test search APIs where available
+- [ ] Document rate limits from response headers
+
+### 2.1.2 GitHub Repository Collections
+
+| Repository | URL | Stars | Skills |
+|------------|-----|-------|--------|
+| anthropics/skills | <https://github.com/anthropics/skills> | — | 17 official |
+| trailofbits/skills | <https://github.com/trailofbits/skills> | 3.4k | 35 security |
+| obra/superpowers | <https://github.com/obra/superpowers> | — | 14 workflow |
+| hesreallyhim/awesome-claude-code | <https://github.com/hesreallyhim/awesome-claude-code> | 26.7k | Curated list |
+| VoltAgent/awesome-claude-code-subagents | <https://github.com/VoltAgent/awesome-claude-code-subagents> | 12.8k | 100+ subagents |
+| travisvn/awesome-claude-skills | <https://github.com/travisvn/awesome-claude-skills> | 8.4k | Curated index |
+| ComposioHQ/awesome-claude-skills | <https://github.com/ComposioHQ/awesome-claude-skills> | 41.7k | Productivity |
+| BehiSecc/awesome-claude-skills | <https://github.com/BehiSecc/awesome-claude-skills> | 7.2k | Tutorials |
+| VoltAgent/awesome-claude-skills | <https://github.com/VoltAgent/awesome-claude-skills> | — | Orchestration |
+| Jeffallan/claude-skills | <https://github.com/Jeffallan/claude-skills> | 5.5k | 66 full-stack |
+| alirezarezvani/claude-skills | <https://github.com/alirezarezvani/claude-skills> | 2.6k | 42 enterprise |
+| alirezarezvani/claude-code-skill-factory | <https://github.com/alirezarezvani/claude-code-skill-factory> | — | Meta-factory |
+| wshobson/agents | <https://github.com/wshobson/agents> | — | 47 skills |
+| abubakarsiddik31/claude-skills-collection | <https://github.com/abubakarsiddik31/claude-skills-collection> | — | Categorized |
+| ashleytower/claude-skills-collection | <https://github.com/ashleytower/claude-skills-collection> | — | Ecosystem |
+| meetrais/claude-agent-skills | <https://github.com/meetrais/claude-agent-skills> | — | API examples |
+| tech-leads-club/agent-skills | <https://github.com/tech-leads-club/agent-skills> | — | TBD |
+| lackeyjb/playwright-skill | <https://github.com/lackeyjb/playwright-skill> | — | Playwright |
+| adrianpuiu/claude-skills-marketplace | <https://github.com/adrianpuiu/claude-skills-marketplace> | — | Marketplace |
+
+### 2.1.3 Related Ecosystems
+
+| Ecosystem | URL | Notes |
+|-----------|-----|-------|
+| Goose Skills | <https://block.github.io/goose/skills/> | Compatible format |
+| OpenClaw | <https://lobehub.com/bg/skills/sundial-org-awesome-openclaw-skills-agent-registry> | Cross-platform |
+
+### 2.1.4 Reference Articles
+
+| Article | URL |
+|---------|-----|
+| Official Docs | <https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview> |
+| 25 Top Registries | <https://medium.com/@frulouis/25-top-claude-agent-skills-registries-community-collections-you-should-know-2025-52aab45c877d> |
+
+---
+
+## Phase 2.2: Agents Discovery
+
+### 2.2.1 Independent Site Registries
 
 | Registry | URL | Status | Notes |
 |----------|-----|--------|-------|
-| skillsmp | <https://skillsmp.com/> | Active | 2000+ skills, largest search engine |
-| ccpm | <https://ccpm.dev/> | Active | Claude Code Package Manager |
-| claude-plugins.dev | <https://claude-plugins.dev/> | Active | Community plugin registry |
-| agentskills.best | <https://agentskills.best/> | Active | Enterprise-grade, quality-controlled |
-| claudeskillsmarket | <https://claudeskillsmarket.com/> | Active | Community-powered registry |
-| claudecodemarketplace | <https://claudecodemarketplace.com/> | Active | Plugins + Agent Skills hub |
-| mcpservers.org/skills | <https://mcpservers.org/claude-skills> | Active | MCP-integrated skills |
-| atcyrus | <https://www.atcyrus.com/skills> | Active | DevOps, security, docs skills |
-| awesome-claude-code.com | <https://awesome-claude-code.com/> | Active | Web-based curated list |
-| awesomeclaude.ai | <https://awesomeclaude.ai/> | Active | AI-focused aggregator |
+| (TBD - research needed) | | | |
 
-### 1.2 Package Manager Registries
+### 2.2.2 GitHub Repository Collections
 
-| Registry | URL | Search Pattern | Notes |
-|----------|-----|----------------|-------|
-| npm | <https://npmjs.com> | `claude-code-skill`, `claude-skill` | JS/TS skills |
-| PyPI | <https://pypi.org> | `claude-skill`, `claude-code` | Python skills |
-| crates.io | <https://crates.io> | `claude` | Rust-based tools |
-| Smithery | <https://smithery.ai> | MCP servers | Companion skills |
-
-### 1.3 Research Tasks
-
-- [ ] Fetch each registry homepage and document API patterns
-- [ ] Test search functionality on each registry
-- [ ] Document authentication requirements (if any)
-- [ ] Identify rate limits per registry
-- [ ] Search npm/PyPI/crates.io for skill packages
-
-### 1.3 Rate Limit Strategy
-
-| Registry | Rate Limit | Strategy |
-|----------|------------|----------|
-| npm | 1000/hr | Cache results for 24h |
-| PyPI | 100/min | 1 req/sec with backoff |
-| crates.io | 1/sec | Sequential with delay |
-| GitHub | 5000/hr (authenticated) | Use token, batch queries |
-
-### 1.4 Fallback Strategy
-
-```text
-IF registries_found < 2:
-  → Pivot to GitHub-first strategy (Phase 2)
-  → Reduce registry-based success criteria
-  → Document findings as "registry ecosystem immature"
-```
-
-### 1.5 Deliverables
-
-- `registries.yaml` - Documented registry endpoints and APIs
-- `registry-search.sh` - Script to query all registries
-- `registry-status.md` - Which registries exist/work
-
-### 1.6 Success Gate
-
-- [ ] 3+ registries verified OR fallback documented
-- [ ] API patterns documented for working registries
+| Repository | URL | Stars | Agents |
+|------------|-----|-------|--------|
+| VoltAgent/awesome-claude-code-subagents | <https://github.com/VoltAgent/awesome-claude-code-subagents> | 12.8k | 100+ subagents |
+| rahulvrane/awesome-claude-agents | <https://github.com/rahulvrane/awesome-claude-agents> | — | Directory |
+| 0xfurai/claude-code-subagents | <https://github.com/0xfurai/claude-code-subagents> | — | 100+ domain |
+| vijaythecoder/awesome-claude-agents | <https://github.com/vijaythecoder/awesome-claude-agents> | — | Dev team |
+| iannuttall/claude-agents | <https://github.com/iannuttall/claude-agents> | 1.9k | Refactoring |
+| wshobson/agents | <https://github.com/wshobson/agents> | — | 85 agents |
+| FrancyJGLisboa/agent-skill-creator | <https://github.com/FrancyJGLisboa/agent-skill-creator> | — | Meta-agent |
 
 ---
 
-## Phase 2: GitHub Search Patterns
+## Phase 2.3: Commands Discovery
 
-### 2.1 Query Builder
+### 2.3.1 Independent Site Registries
 
-Parameterized search patterns:
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| (TBD - research needed) | | | |
 
-```python
-GITHUB_QUERIES = {
-    "file_based": [
-        "filename:SKILL.md claude",
-        "filename:SKILL.md path:skills",
-        "filename:plugin.json skills",
-        "filename:.claude-plugin",
-        "path:skills/ SKILL.md",
-        "path:context/skills",
-    ],
-    "content_based": [
-        '"tags: [" claude skill',
-        '"## Quick Reference" "claude code"',
-        '"## When to Use" "## Workflow" claude',
-        '"## Common Patterns" "## Anti-Patterns"',
-    ],
-    "repository": [
-        "awesome-claude-code",
-        "awesome-claude skills",
-        "claude-code-skill-template",
-        "claude-skill-starter",
-    ],
-    "organization": [
-        "org:anthropics skills",
-        "org:modelcontextprotocol",
-    ],
-    "topic": [
-        "topic:claude-code",
-        "topic:claude-skills",
-        "topic:ai-skills",
-        "topic:llm-skills",
-    ],
-}
-```
+### 2.3.2 GitHub Repository Collections
 
-### 2.2 Rate Limit Strategy
-
-| API | Limit | Strategy |
-|-----|-------|----------|
-| GitHub Search | 30/min (unauth), 30/min (auth) | Batch queries, 2s delay between |
-| GitHub API | 5000/hr (auth) | Use PAT, cache aggressively |
-| GraphQL | 5000 points/hr | Optimize query complexity |
-
-```bash
-# Token rotation for higher limits
-export GITHUB_TOKENS="token1,token2,token3"
-```
-
-### 2.3 Error Handling
-
-```bash
-# Checkpoint/resume capability
-CHECKPOINT_FILE=".github-search-checkpoint.json"
-
-on_error() {
-  save_checkpoint "$CHECKPOINT_FILE"
-  echo "Saved progress. Resume with: ./github-search.sh --resume"
-}
-
-trap on_error ERR
-```
-
-### 2.4 Deliverables
-
-- `github-queries.md` - Documented search queries with expected results
-- `github-search.sh` - Script with checkpoint/resume
-- `github-results.json` - Raw search results
-
-### 2.5 Success Gate
-
-- [ ] All query patterns executed
-- [ ] 50+ unique repositories identified
+| Repository | URL | Notes |
+|------------|-----|-------|
+| hesreallyhim/awesome-claude-code | <https://github.com/hesreallyhim/awesome-claude-code> | Commands section |
+| anthropics/claude-code | <https://github.com/anthropics/claude-code> | Official CLI docs |
 
 ---
 
-## Phase 3: Web Crawling Strategies
+## Phase 2.4: Rules Discovery
 
-### 3.1 Target Sites
+### 2.4.1 Independent Site Registries
 
-| Site | Strategy | Tools | Rate Limit |
-|------|----------|-------|------------|
-| GitHub | API + Search | `gh api`, GraphQL | 5000/hr |
-| GitLab | API | `glab`, REST API | 2000/hr |
-| Dev.to | Tag search | WebFetch, RSS | 30/min |
-| Medium | Tag search | WebFetch | 100/hr |
-| Reddit | Subreddit search | Reddit API | 60/min |
-| HackerNews | Algolia search | HN API | No limit |
-| Bluesky | Hashtag search | AT Protocol | TBD |
-| Mastodon | Hashtag search | ActivityPub | Instance-dependent |
-| Discord | Server search | Manual | N/A |
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| (TBD - research needed) | | | |
 
-### 3.2 Crawling Tools
+### 2.4.2 GitHub Repository Collections
 
-| Tool | Use Case | Cache TTL | Notes |
-|------|----------|-----------|-------|
-| `crawl4ai` MCP | JS-rendered pages | 7 days | Full page crawl |
-| `firecrawl` MCP | Batch crawling | 7 days | Rate-limited, costs $ |
-| `WebFetch` | Static pages | 24 hours | Fast, simple |
-| `gh api` | GitHub data | 24 hours | Structured |
-| `curl` + `jq` | REST APIs | 24 hours | Lightweight |
+| Repository | URL | Notes |
+|------------|-----|-------|
+| (TBD - search for RULES.md patterns) | | |
 
-### 3.3 Caching Strategy
+---
+
+## Phase 2.5: Prompts Discovery
+
+### 2.5.1 Independent Site Registries
+
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| (TBD - research needed) | | | |
+
+### 2.5.2 GitHub Repository Collections
+
+| Repository | URL | Notes |
+|------------|-----|-------|
+| (TBD - search for CLAUDE.md, prompts/) | | |
+
+---
+
+## Phase 2.6: Hooks Discovery
+
+### 2.6.1 Independent Site Registries
+
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| (TBD - research needed) | | | |
+
+### 2.6.2 GitHub Repository Collections
+
+| Repository | URL | Notes |
+|------------|-----|-------|
+| hesreallyhim/awesome-claude-code | <https://github.com/hesreallyhim/awesome-claude-code> | Hooks section |
+
+---
+
+## Phase 2.7: MCP Servers Discovery
+
+### 2.7.1 Independent Site Registries
+
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| Smithery | <https://smithery.ai/> | Active | Primary MCP registry |
+| mcpservers.org | <https://mcpservers.org/> | Active | MCP directory |
+| mcp.so | <https://mcp.so/> | Active | MCP search |
+| glama.ai/mcp | <https://glama.ai/mcp/> | Active | MCP directory |
+
+### 2.7.2 GitHub Repository Collections
+
+| Repository | URL | Notes |
+|------------|-----|-------|
+| modelcontextprotocol/servers | <https://github.com/modelcontextprotocol/servers> | Official |
+| punkpeye/awesome-mcp-servers | <https://github.com/punkpeye/awesome-mcp-servers> | Curated |
+
+---
+
+## Phase 3: Plugin Discovery
+
+> **Purpose:** Discover plugins AFTER base components (since plugins bundle them)
+
+### 3.1 Independent Site Registries
+
+| Registry | URL | Status | Notes |
+|----------|-----|--------|-------|
+| claudemarketplaces | <https://claudemarketplaces.com/> | Active | Plugin hub |
+| buildwithclaude | <https://buildwithclaude.com/> | Active | Builder community |
+| clauderegistry | <https://clauderegistry.com/> | Active | Central registry |
+| litellm plugin docs | <https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace> | Active | Tutorial |
+| paddo.dev | <https://paddo.dev/blog/claude-tools-plugin-marketplace/> | Active | Blog + marketplace |
+
+### 3.2 GitHub Repository Collections
+
+| Repository | URL | Notes |
+|------------|-----|-------|
+| ananddtyagi/cc-marketplace | <https://github.com/ananddtyagi/cc-marketplace> | Plugin marketplace |
+| Kamalnrf/claude-plugins | <https://github.com/Kamalnrf/claude-plugins> | Plugin collection |
+| composio.dev | <https://composio.dev/blog/top-claude-code-plugins> | Top plugins list |
+
+### 3.3 Plugin Structure Analysis
+
+For each discovered plugin, document which components it bundles:
 
 ```yaml
-cache:
-  directory: ".cache/skill-discovery/"
-  ttl:
-    registries: 24h
-    github: 7d
-    web_pages: 7d
-    api_responses: 24h
-  max_size: 500MB
+plugin:
+  name: "example-plugin"
+  components:
+    skills: ["skill-a", "skill-b"]
+    agents: ["agent-x"]
+    commands: ["/cmd1", "/cmd2"]
+    rules: ["rule-1"]
+    hooks: ["post-tool-hook"]
+    mcp_servers: ["server-a"]
 ```
-
-### 3.4 Search Queries by Platform
-
-**Dev.to:**
-
-```text
-https://dev.to/search?q=claude%20code%20skill
-https://dev.to/t/claudecode
-```
-
-**Reddit:**
-
-```text
-site:reddit.com "claude code" skill
-r/ClaudeAI skills
-r/LocalLLaMA claude code
-```
-
-**HackerNews:**
-
-```text
-https://hn.algolia.com/api/v1/search?query=claude+code+skill
-```
-
-**Bluesky:**
-
-```text
-#claudecode
-#claudeai skills
-```
-
-### 3.5 Deliverables
-
-- `crawl-targets.yaml` - Sites and endpoints to crawl
-- `crawl-skill-registry.sh` - Unified crawling script with caching
-- `crawl-results/` - Directory of cached responses
-
-### 3.6 Success Gate
-
-- [ ] All target sites crawled
-- [ ] 20+ additional skills discovered beyond GitHub
 
 ---
 
-## Phase 4: Aggregation & Indexing
+## Phase 4: API Documentation Research
 
-### 4.1 Data Model
+> **Purpose:** Document API access for programmatic registry queries
+
+### 4.1 Research Template Per Registry
+
+For each independent site registry:
 
 ```yaml
-schema_version: 2
+registry:
+  name: "skillsmp"
+  base_url: "https://skillsmp.com"
 
-skill:
+  api:
+    docs_url: "https://skillsmp.com/docs/api"
+    authentication: "api_key" | "oauth" | "none"
+    endpoints:
+      - path: "/api/v1/skills"
+        method: "GET"
+        params: ["query", "category", "page"]
+      - path: "/api/v1/skills/{id}"
+        method: "GET"
+
+  restrictions:
+    robots_txt: "https://skillsmp.com/robots.txt"
+    allowed_paths: ["/api/*"]
+    disallowed_paths: ["/admin/*"]
+    crawl_delay: 1  # seconds
+    rate_limit: "100 req/min"
+    tos_url: "https://skillsmp.com/terms"
+    scraping_allowed: true | false | "with attribution"
+```
+
+### 4.2 Deliverables
+
+- `phase-4/registry-apis.yaml` — Consolidated API documentation
+- `phase-4/rate-limits.yaml` — Rate limits per registry
+- `phase-4/access-restrictions.md` — ToS and robots.txt summary
+
+---
+
+## Phase 5: Aggregation & Indexing
+
+### 5.1 Unified Data Model
+
+```yaml
+schema_version: 3
+
+component:
   # Identity
+  id: string  # UUID
   name: string
-  canonical_url: string  # For deduplication
-  content_hash: string   # SHA256 of SKILL.md content
+  type: "skill|agent|command|rule|prompt|hook|mcp|plugin"
+  canonical_url: string
+  content_hash: string  # SHA256
 
   # Description
   description: string
-  category: "cli-tools|languages|frameworks|workflows|infrastructure|testing"
+  category: string
   tags: [string]
 
   # Source
   source:
-    type: github|npm|registry|web
+    type: "github|npm|registry|web"
+    registry_name: string  # e.g., "skillsmp", "smithery"
     url: string
     last_checked: datetime
 
   # Quality signals
   quality:
-    score: float  # 0.0 - 1.0
+    score: float
     stars: int
     last_commit: datetime
     has_examples: boolean
     has_tests: boolean
-    documentation_completeness: float
 
-  # Metadata
-  metadata:
-    author: string
-    version: string
-    license: string
-    dependencies: [string]
-
-  # Content
-  content:
-    raw_url: string
-    cached_path: string
+  # For plugins only
+  bundled_components:
+    skills: [component_id]
+    agents: [component_id]
+    commands: [component_id]
+    rules: [component_id]
+    hooks: [component_id]
+    mcp_servers: [component_id]
 ```
 
-### 4.2 Deduplication Strategy
-
-```python
-def deduplicate(skills: list[Skill]) -> list[Skill]:
-    """
-    Deduplication priority:
-    1. Exact URL match → keep first seen
-    2. Content hash match → keep highest quality score
-    3. Name + author match → merge metadata, keep best source
-    """
-    seen_urls = {}
-    seen_hashes = {}
-
-    for skill in skills:
-        canonical = normalize_url(skill.canonical_url)
-
-        if canonical in seen_urls:
-            continue  # Exact duplicate
-
-        if skill.content_hash in seen_hashes:
-            existing = seen_hashes[skill.content_hash]
-            if skill.quality.score > existing.quality.score:
-                seen_hashes[skill.content_hash] = skill
-            continue
-
-        seen_urls[canonical] = skill
-        seen_hashes[skill.content_hash] = skill
-
-    return list(seen_urls.values())
-```
-
-### 4.3 Quality Scoring
-
-```python
-def calculate_quality_score(skill: Skill) -> float:
-    weights = {
-        "has_documentation": 0.25,
-        "recent_activity": 0.20,  # Commit in last 6 months
-        "has_examples": 0.20,
-        "star_count": 0.15,      # Normalized
-        "has_tests": 0.10,
-        "complete_metadata": 0.10,
-    }
-
-    score = 0.0
-    for factor, weight in weights.items():
-        score += evaluate_factor(skill, factor) * weight
-
-    return score
-```
-
-### 4.4 Storage: SQLite + FTS5
+### 5.2 Storage Schema
 
 ```sql
--- Schema
-CREATE TABLE skills (
-    id INTEGER PRIMARY KEY,
+CREATE TABLE components (
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    type TEXT NOT NULL,  -- skill|agent|command|rule|prompt|hook|mcp|plugin
     canonical_url TEXT UNIQUE,
     content_hash TEXT,
     description TEXT,
     category TEXT,
     quality_score REAL,
     source_type TEXT,
+    source_registry TEXT,
     source_url TEXT,
     last_checked DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE VIRTUAL TABLE skills_fts USING fts5(
-    name, description, tags, content,
-    content='skills', content_rowid='id'
+CREATE TABLE plugin_components (
+    plugin_id TEXT REFERENCES components(id),
+    component_id TEXT REFERENCES components(id),
+    component_type TEXT,
+    PRIMARY KEY (plugin_id, component_id)
 );
 
-CREATE INDEX idx_skills_category ON skills(category);
-CREATE INDEX idx_skills_quality ON skills(quality_score DESC);
+CREATE VIRTUAL TABLE components_fts USING fts5(
+    name, description, tags,
+    content='components', content_rowid='rowid'
+);
+
+CREATE INDEX idx_components_type ON components(type);
+CREATE INDEX idx_components_quality ON components(quality_score DESC);
 ```
 
-### 4.5 Deliverables
+### 5.3 Deliverables
 
-- `skill-index.db` - SQLite database of discovered skills
-- `skill-search.py` - CLI to search indexed skills
-- `skill-sync.sh` - Script to refresh index from all sources
-- `dedup-report.md` - Statistics on duplicates found/merged
-
-### 4.6 Success Gate
-
-- [ ] All skills from Phases 1-3 indexed
-- [ ] Deduplication removes 10%+ duplicates
-- [ ] Search returns results in <100ms
+- `component-index.db` — SQLite database
+- `component-search.py` — Search CLI
+- `dedup-report.md` — Duplicate analysis
 
 ---
 
-## Phase 5: Integration
+## Phase 6: Integration & Validation
 
-### 5.1 Agent Integration
-
-Update `plugin-skill-researcher` agent to use discovered sources:
-
-```python
-SKILL_SOURCES = [
-    {"type": "local", "path": "context/skills/", "priority": 1},
-    {"type": "index", "path": ".data/skill-index.db", "priority": 2},
-    {"type": "github", "queries": GITHUB_QUERIES, "priority": 3},
-    {"type": "registry", "urls": REGISTRIES, "priority": 4},
-]
-
-async def search_skills(query: str) -> list[Skill]:
-    results = []
-    for source in sorted(SKILL_SOURCES, key=lambda s: s["priority"]):
-        results.extend(await search_source(source, query))
-        if len(results) >= 10:
-            break  # Early exit with enough results
-    return deduplicate(results)
-```
-
-### 5.2 CLI Integration
+### 6.1 CLI Integration
 
 ```bash
-# Search for skills
-just skill-search "changelog generation"
+# Search by type
+just component-search --type skill "changelog"
+just component-search --type mcp "database"
+just component-search --type plugin "devops"
 
-# Fetch and cache a skill
-just skill-fetch github:user/repo/path/to/SKILL.md
+# List by registry
+just component-list --registry skillsmp
+just component-list --registry smithery
 
-# List all indexed skills
-just skill-list --tag cli
+# Sync from all sources
+just component-sync
 
-# Refresh index from all sources
-just skill-sync
-
-# Show index statistics
-just skill-stats
+# Show statistics
+just component-stats
 ```
 
-### 5.3 Periodic Refresh
-
-```bash
-# Cron job for weekly refresh
-0 2 * * 0 cd /path/to/repo && just skill-sync >> /var/log/skill-sync.log 2>&1
-```
-
-### 5.4 Deliverables
-
-- Updated `plugin-skill-researcher` agent
-- `just` recipes for skill discovery
-- Documentation in `docs/src/skill-discovery.md`
-- Cron configuration for periodic refresh
-
-### 5.5 Success Gate
-
-- [ ] Agent successfully queries index
-- [ ] CLI tools functional
-- [ ] Documentation complete
-
----
-
-## Phase 6: Validation
-
-### 6.1 Baseline Comparison
-
-```python
-def validate_recall(discovered: set, baseline: set) -> float:
-    """What % of known skills did we find?"""
-    found = discovered.intersection(baseline)
-    return len(found) / len(baseline)
-
-# Target: 80% recall on baseline skills
-```
-
-### 6.2 Test Queries
-
-| Query | Expected Results | Baseline Skills |
-|-------|------------------|-----------------|
-| "git changelog" | git-cliff, conventional-changelog | 2 known |
-| "kubernetes" | k8s deployment, helm | 3 known |
-| "terraform" | tf module, infrastructure | 2 known |
-| "react component" | react, frontend | 2 known |
-
-### 6.3 Quality Metrics
+### 6.2 Validation Metrics
 
 | Metric | Target | Measurement |
 |--------|--------|-------------|
-| Recall | 80% | % of baseline skills found |
-| Precision | 90% | % of results that are actual skills |
-| Freshness | <7 days | Age of indexed data |
-| Coverage | 90% | % of sources successfully crawled |
-| Search latency | <100ms | P95 response time |
-
-### 6.4 Deliverables
-
-- `validation-report.md` - Full metrics report
-- `false-positives.yaml` - Non-skills incorrectly indexed
-- `missing-skills.yaml` - Baseline skills not found
-
-### 6.5 Success Gate
-
-- [ ] Recall ≥ 80% on baseline
-- [ ] Precision ≥ 90% on sample
-- [ ] All test queries return relevant results
+| Component types covered | 8/8 | All types have discoveries |
+| Registries documented | 20+ | Across all types |
+| API docs captured | 80% | Of independent sites |
+| Recall on baseline | 80% | Known components found |
+| Precision | 90% | Results are actual components |
 
 ---
 
 ## Phase Dependency Graph
 
 ```text
-Phase 0 (Baseline)
+Phase 0 (Matrix + Baseline)
     │
     ▼
-Phase 1 (Registries) ──────┐
-    │                      │
-    ▼                      │
-Phase 2 (GitHub) ──────────┼──► Phase 4 (Aggregation)
-    │                      │         │
-    ▼                      │         ▼
-Phase 3 (Web Crawling) ────┘    Phase 5 (Integration)
-                                     │
-                                     ▼
-                               Phase 6 (Validation)
+Phase 1 (Tool Experiments)
+    │
+    ├──────────────────────────────────────────────┐
+    ▼                                              │
+Phase 2.1 (Skills) ──┐                             │
+Phase 2.2 (Agents) ──┤                             │
+Phase 2.3 (Commands)─┤                             │
+Phase 2.4 (Rules) ───┼──► Phase 4 (API Docs) ──────┤
+Phase 2.5 (Prompts) ─┤                             │
+Phase 2.6 (Hooks) ───┤                             │
+Phase 2.7 (MCP) ─────┘                             │
+    │                                              │
+    ▼                                              │
+Phase 3 (Plugins) ─────────────────────────────────┘
+    │
+    ▼
+Phase 5 (Aggregation)
+    │
+    ▼
+Phase 6 (Integration + Validation)
 ```
 
 **Parallelization:**
 
-- Phases 1, 2, 3 can run in parallel after Phase 0
-- Phase 4 requires all of 1-3 to complete
-- Phases 5-6 are sequential
+- Phase 2.1-2.7 can run in parallel
+- Phase 3 (Plugins) waits for Phase 2 (needs component context)
+- Phase 4 (API Docs) can run in parallel with Phase 2-3
 
 ---
 
 ## Execution Order
 
-| Phase | Name | Duration | Dependencies | Parallelizable |
-|-------|------|----------|--------------|----------------|
-| 0 | Baseline Creation | 0.5 day | None | No |
-| 1 | Registry Discovery | 1 day | Phase 0 | Yes (with 2,3) |
-| 2 | GitHub Patterns | 1 day | Phase 0 | Yes (with 1,3) |
-| 3 | Web Crawling | 2 days | Phase 0 | Yes (with 1,2) |
-| 4 | Aggregation | 1 day | Phases 1-3 | No |
-| 5 | Integration | 1 day | Phase 4 | No |
-| 6 | Validation | 0.5 day | Phase 5 | No |
+| Phase | Name | Duration | Dependencies |
+|-------|------|----------|--------------|
+| 0 | Search Term Matrix | 0.5 day | None |
+| 1 | Tool Experiments | 1 day | Phase 0 |
+| 2.1-2.7 | Component Discovery | 2 days | Phase 1 (parallel) |
+| 3 | Plugin Discovery | 1 day | Phase 2 |
+| 4 | API Documentation | 1 day | Phase 2 (parallel) |
+| 5 | Aggregation | 1 day | Phase 3, 4 |
+| 6 | Validation | 0.5 day | Phase 5 |
 
-**Sequential execution:** 7 days
-**Parallel execution (1-3):** 4.5 days
+**Total: 7 days** (with parallelization)
 
 ---
 
@@ -575,22 +657,21 @@ Phase 3 (Web Crawling) ────┘    Phase 5 (Integration)
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| Registries don't exist | High | Medium | Fallback to GitHub-first |
-| Rate limits block progress | Medium | High | Token rotation, caching, delays |
-| Low skill count discovered | Medium | Medium | Expand search patterns, lower quality threshold |
-| Duplicates inflate count | High | Low | Deduplication in Phase 4 |
-| Index grows stale | Medium | Medium | Weekly cron refresh |
+| Registry API undocumented | Medium | Medium | Manual exploration, network inspection |
+| Rate limits block progress | Medium | High | Caching, delays, tool rotation |
+| robots.txt blocks crawling | Low | Medium | Use search APIs instead |
+| Sparse registries for some types | High | Low | Focus on GitHub patterns |
+| Plugin structure varies | Medium | Medium | Flexible schema, manual review |
 
 ---
 
 ## Success Criteria
 
-- [ ] Baseline of 20+ known skills documented
-- [ ] 3+ skill registries documented (or fallback documented)
-- [ ] GitHub search finds 50+ community skills
-- [ ] Web crawling discovers 20+ additional skills
-- [ ] Deduplication reduces count by 10%+
-- [ ] Unified index is searchable in <100ms
-- [ ] 80% recall on baseline skills
-- [ ] Integration with existing agents complete
-- [ ] Test queries return relevant results
+- [ ] Search term matrix covers all 8 categories
+- [ ] Tool comparison identifies best tools per source
+- [ ] All 8 component types have registry/repo listings
+- [ ] API documentation for 80%+ of independent sites
+- [ ] robots.txt and rate limits documented
+- [ ] Unified index searchable in <100ms
+- [ ] 80% recall on baseline components
+- [ ] Plugin bundling relationships captured
