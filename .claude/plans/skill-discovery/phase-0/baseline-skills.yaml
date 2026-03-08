@@ -1,0 +1,666 @@
+# Skill Discovery Baseline
+# Phase 0: Manual curation of known community skills
+# Created: 2026-03-07
+# Purpose: Ground truth for validation metrics
+
+schema_version: 1
+baseline_created: "2026-03-07"
+total_skills: 85
+
+sources:
+  - name: "anthropics/skills"
+    url: "https://github.com/anthropics/skills"
+    type: official
+    skill_count: 17
+
+  - name: "trailofbits/skills"
+    url: "https://github.com/trailofbits/skills"
+    type: community
+    skill_count: 35
+
+  - name: "obra/superpowers"
+    url: "https://github.com/obra/superpowers"
+    type: community
+    skill_count: 14
+
+  - name: "Various community"
+    url: "https://github.com/hesreallyhim/awesome-claude-code"
+    type: curated-list
+    skill_count: 19
+
+baseline_skills:
+  # ============================================
+  # OFFICIAL ANTHROPIC SKILLS
+  # ============================================
+  - name: "algorithmic-art"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/algorithmic-art"
+    category: "design"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "brand-guidelines"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/brand-guidelines"
+    category: "design"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "canvas-design"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/canvas-design"
+    category: "design"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "claude-api"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/claude-api"
+    category: "development"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "doc-coauthoring"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring"
+    category: "documents"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "docx"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/docx"
+    category: "documents"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "frontend-design"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+    category: "development"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "internal-comms"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/internal-comms"
+    category: "communication"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "mcp-builder"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/mcp-builder"
+    category: "development"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "pdf"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/pdf"
+    category: "documents"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "pptx"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/pptx"
+    category: "documents"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "skill-creator"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/skill-creator"
+    category: "meta"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "slack-gif-creator"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator"
+    category: "communication"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "theme-factory"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/theme-factory"
+    category: "design"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "web-artifacts-builder"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder"
+    category: "development"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "webapp-testing"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/webapp-testing"
+    category: "testing"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  - name: "xlsx"
+    source_url: "https://github.com/anthropics/skills/tree/main/skills/xlsx"
+    category: "documents"
+    quality: "high"
+    source_type: "official"
+    last_verified: "2026-03-07"
+
+  # ============================================
+  # TRAIL OF BITS SECURITY SKILLS
+  # ============================================
+  - name: "building-secure-contracts"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/building-secure-contracts"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: "Smart contract security toolkit with vulnerability scanners"
+
+  - name: "entry-point-analyzer"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/entry-point-analyzer"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "agentic-actions-auditor"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/agentic-actions-auditor"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "audit-context-building"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/audit-context-building"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "burpsuite-project-parser"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/burpsuite-project-parser"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "differential-review"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/differential-review"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "fp-check"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/fp-check"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "insecure-defaults"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/insecure-defaults"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "semgrep-rule-creator"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/semgrep-rule-creator"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "semgrep-rule-variant-creator"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/semgrep-rule-variant-creator"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "sharp-edges"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/sharp-edges"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "static-analysis"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/static-analysis"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "supply-chain-risk-auditor"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/supply-chain-risk-auditor"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "testing-handbook-skills"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/testing-handbook-skills"
+    category: "testing"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "variant-analysis"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/variant-analysis"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "yara-authoring"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/yara-authoring"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "constant-time-analysis"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/constant-time-analysis"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "property-based-testing"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/property-based-testing"
+    category: "testing"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "spec-to-code-compliance"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/spec-to-code-compliance"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "zeroize-audit"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/zeroize-audit"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "dwarf-expert"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/dwarf-expert"
+    category: "reverse-engineering"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "firebase-apk-scanner"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/firebase-apk-scanner"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "modern-python"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/modern-python"
+    category: "development"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "devcontainer-setup"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/devcontainer-setup"
+    category: "infrastructure"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "gh-cli"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/gh-cli"
+    category: "cli-tools"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "git-cleanup"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/git-cleanup"
+    category: "cli-tools"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "seatbelt-sandboxer"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/seatbelt-sandboxer"
+    category: "security"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "second-opinion"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/second-opinion"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "skill-improver"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/skill-improver"
+    category: "meta"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "workflow-skill-design"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/workflow-skill-design"
+    category: "meta"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "ask-questions-if-underspecified"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/ask-questions-if-underspecified"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "let-fate-decide"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/let-fate-decide"
+    category: "workflows"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "culture-index"
+    source_url: "https://github.com/trailofbits/skills/tree/main/plugins/culture-index"
+    category: "management"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  # ============================================
+  # OBRA/SUPERPOWERS SKILLS
+  # ============================================
+  - name: "brainstorming"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/brainstorming"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "dispatching-parallel-agents"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/dispatching-parallel-agents"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "executing-plans"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/executing-plans"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "finishing-a-development-branch"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/finishing-a-development-branch"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "receiving-code-review"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/receiving-code-review"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "requesting-code-review"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/requesting-code-review"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "subagent-driven-development"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/subagent-driven-development"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "systematic-debugging"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/systematic-debugging"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "test-driven-development"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/test-driven-development"
+    category: "testing"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "using-git-worktrees"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/using-git-worktrees"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "using-superpowers"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/using-superpowers"
+    category: "meta"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "verification-before-completion"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/verification-before-completion"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "writing-plans"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/writing-plans"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "writing-skills"
+    source_url: "https://github.com/obra/superpowers/tree/main/skills/writing-skills"
+    category: "meta"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  # ============================================
+  # OTHER COMMUNITY SKILLS
+  # ============================================
+  - name: "humanizer"
+    source_url: "https://github.com/blader/humanizer"
+    category: "writing"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    stars: 7922
+    description: "Removes signs of AI-generated writing from text"
+
+  - name: "planning-with-files"
+    source_url: "https://github.com/OthmanAdi/planning-with-files"
+    category: "workflows"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    stars: 15512
+    description: "Manus-style persistent markdown planning"
+
+  - name: "ios-simulator-skill"
+    source_url: "https://github.com/conorluddy/ios-simulator-skill"
+    category: "development"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "ffuf-web-fuzzing"
+    source_url: "https://github.com/jthack/ffuf_claude_skill"
+    category: "security"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "playwright-skill"
+    source_url: "https://github.com/lackeyjb/playwright-skill"
+    category: "testing"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "claude-d3js-skill"
+    source_url: "https://github.com/chrisvoncsefalvay/claude-d3js-skill"
+    category: "development"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "claude-scientific-skills"
+    source_url: "https://github.com/K-Dense-AI/claude-scientific-skills"
+    category: "research"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "web-asset-generator"
+    source_url: "https://github.com/alonw0/web-asset-generator"
+    category: "development"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "loki-mode"
+    source_url: "https://github.com/asklokesh/claudeskill-loki-mode"
+    category: "development"
+    quality: "low"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "frontend-slides"
+    source_url: "https://github.com/zarazhangrui/frontend-slides"
+    category: "presentation"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "expo-skills"
+    source_url: "https://github.com/expo/skills"
+    category: "development"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: "Expo/React Native development skills"
+
+  - name: "fullstack-dev-skills"
+    source_url: "https://github.com/Jeffallan/claude-skills"
+    category: "development"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    stars: 5538
+    description: "66 specialized skills for full-stack developers"
+
+  - name: "dotnet-skills"
+    source_url: "https://github.com/Aaronontheweb/dotnet-skills"
+    category: "development"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: ".NET development skills and sub-agents"
+
+  - name: "cc-devops-skills"
+    source_url: "https://github.com/akin-ozer/cc-devops-skills"
+    category: "infrastructure"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+  - name: "x-article-publisher-skill"
+    source_url: "https://github.com/wshuyi/x-article-publisher-skill"
+    category: "communication"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: "Publish Markdown articles to X (Twitter)"
+
+  - name: "videocut-skills"
+    source_url: "https://github.com/Ceeon/videocut-skills"
+    category: "media"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: "Video editing agent"
+
+  - name: "skill-codex"
+    source_url: "https://github.com/skills-directory/skill-codex"
+    category: "meta"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    description: "Delegate prompts to Codex"
+
+  - name: "pinme"
+    source_url: "https://github.com/glitternetwork/pinme"
+    category: "infrastructure"
+    quality: "high"
+    source_type: "community"
+    last_verified: "2026-03-07"
+    stars: 2987
+    description: "Deploy frontend in a single command"
+
+  - name: "agentsys"
+    source_url: "https://github.com/avifenesh/agentsys"
+    category: "workflows"
+    quality: "medium"
+    source_type: "community"
+    last_verified: "2026-03-07"
+
+# ============================================
+# SUMMARY STATISTICS
+# ============================================
+summary:
+  by_source:
+    official: 17
+    community: 68
+  by_category:
+    security: 22
+    workflows: 16
+    development: 12
+    documents: 5
+    design: 4
+    testing: 5
+    meta: 6
+    infrastructure: 3
+    cli-tools: 2
+    communication: 3
+    writing: 1
+    research: 1
+    media: 1
+    presentation: 1
+    management: 1
+    reverse-engineering: 1
+  by_quality:
+    high: 63
+    medium: 19
+    low: 3
