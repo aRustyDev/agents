@@ -12,6 +12,7 @@ arustydev
 ashleytower
 atcyrus
 awesomeclaude
+BehiSecc
 biome
 blader
 BLAS
@@ -64,6 +65,7 @@ Iconify
 Jeffallan
 jqueryscript
 justfile
+lackeyjb
 LAPACK
 Livelocks
 lychee
@@ -106,6 +108,7 @@ pylsp
 pyproject
 pytestmark
 radon
+rahulvrane
 recieve
 reprioritize
 rereview

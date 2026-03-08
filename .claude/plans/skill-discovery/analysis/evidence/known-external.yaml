@@ -1,7 +1,7 @@
 # Known External Components
-# Phase 0: Ground truth from community sources
+# Phase 0: Ground truth from user-provided sources
 # Created: 2026-03-08
-# Source: phase-0/baseline-skills.yaml, phase-0/registries.yaml
+# Updated: 2026-03-08 - Full 42 sources from user input
 
 evidence:
   id: "baseline-external"
@@ -9,174 +9,366 @@ evidence:
   source_type: "curated"
 
   # ============================================
-  # SKILLS - From baseline-skills.yaml
+  # GITHUB REPOSITORIES (27)
   # ============================================
-  skills:
-    total_count: 85
-    sources:
+  github_repos:
+    # --- Official ---
+    official:
       - name: "anthropics/skills"
         url: "https://github.com/anthropics/skills"
         type: "official"
+        description: "Official Anthropic repository providing foundational skill examples"
         count: 17
+        notes: "Reference implementation and structural blueprint for custom skills"
 
+      - name: "anthropics/claude-code"
+        url: "https://github.com/anthropics/claude-code"
+        type: "official"
+        description: "Official agentic coding tool documentation and resources"
+        notes: "Everything about the CLI and its skill interface"
+
+    # --- Curated Lists (awesome-*) ---
+    curated_lists:
+      - name: "hesreallyhim/awesome-claude-code"
+        url: "https://github.com/hesreallyhim/awesome-claude-code"
+        type: "curated-list"
+        description: "Curated list of skills, hooks, slash-commands, agent orchestrators, applications, and plugins"
+        notes: "Best practices, feature bounties, and creative setups"
+
+      - name: "jqueryscript/awesome-claude-code"
+        url: "https://github.com/jqueryscript/awesome-claude-code"
+        type: "curated-list"
+        description: "Awesome Claude Code collection"
+
+      - name: "travisvn/awesome-claude-skills"
+        url: "https://github.com/travisvn/awesome-claude-skills"
+        type: "curated-list"
+        description: "Curated index of skills, resources, and tools for developers and builders"
+        notes: "Classic awesome-list format for quick discovery"
+
+      - name: "BehiSecc/awesome-claude-skills"
+        url: "https://github.com/BehiSecc/awesome-claude-skills"
+        type: "curated-list"
+        description: "Community-curated list combining tutorials and templates"
+        notes: "Skill-builder's library with examples for fast cloning"
+
+      - name: "ComposioHQ/awesome-claude-skills"
+        url: "https://github.com/ComposioHQ/awesome-claude-skills"
+        type: "curated-list"
+        description: "Focuses on practical, cross-platform productivity skills"
+        notes: "Work smarter across calendars, docs, and workflows"
+
+      - name: "VoltAgent/awesome-claude-skills"
+        url: "https://github.com/VoltAgent/awesome-claude-skills"
+        type: "curated-list"
+        description: "Skills collection maintained by the VoltAgent community"
+        notes: "Agent orchestration patterns and advanced configurations"
+
+      - name: "rahulvrane/awesome-claude-agents"
+        url: "https://github.com/rahulvrane/awesome-claude-agents"
+        type: "curated-list"
+        description: "Comprehensive directory of agents, frameworks, and recipes"
+        notes: "Ecosystem aggregation and research index"
+
+      - name: "vijaythecoder/awesome-claude-agents"
+        url: "https://github.com/vijaythecoder/awesome-claude-agents"
+        type: "curated-list"
+        description: "Orchestrated sub-agent dev team for feature development and debugging"
+        notes: "Multi-agent collaboration and simulation"
+
+    # --- Subagent Collections ---
+    subagent_collections:
+      - name: "VoltAgent/awesome-claude-code-subagents"
+        url: "https://github.com/VoltAgent/awesome-claude-code-subagents"
+        type: "collection"
+        description: "Collection of 100+ specialized Claude Code subagents"
+        count: 100
+        notes: "Wide range of development use cases"
+
+      - name: "0xfurai/claude-code-subagents"
+        url: "https://github.com/0xfurai/claude-code-subagents"
+        type: "collection"
+        description: "Over 100 domain-specific development sub-agents"
+        count: 100
+        notes: "Massive coverage: languages, DevOps, databases"
+
+      - name: "iannuttall/claude-agents"
+        url: "https://github.com/iannuttall/claude-agents"
+        type: "collection"
+        description: "Custom sub-agents for refactoring, content writing, and planning"
+        stars: 1900
+        notes: "Quick-start templates for practical use"
+
+    # --- Skill Collections ---
+    skill_collections:
       - name: "trailofbits/skills"
         url: "https://github.com/trailofbits/skills"
-        type: "community"
+        type: "collection"
+        description: "Trail of Bits Claude Code skills for security research, vulnerability detection, and audit workflows"
         count: 35
 
       - name: "obra/superpowers"
         url: "https://github.com/obra/superpowers"
-        type: "community"
-        count: 14
+        type: "collection"
+        description: "Core library featuring battle-tested Claude Skills"
+        count: 20
+        notes: "Strong starting point for modular skill design"
 
-      - name: "Various community"
-        url: "https://github.com/hesreallyhim/awesome-claude-code"
-        type: "curated-list"
-        count: 19
+      - name: "alirezarezvani/claude-skills"
+        url: "https://github.com/alirezarezvani/claude-skills"
+        type: "collection"
+        description: "Production-ready skills for marketing, engineering, and executive teams"
+        count: 42
+        notes: "Enterprise-focused, polished examples"
+
+      - name: "abubakarsiddik31/claude-skills-collection"
+        url: "https://github.com/abubakarsiddik31/claude-skills-collection"
+        type: "collection"
+        description: "Combines official and community-built skills categorized by function"
+        notes: "Structured index ideal for learning and contribution"
+
+      - name: "ashleytower/claude-skills-collection"
+        url: "https://github.com/ashleytower/claude-skills-collection"
+        type: "collection"
+        description: "Full ecosystem with factory, examples, and documentation"
+        notes: "Reference environment for building at scale"
+
+      - name: "tech-leads-club/agent-skills"
+        url: "https://github.com/tech-leads-club/agent-skills"
+        type: "collection"
+        description: "Agent skills from Tech Leads Club"
+
+      - name: "meetrais/claude-agent-skills"
+        url: "https://github.com/meetrais/claude-agent-skills"
+        type: "collection"
+        description: "API examples and templates for default and custom skills"
+        notes: "Focused on developer enablement"
+
+    # --- Large Multi-Component Repos ---
+    multi_component:
+      - name: "wshobson/agents"
+        url: "https://github.com/wshobson/agents"
+        type: "multi-component"
+        description: "Production-ready system with agents, skills, and plugins"
+        counts:
+          agents: 85
+          skills: 47
+          plugins: 63
+        notes: "High-quality, structured power packs for real projects"
+
+    # --- Meta-Tools (skill builders) ---
+    meta_tools:
+      - name: "alirezarezvani/claude-code-skill-factory"
+        url: "https://github.com/alirezarezvani/claude-code-skill-factory"
+        type: "meta-tool"
+        description: "Toolkit for building and managing production-ready skills at scale"
+        notes: "A meta-factory for skill developers"
+
+      - name: "FrancyJGLisboa/agent-skill-creator"
+        url: "https://github.com/FrancyJGLisboa/agent-skill-creator"
+        type: "meta-tool"
+        description: "Meta-skill that builds other agents autonomously"
+        notes: "Agentic recursion in practice"
+
+    # --- Single Skills ---
+    single_skills:
+      - name: "lackeyjb/playwright-skill"
+        url: "https://github.com/lackeyjb/playwright-skill"
+        type: "single-skill"
+        description: "Browser-automation skill using Playwright"
+        notes: "For testing, scraping, and automation workflows"
+
+    # --- Marketplaces ---
+    marketplaces:
+      - name: "adrianpuiu/claude-skills-marketplace"
+        url: "https://github.com/adrianpuiu/claude-skills-marketplace"
+        type: "marketplace"
+        description: "Skills marketplace implementation"
+
+    # --- External Ecosystems ---
+    external_ecosystems:
+      - name: "block/goose-skills"
+        url: "https://block.github.io/goose/skills/"
+        type: "external"
+        description: "Community-contributed skills for Goose (Block's AI tool)"
+        notes: "Different tool but similar skill concept - potential patterns to learn from"
 
   # ============================================
-  # REGISTRIES - From registries.yaml
+  # INDEPENDENT SITES (15)
   # ============================================
-  registries:
-    skill_registries:
+  independent_sites:
+    # --- Marketplaces/Registries ---
+    marketplaces:
       - name: "skillsmp"
         url: "https://skillsmp.com/"
+        type: "marketplace"
+        description: "Community-driven marketplace indexing over 2000 Claude Skills"
+        count: 2000
         priority: "high"
-        description: "2000+ skills, largest registry"
+        notes: "The largest open skill search engine to date"
+
+      - name: "smithery-skills"
+        url: "https://smithery.ai/skills"
+        type: "marketplace"
+        description: "Skills section of Smithery MCP registry"
+        priority: "high"
 
       - name: "ccpm"
         url: "https://ccpm.dev/"
-        priority: "high"
+        type: "package-manager"
         description: "Claude Code Package Manager"
+        priority: "high"
 
       - name: "claude-plugins.dev"
         url: "https://claude-plugins.dev/"
-        priority: "high"
+        type: "marketplace"
         description: "Community plugin registry"
+        priority: "high"
 
       - name: "agentskills.best"
         url: "https://agentskills.best/"
+        type: "marketplace"
+        description: "Curated marketplace with production-ready, quality-controlled skills"
         priority: "high"
-        description: "Enterprise-grade skills"
+        notes: "Focus on reliability and enterprise-grade readiness"
 
       - name: "claudeskillsmarket"
         url: "https://claudeskillsmarket.com/"
+        type: "marketplace"
+        description: "Community-powered registry for discovering and sharing public skills"
         priority: "medium"
+        notes: "Grassroots exchange for experimenters and builders"
 
       - name: "claudecodemarketplace"
         url: "https://claudecodemarketplace.com/"
+        type: "marketplace"
+        description: "Dedicated hub for both Claude Code plugins and Agent Skills"
         priority: "medium"
+        notes: "Where builders publish and test extensions built for the CLI"
 
-      - name: "mcpservers.org/skills"
+      - name: "mcpservers-skills"
         url: "https://mcpservers.org/claude-skills"
+        type: "marketplace"
+        description: "Skills library integrated with MCP Servers"
         priority: "medium"
+        notes: "Bridges the MCP ecosystem with Claude's agentic framework"
 
       - name: "atcyrus"
         url: "https://www.atcyrus.com/skills"
+        type: "marketplace"
+        description: "Claude Code skills for documents, development, DevOps, security, and more"
         priority: "medium"
 
+      - name: "lobehub-skills"
+        url: "https://lobehub.com/bg/skills/sundial-org-awesome-openclaw-skills-agent-registry"
+        type: "index"
+        description: "LobeHub skills index"
+        priority: "low"
+
+    # --- Curated Sites ---
+    curated_sites:
       - name: "awesome-claude-code.com"
         url: "https://awesome-claude-code.com/"
+        type: "curated-site"
+        description: "Web version of awesome-claude-code list"
         priority: "medium"
 
       - name: "awesomeclaude.ai"
         url: "https://awesomeclaude.ai/"
+        type: "curated-site"
+        description: "Curated Claude resources"
         priority: "medium"
 
-      - name: "lobehub"
-        url: "https://lobehub.com/"
-        priority: "low"
+    # --- Official Documentation ---
+    official_docs:
+      - name: "docs.claude.com-skills"
+        url: "https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview"
+        type: "documentation"
+        description: "Official documentation explaining Agent Skills"
+        priority: "high"
+        notes: "Starting point for skill design, registration, and testing"
 
+    # --- Integration-Specific ---
+    integrations:
       - name: "notion-skills"
         url: "https://www.notion.so/notiondevs/Notion-Skills-for-Claude-28da4445d27180c7af1df7d8615723d0"
+        type: "integration"
+        description: "Official Notion integration skills"
         priority: "low"
+        notes: "Best for knowledge-management and workspace automation"
 
-    mcp_registries:
-      - name: "smithery"
-        url: "https://smithery.ai/"
-        priority: "high"
-
-      - name: "mcp.so"
-        url: "https://mcp.so/"
-        priority: "high"
-
-      - name: "mcpservers.org"
-        url: "https://mcpservers.org/"
-        priority: "high"
-
-      - name: "glama"
-        url: "https://glama.ai/mcp/servers"
-        priority: "high"
-
-    plugin_registries:
-      - name: "claudemarketplaces"
-        url: "https://claudemarketplaces.com/"
-        priority: "high"
-
-      - name: "buildwithclaude"
-        url: "https://buildwithclaude.com/"
-        priority: "high"
-
-      - name: "clauderegistry"
-        url: "https://clauderegistry.com/"
-        priority: "high"
-
-  # ============================================
-  # GITHUB REPOSITORIES
-  # ============================================
-  github_repos:
-    captured:
-      - "anthropics/skills"
-      - "trailofbits/skills"
-      - "obra/superpowers"
-      - "hesreallyhim/awesome-claude-code"
-
-    uncaptured:
-      - name: "VoltAgent/awesome-claude-code-subagents"
-        priority: "high"
-        notes: "100+ subagents"
-
-      - name: "tech-leads-club/agent-skills"
-        priority: "high"
-
-      - name: "wshobson/agents"
-        priority: "high"
-        notes: "85 agents, 47 skills"
-
-      - name: "0xfurai/claude-code-subagents"
-        priority: "high"
-        notes: "100+ domain subagents"
-
-      - name: "Jeffallan/claude-skills"
-        priority: "high"
-        notes: "66 full-stack skills"
-
-      - name: "alirezarezvani/claude-skills"
-        priority: "high"
-        notes: "42 enterprise skills"
-
-      - name: "travisvn/awesome-claude-skills"
-        priority: "medium"
-
-      - name: "ComposioHQ/awesome-claude-skills"
-        priority: "medium"
-
-      - name: "modelcontextprotocol/servers"
-        priority: "high"
-        notes: "Official MCP servers"
-
-      - name: "punkpeye/awesome-mcp-servers"
-        priority: "high"
-        notes: "Curated MCP list"
+    # --- Reference Articles ---
+    references:
+      - name: "medium-skills-article"
+        url: "https://medium.com/@frulouis/25-top-claude-agent-skills-registries-community-collections-you-should-know-2025-52aab45c877d"
+        type: "reference"
+        description: "Article listing 25 top Claude Agent Skills registries and collections"
+        priority: "low"
+        notes: "Secondary source - may contain additional leads"
 
   # ============================================
   # SUMMARY
   # ============================================
   summary:
-    skills_baseline: 85
-    skill_registries: 12
-    mcp_registries: 4
-    plugin_registries: 3
-    github_repos_captured: 4
-    github_repos_uncaptured: 10
-    total_known_sources: 33
+    github_repos:
+      official: 2
+      curated_lists: 9
+      subagent_collections: 3
+      skill_collections: 8
+      multi_component: 1
+      meta_tools: 2
+      single_skills: 1
+      marketplaces: 1
+      external_ecosystems: 1
+      total: 27
+      # Note: hesreallyhim/awesome-claude-code appears twice in original list (counted once)
+
+    independent_sites:
+      marketplaces: 10
+      curated_sites: 2
+      official_docs: 1
+      integrations: 1
+      references: 1
+      total: 15
+
+    total_sources: 42
+
+    known_skill_counts:
+      anthropics_skills: 17
+      trailofbits_skills: 35
+      obra_superpowers: 20
+      alirezarezvani_skills: 42
+      voltagent_subagents: 100
+      "0xfurai_subagents": 100
+      wshobson_skills: 47
+      wshobson_agents: 85
+      wshobson_plugins: 63
+      skillsmp_total: 2000
+      estimated_unique: "2500+"  # Accounting for overlap
+
+    priority_for_phase_2:
+      high:
+        - "skillsmp.com (2000+ skills)"
+        - "smithery.ai/skills"
+        - "ccpm.dev"
+        - "claude-plugins.dev"
+        - "agentskills.best"
+        - "anthropics/skills (official)"
+        - "trailofbits/skills (35 security skills)"
+        - "VoltAgent/awesome-claude-code-subagents (100+)"
+        - "0xfurai/claude-code-subagents (100+)"
+        - "wshobson/agents (85 agents, 47 skills, 63 plugins)"
+      medium:
+        - "claudeskillsmarket.com"
+        - "claudecodemarketplace.com"
+        - "mcpservers.org/claude-skills"
+        - "atcyrus.com/skills"
+        - "awesome-claude-code.com"
+        - "awesomeclaude.ai"
+        - "alirezarezvani/claude-skills (42)"
+        - "obra/superpowers (20)"
+      low:
+        - "lobehub (index)"
+        - "notion-skills (integration-specific)"
+        - "medium article (reference)"
+        - "block/goose (different tool)"
