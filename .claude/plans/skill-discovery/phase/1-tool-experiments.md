@@ -23,7 +23,7 @@ Compare search tools to determine effectiveness per source type.
 | `gh api` | GitHub CLI | Repo/code search | Free |
 | `crawl4ai` MCP | JS-rendered | SPAs, dynamic content | Free |
 | `firecrawl` MCP | Batch crawl | Large-scale scraping | $ |
-| Serper API | Google wrapper | Broad web search | $ |
+| SearXNG | Meta-search | Privacy-respecting, aggregated | Free (self-host) |
 
 ---
 

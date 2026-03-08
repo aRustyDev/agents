@@ -166,3 +166,4 @@ capsys
 Rubo
 glab
 firecrawl
+searxng
