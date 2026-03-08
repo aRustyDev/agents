@@ -1,0 +1,38 @@
+# Local Baseline Inventory
+# Phase 0: Ground truth from local repository
+# Created: 2026-03-08
+
+evidence:
+  id: "baseline-local"
+  collected: "2026-03-08"
+  source_type: "manual"
+  repository: "/private/etc/infra/pub/ai"
+
+  counts:
+    skills: 192
+    agents: 276
+    commands: 25
+    rules: 33
+    prompts: 3  # output-styles/
+    hooks: 14
+    mcp: 22  # 21 in plugins + 1 root
+    plugins: 21
+
+  paths:
+    skills: "context/skills/"
+    agents: "context/agents/"
+    commands: "context/commands/"
+    rules: ".claude/rules/, context/rules/"
+    prompts: "context/output-styles/"
+    hooks: "context/hooks/"
+    mcp: "context/plugins/*/.mcp.json, .mcp.json"
+    plugins: "context/plugins/"
+
+  notes:
+    - "Skills counted by SKILL.md files"
+    - "Agents counted by *.md files in context/agents/"
+    - "Rules includes both .claude/rules/ and context/rules/"
+    - "MCP configs found in plugin directories"
+    - "Large agent count suggests many subagent definitions"
+
+  total: 586

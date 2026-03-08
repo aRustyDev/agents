@@ -1,0 +1,182 @@
+# Search Term Matrix
+# Phase 0: Systematic search vocabulary for 8 component types
+# Created: 2026-03-08
+
+schema_version: 1
+created: "2026-03-08"
+
+matrix:
+  skills:
+    primary:
+      - "claude skill"
+      - "claude code skill"
+      - "agent skill"
+    synonyms:
+      - "capability"
+      - "knowledge module"
+      - "domain knowledge"
+      - "expertise"
+      - "specialization"
+    narrower:
+      - "SKILL.md"
+      - "skill-creator"
+      - "/skills/"
+      - "skills/"
+      - ".claude/skills/"
+    broader:
+      - "claude code"
+      - "ai assistant"
+      - "llm skill"
+      - "ai capability"
+
+  agents:
+    primary:
+      - "claude agent"
+      - "claude code agent"
+      - "subagent"
+    synonyms:
+      - "specialist"
+      - "expert agent"
+      - "orchestrator"
+      - "assistant"
+      - "sub-agent"
+    narrower:
+      - "AGENT.md"
+      - "subagent_type"
+      - ".claude/agents/"
+      - "agents/"
+    broader:
+      - "agentic"
+      - "ai agent"
+      - "llm agent"
+      - "autonomous agent"
+
+  commands:
+    primary:
+      - "claude command"
+      - "slash command"
+      - "claude code command"
+    synonyms:
+      - "workflow"
+      - "action"
+      - "macro"
+      - "shortcut"
+    narrower:
+      - ".claude/commands/"
+      - "commands/"
+      - "/command"
+      - "command.md"
+    broader:
+      - "cli command"
+      - "interface"
+      - "user workflow"
+
+  rules:
+    primary:
+      - "claude rule"
+      - "claude code rule"
+      - "project rule"
+    synonyms:
+      - "constraint"
+      - "guideline"
+      - "policy"
+      - "directive"
+      - "guardrail"
+    narrower:
+      - "RULES.md"
+      - ".claude/rules/"
+      - "rules/"
+      - "behavioral rules"
+    broader:
+      - "safety"
+      - "coding standard"
+      - "ai constraint"
+
+  prompts:
+    primary:
+      - "claude prompt"
+      - "prompt template"
+      - "system prompt"
+    synonyms:
+      - "instruction"
+      - "template"
+      - "persona"
+      - "output style"
+    narrower:
+      - "CLAUDE.md"
+      - "prompts/"
+      - "output-styles/"
+      - ".prompt.md"
+    broader:
+      - "llm prompt"
+      - "ai prompt"
+      - "prompt engineering"
+
+  hooks:
+    primary:
+      - "claude hook"
+      - "claude code hook"
+      - "lifecycle hook"
+    synonyms:
+      - "interceptor"
+      - "callback"
+      - "event handler"
+      - "trigger"
+    narrower:
+      - "hooks.json"
+      - "PreToolUse"
+      - "PostToolUse"
+      - "Notification"
+      - "Stop"
+    broader:
+      - "automation"
+      - "git hook"
+      - "event system"
+
+  mcp:
+    primary:
+      - "mcp server"
+      - "model context protocol"
+      - "mcp claude"
+    synonyms:
+      - "tool server"
+      - "context server"
+      - "integration"
+      - "connector"
+    narrower:
+      - ".mcp.json"
+      - "mcp-server-"
+      - "@modelcontextprotocol"
+      - "mcpServers"
+    broader:
+      - "claude tools"
+      - "llm tools"
+      - "ai integration"
+      - "api wrapper"
+
+  plugins:
+    primary:
+      - "claude plugin"
+      - "claude code plugin"
+      - "plugin marketplace"
+    synonyms:
+      - "extension"
+      - "addon"
+      - "package"
+      - "bundle"
+    narrower:
+      - "plugin.json"
+      - ".claude-plugin/"
+      - "marketplace"
+    broader:
+      - "claude extension"
+      - "ai plugin"
+      - "registry"
+
+# Summary statistics
+summary:
+  total_types: 8
+  avg_primary_terms: 3
+  avg_synonyms: 5
+  avg_narrower_terms: 4
+  avg_broader_terms: 4

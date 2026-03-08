@@ -1,0 +1,170 @@
+# Boolean Query Patterns
+# Phase 0: Query syntax per search engine
+# Created: 2026-03-08
+
+schema_version: 1
+created: "2026-03-08"
+
+patterns:
+  github:
+    description: "GitHub code and repository search"
+    operators:
+      and: '"term1" "term2"'
+      or: "term1 OR term2"
+      not: "term1 NOT term2"
+      exact: '"exact phrase"'
+    filters:
+      file: "filename:SKILL.md"
+      path: "path:skills/"
+      extension: "extension:md"
+      org: "org:anthropics"
+      repo: "repo:owner/name"
+      language: "language:markdown"
+      topic: "topic:claude-skills"
+      stars: "stars:>100"
+      pushed: "pushed:>2025-01-01"
+    examples:
+      - query: 'filename:SKILL.md "claude"'
+        purpose: "Find SKILL.md files mentioning claude"
+      - query: 'path:.claude/agents/ language:markdown'
+        purpose: "Find agent definitions"
+      - query: 'topic:claude-skills stars:>50'
+        purpose: "Find popular skill repos"
+      - query: 'org:anthropics path:skills/'
+        purpose: "Official Anthropic skills"
+
+  websearch:
+    description: "Claude WebSearch tool"
+    operators:
+      and: "term1 AND term2"
+      or: "term1 OR term2"
+      not: "term1 -term2"
+      exact: '"exact phrase"'
+    filters:
+      site: "site:github.com"
+      filetype: "filetype:md"
+    examples:
+      - query: '"claude skill" site:github.com'
+        purpose: "Skills on GitHub"
+      - query: '"awesome-claude" skills -job -hiring'
+        purpose: "Awesome lists, exclude job posts"
+      - query: '"mcp server" claude registry'
+        purpose: "MCP server registries"
+
+  npm:
+    description: "npm package search"
+    operators:
+      and: "term1 term2"  # Implicit AND
+      scope: "@scope/package"
+    filters:
+      keywords: "keywords:claude"
+      author: "author:anthropic"
+    examples:
+      - query: "claude-skill"
+        purpose: "Skill packages"
+      - query: "@modelcontextprotocol"
+        purpose: "Official MCP packages"
+      - query: "mcp-server"
+        purpose: "MCP server packages"
+
+  pypi:
+    description: "Python Package Index search"
+    operators:
+      and: "term1 term2"  # Implicit AND
+    filters:
+      classifiers: "Framework :: Claude"  # If exists
+    examples:
+      - query: "claude-skill"
+        purpose: "Python skill packages"
+      - query: "mcp-server"
+        purpose: "Python MCP servers"
+
+  searxng:
+    description: "SearXNG meta-search"
+    operators:
+      and: "term1 AND term2"
+      or: "term1 OR term2"
+      not: "term1 !term2"
+      exact: '"exact phrase"'
+    filters:
+      site: "site:github.com"
+      filetype: "filetype:md"
+      engine: "!gh"  # GitHub engine
+      time: "!year"  # Last year
+    examples:
+      - query: '"claude skill" !gh'
+        purpose: "GitHub via SearXNG"
+      - query: '"mcp server" registry !year'
+        purpose: "Recent MCP registries"
+
+# Composite queries for each component type
+component_queries:
+  skills:
+    github:
+      - 'filename:SKILL.md'
+      - 'topic:claude-skills'
+      - 'path:skills/ "claude" language:markdown'
+      - '"awesome-claude" skills'
+    websearch:
+      - '"claude skill" registry'
+      - '"agent skill" marketplace'
+      - 'site:skillsmp.com'
+
+  agents:
+    github:
+      - 'path:.claude/agents/ language:markdown'
+      - '"subagent_type" language:markdown'
+      - 'topic:claude-agents'
+    websearch:
+      - '"claude agent" subagent'
+      - '"awesome-claude" agents'
+
+  commands:
+    github:
+      - 'path:.claude/commands/ language:markdown'
+      - 'path:commands/ "claude"'
+    websearch:
+      - '"claude code" "slash command"'
+
+  rules:
+    github:
+      - 'path:.claude/rules/ language:markdown'
+      - 'filename:RULES.md claude'
+    websearch:
+      - '"claude rule" behavioral'
+
+  prompts:
+    github:
+      - 'filename:CLAUDE.md'
+      - 'path:prompts/ claude'
+      - 'path:output-styles/'
+    websearch:
+      - '"claude prompt" template'
+      - '"system prompt" claude'
+
+  hooks:
+    github:
+      - 'filename:hooks.json claude'
+      - '"PreToolUse" OR "PostToolUse"'
+    websearch:
+      - '"claude hook" lifecycle'
+
+  mcp:
+    github:
+      - 'topic:mcp-server'
+      - 'filename:mcp.json'
+      - '"@modelcontextprotocol/sdk"'
+      - 'mcp-server- language:typescript'
+    websearch:
+      - 'site:smithery.ai'
+      - 'site:mcp.so'
+      - '"mcp server" registry'
+
+  plugins:
+    github:
+      - 'filename:plugin.json claude'
+      - 'path:.claude-plugin/'
+      - 'topic:claude-plugin'
+    websearch:
+      - '"claude plugin" marketplace'
+      - 'site:claudemarketplaces.com'

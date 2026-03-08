@@ -1,0 +1,182 @@
+# Known External Components
+# Phase 0: Ground truth from community sources
+# Created: 2026-03-08
+# Source: phase-0/baseline-skills.yaml, phase-0/registries.yaml
+
+evidence:
+  id: "baseline-external"
+  collected: "2026-03-08"
+  source_type: "curated"
+
+  # ============================================
+  # SKILLS - From baseline-skills.yaml
+  # ============================================
+  skills:
+    total_count: 85
+    sources:
+      - name: "anthropics/skills"
+        url: "https://github.com/anthropics/skills"
+        type: "official"
+        count: 17
+
+      - name: "trailofbits/skills"
+        url: "https://github.com/trailofbits/skills"
+        type: "community"
+        count: 35
+
+      - name: "obra/superpowers"
+        url: "https://github.com/obra/superpowers"
+        type: "community"
+        count: 14
+
+      - name: "Various community"
+        url: "https://github.com/hesreallyhim/awesome-claude-code"
+        type: "curated-list"
+        count: 19
+
+  # ============================================
+  # REGISTRIES - From registries.yaml
+  # ============================================
+  registries:
+    skill_registries:
+      - name: "skillsmp"
+        url: "https://skillsmp.com/"
+        priority: "high"
+        description: "2000+ skills, largest registry"
+
+      - name: "ccpm"
+        url: "https://ccpm.dev/"
+        priority: "high"
+        description: "Claude Code Package Manager"
+
+      - name: "claude-plugins.dev"
+        url: "https://claude-plugins.dev/"
+        priority: "high"
+        description: "Community plugin registry"
+
+      - name: "agentskills.best"
+        url: "https://agentskills.best/"
+        priority: "high"
+        description: "Enterprise-grade skills"
+
+      - name: "claudeskillsmarket"
+        url: "https://claudeskillsmarket.com/"
+        priority: "medium"
+
+      - name: "claudecodemarketplace"
+        url: "https://claudecodemarketplace.com/"
+        priority: "medium"
+
+      - name: "mcpservers.org/skills"
+        url: "https://mcpservers.org/claude-skills"
+        priority: "medium"
+
+      - name: "atcyrus"
+        url: "https://www.atcyrus.com/skills"
+        priority: "medium"
+
+      - name: "awesome-claude-code.com"
+        url: "https://awesome-claude-code.com/"
+        priority: "medium"
+
+      - name: "awesomeclaude.ai"
+        url: "https://awesomeclaude.ai/"
+        priority: "medium"
+
+      - name: "lobehub"
+        url: "https://lobehub.com/"
+        priority: "low"
+
+      - name: "notion-skills"
+        url: "https://www.notion.so/notiondevs/Notion-Skills-for-Claude-28da4445d27180c7af1df7d8615723d0"
+        priority: "low"
+
+    mcp_registries:
+      - name: "smithery"
+        url: "https://smithery.ai/"
+        priority: "high"
+
+      - name: "mcp.so"
+        url: "https://mcp.so/"
+        priority: "high"
+
+      - name: "mcpservers.org"
+        url: "https://mcpservers.org/"
+        priority: "high"
+
+      - name: "glama"
+        url: "https://glama.ai/mcp/servers"
+        priority: "high"
+
+    plugin_registries:
+      - name: "claudemarketplaces"
+        url: "https://claudemarketplaces.com/"
+        priority: "high"
+
+      - name: "buildwithclaude"
+        url: "https://buildwithclaude.com/"
+        priority: "high"
+
+      - name: "clauderegistry"
+        url: "https://clauderegistry.com/"
+        priority: "high"
+
+  # ============================================
+  # GITHUB REPOSITORIES
+  # ============================================
+  github_repos:
+    captured:
+      - "anthropics/skills"
+      - "trailofbits/skills"
+      - "obra/superpowers"
+      - "hesreallyhim/awesome-claude-code"
+
+    uncaptured:
+      - name: "VoltAgent/awesome-claude-code-subagents"
+        priority: "high"
+        notes: "100+ subagents"
+
+      - name: "tech-leads-club/agent-skills"
+        priority: "high"
+
+      - name: "wshobson/agents"
+        priority: "high"
+        notes: "85 agents, 47 skills"
+
+      - name: "0xfurai/claude-code-subagents"
+        priority: "high"
+        notes: "100+ domain subagents"
+
+      - name: "Jeffallan/claude-skills"
+        priority: "high"
+        notes: "66 full-stack skills"
+
+      - name: "alirezarezvani/claude-skills"
+        priority: "high"
+        notes: "42 enterprise skills"
+
+      - name: "travisvn/awesome-claude-skills"
+        priority: "medium"
+
+      - name: "ComposioHQ/awesome-claude-skills"
+        priority: "medium"
+
+      - name: "modelcontextprotocol/servers"
+        priority: "high"
+        notes: "Official MCP servers"
+
+      - name: "punkpeye/awesome-mcp-servers"
+        priority: "high"
+        notes: "Curated MCP list"
+
+  # ============================================
+  # SUMMARY
+  # ============================================
+  summary:
+    skills_baseline: 85
+    skill_registries: 12
+    mcp_registries: 4
+    plugin_registries: 3
+    github_repos_captured: 4
+    github_repos_uncaptured: 10
+    total_known_sources: 33

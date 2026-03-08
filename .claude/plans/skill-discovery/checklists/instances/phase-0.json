@@ -1,0 +1,86 @@
+{
+  "$schema": "../schemas/research-prep.schema.json",
+  "phase": "0",
+  "name": "Baseline & Search Term Matrix",
+  "completed": "2026-03-08",
+  "duration": "0.5 day",
+
+  "success_criteria": {
+    "matrix_coverage": {
+      "target": "8/8 types",
+      "actual": "8/8 types",
+      "passed": true,
+      "evidence": "analysis/results/search-term-matrix.yaml"
+    },
+    "synonyms_per_type": {
+      "target": "5+ per type",
+      "actual": "4-6 per type (avg 5)",
+      "passed": true,
+      "evidence": "analysis/results/search-term-matrix.yaml"
+    },
+    "local_baseline": {
+      "target": "Documented",
+      "actual": "586 components documented",
+      "passed": true,
+      "evidence": "analysis/evidence/local-baseline.yaml"
+    },
+    "external_baseline": {
+      "target": "20+ components",
+      "actual": "85 skills baseline, 33 known sources",
+      "passed": true,
+      "evidence": "analysis/evidence/known-external.yaml"
+    }
+  },
+
+  "deliverables": [
+    {
+      "name": "Search Term Matrix",
+      "path": "analysis/results/search-term-matrix.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Boolean Query Patterns",
+      "path": "analysis/results/boolean-queries.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Local Baseline Inventory",
+      "path": "analysis/evidence/local-baseline.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Known External Components",
+      "path": "analysis/evidence/known-external.yaml",
+      "status": "complete"
+    }
+  ],
+
+  "summary": {
+    "local_components": {
+      "skills": 192,
+      "agents": 276,
+      "commands": 25,
+      "rules": 33,
+      "prompts": 3,
+      "hooks": 14,
+      "mcp": 22,
+      "plugins": 21,
+      "total": 586
+    },
+    "external_sources": {
+      "skill_registries": 12,
+      "mcp_registries": 4,
+      "plugin_registries": 3,
+      "github_repos_captured": 4,
+      "github_repos_uncaptured": 10,
+      "total": 33
+    }
+  },
+
+  "notes": [
+    "Large agent count (276) suggests many subagent definitions in context/agents/",
+    "MCP count includes 21 plugin configs + 1 root .mcp.json",
+    "External sources include both captured (with skill counts) and uncaptured repos",
+    "Search term matrix includes primary, synonyms, narrower, and broader terms per type"
+  ]
+}
