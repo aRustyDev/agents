@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Data Aggregation Checklist",
+  "description": "Checklist for validating data aggregation and indexing",
+  "type": "object",
+  "required": ["phase", "checklist", "completed_at"],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["data_loading", "normalization", "deduplication", "indexing"],
+      "properties": {
+        "data_loading": {
+          "type": "object",
+          "required": ["all_sources_loaded", "component_types_complete"],
+          "properties": {
+            "all_sources_loaded": { "type": "boolean" },
+            "component_types_complete": { "type": "boolean" },
+            "total_records_loaded": { "type": "integer" },
+            "sources_loaded": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "normalization": {
+          "type": "object",
+          "required": ["urls_normalized", "hashes_computed", "schema_applied"],
+          "properties": {
+            "urls_normalized": { "type": "boolean" },
+            "hashes_computed": { "type": "boolean" },
+            "schema_applied": { "type": "boolean" }
+          }
+        },
+        "deduplication": {
+          "type": "object",
+          "required": ["duplicates_identified", "merge_strategy_applied"],
+          "properties": {
+            "duplicates_identified": { "type": "boolean" },
+            "merge_strategy_applied": { "type": "boolean" },
+            "duplicate_count": { "type": "integer" },
+            "unique_count": { "type": "integer" },
+            "deduplication_rate": { "type": "number" }
+          }
+        },
+        "indexing": {
+          "type": "object",
+          "required": ["fts_index_built", "search_tested", "performance_verified"],
+          "properties": {
+            "fts_index_built": { "type": "boolean" },
+            "search_tested": { "type": "boolean" },
+            "performance_verified": { "type": "boolean" },
+            "avg_query_time_ms": { "type": "number" }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "total_components": { "type": "integer" },
+        "by_type": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        },
+        "by_source": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

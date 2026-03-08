@@ -1,0 +1,34 @@
+# Result Template
+# Raw data from experiment execution
+
+result:
+  experiment_id: ""         # Links to experiment definition
+  timestamp: ""             # When executed
+  duration_ms: 0            # How long it took
+
+  # Environment
+  environment:
+    tool: ""                # Tool used
+    version: ""             # Tool version
+    parameters: {}          # Runtime config
+
+  # Raw data
+  raw_data:
+    query: ""               # The search query
+    response_time_ms: 0
+    items_found: 0
+    rate_limited: false
+    error: null             # Error message if failed
+    items: []               # Array of results
+
+  # Computed metrics
+  metrics:
+    recall: null            # If baseline available
+    precision: null         # If manually validated
+    coverage: null          # Unique sources
+
+  # Observations during execution
+  observations:
+    - type: "anomaly"       # anomaly | insight | error | note
+      description: ""
+      severity: "low"       # low | medium | high

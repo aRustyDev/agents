@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Research Planning Checklist",
+  "description": "Checklist for validating research plan completeness",
+  "type": "object",
+  "required": ["phase", "checklist", "completed_at"],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["scope", "search_terms", "sources", "experiments"],
+      "properties": {
+        "scope": {
+          "type": "object",
+          "required": ["component_type_defined", "file_patterns_listed", "source_types_identified"],
+          "properties": {
+            "component_type_defined": { "type": "boolean" },
+            "file_patterns_listed": { "type": "boolean" },
+            "source_types_identified": { "type": "boolean" }
+          }
+        },
+        "search_terms": {
+          "type": "object",
+          "required": ["primary_terms", "synonyms", "narrower_terms", "broader_terms"],
+          "properties": {
+            "primary_terms": { "type": "boolean" },
+            "synonyms": { "type": "boolean" },
+            "narrower_terms": { "type": "boolean" },
+            "broader_terms": { "type": "boolean" }
+          }
+        },
+        "sources": {
+          "type": "object",
+          "required": ["registries_listed", "github_repos_listed", "package_managers_checked"],
+          "properties": {
+            "registries_listed": { "type": "boolean" },
+            "github_repos_listed": { "type": "boolean" },
+            "package_managers_checked": { "type": "boolean" }
+          }
+        },
+        "experiments": {
+          "type": "object",
+          "required": ["experiments_defined", "procedures_documented", "success_criteria_set"],
+          "properties": {
+            "experiments_defined": { "type": "boolean" },
+            "procedures_documented": { "type": "boolean" },
+            "success_criteria_set": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

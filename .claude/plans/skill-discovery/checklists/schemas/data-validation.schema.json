@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Data Validation Checklist",
+  "description": "Checklist for validating data quality and completeness",
+  "type": "object",
+  "required": ["phase", "checklist", "completed_at"],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["completeness", "accuracy", "consistency"],
+      "properties": {
+        "completeness": {
+          "type": "object",
+          "required": ["all_sources_checked", "no_missing_fields", "coverage_target_met"],
+          "properties": {
+            "all_sources_checked": { "type": "boolean" },
+            "no_missing_fields": { "type": "boolean" },
+            "coverage_target_met": { "type": "boolean" },
+            "coverage_percentage": { "type": "number" }
+          }
+        },
+        "accuracy": {
+          "type": "object",
+          "required": ["urls_verified", "counts_validated", "metadata_checked"],
+          "properties": {
+            "urls_verified": { "type": "boolean" },
+            "counts_validated": { "type": "boolean" },
+            "metadata_checked": { "type": "boolean" },
+            "error_rate": { "type": "number" }
+          }
+        },
+        "consistency": {
+          "type": "object",
+          "required": ["schema_compliance", "naming_conventions", "no_duplicates"],
+          "properties": {
+            "schema_compliance": { "type": "boolean" },
+            "naming_conventions": { "type": "boolean" },
+            "no_duplicates": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "validation_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string" },
+          "error": { "type": "string" },
+          "severity": { "enum": ["critical", "warning", "info"] }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

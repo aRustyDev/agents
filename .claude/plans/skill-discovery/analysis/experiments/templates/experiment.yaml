@@ -1,0 +1,47 @@
+# Experiment Template
+# Copy this file and fill in the values
+
+experiment:
+  id: ""                    # Unique identifier (e.g., "exp-001-tool-websearch")
+  title: ""                 # Human-readable title
+  created: ""               # ISO date
+  status: "planned"         # planned | running | completed | failed
+
+  # What we're testing
+  hypothesis: ""            # Expected outcome
+  research_question: ""     # What are we trying to learn?
+
+  # Inputs
+  inputs:
+    tools: []               # Tools being tested
+    queries: []             # Search queries to run
+    parameters: {}          # Additional config
+
+  # Procedure
+  procedure:
+    - step: 1
+      action: ""
+      expected: ""
+    - step: 2
+      action: ""
+      expected: ""
+
+  # What we measure
+  metrics:
+    - name: "recall"
+      definition: "% of known baseline items found"
+      target: 0.8
+    - name: "precision"
+      definition: "% of results that are actual components"
+      target: 0.9
+    - name: "latency_ms"
+      definition: "Time to complete query"
+      target: 5000
+
+  # Output paths
+  results_path: ""          # Where raw results go (analysis/results/)
+  findings_path: ""         # Where analysis goes (analysis/findings/)
+
+  # Relationships
+  depends_on: []            # Prior experiments required
+  evidence_ids: []          # Supporting evidence used

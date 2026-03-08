@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Research Execution Checklist",
+  "description": "Checklist for validating research execution completeness",
+  "type": "object",
+  "required": ["phase", "checklist", "completed_at"],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["registries", "github", "packages", "documentation"],
+      "properties": {
+        "registries": {
+          "type": "object",
+          "required": ["all_probed", "api_tested", "results_recorded"],
+          "properties": {
+            "all_probed": { "type": "boolean" },
+            "api_tested": { "type": "boolean" },
+            "results_recorded": { "type": "boolean" },
+            "count_found": { "type": "integer" }
+          }
+        },
+        "github": {
+          "type": "object",
+          "required": ["queries_executed", "repos_documented", "results_recorded"],
+          "properties": {
+            "queries_executed": { "type": "boolean" },
+            "repos_documented": { "type": "boolean" },
+            "results_recorded": { "type": "boolean" },
+            "count_found": { "type": "integer" }
+          }
+        },
+        "packages": {
+          "type": "object",
+          "required": ["npm_searched", "pypi_searched", "results_recorded"],
+          "properties": {
+            "npm_searched": { "type": "boolean" },
+            "pypi_searched": { "type": "boolean" },
+            "crates_searched": { "type": "boolean" },
+            "results_recorded": { "type": "boolean" },
+            "count_found": { "type": "integer" }
+          }
+        },
+        "documentation": {
+          "type": "object",
+          "required": ["results_yaml_created", "patterns_documented"],
+          "properties": {
+            "results_yaml_created": { "type": "boolean" },
+            "patterns_documented": { "type": "boolean" },
+            "findings_recorded": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

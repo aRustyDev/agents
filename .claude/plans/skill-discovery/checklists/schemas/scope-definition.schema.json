@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope Definition Checklist",
+  "description": "Checklist for validating research scope definition",
+  "type": "object",
+  "required": ["phase", "checklist", "completed_at"],
+  "properties": {
+    "phase": {
+      "type": "string",
+      "description": "Phase identifier"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "checklist": {
+      "type": "object",
+      "required": ["objectives", "boundaries", "deliverables", "timeline"],
+      "properties": {
+        "objectives": {
+          "type": "object",
+          "required": ["clearly_stated", "measurable", "achievable"],
+          "properties": {
+            "clearly_stated": { "type": "boolean" },
+            "measurable": { "type": "boolean" },
+            "achievable": { "type": "boolean" }
+          }
+        },
+        "boundaries": {
+          "type": "object",
+          "required": ["in_scope_defined", "out_of_scope_defined", "assumptions_documented"],
+          "properties": {
+            "in_scope_defined": { "type": "boolean" },
+            "out_of_scope_defined": { "type": "boolean" },
+            "assumptions_documented": { "type": "boolean" }
+          }
+        },
+        "deliverables": {
+          "type": "object",
+          "required": ["outputs_listed", "formats_specified", "locations_defined"],
+          "properties": {
+            "outputs_listed": { "type": "boolean" },
+            "formats_specified": { "type": "boolean" },
+            "locations_defined": { "type": "boolean" }
+          }
+        },
+        "timeline": {
+          "type": "object",
+          "required": ["duration_estimated", "milestones_set"],
+          "properties": {
+            "duration_estimated": { "type": "boolean" },
+            "milestones_set": { "type": "boolean" },
+            "dependencies_mapped": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

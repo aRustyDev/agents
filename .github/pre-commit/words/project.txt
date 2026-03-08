@@ -164,3 +164,11 @@ vijaythecoder
 iannuttall
 adrianpuiu
 FrancyJGLisboa
+promptbase
+flowgpt
+glama
+mcphub
+mcpregistry
+punkpeye
+websearch
+serper

@@ -1,0 +1,37 @@
+# Finding Template
+# Analysis of experiment results
+
+finding:
+  id: ""                    # Unique identifier
+  title: ""                 # Human-readable title
+  created: ""               # ISO date
+
+  # What we learned
+  claim: ""                 # The finding statement
+  confidence: "medium"      # high | medium | low
+  significance: "medium"    # high | medium | low
+
+  # Evidence chain
+  experiment_ids: []        # Which experiments support this
+  evidence_ids: []          # Supporting evidence files
+  result_ids: []            # Raw result files analyzed
+
+  # Supporting data points
+  supporting_data:
+    - source: ""            # File path or URL
+      data_point: ""        # Specific observation
+      interpretation: ""    # What it means
+
+  # Contradicting data (if any)
+  contradicting_data: []
+
+  # So what?
+  implications:
+    - ""                    # What this means for the project
+
+  recommendations:
+    - ""                    # What we should do about it
+
+  # Follow-up
+  open_questions: []        # What we still don't know
+  next_experiments: []      # Suggested follow-up experiments

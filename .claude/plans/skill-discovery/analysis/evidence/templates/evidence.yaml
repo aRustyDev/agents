@@ -1,0 +1,26 @@
+# Evidence Template
+# Supporting data gathered externally or between experiments
+
+evidence:
+  id: ""                    # Unique identifier
+  title: ""                 # Human-readable title
+  collected: ""             # ISO date
+  source_type: "web"        # web | api | manual | document
+
+  # Source information
+  source:
+    url: ""                 # Where it came from
+    fetched_at: ""          # When retrieved
+    method: ""              # How retrieved (WebFetch, gh api, manual)
+
+  # Content
+  content_type: "json"      # json | yaml | markdown | html | text
+  content: {}               # The actual data
+
+  # Metadata
+  reliability: "medium"     # high | medium | low | unknown
+  notes: ""                 # Additional context
+
+  # Usage
+  used_in_experiments: []   # Which experiments reference this
+  used_in_findings: []      # Which findings cite this
