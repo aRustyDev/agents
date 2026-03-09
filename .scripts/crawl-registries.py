@@ -208,6 +208,20 @@ def fetch_with_backoff(
     return None
 
 
+def _sanitize_id(raw_id: str) -> str:
+    """Sanitize ID to match schema pattern ^[a-z0-9_-]+$."""
+    import re
+
+    # Lowercase and replace common separators
+    clean = raw_id.lower()
+    clean = clean.replace("/", "_").replace(" ", "-").replace(".", "-").replace(":", "_")
+    # Remove any remaining invalid characters
+    clean = re.sub(r"[^a-z0-9_-]", "", clean)
+    # Collapse multiple separators
+    clean = re.sub(r"[-_]{2,}", "_", clean)
+    return clean.strip("-_")
+
+
 def transform_to_component(
     raw: dict,
     component_type: str,
@@ -217,7 +231,7 @@ def transform_to_component(
     # Generate deterministic ID
     author = raw.get("author") or raw.get("owner") or "unknown"
     name = raw.get("name", "unknown")
-    component_id = f"{source_name}_{author}_{name}".lower().replace("/", "_").replace(" ", "-")
+    component_id = _sanitize_id(f"{source_name}_{author}_{name}")
 
     return {
         "id": component_id,
