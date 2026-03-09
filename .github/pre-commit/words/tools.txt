@@ -167,3 +167,4 @@ Rubo
 glab
 firecrawl
 searxng
+meilisearch
