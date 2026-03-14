@@ -1,6 +1,7 @@
 ---
-name: blog:research:review
+name: blog/research/review
 description: Evaluate research analysis and compile final report
+argument-hint: <path> [--approve]
 arguments:
   - name: path
     description: Path to the research analysis to review

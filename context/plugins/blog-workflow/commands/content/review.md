@@ -1,6 +1,7 @@
 ---
 name: blog/content/review
 description: Evaluate content brainstorm or phase file
+argument-hint: <path> [--approve]
 arguments:
   - name: path
     description: Path to the artifact to review (file or directory)

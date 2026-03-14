@@ -1,6 +1,7 @@
 ---
-name: blog:idea:draft-plan
+name: blog/idea/draft-plan
 description: Create a project plan from an approved idea
+argument-hint: <path>
 arguments:
   - name: path
     description: Path to the approved idea.md

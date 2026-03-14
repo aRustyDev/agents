@@ -1,6 +1,7 @@
 ---
 name: blog/init
 description: Initialize blog workflow directory structure and copy default templates
+argument-hint: [--force] [--no-templates] [--with-hooks]
 arguments:
   - name: force
     description: Overwrite existing templates

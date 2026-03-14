@@ -1,6 +1,7 @@
 ---
 name: blog/post/spec
 description: Create post specification from phase file
+argument-hint: <path> [--force]
 arguments:
   - name: path
     description: Path to the phase file

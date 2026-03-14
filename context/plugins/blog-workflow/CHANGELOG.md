@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-03-14
+
+### Added
+
+- Add `argument-hint` to all 31 commands for ghost text hints in Claude Code
+
+### Fixed
+
+- Fix command name separators (`:` to `/`) for consistent namespace
+
 ## [2.0.1] - 2026-03-14
 
 ### Fixed

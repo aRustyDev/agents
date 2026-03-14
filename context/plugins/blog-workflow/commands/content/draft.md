@@ -1,6 +1,7 @@
 ---
 name: blog/content/draft
 description: Create content brainstorm from research report
+argument-hint: <path> [--force]
 arguments:
   - name: path
     description: Path to the research report

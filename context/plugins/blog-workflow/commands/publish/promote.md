@@ -1,6 +1,7 @@
 ---
 name: blog/publish/promote
 description: Move validated draft to src/data/blog/
+argument-hint: <path> [--schedule date]
 arguments:
   - name: path
     description: Path to the draft file

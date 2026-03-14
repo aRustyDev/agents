@@ -1,6 +1,7 @@
 ---
-name: blog:template:plan
+name: blog/template/plan
 description: Refine a template with detailed guidance, examples, and word counts
+argument-hint: <path>
 arguments:
   - name: path
     description: Path to the template file to refine

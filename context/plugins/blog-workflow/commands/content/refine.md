@@ -1,6 +1,7 @@
 ---
 name: blog/content/refine
 description: Update content artifact based on review feedback
+argument-hint: <path> ["feedback"]
 arguments:
   - name: path
     description: Path to the artifact to refine

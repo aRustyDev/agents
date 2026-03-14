@@ -1,6 +1,7 @@
 ---
 name: blog/publish/pre-check
 description: Validate frontmatter and links before publish
+argument-hint: <path> [--skip-links]
 arguments:
   - name: path
     description: Path to the draft file

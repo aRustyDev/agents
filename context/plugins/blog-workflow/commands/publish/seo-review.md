@@ -1,6 +1,7 @@
 ---
 name: blog/publish/seo-review
 description: SEO optimization check for blog draft
+argument-hint: <path> [--fix]
 arguments:
   - name: path
     description: Path to the draft file

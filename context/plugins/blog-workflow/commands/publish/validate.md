@@ -1,6 +1,7 @@
 ---
 name: blog/publish/validate
 description: Verify Astro build succeeds with published post
+argument-hint: <path> [--dev]
 arguments:
   - name: path
     description: Path to the published post in src/data/blog/

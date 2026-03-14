@@ -1,6 +1,7 @@
 ---
-name: blog:template:draft
+name: blog/template/draft
 description: Create a new structural template for blog artifacts
+argument-hint: <type> <name>
 arguments:
   - name: type
     description: "Template type: outlines, research-plans, review-checklists, brainstorm-plans"

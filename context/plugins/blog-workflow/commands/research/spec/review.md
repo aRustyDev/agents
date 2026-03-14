@@ -1,6 +1,7 @@
 ---
-name: blog:research:spec:review
+name: blog/research/spec/review
 description: Evaluate research plan quality against checklist
+argument-hint: <path> [--approve]
 arguments:
   - name: path
     description: Path to the research plan to review

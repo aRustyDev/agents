@@ -1,6 +1,7 @@
 ---
 name: blog/post/review
 description: Evaluate post artifact (spec, outline, or draft)
+argument-hint: <path> [--approve]
 arguments:
   - name: path
     description: Path to the artifact or post/ directory for batch review

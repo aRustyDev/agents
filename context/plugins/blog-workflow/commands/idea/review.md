@@ -1,6 +1,7 @@
 ---
-name: blog:idea:review
+name: blog/idea/review
 description: Evaluate an idea or plan artifact against its review checklist
+argument-hint: <path> [--approve]
 arguments:
   - name: path
     description: Path to the artifact (idea.md or plan.md)

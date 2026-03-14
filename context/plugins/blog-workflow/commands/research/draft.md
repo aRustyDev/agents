@@ -1,6 +1,7 @@
 ---
-name: blog:research:draft
+name: blog/research/draft
 description: Execute research according to an approved research plan
+argument-hint: <path>
 arguments:
   - name: path
     description: Path to the approved research plan

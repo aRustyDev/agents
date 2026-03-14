@@ -1,6 +1,7 @@
 ---
-name: blog:research:spec:draft
+name: blog/research/spec/draft
 description: Create a research plan from an approved project plan
+argument-hint: <path>
 arguments:
   - name: path
     description: Path to the approved project plan (plan.md)

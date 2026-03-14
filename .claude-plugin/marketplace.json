@@ -46,7 +46,7 @@
       "name": "blog-workflow",
       "source": "./context/plugins/blog-workflow",
       "description": "Multi-phase blog content creation with personas, templates, and iterative review. Supports tutorials, deep dives, research summaries, and development journals.",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
