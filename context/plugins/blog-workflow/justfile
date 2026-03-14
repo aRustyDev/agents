@@ -1,11 +1,43 @@
-test:
-    echo "TODO: test all source files exist"
-    echo "TODO: test LICENSE"
-    echo "TODO: test CHANGELOG"
-    echo "TODO: test README"
-    echo "TODO: test .claude-plugin/plugin.json"
+# Blog Workflow Plugin Tasks
 
-install: _agents _commands _configs _hooks _scripts _skills _styles
+# Default recipe
+default:
+    @just --list
+
+# Validate blog workflow directory structure in target project
+validate target_dir=".":
+    @.scripts/validate-blog-structure.sh "{{ target_dir }}"
+
+# Initialize blog workflow in target project (copies templates)
+init target_dir:
+    @echo "Initializing blog workflow in {{ target_dir }}..."
+    @mkdir -p "{{ target_dir }}/content/_projects"
+    @mkdir -p "{{ target_dir }}/content/_drafts"
+    @mkdir -p "{{ target_dir }}/content/_templates/personas"
+    @mkdir -p "{{ target_dir }}/content/_templates/outlines"
+    @mkdir -p "{{ target_dir }}/content/_templates/research-plans"
+    @mkdir -p "{{ target_dir }}/content/_templates/review-checklists"
+    @mkdir -p "{{ target_dir }}/content/_templates/brainstorm-plans"
+    @mkdir -p "{{ target_dir }}/content/_templates/schemas"
+    @cp -r .templates/* "{{ target_dir }}/content/_templates/"
+    @echo "Done. Templates copied to {{ target_dir }}/content/_templates/"
+
+# Copy rules to target project's .claude/rules/
+install-rules target_dir:
+    @echo "Installing rules to {{ target_dir }}/.claude/rules/..."
+    @mkdir -p "{{ target_dir }}/.claude/rules"
+    @cp rules/*.md "{{ target_dir }}/.claude/rules/"
+    @echo "Done. Rules installed."
+
+test:
+    @echo "Testing plugin structure..."
+    @test -f .claude-plugin/plugin.json || (echo "Missing: .claude-plugin/plugin.json" && exit 1)
+    @test -d rules || (echo "Missing: rules/" && exit 1)
+    @test -d .templates || (echo "Missing: .templates/" && exit 1)
+    @test -d .scripts || (echo "Missing: .scripts/" && exit 1)
+    @echo "All plugin structure tests passed."
+
+install: _agents _commands _configs _hooks _scripts _skills _styles _rules _templates
 
 _agents:
     echo "TODO: copy all source agent files to target directory"
@@ -29,3 +61,9 @@ _skills:
 
 _styles:
     echo "TODO: copy all source style files to target directory"
+
+_rules:
+    echo "TODO: copy rules/*.md to target .claude/rules/"
+
+_templates:
+    echo "TODO: copy .templates/* to target content/_templates/"
