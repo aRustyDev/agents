@@ -80,18 +80,5 @@
     "./styles/research-summary-format.md",
     "./styles/tutorial-format.md"
   ],
-  "hooks": [
-    "./hooks/validate-blog-frontmatter.sh",
-    "./hooks/promote-safety.sh"
-  ],
-  "lspServers": "./.lsp.json",
-  "requiredDirectories": [
-    "content/_projects",
-    "content/_drafts",
-    "content/_templates/personas",
-    "content/_templates/outlines",
-    "content/_templates/research-plans",
-    "content/_templates/review-checklists",
-    "content/_templates/brainstorm-plans"
-  ]
+  "lspServers": "./.lsp.json"
 }
