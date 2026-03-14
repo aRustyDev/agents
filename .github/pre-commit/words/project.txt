@@ -209,3 +209,4 @@ perfboard
 deprioritized
 STDP
 Izhikevich
+SERP
