@@ -9,6 +9,15 @@
 
 set -euo pipefail
 
+# Delegation: Check for repo-local override first
+SCRIPT_NAME="$(basename "$0")"
+REPO_OVERRIDE="${CLAUDE_PROJECT_ROOT:-.}/.claude/hooks/${SCRIPT_NAME}"
+
+if [[ -f "$REPO_OVERRIDE" ]]; then
+  exec "$REPO_OVERRIDE" "$@"
+fi
+
+# Plugin implementation follows
 FILE="${1:-}"
 
 if [[ -z "$FILE" ]]; then

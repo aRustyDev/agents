@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Task
 
 # Draft Blog Post
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/post/draft` instead, which provides improved workflow integration.
+
 Transform an outline into a complete blog post draft following writing style and code example best practices.
 
 ## Arguments

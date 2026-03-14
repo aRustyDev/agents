@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, WebSearch, WebFetch
 
 # Refine Research Plan
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/research/spec/plan` instead, which provides improved workflow integration.
+
 Review research notes and fill gaps with additional research.
 
 ## Arguments

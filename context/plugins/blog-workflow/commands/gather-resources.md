@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Glob, Grep, WebSearch, WebFetch
 
 # Gather Resources
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/research/draft` instead, which provides improved workflow integration.
+
 Collect additional resources, references, and links for a blog topic.
 
 ## Arguments

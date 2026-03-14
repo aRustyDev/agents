@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 
 # Outline Blog Post
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/post/plan` instead, which provides improved workflow integration.
+
 Transform research notes into a structured post outline following content patterns.
 
 ## Arguments

@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Task
 
 # Research Blog Topic
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/research/draft` instead, which provides improved workflow integration.
+
 Gather sources, synthesize background material, and produce structured research notes for a technical blog post.
 
 ## Arguments

@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 
 # SEO Pass
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/publish/seo-review` instead, which provides improved workflow integration.
+
 Apply SEO best practices to a blog post draft.
 
 ## Arguments

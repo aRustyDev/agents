@@ -6,6 +6,9 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(lychee:*), Bash(python3:*)
 
 # Publish Prep
 
+> **DEPRECATED:** This command is deprecated and will be removed in v3.0.0.
+> Use `/blog/publish/pre-check` instead, which provides improved workflow integration.
+
 Final validation and preparation before publishing a blog post.
 
 ## Arguments

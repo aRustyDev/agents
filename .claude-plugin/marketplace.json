@@ -45,20 +45,21 @@
     {
       "name": "blog-workflow",
       "source": "./context/plugins/blog-workflow",
-      "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
-      "version": "1.6.0",
+      "description": "Multi-phase blog content creation with personas, templates, and iterative review. Supports tutorials, deep dives, research summaries, and development journals.",
+      "version": "2.0.0",
       "author": {
         "name": "Adam Smith",
         "email": "developer@gh.arusty.dev"
       },
       "keywords": [
         "blog",
+        "content",
+        "writing",
+        "persona",
+        "workflow",
         "technical-writing",
-        "content-creation",
-        "markdown",
         "seo",
-        "tutorials",
-        "workflow"
+        "tutorials"
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
