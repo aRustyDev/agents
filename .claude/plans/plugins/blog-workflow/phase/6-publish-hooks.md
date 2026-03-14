@@ -13,7 +13,7 @@ Publish is the only phase without a refine loop. Commands are linear checks lead
 - **`promote`** — Move draft to `src/data/blog/`
 - **`validate`** — Verify build succeeds
 
-```
+```text
 publish/
 ├── seo-review.md   → SEO optimization check
 ├── pre-check.md    → Frontmatter + link validation
@@ -27,29 +27,92 @@ Additionally, this phase introduces **hook scripts** that provide safety automat
 - **Promote safety** — Prevents bypassing the promote workflow
 - **Index staleness** — Warns if `index.md` wasn't updated
 
+---
+
+## Command Summary
+
+| Command | Purpose | Output |
+|---------|---------|--------|
+| `/blog/publish/seo-review` | SEO optimization check | Advisory report |
+| `/blog/publish/pre-check` | Frontmatter + link validation | Pass/fail report |
+| `/blog/publish/promote` | Move draft to `src/data/blog/` | Published post |
+| `/blog/publish/validate` | Build verification | Build status |
+
+---
+
 ## Deliverables
 
 ### 1. Publish Commands
 
 Create under `context/plugins/blog-workflow/commands/publish/`:
 
-| Command | Purpose | Output |
-|---------|---------|--------|
-| `seo-review.md` | SEO optimization check | Advisory report |
-| `pre-check.md` | Frontmatter + link validation | Pass/fail report |
-| `promote.md` | Move draft to `src/data/blog/` | Published post |
-| `validate.md` | Build verification | Build status |
-
-**Command frontmatter pattern**:
+#### seo-review.md
 
 ```yaml
 ---
-name: blog:publish:seo-review
+name: blog/publish/seo-review
 description: SEO optimization check for blog draft
 arguments:
   - name: path
     description: Path to the draft file
     required: true
+  - name: fix
+    description: Auto-fix simple issues (expand description, add keywords)
+    required: false
+---
+```
+
+#### pre-check.md
+
+```yaml
+---
+name: blog/publish/pre-check
+description: Validate frontmatter and links before publish
+arguments:
+  - name: path
+    description: Path to the draft file
+    required: true
+  - name: skip-links
+    description: Skip link validation (faster)
+    required: false
+  - name: force
+    description: Mark as pre-checked even with warnings
+    required: false
+---
+```
+
+#### promote.md
+
+```yaml
+---
+name: blog/publish/promote
+description: Move validated draft to src/data/blog/
+arguments:
+  - name: path
+    description: Path to the draft file
+    required: true
+  - name: schedule
+    description: Future publish date (ISO 8601), keeps draft:true until then
+    required: false
+  - name: force
+    description: Promote even without pre-check (not recommended)
+    required: false
+---
+```
+
+#### validate.md
+
+```yaml
+---
+name: blog/publish/validate
+description: Verify Astro build succeeds with published post
+arguments:
+  - name: path
+    description: Path to the published post in src/data/blog/
+    required: true
+  - name: dev
+    description: Start dev server to visually verify
+    required: false
 ---
 ```
 
@@ -106,6 +169,8 @@ Create under `context/plugins/blog-workflow/hooks/`:
 # Validates AstroPaper frontmatter on writes to src/data/blog/
 # Configured in .claude/settings.json as PostToolUse hook
 
+set -euo pipefail
+
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.filePath // empty')
 
@@ -156,6 +221,8 @@ exit 0
 #!/bin/bash
 # Prevents accidental writes to src/data/blog/ that bypass the promote workflow
 # Configured in .claude/settings.json as PreToolUse hook
+
+set -euo pipefail
 
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
@@ -238,6 +305,78 @@ Add to `.claude/settings.json` (merge with existing hooks):
 }
 ```
 
+---
+
+## Pre-Check State Tracking
+
+Pre-check results are tracked via a status marker in the draft frontmatter:
+
+```yaml
+---
+# After successful pre-check:
+_precheck:
+  status: passed
+  timestamp: 2026-03-14T15:00:00Z
+  warnings: 0
+  fails: 0
+---
+```
+
+### Promote Verification
+
+`promote.md` checks:
+
+1. `_precheck.status` exists and equals `passed`
+2. `_precheck.timestamp` is within last 24 hours (or draft unchanged since)
+3. If stale or missing: "Run `/blog/publish/pre-check` first"
+
+### Force Promote
+
+With `--force`, promote skips pre-check verification but:
+
+- Logs warning: "Bypassing pre-check is not recommended"
+- Still validates basic frontmatter (id, title, description exist)
+
+---
+
+## Promote Marker Handling
+
+### Marker Format
+
+```text
+# promoted-by: /blog/publish/promote
+---
+id: "..."
+title: "..."
+```
+
+The marker is placed as the **first line** of the file, before the YAML frontmatter.
+
+### Marker Purpose
+
+1. **Hook bypass**: `promote-safety.sh` checks for this marker and skips warning
+2. **Audit trail**: Documents that proper workflow was followed
+3. **Detection**: Easy to find all properly-promoted posts via grep
+
+### Marker Persistence
+
+The marker **remains** in the published file:
+
+- Serves as documentation of promotion path
+- Does not affect Astro build (treated as comment)
+- Can be removed manually if desired
+
+### Re-publish Flow
+
+When updating a published post:
+
+1. Edit directly in `src/data/blog/` (marker already present)
+2. Update `modDatetime` field
+3. Run `/blog/publish/validate` to verify build
+4. No re-promotion needed for updates
+
+---
+
 ## Command Behaviors
 
 ### seo-review.md
@@ -246,39 +385,50 @@ Add to `.claude/settings.json` (merge with existing hooks):
 
 **Output**: SEO evaluation with recommendations (advisory, not blocking)
 
-**Arguments**:
-- `path` (required): Path to the draft file
-
 **Tools Used**:
+
 - `Read` — load draft and checklist
+- `Edit` — apply fixes (if `--fix`)
 
 **Logic**:
 
 1. **Load draft** at `{{path}}`
+
 2. **Load SEO checklist** from `.templates/review-checklists/seo.md`
+
 3. **Check title**:
    - Length < 60 characters
    - Contains primary keyword
    - Is compelling/clickable
+
 4. **Check description**:
    - Length 150-160 characters
    - Summarizes value proposition
    - Contains primary keyword
+
 5. **Analyze headings**:
    - H1 matches or approximates title
    - H2s contain secondary keywords
    - Hierarchy is logical (no skipped levels)
+
 6. **Check content**:
    - Primary keyword in first 100 words
    - Related terms used naturally
    - Internal links present
+
 7. **Check images**:
    - Alt text on all images
    - Descriptive filenames
    - File sizes reasonable
-8. **Report findings** with specific suggestions
 
-> **Note**: SEO review is advisory. It does not modify the draft or append a `## Review` section. Suggestions are presented for the user to apply manually or via `blog:post:refine`.
+8. **Auto-fix** (if `--fix`):
+   - Expand short descriptions with content summary
+   - Add missing alt text placeholders
+   - Report what was fixed
+
+9. **Report findings** with specific suggestions
+
+> **Note**: SEO review is advisory. Without `--fix`, it does not modify the draft or append a `## Review` section. Suggestions are presented for the user to apply manually or via `/blog/post/refine`.
 
 **Example output**:
 
@@ -315,43 +465,57 @@ Suggestions:
 1. Expand description to 150-160 characters for better SERP display
 2. Add internal links to related posts (e.g., Linux tracing basics)
 
-Next: Run `blog:publish:pre-check {{path}}` to validate frontmatter
+Next: Run `/blog/publish/pre-check content/_drafts/building-ebpf-tracing-tools.md`
 ```
 
 ### pre-check.md
 
 **Input**: Path to draft
 
-**Output**: Pass/fail validation report
-
-**Arguments**:
-- `path` (required): Path to the draft file
+**Output**: Pass/fail validation report with state tracking
 
 **Tools Used**:
+
 - `Read` — load draft
+- `Edit` — add `_precheck` status to frontmatter
 - `Bash` — run lychee link checker (if available)
 
 **Logic**:
 
 1. **Load draft** at `{{path}}`
+
 2. **Validate frontmatter** against AstroPaper schema:
    - Required fields present: `id`, `title`, `description`, `pubDatetime`, `tags`
    - No wrong field names: `date` (should be `pubDatetime`), `image` (should be `ogImage`)
    - `id` is valid UUIDv4
    - `pubDatetime` is valid ISO 8601
    - `description` ≤ 160 characters
-3. **Check links** (if lychee available):
-   - Run `lychee --no-progress {{path}}`
+
+3. **Check links** (unless `--skip-links`):
+   - Run `lychee --no-progress --timeout 10 {{path}}`
    - Report broken links
    - If lychee not available, note "link check skipped"
+   - Timeout after 30 seconds
+
 4. **Verify image paths**:
    - Check that referenced images exist
    - Check image paths are valid
-5. **Report pass/fail** for each check
 
-> **Note**: Pre-check must pass before promote. Any fail blocks promotion.
+5. **Update frontmatter** with pre-check status:
 
-**Example output**:
+   ```yaml
+   _precheck:
+     status: passed  # or failed
+     timestamp: 2026-03-14T15:00:00Z
+     warnings: 2
+     fails: 0
+   ```
+
+6. **Report pass/fail** for each check
+
+> **Note**: Pre-check must pass before promote. Any fail blocks promotion unless `--force` is used on promote.
+
+**Example output (passing)**:
 
 ```text
 ## Pre-Check: building-ebpf-tracing-tools.md
@@ -371,9 +535,11 @@ Next: Run `blog:publish:pre-check {{path}}` to validate frontmatter
 - [x] All 2 images exist — pass
 
 Summary: 8 pass, 0 warn, 0 fail
+
+Pre-check status added to frontmatter.
 Status: READY FOR PROMOTION
 
-Next: Run `blog:publish:promote {{path}}` to publish
+Next: Run `/blog/publish/promote content/_drafts/building-ebpf-tracing-tools.md`
 ```
 
 **Example output (failing)**:
@@ -400,10 +566,8 @@ Fix the issues above before promoting.
 
 **Output**: Published post at `src/data/blog/<slug>.md`
 
-**Arguments**:
-- `path` (required): Path to the draft file
-
 **Tools Used**:
+
 - `Read` — load draft
 - `Write` — write to `src/data/blog/`
 - `Bash` — delete from `_drafts/`
@@ -411,22 +575,38 @@ Fix the issues above before promoting.
 **Logic**:
 
 1. **Load draft** from `content/_drafts/<slug>.md`
-2. **Verify pre-check passed**:
-   - If not, error: "Draft must pass pre-check before promotion. Run `blog:publish:pre-check` first."
-3. **Update frontmatter**:
+
+2. **Verify pre-check passed** (unless `--force`):
+   - Check `_precheck.status` equals `passed`
+   - Check `_precheck.timestamp` is within 24 hours
+   - If not: "Draft must pass pre-check before promotion. Run `/blog/publish/pre-check` first."
+
+3. **Handle scheduling** (if `--schedule`):
+   - Set `pubDatetime` to scheduled time
+   - Keep `draft: true`
+   - Write to `src/data/blog/` (will publish at scheduled time)
+   - Skip deletion from `_drafts/`
+   - Report scheduled status
+
+4. **Update frontmatter** (normal promote):
    - Add `# promoted-by: /blog/publish/promote` as first line (bypasses safety hook)
    - Set `draft: false`
-   - Set `pubDatetime: <current ISO 8601>` (if not already set)
+   - Set `pubDatetime: <current ISO 8601>` (if not already set to future)
    - Set `modDatetime: null` (first publish)
-4. **Write to** `src/data/blog/<slug>.md`
-5. **Delete from** `content/_drafts/<slug>.md`
-   - The draft is now at its final location
-6. **Update project** (if draft is part of a project):
+   - Remove `_precheck` field (no longer needed)
+
+5. **Write to** `src/data/blog/<slug>.md`
+
+6. **Delete from** `content/_drafts/<slug>.md`
+
+7. **Update project** (if draft is part of a project):
    - Update phase status → `complete`
    - Check if all phases are complete
    - If all complete, update project status → `complete` in `index.md`
    - Otherwise, update project status → `publish`
-7. **Report success** with published path
+   - Update Published Posts table in `index.md`
+
+8. **Report success** with published path
 
 > **Important**: The `# promoted-by: /blog/publish/promote` marker is required. The `promote-safety.sh` hook checks for this marker and skips its warning when present. This is the ONLY intended path to write `draft: false` content to `src/data/blog/`.
 
@@ -439,12 +619,31 @@ Promoted: content/_drafts/building-ebpf-tracing-tools.md
 Frontmatter updated:
 - draft: false
 - pubDatetime: 2026-03-14T15:30:00Z
+- Added promote marker
 
 Draft deleted from: content/_drafts/
 
 Project status: publish (2/3 phases complete)
+Published Posts table updated in index.md
 
-Next: Run `blog:publish:validate {{path}}` to verify build
+Next: Run `/blog/publish/validate src/data/blog/building-ebpf-tracing-tools.md`
+```
+
+**Example output (scheduled)**:
+
+```text
+Scheduled: content/_drafts/building-ebpf-tracing-tools.md
+       →   src/data/blog/building-ebpf-tracing-tools.md
+
+Frontmatter updated:
+- draft: true (will auto-publish)
+- pubDatetime: 2026-03-20T09:00:00Z (scheduled)
+
+Draft kept in: content/_drafts/ (for reference)
+
+Note: Post will go live when pubDatetime passes and site rebuilds.
+
+Next: Run `/blog/publish/validate` after scheduled time to verify
 ```
 
 ### validate.md
@@ -453,11 +652,9 @@ Next: Run `blog:publish:validate {{path}}` to verify build
 
 **Output**: Build verification result
 
-**Arguments**:
-- `path` (required): Path to the published post in `src/data/blog/`
-
 **Tools Used**:
-- `Bash` — run astro build
+
+- `Bash` — run astro build and optionally dev server
 
 **Logic**:
 
@@ -470,10 +667,17 @@ Next: Run `blog:publish:validate {{path}}` to verify build
 2. **Check for errors**:
    - If build fails, report error details
    - If build succeeds, continue
+
 3. **Verify post in output**:
    - Check that post appears in `dist/` output
-   - Verify post URL is accessible
-4. **Report success/failure**
+   - Verify post URL path is correct
+
+4. **Dev server** (if `--dev`):
+   - Start `astro dev`
+   - Report local URL for visual verification
+   - Note: requires manual stop
+
+5. **Report success/failure**
 
 **Example output (success)**:
 
@@ -511,9 +715,146 @@ Error:
 
 Status: BUILD FAILED
 
-Fix the error and run `blog:publish:validate` again.
-Consider rolling back with: git checkout src/data/blog/my-post.md
+Fix the error and run `/blog/publish/validate` again.
+
+Rollback options:
+1. Quick: git checkout src/data/blog/my-post.md
+2. Full: See Rollback Procedure section
 ```
+
+---
+
+## Index.md Table Formats
+
+### Published Posts Table (added/updated by promote.md)
+
+```markdown
+## Published Posts
+
+| Phase | Draft | Published | Date | Status |
+|-------|-------|-----------|------|--------|
+| [tutorial-basics](./phase/0-tutorial-basics.md) | - | [view](/blog/kubernetes-migration-tutorial-basics/) | 2026-03-14 | live |
+| [deep-dive-state](./phase/1-deep-dive-state.md) | [draft](../../../_drafts/kubernetes-migration-deep-dive-state.md) | - | - | drafting |
+```
+
+### Status Values
+
+| Status | Meaning |
+|--------|---------|
+| `drafting` | Draft in progress in `_drafts/` |
+| `ready` | Pre-check passed, ready to promote |
+| `scheduled` | Promoted with future pubDatetime |
+| `live` | Published and validated |
+| `failed` | Validation failed, needs fix |
+
+---
+
+## Rollback Procedure
+
+If validation fails or issues discovered after promote:
+
+### Quick Rollback (within session)
+
+```bash
+# Restore draft from git
+git checkout content/_drafts/<slug>.md
+
+# Remove published post (if new)
+rm src/data/blog/<slug>.md
+
+# Or restore previous version (if update)
+git checkout src/data/blog/<slug>.md
+```
+
+### Manual Rollback Steps
+
+1. **Copy published post back to drafts**:
+
+   ```bash
+   cp src/data/blog/<slug>.md content/_drafts/<slug>.md
+   ```
+
+2. **Edit draft** to restore draft state:
+   - Remove `# promoted-by` marker (first line)
+   - Set `draft: true`
+
+3. **Remove published post**:
+
+   ```bash
+   rm src/data/blog/<slug>.md
+   ```
+
+4. **Update project `index.md`**:
+   - Change Published Posts table status to `drafting`
+   - Update project status if needed
+
+5. **Rebuild to verify**:
+
+   ```bash
+   astro build
+   ```
+
+### Planned Extension: Unpublish Command
+
+Future `/blog/publish/unpublish` command would automate:
+
+1. Copy post back to `content/_drafts/`
+2. Remove `# promoted-by` marker
+3. Set `draft: true`
+4. Delete from `src/data/blog/`
+5. Update project status back to `post`
+
+---
+
+## Error Handling
+
+### seo-review.md Errors
+
+| Condition | Error Message | Resolution |
+|-----------|---------------|------------|
+| Draft not found | "Draft not found at {{path}}" | Verify path |
+| Not a markdown file | "Expected .md file, got {{ext}}" | Check file extension |
+| No frontmatter | "Draft has no frontmatter" | Add YAML frontmatter |
+| Fix failed | "Could not auto-fix: {{reason}}" | Apply fix manually |
+
+### pre-check.md Errors
+
+| Condition | Error Message | Resolution |
+|-----------|---------------|------------|
+| Draft not found | "Draft not found at {{path}}" | Verify path |
+| Missing required field | "Missing required field: {{field}}" | Add field to frontmatter |
+| Invalid UUID | "id '{{value}}' is not valid UUIDv4" | Generate new UUID |
+| Invalid date | "pubDatetime '{{value}}' is not valid ISO 8601" | Fix date format |
+| Description too long | "description is {{N}} chars (max 160)" | Shorten description |
+| Lychee not available | "Link check skipped (lychee not installed)" | Install lychee or use --skip-links |
+| Lychee timeout | "Link check timed out after 30s" | Use --skip-links or check manually |
+| Broken links found | "{{N}} broken links found: {{urls}}" | Fix or remove broken links |
+
+### promote.md Errors
+
+| Condition | Error Message | Resolution |
+|-----------|---------------|------------|
+| Draft not found | "Draft not found at {{path}}" | Verify path |
+| Pre-check not passed | "Pre-check required. Run `/blog/publish/pre-check` first" | Run pre-check |
+| Pre-check stale | "Pre-check is {{N}} hours old (>24h). Re-run to verify" | Run pre-check again |
+| Pre-check failed | "Pre-check status is 'failed'. Fix issues first" | Fix and re-run pre-check |
+| Already promoted | "Post already exists at src/data/blog/{{slug}}.md. Edit in place or use --force" | Edit existing or use --force |
+| Invalid schedule date | "Schedule date '{{value}}' must be in the future" | Use future date |
+| Write failed | "Failed to write to src/data/blog/: {{error}}" | Check permissions |
+| Delete failed | "Failed to remove draft from _drafts/: {{error}}" | Remove manually |
+
+### validate.md Errors
+
+| Condition | Error Message | Resolution |
+|-----------|---------------|------------|
+| Post not found | "Post not found at {{path}}" | Verify path is in src/data/blog/ |
+| Wrong directory | "Expected path in src/data/blog/, got {{path}}" | Use correct path |
+| Astro not available | "astro command not found. Install with: npm install astro" | Install Astro |
+| Build failed | "Astro build failed: {{error}}" | Fix error, consider rollback |
+| Post not in output | "Post not found in dist/ after build" | Check build config |
+| Dev server failed | "Could not start dev server: {{error}}" | Check port availability |
+
+---
 
 ## Hook Behavior Details
 
@@ -528,6 +869,8 @@ Consider rolling back with: git checkout src/data/blog/my-post.md
 | Missing required field | Warn with field name and schema reference |
 | Wrong field name (e.g., `date:`) | Warn with correct field name |
 | File outside `src/data/blog/` | Skip (no action) |
+
+**Hook output display**: Warning appears in Claude's response as additional context, highlighted for user attention.
 
 ### Hook 2: Promote Safety
 
@@ -553,6 +896,10 @@ Consider rolling back with: git checkout src/data/blog/my-post.md
 |---------|--------|
 | Artifacts modified, `index.md` unchanged | Warn about potential staleness |
 | `index.md` updated | No warning |
+
+**Session tracking**: The Stop hook uses a prompt that asks Claude to review its own actions in the session to determine if `index.md` was updated.
+
+---
 
 ## Project Structure After Publish
 
@@ -583,15 +930,17 @@ src/data/blog/
 └── kubernetes-migration-deep-dive-state.md    # draft: false
 ```
 
+---
+
 ## Entry Points
 
 Per SPEC, publish phase can be entered at:
 
 | Scenario | Start At | Notes |
 |----------|----------|-------|
-| From post review | `blog:publish:seo-review` | Normal flow |
-| Existing draft | `blog:publish:seo-review` | Any draft in `_drafts/` |
-| Skip SEO | `blog:publish:pre-check` | Proceed directly to validation |
+| From post review | `/blog/publish/seo-review` | Normal flow |
+| Existing draft | `/blog/publish/seo-review` | Any draft in `_drafts/` |
+| Skip SEO | `/blog/publish/pre-check` | Proceed directly to validation |
 
 ### Direct Entry Without Project
 
@@ -602,15 +951,36 @@ When publishing a standalone draft not tied to a project:
 3. Skip project status updates
 4. Proceed with normal publish flow
 
-## Error Handling
+---
 
-| Scenario | Response |
-|----------|----------|
-| Pre-check fails | Block promotion, report issues |
-| Astro build fails | Report error, suggest rollback |
-| Lychee not available | Skip link check, note in output |
-| Draft not found | Error with path suggestion |
-| Already promoted | Error: "Post already exists at src/data/blog/" |
+## Optional Extensions
+
+### Batch Publish
+
+`/blog/publish/promote --all` to publish all pre-checked drafts:
+
+- Find all drafts with `_precheck.status: passed`
+- Promote each in sequence
+- Report summary
+
+### Unpublish Command
+
+`/blog/publish/unpublish` to reverse a promotion:
+
+- Move post back to `_drafts/`
+- Set `draft: true`
+- Remove promote marker
+- Update project status
+
+### Social Preview
+
+`/blog/publish/preview` to generate social media preview:
+
+- Show OG image rendering
+- Display meta tag output
+- Validate Twitter/OpenGraph cards
+
+---
 
 ## Alignment with SPEC
 
@@ -625,6 +995,8 @@ Key SPEC quotes implemented:
 > "promote | Validated draft | Moves file to `src/data/blog/<slug>.md`, sets `draft: false`, sets `pubDatetime`, adds `# promoted-by: /blog/publish/promote` marker (bypasses promote safety hook)"
 >
 > "The `/blog/publish/promote` command is the **only** intended path to write `draft: false` into `src/data/blog/`. To avoid the hook warning on its own output, the `promote` command writes with a `# promoted-by: /blog/publish/promote` comment in the frontmatter."
+
+---
 
 ## Tasks
 
@@ -656,34 +1028,57 @@ Key SPEC quotes implemented:
 ### Testing
 
 - [ ] Test seo-review: title length, description length, keywords
-- [ ] Test pre-check: frontmatter validation, link check
+- [ ] Test seo-review with --fix applies changes
+- [ ] Test pre-check: frontmatter validation pass/fail
+- [ ] Test pre-check: link check with lychee
+- [ ] Test pre-check: --skip-links skips link validation
+- [ ] Test pre-check: adds _precheck status to frontmatter
 - [ ] Test promote: draft → src/data/blog/, marker added
+- [ ] Test promote: pre-check verification works
+- [ ] Test promote: --force bypasses pre-check
+- [ ] Test promote: --schedule sets future date
 - [ ] Test promote: draft deleted from _drafts/
-- [ ] Test validate: astro build runs, post appears
+- [ ] Test validate: astro build runs successfully
+- [ ] Test validate: astro build failure reported
+- [ ] Test validate: post appears in dist/
+- [ ] Test validate: --dev starts dev server
 - [ ] Test hook: missing field triggers warning
 - [ ] Test hook: wrong field name triggers warning
 - [ ] Test hook: promote marker bypasses safety hook
 - [ ] Test hook: draft: true bypasses safety hook
 - [ ] Test hook: files outside src/data/blog/ not checked
+- [ ] Test rollback procedure works
 - [ ] Test project completion: all phases → status: complete
+- [ ] Verify Published Posts table updated in index.md
+
+---
 
 ## Acceptance Tests
 
 ### Command Tests
 
 - [ ] `/blog/publish/seo-review` checks title (<60 chars), description (150-160)
+- [ ] `/blog/publish/seo-review --fix` auto-fixes simple issues
 - [ ] SEO review checks heading keywords and image alt text
-- [ ] SEO review is advisory (doesn't modify draft)
+- [ ] SEO review is advisory (doesn't modify draft without --fix)
 - [ ] `/blog/publish/pre-check` validates frontmatter against AstroPaper schema
+- [ ] `/blog/publish/pre-check` adds `_precheck` status to frontmatter
+- [ ] `/blog/publish/pre-check --skip-links` skips link validation
 - [ ] Pre-check reports missing/incorrect fields
 - [ ] Pre-check runs link checker or reports skipped
 - [ ] Pre-check failure blocks promotion
+- [ ] `/blog/publish/promote` verifies pre-check passed
+- [ ] `/blog/publish/promote --force` bypasses pre-check verification
+- [ ] `/blog/publish/promote --schedule` sets future pubDatetime
 - [ ] `/blog/publish/promote` moves from `_drafts/` to `src/data/blog/`
-- [ ] Promote adds `# promoted-by: /blog/publish/promote` marker
+- [ ] Promote adds `# promoted-by: /blog/publish/promote` marker as first line
+- [ ] Promote removes `_precheck` field from frontmatter
 - [ ] After promote: `draft: false`, `pubDatetime` set
 - [ ] After promote: draft deleted from `_drafts/`
 - [ ] `/blog/publish/validate` runs `astro build`
+- [ ] `/blog/publish/validate --dev` starts dev server
 - [ ] Validate confirms post in site output
+- [ ] Validate reports build errors with rollback suggestion
 
 ### Hook Tests
 
@@ -695,25 +1090,35 @@ Key SPEC quotes implemented:
 - [ ] **Promote safety**: `draft: true` bypasses warning
 - [ ] **Index staleness**: artifact change without `index.md` update triggers warning
 - [ ] Hook scripts are executable
+- [ ] Hook JSON output appears in Claude response
 
 ### State Tests
 
+- [ ] Project `index.md` Published Posts table updated on promote
 - [ ] Project `index.md` status updated to `publish` when first post promoted
 - [ ] Project `index.md` status updated to `complete` after all posts promoted
+
+### Error Tests
+
+- [ ] All error conditions produce helpful messages with resolution steps
+- [ ] Pre-check stale (>24h) triggers re-run prompt
+- [ ] Already promoted post gives edit-in-place guidance
+
+---
 
 ## Dependencies
 
 - Phase 0 (Foundation) — required for rules and schemas
 - Phase 5 (Post) — optional (can publish existing drafts)
-- External tools: `astro` (required), `lychee` (optional)
+- External tools: `astro` (required), `lychee` (optional), `jq` (required for hooks)
 
 ## Estimated Effort
 
-4-5 hours
+5-6 hours
 
-- Commands (4 files): 2 hours
+- Commands (4 files): 2.5 hours
 - SEO checklist (1 file): 15 min
 - Hook scripts (2 files): 1 hour
 - Settings config: 15 min
 - Plugin manifest updates: 15 min
-- Testing all workflows: 1 hour
+- Testing all workflows: 1.5 hours
