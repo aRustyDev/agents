@@ -1,6 +1,7 @@
 abubakarsiddik
 adrianpuiu
 agentskills
+agentsmd
 agentsys
 alirezarezvani
 Analyz
@@ -20,6 +21,7 @@ blencorp
 brewfile
 buildwithclaude
 burpsuite
+cchooks
 cclint
 ccpm
 CHANGEME
@@ -35,6 +37,7 @@ codebases
 codecov
 codegraph
 Composio
+crawl4ai
 crawlable
 cspell
 cupertino
@@ -43,6 +46,7 @@ devrag
 dsgvo
 DTCG
 Duplicat
+elec
 embeddings
 fastmcp
 ffuf
@@ -89,6 +93,7 @@ mihaelamj
 modelcontextprotocol
 monorepo
 myproject
+neuromorphic
 nomic
 obra
 oldhash
