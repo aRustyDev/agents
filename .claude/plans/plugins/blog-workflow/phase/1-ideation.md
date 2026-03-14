@@ -6,20 +6,120 @@ Create the entry point for all content — brainstorm, review, refine, and plan 
 
 ## Deliverables
 
-### 1. Command Files
+### 1. Skill Files
 
-Create under `.claude/commands/blog/idea/`:
+Create under `context/plugins/blog-workflow/skills/idea/`:
 
-| Command | Purpose |
-|---------|---------|
+| Skill | Purpose |
+|-------|---------|
 | `brainstorm.md` | Take raw concept → `idea.md` + `index.md` |
 | `review.md` | Evaluate idea or plan with checklist |
 | `refine.md` | Update artifact based on review feedback |
 | `draft-plan.md` | Approved idea → `plan.md` |
 
-### 2. Review Checklists
+**Skill frontmatter pattern**:
 
-Create `content/_templates/review-checklists/idea.md`:
+```yaml
+---
+name: blog:idea:brainstorm
+description: Transform a raw concept into a structured idea artifact
+arguments:
+  - name: concept
+    description: The topic or concept to brainstorm
+    required: true
+---
+```
+
+### 2. Artifact Templates
+
+Create `context/plugins/blog-workflow/.templates/idea.md`:
+
+```markdown
+---
+id: {{UUIDv4}}
+type: idea
+status: draft
+created: {{ISO 8601}}
+updated: {{ISO 8601}}
+---
+
+## Concept
+
+{{core concept in 1-2 sentences}}
+
+## Target Audience
+
+{{who is this for? skill level, role, interests}}
+
+## Problem/Need
+
+{{what problem does this solve or need does it address?}}
+
+## Unique Angle
+
+{{what makes this different from existing content?}}
+
+## Scope
+
+{{what's included and explicitly excluded}}
+
+## Research Needs
+
+{{what needs to be researched? sources to consult?}}
+
+## Estimated Effort
+
+{{rough time estimate}}
+```
+
+Create `context/plugins/blog-workflow/.templates/plan.md`:
+
+```markdown
+---
+id: {{UUIDv4}}
+type: plan
+status: draft
+parent: ./idea.md
+created: {{ISO 8601}}
+updated: {{ISO 8601}}
+---
+
+## Overview
+
+{{1-2 paragraph summary of the project}}
+
+## Research Phase
+
+- **Scope**: {{what to research}}
+- **Sources**: {{where to look}}
+- **Deliverable**: Research report
+
+## Content Deliverables
+
+| # | Type | Title | Est. Words |
+|---|------|-------|------------|
+
+## Timeline
+
+| Phase | Duration | Notes |
+|-------|----------|-------|
+
+## Dependencies
+
+{{external dependencies, prerequisites}}
+
+## Risks
+
+{{potential blockers, mitigation strategies}}
+
+## Success Criteria
+
+{{how to know this project is complete}}
+```
+
+### 3. Review Checklists
+
+Create `context/plugins/blog-workflow/.templates/review-checklists/idea.md`:
 
 ```markdown
 ---
@@ -50,7 +150,7 @@ applies_to: idea
 - [ ] Time estimate reasonable
 ```
 
-Create `content/_templates/review-checklists/plan.md`:
+Create `context/plugins/blog-workflow/.templates/review-checklists/plan.md`:
 
 ```markdown
 ---
@@ -84,7 +184,7 @@ applies_to: plan
 - [ ] Links to idea artifact present
 ```
 
-### 3. Command Behaviors
+### 4. Skill Behaviors
 
 #### brainstorm.md
 
@@ -94,17 +194,29 @@ applies_to: plan
 
 - `content/_projects/<slug>/idea.md` (artifact)
 - `content/_projects/<slug>/index.md` (manifest)
+- `content/_projects/<slug>/README.md` (human-readable overview)
+
+**Slug generation**:
+
+1. Lowercase the concept
+2. Replace spaces and special characters with hyphens
+3. Remove consecutive hyphens
+4. Truncate to 50 characters
+5. If `content/_projects/<slug>/` exists, append `-2`, `-3`, etc.
 
 **Logic**:
 
-1. Generate slug from concept
-2. Create project directory
-3. Generate `idea.md` with artifact frontmatter
-4. Create `index.md` with project frontmatter (status: `ideation`)
-5. Create `README.md` from `project-readme.md` template
-6. Run self-review (fail items only)
+1. Generate slug from concept (see rules above)
+2. Check for collision, increment suffix if needed
+3. Create project directory
+4. Generate `idea.md` from `.templates/idea.md` with artifact frontmatter
+5. Create `index.md` from `.templates/project-index.md` (status: `ideation`)
+6. Create `README.md` from `.templates/project-readme.md`
+7. Run self-review per `rules/blog-self-review.md` (fail items only)
 
-> **Note**: Persona verification is added in Phase 2. Until then, brainstorm works without persona.
+> **Persona awareness**: At brainstorm start, check if a persona is configured in the project.
+> If not, inform user that no persona is set and content will use default voice.
+> Persona *creation* commands are in Phase 2, but *awareness check* happens here.
 
 #### review.md
 
@@ -115,11 +227,22 @@ applies_to: plan
 **Logic**:
 
 1. Load artifact
-2. Detect type (idea or plan)
-3. Load appropriate checklist
+2. Detect type from frontmatter (`type: idea` or `type: plan`)
+3. Load appropriate checklist from `.templates/review-checklists/`
 4. Evaluate each criterion
 5. Update artifact status → `in-review`
 6. Update `index.md`
+
+**Approval workflow**:
+
+- If all checklist items pass: prompt user "Approve this artifact? [y/n]"
+- If user approves: set status → `approved`, update `index.md`
+- If user declines or any items fail: keep status at `in-review`
+
+**Flags**:
+
+- `--approve`: Skip confirmation prompt, auto-approve if all items pass
+- `--no-approve`: Evaluate only, never set `approved` status
 
 #### refine.md
 
@@ -130,10 +253,13 @@ applies_to: plan
 **Logic**:
 
 1. Load artifact and feedback
-2. Apply improvements
-3. Run self-review checklist
-4. Set status → `draft`
+2. Apply improvements based on feedback
+3. Run self-review per `rules/blog-self-review.md` (fail items only)
+4. Set status → `draft` (requires re-review before approval)
 5. Update `index.md`
+
+> **Workflow note**: After refinement, the artifact returns to `draft` status.
+> User should run `review.md` again to evaluate changes and potentially approve.
 
 #### draft-plan.md
 
@@ -143,43 +269,154 @@ applies_to: plan
 
 **Logic**:
 
-1. Verify idea is approved
-2. Generate project plan structure
+1. Verify idea status is `approved` (error if not)
+2. Generate project plan from `.templates/plan.md`
 3. Create `plan.md` with artifact frontmatter
-4. Link plan to idea (parent/children)
-5. Update `index.md`
-6. Run self-review
+4. Set `parent: ./idea.md` in plan frontmatter
+5. Add `children: [./plan.md]` to idea frontmatter (bidirectional link)
+6. Update `index.md` Artifacts table
+7. Run self-review per `rules/blog-self-review.md`
+
+**Error handling**:
+
+- If idea is not approved: "Error: idea.md must be approved before creating a plan. Run `blog:idea:review` first."
+
+### 5. Example Output
+
+After running `blog:idea:brainstorm "Building eBPF tracing tools"`:
+
+**`content/_projects/building-ebpf-tracing-tools/idea.md`**:
+
+```markdown
+---
+id: "550e8400-e29b-41d4-a716-446655440000"
+type: idea
+status: draft
+created: 2026-03-14T12:00:00Z
+updated: 2026-03-14T12:00:00Z
+---
+
+## Concept
+
+A practical guide to building custom tracing tools using eBPF, covering the fundamentals and real-world applications.
+
+## Target Audience
+
+Mid-to-senior Linux developers and SREs who want to understand eBPF beyond surface-level tutorials. Should have basic C knowledge and Linux systems experience.
+
+## Problem/Need
+
+Most eBPF tutorials stop at "hello world" examples. Engineers need guidance on building production-quality tracing tools.
+
+## Unique Angle
+
+Hands-on, practitioner perspective with real debugging scenarios from production systems.
+
+## Scope
+
+**Included**: eBPF basics, BPF CO-RE, libbpf, tracepoints, kprobes, practical examples
+**Excluded**: XDP networking, security use cases, kernel internals deep-dive
+
+## Research Needs
+
+- Current state of libbpf and BPF CO-RE tooling
+- Common pitfalls and gotchas
+- Performance considerations
+
+## Estimated Effort
+
+2-3 weeks for research + writing
+```
 
 ## Tasks
 
-- [ ] Create `.claude/commands/blog/idea/` directory
-- [ ] Write `brainstorm.md` command
-- [ ] Write `review.md` command (auto-detects idea vs plan)
-- [ ] Write `refine.md` command
-- [ ] Write `draft-plan.md` command
-- [ ] Create `content/_templates/review-checklists/idea.md`
-- [ ] Create `content/_templates/review-checklists/plan.md`
-- [ ] Test brainstorm → review → refine loop
-- [ ] Test plan review flow
+### Skills
+
+- [ ] Create `context/plugins/blog-workflow/skills/idea/` directory
+- [ ] Write `skills/idea/brainstorm.md` with proper skill frontmatter
+- [ ] Write `skills/idea/review.md` with approval workflow
+- [ ] Write `skills/idea/refine.md` with self-review integration
+- [ ] Write `skills/idea/draft-plan.md` with bidirectional linking
+
+### Templates
+
+- [ ] Create `.templates/idea.md` artifact template
+- [ ] Create `.templates/plan.md` artifact template
+- [ ] Create `.templates/review-checklists/idea.md`
+- [ ] Create `.templates/review-checklists/plan.md`
+
+### Testing
+
+- [ ] Test brainstorm → review → approve flow
+- [ ] Test brainstorm → review → refine → review loop
+- [ ] Test draft-plan with approved idea
+- [ ] Test draft-plan error on unapproved idea
+- [ ] Test slug collision handling (create same concept twice)
+- [ ] Test persona awareness message when no persona configured
 
 ## Acceptance Tests
 
-- [ ] `/blog/idea/brainstorm "test topic"` creates `idea.md`, `index.md`, and `README.md`
-- [ ] `README.md` created from `project-readme.md` template
-- [ ] `idea.md` has valid frontmatter (id, type, status, created, updated)
+### Artifact Creation
+
+- [ ] `blog:idea:brainstorm "test topic"` creates `idea.md`, `index.md`, and `README.md`
+- [ ] `idea.md` follows `.templates/idea.md` structure
+- [ ] `idea.md` has valid frontmatter (id, type: idea, status: draft, created, updated)
 - [ ] `index.md` has valid project frontmatter (type: project, status: ideation)
-- [ ] `index.md` lists the idea artifact
-- [ ] `/blog/idea/review <path>/idea.md` produces checklist evaluation
+- [ ] `index.md` Artifacts table lists the idea artifact
+- [ ] `README.md` created from `.templates/project-readme.md`
+
+### Slug Generation
+
+- [ ] Concept "My Great Idea!" generates slug `my-great-idea`
+- [ ] Existing project causes suffix increment (`my-great-idea-2`)
+- [ ] Long concepts are truncated to 50 characters
+
+### Review Workflow
+
+- [ ] `blog:idea:review <path>/idea.md` produces checklist evaluation
 - [ ] After review, `idea.md` status is `in-review`
-- [ ] `/blog/idea/refine <path>/idea.md` updates artifact, status → `draft`
-- [ ] `/blog/idea/draft-plan <path>/idea.md` creates `plan.md`
-- [ ] `/blog/idea/review <path>/plan.md` auto-detects and reviews plan
-- [ ] Multiple brainstorm → review → refine iterations work correctly
+- [ ] If all items pass, user is prompted to approve
+- [ ] Approval sets status → `approved`
+- [ ] `--approve` flag auto-approves without prompt
+- [ ] `--no-approve` flag evaluates only, never approves
+
+### Refine Workflow
+
+- [ ] `blog:idea:refine <path>/idea.md` updates artifact based on feedback
+- [ ] After refine, status returns to `draft`
+- [ ] Self-review runs automatically (per `rules/blog-self-review.md`)
+
+### Plan Creation
+
+- [ ] `blog:idea:draft-plan <path>/idea.md` creates `plan.md` when idea is approved
+- [ ] `plan.md` follows `.templates/plan.md` structure
+- [ ] `plan.md` has `parent: ./idea.md` in frontmatter
+- [ ] `idea.md` has `children: [./plan.md]` added (bidirectional)
+- [ ] Error if idea is not approved
+
+### Review Plan
+
+- [ ] `blog:idea:review <path>/plan.md` auto-detects plan type
+- [ ] Uses `.templates/review-checklists/plan.md` checklist
+- [ ] Approval workflow works same as idea review
+
+### Persona Awareness
+
+- [ ] When no persona configured, brainstorm shows info message
+- [ ] Message indicates default voice will be used
 
 ## Dependencies
 
 - Phase 0 (Foundation) must be complete
+- Plugin directory structure exists at `context/plugins/blog-workflow/`
+- Base templates exist in `.templates/` (project-index.md, project-readme.md)
+- Rules exist in `rules/` (blog-self-review.md)
 
 ## Estimated Effort
 
-3-4 hours
+4-5 hours
+
+- Skills (4 files): 2 hours
+- Artifact templates (2 files): 30 min
+- Review checklists (2 files): 30 min
+- Testing all workflows: 1.5 hours

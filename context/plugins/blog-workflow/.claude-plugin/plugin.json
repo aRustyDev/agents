@@ -1,6 +1,6 @@
 {
   "name": "blog-workflow",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "Structured workflow for creating technical blog posts from research through publication. Supports tutorials, deep dives, research summaries, and development journals with consistent formatting and quality validation.",
   "author": {
     "name": "Adam Smith",
@@ -36,6 +36,10 @@
     "./agents/technical-editor.md"
   ],
   "skills": [
+    "./skills/idea/brainstorm.md",
+    "./skills/idea/review.md",
+    "./skills/idea/refine.md",
+    "./skills/idea/draft-plan.md",
     "./skills/code-example-best-practices/SKILL.md",
     "./skills/content-structure-patterns/SKILL.md",
     "./skills/seo-for-developers/SKILL.md",
