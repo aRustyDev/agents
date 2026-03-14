@@ -238,6 +238,9 @@ arguments:
   - name: no-templates
     description: Create directories only, skip template copying
     required: false
+  - name: with-hooks
+    description: Generate .claude/settings.json with hook configuration
+    required: false
 ---
 ```
 
@@ -276,12 +279,17 @@ arguments:
 
    - Copy hook scripts if user wants local customization
 
-5. **Self-review**:
+5. **Generate settings.json** (if `--with-hooks`):
+   - Check if `.claude/settings.json` exists
+   - If exists, merge hook configuration
+   - If not, create with blog workflow hooks
+
+6. **Self-review**:
    - Verify all directories exist
    - Verify template files copied correctly
    - Report any errors
 
-6. **Report summary**:
+7. **Report summary**:
 
    ```text
    ## Blog Workflow Initialized
@@ -307,6 +315,17 @@ arguments:
    2. Start with: /blog/idea/brainstorm "Your topic"
    ```
 
+### Error Handling
+
+| Error | Cause | Response |
+|-------|-------|----------|
+| Directory exists | `content/_templates/` present without `--force` | List existing files, suggest `--force` to overwrite |
+| Permission denied | No write access to target directory | Error with specific path and permission issue |
+| Plugin templates missing | Corrupted plugin installation | Error suggesting `claude plugin reinstall blog-workflow` |
+| Partial copy failure | Disk full or IO error | Report what succeeded, what failed, suggest cleanup |
+| Settings.json conflict | Existing hooks with different config | Show diff, ask to merge or skip |
+| Invalid JSON in settings | Malformed existing settings.json | Error with parse location, suggest manual fix |
+
 ### Example Usage
 
 ```text
@@ -318,6 +337,12 @@ arguments:
 
 # Overwrite existing
 /blog/init --force
+
+# Include hook configuration
+/blog/init --with-hooks
+
+# Full setup with hooks
+/blog/init --force --with-hooks
 ```
 
 ---
@@ -369,6 +394,67 @@ Templates bundled with the plugin for distribution:
     └── standard.md
 ```
 
+### Template Frontmatter Specifications
+
+Each template type requires specific frontmatter:
+
+**Outline Templates** (`.templates/outlines/*.md`):
+
+```yaml
+---
+name: tutorial
+description: Step-by-step guide structure for teaching a specific skill
+sections:
+  - intro
+  - prerequisites
+  - steps
+  - troubleshooting
+  - conclusion
+estimated_length: 1500-2500
+difficulty: beginner|intermediate|advanced
+---
+```
+
+**Persona Templates** (`.templates/personas/*.md`):
+
+```yaml
+---
+name: practitioner
+description: Hands-on developer sharing real-world experience
+voice: direct, practical, experience-based
+audience: working developers
+tone: collegial, helpful
+---
+```
+
+**Review Checklists** (`.templates/review-checklists/*.md`):
+
+```yaml
+---
+phase: idea|research|content|post|publish
+artifact: idea.md|plan.md|findings.md|etc
+pass_threshold: 80
+categories:
+  - completeness
+  - clarity
+  - accuracy
+---
+```
+
+**Research Plans** (`.templates/research-plans/*.md`):
+
+```yaml
+---
+name: standard
+description: Default research plan structure
+sources:
+  - primary
+  - secondary
+  - community
+depth: surface|moderate|deep
+---
+```
+
 ### Target Project Templates (`content/_templates/`)
 
 After `/blog/init`, user's project has:
@@ -392,6 +478,55 @@ content/_templates/
 hooks/
 ├── validate-blog-frontmatter.sh
 └── promote-safety.sh
+```
+
+### Hook Script Specifications
+
+**validate-blog-frontmatter.sh**:
+
+| Aspect | Specification |
+|--------|---------------|
+| Purpose | Validate artifact frontmatter on save |
+| Trigger | PostToolUse (Write\|Edit) on `content/_drafts/*` or `content/_projects/*` |
+| Input | `$TOOL_INPUT_FILE_PATH` - path to modified file |
+| Output | JSON to stdout for Claude integration |
+| Exit 0 | Validation passed |
+| Exit 1 | Validation failed (blocks if non-silent) |
+
+```bash
+#!/bin/bash
+# Output format for Claude integration
+cat <<EOF
+{
+  "valid": true|false,
+  "errors": ["list of errors"],
+  "warnings": ["list of warnings"],
+  "file": "$TOOL_INPUT_FILE_PATH"
+}
+EOF
+```
+
+**promote-safety.sh**:
+
+| Aspect | Specification |
+|--------|---------------|
+| Purpose | Prevent accidental writes to `src/data/blog/` |
+| Trigger | PreToolUse (Write) on `src/data/blog/*` |
+| Input | `$TOOL_INPUT_FILE_PATH` - target path |
+| Output | JSON with block reason or allow |
+| Exit 0 | Allow write (has promote marker) |
+| Exit 1 | Block write (no promote marker) |
+
+```bash
+#!/bin/bash
+# Check for promote marker in content
+if grep -q "^# promoted-by: /blog/publish/promote" "$TOOL_INPUT_CONTENT" 2>/dev/null; then
+  echo '{"allow": true}'
+  exit 0
+else
+  echo '{"allow": false, "reason": "Use /blog/publish/promote to publish posts"}'
+  exit 1
+fi
 ```
 
 ### Hook Delegation Model
@@ -466,6 +601,183 @@ For projects using the plugin, add to `.claude/settings.json`:
 
 ---
 
+## Version Management
+
+### Version Bump Protocol
+
+Per `plugin-version-sync.md` rule, versions must be synchronized:
+
+| File | Field | Must Match |
+|------|-------|------------|
+| `.claude-plugin/plugin.json` | `version` | ✓ Primary source |
+| `.claude-plugin/marketplace.json` | `version` | ✓ Must match |
+| `CHANGELOG.md` | Latest `## [X.Y.Z]` header | ✓ Must match |
+
+**Bump procedure**:
+
+1. Update `plugin.json` version
+2. Update `marketplace.json` version (same value)
+3. Add CHANGELOG.md entry for new version
+4. Commit all three files together
+
+### Marketplace Entry Template
+
+Add to `.claude-plugin/marketplace.json`:
+
+```json
+{
+  "name": "blog-workflow",
+  "source": "./context/plugins/blog-workflow",
+  "description": "Multi-phase blog content creation with personas, templates, and iterative review",
+  "version": "2.0.0",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev"
+  },
+  "keywords": ["blog", "content", "writing", "persona", "workflow", "technical-writing"],
+  "license": "MIT",
+  "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
+  "repository": "https://github.com/aRustyDev/ai.git"
+}
+```
+
+### CHANGELOG.md Format
+
+```markdown
+# Changelog
+
+All notable changes to the blog-workflow plugin.
+
+## [2.0.0] - 2026-XX-XX
+
+### Added
+
+- Full phase workflow: idea → research → content → post → publish
+- Persona system with practitioner and educator defaults
+- 18 outline templates for different post types
+- Hook delegation model for customization
+- `/blog/init` command for project setup
+- Template frontmatter specifications
+
+### Changed
+
+- Command namespace: `blog:` → `/blog/`
+- Template location: `templates/` → `.templates/`
+- Skill location: `skills/` → `commands/` (SPEC alignment)
+
+### Deprecated
+
+- Legacy commands (`draft-post.md`, `gather-resources.md`, etc.)
+- Will be removed in v3.0.0
+
+### Migration
+
+See README.md for migration guide from v1.x commands.
+
+## [1.3.0] - 2025-XX-XX
+
+### Added
+
+- Research commands
+- Series planning
+
+## [1.2.0] - 2025-XX-XX
+
+### Added
+
+- Persona/template management
+
+## [1.1.0] - 2025-XX-XX
+
+### Added
+
+- Initial workflow commands
+```
+
+---
+
+## Plugin Validation Checklist
+
+Before releasing a new version:
+
+### Manifest Validation
+
+```bash
+# 1. Validate plugin manifest syntax
+claude plugin validate context/plugins/blog-workflow
+
+# 2. Check all command files exist
+cd context/plugins/blog-workflow
+for cmd in $(jq -r '.commands[]' .claude-plugin/plugin.json); do
+  [ -f "$cmd" ] || echo "Missing: $cmd"
+done
+
+# 3. Check all agent files exist
+for agent in $(jq -r '.agents[]' .claude-plugin/plugin.json); do
+  [ -f "$agent" ] || echo "Missing: $agent"
+done
+
+# 4. Check all skill directories exist
+for skill in $(jq -r '.skills[]' .claude-plugin/plugin.json); do
+  [ -f "$skill" ] || echo "Missing: $skill"
+done
+```
+
+### Template Validation
+
+```bash
+# 5. Verify all outline templates present
+ls -la .templates/outlines/*.md | wc -l  # Should be 18
+
+# 6. Verify all review checklists present
+ls -la .templates/review-checklists/*.md | wc -l  # Should be 10
+
+# 7. Verify template frontmatter
+for f in .templates/**/*.md; do
+  head -1 "$f" | grep -q "^---" || echo "Missing frontmatter: $f"
+done
+```
+
+### Hook Validation
+
+```bash
+# 8. Verify hooks are executable
+[ -x hooks/validate-blog-frontmatter.sh ] || echo "Not executable: validate-blog-frontmatter.sh"
+[ -x hooks/promote-safety.sh ] || echo "Not executable: promote-safety.sh"
+
+# 9. Shellcheck hooks
+shellcheck hooks/*.sh
+```
+
+### Version Validation
+
+```bash
+# 10. Check version consistency
+PLUGIN_VER=$(jq -r '.version' .claude-plugin/plugin.json)
+MARKET_VER=$(jq -r '.plugins[] | select(.name=="blog-workflow") | .version' ../../.claude-plugin/marketplace.json)
+CHANGE_VER=$(grep -m1 '## \[' CHANGELOG.md | sed 's/.*\[\(.*\)\].*/\1/')
+
+echo "plugin.json: $PLUGIN_VER"
+echo "marketplace.json: $MARKET_VER"
+echo "CHANGELOG.md: $CHANGE_VER"
+
+[ "$PLUGIN_VER" = "$MARKET_VER" ] || echo "ERROR: Version mismatch plugin vs marketplace"
+[ "$PLUGIN_VER" = "$CHANGE_VER" ] || echo "ERROR: Version mismatch plugin vs changelog"
+```
+
+### Functional Validation
+
+```bash
+# 11. Test /blog/init in clean directory
+cd /tmp && mkdir blog-test && cd blog-test
+# Run /blog/init and verify structure
+
+# 12. Test one command from each phase
+# /blog/idea/brainstorm, /blog/research/draft, etc.
+```
+
+---
+
 ## README.md
 
 ````markdown
@@ -508,6 +820,7 @@ claude plugin install blog-workflow
 | Command | Purpose |
 |---------|---------|
 | `/blog/init` | Set up directories and copy templates |
+| `/blog/init --with-hooks` | Also configure validation hooks |
 
 ### Ideation (`/blog/idea/*`)
 
@@ -593,6 +906,19 @@ The plugin includes validation hooks:
 - **promote-safety.sh** - Prevents accidental writes to `src/data/blog/`
 
 Customize by copying to `.claude/hooks/` in your project.
+
+## Migration from v1.x
+
+| Old Command | New Command |
+|-------------|-------------|
+| `draft-post` | `/blog/post/draft` |
+| `gather-resources` | `/blog/research/draft` |
+| `outline-post` | `/blog/post/plan` |
+| `publish-prep` | `/blog/publish/pre-check` |
+| `research-topic` | `/blog/research/draft` |
+| `seo-pass` | `/blog/publish/seo-review` |
+
+Legacy commands remain in v2.0.0 with deprecation notices.
 ````
 
 ---
@@ -612,29 +938,34 @@ Customize by copying to `.claude/hooks/` in your project.
 - [ ] Create `educator.md` persona (practitioner.md exists)
 - [ ] Verify all review checklists in `.templates/review-checklists/`
 - [ ] Verify `brainstorm-plans/standard.md` exists
+- [ ] Add frontmatter to all templates per specifications
 
 ### Hooks
 
 - [ ] Update hook scripts with delegation pattern
+- [ ] Add JSON output format to hooks
 - [ ] Document settings.json configuration
 - [ ] Test hook delegation to repo-local overrides
+- [ ] Make hook scripts executable
 
 ### Documentation
 
 - [ ] Write plugin README.md
-- [ ] Update CHANGELOG.md with v2.0.0 changes
+- [ ] Create CHANGELOG.md with v2.0.0 entry
 - [ ] Document migration from legacy commands
 
 ### Registration
 
 - [ ] Update `.claude-plugin/marketplace.json` to v2.0.0
 - [ ] Verify plugin validates with `claude plugin validate`
+- [ ] Run full validation checklist
 
 ### Testing
 
 - [ ] Test `/blog/init` creates structure
 - [ ] Test `/blog/init --force` overwrites
 - [ ] Test `/blog/init --no-templates` directories only
+- [ ] Test `/blog/init --with-hooks` generates settings.json
 - [ ] Test all commands via `/blog/` namespace
 - [ ] Test legacy command deprecation notices
 
@@ -655,6 +986,8 @@ Customize by copying to `.claude/hooks/` in your project.
 - [ ] `/blog/init` reports what was created
 - [ ] `/blog/init --force` overwrites existing templates
 - [ ] `/blog/init --no-templates` creates directories only
+- [ ] `/blog/init --with-hooks` creates .claude/settings.json
+- [ ] `/blog/init --with-hooks` merges with existing settings.json
 - [ ] Running `/blog/init` twice without `--force` skips existing files
 
 ### Commands
@@ -671,6 +1004,8 @@ Customize by copying to `.claude/hooks/` in your project.
 - [ ] Repo-local hook overrides take precedence
 - [ ] Plugin hooks no-op gracefully if validation passes
 - [ ] Removing plugin doesn't break repo-local hooks
+- [ ] Hook scripts are executable
+- [ ] Hook scripts output valid JSON
 
 ### Templates
 
@@ -679,6 +1014,13 @@ Customize by copying to `.claude/hooks/` in your project.
 - [ ] Plugin bundle includes all review checklists
 - [ ] Plugin bundle includes `brainstorm-plans/standard.md`
 - [ ] Plugin bundle includes `research-plans/standard.md`
+- [ ] All templates have valid frontmatter
+
+### Version Consistency
+
+- [ ] plugin.json version matches marketplace.json version
+- [ ] plugin.json version matches CHANGELOG.md latest entry
+- [ ] All three files committed together on version bump
 
 ### Migration
 
@@ -691,6 +1033,8 @@ Customize by copying to `.claude/hooks/` in your project.
 - [ ] Missing `content/_templates/` gives clear error pointing to `/blog/init`
 - [ ] Invalid persona reference gives helpful error
 - [ ] Invalid template reference gives helpful error
+- [ ] Permission denied errors show specific path
+- [ ] Corrupted plugin installation suggests reinstall
 
 ---
 
