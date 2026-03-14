@@ -6,18 +6,18 @@ Create the entry point for all content — brainstorm, review, refine, and plan 
 
 ## Deliverables
 
-### 1. Skill Files
+### 1. Command Files
 
-Create under `context/plugins/blog-workflow/skills/idea/`:
+Create under `context/plugins/blog-workflow/commands/idea/`:
 
-| Skill | Purpose |
-|-------|---------|
+| Command | Purpose |
+|---------|---------|
 | `brainstorm.md` | Take raw concept → `idea.md` + `index.md` |
 | `review.md` | Evaluate idea or plan with checklist |
 | `refine.md` | Update artifact based on review feedback |
 | `draft-plan.md` | Approved idea → `plan.md` |
 
-**Skill frontmatter pattern**:
+**Command frontmatter pattern**:
 
 ```yaml
 ---
@@ -222,7 +222,7 @@ applies_to: plan
 
 **Input**: Artifact path (auto-detects idea vs plan)
 
-**Output**: Checklist evaluation with pass/warn/fail
+**Output**: Checklist evaluation with pass/warn/fail + `## Review` section appended to artifact
 
 **Logic**:
 
@@ -230,8 +230,11 @@ applies_to: plan
 2. Detect type from frontmatter (`type: idea` or `type: plan`)
 3. Load appropriate checklist from `.templates/review-checklists/`
 4. Evaluate each criterion
-5. Update artifact status → `in-review`
-6. Update `index.md`
+5. **Append `## Review` section** to the artifact file (replacing any previous review section)
+6. Update artifact status → `in-review`
+7. Update `index.md`
+
+> **Review storage**: Review results are appended directly to the reviewed artifact in a `## Review` section at the end of the file. This keeps the review collocated with the content it evaluates. The `refine` command reads this section to know what to fix.
 
 **Approval workflow**:
 
@@ -246,19 +249,21 @@ applies_to: plan
 
 #### refine.md
 
-**Input**: Artifact path + review feedback
+**Input**: Artifact path (reads `## Review` section from artifact, or accepts feedback as direct input)
 
-**Output**: Updated artifact
+**Output**: Updated artifact with `## Review` section removed
 
 **Logic**:
 
-1. Load artifact and feedback
-2. Apply improvements based on feedback
-3. Run self-review per `rules/blog-self-review.md` (fail items only)
-4. Set status → `draft` (requires re-review before approval)
-5. Update `index.md`
+1. Load artifact
+2. Read the `## Review` section from the artifact (or accept feedback as direct input)
+3. Apply improvements based on feedback
+4. **Remove the `## Review` section** (it will be regenerated on next review)
+5. Run self-review per `rules/blog-self-review.md` (fail items only)
+6. Set status → `draft` (requires re-review before approval)
+7. Update `index.md`
 
-> **Workflow note**: After refinement, the artifact returns to `draft` status.
+> **Workflow note**: After refinement, the artifact returns to `draft` status and the `## Review` section is removed.
 > User should run `review.md` again to evaluate changes and potentially approve.
 
 #### draft-plan.md
@@ -330,13 +335,13 @@ Hands-on, practitioner perspective with real debugging scenarios from production
 
 ## Tasks
 
-### Skills
+### Commands
 
-- [ ] Create `context/plugins/blog-workflow/skills/idea/` directory
-- [ ] Write `skills/idea/brainstorm.md` with proper skill frontmatter
-- [ ] Write `skills/idea/review.md` with approval workflow
-- [ ] Write `skills/idea/refine.md` with self-review integration
-- [ ] Write `skills/idea/draft-plan.md` with bidirectional linking
+- [ ] Create `context/plugins/blog-workflow/commands/idea/` directory
+- [ ] Write `commands/idea/brainstorm.md` with proper command frontmatter
+- [ ] Write `commands/idea/review.md` with approval workflow
+- [ ] Write `commands/idea/refine.md` with self-review integration
+- [ ] Write `commands/idea/draft-plan.md` with bidirectional linking
 
 ### Templates
 

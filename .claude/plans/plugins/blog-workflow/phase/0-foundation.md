@@ -13,8 +13,20 @@ Create directories with `.gitkeep` files for git tracking:
 ```text
 content/
 ├── _projects/          # All content projects
-├── _drafts/            # Post drafts (shared across projects)
-└── _templates/         # Reusable assets
+└── _drafts/            # Post drafts (shared across projects)
+
+context/plugins/blog-workflow/
+├── commands/           # Workflow command files
+│   ├── idea/
+│   ├── research/
+│   ├── content/
+│   ├── post/
+│   ├── publish/
+│   ├── persona/
+│   └── template/
+├── hooks/              # Hook scripts
+├── rules/              # Rules files
+└── .templates/         # Reusable assets
     ├── personas/       # Authorial voice definitions
     ├── outlines/       # Post structure templates
     ├── research-plans/ # Research methodology templates
@@ -26,9 +38,15 @@ content/
 **Creation script**:
 
 ```bash
-mkdir -p content/{_projects,_drafts,_templates/{personas,outlines,research-plans,review-checklists,brainstorm-plans,schemas}}
+# Content directories
+mkdir -p content/{_projects,_drafts}
 touch content/{_projects,_drafts}/.gitkeep
-touch content/_templates/{personas,outlines,research-plans,review-checklists,brainstorm-plans,schemas}/.gitkeep
+
+# Plugin directories
+mkdir -p context/plugins/blog-workflow/{commands/{idea,research,content,post,publish,persona,template},hooks,rules}
+mkdir -p context/plugins/blog-workflow/.templates/{personas,outlines,research-plans,review-checklists,brainstorm-plans,schemas}
+touch context/plugins/blog-workflow/{hooks,rules}/.gitkeep
+touch context/plugins/blog-workflow/.templates/{personas,outlines,research-plans,review-checklists,brainstorm-plans,schemas}/.gitkeep
 ```
 
 ### 2. AstroPaper Schema Update
@@ -45,7 +63,7 @@ schema: ({ image }) =>
 
 ### 3. Blog Frontmatter Rules
 
-Create `.claude/rules/blog-frontmatter.md`:
+Create `context/plugins/blog-workflow/rules/blog-frontmatter.md`:
 
 ```markdown
 # Blog Frontmatter Rules
@@ -102,7 +120,7 @@ Default: `America/New_York` — hardcoded for consistency across all posts.
 
 ### 4. Index Update Rules
 
-Create `.claude/rules/blog-index-updates.md`:
+Create `context/plugins/blog-workflow/rules/blog-index-updates.md`:
 
 ```markdown
 # Index.md Update Rules
@@ -155,7 +173,7 @@ Never skip the index update — it's the project's source of truth.
 
 ### 5. Self-Review Standard
 
-Create `.claude/rules/blog-self-review.md`:
+Create `context/plugins/blog-workflow/rules/blog-self-review.md`:
 
 ```markdown
 # Self-Review Standard
@@ -197,7 +215,7 @@ After `brainstorm.md` creates an idea:
 
 ### 6. Index.md Template
 
-Create `content/_templates/project-index.md`:
+Create `context/plugins/blog-workflow/.templates/project-index.md`:
 
 ```markdown
 ---
@@ -243,7 +261,7 @@ updated: {{ISO 8601}}
 
 ### 7. Project README Template
 
-Create `content/_templates/project-readme.md`:
+Create `context/plugins/blog-workflow/.templates/project-readme.md`:
 
 ```markdown
 # {{title}}
@@ -279,7 +297,7 @@ Create `content/_templates/project-readme.md`:
 
 ### 8. Brainstorm Plan Template
 
-Create `content/_templates/brainstorm-plans/standard.md`:
+Create `context/plugins/blog-workflow/.templates/brainstorm-plans/standard.md`:
 
 ```markdown
 ---
@@ -330,7 +348,7 @@ applies_to: brainstorm
 
 ### 9. Artifact Frontmatter Schema
 
-Create `content/_templates/schemas/artifact-schema.md`:
+Create `context/plugins/blog-workflow/.templates/schemas/artifact-schema.md`:
 
 ````markdown
 # Artifact Frontmatter Schema
@@ -365,7 +383,7 @@ updated: <ISO 8601>             # Required - last modification timestamp
 | `research-findings` | Raw research output | `research/draft` |
 | `analysis` | Synthesized analysis | `research/plan` |
 | `report` | Final research report | `research/review` |
-| `content-plan` | Content decomposition | `content/draft` |
+| `content-brainstorm` | Content phase brainstorm output | `content/draft` |
 | `phase` | Single content piece plan | `content/plan` |
 | `post-spec` | Post specification | `post/spec` |
 | `post-outline` | Structural outline | `post/plan` |
@@ -383,7 +401,7 @@ updated: <ISO 8601>             # Required - last modification timestamp
 
 ### 10. Linking Rules
 
-Create `content/_templates/schemas/linking-rules.md`:
+Create `context/plugins/blog-workflow/.templates/schemas/linking-rules.md`:
 
 ```markdown
 # Linking Rules
@@ -424,12 +442,15 @@ Create `.scripts/validate-blog-structure.sh`:
 DIRS=(
   "content/_projects"
   "content/_drafts"
-  "content/_templates/personas"
-  "content/_templates/outlines"
-  "content/_templates/research-plans"
-  "content/_templates/review-checklists"
-  "content/_templates/brainstorm-plans"
-  "content/_templates/schemas"
+  "context/plugins/blog-workflow/commands"
+  "context/plugins/blog-workflow/hooks"
+  "context/plugins/blog-workflow/rules"
+  "context/plugins/blog-workflow/.templates/personas"
+  "context/plugins/blog-workflow/.templates/outlines"
+  "context/plugins/blog-workflow/.templates/research-plans"
+  "context/plugins/blog-workflow/.templates/review-checklists"
+  "context/plugins/blog-workflow/.templates/brainstorm-plans"
+  "context/plugins/blog-workflow/.templates/schemas"
 )
 
 MISSING=0
@@ -462,20 +483,20 @@ fi
 
 ### Rules Files
 
-- [ ] Create `.claude/rules/blog-frontmatter.md`
-- [ ] Create `.claude/rules/blog-index-updates.md`
-- [ ] Create `.claude/rules/blog-self-review.md`
+- [ ] Create `context/plugins/blog-workflow/rules/blog-frontmatter.md`
+- [ ] Create `context/plugins/blog-workflow/rules/blog-index-updates.md`
+- [ ] Create `context/plugins/blog-workflow/rules/blog-self-review.md`
 
 ### Templates
 
-- [ ] Create `content/_templates/project-index.md`
-- [ ] Create `content/_templates/project-readme.md`
-- [ ] Create `content/_templates/brainstorm-plans/standard.md`
+- [ ] Create `context/plugins/blog-workflow/.templates/project-index.md`
+- [ ] Create `context/plugins/blog-workflow/.templates/project-readme.md`
+- [ ] Create `context/plugins/blog-workflow/.templates/brainstorm-plans/standard.md`
 
 ### Schema Documentation
 
-- [ ] Create `content/_templates/schemas/artifact-schema.md`
-- [ ] Create `content/_templates/schemas/linking-rules.md`
+- [ ] Create `context/plugins/blog-workflow/.templates/schemas/artifact-schema.md`
+- [ ] Create `context/plugins/blog-workflow/.templates/schemas/linking-rules.md`
 
 ### Validation (Optional)
 
@@ -486,8 +507,8 @@ fi
 
 ### Directory Structure
 
-- [ ] All directories exist under `content/`
-- [ ] Each directory contains `.gitkeep` file
+- [ ] All directories exist under `content/` and `context/plugins/blog-workflow/`
+- [ ] Each directory contains `.gitkeep` file where needed
 - [ ] Validation script passes (if created)
 
 ### Schema Update
@@ -498,9 +519,9 @@ fi
 
 ### Rules Files
 
-- [ ] `.claude/rules/blog-frontmatter.md` loads in Claude Code rules context
-- [ ] `.claude/rules/blog-index-updates.md` loads in Claude Code rules context
-- [ ] `.claude/rules/blog-self-review.md` loads in Claude Code rules context
+- [ ] `context/plugins/blog-workflow/rules/blog-frontmatter.md` loads in Claude Code rules context
+- [ ] `context/plugins/blog-workflow/rules/blog-index-updates.md` loads in Claude Code rules context
+- [ ] `context/plugins/blog-workflow/rules/blog-self-review.md` loads in Claude Code rules context
 - [ ] Frontmatter rules document all required and optional fields
 - [ ] Index update rules document all table formats
 

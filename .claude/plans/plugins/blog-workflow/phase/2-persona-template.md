@@ -6,17 +6,17 @@ Establish authorial voice control and reusable structural templates.
 
 ## Deliverables
 
-### 1. Persona Skills
+### 1. Persona Commands
 
-Create under `context/plugins/blog-workflow/skills/persona/`:
+Create under `context/plugins/blog-workflow/commands/persona/`:
 
-| Skill | Purpose |
-|-------|---------|
+| Command | Purpose |
+|---------|---------|
 | `draft.md` | Conversational persona creation → `personas/<slug>.md` |
 | `plan.md` | Refine persona with examples and voice phrases |
 | `review.md` | Test persona against sample content |
 
-**Skill frontmatter pattern**:
+**Command frontmatter pattern**:
 
 ```yaml
 ---
@@ -29,17 +29,17 @@ arguments:
 ---
 ```
 
-### 2. Template Skills
+### 2. Template Commands
 
-Create under `context/plugins/blog-workflow/skills/template/`:
+Create under `context/plugins/blog-workflow/commands/template/`:
 
-| Skill | Purpose |
-|-------|---------|
+| Command | Purpose |
+|---------|---------|
 | `draft.md` | Create template → `<type>/<slug>.md` |
 | `plan.md` | Refine with required/optional sections and guidance |
 | `review.md` | Dry-run template against sample topic |
 
-**Skill frontmatter pattern**:
+**Command frontmatter pattern**:
 
 ```yaml
 ---
@@ -500,16 +500,16 @@ Dry-run: passed with 1 suggestion
 
 ## Tasks
 
-### Skills
+### Commands
 
-- [x] Create `context/plugins/blog-workflow/skills/persona/` directory
-- [x] Write `skills/persona/draft.md` with skill frontmatter
-- [x] Write `skills/persona/plan.md` with skill frontmatter
-- [x] Write `skills/persona/review.md` with skill frontmatter
-- [x] Create `context/plugins/blog-workflow/skills/template/` directory
-- [x] Write `skills/template/draft.md` with skill frontmatter
-- [x] Write `skills/template/plan.md` with skill frontmatter
-- [x] Write `skills/template/review.md` with skill frontmatter
+- [x] Create `context/plugins/blog-workflow/commands/persona/` directory
+- [x] Write `commands/persona/draft.md` with command frontmatter
+- [x] Write `commands/persona/plan.md` with command frontmatter
+- [x] Write `commands/persona/review.md` with command frontmatter
+- [x] Create `context/plugins/blog-workflow/commands/template/` directory
+- [x] Write `commands/template/draft.md` with command frontmatter
+- [x] Write `commands/template/plan.md` with command frontmatter
+- [x] Write `commands/template/review.md` with command frontmatter
 
 ### Templates
 
@@ -521,19 +521,19 @@ Dry-run: passed with 1 suggestion
 
 ### Plugin Updates
 
-- [x] Update `plugin.json` with new skills
+- [x] Update `plugin.json` with new commands
 - [x] Update `marketplace.json` version
 
 ### Testing
 
 - [ ] Test persona creation flow (draft → plan → review)
 - [ ] Test template creation flow (draft → plan → review)
-- [ ] Test persona selection works with existing brainstorm skill
+- [ ] Test persona selection works with existing brainstorm command
 - [ ] Test outline template can be referenced in artifact frontmatter
 
 ## Acceptance Tests
 
-### Persona Skills
+### Persona Commands
 
 - [ ] `blog:persona:draft` creates persona at `.templates/personas/<slug>.md`
 - [ ] Persona follows `.templates/persona.md` structure
@@ -542,7 +542,7 @@ Dry-run: passed with 1 suggestion
 - [ ] `blog:persona:review` generates sample content for validation
 - [ ] `blog:persona:review` runs checklist from `.templates/review-checklists/persona.md`
 
-### Template Skills
+### Template Commands
 
 - [ ] `blog:template:draft outlines my-template` creates `.templates/outlines/my-template.outline.md`
 - [ ] `blog:template:draft research-plans my-plan` creates `.templates/research-plans/my-plan.md`

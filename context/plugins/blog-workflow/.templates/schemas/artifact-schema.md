@@ -24,17 +24,17 @@ updated: <ISO 8601>             # Required - last modification timestamp
 
 | Type | Description | Created By |
 |------|-------------|------------|
-| `idea` | Brainstormed concept | `idea/brainstorm` |
-| `plan` | Project plan | `idea/draft-plan` |
-| `research-plan` | Research specification | `research/spec/draft` |
-| `research-findings` | Raw research output | `research/draft` |
-| `analysis` | Synthesized analysis | `research/plan` |
-| `report` | Final research report | `research/review` |
-| `content-plan` | Content decomposition | `content/draft` |
-| `phase` | Single content piece plan | `content/plan` |
-| `post-spec` | Post specification | `post/spec` |
-| `post-outline` | Structural outline | `post/plan` |
-| `draft` | Full post draft | `post/draft` |
+| `idea` | Brainstormed concept | `blog:idea:brainstorm` |
+| `plan` | Project plan | `blog:idea:draft-plan` |
+| `research-plan` | Research specification | `blog:research:spec:draft` |
+| `research-findings` | Raw research output | `blog:research:draft` |
+| `analysis` | Synthesized analysis | `blog:research:plan` |
+| `report` | Final research report | `blog:research:review` |
+| `content-brainstorm` | Content phase brainstorm output | `blog:content:draft` |
+| `phase` | Single content piece plan | `blog:content:plan` |
+| `post-spec` | Post specification | `blog:post:spec` |
+| `post-outline` | Structural outline | `blog:post:plan` |
+| `draft` | Full post draft | `blog:post:draft` |
 
 ## Status Values
 
