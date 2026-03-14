@@ -31,3 +31,4 @@ exclude = [
 "docs/**/*.md" = ["MD013"]
 "context/agents/*.md" = ["MD013", "MD040"]
 ".claude/**/*.md" = ["MD013", "MD040"]
+"context/plugins/**/.templates/outlines/*.md" = ["MD036"]  # Emphasis callouts are intentional in templates
