@@ -3,11 +3,14 @@
 *Engages in deep, iterative conversations with Gemini MCP for complex problem-solving.*
 
 ## Usage
+
 - **With arguments**: `/gemini-consult [specific problem or question]`
 - **Without arguments**: `/gemini-consult` - Intelligently infers topic from current context
 
 ## Core Philosophy
+
 Persistent Gemini sessions for evolving problems through:
+
 - **Continuous dialogue** - Multiple rounds until clarity achieved
 - **Context awareness** - Smart problem detection from current work
 - **Session persistence** - Keep alive for the entire problem lifecycle
@@ -22,6 +25,7 @@ User provided context: "$ARGUMENTS"
 
 **When $ARGUMENTS is empty:**
 Think deeply about the current context to infer the most valuable consultation topic:
+
 - What files are open or recently modified?
 - What errors or challenges were discussed?
 - What complex implementation would benefit from Gemini's analysis?
@@ -35,11 +39,13 @@ Extract the core problem, context clues, and complexity indicators.
 ### Step 1.5: Gather External Documentation
 
 **Think deeply about external dependencies:**
+
 - What libraries/frameworks are involved in this problem?
 - Am I fully familiar with their latest APIs and best practices?
 - Have these libraries changed significantly or are they new/evolving?
 
 **When to use Context7 MCP:**
+
 - Libraries with frequent updates (e.g., Google GenAI SDK)
 - New libraries you haven't worked with extensively
 - When implementing features that rely heavily on library-specific patterns
@@ -60,6 +66,7 @@ Include relevant documentation insights in your Gemini consultation for more acc
 ### Step 2: Initialize Gemini Session
 
 **CRITICAL: Always attach foundational files:**
+
 ```python
 foundational_files = [
     "MCP-ASSISTANT-RULES.md",  # If exists
@@ -93,6 +100,7 @@ session = mcp__gemini__consult_gemini(
    - **If Gemini mentions external libraries:** Check Context7 MCP for current documentation to verify or supplement Gemini's guidance
 
 2. **Iterative Refinement**
+
    ```python
    follow_up = mcp__gemini__consult_gemini(
        specific_question="[Targeted follow-up]",
@@ -110,11 +118,13 @@ session = mcp__gemini__consult_gemini(
 **Keep Sessions Open** - Don't close immediately. Maintain for the entire problem lifecycle.
 
 **Only close when:**
+
 - Problem is definitively solved and tested
 - Topic is no longer relevant
 - Fresh start would be more beneficial
 
 **Monitor sessions:**
+
 ```python
 active = mcp__gemini__list_sessions()
 requests = mcp__gemini__get_gemini_requests(session_id="...")
@@ -123,15 +133,19 @@ requests = mcp__gemini__get_gemini_requests(session_id="...")
 ## Key Patterns
 
 ### Clarification Pattern
+
 "You mentioned [X]. In our context of [project specifics], how does this apply to [specific concern]?"
 
 ### Deep Dive Pattern
+
 "Let's explore [aspect] further. What are the trade-offs given our [constraints]?"
 
 ### Alternative Pattern
+
 "What if we approached this as [alternative]? How would that affect [concern]?"
 
 ### Progress Check Pattern
+
 "I've implemented [changes]. Here's what happened: [results]. Should I adjust the approach?"
 
 ## Best Practices
@@ -147,6 +161,7 @@ requests = mcp__gemini__get_gemini_requests(session_id="...")
 ## Implementation Approach
 
 When implementing Gemini's suggestions:
+
 1. Start with the highest-impact changes
 2. Test incrementally
 3. Share results back with Gemini

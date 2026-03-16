@@ -1,12 +1,14 @@
 You are concluding work on the current project and need to create a comprehensive handoff for the next AI session. This command intelligently analyzes your current session achievements and updates the handoff document with both auto-detected progress and user-provided context.
 
-## Auto-Loaded Project Context:
+## Auto-Loaded Project Context
+
 @docs/ai-context/HANDOFF.md
 @/CLAUDE.md
 
 ## Step 1: Process User Arguments
 
 Handle the arguments flexibly:
+
 - **With Arguments**: `$ARGUMENTS` provides user context about what was accomplished or attempted
 - **Without Arguments**: Focus purely on auto-detection from session analysis
 
@@ -17,6 +19,7 @@ User provided context: "$ARGUMENTS"
 Think about what was accomplished in this session and how to best capture it for handoff. Review your recent conversation and tool usage to identify significant work:
 
 **Auto-Detect Evidence of:**
+
 - **File Operations** (Write, Edit, MultiEdit tools) - what files were modified and why
 - **New Features** - functionality added or implemented
 - **Bug Fixes** - issues resolved or debugging attempts
@@ -27,7 +30,8 @@ Think about what was accomplished in this session and how to best capture it for
 - **Blockers Encountered** - issues that prevented completion
 
 **Generate Session Summary:**
-```
+
+```text
 Session Analysis:
 - Primary work area: [component/domain affected]
 - Main accomplishments: [key achievements]
@@ -39,6 +43,7 @@ Session Analysis:
 ## Step 3: Analyze Auto-Loaded HANDOFF.md
 
 Analyze the auto-loaded `docs/ai-context/HANDOFF.md` to understand:
+
 - **Existing sections** and their current status
 - **Related ongoing work** that might connect to your session
 - **Structure and formatting** patterns to maintain consistency
@@ -49,17 +54,20 @@ Analyze the auto-loaded `docs/ai-context/HANDOFF.md` to understand:
 Think about how to best update the handoff based on this session's work. Based on your session analysis and the auto-loaded existing handoff content, decide:
 
 **If Current Work Relates to Existing Task:**
+
 - Update the existing section with new progress
 - Add accomplishments to "What Was Accomplished"
 - Update "Current Status" and "Current Issue" if resolved
 - Modify "Next Steps" based on new state
 
 **If Current Work is New/Unrelated:**
+
 - Create a new section with descriptive title
 - Include timestamp for session identification
 - Follow existing document structure and formatting
 
 **If Work Completed an Existing Task:**
+
 - Mark the task as completed
 - Summarize final outcome
 - Consider archiving or removing if fully resolved
@@ -68,30 +76,38 @@ Think about how to best update the handoff based on this session's work. Based o
 
 Make targeted updates to the auto-loaded HANDOFF.md:
 
-### For New Sections, Include:
+### For New Sections, Include
+
 ```markdown
 ## [Task Title] - [Status]
 
 ### Current Status
+
 [Brief description of current state]
 
 ### What Was Accomplished
+
 [Bulleted list of concrete achievements with file paths]
 
 ### Current Issue (if applicable)
+
 [Any blockers or unresolved problems]
 
 ### Next Steps to [Objective]
+
 [Actionable items for continuation]
 
 ### Key Files to Review
+
 [List of relevant files organized by category]
 
 ### Context for Next Session
+
 [Important notes for continuity]
 ```
 
-### For Updates to Existing Sections:
+### For Updates to Existing Sections
+
 - **Add to accomplishments** without duplicating existing content
 - **Update status** if progress changed the situation
 - **Modify current issues** if problems were resolved or new ones discovered
@@ -102,18 +118,21 @@ Make targeted updates to the auto-loaded HANDOFF.md:
 Ensure your updates follow these guidelines:
 
 **Content Quality:**
+
 - **Specific**: Include exact file paths and technical details
 - **Actionable**: Provide clear next steps for continuation
 - **Contextual**: Explain the reasoning behind decisions
 - **Current**: Reflect the actual state after your session
 
 **Formatting Consistency:**
+
 - Follow existing markdown structure and patterns
 - Use consistent heading levels and formatting
 - Maintain bullet point styles and organization
 - Preserve the document's overall structure
 
 **Information Management:**
+
 - **Don't duplicate** existing information unless updating it
 - **Preserve unrelated** sections that weren't part of your work
 - **Consolidate** related information rather than fragmenting it
@@ -122,6 +141,7 @@ Ensure your updates follow these guidelines:
 ## Step 7: Final Verification
 
 Before completing, verify that your handoff:
+
 - **Accurately reflects** what was accomplished in the session
 - **Combines** auto-detected technical changes with user-provided context
 - **Provides clear direction** for the next AI session
@@ -131,11 +151,13 @@ Before completing, verify that your handoff:
 ## Quality Standards
 
 **Be Comprehensive But Concise:**
+
 - Include all relevant technical details
 - Focus on actionable information
 - Avoid redundancy with existing content
 
 **Maintain Professional Handoff Quality:**
+
 - Clear problem statements and current status
 - Specific file references and technical context
 - Logical next steps that build on current progress

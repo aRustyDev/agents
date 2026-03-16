@@ -7,7 +7,7 @@ Orchestration templates that enable Claude Code to coordinate multi-agent workfl
 After reading the [main kit documentation](../README.md), you'll understand how these commands fit into the integrated system. Each command:
 
 - **Auto-loads** the appropriate documentation tier for its task
-- **Spawns specialized agents** based on complexity 
+- **Spawns specialized agents** based on complexity
 - **Integrates MCP servers** when external expertise helps
 - **Maintains documentation** to keep AI context current
 
@@ -22,9 +22,11 @@ All commands benefit from automatic context injection via the `subagent-context-
 ## Available Commands
 
 ### 📊 `/full-context`
+
 **Purpose**: Comprehensive context gathering and analysis when you need deep understanding or plan to execute code changes.
 
 **When to use**:
+
 - Starting work on a new feature or bug
 - Need to understand how systems interconnect
 - Planning architectural changes
@@ -32,10 +34,12 @@ All commands benefit from automatic context injection via the `subagent-context-
 
 **How it works**: Adaptively scales from direct analysis to multi-agent orchestration based on request complexity. Agents read documentation, analyze code, map dependencies, and consult MCP servers as needed.
 
-### 🔍 `/code-review` 
+### 🔍 `/code-review`
+
 **Purpose**: Get multiple expert perspectives on code quality, focusing on high-impact findings rather than nitpicks.
 
 **When to use**:
+
 - After implementing new features
 - Before merging important changes
 - When you want security, performance, and architecture insights
@@ -44,9 +48,11 @@ All commands benefit from automatic context injection via the `subagent-context-
 **How it works**: Spawns specialized agents (security, performance, architecture) that analyze in parallel. Each agent focuses on critical issues that matter for production code.
 
 ### 🧠 `/gemini-consult` *(Requires Gemini MCP Server)*
+
 **Purpose**: Engage in deep, iterative conversations with Gemini for complex problem-solving and architectural guidance.
 
 **When to use**:
+
 - Tackling complex architectural decisions
 - Need expert guidance on implementation approaches
 - Debugging intricate issues across multiple files
@@ -56,15 +62,18 @@ All commands benefit from automatic context injection via the `subagent-context-
 **How it works**: Creates persistent conversation sessions with Gemini, automatically attaching project context and MCP-ASSISTANT-RULES.md. Supports iterative refinement through follow-up questions and implementation feedback.
 
 **Key features**:
+
 - Context-aware problem detection when no arguments provided
 - Persistent sessions maintained throughout problem lifecycle
 - Automatic attachment of foundational project documentation
 - Support for follow-up questions with session continuity
 
 ### 📝 `/update-docs`
+
 **Purpose**: Keep documentation synchronized with code changes, ensuring AI context remains current.
 
 **When to use**:
+
 - After modifying code
 - After adding new features
 - When project structure changes
@@ -73,9 +82,11 @@ All commands benefit from automatic context injection via the `subagent-context-
 **How it works**: Analyzes what changed and updates the appropriate CLAUDE.md files across all tiers. Maintains the context that future AI sessions will rely on.
 
 ### 📄 `/create-docs`
+
 **Purpose**: Generate initial documentation structure for existing projects that lack AI-optimized documentation.
 
 **When to use**:
+
 - Adopting the framework in an existing project
 - Starting documentation from scratch
 - Need to document legacy code
@@ -84,9 +95,11 @@ All commands benefit from automatic context injection via the `subagent-context-
 **How it works**: Analyzes your project structure and creates appropriate CLAUDE.md files at each tier, establishing the foundation for AI-assisted development.
 
 ### ♻️ `/refactor`
+
 **Purpose**: Intelligently restructure code while maintaining functionality and updating all dependencies.
 
 **When to use**:
+
 - Breaking up large files
 - Improving code organization
 - Extracting reusable components
@@ -95,9 +108,11 @@ All commands benefit from automatic context injection via the `subagent-context-
 **How it works**: Analyzes file structure, maps dependencies, identifies logical split points, and handles all import/export updates across the codebase.
 
 ### 🤝 `/handoff`
+
 **Purpose**: Preserve context when ending a session or when the conversation becomes too long.
 
 **When to use**:
+
 - Ending a work session
 - Context limit approaching
 - Switching between major tasks
@@ -108,6 +123,7 @@ All commands benefit from automatic context injection via the `subagent-context-
 ## Integration Patterns
 
 ### Typical Workflow
+
 ```bash
 /full-context "implement user notifications"    # Understand
 # ... implement the feature ...
@@ -117,6 +133,7 @@ All commands benefit from automatic context injection via the `subagent-context-
 ```
 
 ### Quick Analysis
+
 ```bash
 /full-context "why is the API slow?"           # Investigate
 # ... apply fixes ...
@@ -124,6 +141,7 @@ All commands benefit from automatic context injection via the `subagent-context-
 ```
 
 ### Major Refactoring
+
 ```bash
 /full-context "analyze authentication module"   # Understand current state
 /refactor "@auth/large-auth-file.ts"          # Restructure
@@ -132,6 +150,7 @@ All commands benefit from automatic context injection via the `subagent-context-
 ```
 
 ### Complex Problem Solving
+
 ```bash
 /gemini-consult "optimize real-time data pipeline" # Start consultation
 # ... implement suggested approach ...

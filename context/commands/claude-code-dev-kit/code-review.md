@@ -5,6 +5,7 @@
 ## Core Philosophy
 
 This command prioritizes **needle-moving discoveries** over exhaustive lists. Every finding must demonstrate significant impact on:
+
 - System reliability & stability
 - Security vulnerabilities with real exploitation risk
 - Performance bottlenecks affecting user experience
@@ -12,20 +13,22 @@ This command prioritizes **needle-moving discoveries** over exhaustive lists. Ev
 - Critical technical debt threatening maintainability
 
 ### 🚨 Critical Findings Only
+
 Issues that could cause production failures, security breaches, or severe user impact within 48 hours.
 
 ### 🔥 High-Value Improvements
+
 Changes that unlock new capabilities, remove significant constraints, or improve metrics by >25%.
 
 ### ❌ Excluded from Reports
+
 Minor style issues, micro-optimizations (<10%), theoretical best practices, edge cases affecting <1% of users.
 
+## Auto-Loaded Project Context
 
-## Auto-Loaded Project Context:
 @/CLAUDE.md
 @/docs/ai-context/project-structure.md
 @/docs/ai-context/docs-overview.md
-
 
 ## Command Execution
 
@@ -34,19 +37,24 @@ User provided context: "$ARGUMENTS"
 ### Step 1: Understand User Intent & Gather Context
 
 #### Parse the Request
+
 Analyze the natural language input to determine:
+
 1. **What to review**: Parse file paths, component names, feature descriptions, or commit references
 2. **Review focus**: Identify any specific concerns mentioned (security, performance, etc.)
 3. **Scope inference**: Intelligently determine the breadth of review needed
 
 Examples of intent parsing:
+
 - "the authentication flow" → Find all files related to auth across the codebase
 - "voice pipeline implementation" → Locate voice processing components
 - "recent changes" → Parse git history for relevant commits
 - "the API routes" → Identify all API endpoint files
 
 #### Read Relevant Documentation
+
 Before allocating agents, **read the documentation** to understand:
+
 1. Use `/docs/ai-context/docs-overview.md` to identify relevant docs
 2. Read documentation related to the code being reviewed:
    - Architecture docs for subsystem understanding
@@ -61,7 +69,7 @@ This context ensures intelligent agent allocation based on actual project knowle
 
 Every code review MUST analyze these core areas, with depth determined by scope:
 
-#### 🎯 Mandatory Coverage Areas:
+#### 🎯 Mandatory Coverage Areas
 
 1. **Critical Path Analysis**
    - User-facing functionality that could break
@@ -83,16 +91,18 @@ Every code review MUST analyze these core areas, with depth determined by scope:
    - Service dependencies
    - External system interactions
 
-#### 📊 Dynamic Agent Allocation:
+#### 📊 Dynamic Agent Allocation
 
 Based on review scope, allocate agents proportionally:
 
-**Small to medium Scope (small set of files or small feature)**
+#### Small to Medium Scope
+
 - 2-3 agents covering mandatory areas
 - Each agent handles 1-2 coverage areas
 - Focus on highest-risk aspects
 
-**Large Scope (many files, major feature or subsystem)**
+#### Large Scope
+
 - 4-6 agents with specialized focus
 - Each mandatory area gets dedicated coverage
 - Additional agents for cross-cutting concerns
@@ -101,9 +111,10 @@ Based on review scope, allocate agents proportionally:
 
 Based on scope analysis and mandatory coverage areas, dynamically create specialized agents:
 
-#### Agent Generation Strategy:
+#### Agent Generation Strategy
 
 **With your documentation knowledge from Step 1, think deeply** about optimal agent allocation:
+
 - Leverage your understanding of the project architecture and risks
 - Consider the specific documentation you read about this subsystem
 - Apply insights about critical paths and security considerations
@@ -111,13 +122,14 @@ Based on scope analysis and mandatory coverage areas, dynamically create special
 - Factor in any performance or scalability concerns from the docs
 
 Use your understanding of the project to intuitively determine:
+
 1. **How many agents are needed** - Let the code's complexity and criticality guide you
 2. **How to partition the work** - Follow natural architectural boundaries
 3. **Which specializations matter most** - Focus agents where risk is highest
 
-**Generate Specialized Agents**
+#### Generate Specialized Agents
 
-   For each allocated agent, create a focused role:
+For each allocated agent, create a focused role:
 
    **Example for 6-agent allocation:**
    - Agent 1: Critical_Path_Validator (user flows + error handling)
@@ -132,9 +144,10 @@ Use your understanding of the project to intuitively determine:
    - Agent 2: Critical_Path_Guardian (functionality + integrations)
    - Agent 3: Risk_Quality_Assessor (technical debt + code quality)
 
-#### Dynamic Focus Areas:
+#### Dynamic Focus Areas
 
 Each agent receives specialized instructions based on:
+
 - **File characteristics**: API endpoints → security focus
 - **Code patterns**: Loops/algorithms → performance focus
 - **Dependencies**: External services → integration focus
@@ -143,13 +156,14 @@ Each agent receives specialized instructions based on:
 ### Step 4: Execute Dynamic Multi-Agent Review
 
 **Before launching agents, pause and think deeply:**
+
 - What are the real risks in this code?
 - Which areas could cause the most damage if they fail?
 - Where would a solo developer need the most help?
 
 Generate and launch agents based on your thoughtful analysis:
 
-```
+```text
 For each dynamically generated agent:
   Task: "As [Agent_Role], analyze [assigned_coverage_areas] in [target_scope].
 
@@ -193,18 +207,13 @@ For each dynamically generated agent:
   REMEMBER: Every finding must pass the 'so what?' test for a solo developer."
 ```
 
-#### Parallel Execution Strategy:
+#### Parallel Execution Strategy
 
 **Launch all agents simultaneously** for maximum efficiency
 
-
 ### Step 5: Synthesize Findings with Maximum Analysis Power
 
-After all sub-agents complete their analysis:
-
-**ultrathink**
-
-Activate maximum cognitive capabilities to:
+After all sub-agents complete their analysis, activate maximum cognitive capabilities to:
 
 1. **Filter for Impact**
    - Discard all low-priority findings
@@ -220,6 +229,7 @@ Activate maximum cognitive capabilities to:
    - Calculate ROI for each improvement
    - Consider solo developer constraints
    - Create actionable fix sequence
+
    ```markdown
    # Code Review Summary
 
@@ -228,6 +238,7 @@ Activate maximum cognitive capabilities to:
    **Overall Quality Score**: [A-F grade with justification]
 
    ## Key Metrics
+
    - Security Risk Level: [Critical/High/Medium/Low]
    - Performance Impact: [description]
    - Technical Debt: [assessment]
@@ -242,46 +253,57 @@ Structure the final output as:
 # 🔍 Code Review Report
 
 ## Executive Summary
+
 [High-level findings and overall assessment]
 
 ## 🚨 Production Risks (Fix Within 48 Hours)
+
 [Only issues that could cause downtime, data loss, or security breaches]
 
 ## 🎯 Strategic Improvements (High ROI)
+
 [Only changes that unlock capabilities or improve metrics >25%]
 
 ## ⚡ Quick Wins (Optional)
+
 [Only if <2 hours effort for significant improvement]
 
 ## Detailed Analysis
 
 ### Security Assessment
+
 [Detailed security findings from Security_Auditor]
 
 ### Performance Analysis
+
 [Detailed performance findings from Performance_Analyzer]
 
 ### Architecture Review
+
 [Detailed architecture findings from Architecture_Validator]
 
 ### Code Quality Evaluation
+
 [Detailed quality findings from Quality_Inspector]
 
 [Additional sections based on sub-agents used]
 
 ## Action Plan
+
 1. Critical fixes preventing production failures
 2. High-ROI improvements unlocking capabilities
 
 ## Impact Matrix
+
 | Issue | User Impact | Effort | ROI |
 |-------|-------------|--------|-----|
-| [Only high-impact issues with quantified metrics] |
+| [Only high-impact issues with quantified metrics] |  |  |  |
 ```
 
 ### Step 7: Interactive Follow-up
 
 After presenting the review, offer interactive follow-ups. For example:
+
 - "Would you like me to fix any of the critical issues?"
 - "Should I create a detailed refactoring plan for any component?"
 - "Do you want me to generate tests for uncovered code?"
@@ -297,13 +319,13 @@ After presenting the review, offer interactive follow-ups. For example:
 6. **Use MCP servers** for specialized analysis when beneficial
 7. **Keep security findings sensitive** - don't expose vulnerabilities publicly
 
-## Error Handling
+## Coverage Verification
 
-### Coverage Verification
+### Pre-Result Checklist
 
 Before presenting results, verify complete coverage:
 
-```
+```text
 ☑ Critical Path Analysis: [Covered by agents X, Y]
 ☑ Security Surface: [Covered by agents Y, Z]
 ☑ Performance Impact: [Covered by agents X, Z]
@@ -315,6 +337,7 @@ If any area lacks coverage, deploy additional focused agents.
 ## Error Handling
 
 If issues occur during review:
+
 - **Ambiguous input**: Use search tools to find relevant files before asking for clarification
 - **File not found**: Search for similar names or components across the codebase
 - **Large scope detected**: Dynamically scale agents based on calculated complexity
