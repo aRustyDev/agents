@@ -344,17 +344,24 @@ git checkout HEAD~1 -- .claude/commands
 
 ## Success Criteria
 
-1. [ ] All commands accessible via both paths
-2. [ ] Symlinks resolve correctly
-3. [ ] Git history preserved for moved files
-4. [ ] Claude Code detects commands via symlinks
-5. [ ] Consistent naming: `domain:subdomain:action`
-6. [ ] No duplicate command files
+1. [x] All commands accessible via both paths
+2. [x] Symlinks resolve correctly
+3. [x] Git history preserved for moved files
+4. [x] Claude Code detects commands via symlinks
+5. [x] Consistent naming: `domain:subdomain:action`
+6. [x] No duplicate command files
 
 ---
 
-## Open Questions
+## Completed
 
-1. **bd vs beads**: Keep symlink `bd -> beads` for backward compat?
-2. **feedback.md**: Keep at root or move to `misc/feedback.md`?
-3. **claude-code-dev-kit/**: Keep as-is or namespace under external/?
+**Date:** 2026-03-16
+
+**Implementation commits:**
+- `ea78e1e` - refactor(commands): Consolidate to context/commands/ with symlinks (97 files)
+- `31f314e` - chore: Remove stale _context-commands symlink
+
+**Decisions made:**
+1. **bd vs beads**: Used single symlink `.claude/commands -> ../context/commands`, beads commands now accessible as `/beads:*`
+2. **feedback.md**: Kept at root of `context/commands/`
+3. **claude-code-dev-kit/**: Kept as-is under `context/commands/`
