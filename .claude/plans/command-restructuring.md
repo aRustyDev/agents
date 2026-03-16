@@ -1,36 +1,35 @@
-# Command Restructuring Plan
+# Command Restructuring Plan v2
 
 ## Objective
 
-Reorganize `.claude/commands/` into a consistent hierarchical structure with `context/` prefix for AI context library components.
+1. Move all commands from `.claude/commands/` to `context/commands/` (canonical location)
+2. Symlink `.claude/commands/` → `context/commands/` for backward compatibility
+3. Restructure `context/commands/` into domain-based hierarchy
+
+---
 
 ## Current State
 
-### .claude/commands/ (46 files)
+### .claude/commands/ (69 files)
 
 ```text
 .claude/commands/
-├── bd/                          # 30 files - beads commands (KEEP)
-├── plugin/                      # 5 files - already structured
-│   ├── brainstorm.md
-│   ├── generate-issues.md
-│   ├── plan-roadmap.md
-│   ├── research-components.md
-│   └── scaffold.md
-├── create-agent.md
-├── create-command.md
+├── bd/                          # 30 files - beads commands
+├── context/                     # 35 files - context library commands
+│   ├── agent/    (4 files)
+│   ├── command/  (5 files)
+│   ├── mcp/      (5 files)
+│   ├── plan/     (3 files)
+│   ├── plugin/   (9 files)
+│   ├── rule/     (4 files)
+│   └── skill/    (5 files)
 ├── create-gha.md
 ├── create-lang-conversion-skill.md
-├── create-plugin.md
-├── create-skill.md
-├── find-mcp-servers.md
-├── promote-skill.md
-├── review-plan.md
 ├── string-beads.md
 └── validate-lang-conversion-skill.md
 ```
 
-### context/commands/ (25 files)
+### context/commands/ (18 files)
 
 ```text
 context/commands/
@@ -38,20 +37,13 @@ context/commands/
 ├── add-formula.md
 ├── add-homebrew-formula.md
 ├── batch-formulas.md
-├── create-agent.md              # DUPLICATE
 ├── create-helm-chart.md
-├── create-lang-conversion-skill.md  # DUPLICATE
 ├── create-mdbook-plugin.md
 ├── feedback.md
-├── find-mcp-servers.md          # DUPLICATE
 ├── fix-gha.md
 ├── promote-gha.md
-├── promote-skill.md             # DUPLICATE
-├── refine-skill.md
-├── research-plugin-components.md  # DUPLICATE
 ├── review-skill-issue.md
-├── validate-formula.md
-└── validate-lang-conversion-skill.md  # DUPLICATE
+└── validate-formula.md
 ```
 
 ---
@@ -59,433 +51,310 @@ context/commands/
 ## Target Structure
 
 ```text
-.claude/commands/
-├── bd/                          # UNCHANGED - beads issue tracker
-│   └── ... (30 files)
+context/commands/
+├── beads/                       # Issue tracking (30 files)
+│   ├── audit.md
+│   ├── close.md
+│   ├── create.md
+│   ├── ... (27 more)
+│   └── string.md               # ← string-beads.md
 │
-├── context/                     # NEW - AI context library management
+├── homebrew/
+│   └── formula/
+│       ├── add.md              # ← add-formula.md
+│       ├── add-homebrew.md     # ← add-homebrew-formula.md
+│       ├── batch-add.md        # ← batch-formulas.md
+│       └── validate.md         # ← validate-formula.md
+│
+├── helm/
+│   └── create-chart.md         # ← create-helm-chart.md
+│
+├── mdbook/
+│   └── plugin/
+│       └── create.md           # ← create-mdbook-plugin.md
+│
+├── github/
+│   └── actions/
+│       ├── create.md           # ← create-gha.md
+│       ├── fix.md              # ← fix-gha.md
+│       └── promote.md          # ← promote-gha.md
+│
+├── lang-conversion/
+│   └── skill/
+│       ├── create.md           # ← create-lang-conversion-skill.md
+│       └── validate.md         # ← validate-lang-conversion-skill.md
+│
+├── context/                     # AI context library management
 │   ├── plan/
 │   │   ├── create.md
-│   │   ├── review.md            # ← review-plan.md
-│   │   ├── refine.md
-│   │   └── brainstorm.md
-│   │
+│   │   ├── review.md
+│   │   └── refine.md
 │   ├── agent/
-│   │   ├── create.md            # ← create-agent.md
+│   │   ├── create.md
 │   │   ├── review.md
 │   │   ├── refine.md
-│   │   ├── promote.md
-│   │   └── brainstorm.md
-│   │
+│   │   └── promote.md
 │   ├── command/
-│   │   ├── create.md            # ← create-command.md
+│   │   ├── create.md
 │   │   ├── review.md
 │   │   ├── refine.md
 │   │   ├── promote.md
-│   │   ├── brainstorm.md
 │   │   └── search.md
-│   │
 │   ├── skill/
-│   │   ├── create.md            # ← create-skill.md
-│   │   ├── review.md            # ← review-skill-issue.md
-│   │   ├── refine.md            # ← refine-skill.md
-│   │   ├── promote.md           # ← promote-skill.md
-│   │   ├── brainstorm.md
-│   │   └── search.md
-│   │
-│   ├── plugin/
-│   │   ├── create.md            # ← create-plugin.md
+│   │   ├── create.md
 │   │   ├── review.md
 │   │   ├── refine.md
 │   │   ├── promote.md
-│   │   ├── brainstorm.md        # ← plugin/brainstorm.md
 │   │   ├── search.md
-│   │   ├── scaffold.md          # ← plugin/scaffold.md
-│   │   ├── roadmap.md           # ← plugin/plan-roadmap.md
-│   │   ├── plan.md
-│   │   ├── research.md          # ← plugin/research-components.md
-│   │   └── issues.md            # ← plugin/generate-issues.md
-│   │
+│   │   └── review-issue.md     # ← review-skill-issue.md
+│   ├── plugin/
+│   │   ├── create.md
+│   │   ├── review.md
+│   │   ├── refine.md
+│   │   ├── search.md
+│   │   ├── brainstorm.md
+│   │   ├── scaffold.md
+│   │   ├── roadmap.md
+│   │   ├── research.md
+│   │   └── issues.md
 │   ├── rule/
 │   │   ├── create.md
 │   │   ├── review.md
 │   │   ├── refine.md
-│   │   ├── promote.md
-│   │   └── brainstorm.md
-│   │
+│   │   └── promote.md
 │   └── mcp/
 │       ├── create.md
 │       ├── review.md
 │       ├── refine.md
 │       ├── promote.md
-│       ├── brainstorm.md
-│       └── search.md            # ← find-mcp-servers.md
+│       └── search.md
 │
-├── create-gha.md                # KEEP at root - standalone
-├── create-lang-conversion-skill.md  # KEEP at root - specialized
-├── string-beads.md              # KEEP at root - cross-cutting
-└── validate-lang-conversion-skill.md  # KEEP at root - specialized
+├── feedback.md                  # General feedback
+│
+└── claude-code-dev-kit/         # External toolkit (unchanged)
+    ├── code-review.md
+    ├── create-docs.md
+    ├── full-context.md
+    ├── gemini-consult.md
+    ├── handoff.md
+    ├── README.md
+    ├── refactor.md
+    └── update-docs.md
+```
+
+### Symlink Structure
+
+```text
+.claude/commands/
+├── bd -> ../../context/commands/beads
+├── context -> ../../context/commands/context
+├── create-gha.md -> ../../context/commands/github/actions/create.md
+├── create-lang-conversion-skill.md -> ../../context/commands/lang-conversion/skill/create.md
+├── string-beads.md -> ../../context/commands/beads/string.md
+└── validate-lang-conversion-skill.md -> ../../context/commands/lang-conversion/skill/validate.md
 ```
 
 ---
 
 ## Migration Mapping
 
-### Moves (existing → new)
+### From .claude/commands/
 
-| Current Location | New Location | Status |
-|------------------|--------------|--------|
-| `create-agent.md` | `context/agent/create.md` | MOVE |
-| `create-command.md` | `context/command/create.md` | MOVE |
-| `create-plugin.md` | `context/plugin/create.md` | MOVE |
-| `create-skill.md` | `context/skill/create.md` | MOVE |
-| `find-mcp-servers.md` | `context/mcp/search.md` | MOVE+RENAME |
-| `promote-skill.md` | `context/skill/promote.md` | MOVE |
-| `review-plan.md` | `context/plan/review.md` | MOVE |
-| `plugin/brainstorm.md` | `context/plugin/brainstorm.md` | MOVE |
-| `plugin/generate-issues.md` | `context/plugin/issues.md` | MOVE+RENAME |
-| `plugin/plan-roadmap.md` | `context/plugin/roadmap.md` | MOVE+RENAME |
-| `plugin/research-components.md` | `context/plugin/research.md` | MOVE+RENAME |
-| `plugin/scaffold.md` | `context/plugin/scaffold.md` | MOVE |
+| Current | Target | Action |
+|---------|--------|--------|
+| `bd/*` | `beads/*` | MOVE+RENAME dir |
+| `context/*` | `context/*` | MOVE |
+| `create-gha.md` | `github/actions/create.md` | MOVE |
+| `create-lang-conversion-skill.md` | `lang-conversion/skill/create.md` | MOVE |
+| `string-beads.md` | `beads/string.md` | MOVE |
+| `validate-lang-conversion-skill.md` | `lang-conversion/skill/validate.md` | MOVE |
 
-### Imports from context/commands/
+### From context/commands/ (restructure in place)
 
-| Source | Target | Action |
-|--------|--------|--------|
-| `context/commands/refine-skill.md` | `context/skill/refine.md` | IMPORT |
-| `context/commands/review-skill-issue.md` | `context/skill/review.md` | IMPORT+ADAPT |
-
-### Creates (new commands)
-
-| New Command | Description | Priority | Status |
-|-------------|-------------|----------|--------|
-| `context/plan/create.md` | Create a new plan document | P1 | ✅ |
-| `context/plan/refine.md` | Refine/improve a plan | P2 | ✅ |
-| `context/plan/brainstorm.md` | Brainstorm plan ideas | P3 | SKIPPED |
-| `context/agent/review.md` | Review agent definition | P2 | ✅ |
-| `context/agent/refine.md` | Refine agent definition | P2 | ✅ |
-| `context/agent/promote.md` | Promote agent to registry | P2 | ✅ |
-| `context/agent/brainstorm.md` | Brainstorm agent ideas | P3 | SKIPPED |
-| `context/command/review.md` | Review command | P2 | ✅ |
-| `context/command/refine.md` | Refine command | P2 | ✅ |
-| `context/command/promote.md` | Promote command to registry | P2 | ✅ |
-| `context/command/brainstorm.md` | Brainstorm command ideas | P3 | SKIPPED |
-| `context/command/search.md` | Search for commands | P2 | ✅ |
-| `context/skill/brainstorm.md` | Brainstorm skill ideas | P3 | SKIPPED |
-| `context/skill/search.md` | Search for skills | P2 | ✅ |
-| `context/plugin/review.md` | Review plugin | P2 | ✅ |
-| `context/plugin/refine.md` | Refine plugin | P2 | ✅ |
-| `context/plugin/promote.md` | Promote plugin to registry | P2 | SKIPPED |
-| `context/plugin/search.md` | Search for plugins | P2 | ✅ |
-| `context/plugin/plan.md` | Create plugin development plan | P2 | SKIPPED |
-| `context/rule/create.md` | Create a rule | P1 | ✅ |
-| `context/rule/review.md` | Review rule | P2 | ✅ |
-| `context/rule/refine.md` | Refine rule | P2 | ✅ |
-| `context/rule/promote.md` | Promote rule to registry | P2 | ✅ |
-| `context/rule/brainstorm.md` | Brainstorm rule ideas | P3 | SKIPPED |
-| `context/mcp/create.md` | Create MCP server config | P2 | ✅ |
-| `context/mcp/review.md` | Review MCP server | P2 | ✅ |
-| `context/mcp/refine.md` | Refine MCP server config | P2 | ✅ |
-| `context/mcp/promote.md` | Promote MCP server to registry | P2 | ✅ |
-| `context/mcp/brainstorm.md` | Brainstorm MCP server ideas | P3 | SKIPPED |
-
-### Stays at Root
-
-| Command | Reason |
-|---------|--------|
-| `create-gha.md` | Standalone GHA creation |
-| `create-lang-conversion-skill.md` | Specialized skill type |
-| `validate-lang-conversion-skill.md` | Specialized validation |
-| `string-beads.md` | Cross-cutting plan→beads |
-
-### Deletes (duplicates after consolidation)
-
-| File | Reason |
-|------|--------|
-| `plugin/` directory | Contents moved to `context/plugin/` |
+| Current | Target | Action |
+|---------|--------|--------|
+| `add-formula.md` | `homebrew/formula/add.md` | MOVE |
+| `add-homebrew-formula.md` | `homebrew/formula/add-homebrew.md` | MOVE |
+| `batch-formulas.md` | `homebrew/formula/batch-add.md` | MOVE+RENAME |
+| `validate-formula.md` | `homebrew/formula/validate.md` | MOVE |
+| `create-helm-chart.md` | `helm/create-chart.md` | MOVE |
+| `create-mdbook-plugin.md` | `mdbook/plugin/create.md` | MOVE |
+| `fix-gha.md` | `github/actions/fix.md` | MOVE |
+| `promote-gha.md` | `github/actions/promote.md` | MOVE |
+| `review-skill-issue.md` | `context/skill/review-issue.md` | MOVE |
+| `feedback.md` | `feedback.md` | KEEP |
+| `claude-code-dev-kit/*` | `claude-code-dev-kit/*` | KEEP |
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Create Directory Structure
+### Phase 1: Create Target Directory Structure
 
 ```bash
-mkdir -p .claude/commands/context/{plan,agent,command,skill,plugin,rule,mcp}
+mkdir -p context/commands/{beads,homebrew/formula,helm,mdbook/plugin,github/actions,lang-conversion/skill}
 ```
 
-### Phase 2: Move Existing Commands
+### Phase 2: Move .claude/commands/ to context/commands/
 
-1. Move with git to preserve history:
-
-   ```bash
-   git mv .claude/commands/create-agent.md .claude/commands/context/agent/create.md
-   git mv .claude/commands/create-command.md .claude/commands/context/command/create.md
-   git mv .claude/commands/create-plugin.md .claude/commands/context/plugin/create.md
-   git mv .claude/commands/create-skill.md .claude/commands/context/skill/create.md
-   git mv .claude/commands/find-mcp-servers.md .claude/commands/context/mcp/search.md
-   git mv .claude/commands/promote-skill.md .claude/commands/context/skill/promote.md
-   git mv .claude/commands/review-plan.md .claude/commands/context/plan/review.md
-   ```
-
-2. Move plugin subdirectory contents:
+1. **Move bd/ to beads/**:
 
    ```bash
-   git mv .claude/commands/plugin/brainstorm.md .claude/commands/context/plugin/brainstorm.md
-   git mv .claude/commands/plugin/generate-issues.md .claude/commands/context/plugin/issues.md
-   git mv .claude/commands/plugin/plan-roadmap.md .claude/commands/context/plugin/roadmap.md
-   git mv .claude/commands/plugin/research-components.md .claude/commands/context/plugin/research.md
-   git mv .claude/commands/plugin/scaffold.md .claude/commands/context/plugin/scaffold.md
+   git mv .claude/commands/bd context/commands/beads
    ```
 
-3. Remove empty plugin directory:
+2. **Move context/ hierarchy**:
 
    ```bash
-   rmdir .claude/commands/plugin
+   git mv .claude/commands/context context/commands/context
    ```
 
-### Phase 3: Import from context/commands/
-
-1. Copy relevant commands:
+3. **Move root-level commands**:
 
    ```bash
-   cp context/commands/refine-skill.md .claude/commands/context/skill/refine.md
+   git mv .claude/commands/create-gha.md context/commands/github/actions/create.md
+   git mv .claude/commands/create-lang-conversion-skill.md context/commands/lang-conversion/skill/create.md
+   git mv .claude/commands/validate-lang-conversion-skill.md context/commands/lang-conversion/skill/validate.md
+   git mv .claude/commands/string-beads.md context/commands/beads/string.md
    ```
 
-2. Adapt review-skill-issue.md to generic review.md:
-   - Read `context/commands/review-skill-issue.md`
-   - Create generic `context/skill/review.md` that invokes it when needed
+### Phase 3: Restructure context/commands/ Files
 
-### Phase 4: Update Frontmatter
+1. **Homebrew commands**:
 
-Update `name:` field in all moved commands to match new paths:
+   ```bash
+   git mv context/commands/add-formula.md context/commands/homebrew/formula/add.md
+   git mv context/commands/add-homebrew-formula.md context/commands/homebrew/formula/add-homebrew.md
+   git mv context/commands/batch-formulas.md context/commands/homebrew/formula/batch-add.md
+   git mv context/commands/validate-formula.md context/commands/homebrew/formula/validate.md
+   ```
 
-| Old Name | New Name |
-|----------|----------|
-| `create-agent` | `context/agent/create` |
-| `create-command` | `context/command/create` |
-| `create-plugin` | `context/plugin/create` |
-| `create-skill` | `context/skill/create` |
-| `find-mcp-servers` | `context/mcp/search` |
-| `promote-skill` | `context/skill/promote` |
-| `review-plan` | `context/plan/review` |
-| `plugin/brainstorm` | `context/plugin/brainstorm` |
-| `plugin/generate-issues` | `context/plugin/issues` |
-| `plugin/plan-roadmap` | `context/plugin/roadmap` |
-| `plugin/research-components` | `context/plugin/research` |
-| `plugin/scaffold` | `context/plugin/scaffold` |
+2. **Helm commands**:
 
-### Phase 5: Create New Commands (P1)
+   ```bash
+   git mv context/commands/create-helm-chart.md context/commands/helm/create-chart.md
+   ```
 
-Create minimal working versions of essential new commands:
+3. **MDBook commands**:
 
-1. **context/plan/create.md** - Create plan documents
-2. **context/rule/create.md** - Create rule files
+   ```bash
+   git mv context/commands/create-mdbook-plugin.md context/commands/mdbook/plugin/create.md
+   ```
 
-### Phase 6: Create New Commands (P2)
+4. **GitHub Actions commands**:
 
-Create remaining P2 commands with consistent structure:
+   ```bash
+   git mv context/commands/fix-gha.md context/commands/github/actions/fix.md
+   git mv context/commands/promote-gha.md context/commands/github/actions/promote.md
+   ```
 
-**Pattern for each component type:**
+5. **Skill review-issue**:
 
-- `review.md` - Analyze and validate
-- `refine.md` - Improve based on analysis
-- `search.md` - Find existing components
+   ```bash
+   git mv context/commands/review-skill-issue.md context/commands/context/skill/review-issue.md
+   ```
 
-### Phase 7: Create New Commands (P3)
+### Phase 4: Create Symlinks
 
-Create brainstorm commands for each type.
+1. **Remove .claude/commands/ directory** (after all files moved):
 
-### Phase 8: Cleanup context/commands/
+   ```bash
+   rmdir .claude/commands  # Should be empty after moves
+   ```
 
-After migration complete:
+2. **Create symlinks**:
 
-1. Remove duplicates from `context/commands/`:
-   - `create-agent.md` (moved)
-   - `create-lang-conversion-skill.md` (kept at .claude root)
-   - `find-mcp-servers.md` (moved)
-   - `promote-skill.md` (moved)
-   - `research-plugin-components.md` (moved)
-   - `validate-lang-conversion-skill.md` (kept at .claude root)
+   ```bash
+   # Main directory symlink
+   ln -s ../context/commands .claude/commands
+   ```
 
-2. Keep unique commands in `context/commands/`:
-   - `claude-code-dev-kit/` (external toolkit)
-   - Homebrew formula commands
-   - `create-helm-chart.md`
-   - `create-mdbook-plugin.md`
-   - `feedback.md`
-   - `fix-gha.md`
-   - `promote-gha.md`
-   - `refine-skill.md` (source for import)
-   - `review-skill-issue.md` (specialized workflow)
-   - `validate-formula.md`
+   Or if granular symlinks preferred:
 
----
+   ```bash
+   mkdir .claude/commands
+   ln -s ../../context/commands/beads .claude/commands/bd
+   ln -s ../../context/commands/context .claude/commands/context
+   ln -s ../../context/commands/github/actions/create.md .claude/commands/create-gha.md
+   ln -s ../../context/commands/lang-conversion/skill/create.md .claude/commands/create-lang-conversion-skill.md
+   ln -s ../../context/commands/lang-conversion/skill/validate.md .claude/commands/validate-lang-conversion-skill.md
+   ln -s ../../context/commands/beads/string.md .claude/commands/string-beads.md
+   ```
 
-## Command Templates
+### Phase 5: Update .gitignore and Settings
 
-### Standard Review Command
+1. **Add symlinks to git**:
 
-````markdown
----
-name: context/<type>/review
-description: Review a <type> definition for quality and best practices
-argument-hint: <path> [--check-only] [--create-issues]
----
+   ```bash
+   git add .claude/commands
+   ```
 
-# Review <Type>
+2. **Verify symlinks work**:
 
-Analyze a <type> for quality, structure, and best practices.
+   ```bash
+   ls -la .claude/commands/
+   cat .claude/commands/bd/create.md  # Should resolve
+   ```
 
-## Arguments
+### Phase 6: Verify and Commit
 
-- `$1` - Path to <type> (required)
-- `--check-only` - Analyze only, don't suggest fixes
-- `--create-issues` - Create GitHub issues for findings
+1. **Verify command resolution**:
 
-## Workflow
+   ```bash
+   # Test that Claude Code can find commands via symlinks
+   ls -la .claude/commands/context/skill/
+   ```
 
-### Phase 1: Load and Parse
+2. **Commit**:
 
-1. Read <type> at `$1`
-2. Validate structure
-
-### Phase 2: Quality Analysis
-
-Check:
-
-- [ ] Structure follows conventions
-- [ ] Documentation complete
-- [ ] No obvious issues
-
-### Phase 3: Report
-
-Generate structured report with findings.
-
-## Output
-
-```text
-## <Type> Review: <name>
-
-### Summary
-- Status: PASS/WARN/FAIL
-- Issues: N
-
-### Findings
-...
-```
-````
-
-### Standard Refine Command
-
-````markdown
----
-name: context/<type>/refine
-description: Refine a <type> based on review feedback
-argument-hint: <path>
----
-
-# Refine <Type>
-
-Apply improvements to a <type> based on review findings.
-
-## Arguments
-
-- `$1` - Path to <type> (required)
-
-## Workflow
-
-1. Run review (if not already done)
-2. Present findings
-3. Ask for confirmation
-4. Apply fixes
-5. Re-validate
-````
-
-### Standard Search Command
-
-````markdown
----
-name: context/<type>/search
-description: Search for existing <type>s matching criteria
-argument-hint: <query>
----
-
-# Search <Type>s
-
-Find <type>s in local and remote registries.
-
-## Arguments
-
-- `$1` - Search query (required)
-
-## Sources
-
-1. Local: `context/<type>s/`
-2. Registry: ccpm (if applicable)
-3. Web: claude-plugins.dev, GitHub
-
-## Output
-
-| Name | Source | Match | Description |
-|------|--------|-------|-------------|
-````
+   ```bash
+   git commit -m "refactor(commands): Consolidate to context/commands/ with symlinks"
+   ```
 
 ---
 
-## Validation
+## Naming Convention
 
-### After Phase 2 (Moves)
+Commands follow this naming pattern based on location:
+
+| Location | Command Name Pattern | Example |
+|----------|---------------------|---------|
+| `context/commands/beads/create.md` | `beads:create` | `/beads:create` |
+| `context/commands/homebrew/formula/add.md` | `homebrew:formula:add` | `/homebrew:formula:add` |
+| `context/commands/github/actions/fix.md` | `github:actions:fix` | `/github:actions:fix` |
+| `context/commands/context/skill/create.md` | `context:skill:create` | `/context:skill:create` |
+
+**Note**: The `bd` symlink preserves backward compatibility for `/bd:*` commands.
+
+---
+
+## Rollback Plan
+
+If symlinks cause issues:
 
 ```bash
-# Verify all commands resolve
-ls .claude/commands/context/*/
-# Expect: 7 directories with files
+# Remove symlinks
+rm -rf .claude/commands
 
-# Verify no broken references
-grep -r "create-agent" .claude/commands/  # Should only find context/agent/create.md
-```
-
-### After Phase 4 (Frontmatter)
-
-```bash
-# Check all frontmatter has correct name
-for f in .claude/commands/context/*/*.md; do
-  grep -l "^name:" "$f" || echo "Missing name: $f"
-done
-```
-
-### After Complete
-
-```bash
-# List final structure
-find .claude/commands -name "*.md" | sort
-
-# Count commands per category
-for dir in .claude/commands/context/*/; do
-  echo "$(basename $dir): $(ls $dir/*.md 2>/dev/null | wc -l) commands"
-done
+# Restore from git
+git checkout HEAD~1 -- .claude/commands
 ```
 
 ---
 
 ## Success Criteria
 
-1. ✅ All existing commands work with new paths
-2. ✅ Consistent hierarchy: `context/<type>/<action>.md`
-3. ✅ Each type has: create, review, refine, promote, brainstorm
-4. ✅ Search available for: command, skill, plugin, mcp
-5. ✅ No duplicate commands between locations
-6. ✅ Git history preserved for moved files
-7. ✅ Frontmatter `name:` matches path
+1. [ ] All commands accessible via both paths
+2. [ ] Symlinks resolve correctly
+3. [ ] Git history preserved for moved files
+4. [ ] Claude Code detects commands via symlinks
+5. [ ] Consistent naming: `domain:subdomain:action`
+6. [ ] No duplicate command files
 
 ---
 
-## Risks
+## Open Questions
 
-| Risk | Mitigation |
-|------|------------|
-| Breaking existing workflows | Update all internal references |
-| Lost git history | Use `git mv` for all moves |
-| Missing commands | Create stubs with "TODO" markers |
-| Inconsistent naming | Follow template patterns |
+1. **bd vs beads**: Keep symlink `bd -> beads` for backward compat?
+2. **feedback.md**: Keep at root or move to `misc/feedback.md`?
+3. **claude-code-dev-kit/**: Keep as-is or namespace under external/?
