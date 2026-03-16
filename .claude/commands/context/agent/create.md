@@ -99,9 +99,11 @@ mkdir -p "$(dirname "<target-path>")"
 ## Workflow
 
 ### Step 1: <Phase>
+
 <Instructions>
 
 ### Step 2: <Phase>
+
 <Instructions>
 
 ## Model
@@ -131,9 +133,11 @@ mkdir -p "$(dirname "<target-path>")"
 ## Usage
 
 ### Full Pipeline
+
 <Example invocations>
 
 ### Individual Sub-Agents
+
 <How to run specific stages>
 
 ## Sub-Agents
@@ -152,14 +156,17 @@ mkdir -p "$(dirname "<target-path>")"
 <Detailed instructions>
 
 ### <Sub-Agent 2 Name>
+
 ...
 
 ## Pipeline
 
 ```
+
 Stage 1: <name> → Stage 2: <name> → Stage 3: <name>
                                    ↘ Stage 3b: <name> (parallel)
-```
+
+```text
 
 ## Configuration
 
@@ -183,7 +190,7 @@ Stage 1: <name> → Stage 2: <name> → Stage 3: <name>
 
 ### Step 6: Report
 
-```
+```text
 ## Agent Created
 
 | Field | Value |
@@ -201,7 +208,7 @@ Stage 1: <name> → Stage 2: <name> → Stage 3: <name>
 
 ## Examples
 
-```
+```text
 /create-agent homebrew-expert --location context
 /create-agent code-reviewer --type solo
 /create-agent skill-reviewer --type orchestrated --location project
@@ -257,15 +264,18 @@ For orchestrated agents, assign the cheapest model that can handle each sub-agen
 ## Troubleshooting
 
 **Agent not being invoked:**
+
 - Ensure the file is in `.claude/agents/` or `context/agents/`
 - Check the file has `.md` extension
 - Verify the first line is a `# Title` heading
 
 **Sub-agents not executing in parallel:**
+
 - Task tool calls must be in the same message to run in parallel
 - Verify sub-agents have no data dependencies between them
 
 **Agent producing inconsistent results:**
+
 - Add explicit validation steps after each phase
 - Include example inputs/outputs in the agent definition
 - Constrain the tool list to only what's needed

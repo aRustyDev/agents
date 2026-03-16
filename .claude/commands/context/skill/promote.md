@@ -9,11 +9,13 @@ $ARGUMENTS should be the path to the skill directory (e.g., `.claude/skills/home
 ## Configuration
 
 The ai repo location is determined in order of precedence:
+
 1. Environment variable `$AI_CONFIG_REPO` if set
 2. Git submodule named `ai` in current repo's parent
 3. Default: `~/repos/configs/ai`
 
 Store the resolved path in a variable for use throughout:
+
 ```bash
 AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.path 2>/dev/null || echo "$HOME/repos/configs/ai")}"
 ```
@@ -23,6 +25,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 ### Phase 0: Pre-flight Checks
 
 1. **Verify ai repo exists and is accessible**:
+
    ```bash
    if [[ ! -d "$AI_REPO/.git" ]]; then
      echo "Error: AI repo not found at $AI_REPO"
@@ -35,10 +38,12 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
    - These may cause confusing warnings from `gh` CLI later
 
 3. **Read the GitHub templates** (for reference when constructing issue/PR bodies):
+
    ```bash
    cat "$AI_REPO/.github/ISSUE_TEMPLATE/add-skill.yml"
    cat "$AI_REPO/.github/PULL_REQUEST_TEMPLATE.md"
    ```
+
    Use these templates to structure the issue and PR bodies correctly.
 
 ### Phase 1: Validate and Analyze
@@ -63,6 +68,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
      - **Separate**: New skill is distinct despite similar name
 
 4. **Check for existing branch/issue/PR** (idempotency):
+
    ```bash
    # Check if branch already exists
    git -C "$AI_REPO" branch --list "feat/add-skill-<skill-name>"
@@ -74,6 +80,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
    # Check for existing PRs
    gh pr list --repo aRustyDev/ai --search "feat(skill): add <skill-name> in:title"
    ```
+
    If any exist, ask user whether to continue, update existing, or abort.
 
 ### Phase 2: User Decision (if existing skill found)
@@ -81,6 +88,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 If an existing skill was found, present options to the user using AskUserQuestion:
 
 **Options**:
+
 1. **Upgrade existing** - Replace the existing skill with the new version
 2. **Extend existing** - Merge new content into existing skill
 3. **Create separate** - Create as a new skill with different name
@@ -89,6 +97,7 @@ If an existing skill was found, present options to the user using AskUserQuestio
 ### Phase 3: Create Issue
 
 1. **Read the issue template for reference**:
+
    ```bash
    cat "$AI_REPO/.github/ISSUE_TEMPLATE/add-skill.yml"
    ```
@@ -112,6 +121,7 @@ If an existing skill was found, present options to the user using AskUserQuestio
 ### Phase 4: Create Feature Branch and PR
 
 1. **Create feature branch in ai repo** (use absolute paths and -C flag):
+
    ```bash
    git -C "$AI_REPO" checkout main
    git -C "$AI_REPO" pull origin main
@@ -119,13 +129,16 @@ If an existing skill was found, present options to the user using AskUserQuestio
    ```
 
 2. **Copy skill files to ai repo**:
+
    ```bash
    mkdir -p "$AI_REPO/components/skills/<skill-name>/"
    cp -r "<absolute-path-to-skill>/"* "$AI_REPO/components/skills/<skill-name>/"
    ```
+
    - If upgrading/extending, handle the merge appropriately
 
 3. **Commit changes** (use -C flag for git commands):
+
    ```bash
    git -C "$AI_REPO" add components/skills/<skill-name>/
    git -C "$AI_REPO" commit -m "feat(skill): add <skill-name>
@@ -142,11 +155,13 @@ If an existing skill was found, present options to the user using AskUserQuestio
    ```
 
 4. **Push and create PR** (explicit --head and --base required):
+
    ```bash
    git -C "$AI_REPO" push -u origin feat/add-skill-<skill-name>
    ```
 
    Then create PR. **Important:** Must specify `--head` and `--base` explicitly:
+
    ```bash
    gh pr create \
      --repo aRustyDev/ai \
@@ -157,6 +172,7 @@ If an existing skill was found, present options to the user using AskUserQuestio
    ```
 
 5. **Read PR template for reference**:
+
    ```bash
    cat "$AI_REPO/.github/PULL_REQUEST_TEMPLATE.md"
    ```
@@ -180,16 +196,18 @@ Report to the user in a summary table:
 | PR | `<pr-url>` |
 
 **Next steps:**
+
 1. Review and merge PR
 2. Run `just ai-sync` in dotfiles to install globally
 
 ## Example Usage
 
-```
+```text
 /promote-skill .claude/skills/homebrew-formula/
 ```
 
 This will:
+
 1. Validate the skill at `.claude/skills/homebrew-formula/`
 2. Check if `homebrew-formula` exists in ai repo
 3. Create issue and PR to add it to `components/skills/homebrew-formula/`
@@ -197,18 +215,24 @@ This will:
 ## Troubleshooting
 
 ### "No commits between main and main" error
+
 The `gh pr create` command needs explicit `--head` and `--base` flags when run from outside the target repo.
 
 ### Uncommitted changes warnings
+
 If `gh` warns about uncommitted changes, these are in your current project (not the ai repo). This is safe to ignore but can be confusing.
 
 ### Branch already exists
+
 If the feature branch already exists, either:
+
 - Delete it: `git -C "$AI_REPO" branch -D feat/add-skill-<name>`
 - Or use a different branch name
 
 ### Content escaping issues
+
 If the SKILL.md contains triple backticks, they may break the issue/PR body formatting. Consider:
+
 - Using `~~~` instead of backticks for the outer fence
 - Escaping inner backticks
 - Summarizing instead of embedding full content

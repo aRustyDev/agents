@@ -40,6 +40,7 @@ Analyze a plan or phase-plan document to identify gaps, areas for improvement, a
 Review each section for:
 
 **Completeness Gaps:**
+
 - [ ] Missing success criteria
 - [ ] Undefined deliverables
 - [ ] Unspecified dependencies
@@ -47,6 +48,7 @@ Review each section for:
 - [ ] Unclear ownership/responsibility
 
 **Technical Gaps:**
+
 - [ ] Undefined terms or concepts
 - [ ] Missing edge cases
 - [ ] Unhandled error scenarios
@@ -54,6 +56,7 @@ Review each section for:
 - [ ] Incomplete data schemas
 
 **Process Gaps:**
+
 - [ ] Missing phase transitions
 - [ ] Unclear handoff points
 - [ ] No rollback strategy
@@ -65,18 +68,21 @@ Review each section for:
 Look for opportunities to:
 
 **Strengthen:**
+
 - Vague requirements → concrete acceptance criteria
 - Implicit assumptions → explicit preconditions
 - General approaches → specific techniques
 - Rough estimates → informed projections
 
 **Extend:**
+
 - Missing phases that would improve outcomes
 - Additional deliverables that would add value
 - Parallel work streams that could accelerate
 - Automation opportunities
 
 **Refine:**
+
 - Overly complex steps → simpler alternatives
 - Redundant sections → consolidated content
 - Unclear language → precise terminology
@@ -109,21 +115,25 @@ Output structured findings:
 # Plan Review: <Plan Name>
 
 ## Summary
+
 <1-2 sentence assessment of plan quality and readiness>
 
 ## Gaps Identified
 
 ### Critical (Must Address)
+
 | Gap | Location | Impact | Suggested Fix |
 |-----|----------|--------|---------------|
 | ... | ... | ... | ... |
 
 ### Important (Should Address)
+
 | Gap | Location | Impact | Suggested Fix |
 |-----|----------|--------|---------------|
 | ... | ... | ... | ... |
 
 ### Minor (Nice to Have)
+
 | Gap | Location | Impact | Suggested Fix |
 |-----|----------|--------|---------------|
 | ... | ... | ... | ... |
@@ -131,15 +141,19 @@ Output structured findings:
 ## Improvement Opportunities
 
 ### Strengthen
+
 - <specific improvement with rationale>
 
 ### Extend
+
 - <additional scope with value proposition>
 
 ### Refine
+
 - <simplification with before/after>
 
 ## Questions for Clarification
+
 1. <question that would help refine the plan>
 2. ...
 
@@ -174,24 +188,28 @@ Output structured findings:
 ## Review Criteria Reference
 
 ### Success Criteria Checklist
+
 - [ ] Measurable outcomes defined
 - [ ] Clear done/not-done distinction
 - [ ] Acceptance tests specified
 - [ ] Stakeholder sign-off criteria
 
 ### Deliverables Checklist
+
 - [ ] Output artifacts listed
 - [ ] File locations specified
 - [ ] Format/schema defined
 - [ ] Quality standards stated
 
 ### Dependencies Checklist
+
 - [ ] Prerequisites identified
 - [ ] Blocking dependencies noted
 - [ ] Optional dependencies marked
 - [ ] External dependencies called out
 
 ### Risk Checklist
+
 - [ ] Technical risks identified
 - [ ] Mitigation strategies defined
 - [ ] Fallback plans documented

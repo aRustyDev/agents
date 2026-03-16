@@ -40,6 +40,7 @@ Parse the purpose string into search keywords:
 **Domain noise words to remove:** mcp, server, servers, tool, tools, protocol, model, context
 
 **Algorithm:**
+
 1. Lowercase the purpose string
 2. Split on whitespace and punctuation
 3. Remove all stop words and domain noise words
@@ -65,7 +66,7 @@ sqlite3 -json .data/mcp/knowledge-graph.db "
 
 Also search local MCP config files:
 
-```
+```text
 Grep: settings/mcp/*.yaml for keywords
 ```
 
@@ -83,7 +84,7 @@ Count enriched matches (those with `description` and `features` populated):
 
 Spawn `mcp-registry-scanner` agent (haiku) via Task tool:
 
-```
+```text
 Read context/agents/mcp-registry-scanner.md for full agent spec.
 
 Input:
@@ -97,7 +98,7 @@ This scans remote registries (smithery.ai, glama.ai, pulsemcp.com, mcp.so, GitHu
 
 For each new discovery (and any shallow cache hits missing description/features), spawn `mcp-server-profiler` agents (sonnet) in parallel via Task tool:
 
-```
+```text
 Read context/agents/mcp-server-profiler.md for full agent spec.
 
 allowed_tools: ["Read", "Bash(sqlite3:*)", "Bash(gh:*)", "Bash(curl:*)",
@@ -127,6 +128,7 @@ Score each match against the stated purpose:
 | Tool coverage | 15 pts | `min(tool_count, 10) / 10 × 15` |
 
 **Maintenance breakdown:**
+
 - **Stars:** >100 = 10, >50 = 7, >10 = 4, >0 = 2, NULL = 0
 - **Recency:** <3 months = 15, <6 months = 10, <1 year = 5, >1 year = 2, NULL = 0
 
@@ -203,7 +205,7 @@ sqlite3 .data/mcp/knowledge-graph.db .dump > .data/mcp/knowledge-graph.sql
 
 ## Examples
 
-```
+```text
 /find-mcp-servers "static analysis and code quality for Python"
 /find-mcp-servers "kubernetes cluster management" --top 10
 /find-mcp-servers "database schema management" --refresh
