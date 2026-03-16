@@ -15,10 +15,12 @@ Common issues and solutions for this plugin.
 ### Issue: Plugin Installation Fails
 
 **Symptoms:**
+
 - Error during `just install-plugin`
 - Missing dependencies
 
 **Solution:**
+
 1. Ensure Homebrew is installed: `brew --version`
 2. Install plugin dependencies: `cd context/plugins/blog-workflow && brew bundle`
 3. Retry installation: `just install-plugin blog-workflow`
@@ -26,10 +28,12 @@ Common issues and solutions for this plugin.
 ### Issue: MCP Server Connection Failed
 
 **Symptoms:**
+
 - "Cannot connect to MCP server" error
 - Timeout when using MCP-dependent features
 
 **Solution:**
+
 1. Check if server is running: `ps aux | grep <server-name>`
 2. Restart the server: `just restart-mcp blog-workflow`
 3. Check server logs for errors
@@ -38,10 +42,12 @@ Common issues and solutions for this plugin.
 ### Issue: Command Returns Unexpected Results
 
 **Symptoms:**
+
 - Output doesn't match expectations
 - Missing data in response
 
 **Solution:**
+
 1. Check command arguments: `/<command> --help`
 2. Verify input format matches expected schema
 3. Check for recent changes in [CHANGELOG](../CHANGELOG.md)
@@ -91,6 +97,7 @@ If you can't resolve your issue:
 3. **Report a bug**: [Bug Report](https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml)
 
 When reporting, include:
+
 - Plugin version (from `plugin.json`)
 - Steps to reproduce
 - Expected vs actual behavior
