@@ -13,4 +13,3 @@ Vue/Nuxt developers can leverage this to create scalable, performant application
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines guidelines and best practices for developing with modern web technologies such as Vue 3, Nuxt 3, TypeScript, Node.js, Vite, and Tailwind CSS. It emphasizes writing clear and maintainable TypeScript code using functional programming patterns, organizing code systematically, and adhering to naming conventions. The file advocates for using TypeScript interfaces over types, avoiding enums, and favoring functional components. It also suggests using the Vue Composition API and provides instructions for UI development with Nuxt and Tailwind CSS, focusing on performance optimization techniques such as lazy loading, dynamic imports, and responsive design. The file aims to enhance performance and reactivity using tools like VueUse and optimizing the build process with Vite.
-

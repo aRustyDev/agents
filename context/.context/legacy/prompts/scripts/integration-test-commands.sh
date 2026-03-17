@@ -21,11 +21,11 @@ run_test() {
     local test_name="$1"
     local test_description="$2"
     local test_command="$3"
-    
+
     ((total_tests++))
     echo -e "\n${YELLOW}Test $total_tests: $test_name${NC}"
     echo "Description: $test_description"
-    
+
     if eval "$test_command"; then
         echo -e "${GREEN}✅ PASSED${NC}"
         ((passed_tests++))

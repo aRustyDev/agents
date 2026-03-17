@@ -2,8 +2,8 @@
 // From: Lace test infrastructure improvements (2025-10-03)
 // Context: Fixed 15 flaky tests by replacing arbitrary timeouts
 
-import type { ThreadManager } from '~/threads/thread-manager';
-import type { LaceEvent, LaceEventType } from '~/threads/types';
+import type { ThreadManager } from '~/threads/thread-manager'
+import type { LaceEvent, LaceEventType } from '~/threads/types'
 
 /**
  * Wait for a specific event type to appear in thread
@@ -24,23 +24,23 @@ export function waitForEvent(
   timeoutMs = 5000
 ): Promise<LaceEvent> {
   return new Promise((resolve, reject) => {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     const check = () => {
-      const events = threadManager.getEvents(threadId);
-      const event = events.find((e) => e.type === eventType);
+      const events = threadManager.getEvents(threadId)
+      const event = events.find((e) => e.type === eventType)
 
       if (event) {
-        resolve(event);
+        resolve(event)
       } else if (Date.now() - startTime > timeoutMs) {
-        reject(new Error(`Timeout waiting for ${eventType} event after ${timeoutMs}ms`));
+        reject(new Error(`Timeout waiting for ${eventType} event after ${timeoutMs}ms`))
       } else {
-        setTimeout(check, 10); // Poll every 10ms for efficiency
+        setTimeout(check, 10) // Poll every 10ms for efficiency
       }
-    };
+    }
 
-    check();
-  });
+    check()
+  })
 }
 
 /**
@@ -65,27 +65,27 @@ export function waitForEventCount(
   timeoutMs = 5000
 ): Promise<LaceEvent[]> {
   return new Promise((resolve, reject) => {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     const check = () => {
-      const events = threadManager.getEvents(threadId);
-      const matchingEvents = events.filter((e) => e.type === eventType);
+      const events = threadManager.getEvents(threadId)
+      const matchingEvents = events.filter((e) => e.type === eventType)
 
       if (matchingEvents.length >= count) {
-        resolve(matchingEvents);
+        resolve(matchingEvents)
       } else if (Date.now() - startTime > timeoutMs) {
         reject(
           new Error(
             `Timeout waiting for ${count} ${eventType} events after ${timeoutMs}ms (got ${matchingEvents.length})`
           )
-        );
+        )
       } else {
-        setTimeout(check, 10);
+        setTimeout(check, 10)
       }
-    };
+    }
 
-    check();
-  });
+    check()
+  })
 }
 
 /**
@@ -116,23 +116,23 @@ export function waitForEventMatch(
   timeoutMs = 5000
 ): Promise<LaceEvent> {
   return new Promise((resolve, reject) => {
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     const check = () => {
-      const events = threadManager.getEvents(threadId);
-      const event = events.find(predicate);
+      const events = threadManager.getEvents(threadId)
+      const event = events.find(predicate)
 
       if (event) {
-        resolve(event);
+        resolve(event)
       } else if (Date.now() - startTime > timeoutMs) {
-        reject(new Error(`Timeout waiting for ${description} after ${timeoutMs}ms`));
+        reject(new Error(`Timeout waiting for ${description} after ${timeoutMs}ms`))
       } else {
-        setTimeout(check, 10);
+        setTimeout(check, 10)
       }
-    };
+    }
 
-    check();
-  });
+    check()
+  })
 }
 
 // Usage example from actual debugging session:

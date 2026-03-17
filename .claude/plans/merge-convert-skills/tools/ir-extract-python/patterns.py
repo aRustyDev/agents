@@ -27,12 +27,12 @@ Example:
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Iterator
 
-from ir_core.treesitter import TreeNode, TSSourceSpan, ParseTree
 from ir_core.models import AutomationLevel
+from ir_core.treesitter import TreeNode, TSSourceSpan
 
 
 class PatternKind(str, Enum):

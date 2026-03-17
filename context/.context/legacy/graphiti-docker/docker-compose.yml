@@ -11,28 +11,28 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
       - SEMAPHORE_LIMIT=${SEMAPHORE_LIMIT:-10}
-      
+
       # Database Configuration (Kuzu - embedded, no external service needed)
       - DATABASE_TYPE=kuzu
       - KUZU_DB_PATH=/data/kuzu
-      
+
       # MCP Server Configuration
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-    
+
     volumes:
       # Persist Kuzu database
       - ./data/kuzu:/data/kuzu
-    
+
     ports:
       - "8000:8000"  # MCP server SSE endpoint
-    
+
     command: >
       sh -c "
         apt-get update && apt-get install -y curl &&
         pip install --no-cache-dir graphiti-core[kuzu] &&
         python -m graphiti_mcp_server
       "
-    
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

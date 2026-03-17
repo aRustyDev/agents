@@ -4,10 +4,11 @@ PDF Generation Script for Literature Reviews
 Converts markdown files to professionally formatted PDFs with proper styling.
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
+
 
 def generate_pdf(
     markdown_file: str,
@@ -92,7 +93,7 @@ def generate_pdf(
         print(f"✓ PDF generated successfully: {output_pdf}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error generating PDF:")
+        print("Error generating PDF:")
         print(f"STDOUT: {e.stdout}")
         print(f"STDERR: {e.stderr}")
         return False

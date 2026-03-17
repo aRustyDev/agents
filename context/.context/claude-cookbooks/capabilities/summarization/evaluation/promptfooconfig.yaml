@@ -20,7 +20,7 @@ providers:
 defaultTest:
   assert:
     - type: not-contains-any
-      value: 
+      value:
         - "I am an AI"
         - "As an AI language model"
         - "I'm an AI assistant"

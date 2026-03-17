@@ -1,6 +1,6 @@
 ---
 description: Guidelines for writing clean, maintainable, and human-readable code. Apply these rules when writing or reviewing code to ensure consistency and quality.
-globs: 
+globs:
 ---
 # Clean Code Guidelines
 
@@ -52,4 +52,4 @@ globs:
 ## Version Control
 - Write clear commit messages
 - Make small, focused commits
-- Use meaningful branch names 
+- Use meaningful branch names

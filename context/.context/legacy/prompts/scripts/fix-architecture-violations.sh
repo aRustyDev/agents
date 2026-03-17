@@ -30,7 +30,7 @@ extract_lines() {
     local start=$2
     local end=$3
     local output=$4
-    
+
     sed -n "${start},${end}p" "$file" > "$output"
     echo -e "${GREEN}✓ Extracted lines $start-$end from $(basename $file) to $(basename $output)${NC}"
 }
@@ -40,7 +40,7 @@ fix_module_name() {
     local file=$1
     local old_name=$2
     local new_name=$3
-    
+
     if grep -q "module: $old_name" "$file"; then
         sed -i.bak "s/module: $old_name/module: $new_name/" "$file"
         echo -e "${GREEN}✓ Fixed module name in $(basename $file): $old_name → $new_name${NC}"
@@ -55,7 +55,7 @@ echo "================================================"
 # Fix plan/cleanup.md (291 lines)
 if [ -f "$BASE_DIR/plan/cleanup.md" ]; then
     echo "Processing plan/cleanup.md..."
-    
+
     # Check if scripts already extracted
     if [ ! -f "$BASE_DIR/plan/scripts/cleanup_session.sh" ]; then
         # Extract cleanup session script
@@ -66,19 +66,19 @@ if [ -f "$BASE_DIR/plan/cleanup.md" ]; then
 cleanup_session() {
   local session_id=$1
   local session_dir=".plan/sessions/$session_id"
-  
+
   if [ ! -d "$session_dir" ]; then
     echo "❌ Session not found: $session_id"
     return 1
   fi
-  
+
   # Confirm deletion
   echo "⚠️  This will permanently delete session: $session_id"
   echo "Files to be removed:"
   ls -la "$session_dir"
   echo ""
   read -p "Are you sure? (yes/no): " confirm
-  
+
   if [ "$confirm" = "yes" ]; then
     rm -rf "$session_dir"
     echo "✅ Session deleted: $session_id"
@@ -90,7 +90,7 @@ EOF
         chmod +x "$BASE_DIR/plan/scripts/cleanup_session.sh"
         echo -e "${GREEN}✓ Created cleanup_session.sh${NC}"
     fi
-    
+
     # TODO: Manually update cleanup.md to reference the extracted script
     echo -e "${YELLOW}⚠️  TODO: Manually update cleanup.md to reference scripts/cleanup_session.sh${NC}"
 fi
@@ -98,7 +98,7 @@ fi
 # Fix plan/_core.md (285 lines)
 if [ -f "$BASE_DIR/plan/_core.md" ]; then
     echo "Processing plan/_core.md..."
-    
+
     # Create session structure template
     if [ ! -f "$BASE_DIR/plan/templates/session-structure.yaml" ]; then
         cat > "$BASE_DIR/plan/templates/session-structure.yaml" << 'EOF'
@@ -122,7 +122,7 @@ session_structure:
 EOF
         echo -e "${GREEN}✓ Created session-structure.yaml${NC}"
     fi
-    
+
     # Create error codes template
     if [ ! -f "$BASE_DIR/plan/templates/error-codes.yaml" ]; then
         cat > "$BASE_DIR/plan/templates/error-codes.yaml" << 'EOF'

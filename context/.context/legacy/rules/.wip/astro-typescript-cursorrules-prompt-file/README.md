@@ -13,4 +13,3 @@ Developers using Astro, TypeScript, and TailwindCSS will benefit by creating a c
 
 ## Overview of .cursorrules prompt
 The .cursorrules file establishes guidelines and rules for maintaining consistency and best practices in a development environment. It includes specific rules for creating conventional commit messages, ensuring development adherence using Astro, TypeScript, and TailwindCSS, and maintaining a consistent coding style. It also defines custom slash commands, like "/commit", to facilitate the generation of Git commit messages following the conventional commits specification. These rules aim to streamline development processes and ensure code quality and uniformity across a project.
-

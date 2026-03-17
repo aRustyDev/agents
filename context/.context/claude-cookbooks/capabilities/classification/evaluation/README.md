@@ -53,5 +53,3 @@ If you would like to increase the concurrency of the requests (default = 4), run
 When the evaluation is complete the terminal will print the results for each row in the dataset.
 
 You can now go back to `guide.ipynb` to analyze the results!
-
-

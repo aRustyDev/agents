@@ -1,11 +1,11 @@
 """Search tools for Semantic Search Agent."""
 
-from typing import Optional, List, Dict, Any
-from pydantic_ai import RunContext
-from pydantic import BaseModel, Field
-import asyncpg
 import json
+from typing import Any
+
 from dependencies import AgentDependencies
+from pydantic import BaseModel
+from pydantic_ai import RunContext
 
 
 class SearchResult(BaseModel):
@@ -14,7 +14,7 @@ class SearchResult(BaseModel):
     document_id: str
     content: str
     similarity: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     document_title: str
     document_source: str
 
@@ -22,35 +22,35 @@ class SearchResult(BaseModel):
 async def semantic_search(
     ctx: RunContext[AgentDependencies],
     query: str,
-    match_count: Optional[int] = None
-) -> List[SearchResult]:
+    match_count: int | None = None
+) -> list[SearchResult]:
     """
     Perform pure semantic search using vector similarity.
-    
+
     Args:
         ctx: Agent runtime context with dependencies
         query: Search query text
         match_count: Number of results to return (default: 10)
-    
+
     Returns:
         List of search results ordered by similarity
     """
     try:
         deps = ctx.deps
-        
+
         # Use default if not specified
         if match_count is None:
             match_count = deps.settings.default_match_count
-        
+
         # Validate match count
         match_count = min(match_count, deps.settings.max_match_count)
-        
+
         # Generate embedding for query
         query_embedding = await deps.get_embedding(query)
-        
+
         # Convert embedding to PostgreSQL vector string format
         embedding_str = '[' + ','.join(map(str, query_embedding)) + ']'
-        
+
         # Execute semantic search
         async with deps.db_pool.acquire() as conn:
             results = await conn.fetch(
@@ -60,7 +60,7 @@ async def semantic_search(
                 embedding_str,
                 match_count
             )
-        
+
         # Convert to SearchResult objects
         return [
             SearchResult(
@@ -82,41 +82,41 @@ async def semantic_search(
 async def hybrid_search(
     ctx: RunContext[AgentDependencies],
     query: str,
-    match_count: Optional[int] = None,
-    text_weight: Optional[float] = None
-) -> List[Dict[str, Any]]:
+    match_count: int | None = None,
+    text_weight: float | None = None
+) -> list[dict[str, Any]]:
     """
     Perform hybrid search combining semantic and keyword matching.
-    
+
     Args:
         ctx: Agent runtime context with dependencies
         query: Search query text
         match_count: Number of results to return (default: 10)
         text_weight: Weight for text matching (0-1, default: 0.3)
-    
+
     Returns:
         List of search results with combined scores
     """
     try:
         deps = ctx.deps
-        
+
         # Use defaults if not specified
         if match_count is None:
             match_count = deps.settings.default_match_count
         if text_weight is None:
             text_weight = deps.user_preferences.get('text_weight', deps.settings.default_text_weight)
-        
+
         # Validate parameters
         match_count = min(match_count, deps.settings.max_match_count)
         text_weight = max(0.0, min(1.0, text_weight))
-        
+
         # Generate embedding for query
         query_embedding = await deps.get_embedding(query)
-        
+
         # Convert embedding to PostgreSQL vector string format
         # PostgreSQL vector format: '[1.0,2.0,3.0]' (no spaces after commas)
         embedding_str = '[' + ','.join(map(str, query_embedding)) + ']'
-        
+
         # Execute hybrid search
         async with deps.db_pool.acquire() as conn:
             results = await conn.fetch(
@@ -128,7 +128,7 @@ async def hybrid_search(
                 match_count,
                 text_weight
             )
-        
+
         # Convert to dictionaries with additional scores
         return [
             {

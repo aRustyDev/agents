@@ -52,21 +52,21 @@ check_prerequisites() {
     echo "Please install GitHub CLI: https://cli.github.com" >&2
     exit 1
   fi
-  
+
   # Check for git repository
   if ! git rev-parse --git-dir &> /dev/null; then
     echo "❌ Error: Not in a git repository"
     echo "Run this command from within a git repository" >&2
     exit 2
   fi
-  
+
   # Check GitHub authentication
   if ! gh auth status &>/dev/null; then
     echo "❌ Error: Not authenticated with GitHub"
     echo "Run: gh auth login" >&2
     exit 3
   fi
-  
+
   # Check repository access
   if ! gh repo view &>/dev/null; then
     echo "❌ Error: Cannot access repository"
@@ -79,9 +79,9 @@ check_prerequisites() {
 handle_error() {
   local error_code=$1
   local error_message=$2
-  
+
   echo -e "❌ Error: ${error_message}" >&2
-  
+
   case $error_code in
     1)
       echo "Please install GitHub CLI: https://cli.github.com" >&2
@@ -96,6 +96,6 @@ handle_error() {
       echo "Check repository permissions" >&2
       ;;
   esac
-  
+
   exit $error_code
 }

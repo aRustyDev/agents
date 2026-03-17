@@ -7,10 +7,10 @@ handle_execution_error() {
   local error_type=$1
   local error_details=$2
   local session_dir=$3
-  
+
   echo "❌ Execution error: $error_type"
   echo "Details: $error_details"
-  
+
   case $error_type in
     "auth")
       echo "Solution: Run 'gh auth login' and try again"
@@ -28,7 +28,7 @@ handle_execution_error() {
       echo "Solution: Check error details and try again"
       ;;
   esac
-  
+
   # Save error state for recovery
   echo "{
     \"error_type\": \"$error_type\",
@@ -42,7 +42,7 @@ handle_execution_error() {
 rollback_labels() {
   local labels_file=$1
   echo "🔄 Rolling back labels..."
-  
+
   for label in $(jq -r '.[].name' "$labels_file"); do
     gh label delete "$label" --yes 2>/dev/null || true
   done
@@ -51,7 +51,7 @@ rollback_labels() {
 rollback_milestones() {
   local milestone_map=$1
   echo "🔄 Rolling back milestones..."
-  
+
   echo "$milestone_map" | jq -r 'to_entries[] | .value' | while read -r number; do
     gh api -X DELETE "repos/:owner/:repo/milestones/$number" 2>/dev/null || true
   done
@@ -60,7 +60,7 @@ rollback_milestones() {
 rollback_issues() {
   local session_dir=$1
   echo "🔄 Rolling back issues..."
-  
+
   # Find issues created in this session
   gh issue list --label "plan-generated" --json number,createdAt | \
     jq -r --arg session "$session_dir" '.[] | select(.createdAt > $session) | .number' | \
@@ -73,10 +73,10 @@ rollback_issues() {
 recover_from_partial() {
   local session_dir=$1
   local recovery_point=$2
-  
+
   echo "🔧 Recovering from partial execution..."
   echo "Recovery point: $recovery_point"
-  
+
   case $recovery_point in
     "labels")
       echo "Labels created successfully, continuing from milestones..."
@@ -96,12 +96,12 @@ recover_from_partial() {
 # Validation before execution
 validate_plan_data() {
   local session_dir=$1
-  
+
   echo "✓ Validating plan data..."
-  
+
   # Check required files
   local errors=0
-  
+
   if [ ! -f "$session_dir/issues.json" ]; then
     echo "  ❌ Missing issues.json"
     ((errors++))
@@ -112,11 +112,11 @@ validate_plan_data() {
       ((errors++))
     fi
   fi
-  
+
   if [ ! -f "$session_dir/milestones.json" ] && jq -r '.[].milestone // empty' "$session_dir/issues.json" | grep -q .; then
     echo "  ⚠️  Issues reference milestones but milestones.json missing"
   fi
-  
+
   if [ $errors -gt 0 ]; then
     echo "❌ Validation failed with $errors errors"
     return 1
@@ -130,13 +130,13 @@ validate_plan_data() {
 safe_execute() {
   local command=$1
   local error_handler=$2
-  
+
   if ! eval "$command" 2>/tmp/plan_error.log; then
     local error_msg=$(cat /tmp/plan_error.log)
     $error_handler "$error_msg"
     return 1
   fi
-  
+
   return 0
 }
 

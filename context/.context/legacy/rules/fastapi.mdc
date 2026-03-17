@@ -83,4 +83,4 @@ globs: **/*.py, app/**/*.py, api/**/*.py
 - Use proper type hints
 - Keep documentation updated
 - Document error scenarios
-- Use proper versioning 
+- Use proper versioning

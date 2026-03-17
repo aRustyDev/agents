@@ -74,35 +74,35 @@ Use Input/Output pattern for clear separation of concerns.
 protocol ViewModelType {
     associatedtype Input
     associatedtype Output
-    
+
     func transform(input: Input) -> Output
 }
 
 final class UserListViewModel: ViewModelType {
     private let userRepository: UserRepositoryProtocol
     private let disposeBag = DisposeBag()
-    
+
     struct Input {
         let viewDidLoad: Observable<Void>
         let refresh: Observable<Void>
         let selection: Observable<IndexPath>
     }
-    
+
     struct Output {
         let users: Driver<[User]>
         let loading: Driver<Bool>
         let error: Driver<String?>
         let selectedUser: Driver<User?>
     }
-    
+
     init(userRepository: UserRepositoryProtocol) {
         self.userRepository = userRepository
     }
-    
+
     func transform(input: Input) -> Output {
         let activityTracker = ActivityIndicator()
         let errorTracker = ErrorTracker()
-        
+
         let users = Observable.merge(input.viewDidLoad, input.refresh)
             .flatMapLatest { [unowned self] in
                 self.userRepository.fetchUsers()
@@ -111,19 +111,19 @@ final class UserListViewModel: ViewModelType {
                     .catchErrorJustReturn([])
             }
             .asDriver(onErrorJustReturn: [])
-        
+
         let loading = activityTracker.asDriver()
-        
+
         let error = errorTracker
             .map { $0.localizedDescription }
             .asDriver(onErrorJustReturn: nil)
-        
+
         let selectedUser = input.selection
             .withLatestFrom(users.asObservable()) { indexPath, users in
                 users[safe: indexPath.row]
             }
             .asDriver(onErrorJustReturn: nil)
-        
+
         return Output(
             users: users,
             loading: loading,
@@ -141,34 +141,34 @@ Keep view controllers focused on UI binding and user interaction.
 final class UserListViewController: UIViewController {
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var refreshButton: UIButton!
-    
+
     private let viewModel: UserListViewModel
     private let disposeBag = DisposeBag()
-    
+
     init(viewModel: UserListViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
     }
-    
+
     private func bindViewModel() {
         let input = UserListViewModel.Input(
             viewDidLoad: rx.viewDidLoad.asObservable(),
             refresh: refreshButton.rx.tap.asObservable(),
             selection: tableView.rx.itemSelected.asObservable()
         )
-        
+
         let output = viewModel.transform(input: input)
-        
+
         output.users
             .drive(tableView.rx.items(cellIdentifier: "UserCell")) { _, user, cell in
                 if let userCell = cell as? UserTableViewCell {
@@ -176,20 +176,20 @@ final class UserListViewController: UIViewController {
                 }
             }
             .disposed(by: disposeBag)
-        
+
         output.loading
             .drive(onNext: { [weak self] isLoading in
                 self?.updateLoadingState(isLoading)
             })
             .disposed(by: disposeBag)
-        
+
         output.error
             .compactMap { $0 }
             .drive(onNext: { [weak self] error in
                 self?.showError(message: error)
             })
             .disposed(by: disposeBag)
-        
+
         output.selectedUser
             .compactMap { $0 }
             .drive(onNext: { [weak self] user in
@@ -213,7 +213,7 @@ protocol UserRepositoryProtocol {
 final class UserRepository: UserRepositoryProtocol {
     private let networkService: NetworkServiceProtocol
     private let localService: LocalDataServiceProtocol
-    
+
     init(
         networkService: NetworkServiceProtocol,
         localService: LocalDataServiceProtocol
@@ -221,7 +221,7 @@ final class UserRepository: UserRepositoryProtocol {
         self.networkService = networkService
         self.localService = localService
     }
-    
+
     func fetchUsers() -> Observable<[User]> {
         return networkService.request(.users)
             .map { (response: APIResponse<[User]>) in response.data }
@@ -232,12 +232,12 @@ final class UserRepository: UserRepositoryProtocol {
                 self?.localService.fetchUsers() ?? Observable.just([])
             }
     }
-    
+
     func fetchUser(id: Int) -> Observable<User> {
         return networkService.request(.user(id: id))
             .map { (response: APIResponse<User>) in response.data }
     }
-    
+
     func updateUser(_ user: User) -> Observable<User> {
         return networkService.request(.updateUser(user))
             .map { (response: APIResponse<User>) in response.data }
@@ -283,21 +283,21 @@ viewModel.showAlert.asSignal()
 // Centralized error tracking
 class ErrorTracker: SharedSequenceConvertibleType {
     typealias SharingStrategy = DriverSharingStrategy
-    
+
     private let _subject = PublishSubject<Error>()
-    
+
     func trackError<O: ObservableConvertibleType>(from source: O) -> Observable<O.Element> {
         return source.asObservable().do(onError: onError)
     }
-    
+
     func asSharedSequence() -> SharedSequence<SharingStrategy, Error> {
         return _subject.asObservable().asDriver(onErrorRecover: { _ in .empty() })
     }
-    
+
     func asObservable() -> Observable<Error> {
         return _subject.asObservable()
     }
-    
+
     private func onError(_ error: Error) {
         _subject.onNext(error)
     }
@@ -307,17 +307,17 @@ class ErrorTracker: SharedSequenceConvertibleType {
 class ActivityIndicator: SharedSequenceConvertibleType {
     typealias Element = Bool
     typealias SharingStrategy = DriverSharingStrategy
-    
+
     private let _lock = NSRecursiveLock()
     private let _subject = BehaviorSubject(value: false)
     private let _loading: SharedSequence<SharingStrategy, Bool>
-    
+
     init() {
         _loading = _subject.asObservable()
             .distinctUntilChanged()
             .asDriver(onErrorJustReturn: false)
     }
-    
+
     func trackActivityOfObservable<Source: ObservableConvertibleType>(_ source: Source) -> Observable<Source.Element> {
         return source.asObservable()
             .do(onNext: { _ in
@@ -328,19 +328,19 @@ class ActivityIndicator: SharedSequenceConvertibleType {
                 self.sendStopLoading()
             }, onSubscribe: subscribed)
     }
-    
+
     private func subscribed() {
         _lock.lock()
         _subject.onNext(true)
         _lock.unlock()
     }
-    
+
     private func sendStopLoading() {
         _lock.lock()
         _subject.onNext(false)
         _lock.unlock()
     }
-    
+
     func asSharedSequence() -> SharedSequence<SharingStrategy, Element> {
         return _loading
     }
@@ -355,26 +355,26 @@ protocol NetworkServiceProtocol {
 
 final class NetworkService: NetworkServiceProtocol {
     private let session: URLSession
-    
+
     init(session: URLSession = .shared) {
         self.session = session
     }
-    
+
     func request<T: Codable>(_ endpoint: APIEndpoint) -> Observable<T> {
         return Observable.create { observer in
             let request = endpoint.asURLRequest()
-            
+
             let task = self.session.dataTask(with: request) { data, response, error in
                 if let error = error {
                     observer.onError(NetworkError.connectionError(error))
                     return
                 }
-                
+
                 guard let data = data else {
                     observer.onError(NetworkError.noData)
                     return
                 }
-                
+
                 do {
                     let decodedObject = try JSONDecoder().decode(T.self, from: data)
                     observer.onNext(decodedObject)
@@ -383,9 +383,9 @@ final class NetworkService: NetworkServiceProtocol {
                     observer.onError(NetworkError.decodingError(error))
                 }
             }
-            
+
             task.resume()
-            
+
             return Disposables.create {
                 task.cancel()
             }
@@ -403,7 +403,7 @@ enum APIEndpoint {
     case users
     case user(id: Int)
     case updateUser(User)
-    
+
     func asURLRequest() -> URLRequest {
         // Implementation details
         var request = URLRequest(url: url)
@@ -421,7 +421,7 @@ extension Observable {
     func trackActivity(_ activityIndicator: ActivityIndicator) -> Observable<Element> {
         return activityIndicator.trackActivityOfObservable(self)
     }
-    
+
     func trackError(_ errorTracker: ErrorTracker) -> Observable<Element> {
         return errorTracker.trackError(from: self)
     }
@@ -440,11 +440,11 @@ extension Reactive where Base: UIScrollView {
         return contentOffset
             .flatMap { [weak base] contentOffset -> Observable<Void> in
                 guard let scrollView = base else { return Observable.empty() }
-                
+
                 let visibleHeight = scrollView.frame.height - scrollView.contentInset.top - scrollView.contentInset.bottom
                 let y = contentOffset.y + scrollView.contentInset.top
                 let threshold = max(0.0, scrollView.contentSize.height - visibleHeight)
-                
+
                 return y > threshold ? Observable.just(()) : Observable.empty()
             }
     }
@@ -464,7 +464,7 @@ class UserListViewModelTests: XCTestCase {
     var mockRepository: MockUserRepository!
     var scheduler: TestScheduler!
     var disposeBag: DisposeBag!
-    
+
     override func setUp() {
         super.setUp()
         scheduler = TestScheduler(initialClock: 0)
@@ -472,25 +472,25 @@ class UserListViewModelTests: XCTestCase {
         viewModel = UserListViewModel(userRepository: mockRepository)
         disposeBag = DisposeBag()
     }
-    
+
     func testViewDidLoadFetchesUsers() {
         // Given
         let users = [User(id: 1, name: "John", email: "john@test.com", avatar: nil)]
         mockRepository.usersToReturn = users
-        
+
         let viewDidLoad = scheduler.createHotObservable([.next(10, ())])
         let refresh = scheduler.createHotObservable([Recorded<Event<Void>>]())
         let selection = scheduler.createHotObservable([Recorded<Event<IndexPath>>]())
-        
+
         let input = UserListViewModel.Input(
             viewDidLoad: viewDidLoad.asObservable(),
             refresh: refresh.asObservable(),
             selection: selection.asObservable()
         )
-        
+
         let output = viewModel.transform(input: input)
         let result = scheduler.start { output.users.asObservable() }
-        
+
         // Then
         XCTAssertEqual(result.events.count, 1)
         XCTAssertEqual(result.events.first?.value.element, users)
@@ -499,15 +499,15 @@ class UserListViewModelTests: XCTestCase {
 
 class MockUserRepository: UserRepositoryProtocol {
     var usersToReturn: [User] = []
-    
+
     func fetchUsers() -> Observable<[User]> {
         return Observable.just(usersToReturn)
     }
-    
+
     func fetchUser(id: Int) -> Observable<User> {
         return Observable.just(usersToReturn.first(where: { $0.id == id })!)
     }
-    
+
     func updateUser(_ user: User) -> Observable<User> {
         return Observable.just(user)
     }
@@ -540,4 +540,4 @@ class MockUserRepository: UserRepositoryProtocol {
 - Use ActivityIndicator for loading states
 - Implement proper error handling
 
-Remember: Keep it simple, testable, and maintainable. Focus on reactive streams and clear separation of concerns. 
+Remember: Keep it simple, testable, and maintainable. Focus on reactive streams and clear separation of concerns.

@@ -228,10 +228,7 @@ module.exports.SCHEMA = {
       },
       allOf: [
         {
-          if: {
-            properties: { strategy: { const: ':page_match' } },
-            required: ['strategy'],
-          },
+          if: { properties: { strategy: { const: ':page_match' } }, required: ['strategy'] },
           then: { required: ['regex'] },
         },
       ],
@@ -325,10 +322,7 @@ module.exports.SCHEMA = {
           description: 'Patch fetched from a URL',
           properties: {
             url: { $ref: '#/$defs/url-pattern', description: 'Patch file URL' },
-            sha256: {
-              $ref: '#/$defs/sha256-hash',
-              description: 'Patch file SHA-256',
-            },
+            sha256: { $ref: '#/$defs/sha256-hash', description: 'Patch file SHA-256' },
           },
           required: ['url', 'sha256'],
           additionalProperties: false,
@@ -522,17 +516,11 @@ module.exports.SCHEMA = {
       required: ['run'],
       allOf: [
         {
-          if: {
-            properties: { run_type: { const: ':interval' } },
-            required: ['run_type'],
-          },
+          if: { properties: { run_type: { const: ':interval' } }, required: ['run_type'] },
           then: { required: ['interval'] },
         },
         {
-          if: {
-            properties: { run_type: { const: ':cron' } },
-            required: ['run_type'],
-          },
+          if: { properties: { run_type: { const: ':cron' } }, required: ['run_type'] },
           then: { required: ['cron'] },
         },
       ],
@@ -1402,240 +1390,168 @@ module.exports.SCHEMA = {
       // Language dispatch + dependentSchemas
       allOf: [
         {
-          if: {
-            properties: { language: { const: 'go' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'go' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-go' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'rust' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'rust' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-rust' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'python' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'python' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-python' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'nodejs' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'nodejs' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-nodejs' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'cmake' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'cmake' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-cmake' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'autotools' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'autotools' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-autotools' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'meson' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'meson' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-meson' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'java' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'java' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-java' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'zig' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'zig' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-zig' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'make' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'make' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-make' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'custom' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'custom' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-custom' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'swift' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'swift' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-swift' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'elixir' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'elixir' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-elixir' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'haskell' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'haskell' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-haskell' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'kotlin' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'kotlin' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-kotlin' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'scala' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'scala' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-scala' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'erlang' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'erlang' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-erlang-app' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'ocaml' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'ocaml' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-ocaml' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'nim' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'nim' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-nim' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'dart' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'dart' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-dart' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'gleam' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'gleam' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-gleam' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'roc' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'roc' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-roc' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'julia' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'julia' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-julia' } },
             required: ['install'],
           },
         },
         {
-          if: {
-            properties: { language: { const: 'dotnet' } },
-            required: ['language'],
-          },
+          if: { properties: { language: { const: 'dotnet' } }, required: ['language'] },
           then: {
             properties: { install: { $ref: '#/$defs/install-dotnet' } },
             required: ['install'],

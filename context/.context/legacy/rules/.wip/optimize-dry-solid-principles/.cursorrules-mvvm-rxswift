@@ -70,7 +70,7 @@ struct User: Codable, Equatable {
     let name: String
     let email: String
     let profileImageURL: String?
-    
+
     private enum CodingKeys: String, CodingKey {
         case id, name, email
         case profileImageURL = "profile_image_url"
@@ -87,23 +87,23 @@ struct User: Codable, Equatable {
 ```swift
 class HomeViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
-    
+
     private let viewModel = HomeViewModel()
     private let disposeBag = DisposeBag()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
     }
-    
+
     private func bindViewModel() {
         viewModel.users
             .bind(to: tableView.rx.items(cellIdentifier: "UserCell")) { _, user, cell in
                 // Configure cell
             }
             .disposed(by: disposeBag)
-        
+
         viewModel.isLoading
             .bind(to: loadingIndicator.rx.isAnimating)
             .disposed(by: disposeBag)
@@ -122,18 +122,18 @@ class HomeViewModel {
     // MARK: - Inputs
     let refreshTrigger = PublishSubject<Void>()
     let loadMoreTrigger = PublishSubject<Void>()
-    
+
     // MARK: - Outputs
     let users: Observable<[User]>
     let isLoading: Observable<Bool>
     let error: Observable<Error>
-    
+
     private let userRepository: UserRepositoryProtocol
     private let disposeBag = DisposeBag()
-    
+
     init(userRepository: UserRepositoryProtocol = UserRepository()) {
         self.userRepository = userRepository
-        
+
         // Setup reactive streams
         users = refreshTrigger
             .startWith(())
@@ -142,13 +142,13 @@ class HomeViewModel {
                     .catchErrorJustReturn([])
             }
             .share(replay: 1)
-        
+
         isLoading = Observable.merge(
             refreshTrigger.map { true },
             users.map { _ in false }
         )
         .startWith(false)
-        
+
         error = userRepository.getUsers()
             .materialize()
             .compactMap { $0.error }
@@ -190,12 +190,12 @@ class NetworkService: NetworkServiceProtocol {
                     observer.onError(error)
                     return
                 }
-                
+
                 guard let data = data else {
                     observer.onError(NetworkError.noData)
                     return
                 }
-                
+
                 do {
                     let result = try JSONDecoder().decode(T.self, from: data)
                     observer.onNext(result)
@@ -204,9 +204,9 @@ class NetworkService: NetworkServiceProtocol {
                     observer.onError(error)
                 }
             }
-            
+
             task.resume()
-            
+
             return Disposables.create {
                 task.cancel()
             }
@@ -255,22 +255,22 @@ class HomeViewModelTests: XCTestCase {
     var viewModel: HomeViewModel!
     var mockRepository: MockUserRepository!
     var scheduler: TestScheduler!
-    
+
     override func setUp() {
         super.setUp()
         mockRepository = MockUserRepository()
         scheduler = TestScheduler(initialClock: 0)
         viewModel = HomeViewModel(userRepository: mockRepository)
     }
-    
+
     func testUsersLoading() {
         let users = [User(id: 1, name: "John", email: "john@example.com")]
         mockRepository.usersToReturn = users
-        
+
         let result = scheduler.start {
             self.viewModel.users
         }
-        
+
         XCTAssertEqual(result.events.count, 1)
         XCTAssertEqual(result.events.first?.value.element, users)
     }
@@ -283,4 +283,4 @@ class HomeViewModelTests: XCTestCase {
 - **Kingfisher**: Image loading and caching
 - **SnapKit**: Auto Layout (optional)
 
-Remember to always follow SOLID principles, keep your code testable, and maintain separation of concerns between your Model, View, and ViewModel layers. 
+Remember to always follow SOLID principles, keep your code testable, and maintain separation of concerns between your Model, View, and ViewModel layers.

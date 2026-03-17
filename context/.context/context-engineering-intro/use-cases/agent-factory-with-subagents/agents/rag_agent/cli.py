@@ -4,28 +4,27 @@
 import asyncio
 import sys
 import uuid
-from typing import List
 
-from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt
-from rich.markdown import Markdown
-
-from pydantic_ai import Agent
 from agent import search_agent
 from dependencies import AgentDependencies
+from pydantic_ai import Agent
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.prompt import Prompt
+
 from settings import load_settings
 
 console = Console()
 
 
-async def stream_agent_interaction(user_input: str, conversation_history: List[str], deps: AgentDependencies) -> tuple[str, str]:
+async def stream_agent_interaction(user_input: str, conversation_history: list[str], deps: AgentDependencies) -> tuple[str, str]:
     """Stream agent interaction with real-time tool call display."""
-    
+
     try:
         # Build context with conversation history
         context = "\n".join(conversation_history[-6:]) if conversation_history else ""
-        
+
         prompt = f"""Previous conversation:
 {context}
 
@@ -35,25 +34,25 @@ Search the knowledge base to answer the user's question. Choose the appropriate 
 
         # Stream the agent execution
         async with search_agent.iter(prompt, deps=deps) as run:
-            
+
             response_text = ""
-            
+
             async for node in run:
-                
+
                 # Handle user prompt node
                 if Agent.is_user_prompt_node(node):
                     pass  # Clean start
-                
+
                 # Handle model request node - stream the thinking process
                 elif Agent.is_model_request_node(node):
                     # Show assistant prefix at the start
                     console.print("[bold blue]Assistant:[/bold blue] ", end="")
-                    
+
                     # Stream model request events for real-time text
                     async with node.stream(run.ctx) as request_stream:
                         async for event in request_stream:
                             event_type = type(event).__name__
-                            
+
                             if event_type == "PartDeltaEvent":
                                 # Extract content from delta
                                 if hasattr(event, 'delta') and hasattr(event.delta, 'content_delta'):
@@ -63,23 +62,23 @@ Search the knowledge base to answer the user's question. Choose the appropriate 
                                         response_text += delta_text
                             elif event_type == "FinalResultEvent":
                                 console.print()  # New line after streaming
-                
+
                 # Handle tool calls
                 elif Agent.is_call_tools_node(node):
                     # Stream tool execution events
                     async with node.stream(run.ctx) as tool_stream:
                         async for event in tool_stream:
                             event_type = type(event).__name__
-                            
+
                             if event_type == "FunctionToolCallEvent":
                                 # Extract tool name from the part attribute
                                 tool_name = "Unknown Tool"
                                 args = None
-                                
+
                                 # Check if the part attribute contains the tool call
                                 if hasattr(event, 'part'):
                                     part = event.part
-                                    
+
                                     # Check if part has tool_name directly
                                     if hasattr(part, 'tool_name'):
                                         tool_name = part.tool_name
@@ -87,15 +86,15 @@ Search the knowledge base to answer the user's question. Choose the appropriate 
                                         tool_name = part.function_name
                                     elif hasattr(part, 'name'):
                                         tool_name = part.name
-                                    
+
                                     # Check for arguments in part
                                     if hasattr(part, 'args'):
                                         args = part.args
                                     elif hasattr(part, 'arguments'):
                                         args = part.arguments
-                                
+
                                 console.print(f"  🔹 [cyan]Calling tool:[/cyan] [bold]{tool_name}[/bold]")
-                                
+
                                 # Show tool args if available
                                 if args and isinstance(args, dict):
                                     # Show first few characters of each arg
@@ -111,7 +110,7 @@ Search the knowledge base to answer the user's question. Choose the appropriate 
                                     if len(args_str) > 100:
                                         args_str = args_str[:97] + "..."
                                     console.print(f"    [dim]Args: {args_str}[/dim]")
-                            
+
                             elif event_type == "FunctionToolResultEvent":
                                 # Display tool result - check different possible attributes
                                 result = None
@@ -130,22 +129,22 @@ Search the knowledge base to answer the user's question. Choose the appropriate 
                                     # Debug: show what attributes are available
                                     attrs = [attr for attr in dir(event) if not attr.startswith('_')]
                                     result = f"Unknown result structure. Attrs: {attrs[:5]}"
-                                
+
                                 if result and len(result) > 100:
                                     result = result[:97] + "..."
                                 console.print(f"  ✅ [green]Tool result:[/green] [dim]{result}[/dim]")
-                
+
                 # Handle end node
                 elif Agent.is_end_node(node):
                     pass  # Keep it clean
-        
+
         # Get final result
         final_result = run.result
         final_output = final_result.output if hasattr(final_result, 'output') else str(final_result)
-        
+
         # Return both streamed and final content
         return (response_text.strip(), final_output)
-        
+
     except Exception as e:
         console.print(f"[red]❌ Error: {e}[/red]")
         return ("", f"Error: {e}")
@@ -186,39 +185,39 @@ def display_help():
 
 async def main():
     """Main conversation loop."""
-    
+
     # Show welcome
     display_welcome()
-    
+
     # Initialize dependencies for the session
     deps = AgentDependencies()
     await deps.initialize()
     deps.session_id = str(uuid.uuid4())
-    
+
     console.print("[bold green]✓[/bold green] Search system initialized\n")
-    
+
     conversation_history = []
-    
+
     try:
         while True:
             try:
                 # Get user input
                 user_input = Prompt.ask("[bold green]You").strip()
-                
+
                 # Handle special commands
                 if user_input.lower() in ['exit', 'quit', 'q']:
                     console.print("\n[yellow]👋 Goodbye![/yellow]")
                     break
-                    
+
                 elif user_input.lower() == 'help':
                     display_help()
                     continue
-                
+
                 elif user_input.lower() == 'clear':
                     console.clear()
                     display_welcome()
                     continue
-                
+
                 elif user_input.lower() == 'info':
                     settings = load_settings()
                     console.print(Panel(
@@ -231,7 +230,7 @@ async def main():
                         border_style="magenta"
                     ))
                     continue
-                
+
                 elif user_input.lower().startswith('set '):
                     # Handle preference setting
                     parts = user_input[4:].split('=')
@@ -250,20 +249,20 @@ async def main():
                     else:
                         console.print("[red]Invalid format. Use: set key=value[/red]")
                     continue
-                
+
                 if not user_input:
                     continue
-                
+
                 # Add to history
                 conversation_history.append(f"User: {user_input}")
-                
+
                 # Stream the interaction and get response
                 streamed_text, final_response = await stream_agent_interaction(
-                    user_input, 
-                    conversation_history, 
+                    user_input,
+                    conversation_history,
                     deps
                 )
-                
+
                 # Handle the response display
                 if streamed_text:
                     # Response was streamed, just add spacing
@@ -274,11 +273,11 @@ async def main():
                     console.print(f"[bold blue]Assistant:[/bold blue] {final_response}")
                     console.print()
                     conversation_history.append(f"Assistant: {final_response}")
-                    
+
             except KeyboardInterrupt:
                 console.print("\n[yellow]Use 'exit' to quit[/yellow]")
                 continue
-                
+
     finally:
         # Clean up
         await deps.cleanup()

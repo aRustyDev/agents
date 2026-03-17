@@ -34,7 +34,7 @@ capabilities:
   required:
     - module: path/to/module.md
       version: ">=1.0.0"        # Version constraint
-      
+
   # Loaded based on context triggers
   contextual:
     - name: string              # Capability name
@@ -52,7 +52,7 @@ knowledge_base:
   inherit:
     - module: knowledge/domain.yaml
       sections: [all|specific]  # Which sections to inherit
-      
+
   # Role-specific knowledge
   custom:
     - domain: string
@@ -66,13 +66,13 @@ behaviors:
       - role_name
     consultation_style: string # How consultations are conducted
     auto_consult: boolean     # Auto-consult when uncertain
-    
+
   # Response patterns
   response_style:
     verbosity: concise|normal|detailed
     technical_level: beginner|intermediate|expert
     use_examples: always|when_helpful|rarely
-    
+
   # Learning preferences
   learning:
     continuous: boolean        # Updates knowledge from interactions
@@ -151,7 +151,7 @@ capabilities:
       version: ">=1.0.0"
     - module: patterns/development/best-practices.md
       version: ">=2.0.0"
-      
+
   contextual:
     - name: code-review
       description: Advanced code review capabilities
@@ -160,7 +160,7 @@ capabilities:
         - processes/code-review/comprehensive.md
         - guides/mentoring/code-feedback.md
       priority: high
-      
+
     - name: architecture
       description: System architecture and design
       triggers: ["architecture", "design", "scale"]
@@ -181,12 +181,12 @@ behaviors:
     can_consult: [security-engineer, ml-engineer, devops-engineer]
     consultation_style: "Seeks specialist input for domain-specific decisions"
     auto_consult: true
-    
+
   response_style:
     verbosity: normal
     technical_level: expert
     use_examples: when_helpful
-    
+
   learning:
     continuous: true
     domains: [architecture, best-practices, team-dynamics]

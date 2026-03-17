@@ -203,7 +203,3 @@ Architectural reduction is not universally applicable, but the principle challen
 - Vercel Engineering: "We removed 80% of our agent's tools" (December 2025)
 - AI SDK ToolLoopAgent documentation
 - Vercel Sandbox documentation
-
-
-
-

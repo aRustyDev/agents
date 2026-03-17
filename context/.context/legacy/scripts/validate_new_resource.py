@@ -203,7 +203,7 @@ def update_csv_file(updated_resource: dict[str, str]) -> bool:
         for i, row in enumerate(rows):
             if row.get(ID_HEADER_NAME) == resource_id:
                 # Update the row with validated data
-                rows[i].update(updated_resource)
+                row.update(updated_resource)
                 updated = True
                 break
 

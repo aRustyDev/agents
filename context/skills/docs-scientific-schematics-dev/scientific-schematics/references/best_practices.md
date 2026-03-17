@@ -556,4 +556,3 @@ identify -verbose diagram.pdf
 - **ColorBrewer**: https://colorbrewer2.org/
 
 Following these best practices ensures your diagrams meet publication standards and effectively communicate to all readers, regardless of colorblindness or viewing conditions.
-

@@ -23,27 +23,25 @@ from enum import Enum
 from typing import Any
 
 from ir_core.base import (
-    Synthesizer,
-    SynthConfig,
     OutputFormat,
+    SynthConfig,
+    Synthesizer,
     register_synthesizer,
 )
 from ir_core.models import (
-    IRVersion,
-    Module,
-    TypeDef,
     Function,
-    Import,
     GapMarker,
     GapType,
+    Import,
+    IRVersion,
     Severity,
-    PreservationLevel,
     SynthesisError,
     SynthesisErrorCode,
+    TypeDef,
 )
 
-from .generator import PythonCodeGenerator
 from .formatter import PythonFormatter
+from .generator import PythonCodeGenerator
 from .idioms import PythonIdiomGenerator
 
 

@@ -308,4 +308,3 @@ SuperClaude는 Serena MCP 서버를 통해 영구 세션 관리를 제공하여 
 ---
 
 **핵심 요점**: Serena MCP를 통한 세션 관리는 SuperClaude를 단일 대화 지원에서 영구 프로젝트 파트너십으로 변환하여 모든 개발 단계 및 Claude Code 대화 전반에 걸쳐 컨텍스트, 결정, 학습을 유지합니다.
-

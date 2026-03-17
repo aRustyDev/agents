@@ -89,4 +89,3 @@ Impact will be assessed through pre/post surveys of student participants, tracki
 ✅ **Do** write Overview for broad audience
 ✅ **Do** convey enthusiasm and significance
 ✅ **Do** proofread carefully (this is the first thing reviewers see)
-

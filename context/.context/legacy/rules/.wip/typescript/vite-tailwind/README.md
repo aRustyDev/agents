@@ -13,4 +13,3 @@ This prompt is ideal for a front-end developer aiming to build a scalable, perfo
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines for developers working with a tech stack that includes TypeScript, Node.js, Vite, Vue.js, and related technologies. It emphasizes writing concise and maintainable code using functional programming patterns, avoiding classes, and adhering to DRY principles. It advises on the use of TypeScript interfaces, prefers named exports for functions, and details naming conventions for directories. The file outlines UI and styling practices using DaisyUI and Tailwind CSS, focusing on responsive design. Performance optimization strategies include dynamic loading, image optimization, and chunking strategies in the Vite build process. It also includes best practices for code review, emphasizing performance, readability, and adherence to these guidelines.
-

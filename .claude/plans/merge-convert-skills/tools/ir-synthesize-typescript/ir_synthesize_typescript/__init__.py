@@ -30,8 +30,8 @@ Example:
 """
 
 from ir_synthesize_typescript.linter import (
-    ESLinter,
     ESLintConfig,
+    ESLinter,
     LintIssue,
     LintResult,
     LintSeverity,
@@ -40,12 +40,12 @@ from ir_synthesize_typescript.linter import (
 from ir_synthesize_typescript.synthesizer import TypeScriptSynthesizer
 
 __all__ = [
-    "TypeScriptSynthesizer",
-    "ESLinter",
     "ESLintConfig",
+    "ESLinter",
     "LintIssue",
     "LintResult",
     "LintSeverity",
+    "TypeScriptSynthesizer",
     "lint_typescript",
 ]
 __version__ = "0.1.0"

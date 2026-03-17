@@ -50,4 +50,3 @@ except SpecificException as e:
 
 Catching bare exceptions can hide unintended exceptions leading to bugs.
 They give an illusion of stability while potentially masking issues that should be addressed.
-

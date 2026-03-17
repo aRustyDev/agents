@@ -14,7 +14,7 @@ import yaml
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from scripts.category_utils import category_manager  # noqa: E402
+from scripts.category_utils import category_manager
 
 
 class CategoryAdder:

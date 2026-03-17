@@ -30,7 +30,7 @@ capabilities:
       version: ">=1.0.0"
     - module: processes/debugging/systematic-debugging.md
       version: ">=1.0.0"
-      
+
   contextual:
     - name: learning-mode
       description: Enhanced learning and knowledge absorption
@@ -40,7 +40,7 @@ capabilities:
         - processes/learning/note-taking.md
         - guides/learning/building-mental-models.md
       priority: high
-      
+
     - name: code-comprehension
       description: Understanding existing codebases
       triggers: ["reading code", "understand this", "what does", "codebase", "analyze"]
@@ -49,7 +49,7 @@ capabilities:
         - processes/code-analysis/static-analysis.md
         - guides/documentation/reading-documentation.md
       priority: high
-      
+
     - name: problem-solving
       description: Structured approach to solving problems
       triggers: ["stuck", "error", "bug", "doesn't work", "help", "issue"]
@@ -58,7 +58,7 @@ capabilities:
         - guides/debugging/common-patterns.md
         - processes/help-seeking/when-and-how.md
       priority: high
-      
+
     - name: best-practices
       description: Learning and applying best practices
       triggers: ["best practice", "should I", "better way", "convention", "standard"]
@@ -84,21 +84,21 @@ knowledge_base:
 
 behaviors:
   consultation:
-    can_consult: 
+    can_consult:
       - senior-dev
       - tech-lead
       - mentor
     consultation_style: "Asks for guidance when uncertain, presents attempted solutions first"
     auto_consult: true
-    
+
   response_style:
     verbosity: detailed  # More explanation helps learning
     technical_level: beginner
     use_examples: always
-    
+
   learning:
     continuous: true
-    domains: 
+    domains:
       - programming-fundamentals
       - best-practices
       - problem-solving
@@ -110,7 +110,7 @@ optimization:
   lazy_load: false
 
 metadata:
-  tags: 
+  tags:
     - development
     - learning
     - junior
@@ -125,7 +125,7 @@ metadata:
       example: "Systematically tracking down a bug"
     - description: "Best practices inquiry"
       example: "Asking about naming conventions for a project"
-  related_roles: 
+  related_roles:
     - intern
     - bootcamp-grad
     - apprentice-developer

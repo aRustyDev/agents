@@ -12,13 +12,13 @@ core_concepts:
     priority: critical
     content: |
       Three main categories of design patterns:
-      
+
       1. **Creational Patterns**: Object creation mechanisms
          - Factory, Builder, Singleton, Prototype
-      
+
       2. **Structural Patterns**: Object composition
          - Adapter, Decorator, Facade, Proxy
-      
+
       3. **Behavioral Patterns**: Object collaboration
          - Observer, Strategy, Command, Iterator
     examples:
@@ -26,10 +26,10 @@ core_concepts:
         code: |
           # Creational: Factory for object creation
           user = UserFactory.create_user(type="admin")
-          
+
           # Structural: Decorator for adding behavior
           coffee = MilkDecorator(SugarDecorator(Coffee()))
-          
+
           # Behavioral: Observer for notifications
           subject.attach(observer)
           subject.notify()
@@ -38,7 +38,7 @@ core_concepts:
     priority: critical
     content: |
       Five fundamental principles of object-oriented design:
-      
+
       **S**ingle Responsibility Principle
       **O**pen/Closed Principle
       **L**iskov Substitution Principle
@@ -52,14 +52,14 @@ core_concepts:
               def calculate_total(self): ...
               def save_to_database(self): ...
               def send_email(self): ...
-          
+
           # Good: Single responsibility
           class Order:
               def calculate_total(self): ...
-          
+
           class OrderRepository:
               def save(self, order): ...
-          
+
           class EmailService:
               def send_order_confirmation(self, order): ...
 
@@ -70,12 +70,12 @@ patterns:
     implementation: |
       class Singleton:
           _instance = None
-          
+
           def __new__(cls):
               if cls._instance is None:
                   cls._instance = super().__new__(cls)
               return cls._instance
-          
+
           def __init__(self):
               if not hasattr(self, 'initialized'):
                   self.initialized = True
@@ -94,19 +94,19 @@ patterns:
     when_to_use: When creation logic is complex or type depends on input
     implementation: |
       from abc import ABC, abstractmethod
-      
+
       class Animal(ABC):
           @abstractmethod
           def speak(self): pass
-      
+
       class Dog(Animal):
           def speak(self):
               return "Woof!"
-      
+
       class Cat(Animal):
           def speak(self):
               return "Meow!"
-      
+
       class AnimalFactory:
           @staticmethod
           def create_animal(animal_type: str) -> Animal:
@@ -128,26 +128,26 @@ patterns:
     when_to_use: When multiple objects need to react to changes
     implementation: |
       from typing import List
-      
+
       class Subject:
           def __init__(self):
               self._observers: List[Observer] = []
               self._state = None
-          
+
           def attach(self, observer):
               self._observers.append(observer)
-          
+
           def detach(self, observer):
               self._observers.remove(observer)
-          
+
           def notify(self):
               for observer in self._observers:
                   observer.update(self._state)
-          
+
           def set_state(self, state):
               self._state = state
               self.notify()
-      
+
       class Observer(ABC):
           @abstractmethod
           def update(self, state): pass
@@ -164,23 +164,23 @@ patterns:
     when_to_use: When you have multiple ways to perform a task
     implementation: |
       from abc import ABC, abstractmethod
-      
+
       class PaymentStrategy(ABC):
           @abstractmethod
           def pay(self, amount): pass
-      
+
       class CreditCardPayment(PaymentStrategy):
           def pay(self, amount):
               return f"Paid ${amount} via credit card"
-      
+
       class PayPalPayment(PaymentStrategy):
           def pay(self, amount):
               return f"Paid ${amount} via PayPal"
-      
+
       class ShoppingCart:
           def __init__(self, payment_strategy: PaymentStrategy):
               self.payment_strategy = payment_strategy
-          
+
           def checkout(self, amount):
               return self.payment_strategy.pay(amount)
     trade_offs:
@@ -196,29 +196,29 @@ patterns:
     when_to_use: When you need to add features to objects without altering their structure
     implementation: |
       from abc import ABC, abstractmethod
-      
+
       class Coffee(ABC):
           @abstractmethod
           def cost(self): pass
-          
+
           @abstractmethod
           def description(self): pass
-      
+
       class SimpleCoffee(Coffee):
           def cost(self):
               return 2.0
-          
+
           def description(self):
               return "Simple coffee"
-      
+
       class CoffeeDecorator(Coffee):
           def __init__(self, coffee: Coffee):
               self._coffee = coffee
-      
+
       class MilkDecorator(CoffeeDecorator):
           def cost(self):
               return self._coffee.cost() + 0.5
-          
+
           def description(self):
               return f"{self._coffee.description()}, milk"
     trade_offs:
@@ -275,7 +275,7 @@ pitfalls:
       class StringFactory:
           def create_string(self, value):
               return str(value)
-      
+
       # Simple is better
       value = str(input_value)
 

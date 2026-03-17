@@ -9,11 +9,11 @@ Implements the "Triple Reflection" pattern:
 Only proceeds with execution if confidence >70%.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional, Dict, Any
 import json
+from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -21,8 +21,8 @@ class ReflectionResult:
     """Single reflection analysis result"""
     stage: str
     score: float  # 0.0 - 1.0
-    evidence: List[str]
-    concerns: List[str]
+    evidence: list[str]
+    concerns: list[str]
 
     def __repr__(self) -> str:
         emoji = "✅" if self.score > 0.7 else "⚠️" if self.score > 0.4 else "❌"
@@ -43,8 +43,8 @@ class ConfidenceScore:
 
     # Decision
     should_proceed: bool
-    blockers: List[str]
-    recommendations: List[str]
+    blockers: list[str]
+    recommendations: list[str]
 
     def __repr__(self) -> str:
         status = "🟢 PROCEED" if self.should_proceed else "🔴 BLOCKED"
@@ -84,7 +84,7 @@ class ReflectionEngine:
             "context": 0.2,      # Least critical (can load more)
         }
 
-    def reflect(self, task: str, context: Optional[Dict[str, Any]] = None) -> ConfidenceScore:
+    def reflect(self, task: str, context: dict[str, Any] | None = None) -> ConfidenceScore:
         """
         3-Stage Reflection Process
 
@@ -148,7 +148,7 @@ class ReflectionEngine:
 
         return result
 
-    def _reflect_clarity(self, task: str, context: Optional[Dict] = None) -> ReflectionResult:
+    def _reflect_clarity(self, task: str, context: dict | None = None) -> ReflectionResult:
         """
         Reflection 1: Requirement Clarity
 
@@ -201,7 +201,7 @@ class ReflectionEngine:
             concerns=concerns
         )
 
-    def _reflect_mistakes(self, task: str, context: Optional[Dict] = None) -> ReflectionResult:
+    def _reflect_mistakes(self, task: str, context: dict | None = None) -> ReflectionResult:
         """
         Reflection 2: Past Mistake Check
 
@@ -264,7 +264,7 @@ class ReflectionEngine:
             concerns=concerns
         )
 
-    def _reflect_context(self, task: str, context: Optional[Dict] = None) -> ReflectionResult:
+    def _reflect_context(self, task: str, context: dict | None = None) -> ReflectionResult:
         """
         Reflection 3: Context Readiness
 
@@ -357,10 +357,10 @@ class ReflectionEngine:
 
 
 # Singleton instance
-_reflection_engine: Optional[ReflectionEngine] = None
+_reflection_engine: ReflectionEngine | None = None
 
 
-def get_reflection_engine(repo_path: Optional[Path] = None) -> ReflectionEngine:
+def get_reflection_engine(repo_path: Path | None = None) -> ReflectionEngine:
     """Get or create reflection engine singleton"""
     global _reflection_engine
 
@@ -373,7 +373,7 @@ def get_reflection_engine(repo_path: Optional[Path] = None) -> ReflectionEngine:
 
 
 # Convenience function
-def reflect_before_execution(task: str, context: Optional[Dict] = None) -> ConfidenceScore:
+def reflect_before_execution(task: str, context: dict | None = None) -> ConfidenceScore:
     """
     Perform 3-stage reflection before task execution
 

@@ -21,80 +21,73 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 from ir_core.base import (
-    Extractor,
     ExtractConfig,
     ExtractionMode,
+    Extractor,
     SemanticEnrichmentLevel,
     register_extractor,
 )
 from ir_core.models import (
-    IRVersion,
-    Module,
-    ModuleMetadata,
-    TypeDef,
-    TypeBody,
-    TypeKind,
-    TypeRef,
-    TypeRefKind,
-    TypeParam,
-    TypeRelationship,
-    Function,
-    Param,
-    Receiver,
+    AnnotationSource,
+    Attribute,
+    AutomationLevel,
+    Binding,
+    Block,
+    ControlFlowGraph,
+    Definition,
     Effect,
     EffectKind,
-    Binding,
-    Lifetime,
-    LifetimeKind,
-    Mutability,
-    Visibility,
-    ControlFlowGraph,
-    Block,
-    Terminator,
-    TerminatorKind,
-    Statement,
     Expression,
-    ExpressionKind,
-    Argument,
-    Import,
-    ImportedItem,
-    Export,
-    DefinitionRef,
-    Definition,
-    Attribute,
-    GapMarker,
-    GapType,
-    Severity,
-    SemanticAnnotation,
-    AnnotationSource,
-    AutomationLevel,
-    PreservationStatus,
-    PreservationLevel,
-    SourceSpan as IRSourceSpan,
     ExtractionError,
     ExtractionErrorCode,
     Field_,
-    Variant,
+    Function,
+    GapMarker,
+    GapType,
+    Import,
+    ImportedItem,
+    IRVersion,
+    Lifetime,
+    LifetimeKind,
+    Module,
+    ModuleMetadata,
+    Mutability,
+    Param,
+    PreservationLevel,
+    PreservationStatus,
+    Receiver,
+    SemanticAnnotation,
+    Severity,
+    Statement,
+    Terminator,
+    TerminatorKind,
+    TypeBody,
+    TypeDef,
+    TypeKind,
+    TypeParam,
+    TypeRef,
+    TypeRefKind,
+    TypeRelationship,
+    Visibility,
+)
+from ir_core.models import (
+    SourceSpan as IRSourceSpan,
 )
 from ir_core.treesitter import (
-    TreeSitterAdapter,
-    TreeNode,
     ParseTree,
-    TSSourceSpan,
-    GASTNode,
-    GASTKind,
+    TreeNode,
 )
 
 from .parser import PythonParser
+from .patterns import Pattern, PythonPatternMatcher
 from .semantic import SemanticEnricher
-from .patterns import PythonPatternMatcher, Pattern, PatternKind
 
 
 @register_extractor("python")
@@ -237,7 +230,7 @@ class PythonExtractor(Extractor):
             extraction_version=self.supported_version(),
             extraction_mode=config.mode,
             source_hash=source_hash,
-            extraction_timestamp=datetime.now(timezone.utc),
+            extraction_timestamp=datetime.now(UTC),
             documentation=self._extract_module_docstring(tree),
         )
 

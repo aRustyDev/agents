@@ -38,4 +38,3 @@ const additionalInstructions = `
 6. Follow Fiber's best practices for project structure
 7. Use environment variables for configuration
 `;
-

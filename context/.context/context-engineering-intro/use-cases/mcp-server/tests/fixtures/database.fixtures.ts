@@ -4,7 +4,7 @@ export const mockTableColumns = [
     column_name: 'id',
     data_type: 'integer',
     is_nullable: 'NO',
-    column_default: 'nextval(\'users_id_seq\'::regclass)',
+    column_default: "nextval('users_id_seq'::regclass)",
   },
   {
     table_name: 'users',
@@ -25,7 +25,7 @@ export const mockTableColumns = [
     column_name: 'id',
     data_type: 'integer',
     is_nullable: 'NO',
-    column_default: 'nextval(\'posts_id_seq\'::regclass)',
+    column_default: "nextval('posts_id_seq'::regclass)",
   },
   {
     table_name: 'posts',
@@ -48,13 +48,12 @@ export const mockQueryResult = [
   { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
 ]
 
-export const mockInsertResult = [
-  { id: 3, name: 'New User', email: 'new@example.com' },
-]
+export const mockInsertResult = [{ id: 3, name: 'New User', email: 'new@example.com' }]
 
 export const validSelectQuery = 'SELECT * FROM users WHERE id = 1'
-export const validInsertQuery = 'INSERT INTO users (name, email) VALUES (\'Test\', \'test@example.com\')'
-export const validUpdateQuery = 'UPDATE users SET name = \'Updated\' WHERE id = 1'
+export const validInsertQuery =
+  "INSERT INTO users (name, email) VALUES ('Test', 'test@example.com')"
+export const validUpdateQuery = "UPDATE users SET name = 'Updated' WHERE id = 1"
 export const validDeleteQuery = 'DELETE FROM users WHERE id = 1'
 
 export const dangerousDropQuery = 'DROP TABLE users'

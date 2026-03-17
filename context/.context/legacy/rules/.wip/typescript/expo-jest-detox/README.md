@@ -13,4 +13,3 @@ Mobile app developers utilizing this prompt can create optimized, high-performan
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines for developers working with TypeScript, React Native, and Expo for mobile UI development. It emphasizes writing concise, well-structured TypeScript code using functional programming patterns, avoiding class-based components. Key areas covered include naming conventions, syntax, formatting, UI styling with responsive design, performance optimization, navigation using react-navigation, state management, error handling, and testing with Jest and Detox. It also addresses security practices, internationalization, and leveraging Expo's managed workflow for environment configuration, updates, and deployment. The file promotes best practices for compatibility across iOS and Android platforms, encouraging developers to follow Expo's official documentation.
-

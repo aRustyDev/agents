@@ -7,10 +7,9 @@
 # ///
 
 import json
-import os
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 try:
     from dotenv import load_dotenv
@@ -29,7 +28,7 @@ def log_status_line(input_data, status_line_output, error_message=None):
 
     # Read existing log data or initialize empty list
     if log_file.exists():
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             try:
                 log_data = json.load(f)
             except (json.JSONDecodeError, ValueError):
@@ -64,11 +63,11 @@ def get_session_data(session_id):
         return None, f"Session file {session_file} does not exist"
 
     try:
-        with open(session_file, "r") as f:
+        with open(session_file) as f:
             session_data = json.load(f)
             return session_data, None
     except Exception as e:
-        return None, f"Error reading session file: {str(e)}"
+        return None, f"Error reading session file: {e!s}"
 
 
 def truncate_prompt(prompt, max_length=75):
@@ -181,7 +180,7 @@ def main():
         sys.exit(0)
     except Exception as e:
         # Handle any other errors gracefully - output basic status
-        print(f"\033[31m[Agent] [Claude] 💭 Error: {str(e)}\033[0m")
+        print(f"\033[31m[Agent] [Claude] 💭 Error: {e!s}\033[0m")
         sys.exit(0)
 
 

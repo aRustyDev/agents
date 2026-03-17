@@ -13,4 +13,3 @@ Developers working on collaborative projects would benefit by establishing clear
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines a set of rules and guidelines to be followed when editing or suggesting changes to code. It emphasizes verifying information, making changes file-by-file, preserving existing code, and avoiding unnecessary confirmations or updates. It advises against using apologies, unnecessary whitespace changes, or summarizing changes made. There is a focus on ensuring real file links are provided, using explicit variable names, and following a consistent coding style. Performance, security, error handling, modular design, version compatibility, edge cases, and test coverage are prioritized. The file discourages the use of "magic numbers" and encourages using assertions to catch errors early.
-

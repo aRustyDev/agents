@@ -211,9 +211,9 @@ class BadgeNotification:
                     "(default GITHUB_TOKEN insufficient)"
                 )
             else:
-                result["message"] = f"GitHub API error: {str(e)}"
+                result["message"] = f"GitHub API error: {e!s}"
         except Exception as e:
-            result["message"] = f"Unexpected error: {str(e)}"
+            result["message"] = f"Unexpected error: {e!s}"
 
         return result
 

@@ -11,4 +11,3 @@ When using python types:
 2. ALWAYS use `typing.Optional` for optional types.
     For example, prefer `Optional[str]` over `str | None`.
 3. Never use `# type: ignore` to ignore type errors.
-

@@ -292,7 +292,7 @@ def stream_claude_and_synthesize_ws(messages, audio_queue):
         nonlocal ws_finished
         data = json.loads(message)
 
-        if "audio" in data and data["audio"]:
+        if data.get("audio"):
             audio_bytes = base64.b64decode(data["audio"])
             audio_queue.add(audio_bytes)
 

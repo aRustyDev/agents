@@ -24,4 +24,3 @@ Do you have a question, comment, or want to connect? Head over to our [Github Di
 # Get Started
 
 If you're ready to get started using Deepgram, head over to the [Deepgram Console](https://console.deepgram.com/signup) to get your free API key and free credits and start building with our powerful speech, text and intelligence [APIs](https://developers.deepgram.com/reference/).
-

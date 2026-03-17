@@ -1,0 +1,54 @@
+# Registry API Documentation: CCPM.dev
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "ccpm.dev"
+  base_url: "https://ccpm.dev"
+  type: "commands_registry"
+
+  api:
+    docs_url: null
+    spec_format: "unknown"
+
+    authentication:
+      type: "unknown"
+      notes: "API endpoint exists but returns empty"
+
+    endpoints:
+      - path: "/api"
+        method: "GET"
+        status: "returns empty response"
+        notes: "May require authentication or different parameters"
+
+  access_method:
+    type: "web_scraping"
+    recommended_tool: "WebFetch"
+
+  restrictions:
+    robots_txt:
+      url: "https://ccpm.dev/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed: []
+      crawl_delay: null
+      sitemap: "https://ccpm.dev/sitemap.xml"
+      notes: "Open crawling policy"
+
+    rate_limits:
+      documented: "none"
+      observed: "none"
+
+    terms_of_service:
+      url: null
+      notes: "No ToS page found"
+
+  example:
+    webfetch: |
+      WebFetch https://ccpm.dev/ "Extract command listings"
+
+  observations:
+    - "Commands-focused registry"
+    - "API endpoint exists but appears non-functional"
+    - "Open robots.txt policy"
+    - "May need investigation for API access"

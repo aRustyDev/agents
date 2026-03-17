@@ -1,0 +1,64 @@
+# Rule file module
+# Usage: just rule <command> [args]
+
+set unstable := true
+
+ROOT := source_directory() / "../.."
+SCRIPTS := ROOT / ".scripts"
+RULES := source_directory()
+
+# Validate a rule file
+[group('rule')]
+validate name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    RULE_FILE="{{ RULES }}/{{ name }}.md"
+
+    if [ ! -f "$RULE_FILE" ]; then
+        echo "✗ Rule not found: $RULE_FILE"
+        exit 1
+    fi
+
+    echo "Validating rule: {{ name }}"
+
+    # Check file is not empty
+    if [ ! -s "$RULE_FILE" ]; then
+        echo "  ✗ Rule file is empty"
+        exit 1
+    fi
+
+    # Check for header
+    if ! head -1 "$RULE_FILE" | grep -q "^#"; then
+        echo "  ⚠ Rule should start with a markdown heading"
+    fi
+
+    echo "  ✓ Rule valid"
+
+# Compute hash for a rule
+[group('rule')]
+hash name:
+    @uv run python {{ SCRIPTS }}/build-plugin.py hash "{{ RULES }}/{{ name }}.md"
+
+# List all rules
+[group('rule')]
+list:
+    @ls -1 {{ RULES }}/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort
+
+# Check all rules
+[group('rule')]
+check-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    RULES_DIR="{{ RULES }}"
+    rules=$(ls -1 "$RULES_DIR"/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort)
+    count=0
+    for rule in $rules; do
+        RULE_FILE="$RULES_DIR/$rule.md"
+        if [ -s "$RULE_FILE" ]; then
+            count=$((count + 1))
+        else
+            echo "  ⚠ $rule (empty)"
+        fi
+    done
+    echo ""
+    echo "✓ $count rules checked"

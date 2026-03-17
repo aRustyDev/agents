@@ -1,17 +1,17 @@
 {
-  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
+  "$schema": "Plugin source mapping - maps local paths to repo source paths",
   "sources": {
-    "commands/add-formula.md": {
-      "source": "context/commands/add-formula.md",
-      "hash": "sha256:4501741ed27b4f5a05fd819b7890cf42b74422a3d2613f9324946fdfc3d9f84c"
+    "commands/add.md": {
+      "source": "context/commands/homebrew/formula/add.md",
+      "hash": "sha256:d1a23db135f17b8ffb76e57ad61f6f181f85a0f239c4a0ab0c3ea4db464c8ac2"
     },
-    "commands/validate-formula.md": {
-      "source": "context/commands/validate-formula.md",
-      "hash": "sha256:cb237887abe9ad3c1c14af3549da51f57cb069c38fd05568446bb5d5c01456f2"
+    "commands/validate.md": {
+      "source": "context/commands/homebrew/formula/validate.md",
+      "hash": "sha256:3d45ef85e976c04b468d40f6ba07e581b03be3074f88c767e059d94a48fc12aa"
     },
-    "commands/batch-formulas.md": {
-      "source": "context/commands/batch-formulas.md",
-      "hash": "sha256:f283b8e34fe2086a90cafaac89344b200951de8d03cd48c7c31d73b3f4a01aea"
+    "commands/batch-add.md": {
+      "source": "context/commands/homebrew/formula/batch-add.md",
+      "hash": "sha256:a3ea58b7af53a1819d91c310a42c09f08fe0259aa63fc9a2e0222dc1d726e165"
     },
     "agents/homebrew-expert.md": {
       "source": "context/agents/homebrew-expert.md",

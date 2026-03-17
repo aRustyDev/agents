@@ -55,7 +55,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         c.id AS chunk_id,
         c.document_id,
         c.content,
@@ -93,7 +93,7 @@ AS $$
 BEGIN
     RETURN QUERY
     WITH vector_results AS (
-        SELECT 
+        SELECT
             c.id AS chunk_id,
             c.document_id,
             c.content,
@@ -106,7 +106,7 @@ BEGIN
         WHERE c.embedding IS NOT NULL
     ),
     text_results AS (
-        SELECT 
+        SELECT
             c.id AS chunk_id,
             c.document_id,
             c.content,
@@ -118,7 +118,7 @@ BEGIN
         JOIN documents d ON c.document_id = d.id
         WHERE to_tsvector('english', c.content) @@ plainto_tsquery('english', query_text)
     )
-    SELECT 
+    SELECT
         COALESCE(v.chunk_id, t.chunk_id) AS chunk_id,
         COALESCE(v.document_id, t.document_id) AS document_id,
         COALESCE(v.content, t.content) AS content,
@@ -146,7 +146,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         id AS chunk_id,
         chunks.content,
         chunks.chunk_index,
@@ -167,4 +167,3 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    

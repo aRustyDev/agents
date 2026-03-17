@@ -268,4 +268,3 @@
 - [명령어 가이드](commands.md) - 이러한 플래그를 사용하는 명령어
 - [MCP 서버 가이드](mcp-servers.md) - MCP 플래그 활성화 이해
 - [세션 관리](session-management.md) - 영구 세션에서 플래그 사용
-

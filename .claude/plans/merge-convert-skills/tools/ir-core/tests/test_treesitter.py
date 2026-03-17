@@ -3,18 +3,16 @@
 from __future__ import annotations
 
 import pytest
-
+from ir_core.models import SourceSpan as IRSourceSpan
 from ir_core.treesitter import (
-    TSSourceSpan,
+    ASTNormalizer,
+    GASTKind,
+    GASTNode,
     SourceSpan,  # Backwards compatibility alias
     TreeNode,
-    ParseTree,
     TreeSitterAdapter,
-    GASTNode,
-    GASTKind,
-    ASTNormalizer,
+    TSSourceSpan,
 )
-from ir_core.models import SourceSpan as IRSourceSpan
 
 
 class TestTSSourceSpan:

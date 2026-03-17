@@ -50,4 +50,3 @@ def process_data(data):
 ## Why
 
 Complex execution flow increases cognitive load, makes debugging difficult, and increases the likelihood of bugs. Linear, predictable flow is easier to understand, test, and maintain.
-

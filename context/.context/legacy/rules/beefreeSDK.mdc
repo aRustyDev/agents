@@ -63,7 +63,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
   app.post('/proxy/bee-auth', async (req, res) => {
     try {
       const { uid } = req.body;
-      
+
       const response = await axios.post(
         'https://auth.getbee.io/loginV2',
         {
@@ -73,7 +73,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
         },
         { headers: { 'Content-Type': 'application/json' } }
       );
-      
+
       res.json(response.data);
     } catch (error) {
       console.error('Auth error:', error.message);
@@ -266,7 +266,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
   ```typescript
   // Load template from localStorage
   const selectedTemplate = JSON.parse(localStorage.getItem('currentEmailData'));
-  
+
   if (selectedTemplate) {
     beefreeSDKInstance.start(selectedTemplate);
     console.log('Loaded template from localStorage');
@@ -283,7 +283,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
   // Save template data
   localStorage.setItem('currentEmailData', JSON.stringify(templateData));
   localStorage.setItem('currentEmailName', emailName);
-  
+
   // Load template data
   const emailData = localStorage.getItem('currentEmailData');
   const emailName = localStorage.getItem('currentEmailName');
@@ -315,7 +315,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
       "Content-Type": "text/html"
     },
     body: "<!DOCTYPE html><html><body><h1>Hello World</h1></body></html>"
-  }); 
+  });
   const data = await response.json();
   ```
 
@@ -334,7 +334,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
   onError: function (errorMessage) {
     console.error("Beefree SDK error:", errorMessage);
     // Display user-friendly error message
-    document.getElementById('beefree-sdk-container').innerHTML = 
+    document.getElementById('beefree-sdk-container').innerHTML =
       '<div class="error">Error loading Beefree SDK: ' + errorMessage.message + '</div>';
   }
   ```
@@ -361,7 +361,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
     })
     .catch(error => {
       console.error('Error getting Beefree token:', error);
-      document.getElementById('beefree-sdk-container').innerHTML = 
+      document.getElementById('beefree-sdk-container').innerHTML =
         '<div class="error">Failed to authenticate with Beefree. Please check your credentials and try again.</div>';
     });
   }
@@ -387,7 +387,7 @@ Guidelines and best practices for building applications with [Beefree SDK](https
 ### UI Customization
 Customize the Beefree SDK appearance with:
 - [Customized Themes](https://docs.beefree.io/beefree-sdk/other-customizations/appearance/themes)
-- [Custom CSS](https://docs.beefree.io/beefree-sdk/other-customizations/appearance/custom-css) 
+- [Custom CSS](https://docs.beefree.io/beefree-sdk/other-customizations/appearance/custom-css)
 
 ### Language Customization
 - Set the language for internationalization:
@@ -417,7 +417,7 @@ Customize the Beefree SDK appearance with:
   };
   ```
 ### Other Customizations
-Reference the official [Beefree SDK technical documentation](https://docs.beefree.io/beefree-sdk) for a comprehnsive reference of possible customizations.  
+Reference the official [Beefree SDK technical documentation](https://docs.beefree.io/beefree-sdk) for a comprehnsive reference of possible customizations.
 
 ## Best Practices
 
@@ -557,4 +557,4 @@ Reference the complete project at Beefree SDK [multiple-versions-concept](https:
     </script>
   </body>
 </html>
-``` 
+```

@@ -83,7 +83,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           prompt: |
-            /fix-ci 
+            /fix-ci
             Failed CI Run: ${{ fromJSON(steps.failure_details.outputs.result).runUrl }}
             Failed Jobs: ${{ join(fromJSON(steps.failure_details.outputs.result).failedJobs, ', ') }}
             PR Number: ${{ github.event.workflow_run.pull_requests[0].number }}

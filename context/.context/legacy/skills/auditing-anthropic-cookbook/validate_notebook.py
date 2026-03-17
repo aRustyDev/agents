@@ -79,7 +79,7 @@ class NotebookValidator:
             str(self.notebook_path.absolute()),
         ]
 
-        subprocess.run(cmd, capture_output=True, text=True, check=True)  # noqa: S603
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         self.markdown_output = output_file
         return output_file
@@ -125,11 +125,11 @@ class NotebookValidator:
                     f"echo '{notebook_abs}' | tr '\\n' '\\0' | xargs -0 uvx --from detect-secrets detect-secrets-hook",
                 ]
 
-            result = subprocess.run(  # noqa: S603
+            result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=project_root,  # Run from repo root for scripts/detect-secrets access
+                cwd=project_root, check=False,  # Run from repo root for scripts/detect-secrets access
             )
 
             # detect-secrets returns non-zero exit code if secrets found

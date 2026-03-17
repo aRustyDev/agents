@@ -1,6 +1,6 @@
 services:
   observability-agent:
-    build: 
+    build:
       context: ../..
       dockerfile: observability_agent/docker/Dockerfile
     ports:

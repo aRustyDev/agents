@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import { mockGitHubUser, mockAccessToken } from '../fixtures/auth.fixtures'
+import { mockAccessToken, mockGitHubUser } from '../fixtures/auth.fixtures'
 
 // Mock Octokit
 export const mockOctokit = {
@@ -38,7 +38,8 @@ export function setupGitHubTokenExchange() {
     if (url.includes('github.com/login/oauth/access_token')) {
       return Promise.resolve({
         ok: true,
-        text: () => Promise.resolve(`access_token=${mockAccessToken}&token_type=bearer&scope=read:user`),
+        text: () =>
+          Promise.resolve(`access_token=${mockAccessToken}&token_type=bearer&scope=read:user`),
       } as Response)
     }
     return Promise.reject(new Error('Unexpected fetch call'))

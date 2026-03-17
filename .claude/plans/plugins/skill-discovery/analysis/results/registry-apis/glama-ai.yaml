@@ -1,0 +1,63 @@
+# Registry API Documentation: Glama.ai
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "glama.ai"
+  base_url: "https://glama.ai"
+  type: "mcp_server_registry"
+
+  api:
+    docs_url: null
+    spec_format: "none"
+
+    authentication:
+      type: "unknown"
+      notes: "API endpoint times out"
+
+    endpoints:
+      - path: "/api"
+        method: "GET"
+        status: "Gateway Timeout"
+        notes: "May have internal API not exposed"
+
+  access_method:
+    type: "web_scraping"
+    recommended_tool: "WebFetch or crawl4ai"
+    pages:
+      - path: "/mcp/servers"
+        content: "MCP server listings"
+
+  restrictions:
+    robots_txt:
+      url: "https://glama.ai/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed:
+        - "/settings/"
+        - "/inspect/"
+        - "/admin/"
+        - "/oauth/"
+        - "/test/"
+        - "/blob/"
+        - "/tree/"
+      sitemap: "https://glama.ai/sitemap.xml"
+      notes: "Standard admin paths blocked"
+
+    rate_limits:
+      documented: "none"
+      observed: "none"
+
+    terms_of_service:
+      url: null
+      notes: "No ToS page found"
+
+  example:
+    webfetch: |
+      WebFetch https://glama.ai/mcp/servers "Extract MCP server listings"
+
+  observations:
+    - "Secondary MCP server registry"
+    - "No public API available"
+    - "Standard robots.txt blocking admin paths"
+    - "Web scraping required for access"

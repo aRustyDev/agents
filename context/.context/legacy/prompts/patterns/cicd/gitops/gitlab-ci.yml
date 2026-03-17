@@ -50,7 +50,7 @@ validate:policies:
 
 validate:kustomize:
   stage: validate
-  image: 
+  image:
     name: k8s.gcr.io/kustomize/kustomize:v5.0.0
     entrypoint: [""]
   script:
@@ -129,13 +129,13 @@ update:manifests:
           exit 1
           ;;
       esac
-      
+
       echo "Updating manifests for environment: $ENVIRONMENT"
-      
+
       # Update image tags
       for SERVICE in api frontend worker; do
         IMAGE="${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA}"
-        
+
         # Update using kustomize
         if [ -f "environments/${ENVIRONMENT}/${SERVICE}/kustomization.yaml" ]; then
           cd environments/${ENVIRONMENT}/${SERVICE}
@@ -143,14 +143,14 @@ update:manifests:
           sed -i "s|newTag: .*|newTag: ${CI_COMMIT_SHA}|" kustomization.yaml
           cd -
         fi
-        
+
         # Alternative: Update plain YAML files
         if [ -f "environments/${ENVIRONMENT}/${SERVICE}/deployment.yaml" ]; then
           yq eval ".spec.template.spec.containers[0].image = \"${IMAGE}\"" \
             -i environments/${ENVIRONMENT}/${SERVICE}/deployment.yaml
         fi
       done
-      
+
       # Commit and push
       git add .
       git commit -m "Update ${ENVIRONMENT} to ${CI_COMMIT_SHA}" || echo "No changes to commit"
@@ -169,7 +169,7 @@ deploy:preview:
   script:
     - |
       PREVIEW_NAME="preview-mr-${CI_MERGE_REQUEST_IID}"
-      
+
       # Create preview namespace manifest
       cat > namespace.yaml <<EOF
       apiVersion: v1
@@ -181,23 +181,23 @@ deploy:preview:
           mr: "${CI_MERGE_REQUEST_IID}"
           ci-pipeline-id: "${CI_PIPELINE_ID}"
       EOF
-      
+
       # Generate preview manifests
       mkdir -p preview/
       cp namespace.yaml preview/
-      
+
       # Copy development manifests and update namespace
       cp -r environments/development/* preview/
       find preview/ -name "*.yaml" -o -name "*.yml" | \
         xargs sed -i "s/namespace: development/namespace: ${PREVIEW_NAME}/g"
-      
+
       # Update image tags to MR specific ones
       for SERVICE in api frontend worker; do
         IMAGE="${CI_REGISTRY_IMAGE}/${SERVICE}:${CI_COMMIT_SHA}"
         yq eval ".spec.template.spec.containers[0].image = \"${IMAGE}\"" \
           -i preview/${SERVICE}/deployment.yaml
       done
-      
+
       echo "Preview manifests generated for MR !${CI_MERGE_REQUEST_IID}"
   artifacts:
     paths:
@@ -292,7 +292,7 @@ metrics:deployment:
         "status": "${CI_PIPELINE_STATUS}"
       }
       EOF
-      
+
       # Send to monitoring system
       curl -X POST ${METRICS_ENDPOINT} \
         -H 'Content-type: application/json' \

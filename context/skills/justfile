@@ -1,0 +1,77 @@
+# Skill build system module
+# Usage: just skill <command> [args]
+
+set unstable := true
+
+ROOT := source_directory() / "../.."
+SCRIPTS := ROOT / ".scripts"
+SKILLS := source_directory()
+
+# Validate a skill's SKILL.md structure
+[group('skill')]
+validate name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    SKILL_DIR="{{ SKILLS }}/{{ name }}"
+    SKILL_MD="$SKILL_DIR/SKILL.md"
+
+    if [ ! -f "$SKILL_MD" ]; then
+        echo "✗ SKILL.md not found: $SKILL_MD"
+        exit 1
+    fi
+
+    echo "Validating skill: {{ name }}"
+
+    # Check for required frontmatter
+    if ! grep -q "^---" "$SKILL_MD"; then
+        echo "  ✗ Missing YAML frontmatter"
+        exit 1
+    fi
+
+    # Check for name field
+    if ! grep -q "^name:" "$SKILL_MD"; then
+        echo "  ✗ Missing 'name' field in frontmatter"
+        exit 1
+    fi
+
+    # Check for description field
+    if ! grep -q "^description:" "$SKILL_MD"; then
+        echo "  ✗ Missing 'description' field in frontmatter"
+        exit 1
+    fi
+
+    echo "  ✓ SKILL.md structure valid"
+
+# Compute hash for a skill directory
+[group('skill')]
+hash name:
+    @uv run python {{ SCRIPTS }}/build-plugin.py hash "{{ SKILLS }}/{{ name }}"
+
+# List all skills
+[group('skill')]
+list:
+    @ls -1 {{ SKILLS }}/*/SKILL.md 2>/dev/null | sed 's|.*/context/skills/||;s|/SKILL.md||' | sort
+
+# Check all skills
+[group('skill')]
+check-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    SKILLS_DIR="{{ SKILLS }}"
+    skills=$(ls -1 "$SKILLS_DIR"/*/SKILL.md 2>/dev/null | sed 's|.*/context/skills/||;s|/SKILL.md||' | sort)
+    count=0
+    failed=0
+    for skill in $skills; do
+        SKILL_MD="$SKILLS_DIR/$skill/SKILL.md"
+        # Basic validation
+        if grep -q "^---" "$SKILL_MD" && grep -q "^name:" "$SKILL_MD" && grep -q "^description:" "$SKILL_MD"; then
+            echo "  ✓ $skill"
+            count=$((count + 1))
+        else
+            echo "  ✗ $skill"
+            failed=$((failed + 1))
+        fi
+    done
+    echo ""
+    echo "✓ $count skills valid, $failed failed"
+    [ $failed -eq 0 ]

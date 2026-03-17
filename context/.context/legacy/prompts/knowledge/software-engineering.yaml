@@ -52,7 +52,7 @@ core_concepts:
       - Unit Tests (70%): Fast, isolated component tests
       - Integration Tests (20%): Component interaction tests
       - E2E Tests (10%): Full system tests
-      
+
       Key principles:
       - Test behavior, not implementation
       - Maintain test independence
@@ -75,7 +75,7 @@ core_concepts:
       - Testability: Easy to test in isolation
       - Performance: Efficient use of resources
       - Security: Safe from vulnerabilities
-      
+
       Measured through:
       - Code reviews
       - Static analysis
@@ -87,7 +87,7 @@ core_concepts:
           # Bad: Unclear naming, complex logic
           def calc(x, y, z):
               return x * 1.1 if y > 100 else x * 1.2 if z else x
-          
+
           # Good: Clear naming, simple logic
           def calculate_price_with_discount(base_price, quantity, is_member):
               if quantity > 100:
@@ -127,7 +127,7 @@ deep_topics:
       2. Make small, incremental changes
       3. Run tests after each change
       4. Commit working states frequently
-      
+
       Common refactorings:
       - Extract method/variable
       - Rename for clarity
@@ -146,7 +146,7 @@ patterns:
       class EmailService:
           def __init__(self):
               self.smtp_client = SmtpClient()  # Hard dependency
-      
+
       # Inject dependencies
       class EmailService:
           def __init__(self, smtp_client):
@@ -196,7 +196,7 @@ pitfalls:
       # Over-engineered: Abstract factory for simple case
       class AbstractWidgetFactory:
           def create_widget(self): pass
-      
+
       # Simple and sufficient
       def create_widget(widget_type):
           return Widget(widget_type)
@@ -220,7 +220,7 @@ pitfalls:
           def send_email(): ...
           def generate_report(): ...
           def backup_database(): ...
-      
+
       # Good: Separated concerns
       class UserService: ...
       class AuthService: ...

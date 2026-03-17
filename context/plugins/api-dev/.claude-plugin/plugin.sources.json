@@ -1,0 +1,21 @@
+{
+  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
+  "sources": {
+    "agents/api-designer.md": {
+      "source": "context/agents/api-designer.md",
+      "hash": "sha256:d83470ca041b624577fa89747d6a140b5f4fbe17e1d10eadaaf2086fb896c434"
+    },
+    "agents/api-documenter.md": {
+      "source": "context/agents/api-documenter.md",
+      "hash": "sha256:d0454e93bea29726525fcc2377b206c36740ff7c529bb2a6de08b3c81a6ab86e"
+    },
+    "agents/graphql-architect.md": {
+      "source": "context/agents/graphql-architect.md",
+      "hash": "sha256:a955816ff4625835502ef1e8bdf6c78713bf935a93a970f79cbaae45162999e2"
+    },
+    "agents/backend-developer.md": {
+      "source": "context/agents/backend-developer.md",
+      "hash": "sha256:3923ecf17b8f11c0e93abf32745402a281cffbbf12bff8211966af91e68c1497"
+    }
+  }
+}

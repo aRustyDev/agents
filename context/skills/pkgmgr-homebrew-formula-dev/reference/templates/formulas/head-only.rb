@@ -15,4 +15,3 @@ class BleedingEdge < Formula
     assert_match "bleeding-edge", shell_output("#{bin}/bleeding-edge --help")
   end
 end
-

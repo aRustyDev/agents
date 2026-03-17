@@ -1,7 +1,7 @@
 # Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
 description: "End to End Performance - Base Eval"
 
-prompts: 
+prompts:
   - prompts.py:answer_query_base
   - prompts.py:answer_query_level_two
   - prompts.py:answer_query_level_three

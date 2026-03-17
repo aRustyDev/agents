@@ -389,4 +389,3 @@ If proposing extensive broader impacts activities but have no history of such wo
 ---
 
 **Key Takeaway**: Effective broader impacts are specific, measurable, assessed, integrated with the research plan, and demonstrate institutional commitment. They should be planned with the same rigor as the research itself, with dedicated resources, timelines, milestones, and evaluation strategies. Generic statements about "training students" or "disseminating results" are insufficient—NSF expects concrete plans that demonstrably benefit society.
-

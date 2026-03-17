@@ -2,14 +2,14 @@
   "rules": {
     "commit_message_guidelines": {
       "description": "Guidelines for creating conventional commit messages.",
-      
+
       "format": {
         "description": "The format for commit messages using the conventional commits spec.",
         "body": "[optional scope]: \n\n[optional body]\n\n[optional footer(s)]"
       },
-      
+
       "enabled": true,
-      
+
       "rules": [
         {
           "description": "Always suggest a conventional commit with a type and optional scope in lowercase letters."
@@ -24,7 +24,7 @@
           "description": "Provide the full command to commit, not just the message."
         }
       ],
-      
+
       "examples": [
         {
           "prompt": "<diff_context> /commit",
@@ -32,12 +32,12 @@
         }
       ]
     },
-    
+
     "development_guidelines": {
       "description": "Guidelines for developing code with Astro, TypeScript, and TailwindCSS.",
-      
+
       "enabled": true,
-      
+
       "rules": [
         {
           "description": "Enforce strict TypeScript settings, ensuring type safety across the project."
@@ -50,12 +50,12 @@
         }
       ]
     },
-    
+
     "coding_style": {
       "description": "Guidelines for maintaining consistent coding style.",
-      
+
       "enabled": true,
-      
+
       "rules": [
         {
           "description": "Code must start with path/filename as a one-line comment."
@@ -68,12 +68,12 @@
         }
       ]
     },
-    
+
     "custom_slash_commands": {
       "description": "Custom slash commands.",
-      
+
       "enabled": true,
-      
+
       "commands": [
         {
           "name": "/commit",
@@ -84,4 +84,3 @@
     }
   }
 }
-

@@ -13,4 +13,3 @@ Frontend developers can build modern, optimized, and accessible web interfaces u
 
 ## Overview of .cursorrules prompt
 The .cursorrules file configures an AI programming assistant focused on generating HTML, Tailwind CSS, and vanilla JavaScript code. The assistant prioritizes clear and readable code while using the latest technologies and best practices. It provides accurate and thoughtful solutions, anticipating user needs, and ensures all code is bug-free and fully functional. The assistant engages with the user as an equal expert, emphasizing conciseness and innovation, and refrains from unnecessary repetition when offering code adjustments. It is also transparent about any uncertainties or lack of knowledge.
-

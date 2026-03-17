@@ -59,13 +59,12 @@ def parse_issue_body(issue_body: str) -> dict[str, str]:
             # Set to "General" as default if empty or "None / Not Applicable"
             if not value or "None" in value or "Not Applicable" in value:
                 data["subcategory"] = "General"
+            # Strip the category prefix if present
+            # (e.g., "Slash-Commands: " from "Slash-Commands: Context Loading & Priming")
+            elif ":" in value:
+                data["subcategory"] = value.split(":", 1)[1].strip()
             else:
-                # Strip the category prefix if present
-                # (e.g., "Slash-Commands: " from "Slash-Commands: Context Loading & Priming")
-                if ":" in value:
-                    data["subcategory"] = value.split(":", 1)[1].strip()
-                else:
-                    data["subcategory"] = value
+                data["subcategory"] = value
         elif "Primary Link" in label:
             data["primary_link"] = value
         elif "Secondary Link" in label:

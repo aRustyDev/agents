@@ -586,10 +586,21 @@ def crawl_mcp_so(
 ) -> int:
     """Crawl mcp.so MCP server directory.
 
-    This site may use client-side rendering, so we try the API first,
-    then fall back to HTML parsing.
+    NOTE: mcp.so is a Next.js site requiring JavaScript rendering.
+    The automated crawl cannot extract data - use crawl4ai MCP tool instead:
+
+    1. In Claude Code, use crawl4ai to fetch pages:
+       mcp__crawl4ai__crawl with targets: ["https://mcp.so/servers?page=N", ...]
+
+    2. Extract server URLs with pattern:
+       https://mcp.so/server/<name>/<owner>
+
+    3. Append to components.json in NDJSON format.
+
+    Site has ~294 pages × 50 servers = ~14,700 MCP servers.
     """
     logger.info("Crawling mcp.so...")
+    logger.warning("mcp.so requires JS rendering - see docstring for manual crawl4ai approach")
 
     reg_state = state.get_registry_state("scrape", "mcp_so")
     if reg_state.get("status") == "completed":

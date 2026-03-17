@@ -22,4 +22,3 @@ class RustAnalyzer < Formula
     assert_match "rust-analyzer", shell_output("#{bin}/rust-analyzer --help")
   end
 end
-

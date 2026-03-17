@@ -324,4 +324,3 @@ For issues or questions:
 ## License
 
 Part of the scientific-writer package. See main repository for license information.
-

@@ -4,7 +4,7 @@ This is one of Python's most common gotchas.
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 
 class CacheManager:
@@ -16,7 +16,7 @@ class CacheManager:
     def add_items(
         self,
         key: str,
-        items: List[str] = [],  # BUG: Mutable default argument!
+        items: list[str] = [],  # BUG: Mutable default argument!
     ) -> None:
         """
         Add items to cache.
@@ -28,7 +28,7 @@ class CacheManager:
         items.append(f"Added at {datetime.now()}")
         self.cache[key] = items
 
-    def add_items_fixed(self, key: str, items: Optional[List[str]] = None) -> None:
+    def add_items_fixed(self, key: str, items: list[str] | None = None) -> None:
         """Add items with proper default handling."""
         if items is None:
             items = []
@@ -39,8 +39,8 @@ class CacheManager:
     def merge_configs(
         self,
         name: str,
-        overrides: Dict[str, Any] = {},  # BUG: Mutable default!
-    ) -> Dict[str, Any]:
+        overrides: dict[str, Any] = {},  # BUG: Mutable default!
+    ) -> dict[str, Any]:
         """
         Merge configuration with overrides.
 
@@ -53,8 +53,8 @@ class CacheManager:
         return overrides
 
     def merge_configs_fixed(
-        self, name: str, overrides: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, name: str, overrides: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Merge configs properly."""
         if overrides is None:
             overrides = {}
@@ -71,9 +71,9 @@ class DataProcessor:
 
     def process_batch(
         self,
-        data: List[int],
-        filters: List[str] = [],  # BUG: Mutable default!
-    ) -> List[int]:
+        data: list[int],
+        filters: list[str] = [],  # BUG: Mutable default!
+    ) -> list[int]:
         """
         Process data with optional filters.
 

@@ -30,7 +30,7 @@ def log_status_line(input_data, status_line_output):
 
     # Read existing log data or initialize empty list
     if log_file.exists():
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             try:
                 log_data = json.load(f)
             except (json.JSONDecodeError, ValueError):
@@ -60,7 +60,7 @@ def get_git_branch():
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=2,
+            timeout=2, check=False,
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -74,7 +74,7 @@ def get_git_status():
     try:
         # Check if there are uncommitted changes
         result = subprocess.run(
-            ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=2
+            ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=2, check=False
         )
         if result.returncode == 0:
             changes = result.stdout.strip()

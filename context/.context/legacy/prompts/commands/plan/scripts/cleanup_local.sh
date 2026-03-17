@@ -6,14 +6,14 @@ cleanup_local() {
   if [ -d ".plan" ]; then
     echo "📁 Found local plan directory:"
     du -sh .plan 2>/dev/null || echo "Size calculation unavailable"
-    
+
     # List sessions
     if [ -d ".plan/sessions" ]; then
       echo ""
       echo "Sessions found:"
       ls -la .plan/sessions/
     fi
-    
+
     read -p "Remove all local plan artifacts? (y/n): " CONFIRM
     if [ "$CONFIRM" = "y" ]; then
       rm -rf .plan
@@ -31,12 +31,12 @@ archive_session() {
   local session_id=$1
   local session_dir=".plan/sessions/$session_id"
   local archive_dir=".plan/archive/$(date +%Y%m)"
-  
+
   if [ ! -d "$session_dir" ]; then
     echo "❌ Session not found: $session_id"
     return 1
   fi
-  
+
   mkdir -p "$archive_dir"
   mv "$session_dir" "$archive_dir/"
   echo "✅ Session archived to: $archive_dir/$session_id"

@@ -1388,26 +1388,26 @@ def main():
         hook_input = json.load(sys.stdin)
     except json.JSONDecodeError:
         sys.exit(0)
-    
+
     # Extract notification details
     message = hook_input.get("message", "")
     title = hook_input.get("title", "Claude Code")
     session_id = hook_input.get("session_id", "unknown")
-    
+
     # Ensure logs directory exists
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Log notification to file
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     log_entry = f"[{timestamp}] [{session_id}] {title}: {message}\n"
-    
+
     with open(log_dir / "notifications-detailed.log", "a") as f:
         f.write(log_entry)
-    
+
     # Platform-specific notification (optional)
     # You can uncomment and customize these based on your platform:
-    
+
     # macOS notification using osascript
     if sys.platform == "darwin" and os.path.exists("/usr/bin/osascript"):
         # Escape quotes for AppleScript
@@ -1415,13 +1415,13 @@ def main():
         escaped_title = title.replace('"', '\\"')
         # Uncomment to enable desktop notifications:
         # os.system(f'osascript -e \'display notification "{escaped_message}" with title "{escaped_title}"\'')
-    
+
     # Linux notification using notify-send
     elif sys.platform.startswith("linux") and os.path.exists("/usr/bin/notify-send"):
         # Uncomment to enable desktop notifications:
         # os.system(f'notify-send "{title}" "{message}"')
         pass
-    
+
     # Windows notification (requires win10toast)
     elif sys.platform == "win32":
         # Uncomment and install win10toast to enable:
@@ -1432,7 +1432,7 @@ def main():
         # except ImportError:
         #     pass
         pass
-    
+
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -1489,14 +1489,14 @@ case "$EXT" in
             echo "  Running autopep8 on $FILE_PATH" >> logs/formatting.log
             autopep8 --in-place "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
-        
+
         # Python import sorting
         if command -v isort &> /dev/null; then
             echo "  Running isort on $FILE_PATH" >> logs/formatting.log
             isort "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
         ;;
-        
+
     js|jsx|ts|tsx)
         # JavaScript/TypeScript formatting
         if command -v prettier &> /dev/null; then
@@ -1507,20 +1507,20 @@ case "$EXT" in
             eslint --fix "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
         ;;
-        
+
     go)
         # Go formatting
         if command -v gofmt &> /dev/null; then
             echo "  Running gofmt on $FILE_PATH" >> logs/formatting.log
             gofmt -w "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
-        
+
         if command -v goimports &> /dev/null; then
             echo "  Running goimports on $FILE_PATH" >> logs/formatting.log
             goimports -w "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
         ;;
-        
+
     rs)
         # Rust formatting
         if command -v rustfmt &> /dev/null; then
@@ -1528,7 +1528,7 @@ case "$EXT" in
             rustfmt "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
         ;;
-        
+
     sh|bash)
         # Shell script formatting
         if command -v shfmt &> /dev/null; then
@@ -1536,7 +1536,7 @@ case "$EXT" in
             shfmt -w "$FILE_PATH" 2>> logs/formatting-errors.log || true
         fi
         ;;
-        
+
     *)
         echo "  No formatter configured for .$EXT files" >> logs/formatting.log
         ;;
@@ -1562,19 +1562,19 @@ def main():
     # Ensure logs directory exists
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Read raw input
     raw_input = sys.stdin.read()
-    
+
     try:
         # Parse JSON
         hook_input = json.loads(raw_input)
-        
+
         # Determine hook type from command line args
         hook_type = "unknown"
         if len(sys.argv) > 1:
             hook_type = sys.argv[1]
-        
+
         # Create detailed log entry
         log_entry = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -1582,18 +1582,18 @@ def main():
             "raw_input_length": len(raw_input),
             "parsed_data": hook_input
         }
-        
+
         # Write to detailed log file
         log_file = log_dir / "tool-data-structures.jsonl"
         with log_file.open("a") as f:
             json.dump(log_entry, f, indent=2)
             f.write("\n")
-        
+
         # Also write a pretty-printed version for easier reading
         pretty_file = log_dir / f"tool-data-{hook_type}.json"
         with pretty_file.open("w") as f:
             json.dump(hook_input, f, indent=2)
-        
+
         # Create a human-readable summary
         summary_file = log_dir / "tool-data-summary.log"
         with summary_file.open("a") as f:
@@ -1603,17 +1603,17 @@ def main():
             f.write(f"Tool Name: {hook_input.get('tool_name', 'N/A')}\n")
             f.write(f"Session ID: {hook_input.get('session_id', 'N/A')}\n")
             f.write(f"Available Keys: {', '.join(hook_input.keys())}\n")
-            
+
             # Show tool_input structure
             if 'tool_input' in hook_input:
                 f.write(f"Tool Input Keys: {', '.join(hook_input['tool_input'].keys())}\n")
-            
+
             # Show tool_response structure (for post hooks)
             if 'tool_response' in hook_input:
                 f.write(f"Tool Response Keys: {', '.join(hook_input['tool_response'].keys())}\n")
-            
+
             f.write(f"{'='*60}\n")
-        
+
     except json.JSONDecodeError as e:
         # Log error
         error_entry = {
@@ -1621,12 +1621,12 @@ def main():
             "error": str(e),
             "raw_input": raw_input[:1000]  # First 1000 chars
         }
-        
+
         error_file = log_dir / "tool-data-errors.jsonl"
         with error_file.open("a") as f:
             json.dump(error_entry, f)
             f.write("\n")
-    
+
     # Always exit successfully
     sys.exit(0)
 
@@ -1650,7 +1650,7 @@ def main():
     # Ensure logs directory exists
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Read hook input from stdin
     try:
         hook_input = json.load(sys.stdin)
@@ -1659,10 +1659,10 @@ def main():
         with open(log_dir / "hook-errors.log", "a") as f:
             f.write(f"[{datetime.utcnow().isoformat()}Z] JSON decode error in log_tool_use.py: {e}\n")
         sys.exit(0)
-    
+
     # Determine if this is pre or post hook
     hook_type = sys.argv[1] if len(sys.argv) > 1 else "unknown"
-    
+
     # Create log entry
     log_entry = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -1671,20 +1671,20 @@ def main():
         "tool_name": hook_input.get("tool_name"),
         "transcript_path": hook_input.get("transcript_path")
     }
-    
+
     # Add tool-specific information
     if hook_type == "pre":
         log_entry["tool_input"] = hook_input.get("tool_input", {})
     elif hook_type == "post":
         log_entry["tool_input"] = hook_input.get("tool_input", {})
         log_entry["tool_response"] = hook_input.get("tool_response", {})
-    
+
     # Write to log file
     log_file = log_dir / "tool-usage.jsonl"
     with log_file.open("a") as f:
         json.dump(log_entry, f)
         f.write("\n")
-    
+
     # Success - no output means continue
     sys.exit(0)
 
@@ -1715,7 +1715,7 @@ def analyze_session(session_id: str) -> dict:
         "bash_commands": [],
         "errors": 0
     }
-    
+
     # Read tool usage log if it exists
     tool_log = Path("logs/tool-usage.jsonl")
     if tool_log.exists():
@@ -1727,7 +1727,7 @@ def analyze_session(session_id: str) -> dict:
                         stats["total_tools"] += 1
                         tool_name = entry.get("tool_name", "unknown")
                         stats["tool_counts"][tool_name] += 1
-                        
+
                         # Track specific operations
                         if tool_name == "Read":
                             file_path = entry.get("tool_input", {}).get("file_path")
@@ -1741,7 +1741,7 @@ def analyze_session(session_id: str) -> dict:
                             command = entry.get("tool_input", {}).get("command")
                             if command:
                                 stats["bash_commands"].append(command)
-                        
+
                         # Check for errors in post hooks
                         if entry.get("hook_type") == "post":
                             response = entry.get("tool_response", {})
@@ -1749,7 +1749,7 @@ def analyze_session(session_id: str) -> dict:
                                 stats["errors"] += 1
                 except:
                     pass
-    
+
     return stats
 
 def check_incomplete_todos(session_id: str) -> list:
@@ -1764,18 +1764,18 @@ def main():
         hook_input = json.load(sys.stdin)
     except json.JSONDecodeError:
         sys.exit(0)
-    
+
     session_id = hook_input.get("session_id", "unknown")
     transcript_path = hook_input.get("transcript_path", "")
     stop_hook_active = hook_input.get("stop_hook_active", False)
-    
+
     # Don't create infinite loops
     if stop_hook_active:
         sys.exit(0)
-    
+
     # Analyze the session
     stats = analyze_session(session_id)
-    
+
     # Generate summary
     summary = f"""
 === Session Summary ===
@@ -1784,10 +1784,10 @@ End Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Total Tool Calls: {stats['total_tools']}
 Tool Usage:
 """
-    
+
     for tool, count in stats['tool_counts'].most_common():
         summary += f"  - {tool}: {count}\n"
-    
+
     summary += f"""
 Files Read: {len(stats['file_reads'])}
 Files Modified: {len(stats['file_writes'])}
@@ -1796,11 +1796,11 @@ Errors Encountered: {stats['errors']}
 Transcript: {transcript_path}
 =====================
 """
-    
+
     # Write summary to log
     with open("logs/session-summaries.txt", "a") as f:
         f.write(summary)
-    
+
     # Also create a JSON summary for programmatic access
     json_summary = {
         "session_id": session_id,
@@ -1815,11 +1815,11 @@ Transcript: {transcript_path}
         },
         "transcript_path": transcript_path
     }
-    
+
     with open("logs/session-summaries.jsonl", "a") as f:
         json.dump(json_summary, f)
         f.write("\n")
-    
+
     # Example: Block stop if there are errors (commented out)
     # if stats['errors'] > 0:
     #     output = {
@@ -1828,7 +1828,7 @@ Transcript: {transcript_path}
     #     }
     #     print(json.dumps(output))
     #     sys.exit(0)
-    
+
     # Example: Check for incomplete todos (commented out)
     # incomplete = check_incomplete_todos(session_id)
     # if incomplete:
@@ -1838,7 +1838,7 @@ Transcript: {transcript_path}
     #     }
     #     print(json.dumps(output))
     #     sys.exit(0)
-    
+
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -1881,19 +1881,19 @@ def main():
         hook_input = json.load(sys.stdin)
     except json.JSONDecodeError:
         sys.exit(0)
-    
+
     tool_name = hook_input.get("tool_name", "")
     if tool_name not in ["Write", "Edit", "MultiEdit", "NotebookEdit"]:
         sys.exit(0)
-    
+
     # Ensure logs directory exists
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Extract file path
     tool_input = hook_input.get("tool_input", {})
     file_path = tool_input.get("file_path") or tool_input.get("notebook_path", "unknown")
-    
+
     # Create detailed log entry
     log_entry = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -1904,7 +1904,7 @@ def main():
         "user": os.environ.get("USER", "unknown"),
         "cwd": os.getcwd(),
     }
-    
+
     # Add operation-specific details
     if tool_name == "Write":
         log_entry["operation"] = "create_or_overwrite"
@@ -1917,17 +1917,17 @@ def main():
     elif tool_name == "MultiEdit":
         log_entry["operation"] = "multi_edit"
         log_entry["edit_count"] = len(tool_input.get("edits", []))
-    
+
     # Write to audit log
     with open(log_dir / "file-changes-audit.jsonl", "a") as f:
         json.dump(log_entry, f)
         f.write("\n")
-    
+
     # Also write a simple summary to a human-readable log
     summary = f"[{log_entry['timestamp']}] {tool_name}: {file_path} by {log_entry['user']}"
     with open(log_dir / "file-changes-summary.log", "a") as f:
         f.write(summary + "\n")
-    
+
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -1951,19 +1951,19 @@ VALIDATION_RULES = [
     (r"\bgrep\b(?!.*\|)", "Use 'rg' (ripgrep) instead of 'grep' for better performance and features", False),
     (r"\bfind\s+\S+\s+-name\b", "Use 'rg --files | rg pattern' or 'rg --files -g pattern' instead of 'find -name' for better performance", False),
     (r"\bcat\s+.*\|\s*grep\b", "Use 'rg pattern file' instead of 'cat file | grep pattern'", False),
-    
+
     # Security warnings
     (r"\brm\s+-rf\s+/(?:\s|$)", "DANGER: Attempting to remove root directory!", True),
     (r"\brm\s+-rf\s+~(?:/|$|\s)", "DANGER: Attempting to remove home directory!", True),
     (r"\bdd\s+.*of=/dev/[sh]d[a-z](?:\d|$)", "DANGER: Direct disk write operation detected!", True),
     (r">\s*/dev/[sh]d[a-z]", "DANGER: Attempting to write directly to disk device!", True),
-    
+
     # Insecure practices
     (r"\bcurl\s+.*\s+-k\b", "Security Warning: -k flag disables SSL certificate verification", False),
     (r"\bwget\s+.*--no-check-certificate\b", "Security Warning: --no-check-certificate disables SSL verification", False),
     (r"\bchmod\s+777\b", "Security Warning: chmod 777 gives full permissions to everyone", False),
     (r"\bsudo\s+chmod\s+-R\s+777\b", "DANGER: Recursive chmod 777 is extremely insecure!", True),
-    
+
     # Best practices
     (r"cd\s+&&\s+ls", "Consider using 'ls <directory>' instead of 'cd && ls'", False),
     (r"\|\s*wc\s+-l\b", "Consider using 'rg -c' for counting matches in files", False),
@@ -1975,13 +1975,13 @@ def validate_command(command: str) -> tuple[list[str], bool]:
     """
     issues = []
     should_block = False
-    
+
     for pattern, message, is_dangerous in VALIDATION_RULES:
         if re.search(pattern, command, re.IGNORECASE):
             issues.append(message)
             if is_dangerous:
                 should_block = True
-    
+
     return issues, should_block
 
 def main():
@@ -1991,29 +1991,29 @@ def main():
     except json.JSONDecodeError:
         # If JSON parsing fails, exit silently
         sys.exit(0)
-    
+
     # Check if this is a Bash tool call
     tool_name = input_data.get("tool_name", "")
     if tool_name != "Bash":
         sys.exit(0)
-    
+
     # Get the command
     command = input_data.get("tool_input", {}).get("command", "")
     if not command:
         sys.exit(0)
-    
+
     # Validate the command
     issues, should_block = validate_command(command)
-    
+
     if issues:
         # Output issues to stderr (will be shown to Claude)
         for message in issues:
             print(f"• {message}", file=sys.stderr)
-        
+
         # Exit code 2 blocks the command
         if should_block:
             sys.exit(2)
-    
+
     # Exit code 0 allows the command to proceed
     sys.exit(0)
 
@@ -2365,8 +2365,8 @@ Claude Code → Hook receives JSON → Your script runs → Exit code controls f
 ## The 4 Hook Types
 
 ### 1. PreToolUse - Before any tool runs
-**When:** Right before Claude executes a tool (Bash, Write, Edit, etc.)  
-**Can:** Block execution, validate inputs, log attempts  
+**When:** Right before Claude executes a tool (Bash, Write, Edit, etc.)
+**Can:** Block execution, validate inputs, log attempts
 **Use Cases:**
 - 🛡️ Block dangerous commands (`rm -rf /`)
 - 📝 Log all commands before execution
@@ -2386,8 +2386,8 @@ Claude Code → Hook receives JSON → Your script runs → Exit code controls f
 ```
 
 ### 2. PostToolUse - After tool completes
-**When:** Right after a tool finishes (success or failure)  
-**Can:** Process results, trigger actions, log outcomes  
+**When:** Right after a tool finishes (success or failure)
+**Can:** Process results, trigger actions, log outcomes
 **Use Cases:**
 - 🎨 Auto-format code after file changes
 - 📊 Log command results and exit codes
@@ -2410,8 +2410,8 @@ Claude Code → Hook receives JSON → Your script runs → Exit code controls f
 ```
 
 ### 3. Notification - When Claude notifies you
-**When:** Claude needs your attention or permission  
-**Can:** Customize how you're notified  
+**When:** Claude needs your attention or permission
+**Can:** Customize how you're notified
 **Use Cases:**
 - 🔔 Desktop notifications
 - 💬 Slack/Discord alerts
@@ -2429,8 +2429,8 @@ Claude Code → Hook receives JSON → Your script runs → Exit code controls f
 ```
 
 ### 4. Stop - When Claude finishes responding
-**When:** Claude completes its response  
-**Can:** Summarize session, block stop if tasks incomplete  
+**When:** Claude completes its response
+**Can:** Summarize session, block stop if tasks incomplete
 **Use Cases:**
 - 📈 Generate session analytics
 - ✅ Check for uncommitted changes
@@ -2479,7 +2479,7 @@ When Claude wants to run `rm -rf /`:
 ```
 
 ### Exit Codes Matter
-- **Exit 0**: "All good, proceed" 
+- **Exit 0**: "All good, proceed"
 - **Exit 2**: "Stop! Don't run this" (PreToolUse/Stop only)
 - **Other**: "FYI there was an error" (but continue)
 

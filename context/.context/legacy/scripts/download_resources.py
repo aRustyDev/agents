@@ -267,11 +267,11 @@ def download_github_file(
     except Exception as e:
         if retry_count < max_retries:
             wait_time = (2**retry_count) + random.uniform(1, 2)
-            print(f"  Retry in {wait_time:.1f}s... (Error: {str(e)})")
+            print(f"  Retry in {wait_time:.1f}s... (Error: {e!s})")
             time.sleep(wait_time)
             return download_github_file(url_info, output_path, retry_count + 1, max_retries)
 
-        print(f"  Failed after {max_retries} retries: {str(e)}")
+        print(f"  Failed after {max_retries} retries: {e!s}")
         return False
 
 

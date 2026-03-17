@@ -1,14 +1,18 @@
-import { describe, it, expect } from 'vitest'
-import { validateSqlQuery, isWriteOperation, formatDatabaseError } from '../../../src/database/security'
+import { describe, expect, it } from 'vitest'
 import {
-  validSelectQuery,
-  validInsertQuery,
-  validUpdateQuery,
-  validDeleteQuery,
-  dangerousDropQuery,
+  formatDatabaseError,
+  isWriteOperation,
+  validateSqlQuery,
+} from '../../../src/database/security'
+import {
   dangerousDeleteAllQuery,
-  maliciousInjectionQuery,
+  dangerousDropQuery,
   emptyQuery,
+  maliciousInjectionQuery,
+  validDeleteQuery,
+  validInsertQuery,
+  validSelectQuery,
+  validUpdateQuery,
   whitespaceQuery,
 } from '../../fixtures/database.fixtures'
 
@@ -86,13 +90,13 @@ describe('Database Security', () => {
     })
 
     it('should handle case-insensitive operations', () => {
-      expect(isWriteOperation('insert into users values (1, \'test\')')).toBe(true)
-      expect(isWriteOperation('UPDATE users SET name = \'test\'')).toBe(true)
+      expect(isWriteOperation("insert into users values (1, 'test')")).toBe(true)
+      expect(isWriteOperation("UPDATE users SET name = 'test'")).toBe(true)
       expect(isWriteOperation('Delete from users where id = 1')).toBe(true)
     })
 
     it('should handle queries with leading whitespace', () => {
-      expect(isWriteOperation('   INSERT INTO users VALUES (1, \'test\')')).toBe(true)
+      expect(isWriteOperation("   INSERT INTO users VALUES (1, 'test')")).toBe(true)
       expect(isWriteOperation('\t\nSELECT * FROM users')).toBe(false)
     })
   })

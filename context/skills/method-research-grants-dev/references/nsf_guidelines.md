@@ -567,4 +567,3 @@ NSF uses two equally weighted criteria for all proposals:
 ---
 
 **Key Takeaway**: NSF values both scientific excellence (Intellectual Merit) and societal benefit (Broader Impacts) equally. Successful proposals demonstrate innovative, feasible research that advances knowledge while contributing to education, diversity, infrastructure, or societal well-being in specific, measurable ways.
-

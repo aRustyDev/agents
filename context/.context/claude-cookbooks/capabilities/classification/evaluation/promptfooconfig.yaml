@@ -1,7 +1,7 @@
 description: 'Classification'
 
 # Prompts defined in the prompts.py file
-prompts: 
+prompts:
   - prompts.py:simple_classify
   - prompts.py:rag_classify
   - prompts.py:rag_chain_of_thought_classify
@@ -32,7 +32,7 @@ providers:
     config:
       max_tokens: 4096
       temperature: 0.8
-      
+
 
 # Read more about why we use defaultTest here: https://www.promptfoo.dev/docs/configuration/guide/#tools-and-functions:~:text=Use-,defaultTest,-apply%20a%20transform
 defaultTest:

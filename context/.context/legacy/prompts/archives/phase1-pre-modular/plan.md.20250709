@@ -180,7 +180,7 @@ Once the user confirms the plan is complete:
    ```bash
    TEMP_DIR=$(mktemp -d /tmp/plan.XXXXXX)
    echo "📁 Generating files in: $TEMP_DIR"
-   
+
    # Repository information
    REPO_OWNER=$(gh repo view --json owner -q .owner.login)
    REPO_NAME=$(gh repo view --json name -q .name)
@@ -226,10 +226,10 @@ Once the user confirms the plan is complete:
      P1[Project: Main Development]
      M1[Milestone: Core Features]
      M2[Milestone: Testing Framework]
-     
+
      P1 --> M1
      P1 --> M2
-     
+
      M1 --> I1[Parent: Authentication System]
      I1 --> I2[Child: Implement JWT]
      I1 --> I3[Child: Create login UI]
@@ -245,7 +245,7 @@ Once the user confirms the plan is complete:
    🐛 Parent Issues: A
    📝 Child Issues: B
    👥 Assignments: C batches
-   
+
    Ready to review the script? (y/n)
    ```
 
@@ -389,14 +389,14 @@ Purpose: Remove artifacts created by the plan command, including local files and
      if [ -d ".plan" ]; then
        echo "📁 Found local plan directory:"
        du -sh .plan 2>/dev/null || echo "Size calculation unavailable"
-       
+
        # List sessions
        if [ -d ".plan/sessions" ]; then
          echo ""
          echo "Sessions found:"
          ls -la .plan/sessions/
        fi
-       
+
        read -p "Remove all local plan artifacts? (y/n): " CONFIRM
        if [ "$CONFIRM" = "y" ]; then
          rm -rf .plan
@@ -414,10 +414,10 @@ Purpose: Remove artifacts created by the plan command, including local files and
    ```bash
    discover_github_artifacts() {
      echo "🔍 Scanning for GitHub artifacts created by plan command..."
-     
+
      REPO_OWNER=$(gh repo view --json owner -q .owner.login)
      REPO_NAME=$(gh repo view --json name -q .name)
-     
+
      # Check for plan metadata in sessions
      PLAN_SESSIONS=()
      if [ -d ".plan/sessions" ]; then
@@ -427,14 +427,14 @@ Purpose: Remove artifacts created by the plan command, including local files and
          fi
        done
      fi
-     
+
      # Find projects with naming pattern
      echo ""
      echo "📊 Projects:"
      gh project list --owner "$REPO_OWNER" --format json | \
-       jq -r '.projects[] | select(.title | startswith("'$REPO_NAME' - ")) | 
+       jq -r '.projects[] | select(.title | startswith("'$REPO_NAME' - ")) |
        "  [\(.number)] \(.title) (items: \(.items.totalCount))"'
-     
+
      # Find milestones (check for those created in recent sessions)
      echo ""
      echo "🎯 Milestones:"
@@ -449,16 +449,16 @@ Purpose: Remove artifacts created by the plan command, including local files and
      fi
      gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate | \
        jq -r '.[] | "  [\(.number)] \(.title) (open: \(.open_issues), closed: \(.closed_issues))"'
-     
+
      # Find issues with plan labels or patterns
      echo ""
      echo "📝 Issues (checking multiple patterns):"
-     
+
      # Pattern 1: plan-generated label
      echo "  With 'plan-generated' label:"
      gh issue list --label "plan-generated" --limit 100 --json number,title | \
        jq -r '.[] | "    #\(.number) \(.title)"'
-     
+
      # Pattern 2: Issues created in batches (check for session references)
      if [ ${#PLAN_SESSIONS[@]} -gt 0 ]; then
        echo "  From plan sessions:"
@@ -468,13 +468,13 @@ Purpose: Remove artifacts created by the plan command, including local files and
          fi
        done
      fi
-     
+
      # Count total artifacts
      PROJECT_COUNT=$(gh project list --owner "$REPO_OWNER" --format json | \
        jq '[.projects[] | select(.title | startswith("'$REPO_NAME' - "))] | length')
      MILESTONE_COUNT=$(gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate | jq '. | length')
      ISSUE_COUNT=$(gh issue list --label "plan-generated" --limit 1000 --json number | jq '. | length')
-     
+
      echo ""
      echo "📊 Total artifacts found:"
      echo "  Projects: $PROJECT_COUNT"
@@ -488,18 +488,18 @@ Purpose: Remove artifacts created by the plan command, including local files and
    ```bash
    cleanup_github() {
      discover_github_artifacts
-     
+
      echo ""
      echo "⚠️  WARNING: This will permanently delete GitHub artifacts!"
      echo "This action cannot be undone."
      echo ""
-     
+
      read -p "Type 'DELETE' to confirm removal of GitHub artifacts: " CONFIRM
      if [ "$CONFIRM" != "DELETE" ]; then
        echo "❌ GitHub cleanup cancelled"
        return
      fi
-     
+
      # Detailed confirmation for each type
      echo ""
      echo "Select what to delete:"
@@ -509,7 +509,7 @@ Purpose: Remove artifacts created by the plan command, including local files and
      echo "4) Issues only"
      echo "5) Cancel"
      read -p "Selection: " DELETE_SCOPE
-     
+
      case $DELETE_SCOPE in
        1) delete_all_github_artifacts ;;
        2) delete_projects ;;
@@ -532,7 +532,7 @@ Purpose: Remove artifacts created by the plan command, including local files and
        done
      echo "✅ Projects deleted"
    }
-   
+
    delete_milestones() {
      echo "🗑️ Deleting milestones..."
      gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate | \
@@ -543,7 +543,7 @@ Purpose: Remove artifacts created by the plan command, including local files and
        done
      echo "✅ Milestones deleted"
    }
-   
+
    delete_issues() {
      echo "🗑️ Closing and labeling issues for deletion..."
      gh issue list --label "plan-generated" --limit 1000 --json number | \
@@ -557,7 +557,7 @@ Purpose: Remove artifacts created by the plan command, including local files and
      echo "✅ Issues closed and labeled"
      echo "ℹ️ Note: Issues are closed but not deleted (GitHub doesn't allow issue deletion)"
    }
-   
+
    delete_all_github_artifacts() {
      echo "🗑️ Deleting all GitHub artifacts..."
      create_backup
@@ -573,18 +573,18 @@ Purpose: Remove artifacts created by the plan command, including local files and
    create_backup() {
      BACKUP_DIR=".plan/backups/$(date +%Y%m%d_%H%M%S)"
      mkdir -p "$BACKUP_DIR"
-     
+
      echo "💾 Creating backup in $BACKUP_DIR..."
-     
+
      # Export projects
      gh project list --owner "$REPO_OWNER" --format json > "$BACKUP_DIR/projects.json"
-     
+
      # Export milestones
      gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate > "$BACKUP_DIR/milestones.json"
-     
+
      # Export issues
      gh issue list --label "plan-generated" --limit 1000 --json '*' > "$BACKUP_DIR/issues.json"
-     
+
      echo "✅ Backup created"
    }
    ```
@@ -667,18 +667,18 @@ fi
      local retries=0
      local max_retries=10
      local delay=1
-     
+
      while [ $retries -lt $max_retries ]; do
        if "$@"; then
          return 0
        fi
-       
+
        echo "⏳ Rate limited. Waiting ${delay}s... (attempt $((retries+1))/$max_retries)"
        sleep $delay
        delay=$((delay * 2))
        retries=$((retries + 1))
      done
-     
+
      echo "❌ Max retries reached. Saving progress..."
      save_progress
      return 1

@@ -3,7 +3,7 @@ description: Enforces a specific folder structure within the 'src' directory for
 globs: src/**/*.*
 ---
 - Enforce the following folder structure:
-  
+
   src/
     templates/
     static/

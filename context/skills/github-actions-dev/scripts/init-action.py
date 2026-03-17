@@ -15,7 +15,6 @@ import argparse
 import sys
 from pathlib import Path
 
-
 ACTION_YML_TS = '''name: '{name}'
 description: 'Description of what this action does'
 author: 'Your Name'
@@ -327,7 +326,7 @@ def main() -> int:
         action_type = "TypeScript"
 
     print(f"\n✅ Created {action_type} action: {args.name}")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  cd {args.name}")
 
     if not args.docker and not args.composite:
@@ -335,8 +334,8 @@ def main() -> int:
         print("  npm run build")
         print("  npm test")
 
-    print(f"\nTo test locally:")
-    print(f"  act -j test")
+    print("\nTo test locally:")
+    print("  act -j test")
 
     return 0
 

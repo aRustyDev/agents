@@ -1,0 +1,139 @@
+{
+  "$schema": "../schemas/research-execution.schema.json",
+  "phase": "2",
+  "name": "Component Discovery",
+  "completed": "2026-03-08",
+  "duration": "0.5 day",
+
+  "success_criteria": {
+    "components_discovered": {
+      "target": "7/7",
+      "actual": "7/7 (Skills, Agents, Commands, Rules, Prompts, Hooks, MCP)",
+      "passed": true
+    },
+    "parallel_agents_used": {
+      "target": "Yes",
+      "actual": "Yes - 7 agents in parallel",
+      "passed": true
+    },
+    "coverage_documented": {
+      "target": "Yes",
+      "actual": "Yes - component-coverage.yaml created",
+      "passed": true
+    },
+    "top_sources_identified": {
+      "target": "3+ per type",
+      "actual": "4-6 per type",
+      "passed": true
+    }
+  },
+
+  "deliverables": [
+    {
+      "name": "Skills Registries",
+      "path": "research/results/skills/registries.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Registry Access Patterns",
+      "path": "research/results/registry-access-patterns.yaml",
+      "status": "complete",
+      "notes": "Added 2026-03-08 - comprehensive access patterns for skill-searcher/builder"
+    },
+    {
+      "name": "Component Coverage Finding",
+      "path": "analysis/findings/component-coverage.yaml",
+      "status": "complete"
+    },
+    {
+      "name": "Skills Discovery",
+      "path": "task output a4acde9",
+      "status": "complete",
+      "count": "2500+"
+    },
+    {
+      "name": "Agents Discovery",
+      "path": "task output aaea4bd",
+      "status": "complete",
+      "count": "500+"
+    },
+    {
+      "name": "Commands Discovery",
+      "path": "task output ae2f167",
+      "status": "complete",
+      "count": "500+"
+    },
+    {
+      "name": "Rules Discovery",
+      "path": "task output abdf1cf",
+      "status": "complete",
+      "count": "100+"
+    },
+    {
+      "name": "Prompts Discovery",
+      "path": "task output a70d1ee",
+      "status": "complete",
+      "count": "300+"
+    },
+    {
+      "name": "Hooks Discovery",
+      "path": "task output aa02eaf",
+      "status": "complete",
+      "count": "200+"
+    },
+    {
+      "name": "MCP Servers Discovery",
+      "path": "task output a2c6105",
+      "status": "complete",
+      "count": "18000+"
+    }
+  ],
+
+  "findings": {
+    "total_components": "22,000+",
+    "by_type": {
+      "mcp_servers": "18,000+ (82%)",
+      "skills": "2,500+ (11%)",
+      "agents": "500+ (2%)",
+      "commands": "500+ (2%)",
+      "prompts": "300+ (1%)",
+      "hooks": "200+ (1%)",
+      "rules": "100+ (<1%)"
+    },
+    "top_curated_lists": [
+      "ComposioHQ/awesome-claude-skills (41,939 stars)",
+      "hesreallyhim/awesome-claude-code (26,882 stars)",
+      "agentsmd/agents.md (18,646 stars)",
+      "VoltAgent/awesome-claude-code-subagents (12,910 stars)"
+    ],
+    "official_implementations": [
+      "github/github-mcp-server (27,640 stars)",
+      "awslabs/mcp (8,388 stars)",
+      "microsoft/mcp-for-beginners (15,146 stars)"
+    ]
+  },
+
+  "observations": [
+    "MCP servers dominate the ecosystem (82% of components)",
+    "Rules are rarely standalone - typically bundled in plugins",
+    "Multiple SDKs exist for hooks (Python, TypeScript, Ruby, PHP)",
+    "buildwithclaude.com is the primary unified marketplace",
+    "skillsmp.com requires API access (Cloudflare protection)",
+    "Strong commercial backing from GitHub, AWS, Microsoft"
+  ],
+
+  "blocked_and_resolved": {
+    "skillsmp.com": {
+      "issue": "403 Cloudflare",
+      "resolution": "API with Bearer token from Phase 1",
+      "resolved": true
+    }
+  },
+
+  "notes": [
+    "All 7 parallel agents completed successfully",
+    "Component counts are estimates based on repository counts and registry claims",
+    "MCP server count includes GitHub topic search (8,741) plus registry claims",
+    "Curated awesome-* lists are the most efficient discovery method"
+  ]
+}

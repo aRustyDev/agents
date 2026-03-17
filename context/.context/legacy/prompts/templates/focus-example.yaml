@@ -23,7 +23,7 @@ projects:
       - "frontend"
       - "backend"
     status: "active"
-    
+
   # Example: Mobile application
   - name: "Mobile App"
     description: "iOS and Android customer app"
@@ -37,7 +37,7 @@ projects:
     settings:
       deadline_window: 7  # Tighter deadlines for mobile releases
     status: "active"
-    
+
   # Example: Internal tooling
   - name: "Admin Dashboard"
     description: "Internal admin and analytics dashboard"
@@ -48,7 +48,7 @@ projects:
       - "internal"
       - "low-priority"
     status: "active"
-    
+
   # Example: Infrastructure project
   - name: "Cloud Migration"
     description: "AWS to multi-cloud migration project"
@@ -60,7 +60,7 @@ projects:
       - "q4-priority"
     status: "active"
     # Note: No github_repo - tracked in PM tools only
-    
+
   # Example: New project idea (no repo yet)
   - name: "ML Feature Service"
     description: "Machine learning feature store and serving"
@@ -71,7 +71,7 @@ projects:
       - "planning"
       - "ml"
     status: "active"
-    
+
   # Example: Paused project
   - name: "Legacy System Rewrite"
     description: "Rewriting the legacy PHP system"
@@ -81,7 +81,7 @@ projects:
     tags:
       - "technical-debt"
     status: "paused"  # Won't show in default queries
-    
+
   # Example: Archived project
   - name: "2023 Marketing Site"
     description: "Previous version of marketing site"
@@ -100,7 +100,7 @@ platform_config:
       - "mycompany"
       - "mycompany-oss"
     include_private: true
-    
+
   # Asana configuration
   asana:
     workspace_id: "123456789"
@@ -108,7 +108,7 @@ platform_config:
       priority: "custom_fields.123456"    # Your priority field ID
       sprint: "custom_fields.789012"      # Your sprint field ID
       team: "custom_fields.345678"        # Your team field ID
-    
+
   # Jira configuration
   jira:
     instance: "mycompany.atlassian.net"
@@ -119,7 +119,7 @@ platform_config:
     custom_jql_filters:
       high_priority: "priority in (Highest, High) AND status != Done"
       current_sprint: "sprint in openSprints()"
-    
+
   # Notion configuration
   notion:
     database_ids:
@@ -136,7 +136,7 @@ team_members:
     github: "johndoe"
     asana: "john.doe@company.com"
     jira: "jdoe"
-    
+
   - name: "Jane Smith"
     github: "janesmith"
     asana: "jane.smith@company.com"

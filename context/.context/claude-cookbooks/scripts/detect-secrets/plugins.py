@@ -1,7 +1,7 @@
 import re
 
-from detect_secrets.plugins.base import BasePlugin
 from detect_secrets.core.log import log
+from detect_secrets.plugins.base import BasePlugin
 
 
 class AnthropicSecretsDetector(BasePlugin):

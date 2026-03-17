@@ -3,18 +3,18 @@ Source: https://www.sec.gov/Archives/edgar/data/1430286/000100201408000262/exh10
 EX-10.1 6 exh101.htm OFFICE LEASE
 Exhibit 10.1
 
- 
 
- 
+
+
 
 EXECUTIVE SUITE
- 
+
 OFFICE SUBLEASE AGREEMENT
- 
+
 Between
- 
+
 CROWN PLAZA EXECUTIVE SUITES CORPORATION, Sublessor
- 
+
 and
 
 FUTURE CANADA CHINA ENVIORNMENT, JESSICA CHIANG;
@@ -24,22 +24,22 @@ Guarantor
 For Sublease Space:
 
 4th Floor, Crown Plaza Building
-  
+
 114 W. Magnolia Street
- 
+
 Suite No. 437
-  
+
 Bellingham, Washington 98225
 
- 
 
- 
 
- 
 
- 
 
- 
+
+
+
+
+
 
 EXECUTIVE SUITEOFFICE SUBLEASE AGREEMENT
 
@@ -59,41 +59,41 @@ WITNESSETH:
 
 It is understood by both parties that wherever in this document the term "Sublessee" appears, its definition is understood to mean "Sublessee and Personal Guarantor".
 
-                   (b) 	Identification of Parties. 	 
- 
-SUBLESSOR: 	CROWN PLAZA EXECUTIVE SUITES CORPORATION 
-ADDRESS OF SUBLESSOR: 	114 W. Magnolia, Suite #400 
- 	 	Bellingham, WA 98225 
- 	 	Telephone No. (360) 733-0185     
- 
-SUBLESSEE and GUARANTOR: 	                   FUTURE CANADA CHINA ENVIORNMENT INC.,  
- 	 	                   JESSICA CHIANG   
-ADDRESS OF SUBLESSEE: 	Business Address: 	114 W. Magnolia St., Suite #437 
- 	 	 	Bellingham, WA 98225 
- 	 	Telephone No. 	(360) 392-2828 
- 	 	Contact Person: 	JESSICA LIANG 
- 
- 
- 	 	 	                                                                                         Sublessee's Initials: JC 
- 	 	 	                                                                                         Sublessor's Initials: MLS 
+                   (b) 	Identification of Parties.
+
+SUBLESSOR: 	CROWN PLAZA EXECUTIVE SUITES CORPORATION
+ADDRESS OF SUBLESSOR: 	114 W. Magnolia, Suite #400
+ 	 	Bellingham, WA 98225
+ 	 	Telephone No. (360) 733-0185
+
+SUBLESSEE and GUARANTOR: 	                   FUTURE CANADA CHINA ENVIORNMENT INC.,
+ 	 	                   JESSICA CHIANG
+ADDRESS OF SUBLESSEE: 	Business Address: 	114 W. Magnolia St., Suite #437
+ 	 	 	Bellingham, WA 98225
+ 	 	Telephone No. 	(360) 392-2828
+ 	 	Contact Person: 	JESSICA LIANG
+
+
+ 	 	 	                                                                                         Sublessee's Initials: JC
+ 	 	 	                                                                                         Sublessor's Initials: MLS
 
 -2-
 
-SUBLESSEE'S FORM Of BUSINESS ORGANIZATION: 	 	 
-                   Corporation 	       X 	 	 	 
-                   Partnership 	 	 	 	 	 
-                   Sole Proprietor 	 	 	 	 	 
-                   Spouses Name 	 	 	 	 	 
-         (c) 	Basic Terms 	 	 	 	 	 
-SUBLEASE SPACE: 	Suite. No. 437 on the FOURTH (4TH) floor of the Building. 	[&2(b)] 
-SUBLEASE TERM 	ONE YEAR 	 	 	[&4(a)] 
-SUBLEASE COMMENCEMENT DATE: 	MARCH 1, 2008 	 	[&4(a)] 
-SUBLEASE TERMINATION DATE: 	FEBRUARY 28, 2009 	[&4(a)] 
-BASE RENT: $595.00 	 	 	 	 	[&5(a)] 
-RENT COMMENCEMENT DATE: MARCH 1, 2008 (PRORATED) 	[&5(a)] 
-TYPE OF BUSINESS USE: 	GENERAL OFFICE 	 	[&6(a)] 
-SECURITY DEPORT: 	$595.00 (PAID) 	[&17(a)] See Exhibit D, Start Up Costs 
-BROKER'S COMMISSION TO: 	NO BROKER INVOLVED 	[&32(g)] 
+SUBLESSEE'S FORM Of BUSINESS ORGANIZATION:
+                   Corporation 	       X
+                   Partnership
+                   Sole Proprietor
+                   Spouses Name
+         (c) 	Basic Terms
+SUBLEASE SPACE: 	Suite. No. 437 on the FOURTH (4TH) floor of the Building. 	[&2(b)]
+SUBLEASE TERM 	ONE YEAR 	 	 	[&4(a)]
+SUBLEASE COMMENCEMENT DATE: 	MARCH 1, 2008 	 	[&4(a)]
+SUBLEASE TERMINATION DATE: 	FEBRUARY 28, 2009 	[&4(a)]
+BASE RENT: $595.00 	 	 	 	 	[&5(a)]
+RENT COMMENCEMENT DATE: MARCH 1, 2008 (PRORATED) 	[&5(a)]
+TYPE OF BUSINESS USE: 	GENERAL OFFICE 	 	[&6(a)]
+SECURITY DEPORT: 	$595.00 (PAID) 	[&17(a)] See Exhibit D, Start Up Costs
+BROKER'S COMMISSION TO: 	NO BROKER INVOLVED 	[&32(g)]
 
          (d)      Enumeration of Exhibits. The exhibits enumerated in this Section and attached to this Sublease are incorporated herein by reference and are to be construed as a part of this Sublease. Each party agrees to perform any obligations on its part stated in any and all such Exhibits:
 
@@ -352,7 +352,7 @@ for performance, then Sublessor shall not be in default if Sublessor commences p
 
      One person (the tenant/lessee) shall occupy each suite (office). Should the Sublessee wish to allow an office to be used by more than the one full-time equivalent that occupancy shall only be with the written permission of the Landlord (Sublessor) and, if written permission is granted, an ADDITIONAL PERSON CHARGE shall apply and shall be prorated based on a percentage of a full time equivalent. That charge is $95.00 per person per month per full time equivalent.
 
- 
+
 
 
 33.     TELEPHONE
@@ -371,22 +371,22 @@ for performance, then Sublessor shall not be in default if Sublessor commences p
 
      The riders, schedules, addenda and exhibits, if any, attached hereto, are made a part of this Sublease by reference.
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
+
+
+
+
+
+
 
 Sublessee's Initials: JC
 Sublessor's Initials: MLS
 
- 
+
 
 -13-
 
@@ -395,15 +395,15 @@ Sublessor's Initials: MLS
 SUBLESSOR
 CROWN PLAZA EXECUTIVE SUITES CORPORATION
 
-By 	MICHAEL L. SANDILAND 
-Printed Name 	MICHAEL l. SANDILAND 
-Its 	President 	  	  
-  
-Date 	3/12/08 	  	  
-  
-STATE OF WASHINGTON 	) 	 
-  	  	) 	ss 
-COUNTY OF WHATCOM 	) 	 
+By 	MICHAEL L. SANDILAND
+Printed Name 	MICHAEL l. SANDILAND
+Its 	President
+
+Date 	3/12/08
+
+STATE OF WASHINGTON 	)
+  	  	) 	ss
+COUNTY OF WHATCOM 	)
 
      I certify that I know or have satisfactory evidence that MICHAEL L. SANDILAND signed this instrument as the PRESIDENT of CROWN PLAZA EXECUTIVE SUITES CORPORATION, Sublessor, and acknowledged it to be the free and voluntary act of such party for the uses and purposes mentioned in the instrument.
 
@@ -421,25 +421,25 @@ State of Washington.
 My Commission Expires 09/07/2011
 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
+
+
+
+
+
+
+
+
+
+
 
 Sublessee's Initials: JC
 Sublessor's Initials: MLS
@@ -449,15 +449,15 @@ Sublessor's Initials: MLS
 SUBLESSEE AND GUARANTOR:
 FUTURE CANADA CHINA ENVIORNMENT, JESSICA LIANG
 
-BY 	JESSICA CHIANG 	 	 
-Printed Name      	JESSICA LIANG 	 	 
- 
-Date 	March 12, 2008 	 	 
- 
- 
-STATE OF WASHINGTON 	) 	 
- 	 	) 	ss 
-COUNTY OF WHATCOM 	) 	 
+BY 	JESSICA CHIANG
+Printed Name      	JESSICA LIANG
+
+Date 	March 12, 2008
+
+
+STATE OF WASHINGTON 	)
+ 	 	) 	ss
+COUNTY OF WHATCOM 	)
 
      I certify that I know or have satisfactory that Jessica Chiang signed this instrument as the President, Sublessee, and acknowledged it to be his free and voluntary act for the uses and purposes mentioned in the instrument.
 
@@ -475,28 +475,27 @@ State of Washington.
 My Commission Expires 09/07/2011
 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
 
- 
+
+
+
+
+
+
+
+
+
+
 
 Sublessee's Initials: JC
 Sublessor's Initials: MLS
 
 -15-
-

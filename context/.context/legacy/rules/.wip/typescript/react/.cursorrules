@@ -39,4 +39,3 @@ const additionalInstructions = `
 6. Follow React and TypeScript best practices and naming conventions
 7. Use ESLint with TypeScript and React plugins for code quality
 `;
-

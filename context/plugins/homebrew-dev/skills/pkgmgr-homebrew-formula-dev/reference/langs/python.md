@@ -37,7 +37,6 @@ depends_on "python@3.12"
 ### Install Block
 
 **Standard pattern (with resource blocks):**
-
 ```text
 include Language::Python::Virtualenv
 
@@ -50,7 +49,6 @@ end
 - Requires `resource` blocks for all pip dependencies (generate with `brew update-python-resources`)
 
 **Alternative pattern (install from PyPI - recommended when no resource blocks):**
-
 ```text
 include Language::Python::Virtualenv
 
@@ -66,7 +64,6 @@ end
 - **Important:** Check if PyPI package name differs from repo name (e.g., `ktool` → `k2l`)
 
 **Alternative pattern (build from source - may have issues):**
-
 ```text
 include Language::Python::Virtualenv
 
@@ -82,7 +79,6 @@ end
 - **Important:** Use `venv.pip_install`, NOT `system libexec/"bin/pip"` — the latter doesn't work
 
 **With setuptools dependency (for packages using pkg_resources):**
-
 ```text
 def install
   venv = virtualenv_create(libexec, "python3.14")

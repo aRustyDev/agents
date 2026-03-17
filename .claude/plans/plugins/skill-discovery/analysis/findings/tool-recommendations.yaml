@@ -1,0 +1,215 @@
+# Tool Recommendations
+# Based on Experiments 3, 5, 6, 7
+# Executed: 2026-03-08
+
+finding:
+  id: "finding-002-tool-recommendations"
+  title: "Recommended tools by registry and use case"
+  created: "2026-03-08"
+  confidence: "high"
+  experiments:
+    - "exp-003-crawl4ai-debug"
+    - "exp-005-output-quality"
+    - "exp-006-survey-deep"
+    - "exp-007-searxng"
+
+# ============================================
+# TOOL PERFORMANCE SUMMARY
+# ============================================
+
+tool_performance:
+  searxng:
+    status: "recommended"
+    avg_response_ms: 1116
+    results_per_query: "30+"
+    rate_limited: false
+    best_for: ["registry discovery", "broad search"]
+    engines: ["brave (best)", "duckduckgo", "google", "startpage"]
+
+  crawl4ai:
+    status: "recommended"
+    transport: "MCP (stdio) or HTTP API"
+    avg_response_ms: 1080
+    js_rendering: true
+    best_for: ["JS-heavy sites", "clean markdown extraction"]
+    mcp_tools:
+      - mcp__crawl4ai__scrape
+      - mcp__crawl4ai__crawl
+
+  gh_api:
+    status: "recommended"
+    avg_response_ms: 522
+    pagination: true
+    best_for: ["GitHub repos", "code search", "structured data"]
+
+  webfetch:
+    status: "recommended"
+    avg_response_ms: 574
+    best_for: ["fast static pages", "LLM-assisted extraction"]
+    limitations: ["blocked by Cloudflare", "returns raw HTML"]
+
+  websearch:
+    status: "supplementary"
+    results_per_query: "~10"
+    best_for: ["quick discovery", "API-limited"]
+
+# ============================================
+# REGISTRY → TOOL MAPPING
+# ============================================
+
+registry_tools:
+  buildwithclaude:
+    url: "https://buildwithclaude.com/"
+    survey_tool: "WebFetch or crawl4ai"
+    deep_tool: "crawl4ai"
+    example: |
+      curl -s -X POST "http://localhost:11235/md" \
+        -d '{"url": "https://buildwithclaude.com/skills"}'
+
+  skillsmp:
+    url: "https://skillsmp.com/"
+    survey_tool: "API"
+    deep_tool: "API"
+    auth: "Bearer token from op://Developer/skillsmp/credential"
+    example: |
+      SKILLSMP_KEY=$(op read "op://Developer/skillsmp/credential")
+      curl -s "https://skillsmp.com/api/v1/skills/search?q=TERM" \
+        -H "Authorization: Bearer $SKILLSMP_KEY"
+
+  mcp_so:
+    url: "https://mcp.so/"
+    survey_tool: "crawl4ai"
+    deep_tool: "crawl4ai"
+    notes: "JS-heavy, crawl4ai renders successfully"
+    total_servers: 18288
+    example: |
+      curl -s -X POST "http://localhost:11235/md" \
+        -d '{"url": "https://mcp.so/"}'
+
+  github:
+    url: "https://github.com"
+    survey_tool: "gh api search/repositories"
+    deep_tool: "gh api repos/.../contents"
+    example: |
+      gh api search/repositories -f q="topic:claude-skills" -f sort=stars
+
+  ccpm:
+    url: "https://ccpm.dev/"
+    survey_tool: "WebFetch"
+    deep_tool: "WebFetch"
+
+  glama_ai:
+    url: "https://glama.ai/mcp/servers"
+    survey_tool: "WebFetch or crawl4ai"
+    deep_tool: "crawl4ai"
+
+# ============================================
+# COMPONENT TYPE → TOOL MAPPING
+# ============================================
+
+component_tools:
+  skills:
+    discovery: "SearXNG: 'claude skills registry'"
+    github_survey: "gh api search/repositories -f q='topic:claude-skills'"
+    registry_survey: "crawl4ai on buildwithclaude.com/skills"
+    api_survey: "skillsmp API"
+    deep_download: "gh api repos/.../contents or crawl4ai"
+
+  agents:
+    discovery: "SearXNG: 'claude code agents'"
+    github_survey: "gh api -f q='topic:claude-code-agents OR topic:claude-subagents'"
+    registry_survey: "crawl4ai on buildwithclaude.com/subagents"
+    deep_download: "gh api repos/.../contents"
+
+  commands:
+    discovery: "SearXNG: 'claude code commands'"
+    github_survey: "gh api search/code -f q='path:.claude/commands'"
+    registry_survey: "crawl4ai on buildwithclaude.com/commands"
+
+  hooks:
+    discovery: "SearXNG: 'claude code hooks'"
+    github_survey: "gh api -f q='topic:claude-code-hooks'"
+    registry_survey: "crawl4ai on buildwithclaude.com/hooks"
+
+  mcp_servers:
+    discovery: "SearXNG: 'mcp server registry'"
+    github_survey: "gh api -f q='topic:mcp-server' (8741 repos)"
+    registry_survey: "crawl4ai on mcp.so (18288 servers)"
+
+  prompts:
+    discovery: "SearXNG: 'CLAUDE.md examples'"
+    github_survey: "gh api search/code -f q='filename:CLAUDE.md'"
+
+  rules:
+    discovery: "gh api search/code -f q='path:.claude/rules'"
+    notes: "Typically bundled in plugins, not standalone"
+
+# ============================================
+# WORKFLOW RECOMMENDATIONS
+# ============================================
+
+workflows:
+  full_discovery:
+    description: "Discover all components across registries"
+    steps:
+      - step: 1
+        action: "Use SearXNG to find registries"
+        tool: "SearXNG"
+        query: "claude {component_type} registry"
+
+      - step: 2
+        action: "Survey each registry"
+        tool: "crawl4ai or WebFetch"
+        output: "Component list"
+
+      - step: 3
+        action: "Find GitHub repos"
+        tool: "gh api search/repositories"
+        query: "topic:claude-{type}"
+
+      - step: 4
+        action: "Deep download selected components"
+        tool: "gh api or crawl4ai"
+
+  skill_search:
+    description: "Find a specific skill"
+    steps:
+      - step: 1
+        action: "Search skillsmp API"
+        tool: "curl with Bearer"
+        priority: "highest (2000+ skills)"
+
+      - step: 2
+        action: "Search buildwithclaude"
+        tool: "WebFetch"
+        priority: "secondary (160 skills)"
+
+      - step: 3
+        action: "Search GitHub"
+        tool: "gh api"
+        priority: "fallback"
+
+# ============================================
+# QUICK REFERENCE
+# ============================================
+
+quick_reference:
+  - task: "Find new registries"
+    tool: "SearXNG"
+    command: 'curl "localhost:8888/search?q=...&format=json"'
+
+  - task: "List GitHub repos"
+    tool: "gh api"
+    command: "gh api search/repositories -f q='topic:X'"
+
+  - task: "Extract registry page"
+    tool: "crawl4ai"
+    command: 'curl -X POST localhost:11235/md -d {"url":"..."}'
+
+  - task: "Search skillsmp"
+    tool: "API"
+    command: 'curl skillsmp.com/api/v1/skills/search -H "Auth: Bearer $KEY"'
+
+  - task: "Get file from GitHub"
+    tool: "gh api"
+    command: "gh api repos/X/Y/contents/FILE --jq '.content' | base64 -d"

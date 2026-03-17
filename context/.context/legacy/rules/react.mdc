@@ -75,4 +75,4 @@ globs: **/*.tsx, **/*.jsx, components/**/*
 - Implement proper directory structure
 - Keep styles close to components
 - Use proper imports/exports
-- Document complex component logic 
+- Document complex component logic

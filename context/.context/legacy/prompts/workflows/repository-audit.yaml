@@ -27,11 +27,11 @@ setup_tasks:
       check: Repository accessible
       check: Git initialized
       check: Required tools available
-      
+
   - activate_role:
       command: /role activate prompt-auditor
       context: repository-audit
-      
+
   - create_workspace:
       action: Create audit directory
       location: ./.audit/$(date +%Y%m%d_%H%M%S)
@@ -55,17 +55,17 @@ mkdir -p "$AUDIT_OUTPUT"/{data,reports,logs}
 ```yaml
 survey_stage:
   process: processes/auditing/repository-analysis.md
-  
+
   execute:
     - name: Structure Analysis
       script: |
         echo "Starting repository survey..." | tee -a "$AUDIT_OUTPUT/logs/audit.log"
         survey_repository "$AUDIT_ROOT" > "$AUDIT_OUTPUT/data/survey.txt"
-        
+
     - name: Git History
       script: |
         analyze_git_history > "$AUDIT_OUTPUT/data/git_history.txt"
-        
+
     - name: Initial Metrics
       output: data/initial_metrics.json
 ```
@@ -75,29 +75,29 @@ survey_stage:
 deep_analysis:
   parallel: true
   timeout: 3600  # 1 hour
-  
+
   tasks:
     - name: Duplication Detection
       process: processes/auditing/duplication-detection.md
       output: data/duplication_report.json
       priority: high
-      
+
     - name: Gap Analysis
       process: processes/auditing/gap-analysis.md
       output: data/gap_report.json
       priority: high
-      
+
     - name: Dead Context
       process: processes/auditing/dead-context-detection.md
       helper: helpers/detect-dead-context.sh
       output: data/dead_context.json
       priority: medium
-      
+
     - name: Modularization
       process: processes/auditing/modularization-opportunities.md
       output: data/modularization.json
       priority: medium
-      
+
     - name: Dependencies
       helper: helpers/analyze-dependencies.sh
       output: data/dependencies.dot
@@ -111,9 +111,9 @@ analysis_patterns:
     rounds: 3
     focus:
       round_1: Breadth-first survey
-      round_2: Deep investigation  
+      round_2: Deep investigation
       round_3: Synthesis
-      
+
   - pattern: patterns/analysis/deep-exploration.md
     targets: High-priority findings
     depth: Follow critical threads
@@ -126,7 +126,7 @@ analysis_patterns:
 # Aggregate all findings
 aggregate_findings() {
   echo "Aggregating analysis results..."
-  
+
   # Merge JSON reports
   jq -s '
     {
@@ -136,7 +136,7 @@ aggregate_findings() {
       modularization: .[3]
     }
   ' "$AUDIT_OUTPUT/data/"*.json > "$AUDIT_OUTPUT/data/aggregated.json"
-  
+
   # Generate summary statistics
   generate_summary_stats > "$AUDIT_OUTPUT/data/summary_stats.json"
 }
@@ -149,9 +149,9 @@ prioritization_matrix:
     - impact: User/system impact (1-5)
     - effort: Fix complexity (1-5)
     - risk: If left unfixed (1-5)
-    
+
   scoring: (impact * 2) + risk - effort
-  
+
   categories:
     critical: score >= 10
     high: score >= 7
@@ -165,13 +165,13 @@ recommendations:
   generate_from:
     - finding_type: duplication
       template: Consolidate ${files} into ${target}
-      
+
     - finding_type: gap
       template: Create missing ${component_type}
-      
+
     - finding_type: dead_context
       template: Remove obsolete ${item}
-      
+
     - finding_type: modularization
       template: Split ${file} into ${count} modules
 ```
@@ -185,12 +185,12 @@ generate_audit_report() {
   local TEMPLATE="templates/reports/audit-findings.md"
   local DATA="$AUDIT_OUTPUT/data/aggregated.json"
   local REPORT="$AUDIT_OUTPUT/reports/audit_report.md"
-  
+
   echo "Generating audit report..."
-  
+
   # Populate template with data
   populate_template "$TEMPLATE" "$DATA" > "$REPORT"
-  
+
   # Generate executive summary
   generate_executive_summary "$DATA" > "$AUDIT_OUTPUT/reports/executive_summary.md"
 }
@@ -200,13 +200,13 @@ generate_audit_report() {
 ```yaml
 roadmap_generation:
   if: findings.count > 10
-  
+
   process:
     - group_by_theme: Group related fixes
     - estimate_effort: Calculate time/resources
     - create_phases: Organize into phases
     - set_milestones: Define success criteria
-    
+
   template: templates/reports/optimization-roadmap.md
   output: reports/optimization_roadmap.md
 ```
@@ -216,11 +216,11 @@ roadmap_generation:
 # Package all deliverables
 package_deliverables() {
   local PACKAGE="$AUDIT_OUTPUT/audit_package_$(date +%Y%m%d).tar.gz"
-  
+
   # Create package contents
   cp -r "$AUDIT_OUTPUT/reports" "$AUDIT_OUTPUT/package/"
   cp "$AUDIT_OUTPUT/data/dependencies.dot" "$AUDIT_OUTPUT/package/"
-  
+
   # Add README
   cat > "$AUDIT_OUTPUT/package/README.md" << EOF
 # Repository Audit Package
@@ -239,7 +239,7 @@ Repository: $AUDIT_ROOT
 2. Prioritize recommendations
 3. Follow optimization_roadmap.md
 EOF
-  
+
   # Create archive
   tar -czf "$PACKAGE" -C "$AUDIT_OUTPUT" package/
   echo "Audit package created: $PACKAGE"
@@ -264,11 +264,11 @@ interactive_prompts:
   - prompt: "Repository to audit"
     variable: AUDIT_ROOT
     default: "."
-    
+
   - prompt: "Audit depth (quick/standard/comprehensive)"
     variable: AUDIT_DEPTH
     default: "standard"
-    
+
   - prompt: "Focus areas (comma-separated)"
     variable: AUDIT_FOCUS
     default: "all"
@@ -283,7 +283,7 @@ error_handling:
     - log_error: Record in audit.log
     - save_progress: Checkpoint current state
     - prompt_user: Continue, retry, or abort?
-    
+
   critical_error:
     - save_partial: Export completed analyses
     - generate_error_report: Document failure
@@ -297,7 +297,7 @@ validation:
     - validate_repository: Ensure accessible
     - check_permissions: Verify read access
     - estimate_duration: Warn if large
-    
+
   post_execution:
     - verify_outputs: All expected files exist
     - validate_json: Check data integrity
@@ -324,7 +324,7 @@ validation:
 ```yaml
 ci_integration:
   trigger: Pull request or scheduled
-  
+
   steps:
     - checkout: Repository code
     - run_audit: Execute workflow
@@ -346,12 +346,12 @@ profiles:
     phases: [survey, key_analyses]
     duration: 30 minutes
     depth: shallow
-    
+
   standard:
     phases: [all]
     duration: 2 hours
     depth: moderate
-    
+
   comprehensive:
     phases: [all]
     duration: 4+ hours
@@ -364,10 +364,10 @@ profiles:
 focus_configurations:
   performance:
     emphasize: [load_times, dependencies, caching]
-    
+
   quality:
     emphasize: [documentation, testing, consistency]
-    
+
   maintenance:
     emphasize: [modularization, dead_code, complexity]
 ```

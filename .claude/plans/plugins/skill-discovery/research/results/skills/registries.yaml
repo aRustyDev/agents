@@ -1,0 +1,193 @@
+# Skills Registries
+# Phase 2: Component Discovery
+# Created: 2026-03-08
+
+registries:
+  # ============================================
+  # HIGH PRIORITY - Primary Discovery Sources
+  # ============================================
+  high_priority:
+    - name: "skillsmp"
+      url: "https://skillsmp.com/"
+      status: "active"
+      component_count: "2000+"
+      access_method: "API"
+      api_docs: "https://skillsmp.com/docs/api"
+      auth_required: true
+      credential: "op://Developer/skillsmp/credential"
+      rate_limit: "not documented"
+      features:
+        - "keyword search (/api/v1/skills/search)"
+        - "AI semantic search (/api/v1/skills/ai-search)"
+        - "pagination support"
+      sample_skills:
+        - name: "activity-monitor"
+          author: "zylos-ai"
+          stars: 657
+        - name: "self-improving-agent"
+          author: "alirezarezvani"
+          stars: 2518
+        - name: "agentic-actions-auditor"
+          author: "sickn33"
+          stars: 20711
+      notes: "Largest skill registry - essential for discovery"
+
+    - name: "buildwithclaude"
+      url: "https://buildwithclaude.com/"
+      status: "active"
+      component_count: 115
+      access_method: "WebFetch"
+      auth_required: false
+      features:
+        - "categorized browsing"
+        - "CLI install support"
+      install_command: "/plugin marketplace add davepoon/buildwithclaude"
+      notes: "Well-categorized, includes 115 skills"
+
+    - name: "ccpm"
+      url: "https://ccpm.dev/"
+      status: "active"
+      component_count: 22
+      access_method: "WebFetch"
+      auth_required: false
+      features:
+        - "browsable catalog"
+        - "popular/recent sorting"
+      notes: "Claude Code Package Manager"
+
+    - name: "claude-plugins.dev"
+      url: "https://claude-plugins.dev/"
+      status: "active"
+      component_count: "20+"
+      access_method: "WebFetch"
+      auth_required: false
+      features:
+        - "CLI installation"
+        - "category filtering"
+      notes: "Community plugin registry with CLI support"
+
+    - name: "agentskills.best"
+      url: "https://agentskills.best/"
+      status: "active"
+      component_count: "12+ curated"
+      access_method: "WebFetch"
+      auth_required: false
+      features:
+        - "smart search"
+        - "complexity filtering"
+        - "platform filtering (API/Web/Code)"
+      notes: "Focus on production-ready, quality-controlled skills"
+
+  # ============================================
+  # MEDIUM PRIORITY - Secondary Sources
+  # ============================================
+  medium_priority:
+    - name: "claudemarketplaces"
+      url: "https://claudemarketplaces.com/"
+      status: "active"
+      component_count: "100+"
+      access_method: "WebFetch"
+      auth_required: false
+      aggregates_from:
+        - "anthropics/claude-code (13)"
+        - "wshobson/agents (73)"
+        - "henkisdabro/claudecode-marketplace (27)"
+      notes: "Aggregator pulling from multiple GitHub sources"
+
+    - name: "claudeskillsmarket"
+      url: "https://claudeskillsmarket.com/"
+      status: "active"
+      component_count: "unknown"
+      access_method: "WebFetch"
+      notes: "Community registry"
+
+    - name: "claudecodemarketplace"
+      url: "https://claudecodemarketplace.com/"
+      status: "active"
+      component_count: "unknown"
+      access_method: "WebFetch"
+      notes: "Plugin and skill hub"
+
+    - name: "mcpservers-skills"
+      url: "https://mcpservers.org/claude-skills"
+      status: "active"
+      component_count: "unknown"
+      access_method: "WebFetch"
+      notes: "Skills section of MCP servers directory"
+
+    - name: "atcyrus"
+      url: "https://www.atcyrus.com/skills"
+      status: "active"
+      component_count: "unknown"
+      access_method: "WebFetch"
+      notes: "Skills for documents, development, DevOps, security"
+
+    - name: "awesome-claude-code.com"
+      url: "https://awesome-claude-code.com/"
+      status: "active"
+      component_count: 30
+      access_method: "WebFetch"
+      features:
+        - "search"
+        - "category filtering"
+        - "open-source filter"
+      notes: "Curated directory with 30 entries"
+
+    - name: "awesomeclaude.ai"
+      url: "https://awesomeclaude.ai/"
+      status: "active"
+      component_count: "comprehensive"
+      access_method: "WebFetch"
+      categories:
+        - "Official Resources"
+        - "Claude Code & MCP"
+        - "Community Lists"
+        - "Extensions"
+      notes: "Claude AI Resources Directory"
+
+  # ============================================
+  # LOW PRIORITY - Niche/Supplementary
+  # ============================================
+  low_priority:
+    - name: "lobehub"
+      url: "https://lobehub.com/"
+      status: "active"
+      component_count: "unknown"
+      notes: "OpenClaw skills index"
+
+    - name: "notion-skills"
+      url: "https://www.notion.so/notiondevs/Notion-Skills-for-Claude-28da4445d27180c7af1df7d8615723d0"
+      status: "active"
+      component_count: "unknown"
+      notes: "Notion-specific integration skills"
+
+  # ============================================
+  # RELATED ECOSYSTEMS (Non-Claude)
+  # ============================================
+  related_ecosystems:
+    - name: "goose-skills"
+      url: "https://block.github.io/goose/skills/"
+      status: "active"
+      ecosystem: "Goose (Block)"
+      notes: "Similar skill concept - potential pattern reference"
+
+# ============================================
+# SUMMARY
+# ============================================
+summary:
+  total_registries: 14
+  high_priority: 5
+  medium_priority: 7
+  low_priority: 2
+  related: 1
+
+  estimated_unique_skills: "2500+"
+  api_accessible: 1
+  webfetch_accessible: 12
+  blocked: 0
+
+  discovery_strategy:
+    step_1: "Query skillsmp API with category terms"
+    step_2: "Scrape buildwithclaude categorized listings"
+    step_3: "Cross-reference with GitHub repos"
+    step_4: "Deduplicate by skill name + author"

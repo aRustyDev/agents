@@ -14,11 +14,9 @@ Exit Codes:
     1 - Error (directory not found or processing failed)
 """
 
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Tuple
 
 
 def find_project_root() -> Path:
@@ -43,7 +41,7 @@ def find_project_root() -> Path:
     raise FileNotFoundError("Could not find project root (plugin.json not found)")
 
 
-def clean_name_attributes(content: str) -> Tuple[str, bool]:
+def clean_name_attributes(content: str) -> tuple[str, bool]:
     """
     Remove 'name:' attributes from YAML frontmatter.
 
@@ -118,7 +116,7 @@ def process_commands_directory(commands_dir: Path) -> int:
             print(f"❌ Error:    {md_file.name} - {e}", file=sys.stderr)
 
     print(f"{'='*60}")
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"   • Processed: {processed_count} files")
     print(f"   • Modified:  {modified_count} files")
     print(f"   • Errors:    {error_count} files")
@@ -151,7 +149,7 @@ def main() -> int:
             print("\n❌ Cleanup failed with errors", file=sys.stderr)
             return 1
 
-        print(f"\n✅ Cleanup completed successfully")
+        print("\n✅ Cleanup completed successfully")
         return 0
 
     except FileNotFoundError as e:

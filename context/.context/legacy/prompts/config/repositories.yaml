@@ -8,19 +8,19 @@ core:
     description: "Slash command system and Claude configuration"
     templates: issues-prompts
     default_assignee: "@me"
-    
+
   - name: dotfiles
     owner: aRustyDev
     description: "Personal dotfiles and system configuration"
     templates: issues-dotfiles
     default_assignee: "@me"
-    
+
   - name: pre-commit-hooks
     owner: aRustyDev
     description: "Custom pre-commit hooks collection"
     templates: issues-pre-commit-hooks
     default_assignee: "@me"
-    
+
   - name: blog
     owner: aRustyDev
     description: "Personal blog and technical articles"

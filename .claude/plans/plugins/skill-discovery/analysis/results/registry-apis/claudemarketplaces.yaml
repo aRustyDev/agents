@@ -1,0 +1,83 @@
+# Registry API Documentation: Claude Marketplaces
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "claudemarketplaces"
+  base_url: "https://claudemarketplaces.com"
+  type: "plugin_marketplace_aggregator"
+
+  api:
+    docs_url: "https://claudemarketplaces.com/llms.txt"
+    spec_format: "custom"
+
+    authentication:
+      type: "none"
+      notes: "Public API, no authentication required"
+
+    endpoints:
+      - path: "/api/marketplaces"
+        method: "GET"
+        description: "List all indexed marketplaces with metadata"
+        params: []
+        response_format: "json"
+        response_fields:
+          - repo: "GitHub repo (owner/name)"
+          - slug: "URL-safe identifier"
+          - description: "Marketplace description"
+          - pluginCount: "Number of plugins"
+          - categories: "Array of category tags"
+          - stars: "GitHub stars"
+          - starsFetchedAt: "Stars last updated"
+          - pluginKeywords: "Aggregated keywords"
+          - discoveredAt: "First indexed date"
+          - lastUpdated: "Last update date"
+
+  restrictions:
+    robots_txt:
+      url: "https://claudemarketplaces.com/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed: []
+      crawl_delay: null
+      ai_bots_policy: "EXPLICITLY ALLOWED"
+      allowed_bots:
+        - "GPTBot"
+        - "ChatGPT-User"
+        - "OAI-SearchBot"
+        - "CCBot"
+        - "anthropic-ai"
+        - "Claude-Web"
+        - "ClaudeBot"
+        - "Google-Extended"
+        - "PerplexityBot"
+        - "Bytespider"
+      notes: "One of few registries that explicitly allows AI crawlers"
+
+    rate_limits:
+      documented: "none"
+      observed: "none"
+      notes: "No rate limiting observed"
+
+    terms_of_service:
+      url: null
+      scraping_policy: "allowed (AI-friendly)"
+      api_policy: "public access"
+      commercial_use: "unknown"
+
+  llms_txt:
+    url: "https://claudemarketplaces.com/llms.txt"
+    content: "LLM-friendly discovery file available"
+    notes: "Modern AI-first approach with llms.txt"
+
+  example:
+    curl: |
+      curl -s "https://claudemarketplaces.com/api/marketplaces" | jq '.[0]'
+
+  observations:
+    - "Public JSON API with no authentication"
+    - "Explicitly welcomes AI crawlers in robots.txt"
+    - "Provides llms.txt for AI discovery"
+    - "Daily automated updates with GitHub stars"
+    - "Schema-validated marketplace entries"
+    - "Built with Next.js 15, TypeScript"

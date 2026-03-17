@@ -13,7 +13,7 @@ The Four Questions:
 4. Is there evidence?
 """
 
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Any
 
 
 class SelfCheckProtocol:
@@ -61,7 +61,7 @@ class SelfCheckProtocol:
         # "probably works" statements
     ]
 
-    def validate(self, implementation: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    def validate(self, implementation: dict[str, Any]) -> tuple[bool, list[str]]:
         """
         Run self-check validation
 
@@ -106,7 +106,7 @@ class SelfCheckProtocol:
 
         return len(issues) == 0, issues
 
-    def _check_tests_passing(self, impl: Dict[str, Any]) -> bool:
+    def _check_tests_passing(self, impl: dict[str, Any]) -> bool:
         """
         Verify all tests pass WITH EVIDENCE
 
@@ -126,7 +126,7 @@ class SelfCheckProtocol:
         passing_indicators = ["passed", "OK", "✓", "✅"]
         return any(indicator in test_output for indicator in passing_indicators)
 
-    def _check_requirements_met(self, impl: Dict[str, Any]) -> List[str]:
+    def _check_requirements_met(self, impl: dict[str, Any]) -> list[str]:
         """
         Verify all requirements satisfied
 
@@ -143,7 +143,7 @@ class SelfCheckProtocol:
 
         return unmet
 
-    def _check_assumptions_verified(self, impl: Dict[str, Any]) -> List[str]:
+    def _check_assumptions_verified(self, impl: dict[str, Any]) -> list[str]:
         """
         Verify assumptions checked against official docs
 
@@ -160,7 +160,7 @@ class SelfCheckProtocol:
 
         return unverified
 
-    def _check_evidence_exists(self, impl: Dict[str, Any]) -> List[str]:
+    def _check_evidence_exists(self, impl: dict[str, Any]) -> list[str]:
         """
         Verify evidence provided (test results, code changes, validation)
 
@@ -184,7 +184,7 @@ class SelfCheckProtocol:
 
         return missing
 
-    def _detect_hallucinations(self, impl: Dict[str, Any]) -> List[str]:
+    def _detect_hallucinations(self, impl: dict[str, Any]) -> list[str]:
         """
         Detect hallucination red flags
 
@@ -228,7 +228,7 @@ class SelfCheckProtocol:
 
         return detected
 
-    def format_report(self, passed: bool, issues: List[str]) -> str:
+    def format_report(self, passed: bool, issues: list[str]) -> str:
         """
         Format validation report
 

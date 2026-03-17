@@ -17,4 +17,3 @@ When outputting code blocks, include a # or // file name comment prior to the bl
 Stick to the current architecture choices located in pyproject.toml unless the user suggests a new method or module.
 
 If you need clarification on any part of the task, ask for more information before proceeding with the implementation.
-

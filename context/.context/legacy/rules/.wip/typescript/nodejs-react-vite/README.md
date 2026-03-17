@@ -13,4 +13,3 @@ Front-end developers can use this prompt to build efficient, scalable web applic
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines and constraints for writing TypeScript code in a project using technologies such as Node.js, React, Vite, TanStack Query, TanStack Router, and Tailwind. It emphasizes maintaining existing code and formatting, preferring functional and declarative programming patterns, and using descriptive variable names. It outlines a file structure for components, promotes the use of TypeScript interfaces over types, and advocates for functional components. It also specifies using Tailwind for styling and encourages performance optimizations like efficient data handling and rendering strategies. The file enforces certain naming conventions and syntax rules to ensure consistency and maintainability in the codebase.
-

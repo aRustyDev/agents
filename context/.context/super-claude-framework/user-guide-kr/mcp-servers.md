@@ -337,4 +337,3 @@ echo 'export TAVILY_API_KEY="your_key"' >> ~/.bashrc
 **기술 참조:**
 - [예제 모음](../reference/examples-cookbook.md) - MCP 워크플로우 패턴
 - [기술 아키텍처](../developer-guide/technical-architecture.md) - 통합 세부사항
-

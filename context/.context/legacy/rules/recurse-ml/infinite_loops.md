@@ -47,4 +47,3 @@ while True:
 ## Why
 
 Infinite loops cause programs to hang or consume excessive resources. Always ensure loop variables are properly modified and termination conditions are reachable.
-

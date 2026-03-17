@@ -13,4 +13,3 @@ Developers can leverage this prompt to create a clean, efficient boilerplate for
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines a comprehensive coding style guide for developing TypeScript applications, focusing on code structure, naming conventions, and TypeScript usage. It emphasizes functional programming, iteration, and modularization, recommending the use of interfaces, maps, and Zod for form validation. The guide advises using specific UI libraries and responsive design with Tailwind CSS, promoting performance optimization techniques like dynamic loading and lazy loading. It also stresses error handling, logging, and user-friendly messaging, suggesting the use of server components, early returns, and guard clauses. Additionally, it provides guidelines for managing URL state, optimizing Web Vitals, and integrating with React Remix and Next.js for data fetching and routing.
-

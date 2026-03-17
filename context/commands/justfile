@@ -1,0 +1,71 @@
+# Command (slash command) module
+# Usage: just command <command> [args]
+
+set unstable := true
+
+ROOT := source_directory() / "../.."
+SCRIPTS := ROOT / ".scripts"
+COMMANDS := source_directory()
+
+# Validate a command's frontmatter structure
+[group('command')]
+validate path:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    CMD_FILE="{{ path }}"
+
+    if [ ! -f "$CMD_FILE" ]; then
+        echo "✗ Command not found: $CMD_FILE"
+        exit 1
+    fi
+
+    echo "Validating command: $CMD_FILE"
+
+    # Check for YAML frontmatter
+    if ! head -1 "$CMD_FILE" | grep -q "^---"; then
+        echo "  ✗ Missing YAML frontmatter"
+        exit 1
+    fi
+
+    # Check for closing frontmatter
+    if ! sed -n '2,/^---$/p' "$CMD_FILE" | tail -1 | grep -q "^---"; then
+        echo "  ✗ Unclosed YAML frontmatter"
+        exit 1
+    fi
+
+    # Check for description
+    if ! grep -q "^description:" "$CMD_FILE"; then
+        echo "  ⚠ Missing 'description' (recommended)"
+    fi
+
+    echo "  ✓ Command structure valid"
+
+# Compute hash for a command
+[group('command')]
+hash path:
+    @uv run python {{ SCRIPTS }}/build-plugin.py hash "{{ path }}"
+
+# List all commands
+[group('command')]
+list:
+    @find {{ COMMANDS }} -name "*.md" -type f ! -name "README.md" | sort
+
+# Check all commands (validate frontmatter)
+[group('command')]
+check-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    COMMANDS_DIR="{{ COMMANDS }}"
+    commands=$(find "$COMMANDS_DIR" -name "*.md" -type f ! -name "README.md" | sort)
+    count=0
+    warned=0
+    for cmd in $commands; do
+        if head -1 "$cmd" | grep -q "^---"; then
+            count=$((count + 1))
+        else
+            echo "  ⚠ $cmd"
+            warned=$((warned + 1))
+        fi
+    done
+    echo ""
+    echo "✓ $count commands checked, $warned warnings"

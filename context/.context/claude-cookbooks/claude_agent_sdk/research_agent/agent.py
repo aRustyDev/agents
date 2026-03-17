@@ -6,9 +6,8 @@ import asyncio
 from collections.abc import Callable
 from typing import Any
 
-from dotenv import load_dotenv
-
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+from dotenv import load_dotenv
 
 load_dotenv()
 

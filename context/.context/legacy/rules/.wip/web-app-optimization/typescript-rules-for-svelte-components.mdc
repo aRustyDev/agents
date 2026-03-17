@@ -24,7 +24,7 @@ globs: **/*.svelte.ts
       }
     }
     export const counter = new Counter();
-    
+
 - State Management Example Usage:
   svelte
   <br />

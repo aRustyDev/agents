@@ -33,4 +33,3 @@ const additionalInstructions = `
 6. Follow progressive enhancement principles
 7. Use server-side templating (e.g., Jinja2, Handlebars)
 `;
-

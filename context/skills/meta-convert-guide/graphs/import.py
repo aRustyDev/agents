@@ -344,7 +344,7 @@ Examples:
     result = conn.execute("MATCH ()-[r]->() RETURN count(r) AS relCount")
     rel_count = result.get_next()[0]
 
-    print(f"\nImport complete!")
+    print("\nImport complete!")
     print(f"  Nodes: {node_count}")
     print(f"  Relationships: {rel_count}")
     print(f"  Database: {db_path}")

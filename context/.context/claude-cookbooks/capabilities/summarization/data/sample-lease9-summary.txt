@@ -15,7 +15,7 @@ Description: Commercial sublease agreement for data center space in Santa Clara,
 <term_and_rent>
 - Start Date: December 1, 2003 (referred to as "Closing Date" and "Commencement Date")
 - End Date: September 29, 2014
-- Monthly Base Rent: 
+- Monthly Base Rent:
   - First 2 years: [CONFIDENTIAL AMOUNT] payable by Sublandlord under Master Lease
   - Remainder of term: [CONFIDENTIAL AMOUNT] payable by Sublandlord under Master Lease
 - Security Deposit: Not specified
@@ -40,7 +40,7 @@ Description: Commercial sublease agreement for data center space in Santa Clara,
 - Subletting Restrictions: Subtenant prohibited from assigning or subletting without prior written consent of Master Landlord and Sublandlord
 - Insurance: Subtenant required to maintain insurance as specified in Section 9.1 of the Master Lease
 - Alterations: Subtenant prohibited from making alterations without prior written consent of Master Landlord and Sublandlord
-- Other: 
+- Other:
   - Accompanying agreements include Employee Covenants Agreement, Master Service Agreement, and Conduits Agreement
   - Provisions for transitioning existing customer contracts
   - Sublandlord retains certain rights for point of presence and conduits

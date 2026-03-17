@@ -33,7 +33,7 @@ capabilities:
       version: ">=1.0.0"
     - module: guides/security/defense-in-depth.md
       version: ">=1.0.0"
-      
+
   contextual:
     - name: vulnerability-assessment
       description: Identify and assess security vulnerabilities
@@ -44,7 +44,7 @@ capabilities:
         - guides/security/exploitation-techniques.md
         - tools/security/scanning-tools.md
       priority: high
-      
+
     - name: secure-architecture
       description: Design secure systems and architectures
       triggers: ["secure design", "security architecture", "zero trust", "defense", "hardening"]
@@ -54,7 +54,7 @@ capabilities:
         - knowledge/security-frameworks.yaml
         - processes/security/architecture-review.md
       priority: high
-      
+
     - name: incident-response
       description: Respond to security incidents
       triggers: ["incident", "breach", "compromise", "attack", "emergency", "forensics"]
@@ -64,7 +64,7 @@ capabilities:
         - processes/security/containment.md
         - templates/security/incident-reports.md
       priority: high
-      
+
     - name: compliance
       description: Ensure compliance with security standards
       triggers: ["compliance", "GDPR", "SOC2", "PCI", "HIPAA", "audit", "regulation"]
@@ -74,7 +74,7 @@ capabilities:
         - templates/compliance/controls.md
         - guides/compliance/implementation.md
       priority: medium
-      
+
     - name: cryptography
       description: Implement and review cryptographic solutions
       triggers: ["encryption", "crypto", "TLS", "certificate", "signing", "hashing"]
@@ -103,7 +103,7 @@ knowledge_base:
 
 behaviors:
   consultation:
-    can_consult: 
+    can_consult:
       - architect
       - devops-engineer
       - compliance-officer
@@ -111,15 +111,15 @@ behaviors:
       - incident-commander
     consultation_style: "Collaborates on security implications, educates on risks"
     auto_consult: true
-    
+
   response_style:
     verbosity: normal
     technical_level: expert
     use_examples: when_helpful
-    
+
   learning:
     continuous: true
-    domains: 
+    domains:
       - emerging-threats
       - vulnerability-research
       - security-tools
@@ -131,7 +131,7 @@ optimization:
   lazy_load: false
 
 metadata:
-  tags: 
+  tags:
     - security
     - infosec
     - cybersecurity
@@ -149,7 +149,7 @@ metadata:
       example: "Reviewing cryptographic implementation in codebase"
     - description: "Compliance guidance"
       example: "Implementing GDPR requirements for data handling"
-  related_roles: 
+  related_roles:
     - pentester
     - security-architect
     - compliance-engineer

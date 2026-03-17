@@ -31,7 +31,7 @@ description: Gitflow Workflow Rules. These rules should be applied when performi
 
 ### release/*
 - Branch from: develop
-- Merge back into: 
+- Merge back into:
   - main
   - develop
 - Naming convention: release/vX.Y.Z
@@ -108,4 +108,4 @@ description: Gitflow Workflow Rules. These rules should be applied when performi
 5. After merge to main:
    - Tag release
    - Merge back to develop
-   - Delete hotfix branch 
+   - Delete hotfix branch

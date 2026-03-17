@@ -1,5 +1,16 @@
 set unstable := true
 
+# Default recipe - show available commands
+default:
+    @just --list
+
+# Component build system modules
+mod plugin "context/plugins/justfile"
+mod skill "context/skills/justfile"
+mod command "context/commands/justfile"
+mod agent "context/agents/justfile"
+mod rule "context/rules/justfile"
+
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"

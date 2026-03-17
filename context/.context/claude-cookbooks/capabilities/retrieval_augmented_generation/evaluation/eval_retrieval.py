@@ -1,8 +1,8 @@
-from typing import Dict, Union, Any, List
 import ast
+from typing import Any
 
 
-def calculate_mrr(retrieved_links: List[str], correct_links) -> float:
+def calculate_mrr(retrieved_links: list[str], correct_links) -> float:
     for i, link in enumerate(retrieved_links, 1):
         if link in correct_links:
             return 1 / i
@@ -19,12 +19,12 @@ def evaluate_retrieval(retrieved_links, correct_links):
     return precision, recall, mrr, f1
 
 
-def get_assert(output: str, context) -> Union[bool, float, Dict[str, Any]]:
+def get_assert(output: str, context) -> bool | float | dict[str, Any]:
     correct_chunks = context["vars"]["correct_chunks"]
 
     try:
         precision, recall, mrr, f1 = evaluate_retrieval(output, correct_chunks)
-        metrics: Dict[str, float] = {}
+        metrics: dict[str, float] = {}
         metrics["precision"] = precision
         metrics["recall"] = recall
         metrics["f1"] = f1
@@ -64,30 +64,30 @@ def get_assert(output: str, context) -> Union[bool, float, Dict[str, Any]]:
         return {
             "pass": False,  # if f1 > 0.3 we will pass, otherwise fail
             "score": f1,
-            "reason": f"Unexpected error: {str(e)}",
+            "reason": f"Unexpected error: {e!s}",
             "componentResults": [
                 {
                     "pass": False,
                     "score": mrr,
-                    "reason": f"Unexpected error: {str(e)}",
+                    "reason": f"Unexpected error: {e!s}",
                     "named_scores": {"MRR": mrr},
                 },
                 {
                     "pass": False,
                     "score": precision,
-                    "reason": f"Unexpected error: {str(e)}",
+                    "reason": f"Unexpected error: {e!s}",
                     "named_scores": {"Precision": precision},
                 },
                 {
                     "pass": False,
                     "score": recall,
-                    "reason": f"Unexpected error: {str(e)}",
+                    "reason": f"Unexpected error: {e!s}",
                     "named_scores": {"Recall": recall},
                 },
                 {
                     "pass": False,
                     "score": f1,
-                    "reason": f"Unexpected error: {str(e)}",
+                    "reason": f"Unexpected error: {e!s}",
                     "named_scores": {"F1": f1},
                 },
             ],

@@ -583,4 +583,3 @@ Proposals typically evaluated on:
 ---
 
 **Key Takeaway**: DOE proposals require strong alignment with energy and national security missions, clear pathway to impact (especially for applied programs), and often benefit from partnerships with national laboratories or industry. Cost sharing, technology readiness levels, and commercialization strategies are critical considerations for competitive proposals.
-

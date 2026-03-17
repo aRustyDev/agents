@@ -71,4 +71,3 @@ Get started with these rules using the GitHub App:
 `typing.md:` Use built-in types over typing module types, prefer Optional for optional types, and never ignore type errors.
 
 `uncreachable_code.md:` Remove code that can never be executed due to control flow issues like statements after return or within impossible conditions.
-

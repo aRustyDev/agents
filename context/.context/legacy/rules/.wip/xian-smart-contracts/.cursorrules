@@ -65,7 +65,7 @@ def get_value(key: str):
     return my_hash[key]
 ```
 
-#### Illegal Delimiters 
+#### Illegal Delimiters
 ":" and "." cannot be used in Variable or Hash keys.
 
 ### Foreign State Access
@@ -117,7 +117,7 @@ def seed():
     submission_time = Variable()
     submission_block_num = Variable()
     submission_block_hash = Variable()
-    
+
     # Store blockchain state at contract creation
     submission_time.set(now)
     submission_block_num.set(block_num)
@@ -141,16 +141,16 @@ def seed():
 @export
 def interact_with_token(token_contract: str, recipient: str, amount: float):
     token = importlib.import_module(token_contract)
-    
+
     # Define expected interface
     interface = [
         importlib.Func('transfer', args=('amount', 'to')),
         importlib.Var('balances', Hash)
     ]
-    
+
     # Enforce interface
     assert importlib.enforce_interface(token, interface)
-    
+
     # Call function on other contract
     token.transfer(amount=amount, to=recipient)
 ```
@@ -213,9 +213,9 @@ Example usage in a contract:
 ```python
 @export
 def verify_signature(vk: str, msg: str, signature: str):
-    # Use the verify function to check if the signature is valid 
+    # Use the verify function to check if the signature is valid
     is_valid = crypto.verify(vk, msg, signature)
-    
+
     # Return the result of the verification
     return is_valid
 ```
@@ -296,9 +296,9 @@ ApprovalEvent = LogEvent(
 @export
 def transfer(amount: float, to: str):
     sender = ctx.caller
-    
+
     # ... perform transfer logic ...
-    
+
     # Emit the transfer event
     TransferEvent({
         "from": sender,
@@ -352,19 +352,19 @@ class TestMyContract(unittest.TestCase):
         self.chain_id = "test-chain"
         self.environment = {"chain_id": self.chain_id}
         self.deployer_vk = "test-deployer"
-        
+
         # Initialize the client
         self.client = ContractingClient(environment=self.environment)
         self.client.flush()
-        
+
         # Load and submit the contract
         with open('path/to/my_contract.py') as f:
             code = f.read()
             self.client.submit(code, name="my_contract", constructor_args={"owner": self.deployer_vk})
-            
+
         # Get contract instance
         self.contract = self.client.get_contract("my_contract")
-        
+
     def tearDown(self):
         # Clean up after each test
         self.client.flush()
@@ -383,10 +383,10 @@ def test_transfer_success(self):
     # GIVEN a sender with balance
     sender = "alice"
     self.contract.balances[sender] = 1000
-    
+
     # WHEN a transfer is executed
     result = self.contract.transfer(amount=100, to="bob", signer=sender)
-    
+
     # THEN the balances should be updated correctly
     self.assertEqual(self.contract.balances["bob"], 100)
     self.assertEqual(self.contract.balances[sender], 900)
@@ -412,13 +412,13 @@ def test_change_metadata_unauthorized(self):
 ```python
 def test_permit_double_spending(self):
     # GIVEN a permit already used once
-    self.contract.permit(owner="alice", spender="bob", value=100, deadline=deadline, 
+    self.contract.permit(owner="alice", spender="bob", value=100, deadline=deadline,
                         signature=signature)
-    
+
     # WHEN the permit is used again
     # THEN it should fail
     with self.assertRaises(Exception):
-        self.contract.permit(owner="alice", spender="bob", value=100, 
+        self.contract.permit(owner="alice", spender="bob", value=100,
                             deadline=deadline, signature=signature)
 ```
 
@@ -432,7 +432,7 @@ def test_time_sensitive_function(self):
     env = {"now": Datetime(year=2023, month=1, day=1)}
     result = self.contract.some_function(signer="alice", environment=env)
     self.assertTrue(result)
-    
+
     # Test with time after deadline
     env = {"now": Datetime(year=2024, month=1, day=1)}
     with self.assertRaises(Exception):
@@ -449,10 +449,10 @@ def test_transfer_balances(self):
     # Set initial balances
     self.contract.balances["alice"] = 1000
     self.contract.balances["bob"] = 500
-    
+
     # Perform transfer
     self.contract.transfer(amount=300, to="bob", signer="alice")
-    
+
     # Verify final balances
     self.assertEqual(self.contract.balances["alice"], 700)
     self.assertEqual(self.contract.balances["bob"], 800)
@@ -466,17 +466,17 @@ def test_transfer_balances(self):
 def test_signature_validation(self):
     # GIVEN a properly signed message
     signature = wallet.sign_msg(msg)
-    
+
     # WHEN using the correct parameters
-    result = self.contract.verify_signature(msg=msg, signature=signature, 
+    result = self.contract.verify_signature(msg=msg, signature=signature,
                                           public_key=wallet.public_key)
-    
+
     # THEN verification should succeed
     self.assertTrue(result)
-    
+
     # BUT when using modified parameters
     with self.assertRaises(Exception):
-        self.contract.verify_signature(msg=msg+"tampered", signature=signature, 
+        self.contract.verify_signature(msg=msg+"tampered", signature=signature,
                                      public_key=wallet.public_key)
 ```
 
@@ -490,7 +490,7 @@ def test_edge_cases(self):
     # Test with zero amount
     with self.assertRaises(Exception):
         self.contract.transfer(amount=0, to="receiver", signer="sender")
-    
+
     # Test with negative amount
     with self.assertRaises(Exception):
         self.contract.transfer(amount=-100, to="receiver", signer="sender")
@@ -507,15 +507,15 @@ def test_event_emission(self):
     receiver = "bob"
     amount = 100
     self.contract.balances[sender] = amount
-    
+
     # WHEN executing with return_full_output
     result = self.contract.transfer(
-        amount=amount, 
-        to=receiver, 
+        amount=amount,
+        to=receiver,
         signer=sender,
         return_full_output=True
     )
-    
+
     # THEN verify the event was emitted with correct parameters
     self.assertIn('events', result)
     events = result['events']
@@ -536,10 +536,10 @@ def test_event_emission(self):
 ```python
 def test_no_reentrancy_vulnerability(self):
     # Set up the attack scenario (if possible with Xian)
-    
+
     # Verify state is properly updated before any external calls
     # For example, check that balances are decreased before tokens are sent
-    
+
     # Verify proper operation ordering in the contract
 ```
 
@@ -551,10 +551,10 @@ def test_no_reentrancy_vulnerability(self):
 def test_integer_boundaries(self):
     # Set a large balance
     self.contract.balances["user"] = 10**20
-    
+
     # Test with large transfers
     result = self.contract.transfer(amount=10**19, to="receiver", signer="user")
-    
+
     # Verify results are as expected
     self.assertEqual(self.contract.balances["user"], 9*10**19)
     self.assertEqual(self.contract.balances["receiver"], 10**19)
@@ -569,7 +569,7 @@ def test_front_running_protection(self):
     # Test with deadlines to ensure transactions expire
     deadline = Datetime(year=2023, month=1, day=1)
     current_time = Datetime(year=2023, month=1, day=2)  # After deadline
-    
+
     with self.assertRaises(Exception):
         self.contract.time_sensitive_operation(
             param1="value",
@@ -587,7 +587,7 @@ def test_authorization_checks(self):
     # Test admin functions with non-admin signers
     with self.assertRaises(Exception):
         self.contract.admin_function(param="value", signer="regular_user")
-    
+
     # Test with proper authorization
     result = self.contract.admin_function(param="value", signer="admin")
     self.assertTrue(result)

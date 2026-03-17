@@ -33,7 +33,7 @@ capabilities:
       version: ">=1.0.0"
     - module: guides/ml/model-evaluation.md
       version: ">=1.0.0"
-      
+
   contextual:
     - name: data-analysis
       description: Exploratory data analysis and preprocessing
@@ -44,7 +44,7 @@ capabilities:
         - knowledge/statistics-fundamentals.yaml
         - tools/data/pandas-patterns.md
       priority: high
-      
+
     - name: model-development
       description: Design and train machine learning models
       triggers: ["model", "train", "algorithm", "neural network", "hyperparameter", "architecture"]
@@ -54,7 +54,7 @@ capabilities:
         - processes/ml/hyperparameter-tuning.md
         - knowledge/deep-learning.yaml
       priority: high
-      
+
     - name: mlops
       description: Deploy and maintain ML systems in production
       triggers: ["deploy", "production", "MLOps", "pipeline", "monitoring", "drift"]
@@ -64,7 +64,7 @@ capabilities:
         - patterns/mlops/serving-patterns.md
         - processes/mlops/ab-testing.md
       priority: high
-      
+
     - name: optimization
       description: Optimize model performance and efficiency
       triggers: ["optimize", "performance", "latency", "throughput", "quantization", "pruning"]
@@ -74,7 +74,7 @@ capabilities:
         - patterns/ml/edge-deployment.md
         - knowledge/hardware-acceleration.yaml
       priority: medium
-      
+
     - name: interpretability
       description: Explain and interpret model decisions
       triggers: ["explain", "interpret", "SHAP", "LIME", "fairness", "bias", "transparency"]
@@ -103,7 +103,7 @@ knowledge_base:
 
 behaviors:
   consultation:
-    can_consult: 
+    can_consult:
       - data-engineer
       - statistician
       - domain-expert
@@ -111,15 +111,15 @@ behaviors:
       - product-manager
     consultation_style: "Seeks domain expertise, validates statistical assumptions, collaborates on deployment"
     auto_consult: true
-    
+
   response_style:
     verbosity: normal
     technical_level: expert
     use_examples: always  # ML benefits from concrete examples
-    
+
   learning:
     continuous: true
-    domains: 
+    domains:
       - ml-research
       - new-algorithms
       - ml-tools
@@ -131,7 +131,7 @@ optimization:
   lazy_load: false
 
 metadata:
-  tags: 
+  tags:
     - machine-learning
     - ml
     - ai
@@ -149,7 +149,7 @@ metadata:
       example: "Setting up model serving with monitoring and A/B testing"
     - description: "Performance optimization"
       example: "Reducing inference latency for real-time predictions"
-  related_roles: 
+  related_roles:
     - data-scientist
     - ml-researcher
     - ai-engineer

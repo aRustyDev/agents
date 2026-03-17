@@ -1,0 +1,108 @@
+# Tool Comparison Result Template
+# Use this template for each tool × registry × mode combination
+
+$schema: "./tool-comparison-result.schema.json"
+
+result:
+  # ============================================
+  # METADATA
+  # ============================================
+  experiment_id: ""        # e.g., "exp-003-crawl4ai-debug"
+  registry: ""             # e.g., "mcp.so"
+  tool: ""                 # e.g., "crawl4ai", "searxng", "webfetch", "gh_api"
+  mode: ""                 # "survey" or "deep"
+  executed_at: ""          # ISO 8601 timestamp
+  duration_ms: 0           # Time to complete
+
+  # ============================================
+  # REQUEST
+  # ============================================
+  request:
+    url: ""                # Target URL
+    query: ""              # Search query (if applicable)
+    parameters: {}         # Tool-specific parameters used
+    # Example for crawl4ai:
+    #   url: "https://..."
+    # Example for searxng:
+    #   engines: ["google", "brave", "duckduckgo"]
+    #   format: "json"
+
+  # ============================================
+  # RESPONSE
+  # ============================================
+  response:
+    status: ""             # "success", "partial", "error", "timeout"
+    error_message: ""      # If status != success
+    http_code: 0           # HTTP status code
+    content_type: ""       # Response content type
+    content_length: 0      # Response size in bytes
+
+  # ============================================
+  # CONTENT QUALITY (1-5 scale)
+  # ============================================
+  quality:
+    structure_score: 0     # 1-5: How well-structured is the output?
+    completeness_score: 0  # 1-5: How complete is the content?
+    relevance_score: 0     # 1-5: How relevant are the results?
+    parseability_score: 0  # 1-5: How easy to parse programmatically?
+    overall_score: 0       # Average of above
+
+    structure_notes: ""    # Why this score?
+    completeness_notes: ""
+    relevance_notes: ""
+    parseability_notes: ""
+
+  # ============================================
+  # EXTRACTED DATA (for comparison)
+  # ============================================
+  extracted:
+    items_found: 0         # Number of distinct items/components found
+    sample_items: []       # First 5 items extracted
+    # Example:
+    #   - name: "my-skill"
+    #     url: "https://..."
+    #     description: "..."
+    fields_available: []   # What fields were extractable?
+    # Example: ["name", "description", "url", "stars", "author"]
+    missing_fields: []     # Expected but not found
+
+  # ============================================
+  # SURVEY vs DEEP MODE COMPARISON
+  # ============================================
+  mode_analysis:
+    # For SURVEY mode:
+    survey_coverage: ""    # "full", "partial", "minimal"
+    pagination_support: false
+    total_available: 0     # If discoverable
+
+    # For DEEP mode:
+    full_content: false    # Did we get full content?
+    links_extracted: 0     # Number of links found
+    media_extracted: 0     # Number of media items
+    js_rendered: false     # Was JavaScript rendered?
+
+  # ============================================
+  # TOOL-SPECIFIC FEATURES
+  # ============================================
+  tool_features:
+    rate_limited: false
+    cache_used: false
+    auth_required: false
+    js_rendering: false
+    structured_output: false  # Returns JSON directly vs needs parsing
+
+  # ============================================
+  # SAMPLE OUTPUT
+  # ============================================
+  sample_output: |
+    # First 500 chars of raw output
+    # For comparison across tools
+
+  # ============================================
+  # RECOMMENDATIONS
+  # ============================================
+  recommendations:
+    suitable_for: []       # ["survey", "deep", "both", "neither"]
+    strengths: []
+    weaknesses: []
+    alternative_tool: ""   # If this tool isn't suitable, which is?

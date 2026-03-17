@@ -1,0 +1,288 @@
+# Finding: Component Discovery Coverage
+# Phase 2 Analysis
+# Created: 2026-03-08
+
+finding:
+  id: "finding-002-component-coverage"
+  title: "Component discovery coverage across 7 types"
+  created: "2026-03-08"
+  confidence: "high"
+
+  experiment_ids:
+    - "exp-002-registry-probe"
+
+  # ============================================
+  # CLAIM
+  # ============================================
+  claim: |
+    The Claude Code ecosystem contains 22,000+ discoverable components
+    across 7 types, with MCP servers being the largest category and
+    rules being the smallest standalone category (often bundled).
+
+  # ============================================
+  # COMPONENT SUMMARY
+  # ============================================
+  components:
+    skills:
+      estimated_total: "2,500+"
+      sources_probed: 14
+      top_repositories:
+        - name: "skillsmp"
+          url: "https://skillsmp.com/"
+          count: "2000+"
+          access: "API with Bearer token"
+        - name: "alirezarezvani/claude-skills"
+          url: "https://github.com/alirezarezvani/claude-skills"
+          count: 169
+          stars: 2770
+        - name: "Jeffallan/claude-skills"
+          url: "https://github.com/Jeffallan/claude-skills"
+          count: 66
+          stars: 5704
+        - name: "mrgoonie/claudekit-skills"
+          url: "https://github.com/mrgoonie/claudekit-skills"
+          count: 40
+          stars: 1821
+        - name: "ComposioHQ/awesome-claude-skills"
+          url: "https://github.com/ComposioHQ/awesome-claude-skills"
+          count: 78
+          stars: 41939
+          type: "curated_list"
+      categories_identified:
+        - "Document Processing"
+        - "Development & Code Tools"
+        - "Data & Analysis"
+        - "Business & Marketing"
+        - "Security & Testing"
+        - "AI & Machine Learning"
+        - "Creative & Media"
+
+    agents:
+      estimated_total: "500+"
+      sources_probed: 12
+      top_repositories:
+        - name: "VoltAgent/awesome-claude-code-subagents"
+          url: "https://github.com/VoltAgent/awesome-claude-code-subagents"
+          count: 127
+          stars: 12910
+        - name: "ccplugins/awesome-claude-code-plugins"
+          url: "https://github.com/ccplugins/awesome-claude-code-plugins"
+          count: 130
+          stars: 613
+        - name: "lst97/claude-code-sub-agents"
+          url: "https://github.com/lst97/claude-code-sub-agents"
+          count: 33
+          stars: 1452
+        - name: "vijaythecoder/awesome-claude-agents"
+          url: "https://github.com/vijaythecoder/awesome-claude-agents"
+          count: 24
+          stars: 3990
+        - name: "0xfurai/claude-code-subagents"
+          url: "https://github.com/0xfurai/claude-code-subagents"
+          count: 100
+          stars: 755
+      categories_identified:
+        - "Development/Engineering"
+        - "Infrastructure/DevOps"
+        - "Quality & Testing"
+        - "Data & AI"
+        - "Security"
+        - "Business & Product"
+        - "Meta-Orchestration"
+
+    commands:
+      estimated_total: "500+"
+      sources_probed: 15
+      top_repositories:
+        - name: "kiliczsh/claude-cmd"
+          url: "https://github.com/kiliczsh/claude-cmd"
+          count: 184
+          stars: 286
+          type: "registry"
+        - name: "buildwithclaude"
+          url: "https://buildwithclaude.com/"
+          count: 175
+          type: "marketplace"
+        - name: "Comfy-Org/comfy-claude-prompt-library"
+          url: "https://github.com/Comfy-Org/comfy-claude-prompt-library"
+          count: 82
+          stars: 115
+        - name: "ursisterbtw/ccprompts"
+          url: "https://github.com/ursisterbtw/ccprompts"
+          count: 70
+          stars: 70
+      categories_identified:
+        - "Git/GitHub Workflow"
+        - "Development Workflow"
+        - "Testing/TDD"
+        - "Administrative"
+        - "PM/Business"
+        - "Meta/Framework"
+
+    rules:
+      estimated_total: "100+"
+      sources_probed: 8
+      notes: "Rules typically bundled with plugins, rarely standalone"
+      top_repositories:
+        - name: "NikiforovAll/claude-code-rules"
+          url: "https://github.com/NikiforovAll/claude-code-rules"
+          stars: 99
+          notes: "Practical techniques for AI-assisted development"
+        - name: "Lance-He/claude-md-rules"
+          url: "https://github.com/Lance-He/claude-md-rules"
+          stars: 84
+          notes: "Multi-language rules (Python, Java, C)"
+        - name: "smartwhale8/claude-playbook"
+          url: "https://github.com/smartwhale8/claude-playbook"
+          stars: 5
+          notes: "Production-ready .claude/ scaffolding"
+      patterns_found:
+        - "rust.md, react.md, dotnet.md, ios.md"
+        - "testing.md, cli.md, writing.md"
+        - "linting.md, security.md, yaml.md, sql.md"
+
+    prompts:
+      estimated_total: "300+"
+      sources_probed: 10
+      notes: "Includes CLAUDE.md, output-styles, and AGENTS.md formats"
+      top_repositories:
+        - name: "agentsmd/agents.md"
+          url: "https://github.com/agentsmd/agents.md"
+          stars: 18646
+          notes: "AGENTS.md format specification"
+        - name: "Piebald-AI/claude-code-system-prompts"
+          url: "https://github.com/Piebald-AI/claude-code-system-prompts"
+          stars: 5518
+          notes: "System prompts and tool descriptions"
+        - name: "langgptai/awesome-claude-prompts"
+          url: "https://github.com/langgptai/awesome-claude-prompts"
+          stars: 4451
+          notes: "Claude prompt curation"
+      output_styles_found: 20
+
+    hooks:
+      estimated_total: "200+"
+      sources_probed: 12
+      hook_types:
+        - "PreToolUse"
+        - "PostToolUse"
+        - "UserPromptSubmit"
+        - "SubagentStop"
+        - "SessionEnd"
+        - "Stop"
+      top_repositories:
+        - name: "parcadei/Continuous-Claude-v3"
+          url: "https://github.com/parcadei/Continuous-Claude-v3"
+          stars: 3593
+          notes: "Context management with hooks, ledgers, handoffs"
+        - name: "disler/claude-code-hooks-mastery"
+          url: "https://github.com/disler/claude-code-hooks-mastery"
+          stars: 3243
+          notes: "Master collection of hook patterns"
+        - name: "buildwithclaude"
+          url: "https://buildwithclaude.com/"
+          count: 28
+          type: "marketplace"
+      sdks_identified:
+        - language: "Python"
+          repo: "GowayLee/cchooks"
+        - language: "TypeScript"
+          repo: "sushichan044/cc-hooks-ts"
+        - language: "Ruby"
+          repo: "gabriel-dehan/claude_hooks"
+        - language: "PHP"
+          repo: "beyondcode/claude-hooks-sdk"
+
+    mcp_servers:
+      estimated_total: "18,000+"
+      sources_probed: 6
+      github_topic_count: 8741
+      top_repositories:
+        - name: "n8n-io/n8n"
+          url: "https://github.com/n8n-io/n8n"
+          stars: 178146
+          notes: "Workflow automation with MCP"
+        - name: "upstash/context7"
+          url: "https://github.com/upstash/context7"
+          stars: 48155
+          notes: "Code documentation for LLMs"
+        - name: "github/github-mcp-server"
+          url: "https://github.com/github/github-mcp-server"
+          stars: 27640
+          notes: "GitHub's official MCP Server"
+        - name: "ChromeDevTools/chrome-devtools-mcp"
+          url: "https://github.com/ChromeDevTools/chrome-devtools-mcp"
+          stars: 28104
+          notes: "Chrome DevTools for coding agents"
+        - name: "awslabs/mcp"
+          url: "https://github.com/awslabs/mcp"
+          stars: 8388
+          notes: "Official AWS MCP Servers"
+      registries:
+        - name: "mcp.so"
+          claimed_count: "18,000+"
+          access: "WebFetch/Playwright"
+        - name: "glama.ai"
+          claimed_count: "18,000+"
+          access: "WebFetch/API"
+      language_distribution:
+        TypeScript: "37%"
+        Python: "30%"
+        Go: "10%"
+        JavaScript: "7%"
+        Other: "16%"
+
+  # ============================================
+  # SUMMARY STATISTICS
+  # ============================================
+  summary:
+    total_components: "22,000+"
+    breakdown:
+      mcp_servers: "18,000+ (82%)"
+      skills: "2,500+ (11%)"
+      agents: "500+ (2%)"
+      commands: "500+ (2%)"
+      prompts: "300+ (1%)"
+      hooks: "200+ (1%)"
+      rules: "100+ (<1%)"
+
+    discovery_methods:
+      github_api: "Primary for repositories"
+      webfetch: "For accessible registries"
+      api_access: "For protected registries (skillsmp)"
+
+    top_curated_lists:
+      - name: "ComposioHQ/awesome-claude-skills"
+        stars: 41939
+        type: "skills"
+      - name: "hesreallyhim/awesome-claude-code"
+        stars: 26882
+        type: "mixed"
+      - name: "agentsmd/agents.md"
+        stars: 18646
+        type: "format_spec"
+      - name: "VoltAgent/awesome-claude-code-subagents"
+        stars: 12910
+        type: "agents"
+
+  # ============================================
+  # OBSERVATIONS
+  # ============================================
+  observations:
+    - "MCP servers dominate the ecosystem (82% of components)"
+    - "Rules are rarely standalone - typically bundled in plugins"
+    - "Multiple SDKs exist for hooks (Python, TypeScript, Ruby, PHP)"
+    - "Strong commercial backing: GitHub, AWS, Microsoft with official implementations"
+    - "buildwithclaude.com is the primary unified marketplace"
+    - "skillsmp.com requires API access (Cloudflare protection)"
+    - "Curated awesome-* lists aggregate significant component counts"
+
+  # ============================================
+  # RECOMMENDATIONS FOR PHASE 3
+  # ============================================
+  phase_3_recommendations:
+    - "Focus on high-star curated lists for comprehensive component enumeration"
+    - "Use skillsmp API for skill discovery (most comprehensive)"
+    - "Cross-reference buildwithclaude with GitHub repos for deduplication"
+    - "Prioritize MCP server discovery via GitHub topic search"
+    - "Extract rules from plugin repositories rather than searching standalone"

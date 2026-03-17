@@ -450,4 +450,3 @@ Indirect cost rate is based on our institution's federally negotiated rate agree
 - Detailed costs by phase and task
 - Often requires supporting cost data
 - May need rates approved (DCAA audit for industry)
-

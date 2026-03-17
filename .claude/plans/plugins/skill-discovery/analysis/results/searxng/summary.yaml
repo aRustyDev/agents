@@ -1,0 +1,105 @@
+# Experiment 7: SearXNG Integration Results
+# Executed: 2026-03-08
+# Status: PASSED
+
+experiment:
+  id: "exp-007-searxng"
+  status: "completed"
+  executed_at: "2026-03-08"
+  endpoint: "http://localhost:8888/search"
+
+configuration:
+  format: "json"
+  engines_active:
+    - brave
+    - duckduckgo
+    - google
+    - startpage
+    - wikipedia
+
+tests:
+  - id: "sxng-001-basic"
+    query: "claude code skills marketplace"
+    status: "passed"
+    results:
+      result_count: 31
+      engines_used: ["brave", "duckduckgo", "google", "startpage"]
+      duration_ms: 1213
+      sample_titles:
+        - "Extend Claude with skills - Claude Code Docs"
+        - "Agent Skills Marketplace - Claude, Codex & ChatGPT Skills | SkillsMP"
+        - "r/ClaudeAI on Reddit: I've collected 2300+ Claude Skills"
+        - "Claude Code Plugin Marketplace | AI Tools & Extensions"
+
+  - id: "sxng-002-registry"
+    query: "claude skill marketplace registry"
+    status: "passed"
+    results:
+      result_count: 34
+      registries_found:
+        - "https://buildwithclaude.com/"
+        - "https://skillsmp.com/"
+    notes: "Successfully found major registries"
+
+  - id: "sxng-003-mcp"
+    query: "mcp server model context protocol registry"
+    status: "passed"
+    results:
+      result_count: 25
+      mcp_registries_found:
+        - "https://mcp.so/server/registry/modelcontextprotocol"
+        - "https://registry.mcpservers.org/"
+
+  - id: "sxng-005-engines"
+    query: "claude code skills"
+    status: "passed"
+    results:
+      engine_distribution:
+        brave: 18
+        duckduckgo: 8
+        google: 4
+        startpage: 4
+    notes: "Brave provides most results"
+
+  - id: "sxng-006-ratelimit"
+    test: "5 rapid sequential searches"
+    status: "passed"
+    results:
+      search_1: { results: 33, duration_ms: 1154 }
+      search_2: { results: 34, duration_ms: 1212 }
+      search_3: { results: 32, duration_ms: 1045 }
+      search_4: { results: 33, duration_ms: 1074 }
+      search_5: { results: 33, duration_ms: 1093 }
+      avg_duration_ms: 1116
+      rate_limited: false
+    notes: "No rate limiting observed for local instance"
+
+findings:
+  strengths:
+    - "Multi-engine aggregation (4 engines active)"
+    - "No rate limits (local instance)"
+    - "JSON format works well"
+    - "Good coverage (~30 results per query)"
+    - "Finds all major registries"
+
+  engine_quality:
+    best: "brave (most results, high relevance)"
+    second: "duckduckgo (good supplementary)"
+    limited: "google, startpage (fewer results)"
+
+  comparison_to_websearch:
+    searxng_results: "30+"
+    websearch_results: "~10"
+    advantage: "3x more results with multi-engine aggregation"
+
+  average_response_time_ms: 1116
+
+recommendations:
+  use_for:
+    - "Registry discovery (finds multiple registries per query)"
+    - "Broad component search (30+ results)"
+    - "Rate-limit-free bulk searching"
+
+  example: |
+    curl -s "http://localhost:8888/search?q=QUERY&format=json" | \
+      jq '.results[] | {title, url, engine}'

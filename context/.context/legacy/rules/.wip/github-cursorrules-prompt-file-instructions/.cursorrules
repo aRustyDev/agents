@@ -40,17 +40,17 @@ The example below uses the hard-coded number 0.1 to represent a 10% discount. Th
 
 Before:
 
-def calculate_discount(price):  
-  discount = price * 0.1 # 10% discount  
+def calculate_discount(price):
+  discount = price * 0.1 # 10% discount
   return price - discount
 
 The improved code replaces the hard-coded number with a named constant TEN_PERCENT_DISCOUNT. The name instantly conveys the meaning of the value, making the code more self-documenting.
 
 After:
 
-def calculate_discount(price):  
-  TEN_PERCENT_DISCOUNT = 0.1  
-  discount = price * TEN_PERCENT_DISCOUNT  
+def calculate_discount(price):
+  TEN_PERCENT_DISCOUNT = 0.1
+  discount = price * TEN_PERCENT_DISCOUNT
   return price - discount
 
 Also, If the discount rate needs to be changed, it only requires modifying the constant declaration, not searching for multiple instances of the hard-coded number.
@@ -65,18 +65,18 @@ If we take the code from the previous example, it uses generic names like "price
 
 Before:
 
-def calculate_discount(price):  
-  TEN_PERCENT_DISCOUNT = 0.1  
-  discount = price * TEN_PERCENT_DISCOUNT  
+def calculate_discount(price):
+  TEN_PERCENT_DISCOUNT = 0.1
+  discount = price * TEN_PERCENT_DISCOUNT
   return price - discount
 
 Instead, you can declare the variables to be more descriptive.
 
 After:
 
-def calculate_discount(product_price):  
-  TEN_PERCENT_DISCOUNT = 0.1  
-  discount_amount = product_price * TEN_PERCENT_DISCOUNT  
+def calculate_discount(product_price):
+  TEN_PERCENT_DISCOUNT = 0.1
+  discount_amount = product_price * TEN_PERCENT_DISCOUNT
   return product_price - discount_amount
 
 This improved code uses specific names like "product_price" and "discount_amount," providing a clearer understanding of what the variables represent and how we use them.
@@ -89,9 +89,9 @@ Example:
 
 Before:
 
-def group_users_by_id(user_id):  
-  # This function groups users by id  
-  # ... complex logic ...  
+def group_users_by_id(user_id):
+  # This function groups users by id
+  # ... complex logic ...
   # ... more code …
 
 The comment about the function is redundant and adds no value. The function name already states that it groups users by id; there's no need for a comment stating the same.
@@ -100,18 +100,18 @@ Instead, use comments to convey the "why" behind specific actions or explain beh
 
 After:
 
-def group_users_by_id(user_id):  
-  """Groups users by id to a specific category (1-9).  
-  Warning: Certain characters might not be handled correctly.  
-  Please refer to the documentation for supported formats.  
-  Args:    
-    user_id (str): The user id to be grouped.  
-  Returns:    
-    int: The category number (1-9) corresponding to the user id.  
-  Raises:    
-    ValueError: If the user id is invalid or unsupported.  
-  """  
-  # ... complex logic ...  
+def group_users_by_id(user_id):
+  """Groups users by id to a specific category (1-9).
+  Warning: Certain characters might not be handled correctly.
+  Please refer to the documentation for supported formats.
+  Args:
+    user_id (str): The user id to be grouped.
+  Returns:
+    int: The category number (1-9) corresponding to the user id.
+  Raises:
+    ValueError: If the user id is invalid or unsupported.
+  """
+  # ... complex logic ...
   # ... more code …
 
 This comment provides meaningful information about the function's behavior and explains unusual behavior and potential pitfalls.
@@ -124,9 +124,9 @@ Example:
 
 Before:
 
-def process_data(data):  
-  # ... validate users...  
-  # ... calculate values ...  
+def process_data(data):
+  # ... validate users...
+  # ... calculate values ...
   # ... format output …
 
 This function performs three tasks: validating users, calculating values, and formatting output. If any of these steps fail, the entire function fails, making debugging a complex issue. If we also need to change the logic of one of the tasks, we risk introducing unintended side effects in another task.
@@ -135,13 +135,13 @@ Instead, try to assign each task a function that does just one thing.
 
 After:
 
-def validate_user(data):  
+def validate_user(data):
   # ... data validation logic ...
 
-def calculate_values(data):  
+def calculate_values(data):
   # ... calculation logic based on validated data ...
 
-def format_output(data):  
+def format_output(data):
   # ... format results for display …
 
 The improved code separates the tasks into distinct functions. This results in more readable, maintainable, and testable code. Also, If a change needs to be made, it will be easier to identify and modify the specific function responsible for the desired functionality.
@@ -154,10 +154,10 @@ Example:
 
 Before:
 
-def calculate_book_price(quantity, price):  
+def calculate_book_price(quantity, price):
   return quantity * price
 
-def calculate_laptop_price(quantity, price):  
+def calculate_laptop_price(quantity, price):
   return quantity * price
 
 In the above example, both functions calculate the total price using the same formula. This violates the DRY principle.
@@ -166,7 +166,7 @@ We can fix this by defining a single calculate_product_price function that we us
 
 After:
 
-def calculate_product_price(product_quantity, product_price):  
+def calculate_product_price(product_quantity, product_price):
   return product_quantity * product_price
 
 6. Follow Established Code-Writing Standards
@@ -203,33 +203,33 @@ Example:
 
 Before:
 
-def calculate_product_discount(product_price):  
-  discount_amount = 0  
-  if product_price > 100:  
-    discount_amount = product_price * 0.1  
-  elif price > 50:  
-    discount_amount = product_price * 0.05  
-  else:  
-    discount_amount = 0  
-  final_product_price = product_price - discount_amount  
+def calculate_product_discount(product_price):
+  discount_amount = 0
+  if product_price > 100:
+    discount_amount = product_price * 0.1
+  elif price > 50:
+    discount_amount = product_price * 0.05
+  else:
+    discount_amount = 0
+  final_product_price = product_price - discount_amount
   return final_product_price
 
 We can clean this code up by separating the nested if/else condition that calculates discount logic into another function called get_discount_rate and then calling the get_discount_rate in the calculate_product_discount function. This makes it easier to read at a glance. The get_discount_rate is now isolated and can be reused by other functions in the codebase. It’s also easier to change, test, and debug it without affecting the calculate_discount function.
 
 After:
 
-def calculate_discount(product_price):  
-  discount_rate = get_discount_rate(product_price)  
-  discount_amount = product_price * discount_rate  
-  final_product_price = product_price - discount_amount  
+def calculate_discount(product_price):
+  discount_rate = get_discount_rate(product_price)
+  discount_amount = product_price * discount_rate
+  final_product_price = product_price - discount_amount
   return final_product_price
 
-def get_discount_rate(product_price):  
-  if product_price > 100:  
-    return 0.1  
-  elif product_price > 50:  
-    return 0.05  
-  else:  
+def get_discount_rate(product_price):
+  if product_price > 100:
+    return 0.1
+  elif product_price > 50:
+    return 0.05
+  else:
     return 0
 
 8. Refactor Continuously
@@ -239,4 +239,3 @@ Regularly review and refactor your code to improve its structure, readability, a
 9. Use Version Control
 
 Version control systems meticulously track every change made to your codebase, enabling you to understand the evolution of your code and revert to previous versions if needed. This creates a safety net for code refactoring and prevents accidental deletions or overwrites. Use version control systems like GitHub, GitLab, and Bitbucket to track changes to your codebase and collaborate effectively with others.
-

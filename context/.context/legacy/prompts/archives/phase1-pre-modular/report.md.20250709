@@ -87,15 +87,15 @@ processes:
   - name: issue-tracking/github-issues
     version: ">=1.0.0"
     usage: "Core issue creation and management"
-    
+
   - name: data-sanitization
-    version: ">=1.0.0" 
+    version: ">=1.0.0"
     usage: "Sanitize conversation context before including in issues"
-    
+
   - name: ui/interactive-selection
     version: ">=1.0.0"
     usage: "Repository selection and preview formatting"
-    
+
   - name: meta/context-analysis
     version: ">=1.0.0"
     usage: "Enhanced context gathering from various sources"
@@ -116,16 +116,16 @@ When any subcommand is invoked, Claude will:
 2. **Interactive Repository Selection**
    ```
    Which repository is this issue for?
-   
+
    Core Repositories:
    1) prompts - Slash command system and Claude configuration
-   2) dotfiles - Personal dotfiles and system configuration  
+   2) dotfiles - Personal dotfiles and system configuration
    3) pre-commit-hooks - Custom pre-commit hooks collection
-   
+
    Custom Repositories:
    4) my-project - My awesome project
-   
-   Select repository [1-4]: 
+
+   Select repository [1-4]:
    ```
 
 3. **Template Resolution**
@@ -156,7 +156,7 @@ Report issues with Claude's behavior when using slash-commands.
    ```bash
    # Auto-detect current command context
    CURRENT_COMMAND=$(echo "$CONVERSATION_CONTEXT" | grep -E "^/[a-zA-Z]+" | tail -1)
-   
+
    # Capture environment
    CLAUDE_VERSION="${CLAUDE_MODEL:-unknown}"
    PROMPTS_VERSION=$(cd ~/.claude && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -178,7 +178,7 @@ Report issues with Claude's behavior when using slash-commands.
    Based on bug type, load appropriate template:
    - First check repo-specific: `templates/issues-{repo}/{bug-type}.md`
    - Fallback to generic: `templates/issues/bugs/{bug-type}.md`
-   
+
    Template types:
    - `execution-error.md`
    - `unexpected-behavior.md`
@@ -193,13 +193,13 @@ Report issues with Claude's behavior when using slash-commands.
    # Gather diagnostic data
    gather_enhanced_context() {
      echo "## Additional Context"
-     
+
      # Last command output
      if [ -f "$LAST_COMMAND_OUTPUT" ]; then
        echo "### Last Command Output"
        tail -n 50 "$LAST_COMMAND_OUTPUT"
      fi
-     
+
      # Check common log locations
      for log_dir in ~/logs /tmp ./.claude/logs ./logs; do
        if [ -d "$log_dir" ]; then
@@ -207,19 +207,19 @@ Report issues with Claude's behavior when using slash-commands.
          find "$log_dir" -name "*.log" -mtime -1 -exec tail -n 20 {} \;
        fi
      done
-     
+
      # Git status and recent changes
      echo "### Git Status"
      git status --short
      echo "### Recent Git Changes"
      git diff --stat HEAD~5..HEAD
-     
+
      # System information
      echo "### System Info"
      uname -a
      echo "Memory: $(free -h | grep Mem | awk '{print $3"/"$2}')"
      echo "Disk: $(df -h . | tail -1 | awk '{print $3"/"$2" ("$5" used)"}')"
-     
+
      # Recent shell history (last 10 relevant commands)
      echo "### Recent Commands"
      history | grep -E "(${CURRENT_COMMAND}|error|fail)" | tail -10
@@ -233,7 +233,7 @@ Report issues with Claude's behavior when using slash-commands.
    if [[ "$ENHANCED_CONTEXT" == "true" ]]; then
      FULL_CONTEXT="$FULL_CONTEXT\n\n$(gather_enhanced_context)"
    fi
-   
+
    SANITIZED_CONTEXT=$(echo "$FULL_CONTEXT" | \
      ~/.claude/processes/data-sanitization.sh --remove-pii --truncate 2000)
    ```
@@ -243,10 +243,10 @@ Report issues with Claude's behavior when using slash-commands.
    # Show preview unless --no-preview flag is used
    if [[ "$NO_PREVIEW" != "true" ]]; then
      show_issue_preview "$ISSUE_TITLE" "$ISSUE_BODY" "bug,$BUG_TYPE_LABEL"
-     
+
      # Get user confirmation
      read -p "Choose action: [S]ubmit, [E]dit, [C]ancel, [D]ry-run: " ACTION
-     
+
      case "$ACTION" in
        [Ss]* )
          # Proceed to create issue
@@ -270,7 +270,7 @@ Report issues with Claude's behavior when using slash-commands.
          ;;
      esac
    fi
-   
+
    # Create issue using gh CLI
    gh issue create \
      --repo "$REPO_OWNER/$REPO_NAME" \
@@ -347,7 +347,7 @@ Request new functionality for the slash-command system.
    ```bash
    # Auto-apply labels based on type
    LABELS="enhancement,$FEATURE_TYPE"
-   
+
    # Add additional context labels
    if [[ "$FEATURE_TYPE" == "command" ]]; then
      LABELS="$LABELS,slash-command"
@@ -359,10 +359,10 @@ Request new functionality for the slash-command system.
    # Show preview unless --no-preview flag is used
    if [[ "$NO_PREVIEW" != "true" ]]; then
      show_issue_preview "$FEATURE_TITLE" "$ISSUE_BODY" "$LABELS"
-     
+
      # Get user confirmation
      read -p "Choose action: [S]ubmit, [E]dit, [C]ancel, [D]ry-run: " ACTION
-     
+
      case "$ACTION" in
        [Ss]* )
          # Proceed to create issue
@@ -386,7 +386,7 @@ Request new functionality for the slash-command system.
          ;;
      esac
    fi
-   
+
    # Create issue using gh CLI
    gh issue create \
      --repo "aRustyDev/prompts" \
@@ -501,7 +501,7 @@ gather_environment() {
 # Function to capture and sanitize context
 capture_context() {
   local LINES="${1:-500}"
-  
+
   # Get recent conversation context
   if [ -n "$CLAUDE_CONVERSATION_FILE" ]; then
     tail -n "$LINES" "$CLAUDE_CONVERSATION_FILE" | \
@@ -519,7 +519,7 @@ show_issue_preview() {
   local TITLE="$1"
   local BODY="$2"
   local LABELS="$3"
-  
+
   # Draw preview box using box-drawing characters
   echo "╭─────────────────────────────────────────────╮"
   echo "│ GitHub Issue Preview                        │"
@@ -541,7 +541,7 @@ show_issue_preview() {
 edit_in_editor() {
   local CONTENT="$1"
   local TMPFILE=$(mktemp)
-  
+
   echo "$CONTENT" > "$TMPFILE"
   ${EDITOR:-vi} "$TMPFILE"
   cat "$TMPFILE"
@@ -554,7 +554,7 @@ edit_in_editor() {
 # Function to populate template variables
 populate_template() {
   local TEMPLATE="$1"
-  
+
   # Replace all template variables
   sed -e "s/\${COMMAND}/$CURRENT_COMMAND/g" \
       -e "s/\${CLAUDE_VERSION}/$CLAUDE_VERSION/g" \

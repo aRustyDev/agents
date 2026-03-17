@@ -9,11 +9,11 @@ Provides core functionality for PM Agent:
 """
 
 from .confidence import ConfidenceChecker
-from .self_check import SelfCheckProtocol
 from .reflexion import ReflexionPattern
+from .self_check import SelfCheckProtocol
 
 __all__ = [
     "ConfidenceChecker",
-    "SelfCheckProtocol",
     "ReflexionPattern",
+    "SelfCheckProtocol",
 ]

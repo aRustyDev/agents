@@ -83,4 +83,4 @@ globs: **/*.js, **/*.ts, src/**/*.ts
 - Implement proper error handling
 - Use proper logging
 - Handle process signals properly
-- Document code properly 
+- Document code properly

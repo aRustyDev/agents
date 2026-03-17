@@ -13,4 +13,3 @@ Developers familiar with TypeScript, Node.js, and modern web dev tools would ben
 
 ## Overview of .cursorrules prompt
 The .cursorrules file defines the behavior and interaction style for an expert programming assistant specializing in TypeScript, Node.js, Next.js 14.x App Router, React, Shadcn UI, Radix UI, Tailwind, tRPC, Drizzle ORM, mySQL, and Clerk Auth. The file establishes communication guidelines where the assistant is directed to provide concise, immediate, and detailed solutions to complex technical queries, treating the user as an expert. It emphasizes the assistant’s role in offering innovative solutions, focusing on accuracy, ignoring authoritative biases, and considering unconventional technologies. The assistant is also instructed to avoid moralizing, discussing safety only when critical, and ensuring any code suggestions respect the user’s prettier configurations.
-

@@ -1,0 +1,70 @@
+# Registry API Documentation: MCP.so
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "mcp.so"
+  base_url: "https://mcp.so"
+  type: "mcp_server_registry"
+
+  api:
+    docs_url: null
+    spec_format: "none"
+
+    authentication:
+      type: "none"
+      notes: "No public API documented"
+
+    endpoints: []
+
+  access_method:
+    type: "web_scraping"
+    recommended_tool: "crawl4ai"
+    notes: "JS-heavy site, requires JS rendering"
+    pages:
+      - path: "/"
+        content: "18,288 MCP servers"
+      - path: "/servers"
+        content: "Server listings"
+      - path: "/clients"
+        content: "MCP client listings"
+      - path: "/server/{name}/{author}"
+        content: "Individual server details"
+
+  restrictions:
+    robots_txt:
+      url: "https://mcp.so/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed:
+        - "/*?*q="
+        - "/privacy-policy"
+        - "/terms-of-service"
+      crawl_delay: null
+      notes: "Blocks query parameter URLs, allows main content"
+
+    rate_limits:
+      documented: "none"
+      observed: "none"
+
+    terms_of_service:
+      url: "https://mcp.so/terms-of-service"
+      scraping_policy: "not explicitly addressed"
+      api_policy: "not addressed"
+      prohibited:
+        - "reverse engineering"
+        - "interfering with security or performance"
+      contact: "support@mcp.so"
+
+  example:
+    crawl4ai: |
+      curl -s -X POST "http://localhost:11235/md" \
+        -H "Content-Type: application/json" \
+        -d '{"url": "https://mcp.so/"}'
+
+  observations:
+    - "Largest MCP server registry (18,288 servers)"
+    - "No public API - JS rendering required"
+    - "Third-party registry (not official)"
+    - "ToS prohibits reverse engineering"
+    - "Contact support for API access questions"

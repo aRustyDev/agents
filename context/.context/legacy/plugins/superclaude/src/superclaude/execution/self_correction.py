@@ -12,12 +12,12 @@ Key features:
 - Persistent learning memory
 """
 
-from dataclasses import dataclass, asdict
-from typing import List, Optional, Dict, Any
-from pathlib import Path
-import json
-from datetime import datetime
 import hashlib
+import json
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -25,9 +25,9 @@ class RootCause:
     """Identified root cause of failure"""
     category: str  # e.g., "validation", "dependency", "logic", "assumption"
     description: str
-    evidence: List[str]
+    evidence: list[str]
     prevention_rule: str
-    validation_tests: List[str]
+    validation_tests: list[str]
 
     def __repr__(self) -> str:
         return (
@@ -48,7 +48,7 @@ class FailureEntry:
     error_message: str
     root_cause: RootCause
     fixed: bool
-    fix_description: Optional[str] = None
+    fix_description: str | None = None
     recurrence_count: int = 0
 
     def to_dict(self) -> dict:
@@ -101,7 +101,7 @@ class SelfCorrectionEngine:
         with open(self.reflexion_file, 'w') as f:
             json.dump(initial_data, f, indent=2)
 
-    def detect_failure(self, execution_result: Dict[str, Any]) -> bool:
+    def detect_failure(self, execution_result: dict[str, Any]) -> bool:
         """
         Detect if execution failed
 
@@ -113,7 +113,7 @@ class SelfCorrectionEngine:
     def analyze_root_cause(
         self,
         task: str,
-        failure: Dict[str, Any]
+        failure: dict[str, Any]
     ) -> RootCause:
         """
         Analyze root cause of failure
@@ -183,7 +183,7 @@ class SelfCorrectionEngine:
 
         return "unknown"
 
-    def _find_similar_failures(self, task: str, error_msg: str) -> List[FailureEntry]:
+    def _find_similar_failures(self, task: str, error_msg: str) -> list[FailureEntry]:
         """Find similar past failures"""
 
         try:
@@ -220,7 +220,7 @@ class SelfCorrectionEngine:
         self,
         category: str,
         error_msg: str,
-        similar: List[FailureEntry]
+        similar: list[FailureEntry]
     ) -> str:
         """Generate prevention rule based on failure analysis"""
 
@@ -241,7 +241,7 @@ class SelfCorrectionEngine:
 
         return base_rule
 
-    def _generate_validation_tests(self, category: str, error_msg: str) -> List[str]:
+    def _generate_validation_tests(self, category: str, error_msg: str) -> list[str]:
         """Generate validation tests to prevent recurrence"""
 
         tests = {
@@ -277,10 +277,10 @@ class SelfCorrectionEngine:
     def learn_and_prevent(
         self,
         task: str,
-        failure: Dict[str, Any],
+        failure: dict[str, Any],
         root_cause: RootCause,
         fixed: bool = False,
-        fix_description: Optional[str] = None
+        fix_description: str | None = None
     ):
         """
         Learn from failure and store prevention rules
@@ -288,7 +288,7 @@ class SelfCorrectionEngine:
         Updates Reflexion memory with new learning.
         """
 
-        print(f"📚 Self-Correction: Learning from failure")
+        print("📚 Self-Correction: Learning from failure")
 
         # Generate unique ID for this failure
         failure_id = hashlib.md5(
@@ -334,15 +334,15 @@ class SelfCorrectionEngine:
             if "prevention_rules" not in data:
                 data["prevention_rules"] = []
             data["prevention_rules"].append(root_cause.prevention_rule)
-            print(f"📝 Prevention rule added")
+            print("📝 Prevention rule added")
 
         # Save updated memory
         with open(self.reflexion_file, 'w') as f:
             json.dump(data, f, indent=2)
 
-        print(f"💾 Reflexion memory updated")
+        print("💾 Reflexion memory updated")
 
-    def get_prevention_rules(self) -> List[str]:
+    def get_prevention_rules(self) -> list[str]:
         """Get all active prevention rules"""
 
         try:
@@ -354,7 +354,7 @@ class SelfCorrectionEngine:
         except Exception:
             return []
 
-    def check_against_past_mistakes(self, task: str) -> List[FailureEntry]:
+    def check_against_past_mistakes(self, task: str) -> list[FailureEntry]:
         """
         Check if task is similar to past mistakes
 
@@ -388,10 +388,10 @@ class SelfCorrectionEngine:
 
 
 # Singleton instance
-_self_correction_engine: Optional[SelfCorrectionEngine] = None
+_self_correction_engine: SelfCorrectionEngine | None = None
 
 
-def get_self_correction_engine(repo_path: Optional[Path] = None) -> SelfCorrectionEngine:
+def get_self_correction_engine(repo_path: Path | None = None) -> SelfCorrectionEngine:
     """Get or create self-correction engine singleton"""
     global _self_correction_engine
 
@@ -406,9 +406,9 @@ def get_self_correction_engine(repo_path: Optional[Path] = None) -> SelfCorrecti
 # Convenience function
 def learn_from_failure(
     task: str,
-    failure: Dict[str, Any],
+    failure: dict[str, Any],
     fixed: bool = False,
-    fix_description: Optional[str] = None
+    fix_description: str | None = None
 ):
     """
     Learn from execution failure

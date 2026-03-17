@@ -2,14 +2,11 @@
 Database utilities for PostgreSQL connection and operations.
 """
 
-import os
 import json
-import asyncio
-from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime, timedelta, timezone
-from contextlib import asynccontextmanager
-from uuid import UUID
 import logging
+import os
+from contextlib import asynccontextmanager
+from typing import Any
 
 import asyncpg
 from asyncpg.pool import Pool
@@ -23,20 +20,20 @@ logger = logging.getLogger(__name__)
 
 class DatabasePool:
     """Manages PostgreSQL connection pool."""
-    
-    def __init__(self, database_url: Optional[str] = None):
+
+    def __init__(self, database_url: str | None = None):
         """
         Initialize database pool.
-        
+
         Args:
             database_url: PostgreSQL connection URL
         """
         self.database_url = database_url or os.getenv("DATABASE_URL")
         if not self.database_url:
             raise ValueError("DATABASE_URL environment variable not set")
-        
-        self.pool: Optional[Pool] = None
-    
+
+        self.pool: Pool | None = None
+
     async def initialize(self):
         """Create connection pool."""
         if not self.pool:
@@ -48,20 +45,20 @@ class DatabasePool:
                 command_timeout=60
             )
             logger.info("Database connection pool initialized")
-    
+
     async def close(self):
         """Close connection pool."""
         if self.pool:
             await self.pool.close()
             self.pool = None
             logger.info("Database connection pool closed")
-    
+
     @asynccontextmanager
     async def acquire(self):
         """Acquire a connection from the pool."""
         if not self.pool:
             await self.initialize()
-        
+
         async with self.pool.acquire() as connection:
             yield connection
 
@@ -80,20 +77,20 @@ async def close_database():
     await db_pool.close()
 
 # Document Management Functions
-async def get_document(document_id: str) -> Optional[Dict[str, Any]]:
+async def get_document(document_id: str) -> dict[str, Any] | None:
     """
     Get document by ID.
-    
+
     Args:
         document_id: Document UUID
-    
+
     Returns:
         Document data or None if not found
     """
     async with db_pool.acquire() as conn:
         result = await conn.fetchrow(
             """
-            SELECT 
+            SELECT
                 id::text,
                 title,
                 source,
@@ -106,7 +103,7 @@ async def get_document(document_id: str) -> Optional[Dict[str, Any]]:
             """,
             document_id
         )
-        
+
         if result:
             return {
                 "id": result["id"],
@@ -117,29 +114,29 @@ async def get_document(document_id: str) -> Optional[Dict[str, Any]]:
                 "created_at": result["created_at"].isoformat(),
                 "updated_at": result["updated_at"].isoformat()
             }
-        
+
         return None
 
 
 async def list_documents(
     limit: int = 100,
     offset: int = 0,
-    metadata_filter: Optional[Dict[str, Any]] = None
-) -> List[Dict[str, Any]]:
+    metadata_filter: dict[str, Any] | None = None
+) -> list[dict[str, Any]]:
     """
     List documents with optional filtering.
-    
+
     Args:
         limit: Maximum number of documents to return
         offset: Number of documents to skip
         metadata_filter: Optional metadata filter
-    
+
     Returns:
         List of documents
     """
     async with db_pool.acquire() as conn:
         query = """
-            SELECT 
+            SELECT
                 d.id::text,
                 d.title,
                 d.source,
@@ -150,27 +147,27 @@ async def list_documents(
             FROM documents d
             LEFT JOIN chunks c ON d.id = c.document_id
         """
-        
+
         params = []
         conditions = []
-        
+
         if metadata_filter:
             conditions.append(f"d.metadata @> ${len(params) + 1}::jsonb")
             params.append(json.dumps(metadata_filter))
-        
+
         if conditions:
             query += " WHERE " + " AND ".join(conditions)
-        
+
         query += """
             GROUP BY d.id, d.title, d.source, d.metadata, d.created_at, d.updated_at
             ORDER BY d.created_at DESC
             LIMIT $%d OFFSET $%d
         """ % (len(params) + 1, len(params) + 2)
-        
+
         params.extend([limit, offset])
-        
+
         results = await conn.fetch(query, *params)
-        
+
         return [
             {
                 "id": row["id"],
@@ -185,14 +182,14 @@ async def list_documents(
         ]
 
 # Utility Functions
-async def execute_query(query: str, *params) -> List[Dict[str, Any]]:
+async def execute_query(query: str, *params) -> list[dict[str, Any]]:
     """
     Execute a custom query.
-    
+
     Args:
         query: SQL query
         *params: Query parameters
-    
+
     Returns:
         Query results
     """
@@ -204,7 +201,7 @@ async def execute_query(query: str, *params) -> List[Dict[str, Any]]:
 async def test_connection() -> bool:
     """
     Test database connection.
-    
+
     Returns:
         True if connection successful
     """

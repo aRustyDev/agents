@@ -54,4 +54,4 @@ globs: **/*.ts, **/*.tsx, **/*.d.ts
 - Implement the Repository pattern for data access
 - Use the Factory pattern for object creation
 - Leverage dependency injection
-- Use the Module pattern for encapsulation 
+- Use the Module pattern for encapsulation

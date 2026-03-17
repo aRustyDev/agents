@@ -1,0 +1,113 @@
+# Deduplication Statistics
+# Phase 5: Aggregation & Indexing
+# Generated: 2026-03-08
+
+experiment:
+  id: "exp-007-deduplication"
+  title: "Measure duplicate component rate"
+  status: "completed"
+
+data_coverage:
+  total_registries: 14
+  total_components_indexed: 30
+  estimated_total_available: 31700
+  coverage_percentage: 0.09  # We've indexed ~0.09% of available
+
+current_stats:
+  total_components: 30
+  unique_by_url: 22
+  potential_duplicates: 0
+
+  by_type:
+    plugin: 20
+    skill: 5
+    agent: 2
+    command: 1
+    hook: 1
+    mcp_server: 1
+
+  by_source:
+    github: 22
+    buildwithclaude: 4
+    skillsmp: 3
+    awesome_list: 1
+
+registry_coverage:
+  # Shows claimed vs indexed
+  - registry: mcp.so
+    claimed: 18288
+    indexed: 0
+    coverage: 0%
+
+  - registry: buildwithclaude
+    claimed: 8089
+    indexed: 4
+    coverage: 0.05%
+
+  - registry: claudemarketplaces
+    claimed: 2919
+    indexed: 0
+    coverage: 0%
+
+  - registry: skillsmp
+    claimed: 2000
+    indexed: 3
+    coverage: 0.15%
+
+  - registry: awesome_subagents
+    claimed: 127
+    indexed: 1
+    coverage: 0.79%
+
+deduplication_potential:
+  hypothesis: "10-20% of components appear in multiple sources"
+
+  current_finding: "0% duplicates in current sample"
+
+  explanation: |
+    The low duplicate rate is expected because:
+    1. We've only indexed 30 components from a pool of ~31,700
+    2. Components were primarily sourced from GitHub (single source)
+    3. Cross-registry components haven't been crawled yet
+
+  expected_after_full_crawl:
+    duplicate_rate: "15-25%"
+    primary_overlaps:
+      - "GitHub repos mirrored in buildwithclaude"
+      - "skillsmp entries linked to GitHub repos"
+      - "Awesome lists containing registry entries"
+
+deduplication_strategy:
+  priority_order:
+    1: "exact_url_match"
+    2: "content_hash_match"
+    3: "name_author_type_match"
+
+  keep_policy:
+    - "Prefer official vendor entries (hashicorp, astral-sh)"
+    - "Prefer registry entries over awesome lists"
+    - "Higher star count wins for GitHub duplicates"
+    - "Most recent update wins for registry duplicates"
+
+fts_performance:
+  search_latency_ms: "<10"
+  index_size_bytes: "small (30 entries)"
+  query_examples:
+    - query: "chrome"
+      results: 2
+      latency: "<5ms"
+    - query: "agent"
+      results: 2
+      latency: "<5ms"
+
+observations:
+  - "Database schema successfully supports all component types"
+  - "FTS5 search is fast and functional"
+  - "Current sample is too small for meaningful deduplication analysis"
+  - "Full registry crawl required for Phase 6 validation"
+  - "Plugin component relationships successfully mapped"
+
+next_steps:
+  - "Run full crawl of top registries in Phase 6"
+  - "Implement quality scoring based on stars, recency, completeness"
+  - "Build deduplication pipeline for cross-registry entries"

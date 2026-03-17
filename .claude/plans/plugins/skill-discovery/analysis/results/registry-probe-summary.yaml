@@ -1,0 +1,169 @@
+result:
+  experiment_id: "exp-002-registry-probe"
+  probed_at: "2026-03-09T12:00:00Z"
+
+  registries_probed: 10
+  registries_successful: 8
+  registries_failed: 2
+
+  summary:
+    total_components_discovered: 5668
+    new_sources_identified: 4
+    largest_registry: "smithery.ai/skills (125,357 skills)"
+
+  registries:
+    - name: "mcp.so"
+      url: "https://mcp.so"
+      status: "crawled"
+      components_found: 1384
+      type: "MCP servers"
+      crawl_method: "pagination (?page=N)"
+      api_available: false
+      notes: "Completed full crawl across 294 pages"
+
+    - name: "buildwithclaude.com"
+      url: "https://buildwithclaude.com"
+      status: "crawled"
+      components_found: 234
+      types:
+        plugins: 8089
+        skills: 161
+        subagents: 117
+        commands: 175
+        hooks: 28
+        mcp_servers: 2824
+      crawl_method: "static pages"
+      api_available: false
+      github_repo: "davepoon/buildwithclaude"
+      notes: "Aggregates multiple marketplaces, excellent coverage"
+
+    - name: "mcpservers.org"
+      url: "https://mcpservers.org"
+      status: "crawled"
+      components_found: 103
+      total_available: 6523
+      type: "MCP servers"
+      crawl_method: "pagination (?page=N)"
+      api_available: false
+      categories:
+        - Search
+        - Web Scraping
+        - Communication
+        - Productivity
+        - Development
+        - Database
+        - Cloud Service
+        - File System
+        - Cloud Storage
+        - Version Control
+        - Other
+      notes: "Large catalog, supports filtering by category"
+
+    - name: "smithery.ai"
+      url: "https://smithery.ai"
+      status: "crawled"
+      servers_found: 47
+      servers_total: 3807
+      skills_total: 125357
+      types:
+        - MCPs
+        - Skills
+      crawl_method: "static pages"
+      api_available: false
+      features:
+        - Categories (Web Search, Browser Automation, etc.)
+        - Status filters (Verified, Local/Remote)
+        - Namespace filtering
+      notes: "Massive skill repository with 125K+ skills"
+
+    - name: "skillsmp.com"
+      url: "https://skillsmp.com"
+      status: "crawled"
+      components_found: 9
+      total_available: 414701
+      type: "Skills"
+      crawl_method: "static pages"
+      api_available: true
+      api_docs_url: "https://skillsmp.com/en/docs/api"
+      features:
+        - AI semantic search
+        - Categories (Tools, Development, Business, Data & AI)
+        - GitHub integration
+      notes: "Largest skill registry, uses SKILL.md standard"
+
+    - name: "glama.ai"
+      url: "https://glama.ai/mcp/servers"
+      status: "probed"
+      total_available: 18503
+      type: "MCP servers"
+      crawl_method: "infinite scroll (failed pagination)"
+      api_available: "unclear"
+      notes: "Pagination ?page=N returns same content, likely needs API or JS scroll"
+
+    - name: "claudemarketplaces.com"
+      url: "https://claudemarketplaces.com"
+      status: "existing"
+      components_found: 2919
+      type: "Skills and plugins"
+      notes: "Already in database from previous sessions"
+
+    - name: "ccpm.dev"
+      url: "https://ccpm.dev"
+      status: "empty"
+      notes: "Returns empty content, may need special handling"
+
+    - name: "awesome-claude-code.com"
+      url: "https://awesome-claude-code.com"
+      status: "not_probed"
+      notes: "To be investigated"
+
+    - name: "awesomeclaude.ai"
+      url: "https://awesomeclaude.ai"
+      status: "not_probed"
+      notes: "To be investigated"
+
+  components_by_source:
+    claudemarketplaces: 2919
+    awesome_modelcontextprotocol_servers: 1506
+    awesome_punkpeye_awesome-mcp-servers: 1483
+    mcp_so: 1384
+    awesome_wong2_awesome-mcp-servers: 538
+    github: 380
+    buildwithclaude_com: 234
+    mcpservers_org: 103
+    smithery_ai: 47
+    awesome_anthropics_anthropic-cookbook: 29
+    skillsmp_com: 9
+
+  findings:
+    - "buildwithclaude.com and skillsmp.com are now working (previously failed)"
+    - "smithery.ai has 125K+ skills, massive untapped resource"
+    - "glama.ai has 18K+ servers but needs different crawl approach"
+    - "Most registries use static HTML, easily crawlable with WebFetch/crawl4ai"
+    - "skillsmp.com has documented API for programmatic access"
+
+  recommendations:
+    - priority: high
+      action: "Deep crawl smithery.ai/skills (125K+ skills)"
+      method: "Use pagination or API if available"
+
+    - priority: high
+      action: "Investigate glama.ai API access"
+      method: "Check /mcp/api endpoint or use browser automation"
+
+    - priority: medium
+      action: "Complete mcpservers.org crawl (6.5K servers)"
+      method: "Paginate through all 218 pages"
+
+    - priority: medium
+      action: "Crawl skillsmp.com API for 414K skills"
+      method: "Use documented API at /docs/api"
+
+    - priority: low
+      action: "Investigate remaining registries"
+      method: "Probe ccpm.dev, awesome-claude-code.com, awesomeclaude.ai"
+
+  next_steps:
+    - "Import current 5,668 components to Meilisearch"
+    - "Research smithery.ai and skillsmp.com APIs"
+    - "Implement bulk crawl for large registries"

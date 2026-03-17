@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the database connection module
 const mockDbInstance = {
@@ -22,14 +22,14 @@ describe('Database Utils', () => {
     it('should execute database operation successfully', async () => {
       const mockOperation = vi.fn().mockResolvedValue('success')
       const result = await withDatabase('test-url', mockOperation)
-      
+
       expect(result).toBe('success')
       expect(mockOperation).toHaveBeenCalledWith(mockDbInstance)
     })
 
     it('should handle database operation errors', async () => {
       const mockOperation = vi.fn().mockRejectedValue(new Error('Operation failed'))
-      
+
       await expect(withDatabase('test-url', mockOperation)).rejects.toThrow('Operation failed')
       expect(mockOperation).toHaveBeenCalledWith(mockDbInstance)
     })
@@ -37,9 +37,9 @@ describe('Database Utils', () => {
     it('should log successful operations', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
       const mockOperation = vi.fn().mockResolvedValue('success')
-      
+
       await withDatabase('test-url', mockOperation)
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringMatching(/Database operation completed successfully in \d+ms/)
       )
@@ -49,9 +49,9 @@ describe('Database Utils', () => {
     it('should log failed operations', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const mockOperation = vi.fn().mockRejectedValue(new Error('Operation failed'))
-      
+
       await expect(withDatabase('test-url', mockOperation)).rejects.toThrow('Operation failed')
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringMatching(/Database operation failed after \d+ms:/),
         expect.any(Error)
@@ -63,12 +63,12 @@ describe('Database Utils', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
       const mockOperation = vi.fn().mockImplementation(async () => {
         // Simulate some delay
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise((resolve) => setTimeout(resolve, 10))
         return 'success'
       })
-      
+
       await withDatabase('test-url', mockOperation)
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringMatching(/Database operation completed successfully in \d+ms/)
       )

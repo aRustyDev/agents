@@ -4,10 +4,10 @@
 
 discover_github_artifacts() {
   echo "🔍 Scanning for GitHub artifacts created by plan command..."
-  
+
   REPO_OWNER=$(gh repo view --json owner -q .owner.login)
   REPO_NAME=$(gh repo view --json name -q .name)
-  
+
   # Check for plan metadata in sessions
   PLAN_SESSIONS=()
   if [ -d ".plan/sessions" ]; then
@@ -17,33 +17,33 @@ discover_github_artifacts() {
       fi
     done
   fi
-  
+
   # Find projects with naming pattern
   echo ""
   echo "📊 Projects:"
   gh project list --owner "$REPO_OWNER" --format json | \
-    jq -r '.projects[] | select(.title | startswith("'$REPO_NAME' - ")) | 
+    jq -r '.projects[] | select(.title | startswith("'$REPO_NAME' - ")) |
     "  [\(.number)] \(.title) (items: \(.items.totalCount))"'
-  
+
   # Find milestones
   echo ""
   echo "🎯 Milestones:"
   gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate | \
     jq -r '.[] | "  [\(.number)] \(.title) (open: \(.open_issues), closed: \(.closed_issues))"'
-  
+
   # Find issues with plan labels
   echo ""
   echo "📝 Issues:"
   echo "  With 'plan-generated' label:"
   gh issue list --label "plan-generated" --limit 100 --json number,title | \
     jq -r '.[] | "    #\(.number) \(.title)"'
-  
+
   # Count total artifacts
   PROJECT_COUNT=$(gh project list --owner "$REPO_OWNER" --format json | \
     jq '[.projects[] | select(.title | startswith("'$REPO_NAME' - "))] | length')
   MILESTONE_COUNT=$(gh api "repos/$REPO_OWNER/$REPO_NAME/milestones" --paginate | jq '. | length')
   ISSUE_COUNT=$(gh issue list --label "plan-generated" --limit 1000 --json number | jq '. | length')
-  
+
   echo ""
   echo "📊 Total artifacts found:"
   echo "  Projects: $PROJECT_COUNT"
@@ -54,18 +54,18 @@ discover_github_artifacts() {
 
 cleanup_github() {
   discover_github_artifacts
-  
+
   echo ""
   echo "⚠️  WARNING: This will permanently delete GitHub artifacts!"
   echo "This action cannot be undone."
   echo ""
-  
+
   read -p "Type 'DELETE' to confirm removal of GitHub artifacts: " CONFIRM
   if [ "$CONFIRM" != "DELETE" ]; then
     echo "❌ GitHub cleanup cancelled"
     return
   fi
-  
+
   # Detailed confirmation for each type
   echo ""
   echo "Select what to delete:"
@@ -75,7 +75,7 @@ cleanup_github() {
   echo "4) Issues only"
   echo "5) Cancel"
   read -p "Selection: " DELETE_SCOPE
-  
+
   case $DELETE_SCOPE in
     1) delete_all_github_artifacts ;;
     2) delete_projects ;;

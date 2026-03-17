@@ -4,16 +4,15 @@ Skill Installation Command
 Installs SuperClaude skills to ~/.claude/skills/ directory.
 """
 
-from pathlib import Path
-from typing import List, Optional, Tuple
 import shutil
+from pathlib import Path
 
 
 def install_skill_command(
     skill_name: str,
     target_path: Path,
     force: bool = False
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Install a skill to target directory
 
@@ -54,7 +53,7 @@ def install_skill_command(
         return False, f"Failed to install skill: {e}"
 
 
-def _get_skill_source(skill_name: str) -> Optional[Path]:
+def _get_skill_source(skill_name: str) -> Path | None:
     """
     Get source directory for skill
 
@@ -68,9 +67,9 @@ def _get_skill_source(skill_name: str) -> Optional[Path]:
         Path to skill source directory
     """
     package_root = Path(__file__).resolve().parent.parent
-    skill_dirs: List[Path] = []
+    skill_dirs: list[Path] = []
 
-    def _candidate_paths(base: Path) -> List[Path]:
+    def _candidate_paths(base: Path) -> list[Path]:
         if not base.exists():
             return []
         normalized = skill_name.replace("-", "_")
@@ -127,7 +126,7 @@ def list_available_skills() -> list[str]:
     if repo_root.name == "src":
         candidate_dirs.append(repo_root.parent / "skills")
 
-    skills: List[str] = []
+    skills: list[str] = []
     seen: set[str] = set()
 
     for base in candidate_dirs:

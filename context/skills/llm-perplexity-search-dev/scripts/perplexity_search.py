@@ -16,11 +16,11 @@ Author: Scientific Skills
 License: MIT
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
-from typing import Optional, Dict, Any, List
+from typing import Any
 
 
 def check_dependencies():
@@ -34,7 +34,7 @@ def check_dependencies():
         return False
 
 
-def check_api_key() -> Optional[str]:
+def check_api_key() -> str | None:
     """Check if OpenRouter API key is configured."""
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
@@ -55,7 +55,7 @@ def search_with_perplexity(
     max_tokens: int = 4000,
     temperature: float = 0.2,
     verbose: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Perform a search using Perplexity models via LiteLLM and OpenRouter.
 
@@ -259,7 +259,7 @@ Available Models:
 
     # Print usage stats if verbose
     if args.verbose:
-        print(f"\nUsage:", file=sys.stderr)
+        print("\nUsage:", file=sys.stderr)
         print(f"  Prompt tokens: {result['usage']['prompt_tokens']}", file=sys.stderr)
         print(f"  Completion tokens: {result['usage']['completion_tokens']}", file=sys.stderr)
         print(f"  Total tokens: {result['usage']['total_tokens']}", file=sys.stderr)

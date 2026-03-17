@@ -15,7 +15,7 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     ((test_count++))
-    
+
     echo -e "\n📋 Test: $test_name"
     if eval "$test_command"; then
         echo -e "${GREEN}✅ PASS${NC}"
@@ -87,7 +87,7 @@ for file in $(find .claude/commands/{command,plan,report} -name "*.md" -type f 2
     if [[ "$file" == *"/templates/"* ]]; then
         continue
     fi
-    
+
     deps=$(grep -A20 "^dependencies:" "$file" 2>/dev/null | grep "^  - " | sed 's/^  - //' | grep -v "^$")
     for dep in $deps; do
         # Check if dependency exists in same directory

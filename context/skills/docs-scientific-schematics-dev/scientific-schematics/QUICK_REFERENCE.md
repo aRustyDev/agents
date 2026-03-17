@@ -204,4 +204,3 @@ python scripts/generate_schematic.py "diagram" -o out.png -v
 - Implementation details: `IMPLEMENTATION_SUMMARY.md`
 - Example script: `example_usage.sh`
 - Get API key: https://openrouter.ai/keys
-

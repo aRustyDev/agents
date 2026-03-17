@@ -592,7 +592,7 @@ d.name;
 
     <sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   department_id,
   AVG(CASE WHEN strftime('%Y', hire_date) = '2022' THEN salary END) AS avg_salary_2022,
   AVG(CASE WHEN strftime('%Y', hire_date) = '2023' THEN salary END) AS avg_salary_2023
@@ -600,7 +600,7 @@ FROM employees
 WHERE strftime('%Y', hire_date) IN ('2022', '2023')
 GROUP BY department_id
 )
-SELECT 
+SELECT
 d.name AS department_name,
 ROUND((avg_salary_2023 - avg_salary_2022) / avg_salary_2022 * 100, 2) AS percentage_increase
 FROM avg_salaries AS a
@@ -613,23 +613,23 @@ ORDER BY percentage_increase DESC
 
     <sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   d.name AS department,
   AVG(CASE WHEN strftime('%Y', e.hire_date) = '2022' THEN e.salary END) AS avg_salary_2022,
   AVG(CASE WHEN strftime('%Y', e.hire_date) = '2023' THEN e.salary END) AS avg_salary_2023
-FROM 
+FROM
   employees e
-JOIN 
+JOIN
   departments d ON e.department_id = d.id
-GROUP BY 
+GROUP BY
   d.name
 )
-SELECT 
+SELECT
 department,
 ROUND(((avg_salary_2023 - avg_salary_2022) / avg_salary_2022) * 100, 2) AS percentage_increase
-FROM 
+FROM
 avg_salaries
-WHERE 
+WHERE
 avg_salary_2022 IS NOT NULL AND avg_salary_2023 IS NOT NULL;
 </sql>
 
@@ -661,7 +661,7 @@ FROM employees
 WHERE YEAR(hire_date) = 2023
 GROUP BY department_id
 )
-SELECT 
+SELECT
 d.name AS department_name,
 ROUND(
   COALESCE(
@@ -709,7 +709,7 @@ JOIN departments d ON e.department_id = d.id
 WHERE strftime('%Y', e.hire_date) = '2023'
 GROUP BY d.name
 )
-SELECT 
+SELECT
 avg_2022.department,
 ROUND(((avg_2023.avg_salary_2023 - avg_2022.avg_salary_2022) / avg_2022.avg_salary_2022 * 100), 2) AS percentage_increase
 FROM avg_2022
@@ -731,25 +731,25 @@ To calculate the percentage increase in average salary for each department from 
 </thought_process>
 <sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   d.name AS department_name,
   EXTRACT(YEAR FROM e.hire_date) AS year,
   AVG(e.salary) AS avg_salary
-FROM 
+FROM
   employees e
   JOIN departments d ON e.department_id = d.id
-WHERE 
+WHERE
   EXTRACT(YEAR FROM e.hire_date) IN (2022, 2023)
-GROUP BY 
+GROUP BY
   d.name, EXTRACT(YEAR FROM e.hire_date)
 )
-SELECT 
+SELECT
 a1.department_name,
 ((a2.avg_salary - a1.avg_salary) / a1.avg_salary) * 100 AS percentage_increase
-FROM 
+FROM
 avg_salaries a1
 JOIN avg_salaries a2 ON a1.department_name = a2.department_name
-WHERE 
+WHERE
 a1.year = 2022 AND a2.year = 2023;
 </sql>
 <error>
@@ -763,23 +763,23 @@ To address the potential issue of missing departments, we can use LEFT JOINs and
 </thought_process>
 <sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   d.name AS department_name,
   EXTRACT(YEAR FROM e.hire_date) AS year,
   AVG(e.salary) AS avg_salary
-FROM 
+FROM
   departments d
   LEFT JOIN employees e ON e.department_id = d.id AND EXTRACT(YEAR FROM e.hire_date) IN (2022, 2023)
-GROUP BY 
+GROUP BY
   d.name, EXTRACT(YEAR FROM e.hire_date)
 )
-SELECT 
+SELECT
 d.name AS department_name,
-CASE 
+CASE
   WHEN COALESCE(a1.avg_salary, 0) = 0 THEN NULL
-  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100 
+  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100
 END AS percentage_increase
-FROM 
+FROM
 departments d
 LEFT JOIN avg_salaries a1 ON d.name = a1.department_name AND a1.year = 2022
 LEFT JOIN avg_salaries a2 ON d.name = a2.department_name AND a2.year = 2023;
@@ -795,32 +795,32 @@ To provide more informative results, let's add columns to show the average salar
 </thought_process>
 <sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   d.name AS department_name,
   EXTRACT(YEAR FROM e.hire_date) AS year,
   AVG(e.salary) AS avg_salary
-FROM 
+FROM
   departments d
   LEFT JOIN employees e ON e.department_id = d.id AND EXTRACT(YEAR FROM e.hire_date) IN (2022, 2023)
-GROUP BY 
+GROUP BY
   d.name, EXTRACT(YEAR FROM e.hire_date)
 )
-SELECT 
+SELECT
 d.name AS department_name,
 COALESCE(a1.avg_salary, 0) AS avg_salary_2022,
 COALESCE(a2.avg_salary, 0) AS avg_salary_2023,
-CASE 
+CASE
   WHEN a1.avg_salary IS NULL AND a2.avg_salary IS NULL THEN 'No data for both years'
   WHEN a1.avg_salary IS NULL THEN 'No data for 2022'
   WHEN a2.avg_salary IS NULL THEN 'No data for 2023'
   WHEN a1.avg_salary = 0 THEN 'Cannot calculate (2022 avg salary is 0)'
   ELSE 'Complete data'
 END AS data_status,
-CASE 
+CASE
   WHEN COALESCE(a1.avg_salary, 0) = 0 THEN NULL
-  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100 
+  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100
 END AS percentage_increase
-FROM 
+FROM
 departments d
 LEFT JOIN avg_salaries a1 ON d.name = a1.department_name AND a1.year = 2022
 LEFT JOIN avg_salaries a2 ON d.name = a2.department_name AND a2.year = 2023;
@@ -829,32 +829,32 @@ LEFT JOIN avg_salaries a2 ON d.name = a2.department_name AND a2.year = 2023;
 
 <final_sql>
 WITH avg_salaries AS (
-SELECT 
+SELECT
   d.name AS department_name,
   EXTRACT(YEAR FROM e.hire_date) AS year,
   AVG(e.salary) AS avg_salary
-FROM 
+FROM
   departments d
   LEFT JOIN employees e ON e.department_id = d.id AND EXTRACT(YEAR FROM e.hire_date) IN (2022, 2023)
-GROUP BY 
+GROUP BY
   d.name, EXTRACT(YEAR FROM e.hire_date)
 )
-SELECT 
+SELECT
 d.name AS department_name,
 COALESCE(a1.avg_salary, 0) AS avg_salary_2022,
 COALESCE(a2.avg_salary, 0) AS avg_salary_2023,
-CASE 
+CASE
   WHEN a1.avg_salary IS NULL AND a2.avg_salary IS NULL THEN 'No data for both years'
   WHEN a1.avg_salary IS NULL THEN 'No data for 2022'
   WHEN a2.avg_salary IS NULL THEN 'No data for 2023'
   WHEN a1.avg_salary = 0 THEN 'Cannot calculate (2022 avg salary is 0)'
   ELSE 'Complete data'
 END AS data_status,
-CASE 
+CASE
   WHEN COALESCE(a1.avg_salary, 0) = 0 THEN NULL
-  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100 
+  ELSE ((COALESCE(a2.avg_salary, 0) - COALESCE(a1.avg_salary, 0)) / COALESCE(a1.avg_salary, 0)) * 100
 END AS percentage_increase
-FROM 
+FROM
 departments d
 LEFT JOIN avg_salaries a1 ON d.name = a1.department_name AND a1.year = 2022
 LEFT JOIN avg_salaries a2 ON d.name = a2.department_name AND a2.year = 2023;
@@ -983,7 +983,7 @@ To find the employees who earn above their department's average salary, we need 
 3. Return the employees who earn above their department's average salary, along with the percentage difference.
 </thought_process>
 <sql>
-SELECT e.name, e.salary, d.name AS department_name, 
+SELECT e.name, e.salary, d.name AS department_name,
      (e.salary - (SELECT AVG(salary) FROM employees WHERE department_id = e.department_id)) / (SELECT AVG(salary) FROM employees WHERE department_id = e.department_id) * 100 AS percentage_above_average
 FROM employees e
 JOIN departments d ON e.department_id = d.id
@@ -999,7 +999,7 @@ This query might fail if there are no employees in a department, as the subquery
 To handle the case where a department might have no employees, we can use a LEFT JOIN to ensure all departments are included, and then filter the results to only include employees who earn above their department's average.
 </thought_process>
 <sql>
-SELECT e.name, e.salary, d.name AS department_name, 
+SELECT e.name, e.salary, d.name AS department_name,
      (e.salary - d_avg.avg_salary) / d_avg.avg_salary * 100 AS percentage_above_average
 FROM employees e
 LEFT JOIN departments d ON e.department_id = d.id
@@ -1016,7 +1016,7 @@ This query should work for the given scenario, as it handles the case where a de
 </attempt2>
 
 <final_sql>
-SELECT e.name, e.salary, d.name AS department_name, 
+SELECT e.name, e.salary, d.name AS department_name,
      (e.salary - d_avg.avg_salary) / d_avg.avg_salary * 100 AS percentage_above_average
 FROM employees e
 LEFT JOIN departments d ON e.department_id = d.id
@@ -1038,21 +1038,21 @@ SELECT department_id, AVG(salary) AS avg_salary
 FROM employees
 GROUP BY department_id
 )
-SELECT 
+SELECT
 e.name,
 e.salary,
 d.name AS department,
 da.avg_salary AS dept_avg_salary,
 ROUND((e.salary - da.avg_salary) / da.avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 employees e
-JOIN 
+JOIN
 departments d ON e.department_id = d.id
-JOIN 
+JOIN
 dept_avgs da ON e.department_id = da.department_id
-WHERE 
+WHERE
 e.salary > da.avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC
 </sql>
 
@@ -1095,19 +1095,19 @@ SELECT department_id, AVG(salary) AS avg_salary
 FROM employees
 GROUP BY department_id
 )
-SELECT 
+SELECT
 e.name AS employee_name,
 d.name AS department_name,
 e.salary,
 ROUND(da.avg_salary, 2) AS dept_avg_salary,
 ROUND((e.salary - da.avg_salary) / da.avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 employees e
 JOIN departments d ON e.department_id = d.id
 JOIN dept_avg da ON e.department_id = da.department_id
-WHERE 
+WHERE
 e.salary > da.avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC;
 </sql>
 
@@ -1130,21 +1130,21 @@ SELECT department_id, AVG(salary) AS dept_avg_salary
 FROM employees
 GROUP BY department_id
 )
-SELECT 
+SELECT
 e.name AS employee_name,
 d.name AS department_name,
 e.salary,
 da.dept_avg_salary,
 ROUND((e.salary - da.dept_avg_salary) / da.dept_avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 employees e
-JOIN 
+JOIN
 departments d ON e.department_id = d.id
-JOIN 
+JOIN
 dept_avgs da ON e.department_id = da.department_id
-WHERE 
+WHERE
 e.salary > da.dept_avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC;
 </sql>
 
@@ -1163,21 +1163,21 @@ To solve this query, we need to:
 We can use a subquery to calculate the department averages, then join it with the employees table.
 </thought_process>
 <sql>
-SELECT 
+SELECT
 e.name,
 e.salary,
 d.name AS department,
 ROUND((e.salary - dept_avg.avg_salary) / dept_avg.avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 employees e
-JOIN 
+JOIN
 departments d ON e.department_id = d.id
-JOIN 
+JOIN
 (SELECT department_id, AVG(salary) AS avg_salary FROM employees GROUP BY department_id) dept_avg
 ON e.department_id = dept_avg.department_id
-WHERE 
+WHERE
 e.salary > dept_avg.avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC;
 </sql>
 <error>
@@ -1191,50 +1191,50 @@ To improve efficiency, we can use a window function (AVG() OVER()) instead of a 
 </thought_process>
 <sql>
 WITH dept_averages AS (
-SELECT 
+SELECT
     e.*,
     d.name AS department_name,
     AVG(e.salary) OVER (PARTITION BY e.department_id) AS dept_avg_salary
-FROM 
+FROM
     employees e
-JOIN 
+JOIN
     departments d ON e.department_id = d.id
 )
-SELECT 
+SELECT
 name,
 salary,
 department_name,
 ROUND((salary - dept_avg_salary) / dept_avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 dept_averages
-WHERE 
+WHERE
 salary > dept_avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC;
 </sql>
 </attempt2>
 
 <final_sql>
 WITH dept_averages AS (
-SELECT 
+SELECT
     e.*,
     d.name AS department_name,
     AVG(e.salary) OVER (PARTITION BY e.department_id) AS dept_avg_salary
-FROM 
+FROM
     employees e
-JOIN 
+JOIN
     departments d ON e.department_id = d.id
 )
-SELECT 
+SELECT
 name,
 salary,
 department_name,
 ROUND((salary - dept_avg_salary) / dept_avg_salary * 100, 2) AS percentage_above_avg
-FROM 
+FROM
 dept_averages
-WHERE 
+WHERE
 salary > dept_avg_salary
-ORDER BY 
+ORDER BY
 percentage_above_avg DESC;
 </final_sql>
 

@@ -1,0 +1,145 @@
+# Plugin Registry Inventory
+# Phase 3: Plugin Discovery
+# Executed: 2026-03-08
+
+registries:
+  - name: "claudemarketplaces"
+    url: "https://claudemarketplaces.com/"
+    status: "active"
+    plugin_count: 2919
+    description: "Marketplace aggregator - indexes GitHub repos with marketplace.json"
+    api_docs: "N/A (web scraping)"
+    has_search: true
+    categories: true
+    install_command: "/plugin marketplace add {owner}/{repo}"
+    top_marketplaces:
+      - name: "f/prompts.chat"
+        stars: 144800
+        plugins: 1
+      - name: "anthropics/claude-code"
+        stars: 65100
+        plugins: 13
+      - name: "obra/superpowers"
+        stars: 46900
+        plugins: 1
+      - name: "ComposioHQ/awesome-claude-skills"
+        stars: 32000
+        plugins: 107
+      - name: "wshobson/agents"
+        stars: 28000
+        plugins: 73
+      - name: "VoltAgent/awesome-claude-code-subagents"
+        stars: 9900
+        plugins: 10
+    notes: "Independent project by @mertduzgun. Auto-indexes GitHub repos."
+
+  - name: "buildwithclaude"
+    url: "https://buildwithclaude.com/plugins"
+    status: "active"
+    plugin_count: 8089
+    description: "Comprehensive plugin directory with category filtering"
+    api_docs: "N/A (web interface)"
+    has_search: true
+    categories: true
+    sections:
+      - plugins: 8089
+      - skills: "160+"
+      - subagents: "available"
+      - commands: "available"
+      - hooks: "available"
+      - mcp_servers: "available"
+      - marketplaces: "available"
+    install_command: "Direct GitHub links"
+    notes: "By Dave Poon. Multi-component registry (plugins, skills, agents, etc.)"
+
+  - name: "clauderegistry"
+    url: "https://clauderegistry.com/"
+    status: "active"
+    plugin_count: 7
+    description: "Curated plugin directory with use cases and guides"
+    api_docs: "N/A"
+    has_search: true
+    install_command: "/plugin marketplace add clauderegistry/marketplace"
+    plugins:
+      - seo-optimizer
+      - code-tutor
+      - data-converter
+      - test-generator
+      - legacy-analyzer
+      - doc-generator
+      - code-auditor
+    use_cases:
+      - "Full Testing Pipeline"
+      - "Codebase Onboarding"
+      - "SEO Launch Checklist"
+      - "Legacy Modernization"
+      - "API Documentation Pipeline"
+      - "Data Migration Workflow"
+      - "Code Quality Review"
+      - "Learning a New Codebase"
+    notes: "Focus on professional use cases with combined plugin workflows"
+
+  - name: "litellm-marketplace"
+    url: "https://docs.litellm.ai/docs/tutorials/claude_code_plugin_marketplace"
+    status: "active"
+    plugin_count: "N/A (enterprise solution)"
+    description: "Enterprise plugin governance via LiteLLM AI Gateway"
+    api_docs: "Yes - REST API"
+    has_search: false
+    type: "enterprise"
+    endpoints:
+      public:
+        - "GET /claude-code/marketplace.json"
+      admin:
+        - "POST /claude-code/plugins"
+        - "GET /claude-code/plugins"
+        - "POST /claude-code/plugins/{name}/enable|disable"
+        - "DELETE /claude-code/plugins/{name}"
+    install_command: "claude plugin install [name]@litellm"
+    notes: "Self-hosted enterprise registry. Not a public catalog."
+
+  - name: "paddo-tools"
+    url: "https://paddo.dev/blog/claude-tools-plugin-marketplace/"
+    status: "active"
+    plugin_count: 6
+    description: "Specialized workflow plugins"
+    github: "https://github.com/paddo/claude-tools"
+    has_search: false
+    install_command: "claude plugin install [name]@paddo-tools"
+    plugins:
+      - name: "gemini-tools"
+        description: "Visual analysis and UI mockup via Gemini 3 Pro"
+      - name: "codex"
+        description: "Architecture thinking via OpenAI Codex"
+      - name: "dns"
+        description: "Multi-provider domain record management"
+      - name: "headless"
+        description: "Browser automation via Playwright"
+      - name: "mobile"
+        description: "Native app testing via Appium"
+      - name: "miro"
+        description: "Miro board reading and interpretation"
+    architecture: "Claude orchestrates, external tools execute"
+    notes: "Delegates to specialized CLIs/APIs, uses Haiku subagents"
+
+  - name: "composio"
+    url: "https://composio.dev/blog/top-claude-code-plugins"
+    status: "active"
+    plugin_count: "10+ (blog post)"
+    description: "Blog article listing top Claude Code plugins"
+    type: "curated_list"
+    notes: "Content not extractable (CSS/JS heavy). Lists top 10 plugins for 2026."
+
+# Summary Statistics
+summary:
+  total_registries: 6
+  registries_with_plugins: 5
+  total_plugins_indexed: "11000+"  # buildwithclaude + claudemarketplaces overlap
+  primary_registries:
+    - buildwithclaude: 8089
+    - claudemarketplaces: 2919
+  curated_registries:
+    - clauderegistry: 7
+    - paddo-tools: 6
+  enterprise_registries:
+    - litellm: "self-hosted"

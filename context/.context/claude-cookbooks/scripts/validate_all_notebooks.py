@@ -10,12 +10,12 @@ Features:
 - Idempotent with state persistence
 """
 
-import json
-import subprocess
-from pathlib import Path
-from datetime import datetime
-import os
 import argparse
+import json
+import os
+import subprocess
+from datetime import datetime
+from pathlib import Path
 
 
 class NotebookValidator:
@@ -197,7 +197,7 @@ class NotebookValidator:
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, timeout=130, text=True)
+            result = subprocess.run(cmd, capture_output=True, timeout=130, text=True, check=False)
             if result.returncode == 0:
                 return {"success": True}
             else:
@@ -344,8 +344,8 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
         # Build markdown
         markdown = f"""## 📊 Notebook Validation Report
 
-**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M")}  
-**Status:** {passing}/{total} notebooks passing ({percentage:.1f}%)  
+**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M")}
+**Status:** {passing}/{total} notebooks passing ({percentage:.1f}%)
 """
 
         # Add progress bar
@@ -441,7 +441,7 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
 
     def run_validation(self, mode="quick", pattern="**/*.ipynb"):
         """Run validation on all notebooks."""
-        notebooks = list(Path(".").glob(pattern))
+        notebooks = list(Path().glob(pattern))
         notebooks = [n for n in notebooks if ".ipynb_checkpoints" not in str(n)]
 
         if not notebooks:
@@ -523,7 +523,7 @@ Overall: {passing}/{total} notebooks passing ({percentage:.1f}%)
 
     def run_progressive_validation(self):
         """Run validation in batches with user control."""
-        notebooks = list(Path(".").glob("**/*.ipynb"))
+        notebooks = list(Path().glob("**/*.ipynb"))
         notebooks = [n for n in notebooks if ".ipynb_checkpoints" not in str(n)]
 
         if not notebooks:

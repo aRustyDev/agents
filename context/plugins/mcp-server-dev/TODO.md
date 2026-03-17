@@ -1,0 +1,115 @@
+## MCP
+
+- [ ] [Lisp based](https://mcpservers.org/servers/40ants/mcp)
+- [ ] [Base](https://mcpservers.org/servers/dawsonlp/BaseMcpServer)
+- [ ] [MCP Template + Apple Container](https://mcpservers.org/servers/daviddrummond95/cookiecutter-mcp-uv-container)
+- [ ] [MCP Template](https://mcpservers.org/servers/shivarajbakale/create-mcp-app)
+- [ ] [Dart Example](https://mcpservers.org/servers/Mezee/dart-mcp)
+- [ ] [DIY MCP](https://mcpservers.org/servers/mwpryer/diy-mcp)
+- [ ] [Everything](https://mcpservers.org/servers/modelcontextprotocol/everything)
+- [ ] [Everything](https://mcpservers.org/servers/dazeb/mcp-everything)
+- [ ] [FastMCP](https://mcpservers.org/servers/yjacquin/fast-mcp)
+- [ ] [FastMCP](https://mcpservers.org/servers/punkpeye/fastmcp)
+- [ ] [FastMCP](https://mcpservers.org/servers/jlowin/fastmcp)
+- [ ] [FastMCP](https://mcpservers.org/servers/4R9UN/fastmcp-threatintel)
+- [ ] [FastMCP](https://mcpservers.org/servers/TJC-LP/fast-mcp-scala)
+- [ ] [FastMCP](https://mcpservers.org/servers/terseprompts/fastmcp4j)
+- [ ] [Golang](https://mcpservers.org/servers/localrivet/gomcp)
+- [ ] [WASM Pluggins](https://mcpservers.org/servers/tuananh/hyper-mcp)
+- [ ] [Learn MCP](https://mcpservers.org/servers/kun-g/learn-mcp)
+- [ ] [Local MCP](https://mcpservers.org/servers/cti1650/vercel-mcp-test)
+- [ ] [Local Ref Impls](https://mcpservers.org/servers/samlazrak/localcontextmcp)
+- [ ] [Laravel MCP](https://mcpservers.org/servers/0xmergen/lmad)
+- [ ] [MCP Advisor](https://mcpservers.org/servers/olaservo/mcp-advisor)
+- [ ] [MCP Crash Course](https://mcpservers.org/servers/Anvisimi/mcpcrashcourse)
+- [ ] [MCP Analytics GitHub OAuth](https://mcpservers.org/servers/bighadj22/mcp-analytics-github-oauth)
+- [ ] [All Ref Impls](https://mcpservers.org/servers/aswinthulasir/mcp-all-servers)
+- [ ] [Base Template](https://mcpservers.org/servers/yone-k/mcp-base)
+- [ ] [MCP Builder](https://mcpservers.org/servers/XD3an/mcp-builder)
+- [ ] [MCP Chain](https://mcpservers.org/servers/ruliana/mcp-chain)
+- [ ] [MCP CLI](https://mcpservers.org/servers/chrishayuk/mcp-cli)
+- [ ] [MCP Create](https://mcpservers.org/servers/tesla0225/mcp-create)
+- [ ] [MCP Crash Course](https://mcpservers.org/servers/suryanshp1/mcpcrashcourse)
+- [ ] [Demo Server](https://mcpservers.org/servers/pjhaney2/mcp-server)
+- [ ] [VSCode Diagnostic Extension](https://mcpservers.org/servers/newbpydev/mcp-diagnostics-extension)
+- [ ] [MCP Everything](https://mcpservers.org/servers/s2005/mcp-everything)
+- [ ] [MCP DotNet Experiments](https://mcpservers.org/servers/halllo/McpExperiments)
+- https://mcpservers.org/servers/leehack/mcp_dart
+- https://mcpservers.org/servers/QuantGeekDev/mcp-framework
+- https://mcpservers.org/servers/QuantGeekDev/mcp-framework-starter
+- https://mcpservers.org/servers/Jeffwalters9597/MCP-Visual-Inspector
+- https://mcpservers.org/servers/modelcontextprotocol/inspector
+- https://mcpservers.org/servers/utkarshp0/mcp-inspector
+- https://mcpservers.org/servers/raptor7197/mcp-server
+- https://mcpservers.org/servers/harehimself/mcp-lab
+- https://mcpservers.org/servers/0GiS0/mcp-low-level-server-streamable-http
+- https://mcpservers.org/servers/RonFelsenfeld/mcp-playground
+- https://mcpservers.org/servers/sokardys/mcp-poc
+- https://mcpservers.org/servers/Syndicats/mcp-initializer
+- https://mcpservers.org/servers/veysby/mcp-quickstart
+- https://mcpservers.org/servers/labterminal/mcp-reticle
+- https://mcpservers.org/servers/Yvonne-Aizawa/test-mcp
+- https://mcpservers.org/servers/GongRzhe/MCP-Server-Creator
+- https://mcpservers.org/servers/chrisleekr/mcp-server-boilerplate
+- https://mcpservers.org/servers/bitfollow/mcp-server-example
+- https://mcpservers.org/servers/GreatAuk/mcp-weather
+- https://mcpservers.org/servers/coinselor/mcp-zenon
+- https://mcpservers.org/servers/TheSethRose/MCP-Server-Starter
+- https://mcpservers.org/servers/revskill10/hello-mcp
+- https://mcpservers.org/servers/narumiruna/lyapi-mcp
+- https://mcpservers.org/servers/iranimij/mcp-node-server
+- https://mcpservers.org/servers/Gyurmatag/mcp-server-test
+- https://mcpservers.org/servers/james-techyon/mcp-server-toolkit
+- https://mcpservers.org/servers/Julian-Figueroa/mcp-cloudflare-oauth
+- https://mcpservers.org/servers/nickcham/mcp-worker-oauth
+- https://mcpservers.org/servers/bighadj22/cloudflare-mcp-google-oauth-analytics
+- https://mcpservers.org/servers/Mudit7715/MCP
+- https://mcpservers.org/servers/devassistantai/mcp-servers
+- https://mcpservers.org/servers/mend3/mcp
+- https://mcpservers.org/servers/festion/mcp-servers
+- https://mcpservers.org/servers/geoffjay/mcp-servers
+- https://mcpservers.org/servers/slcc2c/mcp-workshop-servers
+- https://mcpservers.org/servers/oleksandrsirenko/mcp-simple-server
+- https://mcpservers.org/servers/MatthewDailey/mcp-starter
+- https://mcpservers.org/servers/kayaozkur/mcp-server-specnavigator
+- https://mcpservers.org/servers/ferrants/mcp-streamable-http-python-server
+- https://mcpservers.org/servers/hanweg/mcp-tool-builder
+- https://mcpservers.org/servers/getfounded/mcp-tool-kit
+- https://mcpservers.org/servers/RyosukeDTomita/mcp_tool_poisoning_attacks
+- https://mcpservers.org/servers/cgize/claude-mcp-think-tool
+- https://mcpservers.org/servers/fulfilio/mcp-utils
+- https://mcpservers.org/servers/hungryrobot1/MCP-PIF
+- https://mcpservers.org/servers/dominiquekossi/mcp-agent-kit
+- https://mcpservers.org/servers/inercia/mcp-cli-adapter
+- https://mcpservers.org/servers/LLM-Booster/mcp-booster
+- https://mcpservers.org/servers/Tritlo/mcp
+- https://mcpservers.org/servers/m-hikichi/MCP-guide
+- https://mcpservers.org/servers/angrysky56/mcp-creator-mcp
+- https://mcpservers.org/servers/windymelt/mcp-scala
+- https://mcpservers.org/servers/lavraham/MCP-domainXML
+- https://mcpservers.org/servers/nicholasrubright/MCPatterns
+- https://mcpservers.org/servers/MCPJam/inspector
+- https://mcpservers.org/servers/neptaco/mcproc
+- https://mcpservers.org/servers/sebsto/mcpserverkit
+- https://mcpservers.org/servers/cyanheads/mentor-mcp-server
+- https://mcpservers.org/servers/anirudhlath/meta-mcp
+- https://mcpservers.org/servers/semaes111/MCP
+- https://mcpservers.org/servers/modelcontextprotocol/servers
+- https://mcpservers.org/servers/Owengundam/MCPservers
+- https://mcpservers.org/servers/andreagroferreira/servers
+- https://mcpservers.org/servers/iamadk/reference-servers
+- https://mcpservers.org/servers/shanaka95/MockMCPServer
+- https://mcpservers.org/servers/MockLoop/mockloop-mcp
+- https://mcpservers.org/servers/colsonSung/mcp-servers
+- https://mcpservers.org/servers/GibsonAI/mcp
+- https://mcpservers.org/servers/gokr/nimcp
+- https://mcpservers.org/servers/DTeam-Top/mcp-oauth
+- https://mcpservers.org/servers/shanejonas/openrpc-mpc-server
+- https://mcpservers.org/servers/evansims/openfga-mcp
+- https://mcpservers.org/servers/SAKETH11111/reference-servers
+- https://mcpservers.org/servers/cameroncooke/reloaderoo
+- https://mcpservers.org/servers/popokPJT/remote-mcp-server
+- https://mcpservers.org/servers/riccardo-larosa/docebo-mcp-server
+- https://mcpservers.org/servers/mcpdotdirect/template-mcp-server
+- https://mcpservers.org/servers/terrynguyen255/test-mcp-server
+- https://mcpservers.org/servers/rustycl0ck/mcp-grpc-transport

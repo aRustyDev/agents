@@ -1,0 +1,258 @@
+## Verify these are covered in the plugin
+
+- Cover PoC vs Prototype vs MVP
+  - definition
+  - identification process
+  - when to use
+    - **PoC**: when testing a new, complex, or unproven technology.
+    - **Prototype**: when you need to visualize the user experience and align stakeholders on design.
+    - **MVP**: when you need to launch quickly to gather real user feedback and start generating revenue
+  - ordering
+  - scoping
+  - requirements
+    - documentation
+    - interface
+    - tests
+    - quality/metrics gates
+- Incremental + Progressive Delivery
+- Justfile as command runner approach
+- Testing strategy
+  - Unit, Mocking, Component, Integration, E2E, Visual, Smoke, Regression
+- Project Management Component Definitions
+  - Q: Theme|Feature > Epic || Epic > Feature
+  - Theme:
+    - wide area of focus that helps Agile teams keep track of their org-lvl goals
+    - Align teams with strategic goals
+    - Broad organizational focus
+    - Like a label that can be used to group similar activities.
+    - Helps to define the common characteristics between different areas & unite them under one heading.
+    - Example: a theme might be “improve customer retention.”
+  - Initiative:
+    - collection of epics that drive toward a common goal
+    - Purpose: Groups epics with a shared goal
+    - Scope: Cross-team and strategic
+  - Epics: large, long-term goals (months)
+    - Break into features
+    - Provide strategic direction
+    - useful as placeholders for large requirements
+    - substantial collection of smaller stories that combine to make one large story
+  - Features:
+    - Purpose: Delivers specific functionality
+    - Scope: Focused and tactical
+    - 1-2 sprints
+    - aka 'Theme'
+    - Smaller chunks of functionality within an Epic
+  - Stories: User Stories (days)
+    - Focus on user value
+    - a concise requirement that can be completed within one sprint
+    - Smallest units of user functionality
+    - Typically estimated using story pointed and defined using INVEST criteria
+    - Measured in "Story Points"
+    - Should deliver a vertical slice of functionality to the Cx
+      - Should be valuable & complete by the end of an iteration
+    - Must deliver particular value to the user
+    - Must be describable in simple language that outlines the desired outcome.
+    - Time Estimate should be computed from component tasks
+    - Should include start date + end date
+  - Tasks: Technical implementation tasks
+    - Focus on execution
+    - Decomposed parts of a story that get into HOW the story will be completed
+    - Hour estimated
+    - Purpose: Detail execution steps
+    - Scope: Specific and technical
+  - Sub-Tasks: Use when a Task is complex or parrallelizable
+  - ...
+  - Milestones
+  - Statuses
+  - Priorities
+  - Complexity
+  - Difficulty
+  - Unknowns
+  - Story Mapping
+    - User Activities
+    - User Tasks
+    - User Stories
+    - Epics
+    - Releases
+  - Capacity Planning
+  - Labels (How to use them)
+    - Product
+    - Feature
+    - Fix/Bug
+    - Documentation
+    - Tests
+    - Project
+- Development Flow
+  - Problem / Goal
+  - Research & Explore
+  - Requirements
+    - Developing an overall model
+    - Building a feature list
+  - Design (ADRs)
+    - Developing a SPEC / PRD
+    - Designing by feature
+  - Plan
+    - Draft
+      - Planning by feature
+    - Refine
+    - Decompose
+      - Refine
+    - Review
+  - Project Development
+    - Epics
+    - Stories
+    - Tasks
+    - Sub-Tasks
+    - Review
+      - Dependencies
+      - Consistency
+  - Development
+  - Integration
+  - Testing
+  - Production
+
+## SKILLS
+
+- Testing
+  - Strategy
+  - Unit Testing
+    - [Best Practices](https://www.sw-engineering-candies.com/blog-1/unit-testing-best-practices)
+      - Always Write Isolated Test Cases
+      - Test One Thing Only in One Test Case
+      - Use a Single Assert Method per Test Case
+      - Use a Naming Convention for Test Cases
+      - Use the Arrange-Act-Assert Style or Given-When-Then Style
+      - Avoid the Expected Exception Tests
+      - Structure All Test Cases
+      - Use Descriptive Messages in Assert Methods
+      - Measure Code Coverage to Find Missing Test Cases
+      - Don't Forget to Refactor the Test Code
+      - Limit Use of Mocks
+      - Use Parameterized Tests w/ per Test-Case JSON data files and/or Faker Data
+  - Mocks
+    - Strategy
+    - Planning
+    - Troubleshooting
+    - Context
+  - Component Testing
+  - Integration Testing
+  - E2E Testing
+  - Visual Testing
+  - Smoke Testing
+  - API/Contract Testing
+  - Regression
+- Development Patterns
+  - BDD (Behavior-Driven Development)
+    - Use-Case:
+      - Use as the specific technique for implementing each "feature".
+      - Excellent for ensuring business requirements are met
+    - Characteristics:
+      - Uses a specific syntax, often Gherkin (Given-When-Then)
+        - nudges towards treating the *thing* under test as a black box
+        - Alt: Arrange Act Assert (AAA); more focused on internal mechanics of tests
+      - Creates human-readable and machine-executable specifications
+    - Priority: "what the system should do" (behavioral).
+    - Focus: "specification-by-example" practice, often automating scenarios as tests.
+    - Collaboration: Business + Dev + QA
+    - Goal:
+      - Align software behavior with user needs
+      - Foster shared understanding & describe behavior
+    - Outputs: Executable specifications (scenarios)
+    - Documentation:
+      - Business-readable specifications for all stakeholders
+    - Workflow:
+      - Discover behaviors with stakeholders.
+      - Describe scenarios in natural language.
+      - Automate steps, watch fail, implement to pass.
+  - TDD (Test-Driven Development)
+    - Characteristics: ___
+    - Priority: ___
+    - Focus: ___
+    - Documentation:
+      - Technical documentation for developers
+    - Workflow:
+      - **Red**: Write a test that fails.
+      - **Green**: Write minimal code to pass it.
+      - **Refactor**: Clean design with tests guarding behavior.
+  - FDD (Feature Driven Development):
+    - Use-Case:
+      - High-level, project-management-oriented approach to development
+      - Best for large, complex, long-running projects needing high visibility and predictability
+    - Characteristics: Iterative, agile
+    - Priority: "how to deliver" in a structured way.
+    - Focus: iteratively delivering small, client-valued, functional features.
+    - Collaboration: Domain experts + Developers
+    - Goal: Deliver working software feature-by-feature
+    - Outputs: A prioritized list of small, actionable features
+    - Documentation:
+      - ___
+    - Workflow:
+      - Develop an overall model
+      - Build a feature list
+      - Plan by feature
+      - Design by feature
+      - Build by feature
+  - DDD (Domain-Driven Design)
+    - Characteristics: ___
+    - Priority: ___
+    - Focus: ___
+    - Documentation:
+      - ___
+    - Workflow:
+      - Shared ubiquitous language in code and conversation.
+      - Bounded contexts to avoid “big ball of mud.”
+      - Tactical patterns: entities, value objects, aggregates, domain events.
+  - ATDD (Acceptance Test-Driven Development)
+    - Use-Case:
+      - ___
+    - Characteristics: ___
+    - Priority: define automated acceptance criteria early in the development process
+    - Focus:
+      - Concentrates on system-level acceptance criteria
+      - Capturing requirements in acceptance tests and uses them to drive the development.
+      - It seems like ATDD focuses on external quality of the software.
+        - ie: does the system do what it is required to do?
+    - Collaboration: users + testers + developers + Business analysts
+    - Goal:
+      - Validate business requirements
+      - Establish the criteria (often from a user perspective)
+      - Create concrete examples.
+      - Develop acceptance tests & run to see the results of failure with the right code based on these examples
+      - Minimal code is then developed to run the program
+      - More acceptance tests are run again -> validate results
+      - Refactor based on the acceptance tests results
+      - Final program is developed for use.
+    - Outputs:
+      - Need to define some verifiable output format (report?)
+    - Documentation:
+      - Requirements traceability for analysts
+    - Workflow:
+      - Three Amigos (business, dev, test) define acceptance examples.
+      - Automate acceptance checks (fast, below UI).
+      - Code until checks pass.
+- Project Management
+  - Components
+    - Sprints
+  - Roles
+    - Product Owner
+    - Scrum Master
+    - Developers
+    - Chief Architect
+    - Development Manager
+    - Chief Programmer
+    - Class Owners
+  - Ceremonies
+  - Philosophies
+    - Agile
+  - Frameworks
+    - Scrum
+    - Kanban
+- Processes:
+  - Developing an overall model
+  - Building a feature list
+  - Planning by feature
+  - Designing by feature
+  - Building by feature
+- Feature Definition
+  - A small, client-valued function (e.g., "calculate total") that can be completed quickly.
+- Breaking down large systems into manageable, small components.

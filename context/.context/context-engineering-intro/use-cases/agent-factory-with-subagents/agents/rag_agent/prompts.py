@@ -1,9 +1,8 @@
 """System prompts for Semantic Search Agent."""
 
-from pydantic_ai import RunContext
-from typing import Optional
-from dependencies import AgentDependencies
 
+from dependencies import AgentDependencies
+from pydantic_ai import RunContext
 
 MAIN_SYSTEM_PROMPT = """You are a helpful assistant with access to a knowledge base that you can search when needed.
 
@@ -39,11 +38,11 @@ def get_dynamic_prompt(ctx: RunContext[AgentDependencies]) -> str:
     """Generate dynamic prompt based on context."""
     deps = ctx.deps
     parts = []
-    
+
     # Add session context if available
     if deps.session_id:
         parts.append(f"Session ID: {deps.session_id}")
-    
+
     # Add user preferences
     if deps.user_preferences:
         if deps.user_preferences.get('search_type'):
@@ -52,12 +51,12 @@ def get_dynamic_prompt(ctx: RunContext[AgentDependencies]) -> str:
             parts.append(f"Preferred text weight: {deps.user_preferences['text_weight']}")
         if deps.user_preferences.get('result_count'):
             parts.append(f"Preferred result count: {deps.user_preferences['result_count']}")
-    
+
     # Add query history context
     if deps.query_history:
         recent = deps.query_history[-3:]  # Last 3 queries
         parts.append(f"Recent searches: {', '.join(recent)}")
-    
+
     if parts:
         return "\n\nCurrent Context:\n" + "\n".join(parts)
     return ""

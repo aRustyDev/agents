@@ -25,10 +25,10 @@ for file in "$@"; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     # Check if file is empty or very small (less than 10 bytes)
     size=$(wc -c < "$file" | tr -d ' ')
-    
+
     if [ "$size" -lt 10 ]; then
         EMPTY_FILES+=("$file")
         FAILED=1

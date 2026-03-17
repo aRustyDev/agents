@@ -3,7 +3,7 @@ Description: This is a commercial sublease agreement between Cutter & Buck Inc. 
 <parties involved>
 
 - Sublessor: Cutter & Buck Inc.
-- Sublessee: Tableau Software, Inc. 
+- Sublessee: Tableau Software, Inc.
 - Original lessor: Fremont Lake Union Center LLC
 
 </parties involved>

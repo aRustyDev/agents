@@ -1,0 +1,208 @@
+# Experiment 5: Output Quality Comparison Results
+# Executed: 2026-03-08
+# Status: PASSED
+
+experiment:
+  id: "exp-005-output-quality"
+  status: "completed"
+  executed_at: "2026-03-08"
+
+tools_tested:
+  - WebFetch
+  - WebSearch
+  - crawl4ai (HTTP API)
+  - SearXNG
+  - gh api
+
+# ============================================
+# TYPE A: Static HTML Registry (buildwithclaude.com)
+# ============================================
+
+type_a_static:
+  registry: "buildwithclaude.com"
+  url: "https://buildwithclaude.com/skills"
+
+  results:
+    webfetch:
+      status: "success"
+      duration_ms: 574
+      content_size_bytes: 107267
+      structure_score: 4  # Returns raw HTML
+      completeness_score: 5  # Full page content
+      parseability_score: 3  # Needs HTML parsing or LLM
+      items_extracted: "160+ skills listed"
+
+    crawl4ai:
+      status: "success"
+      duration_ms: 1080
+      content_size_chars: 6820
+      structure_score: 5  # Clean markdown
+      completeness_score: 4  # Main content only
+      parseability_score: 5  # Ready to use
+      items_extracted: "160+ skills with URLs"
+
+  winner: "crawl4ai"
+  reason: "Clean markdown output, no parsing needed"
+
+# ============================================
+# TYPE B: JS-Heavy Registry (mcp.so)
+# ============================================
+
+type_b_js_heavy:
+  registry: "mcp.so"
+  url: "https://mcp.so/"
+
+  results:
+    webfetch:
+      status: "success"
+      structure_score: 4
+      completeness_score: 4
+      js_rendered: "partial (LLM extracted from HTML)"
+      items_extracted: "18,288 servers (from text)"
+      notes: "WebFetch + LLM prompt successfully extracted data"
+
+    crawl4ai:
+      status: "success"
+      content_size_chars: 11614
+      structure_score: 5
+      completeness_score: 5
+      js_rendered: true
+      items_extracted: "18,288 servers + featured lists"
+      notes: "Full JS rendering, complete page content"
+
+  winner: "crawl4ai"
+  reason: "Full JS rendering, structured markdown"
+
+# ============================================
+# TYPE C: Protected Registry (skillsmp.com)
+# ============================================
+
+type_c_protected:
+  registry: "skillsmp.com"
+  url: "https://skillsmp.com/"
+
+  results:
+    webfetch:
+      status: "blocked"
+      error: "403 Cloudflare"
+      notes: "Bot protection active"
+
+    api:
+      status: "success"
+      method: "Bearer token auth"
+      structure_score: 5  # Native JSON
+      completeness_score: 5  # All fields
+      parseability_score: 5  # Direct JSON
+      notes: "Best option for skillsmp"
+
+  winner: "API (curl with Bearer)"
+  reason: "Only working method, native JSON"
+
+# ============================================
+# SEARCH COMPARISON
+# ============================================
+
+search_comparison:
+  query: "claude code skills marketplace"
+
+  results:
+    websearch:
+      result_count: "~10"
+      response_time: "~1-2s"
+      structure: "Summary with links"
+      rate_limited: "API limits apply"
+
+    searxng:
+      result_count: 31
+      response_time_ms: 1213
+      engines: 4
+      structure: "JSON with full metadata"
+      rate_limited: false
+
+  winner: "SearXNG"
+  reason: "3x more results, no rate limits, JSON format"
+
+# ============================================
+# GITHUB COMPARISON
+# ============================================
+
+github_comparison:
+  query: "topic:claude-skills"
+
+  results:
+    gh_api:
+      status: "success"
+      total_count: 999
+      duration_ms: 522
+      structure_score: 5  # Native JSON
+      fields: ["full_name", "stars", "description", "url", "language"]
+      pagination: true
+
+    websearch:
+      status: "success"
+      result_count: "~10"
+      structure: "Summary only"
+
+  winner: "gh api"
+  reason: "Structured JSON, pagination, full metadata"
+
+# ============================================
+# OVERALL RANKINGS
+# ============================================
+
+rankings:
+  by_registry_type:
+    static_html:
+      1: { tool: "crawl4ai", reason: "Clean markdown" }
+      2: { tool: "WebFetch", reason: "Fast, reliable" }
+
+    js_heavy:
+      1: { tool: "crawl4ai", reason: "JS rendering" }
+      2: { tool: "WebFetch + LLM", reason: "Works but slower" }
+
+    protected:
+      1: { tool: "API", reason: "Only option" }
+      2: { tool: "crawl4ai (auth)", reason: "If no API" }
+
+  by_use_case:
+    survey:
+      github: "gh api search/repositories"
+      registries: "crawl4ai or WebFetch"
+      discovery: "SearXNG"
+
+    deep:
+      github: "gh api repos/.../contents"
+      registries: "crawl4ai"
+      protected: "API"
+
+# ============================================
+# FINAL RECOMMENDATIONS
+# ============================================
+
+recommendations:
+  primary_tools:
+    github: "gh api"
+    static_registry: "crawl4ai (cleaner) or WebFetch (faster)"
+    js_registry: "crawl4ai"
+    protected_registry: "API with auth"
+    search: "SearXNG (local, no limits)"
+
+  tool_selection_matrix:
+    - condition: "GitHub repository/code search"
+      tool: "gh api"
+      example: "gh api search/repositories -f q='topic:X'"
+
+    - condition: "Static HTML registry"
+      tool: "crawl4ai or WebFetch"
+      example: "curl localhost:11235/md"
+
+    - condition: "JS-heavy site"
+      tool: "crawl4ai"
+      example: "curl localhost:11235/md with JS wait"
+
+    - condition: "Registry discovery"
+      tool: "SearXNG"
+      example: "curl localhost:8888/search?format=json"
+
+    - condition: "Protected/Cloudflare site"
+      tool: "API if available, else crawl4ai with auth"

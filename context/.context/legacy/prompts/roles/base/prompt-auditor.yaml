@@ -31,7 +31,7 @@ capabilities:
       version: ">=1.0.0"
     - module: patterns/analysis/systematic-review.md
       version: ">=1.0.0"
-      
+
   contextual:
     - name: duplication-analysis
       description: Detect and analyze duplicate or redundant content
@@ -40,7 +40,7 @@ capabilities:
         - processes/auditing/duplication-detection.md
         - helpers/similarity-analyzer.sh
       priority: high
-      
+
     - name: gap-analysis
       description: Identify missing components and coverage gaps
       triggers: ["gap", "missing", "incomplete", "coverage", "absence"]
@@ -48,7 +48,7 @@ capabilities:
         - processes/auditing/gap-analysis.md
         - patterns/analysis/deep-exploration.md
       priority: high
-      
+
     - name: dead-context
       description: Find obsolete, outdated, or unused content
       triggers: ["dead", "obsolete", "unused", "stale", "deprecated"]
@@ -56,7 +56,7 @@ capabilities:
         - processes/auditing/dead-context-detection.md
         - helpers/detect-dead-context.sh
       priority: high
-      
+
     - name: modularization
       description: Discover opportunities for better organization
       triggers: ["modular", "organize", "structure", "refactor", "decompose"]
@@ -64,7 +64,7 @@ capabilities:
         - processes/auditing/modularization-opportunities.md
         - processes/meta/prompt-decomposition.md
       priority: medium
-      
+
     - name: performance-analysis
       description: Analyze load times and efficiency
       triggers: ["performance", "speed", "efficiency", "optimize", "slow"]
@@ -87,22 +87,22 @@ knowledge_base:
 
 behaviors:
   consultation:
-    can_consult: 
+    can_consult:
       - senior-dev
       - architect
       - technical-writer
       - devops-engineer
     consultation_style: "Seeks expert validation for findings and recommendations"
     auto_consult: true
-    
+
   response_style:
     verbosity: detailed  # Thorough analysis requires detail
     technical_level: expert
     use_examples: always  # Concrete evidence for findings
-    
+
   learning:
     continuous: true
-    domains: 
+    domains:
       - repository-patterns
       - optimization-techniques
       - audit-methodologies
@@ -113,7 +113,7 @@ optimization:
   lazy_load: true  # Load capabilities as needed
 
 metadata:
-  tags: 
+  tags:
     - auditing
     - analysis
     - optimization
@@ -128,7 +128,7 @@ metadata:
       example: "Identifying missing documentation or processes"
     - description: "Performance audit"
       example: "Analyzing load times and module dependencies"
-  related_roles: 
+  related_roles:
     - code-reviewer
     - architect
     - qa-engineer

@@ -30,7 +30,7 @@ capabilities:
       version: ">=1.0.0"
     - module: processes/code-review/comprehensive.md
       version: ">=1.0.0"
-      
+
   contextual:
     - name: mentoring
       description: Guide junior developers and conduct teaching sessions
@@ -40,7 +40,7 @@ capabilities:
         - guides/mentoring/code-feedback.md
         - processes/knowledge-transfer.md
       priority: high
-      
+
     - name: architecture
       description: Design and review system architecture
       triggers: ["architecture", "design", "scale", "microservices", "monolith", "distributed"]
@@ -49,7 +49,7 @@ capabilities:
         - guides/architecture/trade-offs.md
         - guides/architecture/evolutionary-design.md
       priority: high
-      
+
     - name: legacy-modernization
       description: Refactor and modernize legacy codebases
       triggers: ["legacy", "refactor", "modernize", "technical debt", "migration"]
@@ -58,7 +58,7 @@ capabilities:
         - guides/migration/incremental-migration.md
         - patterns/strangler-fig.md
       priority: medium
-      
+
     - name: performance
       description: Optimize application and system performance
       triggers: ["performance", "optimize", "slow", "bottleneck", "profiling", "benchmark"]
@@ -84,7 +84,7 @@ knowledge_base:
 
 behaviors:
   consultation:
-    can_consult: 
+    can_consult:
       - security-engineer
       - ml-engineer
       - devops-engineer
@@ -92,15 +92,15 @@ behaviors:
       - product-manager
     consultation_style: "Seeks specialist input for domain-specific decisions, validates assumptions"
     auto_consult: true
-    
+
   response_style:
     verbosity: normal
     technical_level: adaptive  # Adjusts based on audience
     use_examples: when_helpful
-    
+
   learning:
     continuous: true
-    domains: 
+    domains:
       - software-architecture
       - team-leadership
       - emerging-technologies
@@ -112,7 +112,7 @@ optimization:
   lazy_load: false
 
 metadata:
-  tags: 
+  tags:
     - development
     - architecture
     - mentoring
@@ -128,7 +128,7 @@ metadata:
       example: "Providing constructive feedback on PR with learning opportunities"
     - description: "Technical decision making"
       example: "Choosing between competing technologies for a new project"
-  related_roles: 
+  related_roles:
     - tech-lead
     - architect
     - staff-engineer

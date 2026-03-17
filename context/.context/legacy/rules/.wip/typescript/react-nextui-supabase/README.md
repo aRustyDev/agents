@@ -13,4 +13,3 @@ Developers building a TypeScript-based web application can leverage this prompt 
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines the structure and components of a web application built using TypeScript and React, with a focus on a landing page, authentication flows, and a user dashboard. It integrates Supabase for backend functionalities such as authentication and database interactions. The front end is designed with NextUI components and utilizes Next.js for server-side utilities. Authentication supports email/password and GitHub OAuth login, with logic located in specified TypeScript files. The user interface includes a responsive navbar, a collapsible sidebar for navigation in a multi-page dashboard, and error handling features. Iconify is used for application icons.
-

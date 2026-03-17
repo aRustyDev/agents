@@ -13,4 +13,3 @@ Software developers can use this prompt to improve code quality by implementing 
 
 ## Overview of .cursorrules prompt
 The .cursorrules file discusses the importance of writing clean, readable, and maintainable code. It outlines the concept of "clean code" as defined by Robert Cecil Martin and describes its significance in improving code readability, maintenance, team collaboration, debugging, and code quality. The file details best practices and principles for achieving clean code, including using named constants, meaningful names, sparing but meaningful comments, short functions adhering to the single responsibility principle, avoiding code duplication, following coding standards, encapsulating nested conditionals, continuous refactoring, and using version control systems. These guidelines aim to help developers create more efficient, reliable, and understandable software.
-

@@ -37,4 +37,3 @@ const additionalInstructions = `
 6. Follow Flask's application factory pattern
 7. Use environment variables for configuration
 `;
-

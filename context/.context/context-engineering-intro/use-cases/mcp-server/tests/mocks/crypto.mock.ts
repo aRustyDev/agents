@@ -13,13 +13,13 @@ export const mockGetRandomValues = vi.fn()
 export function setupCryptoMocks() {
   // Mock HMAC signing
   mockCryptoSubtle.sign.mockResolvedValue(new ArrayBuffer(32))
-  
+
   // Mock signature verification
   mockCryptoSubtle.verify.mockResolvedValue(true)
-  
+
   // Mock key import
   mockCryptoSubtle.importKey.mockResolvedValue({} as CryptoKey)
-  
+
   // Mock random values
   mockGetRandomValues.mockImplementation((array: Uint8Array) => {
     for (let i = 0; i < array.length; i++) {

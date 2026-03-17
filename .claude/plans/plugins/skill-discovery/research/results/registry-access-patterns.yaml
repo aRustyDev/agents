@@ -1,0 +1,635 @@
+# Registry Access Patterns
+# Purpose: Enable future "skill-searcher" or "skill-builder" skills
+# Created: 2026-03-08
+# Phase: 2 (supplement)
+
+# ============================================
+# MULTI-COMPONENT REGISTRIES
+# ============================================
+
+buildwithclaude:
+  url: "https://buildwithclaude.com/"
+  component_types:
+    - skills
+    - agents
+    - commands
+    - hooks
+    - plugins
+
+  access:
+    method: "WebFetch"
+    auth_required: false
+    js_rendered: false
+
+  endpoints:
+    skills:
+      url: "https://buildwithclaude.com/skills"
+      format: "HTML (parseable)"
+      example:
+        tool: "WebFetch"
+        prompt: "Extract all skill names, descriptions, and install commands"
+      install_pattern: "/plugin marketplace add {author}/{name}"
+
+    agents:
+      url: "https://buildwithclaude.com/agents"
+      count: 117
+      format: "HTML"
+
+    commands:
+      url: "https://buildwithclaude.com/commands"
+      count: 175
+      format: "HTML"
+
+    hooks:
+      url: "https://buildwithclaude.com/hooks"
+      count: 28
+      format: "HTML"
+
+    plugins:
+      url: "https://buildwithclaude.com/plugins"
+      count: 50
+      format: "HTML"
+
+  search:
+    available: true
+    method: "URL query param"
+    example: "https://buildwithclaude.com/skills?search=typescript"
+
+  notes: |
+    Primary unified marketplace. HTML-based but well-structured.
+    Categories filter available. CLI install commands provided.
+
+github:
+  url: "https://github.com"
+  component_types:
+    - skills
+    - agents
+    - commands
+    - rules
+    - prompts
+    - hooks
+    - mcp_servers
+
+  access:
+    method: "gh CLI"
+    auth_required: false  # for search; rate-limited without auth
+    rate_limit: "10 requests/min unauthenticated, 30/min authenticated"
+
+  endpoints:
+    skills:
+      search_query: "claude skills in:readme language:markdown"
+      topic_search: "topic:claude-skills"
+      example:
+        bash: |
+          # Search by topic
+          gh api search/repositories \
+            -f q="topic:claude-skills" \
+            -f sort=stars \
+            -f per_page=30 \
+            --jq '.items[] | {name: .full_name, stars: .stargazers_count, url: .html_url}'
+
+          # Search README content
+          gh api search/repositories \
+            -f q="claude skills in:readme" \
+            --jq '.items[].full_name'
+      response_format: "JSON"
+
+    agents:
+      search_query: "claude code agents in:readme"
+      topic_search: "topic:claude-code-agents OR topic:claude-subagents"
+      example:
+        bash: |
+          gh api search/repositories \
+            -f q="topic:claude-code-agents OR topic:claude-subagents" \
+            -f sort=stars \
+            --jq '.items[] | {name: .full_name, stars: .stargazers_count}'
+
+    commands:
+      search_query: "path:.claude/commands extension:md"
+      example:
+        bash: |
+          # Find repos with .claude/commands directories
+          gh api search/code \
+            -f q="path:.claude/commands extension:md" \
+            --jq '.items[] | {repo: .repository.full_name, path: .path}'
+
+    rules:
+      search_query: "path:.claude/rules extension:md"
+      example:
+        bash: |
+          gh api search/code \
+            -f q="path:.claude/rules extension:md" \
+            --jq '.items[] | {repo: .repository.full_name, path: .path}'
+
+    prompts:
+      search_query: "CLAUDE.md in:path"
+      output_styles_query: "path:output-styles extension:md"
+      example:
+        bash: |
+          # Find CLAUDE.md files
+          gh api search/code \
+            -f q="filename:CLAUDE.md" \
+            --jq '.items[] | {repo: .repository.full_name, path: .path}'
+
+          # Find output styles
+          gh api search/code \
+            -f q="path:output-styles extension:md" \
+            --jq '.items[].repository.full_name' | sort -u
+
+    hooks:
+      search_query: "claude code hooks in:readme"
+      topic_search: "topic:claude-code-hooks"
+      example:
+        bash: |
+          gh api search/repositories \
+            -f q="topic:claude-code-hooks" \
+            -f sort=stars \
+            --jq '.items[] | {name: .full_name, stars: .stargazers_count}'
+
+    mcp_servers:
+      topic_search: "topic:mcp-server"
+      topic_count: 8741
+      example:
+        bash: |
+          # By topic (most reliable)
+          gh api search/repositories \
+            -f q="topic:mcp-server" \
+            -f sort=stars \
+            -f per_page=100 \
+            --jq '.items[] | {name: .full_name, stars: .stargazers_count, lang: .language}'
+
+          # By org (official implementations)
+          gh api repos/github/github-mcp-server --jq '{name, stars: .stargazers_count}'
+          gh api repos/awslabs/mcp --jq '{name, stars: .stargazers_count}'
+
+  notes: |
+    Most comprehensive source. Use topic search for structured results.
+    Code search has 1000 result limit. Rate limits apply.
+
+# ============================================
+# SKILLS-FOCUSED REGISTRIES
+# ============================================
+
+skillsmp:
+  url: "https://skillsmp.com/"
+  component_types:
+    - skills
+
+  access:
+    method: "API"
+    auth_required: true
+    auth_type: "Bearer token"
+    credential_source: "op://Developer/skillsmp/credential"
+    web_blocked: true  # Cloudflare protection
+
+  endpoints:
+    search:
+      path: "/api/v1/skills/search"
+      method: "GET"
+      params:
+        q: "search term (required)"
+        limit: "results per page (default 10)"
+        page: "pagination (default 1)"
+      example:
+        bash: |
+          SKILLSMP_KEY=$(op read "op://Developer/skillsmp/credential")
+
+          # Basic search
+          curl -s "https://skillsmp.com/api/v1/skills/search?q=typescript&limit=20" \
+            -H "Authorization: Bearer $SKILLSMP_KEY" | jq '.data.skills[]'
+
+          # Paginated enumeration
+          for page in 1 2 3 4 5; do
+            curl -s "https://skillsmp.com/api/v1/skills/search?q=code&limit=100&page=$page" \
+              -H "Authorization: Bearer $SKILLSMP_KEY" | jq '.data.skills[].name'
+          done
+      response_schema:
+        success: "boolean"
+        data:
+          skills: "array of skill objects"
+          pagination:
+            page: "number"
+            limit: "number"
+            total: "number"
+            hasNext: "boolean"
+        skill_object:
+          id: "string"
+          name: "string"
+          author: "string (GitHub username)"
+          description: "string"
+          githubUrl: "string"
+          skillUrl: "string"
+          stars: "number"
+          updatedAt: "string (unix timestamp)"
+
+    ai_search:
+      path: "/api/v1/skills/ai-search"
+      method: "GET"
+      params:
+        q: "natural language query"
+      status: "untested"
+      notes: "Semantic search endpoint - may return better relevance"
+
+  limitations:
+    - "No enumeration/listing endpoint"
+    - "Must search to discover"
+    - "Cloudflare blocks WebFetch"
+
+  notes: |
+    Largest skill registry (2000+ claimed). API is fast (~170ms).
+    Best for targeted keyword searches.
+
+ccpm:
+  url: "https://ccpm.dev/"
+  component_types:
+    - skills
+    - plugins
+
+  access:
+    method: "WebFetch"
+    auth_required: false
+    js_rendered: false
+
+  endpoints:
+    browse:
+      url: "https://ccpm.dev/"
+      format: "HTML"
+      example:
+        tool: "WebFetch"
+        prompt: "List all packages with their names, descriptions, and install commands"
+
+    package_detail:
+      url_pattern: "https://ccpm.dev/package/{name}"
+      format: "HTML"
+
+  install_command: "ccpm install {package}"
+  count: 22
+
+  notes: |
+    Claude Code Package Manager. Smaller but curated collection.
+    Direct CLI installation support.
+
+claude_plugins_dev:
+  url: "https://claude-plugins.dev/"
+  component_types:
+    - skills
+    - plugins
+
+  access:
+    method: "WebFetch"
+    auth_required: false
+
+  endpoints:
+    browse:
+      url: "https://claude-plugins.dev/"
+      format: "HTML"
+      example:
+        tool: "WebFetch"
+        prompt: "Extract all plugin names, categories, and installation instructions"
+
+  count: "20+"
+
+  notes: |
+    Community plugin registry with CLI support.
+    Category filtering available.
+
+agentskills_best:
+  url: "https://agentskills.best/"
+  component_types:
+    - skills
+
+  access:
+    method: "WebFetch"
+    auth_required: false
+
+  features:
+    - "Smart search"
+    - "Complexity filtering"
+    - "Platform filtering (API/Web/Code)"
+
+  endpoints:
+    browse:
+      url: "https://agentskills.best/"
+      format: "HTML"
+      example:
+        tool: "WebFetch"
+        prompt: "List all skills with complexity level and platform type"
+
+  count: "12+ curated"
+
+  notes: |
+    Focus on production-ready, quality-controlled skills.
+    Includes complexity ratings.
+
+# ============================================
+# MCP SERVER REGISTRIES
+# ============================================
+
+mcp_so:
+  url: "https://mcp.so/"
+  component_types:
+    - mcp_servers
+
+  access:
+    method: "crawl4ai or Playwright"
+    auth_required: false
+    js_rendered: true  # Heavy JavaScript
+
+  endpoints:
+    browse:
+      url: "https://mcp.so/"
+      format: "JavaScript-rendered HTML"
+      example:
+        tool: "crawl4ai"
+        code: |
+          # Requires crawl4ai MCP
+          mcp__crawl4ai__md(url="https://mcp.so/", wait_for="div.server-card")
+
+    search:
+      url_pattern: "https://mcp.so/search?q={query}"
+      format: "JavaScript-rendered"
+
+  claimed_count: "18,000+"
+
+  limitations:
+    - "Heavy JavaScript rendering required"
+    - "WebFetch returns partial content"
+    - "No documented API"
+
+  notes: |
+    Largest MCP registry by claimed count.
+    Requires headless browser for full access.
+
+glama_ai:
+  url: "https://glama.ai/mcp/servers"
+  component_types:
+    - mcp_servers
+
+  access:
+    method: "WebFetch or API"
+    auth_required: false
+    js_rendered: "partial"
+
+  endpoints:
+    browse:
+      url: "https://glama.ai/mcp/servers"
+      format: "HTML with JSON data"
+      example:
+        tool: "WebFetch"
+        prompt: "Extract server names, descriptions, and GitHub URLs from the page"
+
+    api:
+      url: "https://glama.ai/api/mcp/servers"
+      status: "unverified"
+      notes: "API may exist - needs probing"
+
+  claimed_count: "18,000+"
+
+  notes: |
+    Alternative to mcp.so. May have API access.
+    Less JavaScript-heavy than mcp.so.
+
+mcpservers_org:
+  url: "https://mcpservers.org/"
+  component_types:
+    - mcp_servers
+    - skills  # has /claude-skills section
+
+  access:
+    method: "WebFetch"
+    auth_required: false
+
+  endpoints:
+    mcp_servers:
+      url: "https://mcpservers.org/"
+      format: "HTML"
+
+    skills:
+      url: "https://mcpservers.org/claude-skills"
+      format: "HTML"
+      example:
+        tool: "WebFetch"
+        prompt: "List all Claude skills with their names and descriptions"
+
+  notes: |
+    Community MCP directory with skills section.
+
+smithery:
+  url: "https://smithery.ai/"
+  component_types:
+    - mcp_servers
+
+  access:
+    method: "WebFetch or API"
+    auth_required: false
+
+  endpoints:
+    browse:
+      url: "https://smithery.ai/"
+      format: "HTML"
+
+    api:
+      status: "unverified"
+      notes: "May have REST API - needs probing"
+
+  notes: |
+    General AI tools registry with MCP servers.
+
+# ============================================
+# AGENTS-FOCUSED REGISTRIES
+# ============================================
+
+voltagent_subagents:
+  url: "https://github.com/VoltAgent/awesome-claude-code-subagents"
+  component_types:
+    - agents
+
+  access:
+    method: "gh CLI or WebFetch"
+    auth_required: false
+
+  endpoints:
+    readme:
+      example:
+        bash: |
+          # Fetch and parse README
+          gh api repos/VoltAgent/awesome-claude-code-subagents/readme \
+            --jq '.content' | base64 -d
+
+        webfetch: |
+          WebFetch(
+            url="https://raw.githubusercontent.com/VoltAgent/awesome-claude-code-subagents/main/README.md",
+            prompt="Extract all agent names, descriptions, and categories"
+          )
+
+  count: "127+"
+
+  notes: |
+    Curated list of subagents. 12,910 stars.
+    Well-organized by category.
+
+# ============================================
+# CURATED AWESOME LISTS
+# ============================================
+
+awesome_claude_skills:
+  url: "https://github.com/ComposioHQ/awesome-claude-skills"
+  component_types:
+    - skills
+
+  access:
+    method: "gh CLI or WebFetch"
+    auth_required: false
+
+  endpoints:
+    readme:
+      example:
+        bash: |
+          gh api repos/ComposioHQ/awesome-claude-skills/readme \
+            --jq '.content' | base64 -d | head -500
+
+  count: "78+"
+  stars: 41939
+
+  notes: |
+    Highest-starred skills list. Includes Composio integrations.
+
+awesome_claude_code:
+  url: "https://github.com/hesreallyhim/awesome-claude-code"
+  component_types:
+    - skills
+    - hooks
+    - commands
+    - agents
+
+  access:
+    method: "gh CLI or WebFetch"
+    auth_required: false
+
+  count: "mixed"
+  stars: 26882
+
+  notes: |
+    Comprehensive ecosystem list. Multiple component types.
+
+# ============================================
+# PROMPTS/CLAUDE.MD REGISTRIES
+# ============================================
+
+agents_md:
+  url: "https://github.com/agentsmd/agents.md"
+  component_types:
+    - prompts
+    - agents
+
+  access:
+    method: "gh CLI"
+    auth_required: false
+
+  endpoints:
+    spec:
+      example:
+        bash: |
+          gh api repos/agentsmd/agents.md/contents/AGENTS.md \
+            --jq '.content' | base64 -d
+
+  stars: 18646
+
+  notes: |
+    AGENTS.md format specification. Reference implementation.
+
+claude_code_system_prompts:
+  url: "https://github.com/Piebald-AI/claude-code-system-prompts"
+  component_types:
+    - prompts
+
+  access:
+    method: "gh CLI"
+    auth_required: false
+
+  endpoints:
+    browse:
+      example:
+        bash: |
+          gh api repos/Piebald-AI/claude-code-system-prompts/contents \
+            --jq '.[].name'
+
+  stars: 5518
+
+  notes: |
+    System prompts, tool descriptions, utility prompts.
+
+# ============================================
+# ACCESS PATTERN SUMMARY
+# ============================================
+
+summary:
+  by_access_method:
+    api_with_auth:
+      - skillsmp
+
+    api_no_auth:
+      - github
+
+    webfetch:
+      - buildwithclaude
+      - ccpm
+      - claude_plugins_dev
+      - agentskills_best
+      - mcpservers_org
+      - glama_ai
+
+    crawl4ai_required:
+      - mcp_so
+
+    gh_cli:
+      - github
+      - voltagent_subagents
+      - awesome_claude_skills
+      - awesome_claude_code
+      - agents_md
+      - claude_code_system_prompts
+
+  by_component_type:
+    skills:
+      - skillsmp (API, 2000+)
+      - buildwithclaude (WebFetch, 26)
+      - ccpm (WebFetch, 22)
+      - github (gh CLI, topic search)
+      - awesome_claude_skills (gh CLI, 78+)
+
+    agents:
+      - buildwithclaude (WebFetch, 117)
+      - voltagent_subagents (gh CLI, 127+)
+      - github (gh CLI, topic search)
+
+    commands:
+      - buildwithclaude (WebFetch, 175)
+      - github (gh CLI, path search)
+
+    hooks:
+      - buildwithclaude (WebFetch, 28)
+      - github (gh CLI, topic search)
+
+    mcp_servers:
+      - mcp_so (crawl4ai, 18000+)
+      - glama_ai (WebFetch/API, 18000+)
+      - github (gh CLI, 8741 topic)
+
+    prompts:
+      - agents_md (gh CLI, spec)
+      - claude_code_system_prompts (gh CLI, 5518 stars)
+      - github (gh CLI, filename search)
+
+    rules:
+      - github (gh CLI, path search)
+      # Rules typically bundled in plugins, not standalone
+
+  recommended_first_choice:
+    skills: "skillsmp API + github topic:claude-skills"
+    agents: "buildwithclaude + voltagent_subagents"
+    commands: "buildwithclaude + github path:.claude/commands"
+    hooks: "buildwithclaude + github topic:claude-code-hooks"
+    mcp_servers: "github topic:mcp-server (most reliable)"
+    prompts: "github filename:CLAUDE.md + agents_md"
+    rules: "github path:.claude/rules"

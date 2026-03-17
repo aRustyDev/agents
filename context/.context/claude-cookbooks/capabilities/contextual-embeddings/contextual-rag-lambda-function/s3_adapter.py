@@ -1,4 +1,5 @@
 import json
+
 import boto3
 from botocore.exceptions import ClientError
 
@@ -55,7 +56,7 @@ class S3Adapter:
             return json.loads(response["Body"].read().decode("utf-8"))
 
         except ClientError as e:
-            print(f"Error reading file from S3: {str(e)}")
+            print(f"Error reading file from S3: {e!s}")
 
     def parse_s3_path(self, s3_path):
         # Remove 's3://' prefix if present

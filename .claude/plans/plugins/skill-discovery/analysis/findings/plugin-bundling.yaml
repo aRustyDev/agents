@@ -1,0 +1,209 @@
+# Finding: Plugin Component Bundling Patterns
+# Phase 3: Plugin Discovery
+# Executed: 2026-03-08
+
+finding:
+  id: "finding-003-plugin-bundling"
+  title: "Plugin component bundling patterns"
+  created: "2026-03-08"
+  confidence: "high"
+
+# ============================================
+# CLAIMS
+# ============================================
+
+claims:
+  - claim: "57% of plugins use minimal manifest pattern"
+    evidence: "8 of 14 sampled plugins have no explicit component references"
+    confidence: "high"
+
+  - claim: "MCP servers are the most explicitly declared component"
+    evidence: "29% of plugins declare mcpServers (4 of 14)"
+    confidence: "high"
+
+  - claim: "Three distinct bundling patterns exist"
+    evidence: "includes_object, direct_paths, array_paths patterns observed"
+    confidence: "high"
+
+  - claim: "Plugin ecosystem is fragmented across 11,000+ entries"
+    evidence: "buildwithclaude: 8,089 + claudemarketplaces: 2,919"
+    confidence: "high"
+
+# ============================================
+# SUPPORTING DATA
+# ============================================
+
+supporting_data:
+  registry_counts:
+    buildwithclaude: 8089
+    claudemarketplaces: 2919
+    clauderegistry: 7
+    paddo_tools: 6
+    litellm: "enterprise (self-hosted)"
+
+  github_repos:
+    total_found: 30
+    top_stars: "thedotmack/claude-mem (33.5k)"
+    official: "anthropics/claude-plugins-official (9.5k)"
+
+  bundling_patterns:
+    minimal:
+      count: 8
+      percentage: 57
+      description: "Metadata only, components via directory convention"
+
+    component_bundling:
+      count: 4
+      percentage: 29
+      description: "Explicit includes/paths to components"
+
+    mcp_integration:
+      count: 4
+      percentage: 29
+      description: "Declares mcpServers for runtime integration"
+
+  component_frequency:
+    mcpServers: 4
+    agents: 3
+    commands: 3
+    hooks: 3
+    skills: 2
+    rules: 1
+    scripts: 1
+
+  average_explicit_components: 1.8
+
+# ============================================
+# PATTERNS DISCOVERED
+# ============================================
+
+patterns:
+  manifest_fields:
+    required:
+      - name
+      - version
+      - description
+    common:
+      - author
+      - repository
+      - license
+      - keywords
+      - homepage
+    component_specific:
+      - includes
+      - agents
+      - skills
+      - commands
+      - hooks
+      - rules
+      - mcpServers
+
+  bundling_methods:
+    includes_object:
+      description: "Directory mapping via includes field"
+      example: |
+        "includes": {
+          "agents": "agents/",
+          "skills": "skills/",
+          "hooks": "hooks/"
+        }
+      used_by: ["claude-forge"]
+
+    direct_paths:
+      description: "Single path strings for each type"
+      example: |
+        "commands": "./commands/",
+        "skills": "./skills/",
+        "hooks": "./hooks/hooks.json"
+      used_by: ["ralph-wiggum-marketer"]
+
+    array_paths:
+      description: "Explicit file arrays"
+      example: |
+        "commands": [
+          "./claude/commands/execute-prp.md",
+          "./claude/commands/generate-prp.md"
+        ],
+        "agents": [
+          "./claude/agents/codebase-research.md"
+        ]
+      used_by: ["cc-blueprint-toolkit"]
+
+  mcp_server_pattern:
+    description: "Runtime MCP server declarations"
+    example: |
+      "mcpServers": {
+        "server-name": {
+          "command": "npx",
+          "args": ["package@version", "mcp", "start"],
+          "optional": true|false
+        }
+      }
+    used_by: ["claude-flow", "chrome-devtools-mcp", "superpowers-chrome"]
+
+# ============================================
+# IMPLICATIONS
+# ============================================
+
+implications:
+  - title: "Plugins rely on convention over configuration"
+    detail: "Most plugins don't explicitly list components - they use standard directory structure"
+    impact: "Discovery must scan directories, not just parse manifests"
+
+  - title: "MCP servers require explicit declaration"
+    detail: "Unlike other components, MCP servers need runtime config"
+    impact: "MCP-enabled plugins are easy to identify from manifest"
+
+  - title: "Overlap between registries is significant"
+    detail: "claudemarketplaces aggregates GitHub repos, buildwithclaude indexes differently"
+    impact: "Deduplication required when building unified index"
+
+  - title: "Enterprise plugins have complex MCP configurations"
+    detail: "claude-flow has 3 MCP servers with optional flags"
+    impact: "Support for optional/required dependencies needed"
+
+# ============================================
+# RECOMMENDATIONS
+# ============================================
+
+recommendations:
+  - id: "rec-001"
+    title: "Index both manifest and directory structure"
+    action: "Parse plugin.json AND scan standard directories (agents/, skills/, etc.)"
+    priority: "high"
+
+  - id: "rec-002"
+    title: "Prioritize MCP-enabled plugins for categorization"
+    action: "mcpServers field is most reliable indicator of plugin capabilities"
+    priority: "high"
+
+  - id: "rec-003"
+    title: "Deduplicate across registries by repository URL"
+    action: "Use GitHub repo URL as canonical identifier"
+    priority: "high"
+
+  - id: "rec-004"
+    title: "Track marketplace vs plugin distinction"
+    action: "Some repos are marketplaces (contain multiple plugins), not single plugins"
+    priority: "medium"
+
+  - id: "rec-005"
+    title: "Extract component counts from descriptions"
+    action: "Many plugins mention counts in description (e.g., '150+ commands')"
+    priority: "low"
+
+# ============================================
+# CROSS-REFERENCES
+# ============================================
+
+cross_references:
+  phase_2_components:
+    skills: "Discovered in Phase 2: 2300+ via skillsmp"
+    agents: "Discovered in Phase 2: 127+ via awesome-subagents"
+    commands: "Discovered in Phase 2: various repos"
+    hooks: "Discovered in Phase 2: various repos"
+    mcp_servers: "Discovered in Phase 2: 18,288 via mcp.so"
+
+  overlap_analysis:
+    note: "Many Phase 2 components are bundled within plugins discovered in Phase 3"
+    implication: "Component → Plugin relationship exists but not 1:1"

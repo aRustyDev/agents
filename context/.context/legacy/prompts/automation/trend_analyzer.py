@@ -4,25 +4,24 @@ Trend Analyzer for Claude Repository Audits
 Analyzes metrics over time to identify trends and patterns
 """
 
-import json
 import argparse
+import json
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any
-import statistics
+from typing import Any
+
 
 class TrendAnalyzer:
     def __init__(self, baseline_path: str, current_path: str):
         self.baseline = self._load_json(baseline_path)
         self.current = self._load_json(current_path)
         self.trends = {}
-        
-    def _load_json(self, path: str) -> Dict:
+
+    def _load_json(self, path: str) -> dict:
         """Load JSON file"""
-        with open(path, 'r') as f:
+        with open(path) as f:
             return json.load(f)
-    
-    def analyze_trends(self) -> Dict[str, Any]:
+
+    def analyze_trends(self) -> dict[str, Any]:
         """Analyze all trends"""
         self.trends = {
             'summary': self._analyze_summary(),
@@ -34,8 +33,8 @@ class TrendAnalyzer:
             'recommendations': self._generate_recommendations()
         }
         return self.trends
-    
-    def _analyze_summary(self) -> Dict:
+
+    def _analyze_summary(self) -> dict:
         """Generate summary statistics"""
         return {
             'analysis_date': datetime.now().isoformat(),
@@ -43,15 +42,15 @@ class TrendAnalyzer:
             'current_date': self.current.get('audit_date', datetime.now().isoformat()),
             'overall_trend': self._calculate_overall_trend()
         }
-    
-    def _analyze_module_trends(self) -> Dict:
+
+    def _analyze_module_trends(self) -> dict:
         """Analyze module-related trends"""
         baseline_modules = self.baseline.get('modules', {})
         current_modules = self.current.get('modules', {})
-        
+
         total_change = current_modules.get('total', 0) - baseline_modules.get('total', 0)
         avg_size_change = current_modules.get('average_size_lines', 0) - baseline_modules.get('average_size_lines', 0)
-        
+
         return {
             'total_change': {
                 'value': total_change,
@@ -70,18 +69,18 @@ class TrendAnalyzer:
                 'improved': current_modules.get('empty_files', 0) < baseline_modules.get('empty_files', 0)
             }
         }
-    
-    def _analyze_quality_trends(self) -> Dict:
+
+    def _analyze_quality_trends(self) -> dict:
         """Analyze quality metric trends"""
         baseline_quality = self.baseline.get('quality_metrics', {})
         current_quality = self.current.get('quality_metrics', {})
-        
+
         metrics = {}
         for metric in ['modules_with_tests', 'modules_with_examples', 'documented_modules']:
             baseline_val = baseline_quality.get(metric, 0)
             current_val = current_quality.get(metric, 0)
             change = current_val - baseline_val
-            
+
             metrics[metric] = {
                 'baseline': baseline_val,
                 'current': current_val,
@@ -89,14 +88,14 @@ class TrendAnalyzer:
                 'percentage_change': self._calculate_percentage(baseline_val, change),
                 'improved': change > 0
             }
-        
+
         return metrics
-    
-    def _analyze_dependency_trends(self) -> Dict:
+
+    def _analyze_dependency_trends(self) -> dict:
         """Analyze dependency-related trends"""
         baseline_deps = self.baseline.get('dependencies', {})
         current_deps = self.current.get('dependencies', {})
-        
+
         return {
             'total_dependencies': {
                 'baseline': baseline_deps.get('total_declared', 0),
@@ -125,15 +124,15 @@ class TrendAnalyzer:
                 }
             }
         }
-    
-    def _analyze_issue_trends(self) -> Dict:
+
+    def _analyze_issue_trends(self) -> dict:
         """Analyze issue trends"""
         baseline_issues = self.baseline.get('issues', {})
         current_issues = self.current.get('issues', {})
-        
+
         total_baseline = sum(baseline_issues.values())
         total_current = sum(current_issues.values())
-        
+
         return {
             'total_issues': {
                 'baseline': total_baseline,
@@ -150,17 +149,17 @@ class TrendAnalyzer:
                 for issue_type in set(list(baseline_issues.keys()) + list(current_issues.keys()))
             }
         }
-    
-    def _analyze_health_trends(self) -> Dict:
+
+    def _analyze_health_trends(self) -> dict:
         """Analyze overall health trends"""
         baseline_health = self.baseline.get('health_score', 50)
         current_health = self.current.get('health_score', 50)
         health_change = current_health - baseline_health
-        
+
         baseline_debt = self.baseline.get('technical_debt_hours', 0)
         current_debt = self.current.get('technical_debt_hours', 0)
         debt_change = current_debt - baseline_debt
-        
+
         return {
             'health_score': {
                 'baseline': baseline_health,
@@ -176,19 +175,19 @@ class TrendAnalyzer:
                 'trend': 'increasing' if debt_change > 5 else 'decreasing' if debt_change < -5 else 'stable'
             }
         }
-    
+
     def _calculate_overall_trend(self) -> str:
         """Calculate overall repository trend"""
         positive_indicators = 0
         negative_indicators = 0
-        
+
         # Check various indicators
         health_change = self.current.get('health_score', 50) - self.baseline.get('health_score', 50)
         if health_change > 0:
             positive_indicators += 2  # Health score is double weighted
         elif health_change < 0:
             negative_indicators += 2
-        
+
         # Check issues
         baseline_issues = sum(self.baseline.get('issues', {}).values())
         current_issues = sum(self.current.get('issues', {}).values())
@@ -196,13 +195,13 @@ class TrendAnalyzer:
             positive_indicators += 1
         elif current_issues > baseline_issues:
             negative_indicators += 1
-        
+
         # Check dependencies
         if self.current.get('dependencies', {}).get('missing', 0) == 0:
             positive_indicators += 1
         if self.current.get('dependencies', {}).get('circular', 0) == 0:
             positive_indicators += 1
-        
+
         # Determine overall trend
         if positive_indicators > negative_indicators + 2:
             return "significantly improving"
@@ -214,17 +213,17 @@ class TrendAnalyzer:
             return "declining"
         else:
             return "stable"
-    
+
     def _calculate_percentage(self, base: float, change: float) -> float:
         """Calculate percentage change"""
         if base == 0:
             return 0.0
         return round((change / base) * 100, 1)
-    
-    def _generate_recommendations(self) -> List[Dict]:
+
+    def _generate_recommendations(self) -> list[dict]:
         """Generate actionable recommendations based on trends"""
         recommendations = []
-        
+
         # Check module size trend
         module_trends = self.trends.get('modules', {})
         if module_trends.get('average_size', {}).get('trend') == 'growing':
@@ -234,7 +233,7 @@ class TrendAnalyzer:
                 'recommendation': 'Module sizes are increasing. Consider splitting large modules.',
                 'action': 'Run module size analysis and refactor modules over 150 lines.'
             })
-        
+
         # Check quality metrics
         quality_trends = self.trends.get('quality', {})
         if quality_trends.get('modules_with_tests', {}).get('current', 0) < 50:
@@ -244,7 +243,7 @@ class TrendAnalyzer:
                 'recommendation': 'Test coverage is low. Increase module testing.',
                 'action': 'Add test scenarios to all critical modules.'
             })
-        
+
         # Check dependencies
         dep_trends = self.trends.get('dependencies', {})
         if dep_trends.get('missing_dependencies', {}).get('current', 0) > 0:
@@ -254,7 +253,7 @@ class TrendAnalyzer:
                 'recommendation': 'Missing dependencies detected.',
                 'action': 'Create missing dependency modules or update references.'
             })
-        
+
         # Check health score
         health_trends = self.trends.get('health', {})
         if health_trends.get('health_score', {}).get('current', 0) < 70:
@@ -264,15 +263,15 @@ class TrendAnalyzer:
                 'recommendation': 'Repository health score is below target.',
                 'action': 'Focus on resolving high-priority issues to improve health score.'
             })
-        
+
         return recommendations
-    
+
     def save_trends(self, output_path: str):
         """Save trends analysis to file"""
         with open(output_path, 'w') as f:
             json.dump(self.trends, f, indent=2)
         print(f"Trends analysis saved to: {output_path}")
-    
+
     def print_summary(self):
         """Print a human-readable summary"""
         print("\n📊 TREND ANALYSIS SUMMARY")
@@ -280,12 +279,12 @@ class TrendAnalyzer:
         print(f"Overall Trend: {self.trends['summary']['overall_trend'].upper()}")
         print(f"Health Score: {self.trends['health']['health_score']['baseline']} → {self.trends['health']['health_score']['current']}")
         print(f"Technical Debt: {self.trends['health']['technical_debt']['baseline_hours']}h → {self.trends['health']['technical_debt']['current_hours']}h")
-        
+
         print("\n📈 Key Metrics:")
         print(f"- Total Modules: {self.trends['modules']['total_change']['value']:+d}")
         print(f"- Average Size: {self.trends['modules']['average_size']['change']:+.1f} lines")
         print(f"- Total Issues: {self.trends['issues']['total_issues']['change']:+d}")
-        
+
         print("\n💡 Top Recommendations:")
         for rec in self.trends['recommendations'][:3]:
             print(f"- [{rec['priority'].upper()}] {rec['recommendation']}")
@@ -297,17 +296,17 @@ def main():
     parser.add_argument('--current', required=True, help='Path to current audit JSON')
     parser.add_argument('--output', required=True, help='Path to save trends analysis')
     parser.add_argument('--verbose', action='store_true', help='Print detailed output')
-    
+
     args = parser.parse_args()
-    
+
     # Run analysis
     analyzer = TrendAnalyzer(args.baseline, args.current)
     analyzer.analyze_trends()
     analyzer.save_trends(args.output)
-    
+
     if args.verbose:
         analyzer.print_summary()
-    
+
     # Exit with appropriate code
     health_trend = analyzer.trends['health']['health_score']['trend']
     if health_trend == 'declining':

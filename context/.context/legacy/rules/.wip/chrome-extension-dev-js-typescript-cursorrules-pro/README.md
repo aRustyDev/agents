@@ -13,4 +13,3 @@ Developers creating Chrome Extensions will benefit by building well-structured, 
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines for developers building Chrome extensions using JavaScript, TypeScript, HTML, and CSS. It covers code style and structure, advocating for concise, functional programming with descriptive naming conventions. TypeScript usage is encouraged for type safety. The file outlines best practices for extension architecture, including separation of concerns, state management, and message passing. Security is emphasized with guidelines on permissions, content security policy, and data validation. UI and styling advice, performance optimization tips, and browser API usage strategies are included. Cross-browser compatibility, testing and debugging practices, and context-aware development considerations are also addressed. The file stresses the importance of adhering to Chrome Extension documentation for best practices.
-

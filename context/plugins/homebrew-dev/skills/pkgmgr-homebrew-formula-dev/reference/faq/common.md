@@ -5,7 +5,6 @@
 **Problem:** Need different binaries for ARM (Apple Silicon) vs Intel.
 
 **WRONG (deprecated):**
-
 ```ruby
 # DO NOT use url/sha256 inside on_arm/on_intel blocks
 on_arm do
@@ -19,7 +18,6 @@ end
 ```
 
 **CORRECT: Use default URL + resource with nested arch block:**
-
 ```text
 # Default URL for one architecture (e.g., ARM)
 url "https://example.com/tool-arm64.tar.gz"
@@ -75,7 +73,6 @@ end
 **Cause:** Some tools write help text to stderr instead of stdout. `shell_output` only captures stdout by default.
 
 **Solution:** Redirect stderr to stdout in the test:
-
 ```text
 test do
   assert_match "tool-name", shell_output("#{bin}/tool --help 2>&1")
@@ -89,7 +86,6 @@ end
 **Cause:** Many Rust crates depend on `openssl-sys` which requires OpenSSL headers. macOS includes these, but Linux (Homebrew) does not.
 
 **Solution:** Add OpenSSL dependency for Linux only:
-
 ```text
 depends_on "rust" => :build
 
@@ -105,7 +101,6 @@ end
 **Cause:** The binary dynamically links against OpenSSL at runtime, but OpenSSL is only declared as a Linux dependency. After the bottle is installed, OpenSSL is removed because it's not a declared dependency.
 
 **Solution:** If the binary needs OpenSSL at runtime on both platforms, make it a global runtime dependency:
-
 ```text
 depends_on "rust" => :build
 depends_on "openssl@3"
@@ -124,7 +119,6 @@ end
 **Cause:** Homebrew can't auto-detect the Python version when using generic `python@3` dependency.
 
 **Solution:** Specify the exact Python version:
-
 ```text
 depends_on "python@3.14"
 
@@ -140,7 +134,6 @@ end
 **Cause:** CI tries to build bottles, but HEAD-only formulas have no stable URL/sha256 for reproducible builds.
 
 **Solution:** Either:
-
 1. Wait for upstream to create a release
 2. Update CI workflow to detect and skip bottle builds for HEAD-only formulas
 3. Mark as `deprecate!` or `disable!` if the project is abandoned
@@ -158,7 +151,6 @@ The `# typed: strict` and `# frozen_string_literal: true` headers are **optional
 **Cause:** Homebrew enforces strict ordering: build dependencies must come before runtime dependencies, and within each category, dependencies should be alphabetical.
 
 **WRONG:**
-
 ```text
 on_linux do
   depends_on "openssl@3"
@@ -168,7 +160,6 @@ end
 ```
 
 **CORRECT:**
-
 ```text
 on_linux do
   depends_on "pkgconf" => :build
@@ -178,7 +169,6 @@ end
 ```
 
 **Rule:** Within any block (`on_linux`, `on_macos`, or top-level), list dependencies in this order:
-
 1. Build dependencies (`=> :build`) — alphabetically
 2. Test dependencies (`=> :test`) — alphabetically
 3. Runtime dependencies — alphabetically
@@ -190,7 +180,6 @@ end
 **Cause:** Calling `system libexec/"bin/pip"` directly doesn't work because pip isn't installed at that path after `virtualenv_create`.
 
 **WRONG:**
-
 ```text
 def install
   virtualenv_create(libexec, "python3.14")
@@ -200,7 +189,6 @@ end
 ```
 
 **CORRECT:**
-
 ```text
 def install
   venv = virtualenv_create(libexec, "python3.14")
@@ -218,7 +206,6 @@ end
 **Cause:** `pkg_resources` is part of `setuptools`, which was removed from Python's standard library in Python 3.12+. Some packages still use it at runtime.
 
 **Solution:** Install setuptools explicitly before the main package:
-
 ```text
 def install
   venv = virtualenv_create(libexec, "python3.14")
@@ -233,13 +220,11 @@ end
 **Problem:** Test fails with assertion mismatch even though binary installs correctly.
 
 **Cause:** The actual binary output differs from expected. Common issues:
-
 - Binary name differs from formula name (e.g., `jwt-ui` installs `jwtui`)
 - Help text format differs (e.g., "cargo selector" vs "cargo-selector")
 - Output goes to stderr instead of stdout
 
 **Solution:** Always verify actual output before writing tests:
-
 ```bash
 # After installing locally, check real output
 brew install --build-from-source arustydev/tap/<name>
@@ -247,7 +232,6 @@ brew install --build-from-source arustydev/tap/<name>
 ```
 
 Then write the test to match the actual output:
-
 ```text
 test do
   # Match what the binary actually outputs

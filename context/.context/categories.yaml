@@ -1,6 +1,6 @@
 # Unified Category Definitions
 # This is the single source of truth for all categories in awesome-claude-code
-# 
+#
 # Adding a new category requires only updating this file.
 # All scripts and templates will automatically use these definitions.
 
@@ -26,7 +26,7 @@ categories:
     subcategories:
       - id: general
         name: "General"
-    
+
   - id: tooling
     name: "Tooling"
     prefix: tool
@@ -43,7 +43,7 @@ categories:
         name: "Usage Monitors"
       - id: orchestrators
         name: "Orchestrators"
-        
+
   - id: statusline
     name: "Status Lines"
     prefix: status
@@ -54,7 +54,7 @@ categories:
     subcategories:
       - id: general
         name: "General"
-    
+
   - id: hooks
     name: "Hooks"
     prefix: hook
@@ -100,7 +100,7 @@ categories:
         name: "Project & Task Management"
       - id: miscellaneous
         name: "Miscellaneous"
-        
+
   - id: claude-md-files
     name: "CLAUDE.md Files"
     prefix: claude

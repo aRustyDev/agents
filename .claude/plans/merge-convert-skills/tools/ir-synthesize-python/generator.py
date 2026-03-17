@@ -15,28 +15,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ir_core.models import (
-    Function,
-    TypeDef,
-    TypeRef,
-    TypeRefKind,
-    TypeKind,
-    TypeParam,
-    Param,
-    Import,
-    Effect,
-    EffectKind,
-    Visibility,
-    Mutability,
     ControlFlowGraph,
-    Block,
-    Statement,
-    Terminator,
-    TerminatorKind,
+    EffectKind,
     Expression,
     ExpressionKind,
     Field_,
-    GapType,
-    Severity,
+    Function,
+    Import,
+    Param,
+    Statement,
+    Terminator,
+    TerminatorKind,
+    TypeDef,
+    TypeKind,
+    TypeRef,
+    TypeRefKind,
 )
 
 if TYPE_CHECKING:
@@ -78,7 +71,7 @@ class PythonCodeGenerator:
     def gen_function(
         self,
         func: Function,
-        context: "SynthesisContext",
+        context: SynthesisContext,
         is_method: bool = False,
     ) -> str:
         """Generate a function definition.
@@ -112,7 +105,7 @@ class PythonCodeGenerator:
 
         return "\n".join(lines)
 
-    def gen_class(self, type_def: TypeDef, context: "SynthesisContext") -> str:
+    def gen_class(self, type_def: TypeDef, context: SynthesisContext) -> str:
         """Generate a class definition.
 
         Args:
@@ -172,7 +165,7 @@ class PythonCodeGenerator:
 
         return "\n".join(lines)
 
-    def gen_import(self, imp: Import, context: "SynthesisContext") -> str:
+    def gen_import(self, imp: Import, context: SynthesisContext) -> str:
         """Generate an import statement.
 
         Args:
@@ -201,7 +194,7 @@ class PythonCodeGenerator:
     def gen_type_annotation(
         self,
         type_ref: TypeRef,
-        context: "SynthesisContext",
+        context: SynthesisContext,
     ) -> str:
         """Generate a type annotation from a TypeRef.
 
@@ -293,7 +286,7 @@ class PythonCodeGenerator:
 
         return "Any"
 
-    def _resolve_type_name(self, type_id: str | None, context: "SynthesisContext") -> str:
+    def _resolve_type_name(self, type_id: str | None, context: SynthesisContext) -> str:
         """Resolve a type ID to a Python type name.
 
         Args:
@@ -327,7 +320,7 @@ class PythonCodeGenerator:
 
         return type_id
 
-    def _gen_signature(self, func: Function, context: "SynthesisContext") -> str:
+    def _gen_signature(self, func: Function, context: SynthesisContext) -> str:
         """Generate a function signature.
 
         Args:
@@ -362,7 +355,7 @@ class PythonCodeGenerator:
 
         return f"{prefix}def {func.name}({params_str}){return_type}:"
 
-    def _gen_param(self, param: Param, context: "SynthesisContext") -> str:
+    def _gen_param(self, param: Param, context: SynthesisContext) -> str:
         """Generate a parameter string.
 
         Args:
@@ -393,7 +386,7 @@ class PythonCodeGenerator:
 
         return name
 
-    def _gen_decorators(self, func: Function, context: "SynthesisContext") -> list[str]:
+    def _gen_decorators(self, func: Function, context: SynthesisContext) -> list[str]:
         """Generate decorator lines for a function.
 
         Args:
@@ -430,7 +423,7 @@ class PythonCodeGenerator:
         return decorators
 
     def _gen_class_decorators(
-        self, type_def: TypeDef, context: "SynthesisContext"
+        self, type_def: TypeDef, context: SynthesisContext
     ) -> list[str]:
         """Generate decorator lines for a class.
 
@@ -452,7 +445,7 @@ class PythonCodeGenerator:
         return decorators
 
     def _gen_class_signature(
-        self, type_def: TypeDef, context: "SynthesisContext"
+        self, type_def: TypeDef, context: SynthesisContext
     ) -> str:
         """Generate a class signature.
 
@@ -476,7 +469,7 @@ class PythonCodeGenerator:
 
         return f"class {name}{type_params}{bases}:"
 
-    def _gen_class_field(self, field: Field_, context: "SynthesisContext") -> str:
+    def _gen_class_field(self, field: Field_, context: SynthesisContext) -> str:
         """Generate a class field annotation.
 
         Args:
@@ -492,7 +485,7 @@ class PythonCodeGenerator:
             return f"{field.name}: {type_str} = {field.default_value!r}"
         return f"{field.name}: {type_str}"
 
-    def _gen_dataclass(self, type_def: TypeDef, context: "SynthesisContext") -> str:
+    def _gen_dataclass(self, type_def: TypeDef, context: SynthesisContext) -> str:
         """Generate a dataclass from a struct TypeDef.
 
         Args:
@@ -542,7 +535,7 @@ class PythonCodeGenerator:
         return "\n".join(lines)
 
     def _gen_dataclass_field(
-        self, field: Field_, context: "SynthesisContext"
+        self, field: Field_, context: SynthesisContext
     ) -> str:
         """Generate a dataclass field.
 
@@ -560,7 +553,7 @@ class PythonCodeGenerator:
 
         return f"{field.name}: {type_str}"
 
-    def _gen_protocol(self, type_def: TypeDef, context: "SynthesisContext") -> str:
+    def _gen_protocol(self, type_def: TypeDef, context: SynthesisContext) -> str:
         """Generate a Protocol from an interface TypeDef.
 
         Args:
@@ -600,7 +593,7 @@ class PythonCodeGenerator:
         return "\n".join(lines)
 
     def _gen_method_signature(
-        self, method_sig: "MethodSignature", context: "SynthesisContext"
+        self, method_sig: MethodSignature, context: SynthesisContext
     ) -> str:
         """Generate a method signature for a Protocol.
 
@@ -623,7 +616,7 @@ class PythonCodeGenerator:
 
         return f"def {method_sig.name}({params_str}) -> {ret_type}:"
 
-    def _gen_body(self, func: Function, context: "SynthesisContext") -> str:
+    def _gen_body(self, func: Function, context: SynthesisContext) -> str:
         """Generate the function body.
 
         Args:
@@ -638,7 +631,7 @@ class PythonCodeGenerator:
 
         return self._gen_cfg(func.body, context)
 
-    def _gen_cfg(self, cfg: ControlFlowGraph, context: "SynthesisContext") -> str:
+    def _gen_cfg(self, cfg: ControlFlowGraph, context: SynthesisContext) -> str:
         """Generate code from a control flow graph.
 
         Args:
@@ -675,7 +668,7 @@ class PythonCodeGenerator:
 
         return "\n".join(lines)
 
-    def _gen_statement(self, stmt: Statement, context: "SynthesisContext") -> str:
+    def _gen_statement(self, stmt: Statement, context: SynthesisContext) -> str:
         """Generate code for a statement.
 
         Args:
@@ -708,7 +701,7 @@ class PythonCodeGenerator:
         return ""
 
     def _gen_terminator(
-        self, term: Terminator, context: "SynthesisContext"
+        self, term: Terminator, context: SynthesisContext
     ) -> str:
         """Generate code for a terminator.
 
@@ -738,7 +731,7 @@ class PythonCodeGenerator:
         return ""
 
     def _gen_expression(
-        self, expr: Expression, context: "SynthesisContext"
+        self, expr: Expression, context: SynthesisContext
     ) -> str:
         """Generate code for an expression.
 
@@ -812,7 +805,7 @@ class PythonCodeGenerator:
 
         return ""
 
-    def _gen_literal(self, expr: Expression, context: "SynthesisContext") -> str:
+    def _gen_literal(self, expr: Expression, context: SynthesisContext) -> str:
         """Generate a literal expression.
 
         Args:
@@ -825,13 +818,9 @@ class PythonCodeGenerator:
         value = expr.literal_value
         kind = expr.literal_kind
 
-        if kind == "string":
+        if kind == "string" or kind == "bytes":
             return repr(value)
-        elif kind == "bytes":
-            return repr(value)
-        elif kind == "integer":
-            return str(value)
-        elif kind == "float":
+        elif kind == "integer" or kind == "float":
             return str(value)
         elif kind == "boolean":
             return "True" if value else "False"
@@ -840,7 +829,7 @@ class PythonCodeGenerator:
 
         return repr(value)
 
-    def _gen_operator(self, expr: Expression, context: "SynthesisContext") -> str:
+    def _gen_operator(self, expr: Expression, context: SynthesisContext) -> str:
         """Generate an operator expression.
 
         Args:
@@ -910,7 +899,7 @@ class PythonCodeGenerator:
 
         return ""
 
-    def _gen_lambda(self, expr: Expression, context: "SynthesisContext") -> str:
+    def _gen_lambda(self, expr: Expression, context: SynthesisContext) -> str:
         """Generate a lambda expression.
 
         Args:
@@ -925,7 +914,6 @@ class PythonCodeGenerator:
         # Handle async lambdas (not directly supported in Python)
         if expr.is_async:
             # Can't have async lambdas, add gap
-            from .synthesizer import SynthesisContext
             # Would need access to context for gap tracking
             pass
 
@@ -939,7 +927,7 @@ class PythonCodeGenerator:
 
         return f"lambda {params}: {body}"
 
-    def _gen_argument(self, arg: "Argument", context: "SynthesisContext") -> str:
+    def _gen_argument(self, arg: Argument, context: SynthesisContext) -> str:
         """Generate a function argument.
 
         Args:
@@ -949,7 +937,6 @@ class PythonCodeGenerator:
         Returns:
             Argument code
         """
-        from ir_core.models import Argument
 
         value_str = self._gen_expression(arg.value, context)
 
@@ -998,7 +985,7 @@ class PythonCodeGenerator:
         return None
 
     def _find_function(
-        self, func_id: str, context: "SynthesisContext"
+        self, func_id: str, context: SynthesisContext
     ) -> Function | None:
         """Find a function by ID in the IR.
 

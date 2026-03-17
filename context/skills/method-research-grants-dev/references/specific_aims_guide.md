@@ -455,4 +455,3 @@ The Specific Aims page is where grants are won or lost. **Invest time in getting
 ---
 
 **Key Takeaway**: The perfect Specific Aims page tells a compelling story in exactly one page—establishing a significant problem, presenting an innovative and feasible solution, showing preliminary evidence of success, and articulating transformative impact. Every sentence must earn its place.
-

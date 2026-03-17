@@ -328,4 +328,3 @@ class QualityMonitor:
 - All metrics within acceptable ranges
 - Monitor "Clarity" criterion - lower agreement may indicate need for rubric refinement
 ```
-

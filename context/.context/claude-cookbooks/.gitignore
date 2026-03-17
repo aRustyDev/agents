@@ -148,7 +148,7 @@ lychee-report.md
 
 # Notebook validation
 .notebook_validation_state.json
-.notebook_validation_checkpoint.json  
+.notebook_validation_checkpoint.json
 validation_report_*.md
 # Memory tool demo artifacts
 tool_use/demo_memory/

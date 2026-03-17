@@ -40,4 +40,3 @@ const additionalInstructions = `
 6. Follow Django's best practices for project structure
 7. Use Django's staticfiles app for managing static assets
 `;
-

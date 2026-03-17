@@ -163,4 +163,3 @@ The proposed research is significant because it will establish a molecular taxon
 4. **Study funded examples** - Look at successful aims pages in your field
 5. **Test on non-experts** - Can someone in a different field understand the importance?
 6. **Check every word** - Every sentence must earn its place on this precious page
-

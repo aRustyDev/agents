@@ -1,0 +1,65 @@
+# Agent definition module
+# Usage: just agent <command> [args]
+
+set unstable := true
+
+ROOT := source_directory() / "../.."
+SCRIPTS := ROOT / ".scripts"
+AGENTS := source_directory()
+
+# Validate an agent definition
+[group('agent')]
+validate name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    AGENT_FILE="{{ AGENTS }}/{{ name }}.md"
+
+    if [ ! -f "$AGENT_FILE" ]; then
+        echo "✗ Agent not found: $AGENT_FILE"
+        exit 1
+    fi
+
+    echo "Validating agent: {{ name }}"
+
+    # Check file is not empty
+    if [ ! -s "$AGENT_FILE" ]; then
+        echo "  ✗ Agent file is empty"
+        exit 1
+    fi
+
+    # Check for system prompt content (should have meaningful content)
+    lines=$(wc -l < "$AGENT_FILE" | tr -d ' ')
+    if [ "$lines" -lt 5 ]; then
+        echo "  ⚠ Agent has very little content ($lines lines)"
+    fi
+
+    echo "  ✓ Agent definition valid"
+
+# Compute hash for an agent
+[group('agent')]
+hash name:
+    @uv run python {{ SCRIPTS }}/build-plugin.py hash "{{ AGENTS }}/{{ name }}.md"
+
+# List all agents
+[group('agent')]
+list:
+    @ls -1 {{ AGENTS }}/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort
+
+# Check all agents
+[group('agent')]
+check-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    AGENTS_DIR="{{ AGENTS }}"
+    agents=$(ls -1 "$AGENTS_DIR"/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort)
+    count=0
+    for agent in $agents; do
+        AGENT_FILE="$AGENTS_DIR/$agent.md"
+        if [ -s "$AGENT_FILE" ]; then
+            count=$((count + 1))
+        else
+            echo "  ⚠ $agent (empty)"
+        fi
+    done
+    echo ""
+    echo "✓ $count agents checked"

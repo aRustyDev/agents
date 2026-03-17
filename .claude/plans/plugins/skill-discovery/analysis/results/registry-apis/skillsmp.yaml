@@ -1,0 +1,104 @@
+# Registry API Documentation: SkillsMP
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "skillsmp"
+  base_url: "https://skillsmp.com"
+  type: "skills"
+
+  api:
+    docs_url: "https://skillsmp.com/en/docs/api"
+    spec_format: "custom"
+    version: "v1"
+
+    authentication:
+      type: "api_key"
+      header: "Authorization: Bearer sk_live_..."
+      signup_url: "https://skillsmp.com/auth/login"
+      notes: "Requires account registration"
+
+    endpoints:
+      - path: "/api/v1/skills/search"
+        method: "GET"
+        description: "Search skills using keywords"
+        params:
+          - name: "q"
+            type: "string"
+            required: true
+            description: "Search query"
+          - name: "page"
+            type: "number"
+            required: false
+            default: 1
+          - name: "limit"
+            type: "number"
+            required: false
+            default: 20
+            max: 100
+          - name: "sortBy"
+            type: "string"
+            required: false
+            values: ["stars", "recent"]
+        response_format: "json"
+
+      - path: "/api/v1/skills/ai-search"
+        method: "GET"
+        description: "AI semantic search powered by Cloudflare AI"
+        params:
+          - name: "q"
+            type: "string"
+            required: true
+            description: "AI search query"
+        response_format: "json"
+
+  restrictions:
+    robots_txt:
+      url: "https://skillsmp.com/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed: ["/api/", "/auth/"]
+      crawl_delay: null
+      notes: "API paths blocked for crawlers (use API with key)"
+
+    rate_limits:
+      documented: "500 requests/day per API key"
+      reset: "midnight UTC"
+      headers:
+        - "X-RateLimit-Daily-Limit: 500"
+        - "X-RateLimit-Daily-Remaining: N"
+      wildcard_searches: "not supported"
+
+    terms_of_service:
+      url: "https://skillsmp.com/en/terms"
+      scraping_policy: "may not scrape or systematically download large portions"
+      api_policy: "allowed with API key"
+      commercial_use: "allowed per individual skill licenses"
+
+  error_codes:
+    - code: "MISSING_API_KEY"
+      http: 401
+      description: "API key not provided"
+    - code: "INVALID_API_KEY"
+      http: 401
+      description: "Invalid API key"
+    - code: "MISSING_QUERY"
+      http: 400
+      description: "Missing required query parameter"
+    - code: "DAILY_QUOTA_EXCEEDED"
+      http: 429
+      description: "Daily API quota exceeded"
+    - code: "INTERNAL_ERROR"
+      http: 500
+      description: "Internal server error"
+
+  example:
+    curl: |
+      curl -X GET "https://skillsmp.com/api/v1/skills/search?q=SEO" \
+        -H "Authorization: Bearer sk_live_your_api_key"
+
+  observations:
+    - "Well-documented REST API with OpenAPI-like structure"
+    - "500 req/day free tier sufficient for discovery"
+    - "AI semantic search available (Cloudflare AI)"
+    - "Wildcard searches not supported"

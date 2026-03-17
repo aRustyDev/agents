@@ -75,3 +75,5 @@ tier-3:
   - url: https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-registry
     name: GitHub Copilot MCP Docs
     notes: Documentation, not a registry
+
+# https://github.com/wong2/awesome-mcp-servers

@@ -103,7 +103,7 @@ config:
     critical: 1    # Create issue for any critical finding
     high: 5        # Create issue if more than 5 high findings
     medium: 20     # Create issue if more than 20 medium findings
-  
+
   # Metrics to track
   tracked_metrics:
     - total_modules
@@ -115,7 +115,7 @@ config:
     - oversized_modules
     - test_coverage
     - documentation_coverage
-  
+
   # Notification settings
   notifications:
     slack:

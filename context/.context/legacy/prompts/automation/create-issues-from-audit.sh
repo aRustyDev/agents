@@ -48,7 +48,7 @@ create_issue() {
     local title=$3
     local description=$4
     local action=$5
-    
+
     # Determine labels based on severity and category
     local labels="audit-finding,$severity"
     case $category in
@@ -65,7 +65,7 @@ create_issue() {
             labels="$labels,performance"
             ;;
     esac
-    
+
     # Create issue body
     local body="## Audit Finding
 
@@ -102,7 +102,7 @@ This issue was automatically created from the monthly repository audit.
 parse_findings() {
     local audit_file=$1
     local threshold=$2
-    
+
     # Use Python to parse JSON and extract findings
     python3 -c "
 import json

@@ -13,4 +13,3 @@ Developers building modern web applications using TypeScript, React, and Next.js
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines best practices and conventions for developing applications using TypeScript, Node.js, Next.js, React, and associated tools like Radix UI and Tailwind CSS. It emphasizes concise, technical TypeScript code using functional programming patterns while avoiding classes and code duplication. It suggests naming conventions, such as using lowercase with dashes for directories, and favors interfaces over types and enums. The file also details performance optimization strategies, including minimizing client-side state and using React Server Components and dynamic loading. For database interactions, it recommends Supabase for data fetching and schema management. Additionally, it provides guidance on responsive design, leveraging Tailwind CSS, and optimizing web vitals.
-

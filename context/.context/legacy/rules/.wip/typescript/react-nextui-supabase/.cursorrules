@@ -31,4 +31,3 @@ Error Handling: A generic error component is used to display errors and provide 
 
 Navbar: A responsive navbar for the landing page and possibly other public pages.
 Sidebar: A collapsible sidebar for the dashboard, indicating a more complex, multi-page application structure for authenticated users.
-

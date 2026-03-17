@@ -31,16 +31,16 @@ cache_role() {
   local ROLE_NAME="$1"
   local ROLE_PATH="$2"
   local CACHE_DIR=".claude/cache/roles/${ROLE_NAME}"
-  
+
   # Create cache directory
   mkdir -p "$CACHE_DIR"
-  
+
   # Calculate content hash
   local CONTENT_HASH=$(sha256sum "$ROLE_PATH" | cut -d' ' -f1)
-  
+
   # Compress and store
   zstd -19 --quiet "$ROLE_PATH" -o "$CACHE_DIR/core.zst"
-  
+
   # Update metadata
   cat > "$CACHE_DIR/metadata.yaml" << EOF
 role_name: $ROLE_NAME
@@ -53,7 +53,7 @@ size_compressed: $(stat -f%z "$CACHE_DIR/core.zst" 2>/dev/null || stat -c%s "$CA
 access_count: 0
 last_accessed: null
 EOF
-  
+
   # Update manifest
   update_cache_manifest "$ROLE_NAME" "$CONTENT_HASH"
 }
@@ -64,16 +64,16 @@ EOF
 read_cached_role() {
   local ROLE_NAME="$1"
   local CACHE_DIR=".claude/cache/roles/${ROLE_NAME}"
-  
+
   # Check cache existence
   if [ ! -f "$CACHE_DIR/core.zst" ]; then
     return 1  # Cache miss
   fi
-  
+
   # Validate hash
   local EXPECTED_HASH=$(yq e ".content_hash" "$CACHE_DIR/metadata.yaml")
   local SOURCE_PATH=$(yq e ".source_path" "$CACHE_DIR/metadata.yaml")
-  
+
   if [ -f "$SOURCE_PATH" ]; then
     local CURRENT_HASH=$(sha256sum "$SOURCE_PATH" | cut -d' ' -f1)
     if [ "$EXPECTED_HASH" != "$CURRENT_HASH" ]; then
@@ -82,13 +82,13 @@ read_cached_role() {
       return 1
     fi
   fi
-  
+
   # Decompress and return
   zstd -d --quiet "$CACHE_DIR/core.zst" -c
-  
+
   # Update access metrics
   update_access_metrics "$ROLE_NAME"
-  
+
   return 0
 }
 ```
@@ -98,18 +98,18 @@ read_cached_role() {
 validate_cache() {
   local MANIFEST=".claude/cache/roles/manifest.yaml"
   local INVALID_COUNT=0
-  
+
   # Check each cached role
   for role in $(yq e '.roles[].name' "$MANIFEST"); do
     local CACHE_DIR=".claude/cache/roles/${role}"
     local METADATA="$CACHE_DIR/metadata.yaml"
-    
+
     if [ ! -f "$METADATA" ]; then
       echo "Missing metadata for $role"
       ((INVALID_COUNT++))
       continue
     fi
-    
+
     # Verify compression integrity
     if ! zstd -t "$CACHE_DIR/core.zst" 2>/dev/null; then
       echo "Corrupted cache for $role"
@@ -117,7 +117,7 @@ validate_cache() {
       ((INVALID_COUNT++))
     fi
   done
-  
+
   return $INVALID_COUNT
 }
 ```
@@ -146,7 +146,7 @@ metrics:
 predictive_cache() {
   # Analyze usage patterns
   local PREDICTIONS=$(analyze_role_transitions)
-  
+
   # Pre-cache likely next roles
   for role in $PREDICTIONS; do
     if [ ! -d ".claude/cache/roles/$role" ]; then
@@ -161,13 +161,13 @@ predictive_cache() {
 evict_stale_cache() {
   local MAX_CACHE_SIZE="500M"
   local MAX_AGE_DAYS=30
-  
+
   # Remove old entries
   find .claude/cache/roles -name "metadata.yaml" -mtime +$MAX_AGE_DAYS | \
     while read metadata; do
       rm -rf "$(dirname "$metadata")"
     done
-  
+
   # Check total size
   local CACHE_SIZE=$(du -sh .claude/cache | cut -f1)
   if [[ "$CACHE_SIZE" > "$MAX_CACHE_SIZE" ]]; then
@@ -205,7 +205,7 @@ compression_levels:
 ```bash
 monitor_cache_performance() {
   local REPORT=".claude/metrics/cache-performance.yaml"
-  
+
   cat > "$REPORT" << EOF
 timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 cache_stats:
@@ -228,16 +228,16 @@ EOF
 # Role loader checks cache first
 load_role_with_cache() {
   local ROLE="$1"
-  
+
   # Try cache first
   if read_cached_role "$ROLE"; then
     echo "Loaded from cache in $(measure_time)ms"
     return 0
   fi
-  
+
   # Fall back to fresh load
   load_role_fresh "$ROLE"
-  
+
   # Cache for next time
   cache_role "$ROLE" &
 }

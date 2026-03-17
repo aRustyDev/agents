@@ -1,0 +1,22 @@
+[[topics]]
+title="cross-functional-design"
+
+[[design-system]]
+title="Material Design 3"
+url="https://m3.material.io/components"
+
+[[design-system]]
+title="Carbon Design System"
+url="https://carbondesignsystem.com/components/overview/"
+
+[[design-system]]
+title="Ant Design 5"
+url="https://ant.design/components/overview"
+
+[[design-system]]
+title="Atlassian Design System"
+url="https://atlassian.design/components"
+
+[[design-system]]
+title="shadcn/ui"
+url="https://ui.shadcn.com/docs/components"

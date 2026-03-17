@@ -51,12 +51,12 @@ case "${1:-}" in
         echo -e "${GREEN}✅ Uploaded to TestPyPI! Test with:${NC}"
         echo -e "   pip install --index-url https://test.pypi.org/simple/ SuperClaude"
         ;;
-    
+
     "test-install")
         echo -e "${YELLOW}🧪 Testing installation from TestPyPI...${NC}"
         python3 "$BUILD_SCRIPT" --testpypi --test-install --skip-build
         ;;
-    
+
     "prod"|"production")
         echo -e "${YELLOW}🚨 Building and uploading to PRODUCTION PyPI...${NC}"
         echo -e "${RED}⚠️  This cannot be undone!${NC}"
@@ -64,28 +64,28 @@ case "${1:-}" in
         echo -e "${GREEN}✅ Uploaded to PyPI! Install with:${NC}"
         echo -e "   pip install SuperClaude"
         ;;
-    
+
     "build")
         echo -e "${YELLOW}🔨 Building package only...${NC}"
         python3 "$BUILD_SCRIPT" --skip-validation --testpypi --skip-upload
         echo -e "${GREEN}✅ Package built in dist/ directory${NC}"
         ;;
-    
+
     "clean")
         echo -e "${YELLOW}🧹 Cleaning build artifacts...${NC}"
         python3 "$BUILD_SCRIPT" --clean
         echo -e "${GREEN}✅ Build artifacts cleaned${NC}"
         ;;
-    
+
     "check"|"validate")
         echo -e "${YELLOW}🔍 Validating project structure...${NC}"
         python3 "$BUILD_SCRIPT" --skip-build --testpypi
         ;;
-    
+
     "help"|"-h"|"--help"|"")
         show_usage
         ;;
-    
+
     *)
         echo -e "${RED}❌ Unknown command: $1${NC}"
         echo ""

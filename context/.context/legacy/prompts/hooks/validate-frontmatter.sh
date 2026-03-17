@@ -43,13 +43,13 @@ for file in "$@"; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     echo -e "${YELLOW}Checking frontmatter for: $(basename "$file")${NC}"
     issues=()
-    
+
     # Extract frontmatter
     frontmatter=$(extract_frontmatter "$file")
-    
+
     # Check if frontmatter exists
     if [ -z "$frontmatter" ]; then
         echo -e "  ${RED}✗ No YAML frontmatter found${NC}"
@@ -57,7 +57,7 @@ for file in "$@"; do
         FAILED=1
         continue
     fi
-    
+
     # Check required fields
     for field in "${REQUIRED_FIELDS[@]}"; do
         value=$(get_field_value "$frontmatter" "$field")
@@ -66,7 +66,7 @@ for file in "$@"; do
             FAILED=1
         fi
     done
-    
+
     # Validate scope
     scope=$(get_field_value "$frontmatter" "scope")
     if [ -n "$scope" ]; then
@@ -82,7 +82,7 @@ for file in "$@"; do
             FAILED=1
         fi
     fi
-    
+
     # Validate priority
     priority=$(get_field_value "$frontmatter" "priority")
     if [ -n "$priority" ]; then
@@ -98,7 +98,7 @@ for file in "$@"; do
             FAILED=1
         fi
     fi
-    
+
     # Check triggers is an array
     if ! echo "$frontmatter" | grep -q "^triggers:"; then
         issues+=("Missing triggers field")
@@ -107,7 +107,7 @@ for file in "$@"; do
         issues+=("Triggers must be an array (use '- item' format)")
         FAILED=1
     fi
-    
+
     # Report issues for this file
     if [ ${#issues[@]} -eq 0 ]; then
         echo -e "  ${GREEN}✓ Valid frontmatter${NC}"
@@ -132,7 +132,7 @@ else
 ---
 module: ModuleName
 scope: persistent|context|temporary
-triggers: 
+triggers:
   - "trigger one"
   - "trigger two"
 conflicts: []

@@ -1,0 +1,233 @@
+# Registry API Summary Report
+# Phase 4: API Documentation
+# Generated: 2026-03-08
+
+summary:
+  total_registries: 8
+  with_api_docs: 3
+  with_search_api: 2
+  requiring_auth: 2
+  rate_limited: 3
+  allow_scraping: 8
+
+registries:
+  - name: skillsmp.com
+    type: skills_registry
+    api_available: true
+    api_documented: true
+    search_api: true
+    ai_search: true
+    authentication: api_key
+    rate_limit: "500 req/day"
+    scraping_allowed: true
+    access_method: api
+    priority: high
+    notes: "Best API, semantic AI search, well-documented"
+
+  - name: claudemarketplaces.com
+    type: marketplace_aggregator
+    api_available: true
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: none
+    rate_limit: none
+    scraping_allowed: true
+    access_method: api
+    priority: high
+    notes: "Public JSON API, AI-friendly (llms.txt), no auth needed"
+
+  - name: github.com
+    type: code_repository
+    api_available: true
+    api_documented: true
+    search_api: true
+    ai_search: false
+    authentication: optional
+    rate_limit: "5000 req/hour (auth), 30 req/min (search)"
+    scraping_allowed: true
+    access_method: api
+    priority: high
+    notes: "Primary source, use gh CLI for simplified access"
+
+  - name: buildwithclaude.com
+    type: plugin_registry
+    api_available: false
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: none
+    rate_limit: none
+    scraping_allowed: true
+    access_method: web_scraping
+    priority: medium
+    notes: "Largest registry (8,089 plugins), no API, blocks AI training"
+
+  - name: mcp.so
+    type: mcp_server_registry
+    api_available: false
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: none
+    rate_limit: none
+    scraping_allowed: true
+    access_method: web_scraping
+    priority: medium
+    notes: "Largest MCP registry (18,288 servers), requires JS rendering"
+
+  - name: glama.ai
+    type: mcp_server_registry
+    api_available: false
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: unknown
+    rate_limit: none
+    scraping_allowed: true
+    access_method: web_scraping
+    priority: low
+    notes: "API times out, secondary MCP registry"
+
+  - name: clauderegistry.com
+    type: curated_plugin_registry
+    api_available: false
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: none
+    rate_limit: "1 req/sec (crawl-delay)"
+    scraping_allowed: true
+    access_method: web_scraping
+    priority: low
+    notes: "Small curated registry (7 plugins)"
+
+  - name: ccpm.dev
+    type: commands_registry
+    api_available: false
+    api_documented: false
+    search_api: false
+    ai_search: false
+    authentication: unknown
+    rate_limit: none
+    scraping_allowed: true
+    access_method: web_scraping
+    priority: low
+    notes: "API endpoint exists but returns empty"
+
+access_tiers:
+  tier_1_api:
+    description: "Full REST API with documentation"
+    registries:
+      - skillsmp.com
+      - github.com
+    strategy: "Direct API calls with rate limit management"
+    tools: ["WebFetch", "gh CLI", "curl"]
+
+  tier_2_public_json:
+    description: "Public JSON endpoints without docs"
+    registries:
+      - claudemarketplaces.com
+    strategy: "Fetch JSON directly, reverse-engineer structure"
+    tools: ["WebFetch", "curl"]
+
+  tier_3_web_scraping:
+    description: "No API, require web scraping"
+    registries:
+      - buildwithclaude.com
+      - mcp.so
+      - glama.ai
+      - clauderegistry.com
+      - ccpm.dev
+    strategy: "crawl4ai for JS-rendered, WebFetch for static"
+    tools: ["crawl4ai", "WebFetch"]
+
+ai_friendliness:
+  explicitly_friendly:
+    - claudemarketplaces.com  # llms.txt, allows AI crawlers
+  neutral:
+    - skillsmp.com
+    - github.com
+    - mcp.so
+    - glama.ai
+    - clauderegistry.com
+    - ccpm.dev
+  blocks_ai_training:
+    - buildwithclaude.com  # Content-Signal: ai-train=no
+
+rate_limit_summary:
+  strict:
+    - name: skillsmp.com
+      limit: "500 requests/day"
+      strategy: "Batch requests, cache aggressively"
+  moderate:
+    - name: github.com
+      limit: "30 requests/minute (search)"
+      strategy: "Authenticate for 5000/hour, use gh CLI"
+  polite:
+    - name: clauderegistry.com
+      limit: "1 request/second (crawl-delay)"
+      strategy: "Respect delay, batch efficiently"
+  none:
+    - buildwithclaude.com
+    - mcp.so
+    - glama.ai
+    - claudemarketplaces.com
+    - ccpm.dev
+
+recommendations:
+  immediate_actions:
+    - description: "Implement skillsmp.com API client"
+      priority: high
+      reason: "Best documented API with AI-powered semantic search"
+
+    - description: "Add claudemarketplaces.com to discovery pipeline"
+      priority: high
+      reason: "Public JSON API, no auth, AI-friendly"
+
+    - description: "Configure GitHub topic searches"
+      priority: high
+      reason: "Primary source for component repositories"
+
+  tool_selection:
+    api_registries:
+      tool: "WebFetch or custom HTTP client"
+      registries: ["skillsmp.com", "claudemarketplaces.com"]
+
+    code_search:
+      tool: "gh CLI"
+      registries: ["github.com"]
+
+    js_heavy_sites:
+      tool: "crawl4ai (mcp__crawl4ai__scrape)"
+      registries: ["mcp.so", "buildwithclaude.com"]
+
+    static_sites:
+      tool: "WebFetch"
+      registries: ["clauderegistry.com", "ccpm.dev", "glama.ai"]
+
+  caching_strategy:
+    aggressive:
+      - skillsmp.com  # 500/day limit
+      - github.com    # Search API throttled
+    moderate:
+      - buildwithclaude.com
+      - mcp.so
+    minimal:
+      - claudemarketplaces.com  # No limits
+      - clauderegistry.com      # Small dataset
+
+  compliance:
+    - "Respect robots.txt disallow directives"
+    - "Honor crawl-delay when specified"
+    - "Authenticate with GitHub for higher limits"
+    - "Do not use buildwithclaude.com content for AI training"
+    - "Contact support@mcp.so for API access questions"
+
+observations:
+  - "Only 3 of 8 registries have usable APIs"
+  - "skillsmp.com offers the best discovery experience (AI semantic search)"
+  - "GitHub remains primary source despite not being a dedicated registry"
+  - "Large registries (buildwithclaude, mcp.so) lack APIs"
+  - "AI-friendly policies are rare (only claudemarketplaces explicitly allows)"
+  - "Most registries allow scraping but require JS rendering"

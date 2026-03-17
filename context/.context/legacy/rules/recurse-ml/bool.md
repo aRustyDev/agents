@@ -32,4 +32,3 @@ if is_user_valid and has_required_permission and is_privileged_user and is_recen
 ## Why
 
 Complex boolean expressions are error-prone and difficult to debug. Breaking them into named variables makes the logic clearer and easier to modify or test individual conditions.
-

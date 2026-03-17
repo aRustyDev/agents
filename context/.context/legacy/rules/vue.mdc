@@ -83,4 +83,4 @@ globs: **/*.vue, **/*.ts, components/**/*
 - Use proper environment variables
 - Implement proper code splitting
 - Use proper asset handling
-- Configure proper optimization 
+- Configure proper optimization

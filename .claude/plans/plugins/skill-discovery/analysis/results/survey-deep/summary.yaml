@@ -1,0 +1,233 @@
+# Experiment 6: Survey vs Deep Download Patterns
+# Executed: 2026-03-08
+# Status: PASSED
+
+experiment:
+  id: "exp-006-survey-deep"
+  status: "completed"
+  executed_at: "2026-03-08"
+
+# ============================================
+# SURVEY MODE PATTERNS
+# ============================================
+
+survey_patterns:
+  github_repos:
+    pattern_id: "survey-github-repos"
+    tool: "gh api"
+    mode: "survey"
+    when_to_use: "Discover repositories by topic or keyword"
+
+    example:
+      command: |
+        gh api search/repositories \
+          -f q="topic:claude-skills" \
+          -f sort=stars \
+          -f per_page=100 \
+          --jq '.items[] | {name: .full_name, stars: .stargazers_count}'
+
+    performance:
+      avg_time_ms: 522
+      results_per_query: 100
+      pagination: true
+
+    fields_captured:
+      - full_name
+      - stargazers_count
+      - description
+      - html_url
+      - language
+      - updated_at
+
+  registry_listing:
+    pattern_id: "survey-registry"
+    tool: "crawl4ai"
+    mode: "survey"
+    when_to_use: "List all components from a registry page"
+
+    example:
+      command: |
+        curl -s -X POST "http://localhost:11235/md" \
+          -H "Content-Type: application/json" \
+          -d '{"url": "https://buildwithclaude.com/skills"}' | \
+          tr -d '\000-\037' | jq -r '.markdown'
+
+    performance:
+      avg_time_ms: 1080
+      coverage: "100% of page content"
+
+    fields_captured:
+      - skill_name
+      - skill_url
+      - description
+      - source (GitHub or buildwithclaude)
+
+  search_discovery:
+    pattern_id: "survey-search"
+    tool: "SearXNG"
+    mode: "survey"
+    when_to_use: "Discover new registries or components"
+
+    example:
+      command: |
+        curl -s "http://localhost:8888/search?q=claude+skills+registry&format=json" | \
+          jq '.results[] | {title, url}'
+
+    performance:
+      avg_time_ms: 1116
+      results_per_query: 30+
+      rate_limited: false
+
+    fields_captured:
+      - title
+      - url
+      - content_snippet
+      - engine_source
+
+# ============================================
+# DEEP MODE PATTERNS
+# ============================================
+
+deep_patterns:
+  github_repo_contents:
+    pattern_id: "deep-github-repo"
+    tool: "gh api"
+    mode: "deep"
+    when_to_use: "Download complete skill/agent from repository"
+
+    example:
+      steps:
+        - name: "List repo contents"
+          command: |
+            gh api repos/OWNER/REPO/contents --jq '.[].path'
+
+        - name: "Find skill files"
+          command: |
+            gh api repos/OWNER/REPO/contents/skills --jq '.[].path'
+
+        - name: "Download file content"
+          command: |
+            gh api repos/OWNER/REPO/contents/skills/SKILL.md \
+              --jq '.content' | base64 -d
+
+    fields_captured:
+      - full_file_content
+      - directory_structure
+      - all_metadata
+
+  registry_detail:
+    pattern_id: "deep-registry"
+    tool: "crawl4ai"
+    mode: "deep"
+    when_to_use: "Extract full detail from a component page"
+
+    example:
+      command: |
+        curl -s -X POST "http://localhost:11235/md" \
+          -H "Content-Type: application/json" \
+          -d '{"url": "https://buildwithclaude.com/skill/SKILL_NAME"}' | \
+          tr -d '\000-\037' | jq -r '.markdown'
+
+    fields_captured:
+      - full_description
+      - install_command
+      - author
+      - source_url
+      - usage_examples
+
+  api_deep_search:
+    pattern_id: "deep-api"
+    tool: "curl with auth"
+    mode: "deep"
+    when_to_use: "Get full details from protected registry API"
+
+    example:
+      command: |
+        SKILLSMP_KEY=$(op read "op://Developer/skillsmp/credential")
+        curl -s "https://skillsmp.com/api/v1/skills/search?q=NAME&limit=1" \
+          -H "Authorization: Bearer $SKILLSMP_KEY" | jq '.data.skills[0]'
+
+    fields_captured:
+      - id
+      - name
+      - author
+      - description
+      - githubUrl
+      - skillUrl
+      - stars
+      - updatedAt
+
+# ============================================
+# DECISION TREE
+# ============================================
+
+decision_tree:
+  start: "What are you trying to do?"
+
+  branches:
+    - question: "Discover new sources?"
+      answer_yes: "Use SearXNG for meta-search"
+      tool: "SearXNG"
+      mode: "survey"
+
+    - question: "List components from known registry?"
+      answer_yes: "Use crawl4ai or WebFetch"
+      tool: "crawl4ai"
+      mode: "survey"
+
+    - question: "Find GitHub repositories?"
+      answer_yes: "Use gh api search/repositories"
+      tool: "gh api"
+      mode: "survey"
+
+    - question: "Download full component definition?"
+      branches:
+        - question: "From GitHub?"
+          answer_yes: "Use gh api repos/.../contents"
+          tool: "gh api"
+          mode: "deep"
+
+        - question: "From web registry?"
+          answer_yes: "Use crawl4ai on detail page"
+          tool: "crawl4ai"
+          mode: "deep"
+
+        - question: "From protected API?"
+          answer_yes: "Use curl with Bearer auth"
+          tool: "API"
+          mode: "deep"
+
+# ============================================
+# SUMMARY TABLE
+# ============================================
+
+summary_table:
+  - use_case: "Find new registries"
+    mode: "survey"
+    tool: "SearXNG"
+    time: "~1.1s"
+    output: "30+ URLs"
+
+  - use_case: "List registry components"
+    mode: "survey"
+    tool: "crawl4ai"
+    time: "~1s"
+    output: "Markdown list"
+
+  - use_case: "Find GitHub repos"
+    mode: "survey"
+    tool: "gh api"
+    time: "~0.5s"
+    output: "JSON array"
+
+  - use_case: "Download repo contents"
+    mode: "deep"
+    tool: "gh api"
+    time: "varies"
+    output: "File content"
+
+  - use_case: "Get skill details"
+    mode: "deep"
+    tool: "crawl4ai/API"
+    time: "~1s"
+    output: "Full definition"

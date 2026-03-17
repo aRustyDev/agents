@@ -189,7 +189,7 @@ class GitUtils:
         """
         try:
             result = subprocess.run(
-                ["git", "status", "--porcelain"], capture_output=True, text=True
+                ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
             )
             return not result.stdout.strip()
         except subprocess.SubprocessError:
@@ -204,7 +204,7 @@ class GitUtils:
         """
         try:
             result = subprocess.run(
-                ["git", "status", "--porcelain"], capture_output=True, text=True
+                ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
             )
             return result.stdout.strip()
         except subprocess.SubprocessError:
@@ -226,7 +226,7 @@ class GitUtils:
                 ["git", "add", str(filepath)],
                 cwd=cwd,
                 capture_output=True,
-                text=True,
+                text=True, check=False,
             )
             if result.returncode != 0:
                 self.logger.error(f"Failed to stage file: {result.stderr}")
@@ -252,7 +252,7 @@ class GitUtils:
                 ["git", "diff", "--name-only", str(filepath)],
                 cwd=cwd,
                 capture_output=True,
-                text=True,
+                text=True, check=False,
             )
             unstaged = bool(result.stdout.strip())
 
@@ -260,7 +260,7 @@ class GitUtils:
                 ["git", "diff", "--cached", "--name-only", str(filepath)],
                 cwd=cwd,
                 capture_output=True,
-                text=True,
+                text=True, check=False,
             )
             staged = bool(result.stdout.strip())
 

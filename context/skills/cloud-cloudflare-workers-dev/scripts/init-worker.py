@@ -15,7 +15,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 WRANGLER_TEMPLATE = '''name = "{name}"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
@@ -180,22 +179,22 @@ dist/
     (project_path / '.gitignore').write_text(gitignore)
 
     print(f"\n✅ Created Cloudflare Worker project: {name}")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  cd {name}")
-    print(f"  npm install")
+    print("  npm install")
 
     if with_d1:
         print(f"  wrangler d1 create {name}-db")
-        print(f"  # Update wrangler.toml with database_id")
+        print("  # Update wrangler.toml with database_id")
 
     if with_kv:
-        print(f"  wrangler kv:namespace create KV")
-        print(f"  # Update wrangler.toml with namespace id")
+        print("  wrangler kv:namespace create KV")
+        print("  # Update wrangler.toml with namespace id")
 
     if with_r2:
         print(f"  wrangler r2 bucket create {name}-bucket")
 
-    print(f"  npm run dev")
+    print("  npm run dev")
 
     return True
 

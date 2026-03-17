@@ -23,10 +23,10 @@ Process:
     4. Store for future reference (dual storage)
 """
 
-from typing import Dict, List, Optional, Any
-from pathlib import Path
 import json
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 
 class ReflexionPattern:
@@ -53,7 +53,7 @@ class ReflexionPattern:
             reflexion.record_error(error_info)
     """
 
-    def __init__(self, memory_dir: Optional[Path] = None):
+    def __init__(self, memory_dir: Path | None = None):
         """
         Initialize reflexion pattern
 
@@ -73,7 +73,7 @@ class ReflexionPattern:
         self.memory_dir.mkdir(parents=True, exist_ok=True)
         self.mistakes_dir.mkdir(parents=True, exist_ok=True)
 
-    def get_solution(self, error_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def get_solution(self, error_info: dict[str, Any]) -> dict[str, Any] | None:
         """
         Get known solution for similar error
 
@@ -99,7 +99,7 @@ class ReflexionPattern:
         solution = self._search_local_files(error_signature)
         return solution
 
-    def record_error(self, error_info: Dict[str, Any]) -> None:
+    def record_error(self, error_info: dict[str, Any]) -> None:
         """
         Record error and solution for future learning
 
@@ -127,7 +127,7 @@ class ReflexionPattern:
         if error_info.get("root_cause") or error_info.get("solution"):
             self._create_mistake_doc(error_info)
 
-    def _create_error_signature(self, error_info: Dict[str, Any]) -> str:
+    def _create_error_signature(self, error_info: dict[str, Any]) -> str:
         """
         Create error signature for matching
 
@@ -160,7 +160,7 @@ class ReflexionPattern:
 
         return " | ".join(parts)
 
-    def _search_mindbase(self, error_signature: str) -> Optional[Dict[str, Any]]:
+    def _search_mindbase(self, error_signature: str) -> dict[str, Any] | None:
         """
         Search for similar error in mindbase (semantic search)
 
@@ -174,7 +174,7 @@ class ReflexionPattern:
         # For now, return None (fallback to file search)
         return None
 
-    def _search_local_files(self, error_signature: str) -> Optional[Dict[str, Any]]:
+    def _search_local_files(self, error_signature: str) -> dict[str, Any] | None:
         """
         Search for similar error in local JSONL file
 
@@ -234,7 +234,7 @@ class ReflexionPattern:
 
         return (overlap / total) >= threshold
 
-    def _create_mistake_doc(self, error_info: Dict[str, Any]) -> None:
+    def _create_mistake_doc(self, error_info: dict[str, Any]) -> None:
         """
         Create detailed mistake documentation
 
@@ -306,7 +306,7 @@ class ReflexionPattern:
 
         filepath.write_text(content)
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get reflexion pattern statistics
 

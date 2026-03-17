@@ -1,0 +1,206 @@
+# Plugin GitHub Repositories
+# Phase 3: Plugin Discovery
+# Executed: 2026-03-08
+
+github_repos:
+  # Top repositories by stars
+  - name: "thedotmack/claude-mem"
+    url: "https://github.com/thedotmack/claude-mem"
+    stars: 33507
+    description: "Automatic session capture, AI compression, and context injection"
+    type: "plugin"
+
+  - name: "wasp-lang/open-saas"
+    url: "https://github.com/wasp-lang/open-saas"
+    stars: 13493
+    description: "SaaS boilerplate with Claude Code plugin for AI-ready development"
+    type: "marketplace"
+
+  - name: "anthropics/claude-plugins-official"
+    url: "https://github.com/anthropics/claude-plugins-official"
+    stars: 9478
+    description: "Official Anthropic-managed plugin directory"
+    type: "official_registry"
+
+  - name: "jarrodwatts/claude-hud"
+    url: "https://github.com/jarrodwatts/claude-hud"
+    stars: 4196
+    description: "Visual HUD showing context usage, tools, agents, and todos"
+    type: "plugin"
+
+  - name: "agenticnotetaking/arscontexta"
+    url: "https://github.com/agenticnotetaking/arscontexta"
+    stars: 2187
+    description: "Knowledge system generator from conversations"
+    type: "plugin"
+
+  - name: "jeremylongshore/claude-code-plugins-plus-skills"
+    url: "https://github.com/jeremylongshore/claude-code-plugins-plus-skills"
+    stars: 1551
+    description: "270+ plugins with 739 agent skills, CCPI package manager"
+    type: "marketplace"
+    plugin_count: 270
+
+  - name: "kenryu42/claude-code-safety-net"
+    url: "https://github.com/kenryu42/claude-code-safety-net"
+    stars: 1123
+    description: "Safety net catching destructive git/filesystem commands"
+    type: "plugin"
+
+  - name: "muratcankoylan/ralph-wiggum-marketer"
+    url: "https://github.com/muratcankoylan/ralph-wiggum-marketer"
+    stars: 682
+    description: "Autonomous AI copywriter plugin"
+    type: "plugin"
+
+  - name: "ananddtyagi/cc-marketplace"
+    url: "https://github.com/ananddtyagi/cc-marketplace"
+    stars: 657
+    description: "Claude Code Plugins marketplace repo"
+    type: "marketplace"
+
+  - name: "team-attention/plugins-for-claude-natives"
+    url: "https://github.com/team-attention/plugins-for-claude-natives"
+    stars: 633
+    description: "Claude Code plugins for power users"
+    type: "marketplace"
+
+  - name: "ccplugins/awesome-claude-code-plugins"
+    url: "https://github.com/ccplugins/awesome-claude-code-plugins"
+    stars: 613
+    description: "Curated list: slash commands, subagents, MCP servers, hooks"
+    type: "awesome_list"
+
+  - name: "obra/superpowers-marketplace"
+    url: "https://github.com/obra/superpowers-marketplace"
+    stars: 601
+    description: "Curated Claude Code plugin marketplace"
+    type: "marketplace"
+
+  - name: "hamelsmu/claude-review-loop"
+    url: "https://github.com/hamelsmu/claude-review-loop"
+    stars: 545
+    description: "Automated code review loop with Codex"
+    type: "plugin"
+
+  - name: "gmickel/gmickel-claude-marketplace"
+    url: "https://github.com/gmickel/gmickel-claude-marketplace"
+    stars: 542
+    description: "Flow-Next, Ralph, multi-model review gates"
+    type: "marketplace"
+
+  - name: "zscole/adversarial-spec"
+    url: "https://github.com/zscole/adversarial-spec"
+    stars: 506
+    description: "Iterative spec refinement via multi-LLM debate"
+    type: "plugin"
+
+  - name: "kingbootoshi/cartographer"
+    url: "https://github.com/kingbootoshi/cartographer"
+    stars: 505
+    description: "Codebase mapping with parallel AI subagents"
+    type: "plugin"
+
+  - name: "sangrokjung/claude-forge"
+    url: "https://github.com/sangrokjung/claude-forge"
+    stars: 437
+    description: "11 AI agents, 36 commands, 15 skills, 6-layer security hooks"
+    type: "marketplace"
+
+  - name: "hashicorp/agent-skills"
+    url: "https://github.com/hashicorp/agent-skills"
+    stars: 432
+    description: "Agent skills and plugins for HashiCorp products"
+    type: "official_vendor"
+
+  - name: "quant-sentiment-ai/claude-equity-research"
+    url: "https://github.com/quant-sentiment-ai/claude-equity-research"
+    stars: 340
+    description: "Institutional-grade equity research plugin"
+    type: "plugin"
+
+  - name: "Piebald-AI/claude-code-lsps"
+    url: "https://github.com/Piebald-AI/claude-code-lsps"
+    stars: 285
+    description: "Plugin marketplace with LSP servers"
+    type: "marketplace"
+
+  - name: "humanplane/homunculus"
+    url: "https://github.com/humanplane/homunculus"
+    stars: 284
+    description: "Self-evolving plugin that learns work patterns"
+    type: "plugin"
+
+  - name: "trailofbits/skills-curated"
+    url: "https://github.com/trailofbits/skills-curated"
+    stars: 255
+    description: "Community-vetted Claude Code plugin marketplace"
+    type: "marketplace"
+
+  - name: "MadAppGang/claude-code"
+    url: "https://github.com/MadAppGang/claude-code"
+    stars: 242
+    description: "Claude code plugins marketplace"
+    type: "marketplace"
+
+  - name: "tzachbon/smart-ralph"
+    url: "https://github.com/tzachbon/smart-ralph"
+    stars: 242
+    description: "Spec-driven development with smart compaction"
+    type: "plugin"
+
+  - name: "athola/claude-night-market"
+    url: "https://github.com/athola/claude-night-market"
+    stars: 211
+    description: "Personal workflow plugins marketplace"
+    type: "marketplace"
+
+  - name: "obra/superpowers-chrome"
+    url: "https://github.com/obra/superpowers-chrome"
+    stars: 197
+    description: "Chrome browser control via DevTools Protocol"
+    type: "plugin"
+
+  - name: "croffasia/cc-blueprint-toolkit"
+    url: "https://github.com/croffasia/cc-blueprint-toolkit"
+    stars: 184
+    description: "Blueprint-driven development plugin"
+    type: "plugin"
+
+  - name: "astral-sh/claude-code-plugins"
+    url: "https://github.com/astral-sh/claude-code-plugins"
+    stars: 166
+    description: "Astral (uv/ruff) Claude Code plugins"
+    type: "official_vendor"
+
+  - name: "quemsah/awesome-claude-plugins"
+    url: "https://github.com/quemsah/awesome-claude-plugins"
+    stars: 161
+    description: "Plugin adoption metrics via n8n workflows"
+    type: "analytics"
+
+  - name: "kingbootoshi/nano-banana-2-skill"
+    url: "https://github.com/kingbootoshi/nano-banana-2-skill"
+    stars: 153
+    description: "AI image generation via Gemini 3 Pro"
+    type: "plugin"
+
+# Summary Statistics
+summary:
+  total_repos_found: 30
+  repos_by_type:
+    plugin: 15
+    marketplace: 10
+    official_registry: 1
+    official_vendor: 2
+    awesome_list: 1
+    analytics: 1
+  top_stars:
+    - "thedotmack/claude-mem": 33507
+    - "wasp-lang/open-saas": 13493
+    - "anthropics/claude-plugins-official": 9478
+  marketplace_repos:
+    - "jeremylongshore/claude-code-plugins-plus-skills": "270+ plugins"
+    - "ananddtyagi/cc-marketplace": "marketplace"
+    - "obra/superpowers-marketplace": "curated"
+    - "sangrokjung/claude-forge": "11 agents, 36 commands, 15 skills"

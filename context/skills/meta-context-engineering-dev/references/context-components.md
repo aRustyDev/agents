@@ -280,4 +280,3 @@ def get_reference(file_reference):
 ```
 
 This pattern ensures files are loaded once and cached for the session.
-

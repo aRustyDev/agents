@@ -46,9 +46,10 @@ import subprocess
 import sys
 import tempfile
 import textwrap
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 # Resource limits only available on Unix-like systems
 try:
@@ -309,7 +310,7 @@ class SafeExecutor:
                 capture_output=True,
                 timeout=actual_timeout,
                 text=True,
-                preexec_fn=self._preexec_fn,  # Resource limits (Linux only)
+                preexec_fn=self._preexec_fn, check=False,  # Resource limits (Linux only)
             )
 
             # Parse the output
@@ -365,7 +366,7 @@ class SafeExecutor:
                 capture_output=True,
                 timeout=self.config.timeout * max_examples / 10,  # Scale timeout
                 text=True,
-                preexec_fn=self._preexec_fn,  # Resource limits (Linux only)
+                preexec_fn=self._preexec_fn, check=False,  # Resource limits (Linux only)
             )
 
             # Parse multiple results from output
@@ -430,7 +431,7 @@ class SafeExecutor:
         if isinstance(val1, (list, tuple)) and isinstance(val2, (list, tuple)):
             if len(val1) != len(val2):
                 return False
-            return all(self._values_equal(v1, v2) for v1, v2 in zip(val1, val2))
+            return all(self._values_equal(v1, v2) for v1, v2 in zip(val1, val2, strict=False))
 
         # Handle dicts recursively
         if isinstance(val1, dict) and isinstance(val2, dict):

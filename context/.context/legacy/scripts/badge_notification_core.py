@@ -73,10 +73,9 @@ class RateLimiter:
             )
             time.sleep(self.backoff_seconds)
             self.backoff_seconds = min(self.backoff_seconds * 2, self.max_backoff)
-        else:
-            # Reset backoff if we're doing well
-            if status["remaining"] > 1000:
-                self.backoff_seconds = 1
+        # Reset backoff if we're doing well
+        elif status["remaining"] > 1000:
+            self.backoff_seconds = 1
 
     def handle_rate_limit_error(self, error: RateLimitExceededException):
         """Handle rate limit exception"""
@@ -312,7 +311,7 @@ Feel free to close this issue at any time.
 Thank you for contributing to the Claude Code ecosystem! 🙏
 
 ---
-*This notification was sent because your project was added to the Awesome Claude Code list. This is a one-time notification.*"""  # noqa: E501
+*This notification was sent because your project was added to the Awesome Claude Code list. This is a one-time notification.*"""
 
     def notification_exists(self, repo, strict: bool = True) -> bool:
         """

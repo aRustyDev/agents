@@ -1,0 +1,41 @@
+---
+links:
+  - https://github.com/yamadashy/repomix/blob/main/browser/.claude/skills/browser-extension-developer/SKILL.md
+  - https://github.com/davila7/claude-code-templates/tree/main/cli-tool/components/skills/utilities/browser-extension-builder/SKILL.md
+  - https://github.com/madappgang/claude-code/tree/main/plugins/dev/skills/frontend/browser-debugging/SKILL.md
+  - https://github.com/xenitv1/claude-code-maestro/tree/main/skills/browser-extension/SKILL.md
+  - https://github.com/jhl-labs/sepilot_desktop/tree/main/.claude/skills/extension-development/SKILL.md
+  - https://skillsmp.com/skills/lovedragonball-power-ranger-toolkit-src-skills-chrome-extension/SKILL.md
+  - https://skillsmp.com/skills/pproenca-dot-skills-skills-experimental-wxt-browser-extensions/SKILL.md
+  - https://skillsmp.com/skills/daichan132-youtube-live-chat-fullscreen-codex-skills-extension-debug/SKILL.md
+  - https://skillsmp.com/skills/pproenca-dot-skills-skills-experimental-chrome-extension-ui/SKILL.md
+  - https://skillsmp.com/skills/henkisdabro-wookstar-claude-plugins-plugins-tampermonkey-skills-tampermonkey/SKILL.md
+  - https://skillsmp.com/skills/omer-metin-skills-for-antigravity-skills-browser-extension-builder/SKILL.md
+  - https://skillsmp.com/skills/tenequm-claude-plugins-chrome-extension-wxt-skill/SKILL.md
+  - https://github.com/tbartel74/vigil-code/skills/browser-extension-developer/SKILL.md
+  - https://github.com/oimiragieo/agent-studio/skills/chrome-extension-expert/SKILL.md
+  - https://skillsmp.com/skills/ingpoc-skills-browser-testing/SKILL.md
+  - https://skillsmp.com/skills/axelmrak-ai-skills-browser-extension-builder/SKILL.md
+  - https://github.com/oimiragieo/agent-studio/skills/chrome-browser/SKILL.md
+  - https://skillsmp.com/skills/phrazzld-claude-config-skills-extension-toolchain/SKILL.md
+  - https://github.com/yonatangross/create-yg-app/skills/browser-content-capture/SKILL.md
+  - https://skillsmp.com/skills/timequity-plugins-vibe-coder-skills-design-preferences/SKILL.md
+  - https://skillsmp.com/skills/timequity-plugins-vibe-coder-skills-browser-extension/SKILL.md
+  - https://github.com/ali/gear-five/skills/browser-security/SKILL.md
+  - https://skillsmp.com/skills/phrazzld-codex-config-skills-browser-extension-dev/SKILL.md
+  - https://skillsmp.com/skills/phrazzld-claude-config-skills-browser-extension-dev/SKILL.md
+  - https://skillsmp.com/skills/kjgarza-marketplace-claude-plugins-senior-software-developer-skills-chrome-extension-builder/SKILL.md
+  - https://skillsmp.com/skills/whodaniel-fuse-agent-skills-antigravity-browser-extension-builder/SKILL.md
+  - https://skillsmp.com/skills/phrazzld-codex-config-skills-extension-toolchain/SKILL.md
+  - https://github.com/ymkz/curaq-clipper/skills/chrome-extension-wxt/SKILL.md
+  - https://skillsmp.com/skills/rand-cc-polymath-skills-discover-wasm/SKILL.md
+  - https://github.com/fazil47/wgpu-renderer/skills/wasm-validator/SKILL.md
+  - https://skillsmp.com/skills/pluginagentmarketplace-custom-plugin-rust-skills-rust-wasm/SKILL.md
+topics:
+  - modern browser toolchain patterns
+  - cross-browser compatibility
+  - wasm candidate selection
+extensions:
+  - github stuff
+  - oreilly extractor
+  -

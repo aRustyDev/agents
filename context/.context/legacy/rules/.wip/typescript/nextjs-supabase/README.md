@@ -13,4 +13,3 @@ Developers building modern, scalable web applications with a strong focus on per
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines for developing a project using TypeScript, Next.js, React, and associated libraries such as Shadcn UI, Radix UI, Supabase, Tailwind, and Vercel AI SDK. It emphasizes writing concise and modular TypeScript code using functional programming principles. The file outlines specific conventions for naming, syntax, UI styling, and performance optimization. It suggests the use of Supabase for database operations and details integration with Vercel AI SDK for AI-powered features. There are directives for efficient data fetching, error handling, SEO optimization, and adherence to Next.js docs for best practices in routing, rendering, and fetching data. The aim is to maintain high performance, readability, and maintainability within the project.
-

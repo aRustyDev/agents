@@ -75,7 +75,7 @@ relationships:
     - module_id
   conflicts:          # May contradict
     - module_id
-    
+
 # Metadata
 metadata:
   domain: string      # Knowledge domain
@@ -145,11 +145,11 @@ core_concepts:
           class User:
             def save(self): ...
             def send_email(self): ...
-          
+
           # Good: Separated concerns
           class User:
             def save(self): ...
-          
+
           class EmailService:
             def send_email(self, user): ...
 
@@ -163,14 +163,14 @@ core_concepts:
           # Bad: Repeated logic
           def calc_price_usd(amount):
             return amount * 1.1 * 0.9
-          
+
           def calc_price_eur(amount):
             return amount * 1.1 * 0.85
-          
+
           # Good: Extracted common logic
           def calc_base_price(amount):
             return amount * 1.1
-          
+
           def calc_price_usd(amount):
             return calc_base_price(amount) * 0.9
 

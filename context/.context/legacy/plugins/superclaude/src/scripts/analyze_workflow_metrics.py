@@ -10,13 +10,12 @@ Usage:
     python scripts/analyze_workflow_metrics.py --task-type bug_fix
 """
 
-import json
 import argparse
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from collections import defaultdict
+import json
 import statistics
+from collections import defaultdict
+from datetime import datetime, timedelta
+from pathlib import Path
 
 
 class WorkflowMetricsAnalyzer:
@@ -24,7 +23,7 @@ class WorkflowMetricsAnalyzer:
 
     def __init__(self, metrics_file: Path):
         self.metrics_file = metrics_file
-        self.metrics: List[Dict] = []
+        self.metrics: list[dict] = []
         self._load_metrics()
 
     def _load_metrics(self):
@@ -33,14 +32,14 @@ class WorkflowMetricsAnalyzer:
             print(f"Warning: {self.metrics_file} not found")
             return
 
-        with open(self.metrics_file, 'r') as f:
+        with open(self.metrics_file) as f:
             for line in f:
                 if line.strip():
                     self.metrics.append(json.loads(line))
 
         print(f"Loaded {len(self.metrics)} metric records")
 
-    def filter_by_period(self, period: str) -> List[Dict]:
+    def filter_by_period(self, period: str) -> list[dict]:
         """Filter metrics by time period"""
         now = datetime.now()
 
@@ -61,7 +60,7 @@ class WorkflowMetricsAnalyzer:
         print(f"Filtered to {len(filtered)} records in last {period}")
         return filtered
 
-    def analyze_by_task_type(self, metrics: List[Dict]) -> Dict:
+    def analyze_by_task_type(self, metrics: list[dict]) -> dict:
         """Analyze metrics grouped by task type"""
         by_task = defaultdict(list)
 
@@ -80,7 +79,7 @@ class WorkflowMetricsAnalyzer:
 
         return results
 
-    def analyze_by_complexity(self, metrics: List[Dict]) -> Dict:
+    def analyze_by_complexity(self, metrics: list[dict]) -> dict:
         """Analyze metrics grouped by complexity level"""
         by_complexity = defaultdict(list)
 
@@ -98,7 +97,7 @@ class WorkflowMetricsAnalyzer:
 
         return results
 
-    def analyze_by_workflow(self, metrics: List[Dict]) -> Dict:
+    def analyze_by_workflow(self, metrics: list[dict]) -> dict:
         """Analyze metrics grouped by workflow variant"""
         by_workflow = defaultdict(list)
 
@@ -117,7 +116,7 @@ class WorkflowMetricsAnalyzer:
 
         return results
 
-    def identify_best_workflows(self, metrics: List[Dict]) -> Dict[str, str]:
+    def identify_best_workflows(self, metrics: list[dict]) -> dict[str, str]:
         """Identify best workflow for each task type"""
         by_task_workflow = defaultdict(lambda: defaultdict(list))
 
@@ -145,7 +144,7 @@ class WorkflowMetricsAnalyzer:
 
         return best_workflows
 
-    def identify_inefficiencies(self, metrics: List[Dict]) -> List[Dict]:
+    def identify_inefficiencies(self, metrics: list[dict]) -> list[dict]:
         """Identify inefficient patterns"""
         inefficiencies = []
 
@@ -185,7 +184,7 @@ class WorkflowMetricsAnalyzer:
 
         return inefficiencies
 
-    def calculate_token_savings(self, metrics: List[Dict]) -> Dict:
+    def calculate_token_savings(self, metrics: list[dict]) -> dict:
         """Calculate token savings vs unlimited baseline"""
         # Unlimited baseline estimates
         baseline = {

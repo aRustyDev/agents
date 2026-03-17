@@ -1,6 +1,6 @@
 #!/bin/bash
 # Example usage of AI-powered scientific schematic generation
-# 
+#
 # Prerequisites:
 # 1. Set OPENROUTER_API_KEY environment variable
 # 2. Ensure Python 3.10+ is installed
@@ -86,4 +86,3 @@ echo "  1. View the generated images"
 echo "  2. Review the quality scores in *_review_log.json"
 echo "  3. Try your own prompts!"
 echo ""
-

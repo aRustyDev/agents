@@ -10,7 +10,7 @@ providers:
       max_tokens: 4096
       temperature: 0
 
-prompts: 
+prompts:
   - id: prompts.py:generate_prompt
     label: Basic
   - id: prompts.py:generate_prompt_with_examples

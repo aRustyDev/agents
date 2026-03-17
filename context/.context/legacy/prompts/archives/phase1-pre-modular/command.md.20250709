@@ -35,7 +35,7 @@ This command is implemented as a modular system with specialized modules for eac
    - Process detection and template generation
    - Handles `/project:command init`
 
-2. **`update.md`** - Enhance Existing Command  
+2. **`update.md`** - Enhance Existing Command
    - Add features or modify functionality while maintaining consistency
    - Preserves backward compatibility
    - Handles `/project:command update`
@@ -126,12 +126,12 @@ For each potential match:
 
 3. Ask for confirmation:
    "Would you like to use the existing [process-name] process for [specific functionality]?
-   
+
    Benefits of reusing:
    - Consistent behavior across commands
    - Well-tested implementation
    - Automatic updates when process improves
-   
+
    [View process details] [Use this process] [Create custom instead]"
 
 #### Conflict Detection
@@ -142,7 +142,7 @@ If choosing to use existing process:
    Conflict detected:
    - You described: [user's description]
    - Process does: [existing behavior]
-   
+
    How would you like to resolve this?
    1. Use existing behavior
    2. Create command-specific override
@@ -155,13 +155,13 @@ Identify features you want that aren't in the shared process:
 2. **For each missing feature, ask**:
    ```
    The [process-name] process doesn't include [feature].
-   
+
    Would you like to:
    1. Add this to the shared process (benefits all commands)
    2. Create a conditional extension (only your command uses it)
    3. Implement separately in your command
    4. Skip this feature
-   
+
    If adding to shared process:
    - Should this be always active?
    - Or activated by a flag/condition?
@@ -243,7 +243,7 @@ processes:
       - feature: "commit-message-format"
         condition: "when flag --custom-format is used"
         implementation: "Use user-provided format"
-  
+
   - name: testing/tdd-pattern
     version: ">=1.0.0"
     usage: "For test-driven implementation"

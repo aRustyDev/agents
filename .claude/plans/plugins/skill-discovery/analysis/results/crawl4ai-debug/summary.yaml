@@ -1,0 +1,65 @@
+# Experiment 3: crawl4ai Debug Results
+# Executed: 2026-03-08
+# Status: PASSED (via HTTP API workaround)
+
+experiment:
+  id: "exp-003-crawl4ai-debug"
+  status: "completed"
+  executed_at: "2026-03-08"
+  method: "HTTP API (MCP SSE broken, stdio fix pending restart)"
+
+tests:
+  - id: "c4a-001-basic-md"
+    target: "https://buildwithclaude.com/"
+    status: "passed"
+    results:
+      success: true
+      filter: "fit"
+      content_length: 8927
+      duration_ms: 1084
+      sample: "# Extend Claude with curated plugins..."
+    notes: "Successfully extracted 487+ components listing"
+
+  - id: "c4a-002-js-render"
+    target: "https://mcp.so/"
+    status: "passed"
+    results:
+      success: true
+      content_length: 11614
+      js_rendered: true
+      data_extracted:
+        total_servers: 18288
+        featured_servers: 12
+        featured_clients: 12
+    notes: "Successfully rendered JavaScript and extracted MCP server count"
+
+  - id: "c4a-003-bm25"
+    target: "https://buildwithclaude.com/skills"
+    status: "partial"
+    results:
+      filter_applied: "fit"  # BM25 not applied via HTTP API
+      content_length: 6573
+    notes: "BM25 filter requires MCP - HTTP API defaults to 'fit'"
+
+findings:
+  js_rendering: "WORKING - mcp.so fully rendered"
+  markdown_extraction: "WORKING - clean output"
+  bm25_filtering: "NOT AVAILABLE via HTTP API"
+
+  http_api_capabilities:
+    - "/md - Markdown extraction (working)"
+    - "/html - HTML extraction (not tested)"
+    - "/crawl - Batch crawling (not tested)"
+
+  limitations:
+    - "BM25/LLM filtering requires MCP tools"
+    - "HTTP API has control characters in output (need tr -d cleanup)"
+    - "MCP SSE transport broken (issue #1316)"
+
+recommendations:
+  primary: "Use HTTP API with curl for crawl4ai"
+  fallback: "Restart Claude Code for stdio MCP transport"
+  example: |
+    curl -s -X POST "http://localhost:11235/md" \
+      -H "Content-Type: application/json" \
+      -d '{"url": "TARGET_URL"}' | tr -d '\000-\037' | jq '.markdown'

@@ -46,7 +46,7 @@ while IFS= read -r line; do
     if [[ -n "$line" ]]; then
         module_name=$(echo "$line" | sed 's/.*module: //' | tr -d ' ')
         file_path=$(echo "$line" | cut -d: -f1)
-        
+
         # Check if module name matches CamelCase pattern
         if ! [[ "$module_name" =~ ^[A-Z][a-zA-Z]*$ ]]; then
             echo -e "${YELLOW}⚠️  Non-standard naming: $file_path -> $module_name${NC}"
@@ -61,7 +61,7 @@ echo -e "\n4. Checking specific modules from issue #124:"
 check_module() {
     local file="$1"
     local expected="$2"
-    
+
     if [ -f "$file" ]; then
         actual=$(grep "^module:" "$file" | sed 's/module: *//' | tr -d ' ')
         if [ "$actual" = "$expected" ]; then

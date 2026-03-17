@@ -1,0 +1,133 @@
+<!--https://github.com/nicobailon/visual-explainer-->
+- How does this plugin capture "Resources Needed"? (for the project being planned)
+- How does this plugin delineate "MVP" (Minimum Viable Product) requirements?
+- How to determine if an item/plan should be addressed now or after development work has progressed?
+- How to compare existing code against a SPEC it should be built against?
+- How to mark Beads issues for historical analysis
+  - labels: 'violation', 'severity', 'cleanup', 'refactor', 'bug', 'misalignment', 'feature', 'refine', 'improve', 'extend', 'gap'
+  - ex: frontend
+    - wireframing
+    - colors
+    - typography
+    - library
+    - prototyping
+    - design
+    - design-to-code
+    - visual-testing
+    - a11y
+    - 118n
+- Task Components
+  - Entry Gate - Checklist verifying all components are built before assembly
+  - Detailed Test Acceptance Criteria - Each task has comprehensive test specs matching the existing pattern
+  - Dependency Graph - Visual representation of task dependencies
+  - Implementation Notes - patterns, anti-patterns, goals
+  - Future considerations - ex: (pagination, offline, bulk operations)
+  - Rollback Strategy - Specific rollback procedures for failures
+  - Acceptance Criteria - Specific requirements for success
+  - Failure Criteria - Specific things that will cause failure
+  - Relationships - blocks/depends-on/siblings
+  - Detailed description with context and rationale
+  - Checklist of specific tasks
+  - Acceptance criteria for completion
+  - Technical specifications
+  - Dependency documentation
+- Beads patterns
+  - `MVP` is a **label**
+  - `Epics` are **features**
+    - `Tasks` are either **task** or **components**
+      - `SubTasks` are **task**
+- How to organize ADRs vs Decision Records?
+  - `kind:architecture|implementation|convention` (is convention a decision or a policy?)
+  - `scope:planning|product|system|component`
+- What patterns work to capture 'lessons learned' by agents during development?
+  - Thoughts:
+    - Might be best to have a hybrid approach. Some simple fleeting thoughts captured in the moment, then compiled into "permanent" record at some stop point?
+  - Key Documents and Tools
+    - Lessons Learned **Log/Register** (Spreadsheet): A real-time tracker (often in Excel/Google Sheets) to record, track, and update issues throughout the project lifecycle.
+    - Lessons Learned **Report** (Word Document): A formal, detailed report compiled at project closeout, often including an executive summary, project background, and detailed analysis of findings.
+    - **Surveys/Questionnaires** (Google Forms/SurveyMonkey): Used to collect anonymous or structured feedback from team members while information is fresh.
+    - **Post-Mortem/Retrospective** Templates: Standardized, structured documents used to analyze what went well and what didn't in a project
+  - Components
+    - **Identification**: Unique ID, date, author, and category (e.g., technical, process, team).
+    - **Description**: A detailed description of the event, its impact, and root causes.
+    - **Actionable** Items: Recommended actions, assigned owners, and status (open/closed).
+    - **Context**: Project name, stakeholders, and project phase
+  - Best Practices
+      - **Centralized Repository**: Store all documents in a shared, searchable repository for easy access.
+      - **Real-Time Capture**: Document lessons when they occur, not just at the end of the project.
+      - **Facilitated Sessions**: Use a neutral facilitator for workshops to encourage open, honest feedback.
+      - **Action-Oriented**: Ensure every recorded lesson has an accompanying action item for improvement
+- How to capture "front-end" specs/requirements?
+  - Modals/Wireframes/Screenshots/Prototypes/Animations/etc
+  - Kanban Board, Issue Detail Modal
+- How should we 'score' a plan? -> TODO: Create SPEC of PLAN
+  - **Completeness Gaps:**
+    - [ ] Missing success criteria
+    - [ ] Undefined deliverables
+    - [ ] Unspecified dependencies
+    - [ ] Missing effort estimates
+    - [ ] Unclear ownership/responsibility
+  - **Technical Gaps:**
+    - [ ] Undefined terms or concepts
+    - [ ] Missing edge cases
+    - [ ] Unhandled error scenarios
+    - [ ] Missing validation steps
+    - [ ] Incomplete data schemas
+  - **Process Gaps:**
+    - [ ] Missing phase transitions
+    - [ ] Unclear handoff points
+    - [ ] No rollback strategy
+    - [ ] Missing checkpoints
+    - [ ] No feedback loops
+  - **Strengthen:**
+    - Vague requirements → concrete acceptance criteria
+    - Implicit assumptions → explicit preconditions
+    - General approaches → specific techniques
+    - Rough estimates → informed projections
+  - **Extend:**
+    - Missing phases that would improve outcomes
+    - Additional deliverables that would add value
+    - Parallel work streams that could accelerate
+    - Automation opportunities
+  - **Refine:**
+    - Overly complex steps → simpler alternatives
+    - Redundant sections → consolidated content
+    - Unclear language → precise terminology
+    - Missing examples → concrete illustrations
+  - **External Research:**
+    - Search for similar approaches in industry
+    - Check for established patterns or frameworks
+    - Look for relevant prior art
+  - **Internal Consistency:**
+    - Verify deliverables match success criteria
+    - Check phase dependencies are satisfied
+    - Ensure estimates align with scope
+  - **Related Plans:**
+    - Glob for other plans in `.claude/plans/`
+    - Check for conflicts or overlaps
+    - Identify integration points
+  - **Dimensions**
+    - Completeness
+    - Clarity
+    - Feasibility
+    - Risk Coverage
+  - **Success Criteria Checklist**
+    - [ ] Measurable outcomes defined
+    - [ ] Clear done/not-done distinction
+    - [ ] Acceptance tests specified
+    - [ ] Stakeholder sign-off criteria
+  - **Deliverables Checklist**
+    - [ ] Output artifacts listed
+    - [ ] File locations specified
+    - [ ] Format/schema defined
+    - [ ] Quality standards stated
+  - **Dependencies Checklist**
+    - [ ] Prerequisites identified
+    - [ ] Blocking dependencies noted
+    - [ ] Optional dependencies marked
+    - [ ] External dependencies called out
+  - **Risk Checklist**
+    - [ ] Technical risks identified
+    - [ ] Mitigation strategies defined
+    - [ ] Fallback plans documented
+    - [ ] Risk owners assigned

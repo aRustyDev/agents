@@ -10,13 +10,13 @@ A simple conversational agent that demonstrates core PydanticAI patterns:
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
-from pydantic_settings import BaseSettings
-from pydantic import Field
-from pydantic_ai import Agent, RunContext
-from pydantic_ai.providers.openai import OpenAIProvider
-from pydantic_ai.models.openai import OpenAIModel
+
 from dotenv import load_dotenv
+from pydantic import Field
+from pydantic_ai import Agent
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_settings import BaseSettings
 
 # Load environment variables
 load_dotenv()
@@ -26,13 +26,13 @@ logger = logging.getLogger(__name__)
 
 class Settings(BaseSettings):
     """Configuration settings for the chat agent."""
-    
+
     # LLM Configuration
     llm_provider: str = Field(default="openai")
     llm_api_key: str = Field(...)
     llm_model: str = Field(default="gpt-4")
     llm_base_url: str = Field(default="https://api.openai.com/v1")
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = False
@@ -62,14 +62,14 @@ def get_llm_model() -> OpenAIModel:
 @dataclass
 class ConversationContext:
     """Simple context for conversation state management."""
-    user_name: Optional[str] = None
+    user_name: str | None = None
     conversation_count: int = 0
     preferred_language: str = "English"
-    session_id: Optional[str] = None
+    session_id: str | None = None
 
 
 SYSTEM_PROMPT = """
-You are a friendly and helpful AI assistant. 
+You are a friendly and helpful AI assistant.
 
 Your personality:
 - Warm and approachable
@@ -98,79 +98,79 @@ chat_agent = Agent(
 def dynamic_context_prompt(ctx) -> str:
     """Dynamic system prompt that includes conversation context."""
     prompt_parts = []
-    
+
     if ctx.deps.user_name:
         prompt_parts.append(f"The user's name is {ctx.deps.user_name}.")
-    
+
     if ctx.deps.conversation_count > 0:
         prompt_parts.append(f"This is message #{ctx.deps.conversation_count + 1} in your conversation.")
-    
+
     if ctx.deps.preferred_language != "English":
         prompt_parts.append(f"The user prefers to communicate in {ctx.deps.preferred_language}.")
-    
+
     return " ".join(prompt_parts) if prompt_parts else ""
 
 
-async def chat_with_agent(message: str, context: Optional[ConversationContext] = None) -> str:
+async def chat_with_agent(message: str, context: ConversationContext | None = None) -> str:
     """
     Main function to chat with the agent.
-    
+
     Args:
         message: User's message to the agent
         context: Optional conversation context for memory
-    
+
     Returns:
         String response from the agent
     """
     if context is None:
         context = ConversationContext()
-    
+
     # Increment conversation count
     context.conversation_count += 1
-    
+
     # Run the agent with the message and context
     result = await chat_agent.run(message, deps=context)
-    
+
     return result.data
 
 
-def chat_with_agent_sync(message: str, context: Optional[ConversationContext] = None) -> str:
+def chat_with_agent_sync(message: str, context: ConversationContext | None = None) -> str:
     """
     Synchronous version of chat_with_agent for simple use cases.
-    
+
     Args:
         message: User's message to the agent
         context: Optional conversation context for memory
-    
+
     Returns:
         String response from the agent
     """
     if context is None:
         context = ConversationContext()
-    
+
     # Increment conversation count
     context.conversation_count += 1
-    
+
     # Run the agent synchronously
     result = chat_agent.run_sync(message, deps=context)
-    
+
     return result.data
 
 
 # Example usage and demonstration
 if __name__ == "__main__":
     import asyncio
-    
+
     async def demo_conversation():
         """Demonstrate the basic chat agent with a simple conversation."""
         print("=== Basic Chat Agent Demo ===\n")
-        
+
         # Create conversation context
         context = ConversationContext(
             user_name="Alex",
             preferred_language="English"
         )
-        
+
         # Sample conversation
         messages = [
             "Hello! My name is Alex, nice to meet you.",
@@ -178,14 +178,14 @@ if __name__ == "__main__":
             "That's interesting! What makes it different from other AI frameworks?",
             "Thanks for the explanation. Can you recommend some good resources to learn more?"
         ]
-        
+
         for message in messages:
             print(f"User: {message}")
-            
+
             response = await chat_with_agent(message, context)
-            
+
             print(f"Agent: {response}")
             print("-" * 50)
-    
+
     # Run the demo
     asyncio.run(demo_conversation())

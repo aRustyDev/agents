@@ -6,10 +6,10 @@ Searches multiple literature databases and aggregates results.
 
 import json
 import sys
-from typing import Dict, List
 from datetime import datetime
 
-def format_search_results(results: List[Dict], output_format: str = 'json') -> str:
+
+def format_search_results(results: list[dict], output_format: str = 'json') -> str:
     """
     Format search results for output.
 
@@ -24,7 +24,7 @@ def format_search_results(results: List[Dict], output_format: str = 'json') -> s
         return json.dumps(results, indent=2)
 
     elif output_format == 'markdown':
-        md = f"# Literature Search Results\n\n"
+        md = "# Literature Search Results\n\n"
         md += f"**Search Date**: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
         md += f"**Total Results**: {len(results)}\n\n"
 
@@ -80,7 +80,7 @@ def format_search_results(results: List[Dict], output_format: str = 'json') -> s
     else:
         raise ValueError(f"Unknown format: {output_format}")
 
-def deduplicate_results(results: List[Dict]) -> List[Dict]:
+def deduplicate_results(results: list[dict]) -> list[dict]:
     """
     Remove duplicate results based on DOI or title.
 
@@ -116,7 +116,7 @@ def deduplicate_results(results: List[Dict]) -> List[Dict]:
 
     return unique_results
 
-def rank_results(results: List[Dict], criteria: str = 'citations') -> List[Dict]:
+def rank_results(results: list[dict], criteria: str = 'citations') -> list[dict]:
     """
     Rank results by specified criteria.
 
@@ -136,7 +136,7 @@ def rank_results(results: List[Dict], criteria: str = 'citations') -> List[Dict]
     else:
         return results
 
-def filter_by_year(results: List[Dict], start_year: int = None, end_year: int = None) -> List[Dict]:
+def filter_by_year(results: list[dict], start_year: int = None, end_year: int = None) -> list[dict]:
     """
     Filter results by publication year range.
 
@@ -164,7 +164,7 @@ def filter_by_year(results: List[Dict], start_year: int = None, end_year: int = 
 
     return filtered
 
-def generate_search_summary(results: List[Dict]) -> Dict:
+def generate_search_summary(results: list[dict]) -> dict:
     """
     Generate summary statistics for search results.
 
@@ -223,7 +223,7 @@ def main():
     # Load results
     results_file = sys.argv[1]
     try:
-        with open(results_file, 'r', encoding='utf-8') as f:
+        with open(results_file, encoding='utf-8') as f:
             results = json.load(f)
     except Exception as e:
         print(f"Error loading results: {e}")

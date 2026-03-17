@@ -61,4 +61,3 @@ Best Practices
 - Implement lazy loading for non-critical components.
 - Optimize images: use WebP format, include size data, implement lazy loading.
 - Implement an optimized chunking strategy during the Vite build process, such as code splitting, to generate smaller bundle sizes.
-

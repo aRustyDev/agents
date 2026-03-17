@@ -25,10 +25,10 @@ MISSING_DEPS=()
 # Function to extract dependencies from a module
 extract_dependencies() {
     local file=$1
-    
+
     # Extract YAML frontmatter between --- markers
     awk '/^---$/,/^---$/ {
-        if(/dependencies:/) f=1; 
+        if(/dependencies:/) f=1;
         if(f && /^  -/) {
             gsub(/^  - /, "");
             gsub(/"/, "");
@@ -40,7 +40,7 @@ extract_dependencies() {
 # Function to check if a dependency exists
 dependency_exists() {
     local dep=$1
-    
+
     # Search for the dependency file
     if find "$CLAUDE_DIR" \( -name "${dep}.md" -o -name "${dep}.yaml" -o -name "${dep}.yml" \) \
         -not -path "*/archive/*" -not -path "*/cache/*" | grep -q .; then
@@ -56,23 +56,23 @@ for file in "$@"; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     echo -e "${YELLOW}Checking dependencies for: $(basename "$file")${NC}"
-    
+
     # Extract dependencies
     deps=$(extract_dependencies "$file")
-    
+
     if [ -z "$deps" ]; then
         echo -e "  ${GREEN}✓ No dependencies declared${NC}"
         continue
     fi
-    
+
     # Check each dependency
     while IFS= read -r dep; do
         if [ -z "$dep" ]; then
             continue
         fi
-        
+
         if dependency_exists "$dep"; then
             echo -e "  ${GREEN}✓ Found: $dep${NC}"
         else

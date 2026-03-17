@@ -1,0 +1,252 @@
+# Registry Scope Definitions
+# Defines "complete" crawl state for each registry source
+# Last updated: 2026-03-09
+
+meta:
+  purpose: "Define clear completion criteria for registry crawling"
+  usage: |
+    Run check-registry-completeness.sh to verify current state against these definitions.
+    Numbers marked as "estimated" should be re-verified before major crawl operations.
+
+registries:
+
+  # ============================================================================
+  # TIER 1: Large registries requiring systematic crawl plans
+  # ============================================================================
+
+  skillsmp_com:
+    url: "https://skillsmp.com"
+    total_advertised: 414701
+    total_verified: null  # Not yet verified via API
+    verification_date: null
+    verification_method: "homepage_display"
+    component_types: ["skill"]
+    crawl_status: "incomplete"
+    crawl_method_available:
+      - api: "https://skillsmp.com/en/docs/api"
+      - pagination: "unknown"
+      - sitemap: "unknown"
+    completion_criteria:
+      minimum_threshold: 10000  # 2.4% of advertised
+      target_threshold: 100000  # 24% of advertised
+      complete_threshold: 400000  # ~97% of advertised
+    notes: |
+      Largest skill registry. Claims 414K+ skills from GitHub SKILL.md files.
+      Has documented API - should verify rate limits and pagination support.
+      Consider sampling strategy rather than full crawl initially.
+
+  smithery_ai_skills:
+    url: "https://smithery.ai/skills"
+    total_advertised: 125357
+    total_verified: null
+    verification_date: null
+    verification_method: "homepage_display"
+    component_types: ["skill"]
+    crawl_status: "incomplete"
+    crawl_method_available:
+      - pagination: "unknown"
+      - api: "unknown"
+      - sitemap: "unknown"
+    completion_criteria:
+      minimum_threshold: 5000
+      target_threshold: 50000
+      complete_threshold: 120000
+    notes: |
+      Second largest skill registry. Includes official Anthropic skills.
+      Need to investigate if API exists or pagination works.
+
+  smithery_ai_servers:
+    url: "https://smithery.ai/servers"
+    total_advertised: 3807
+    total_verified: 3807
+    verification_date: "2026-03-09"
+    verification_method: "search_result_count"
+    component_types: ["mcp_server"]
+    crawl_status: "partial"
+    current_count: 47
+    crawl_method_available:
+      - pagination: "?page=N"
+      - categories: true
+    completion_criteria:
+      minimum_threshold: 1000
+      target_threshold: 3000
+      complete_threshold: 3800
+    notes: |
+      Shows "3,807 servers found" in search results.
+      Pagination appears to work. Need systematic crawl.
+
+  glama_ai:
+    url: "https://glama.ai/mcp/servers"
+    total_advertised: 18503
+    total_verified: 18503
+    verification_date: "2026-03-09"
+    verification_method: "homepage_display"
+    component_types: ["mcp_server"]
+    crawl_status: "dropped"
+    current_count: 0
+    dropped_date: "2026-03-09"
+    dropped_reason: "User-specific servers, not open source"
+    notes: |
+      DROPPED: MCP servers on glama.ai appear to be specific to individual users,
+      not open source components. Pagination also broken (infinite scroll).
+      Not a viable source for public component discovery.
+
+  mcpservers_org:
+    url: "https://mcpservers.org/all"
+    total_advertised: 6523
+    total_verified: 6523
+    verification_date: "2026-03-09"
+    verification_method: "search_result_count"
+    component_types: ["mcp_server"]
+    crawl_status: "partial"
+    current_count: 103
+    crawl_method_available:
+      - pagination: "?sort=newest&page=N"
+      - categories: "/category/{name}"
+    completion_criteria:
+      minimum_threshold: 2000
+      target_threshold: 5000
+      complete_threshold: 6500
+    notes: |
+      Shows "6523 servers" in results. 30 per page = 218 pages.
+      Pagination works. Straightforward to complete.
+
+  # ============================================================================
+  # TIER 2: Medium registries, partially crawled
+  # ============================================================================
+
+  mcp_so:
+    url: "https://mcp.so"
+    total_advertised: null  # No count displayed
+    total_verified: null
+    verification_date: null
+    verification_method: null
+    component_types: ["mcp_server"]
+    crawl_status: "complete"
+    current_count: 1384
+    crawl_method_available:
+      - pagination: "?page=N (294 pages crawled)"
+    completion_criteria:
+      minimum_threshold: 1000
+      target_threshold: 1500
+      complete_threshold: 2000  # Estimated based on page count
+    notes: |
+      Full pagination crawl completed (pages 1-294).
+      May have new additions since last crawl.
+      No advertised total to verify completeness.
+
+  buildwithclaude_com:
+    url: "https://buildwithclaude.com"
+    total_advertised:
+      plugins: 8089
+      skills: 161
+      subagents: 117
+      commands: 175
+      hooks: 28
+      mcp_servers: 2824
+    total_verified: null
+    verification_date: "2026-03-09"
+    verification_method: "page_display"
+    component_types: ["plugin", "skill", "agent", "command", "hook", "mcp_server"]
+    crawl_status: "partial"
+    current_count: 234
+    crawl_method_available:
+      - static_pages: true
+      - github_source: "davepoon/buildwithclaude"
+    completion_criteria:
+      minimum_threshold: 500
+      target_threshold: 5000
+      complete_threshold: 11000
+    notes: |
+      Aggregator site indexing multiple GitHub marketplaces.
+      Could clone the GitHub repo for complete data.
+      MCP servers section has 2824 entries to crawl.
+
+  # ============================================================================
+  # TIER 3: Completed or stable sources
+  # ============================================================================
+
+  awesome_lists:
+    sources:
+      - "awesome:modelcontextprotocol/servers"
+      - "awesome:punkpeye/awesome-mcp-servers"
+      - "awesome:wong2/awesome-mcp-servers"
+      - "awesome:anthropics/anthropic-cookbook"
+    total_current: 3538
+    crawl_status: "complete"
+    notes: |
+      GitHub awesome lists. Considered complete as of initial import.
+      Could refresh periodically to capture new additions.
+
+  github_search:
+    url: "https://github.com"
+    total_current: 352
+    crawl_status: "partial"
+    notes: |
+      GitHub search results for SKILL.md and similar.
+      Open-ended - more can always be discovered.
+
+  # ============================================================================
+  # TIER 4: To be investigated
+  # ============================================================================
+
+  ccpm_dev:
+    url: "https://ccpm.dev"
+    crawl_status: "failed"
+    notes: "Returns empty content. May require special handling."
+
+  awesome_claude_code_com:
+    url: "https://awesome-claude-code.com"
+    crawl_status: "not_started"
+    notes: "To be probed."
+
+  awesomeclaude_ai:
+    url: "https://awesomeclaude.ai"
+    crawl_status: "not_started"
+    notes: "To be probed."
+
+  lobehub_com:
+    url: "https://lobehub.com"
+    crawl_status: "not_started"
+    notes: "To be probed."
+
+# ============================================================================
+# Completion Summary
+# ============================================================================
+
+completion_summary:
+  total_known_universe: 580000  # Sum of all advertised totals (rough estimate)
+  current_collected: 5668
+  coverage_percentage: 0.98  # Current / known universe
+
+  by_tier:
+    tier1_large:
+      registries: 4  # glama.ai dropped
+      known_total: 550500  # Removed glama.ai's 18.5K
+      collected: 1543
+      coverage: 0.28%
+
+    tier2_medium:
+      registries: 2
+      known_total: 11000  # rough estimate
+      collected: 1618
+      coverage: 14.7%
+
+    tier3_complete:
+      registries: 4
+      collected: 3890
+      status: "considered complete"
+
+    tier4_unknown:
+      registries: 4
+      status: "to be investigated"
+
+# ============================================================================
+# Recheck Schedule
+# ============================================================================
+
+recheck_schedule:
+  tier1_large: "weekly"  # Actively growing registries
+  tier2_medium: "monthly"
+  tier3_complete: "quarterly"
+  tier4_unknown: "as needed"

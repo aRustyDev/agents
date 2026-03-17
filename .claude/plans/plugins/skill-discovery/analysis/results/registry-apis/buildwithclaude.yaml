@@ -1,0 +1,79 @@
+# Registry API Documentation: Build With Claude
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "buildwithclaude"
+  base_url: "https://buildwithclaude.com"
+  type: "multi_component_registry"
+
+  api:
+    docs_url: null
+    spec_format: "none"
+
+    authentication:
+      type: "none"
+      notes: "No public API - web scraping only"
+
+    endpoints: []
+
+  access_method:
+    type: "web_scraping"
+    recommended_tool: "crawl4ai"
+    pages:
+      - path: "/plugins"
+        content: "8,089 plugins"
+      - path: "/skills"
+        content: "160+ skills"
+      - path: "/subagents"
+        content: "Subagent listings"
+      - path: "/commands"
+        content: "Command listings"
+      - path: "/hooks"
+        content: "Hook listings"
+      - path: "/mcp-servers"
+        content: "MCP server listings"
+      - path: "/marketplaces"
+        content: "Marketplace listings"
+
+  restrictions:
+    robots_txt:
+      url: "https://buildwithclaude.com/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      content_signal: "search=yes, ai-train=no"
+      disallowed_bots:
+        - "Amazonbot"
+        - "Applebot-Extended"
+        - "Bytespider"
+        - "CCBot"
+        - "ClaudeBot"
+        - "Google-Extended"
+        - "GPTBot"
+        - "meta-externalagent"
+      notes: "Cloudflare managed robots.txt - blocks AI training crawlers"
+
+    rate_limits:
+      documented: "none"
+      observed: "none"
+      notes: "No rate limiting observed for regular browsing"
+
+    terms_of_service:
+      url: "https://github.com/davepoon/buildwithclaude/blob/main/LICENSE"
+      license: "MIT"
+      scraping_policy: "allowed for search (Content-Signal)"
+      ai_training: "explicitly forbidden (Content-Signal: ai-train=no)"
+
+  example:
+    crawl4ai: |
+      curl -s -X POST "http://localhost:11235/md" \
+        -H "Content-Type: application/json" \
+        -d '{"url": "https://buildwithclaude.com/plugins"}'
+
+  observations:
+    - "No public API - web interface only"
+    - "Largest plugin registry (8,089 plugins)"
+    - "Uses Cloudflare Content-Signal for AI policy"
+    - "Allows search indexing, blocks AI training"
+    - "Open source (MIT license)"
+    - "Multi-component: plugins, skills, agents, commands, hooks, MCP"

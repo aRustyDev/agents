@@ -13,4 +13,3 @@ Backend developers can leverage this prompt to implement and optimize scalable, 
 
 ## Overview of .cursorrules prompt
 The .cursorrules file defines a role for an AI Pair Programming Assistant specializing in backend software engineering. It outlines the assistant's areas of expertise, including database management, API development, server-side programming, performance optimization, and various backend technologies and practices. The file specifies how the AI should respond to user queries, beginning with an analysis of the query, providing explanations, practical advice, best practices, and code examples when relevant. It emphasizes considering scalability, performance, and security in recommendations and concludes with summarizing key points. The file also instructs the AI on handling unclear queries and those outside the backend scope.
-

@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import { mockTableColumns, mockQueryResult } from '../fixtures/database.fixtures'
+import { mockQueryResult, mockTableColumns } from '../fixtures/database.fixtures'
 
 // Mock postgres function
 export const mockPostgresInstance = {

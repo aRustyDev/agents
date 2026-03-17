@@ -1,4 +1,4 @@
-Source: https://www.sec.gov/Archives/edgar/data/1045425/000119312507044370/dex1032.htm 
+Source: https://www.sec.gov/Archives/edgar/data/1045425/000119312507044370/dex1032.htm
 
 Exhibit 10.32
 
@@ -12,63 +12,63 @@ WHERAS, Sublessor desires to lease to Sublessee and Sublessee desires to rent fr
 
 NOW, THEREFORE, in consideration of the rents, covenants and provisions contained herein and other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, Sublessor and Sublessee, each intending to be legally bound hereby, agree as follows:
 
-1. PREMISES. (a) Sublessor hereby subleases to Sublessee, on the terms and conditions set forth in this Sublease, a portion of the Master Premises, as more fully set forth on Exhibit “B” attached hereto (the “Premises”). (b) Sublessee has examined the Premises and is satisfied with its condition. The Parties agree that Sublessor has not made and Sublessee is not relying upon, any statements or representations made by Sublessor or Lessor, or their respective employees, agents or anyone else acting on behalf of Sublessor or Lessor (as applicable), including without limitation, any statements or representations concerning the condition of the Premises or the fitness of the Premises for Sublessee’s intended use of the Premises. Sublessee acknowledges that it takes the Premises in an “AS IS, WHERE IS” condition. 
+1. PREMISES. (a) Sublessor hereby subleases to Sublessee, on the terms and conditions set forth in this Sublease, a portion of the Master Premises, as more fully set forth on Exhibit “B” attached hereto (the “Premises”). (b) Sublessee has examined the Premises and is satisfied with its condition. The Parties agree that Sublessor has not made and Sublessee is not relying upon, any statements or representations made by Sublessor or Lessor, or their respective employees, agents or anyone else acting on behalf of Sublessor or Lessor (as applicable), including without limitation, any statements or representations concerning the condition of the Premises or the fitness of the Premises for Sublessee’s intended use of the Premises. Sublessee acknowledges that it takes the Premises in an “AS IS, WHERE IS” condition.
 
-2. TERM. (a) This Sublease shall commence on April 1, 2024 (“Commencement Date”) for a term (“Term”) of five (5) years. (b) Upon expiration of the Term, if Sublessor shall renew the Master Lease, the Parties may renew this Sublease on similar terms as the Parties may agree. 
+2. TERM. (a) This Sublease shall commence on April 1, 2024 (“Commencement Date”) for a term (“Term”) of five (5) years. (b) Upon expiration of the Term, if Sublessor shall renew the Master Lease, the Parties may renew this Sublease on similar terms as the Parties may agree.
 
-3. RENT. (a) During the Term, Sublessee agrees to pay Sublessor monthly rent in the amount set forth on Exhibit “B” attached hereto (“Fixed Rent,” and together with all additional rent payable under this Sublease, “Rent”). (b) Sublessee shall pay as additional rent, its pro rata share (based on the square footage rented by Sublessee) of Sublessor’s Allocated Share of Recognized Expenses as set forth in Section 6 of the Master Lease. (c) All Rent due under this Sublease shall be paid in lawful money of the United States without notice, offset or demand, with the first payment being delivered by Sublessee to Sublessor on the Commencement Date and payments to be made thereafter on the first day of each calendar month during the Term by the Sublessee to Sublessor at the address set forth for Sublessor in Section 16 below, or at such other place as Sublessor may from time to time designate. Any Rent for any partial month at the beginning or end of the Term shall be prorated based on the actual number of days in the month in question. (d) If any payment required by Sublessee under any of the terms hereof shall not be paid within five (5) days of the date on which said payment is due, Sublessee shall, upon demand, pay a late charge to Sublessor equal to the greater of (a) One Hundred Fifty Dollars ($150.00), or (b) $0.06 for each dollar so due and such late charge shall be deemed to be additional rent for the purposes of this Sublease. This remedy shall not be the exclusive remedy to Lessor. 
+3. RENT. (a) During the Term, Sublessee agrees to pay Sublessor monthly rent in the amount set forth on Exhibit “B” attached hereto (“Fixed Rent,” and together with all additional rent payable under this Sublease, “Rent”). (b) Sublessee shall pay as additional rent, its pro rata share (based on the square footage rented by Sublessee) of Sublessor’s Allocated Share of Recognized Expenses as set forth in Section 6 of the Master Lease. (c) All Rent due under this Sublease shall be paid in lawful money of the United States without notice, offset or demand, with the first payment being delivered by Sublessee to Sublessor on the Commencement Date and payments to be made thereafter on the first day of each calendar month during the Term by the Sublessee to Sublessor at the address set forth for Sublessor in Section 16 below, or at such other place as Sublessor may from time to time designate. Any Rent for any partial month at the beginning or end of the Term shall be prorated based on the actual number of days in the month in question. (d) If any payment required by Sublessee under any of the terms hereof shall not be paid within five (5) days of the date on which said payment is due, Sublessee shall, upon demand, pay a late charge to Sublessor equal to the greater of (a) One Hundred Fifty Dollars ($150.00), or (b) $0.06 for each dollar so due and such late charge shall be deemed to be additional rent for the purposes of this Sublease. This remedy shall not be the exclusive remedy to Lessor.
 
-4. USE OF PREMISES. Sublessee shall not use or occupy or permit the Premises to be used or occupied, nor do or permit anything to be done in or on the Premises, in whole or in part, in a manner which would in any way violate any term or condition of this Sublease or the Master Lease, or make void or voidable any insurance then in force with respect thereto, or as will cause or be likely to cause injury to any improvements on the Premises or any part thereof, or as will constitute a public or private nuisance, and shall not use or occupy or permit the Premises to be used or occupied, in whole or in part, in a manner which may violate any present or future laws, regulations, ordinances or requirements of any federal, state or local governments, or of any departments, subdivisions, bureaus or offices thereof, or any other government, public or quasi-public authorities now existing or hereafter created, having jurisdiction over the Premises. 
+4. USE OF PREMISES. Sublessee shall not use or occupy or permit the Premises to be used or occupied, nor do or permit anything to be done in or on the Premises, in whole or in part, in a manner which would in any way violate any term or condition of this Sublease or the Master Lease, or make void or voidable any insurance then in force with respect thereto, or as will cause or be likely to cause injury to any improvements on the Premises or any part thereof, or as will constitute a public or private nuisance, and shall not use or occupy or permit the Premises to be used or occupied, in whole or in part, in a manner which may violate any present or future laws, regulations, ordinances or requirements of any federal, state or local governments, or of any departments, subdivisions, bureaus or offices thereof, or any other government, public or quasi-public authorities now existing or hereafter created, having jurisdiction over the Premises.
 
 5. ASSIGNMENT AND SUBLETTING. Sublessee shall not assign this Sublease or further sublet all or any part of the Premises, without Sublessor’s prior written consent, such consent to be withheld in Sublessor’s sole and absolute discretion.
 
-6. INDEMNIFICATION. Sublessee hereby indemnifies Sublessor and Lessor and covenants and agrees to pay, defend and save Sublessor and Lessor harmless from and against any and all liability, loss, damage, cost, expense (including, without limitation, all attorney’s fees and costs of litigation), causes of action, suits, claims, demands or judgments of any nature whatsoever that arises from Sublessee’s actions or omissions and which is based upon, arising from or connected in any manner with (a) injury to or death of any person or damage to any property occurring on the Premises, (b) the use, non-use, possession, operation, maintenance, management or occupation of the Premises or any part thereof, (c) any negligence on the part of Sublessee or its agents, contractors, servants, employees, licenses or invitees, or (d) the violation by Sublessee of any term, condition or covenant of this Sublease or the Master Lease (to the extent incorporated herein) or of any contract, agreement, restriction or regulation affecting the Premises or any part thereof or the ownership, occupancy or use thereof. The obligations of Sublessee under this Section shall survive any termination or expiration of this Sublease. 
+6. INDEMNIFICATION. Sublessee hereby indemnifies Sublessor and Lessor and covenants and agrees to pay, defend and save Sublessor and Lessor harmless from and against any and all liability, loss, damage, cost, expense (including, without limitation, all attorney’s fees and costs of litigation), causes of action, suits, claims, demands or judgments of any nature whatsoever that arises from Sublessee’s actions or omissions and which is based upon, arising from or connected in any manner with (a) injury to or death of any person or damage to any property occurring on the Premises, (b) the use, non-use, possession, operation, maintenance, management or occupation of the Premises or any part thereof, (c) any negligence on the part of Sublessee or its agents, contractors, servants, employees, licenses or invitees, or (d) the violation by Sublessee of any term, condition or covenant of this Sublease or the Master Lease (to the extent incorporated herein) or of any contract, agreement, restriction or regulation affecting the Premises or any part thereof or the ownership, occupancy or use thereof. The obligations of Sublessee under this Section shall survive any termination or expiration of this Sublease.
 
-7. HOLDOVER RENT. Upon expiration or other termination of this Sublease, Sublessee shall peaceably quit and surrender the Premises to Sublessor, and Sublessor may without further notice enter upon, possess and repossess itself thereof and hold and enjoy the Premises and the right to receive all rental and other income of and from the same. It is expressly agreed that any holding, continued use or occupancy of the Premises by Sublessee after the expiration or other termination of this Sublease shall operate and be construed as a tenancy at sufferance. If Sublessor shall not give consent to such holdover to Sublessee, such tenancy may be terminated as above provided, and until Sublessee has vacated the Premises, it agrees to pay to Sublessor rent at a monthly rental equal to twice the amount of the monthly Rent payable pursuant to this Sublease during the last full month before termination of this Sublease and Sublessee agrees to indemnify, defend and hold Sublessor harmless of, from and against all liability arising under the Master Lease arising from such holdover. 
+7. HOLDOVER RENT. Upon expiration or other termination of this Sublease, Sublessee shall peaceably quit and surrender the Premises to Sublessor, and Sublessor may without further notice enter upon, possess and repossess itself thereof and hold and enjoy the Premises and the right to receive all rental and other income of and from the same. It is expressly agreed that any holding, continued use or occupancy of the Premises by Sublessee after the expiration or other termination of this Sublease shall operate and be construed as a tenancy at sufferance. If Sublessor shall not give consent to such holdover to Sublessee, such tenancy may be terminated as above provided, and until Sublessee has vacated the Premises, it agrees to pay to Sublessor rent at a monthly rental equal to twice the amount of the monthly Rent payable pursuant to this Sublease during the last full month before termination of this Sublease and Sublessee agrees to indemnify, defend and hold Sublessor harmless of, from and against all liability arising under the Master Lease arising from such holdover.
 
-8. INSURANCE. (a) Throughout the Term, Sublessee agrees to maintain all insurance as required on the part of the Tenant under the Master Lease, and shall name as additional insureds, as their interests may appear, both the Lessor and Sublessor. (b) Upon execution and delivery of this Sublease and thereafter not less than thirty (30) days prior to the expiration date of the policies maintained pursuant to this Section, Sublessee shall provide Sublessor with evidence of coverage and payment in the form of a Certificate of Insurance (“Certificate”). Said Certificate shall provide for a fifteen (15) day written notice to Sublessor and Lessor in the event of cancellation or modification. 
+8. INSURANCE. (a) Throughout the Term, Sublessee agrees to maintain all insurance as required on the part of the Tenant under the Master Lease, and shall name as additional insureds, as their interests may appear, both the Lessor and Sublessor. (b) Upon execution and delivery of this Sublease and thereafter not less than thirty (30) days prior to the expiration date of the policies maintained pursuant to this Section, Sublessee shall provide Sublessor with evidence of coverage and payment in the form of a Certificate of Insurance (“Certificate”). Said Certificate shall provide for a fifteen (15) day written notice to Sublessor and Lessor in the event of cancellation or modification.
 
 9. OTHER PROVISIONS OF SUBLEASE. Except to the extent made inapplicable or otherwise modified by the terms of this Sublease, all terms and conditions of the Master Lease are incorporated into and made a part of this Sublease as if Sublessor were the lessor thereunder, (it being understood that Sublessor’s obligation and ability to perform obligations of the Lessor incorporated herein under the Master
 
-Lease may be dependant upon the approval of and/or performance by Lessor, over which Sublessor has no control). Sublessee assumes and agrees to perform the lessee’s obligations under the Master Lease during the Term to the extent that such obligations are applicable to the Premises. Sublessee shall not commit or suffer any act or omission that will violate any of the provisions of the Master Lease. If the Master Lease terminates, this Sublease shall terminate and the parties shall be relieved of any further liability or obligation under this Sublease provided however, that if the Master Lease terminates as a result of a default or breach by Sublessor or Sublessee under this Sublease and/or the Master Lease, then the defaulting party shall be liable to the non-defaulting party for all damages suffered as a result of such termination. Notwithstanding the foregoing, if the Master Lease gives Sublessor any right to terminate the Master Lease in the event of the partial or total damage, destruction, or condemnation of the Master Premises or the building or project of which the Master Premises are a part, the exercise of such right by Sublessor shall not constitute a default or breach hereunder. Notwithstanding anything contained herein and provided that Sublessee is not in default under the terms and conditions of this Sublease, Sublessor agrees not to terminate the Master Lease or do any act (or refrain from doing any act) that would lead to the Master Lease being terminated prior to the end of the term of this Sublease, without the prior written consent of Sublessee, which shall not be unreasonably withheld. 
+Lease may be dependant upon the approval of and/or performance by Lessor, over which Sublessor has no control). Sublessee assumes and agrees to perform the lessee’s obligations under the Master Lease during the Term to the extent that such obligations are applicable to the Premises. Sublessee shall not commit or suffer any act or omission that will violate any of the provisions of the Master Lease. If the Master Lease terminates, this Sublease shall terminate and the parties shall be relieved of any further liability or obligation under this Sublease provided however, that if the Master Lease terminates as a result of a default or breach by Sublessor or Sublessee under this Sublease and/or the Master Lease, then the defaulting party shall be liable to the non-defaulting party for all damages suffered as a result of such termination. Notwithstanding the foregoing, if the Master Lease gives Sublessor any right to terminate the Master Lease in the event of the partial or total damage, destruction, or condemnation of the Master Premises or the building or project of which the Master Premises are a part, the exercise of such right by Sublessor shall not constitute a default or breach hereunder. Notwithstanding anything contained herein and provided that Sublessee is not in default under the terms and conditions of this Sublease, Sublessor agrees not to terminate the Master Lease or do any act (or refrain from doing any act) that would lead to the Master Lease being terminated prior to the end of the term of this Sublease, without the prior written consent of Sublessee, which shall not be unreasonably withheld.
 
 10. DEFAULT; REMEDIES. An “Event of Default” shall be deemed to occur under this Sublease in the event:
- (a) Sublessee fails to pay any Rent specified in this Sublease at the time or place when due; 
- (b) Sublessee shall desert or vacate the Premises; 
- (c) the Sublessee shall fail to comply with any term, provision, condition or covenant of this Sublease or of the Master Lease (other than the payment of Rent required to be paid under this Sublease), and Sublessee shall not cure such default within ten (10) calendar days after notice to Sublessee of Sublessee’s failure so to comply or such longer period as may be necessary to cure any non-monetary default proceeding continuously and diligently, except Sublessee’s failure to maintain insurance as required hereunder shall be an immediate Event of Default hereunder; 
- (d) any petition shall be filed by or against Sublessee under any section or chapter of the Federal or State Bankruptcy Statutes, and in the event of any such petitions being filed against Sublessee, such petition shall not be dismissed within forty-five (45) calendar days of the date of filing of such petition; 
- (e) Sublessee shall become insolvent or make a transfer in fraud of creditors; 
- (f) Sublessee shall make an assignment for the benefit of creditors; (g) a receiver shall be appointed for a substantial part of the assets of Sublessee; 
- (h) Sublessee’s interest in this Sublease shall be levied upon under execution; or 
-    (i) Sublessee shall, other than in the ordinary course of business, remove or attempt to remove the personal property of Sublessor from the Premises. Upon the occurrence of an Event of Default, Sublessor shall have the option to do any one or more of the following in addition to and not in limitation of any other remedy permitted at law or in equity or under the terms of this Sublease: 
-    (1) Terminate this Sublease, in which event the Sublessee shall immediately surrender the Premises to Sublessor. In the event of such termination, Sublessor may, at its option, declare up to the entire amount of the rentals which would otherwise become due and payable during the remainder of the Term to be due and payable immediately, in which event Sublessee shall pay the same at once, together with all rentals theretofore due at the office of the Sublessor; provided, however, that such payment shall not constitute payment in advance of the rentals for the remainder of said Term; or 
-    (2) Enter the Premises as the agent of Sublessee, by reasonable force, if necessary, without being liable to prosecution for any claim for damages therefor; or 
-    (3) Take all steps necessary to cure the breach or default, with the costs so incurred to be paid by Sublessee upon demand therefore; or 
-    (4) Pursue all remedies available to Lessor pursuant to the terms of the Master Lease. No receipt of money by Sublessor from Sublessee after the termination of this Sublease or after service of any notice or after the commencement of any suit or final judgment for possession of the Premises shall reinstate, continue or extend the Term or affect any such termination, notice or suit. Pursuit by Sublessor of any of the foregoing remedies shall not preclude pursuit by Sublessor of any other remedies herein provided or at law or in equity. No waiver by Sublessor of any breach by Sublessee or of any of Sublessee’s obligations, agreements or covenants herein shall be a waiver of any subsequent breach or of any subsequent obligation, agreement or covenant, nor shall forbearance by Sublessor to seek a remedy for any breach by Sublessee be a waiver by Sublessor of any rights and remedies with respect to such or any subsequent breach. 
-    
-11. BROKER PARTICIPATION. Sublessor and Sublessee warrant and represent that they have dealt with no real estate broker in connection with this Sublease and that no broker is entitled to any commission on account of this Sublease. Sublessor and Sublessee shall each indemnify, hold harmless and defend the other from any and all claims, actual or threatened, for compensation by any such third person, by reason of Sublessor’s or Sublessee’s breach of its representations contained in this paragraph. 
+ (a) Sublessee fails to pay any Rent specified in this Sublease at the time or place when due;
+ (b) Sublessee shall desert or vacate the Premises;
+ (c) the Sublessee shall fail to comply with any term, provision, condition or covenant of this Sublease or of the Master Lease (other than the payment of Rent required to be paid under this Sublease), and Sublessee shall not cure such default within ten (10) calendar days after notice to Sublessee of Sublessee’s failure so to comply or such longer period as may be necessary to cure any non-monetary default proceeding continuously and diligently, except Sublessee’s failure to maintain insurance as required hereunder shall be an immediate Event of Default hereunder;
+ (d) any petition shall be filed by or against Sublessee under any section or chapter of the Federal or State Bankruptcy Statutes, and in the event of any such petitions being filed against Sublessee, such petition shall not be dismissed within forty-five (45) calendar days of the date of filing of such petition;
+ (e) Sublessee shall become insolvent or make a transfer in fraud of creditors;
+ (f) Sublessee shall make an assignment for the benefit of creditors; (g) a receiver shall be appointed for a substantial part of the assets of Sublessee;
+ (h) Sublessee’s interest in this Sublease shall be levied upon under execution; or
+    (i) Sublessee shall, other than in the ordinary course of business, remove or attempt to remove the personal property of Sublessor from the Premises. Upon the occurrence of an Event of Default, Sublessor shall have the option to do any one or more of the following in addition to and not in limitation of any other remedy permitted at law or in equity or under the terms of this Sublease:
+    (1) Terminate this Sublease, in which event the Sublessee shall immediately surrender the Premises to Sublessor. In the event of such termination, Sublessor may, at its option, declare up to the entire amount of the rentals which would otherwise become due and payable during the remainder of the Term to be due and payable immediately, in which event Sublessee shall pay the same at once, together with all rentals theretofore due at the office of the Sublessor; provided, however, that such payment shall not constitute payment in advance of the rentals for the remainder of said Term; or
+    (2) Enter the Premises as the agent of Sublessee, by reasonable force, if necessary, without being liable to prosecution for any claim for damages therefor; or
+    (3) Take all steps necessary to cure the breach or default, with the costs so incurred to be paid by Sublessee upon demand therefore; or
+    (4) Pursue all remedies available to Lessor pursuant to the terms of the Master Lease. No receipt of money by Sublessor from Sublessee after the termination of this Sublease or after service of any notice or after the commencement of any suit or final judgment for possession of the Premises shall reinstate, continue or extend the Term or affect any such termination, notice or suit. Pursuit by Sublessor of any of the foregoing remedies shall not preclude pursuit by Sublessor of any other remedies herein provided or at law or in equity. No waiver by Sublessor of any breach by Sublessee or of any of Sublessee’s obligations, agreements or covenants herein shall be a waiver of any subsequent breach or of any subsequent obligation, agreement or covenant, nor shall forbearance by Sublessor to seek a remedy for any breach by Sublessee be a waiver by Sublessor of any rights and remedies with respect to such or any subsequent breach.
 
-12. NOTICES. All notices provided for under this Sublease shall be in writing and shall be sufficient if sent by registered or certified mail, return receipt requested, postage prepaid, by prepaid nationally recognized overnight delivery service, or by hand delivery to the Party for whom such notice is intended, as follows: Sublessor: Cohen & Company 2929 Arch Street, Suite 1703 Philadelphia, PA 19104 Attention: Michael Shenkman Sublessee: Taberna Capital Management, LLC 2929 Arch Street, Suite 1703 Philadelphia, PA 19104 Attention: Jack Salmon 
+11. BROKER PARTICIPATION. Sublessor and Sublessee warrant and represent that they have dealt with no real estate broker in connection with this Sublease and that no broker is entitled to any commission on account of this Sublease. Sublessor and Sublessee shall each indemnify, hold harmless and defend the other from any and all claims, actual or threatened, for compensation by any such third person, by reason of Sublessor’s or Sublessee’s breach of its representations contained in this paragraph.
 
-
-13. GOVERNING LAW. This Sublease shall be governed by and construed in accordance with the laws of the Commonwealth of Pennsylvania. 
+12. NOTICES. All notices provided for under this Sublease shall be in writing and shall be sufficient if sent by registered or certified mail, return receipt requested, postage prepaid, by prepaid nationally recognized overnight delivery service, or by hand delivery to the Party for whom such notice is intended, as follows: Sublessor: Cohen & Company 2929 Arch Street, Suite 1703 Philadelphia, PA 19104 Attention: Michael Shenkman Sublessee: Taberna Capital Management, LLC 2929 Arch Street, Suite 1703 Philadelphia, PA 19104 Attention: Jack Salmon
 
 
-14. ADHERENCE TO TERMS AND CONDITIONS. The failure of Sublessor to insist upon the strict performance by Sublessee of any term, condition or covenant on Sublessee’s part to be performed pursuant to the terms of this Sublease or to exercise any right, power or remedy of Sublessor contained in this Sublease shall not be or be deemed to be a waiver of such performance or relinquishment of such right now or at any time subsequent hereto. The receipt by Sublessor of any Rent required to be paid by Sublessee hereunder with knowledge of any Event of Default or default hereunder by Sublessee shall not be or be deemed to be a waiver of such default or Event of Default, nor shall any endorsement or statement on any check or any letter accompanying any check or payment of Rent be deemed an accord and satisfaction and Sublessee may accept any such check or payment without prejudice to Sublessor’s right to recover the balance of such Rent or to pursue any other right or remedy of Sublessor herein provided or provided at law or in equity. 
+13. GOVERNING LAW. This Sublease shall be governed by and construed in accordance with the laws of the Commonwealth of Pennsylvania.
+
+
+14. ADHERENCE TO TERMS AND CONDITIONS. The failure of Sublessor to insist upon the strict performance by Sublessee of any term, condition or covenant on Sublessee’s part to be performed pursuant to the terms of this Sublease or to exercise any right, power or remedy of Sublessor contained in this Sublease shall not be or be deemed to be a waiver of such performance or relinquishment of such right now or at any time subsequent hereto. The receipt by Sublessor of any Rent required to be paid by Sublessee hereunder with knowledge of any Event of Default or default hereunder by Sublessee shall not be or be deemed to be a waiver of such default or Event of Default, nor shall any endorsement or statement on any check or any letter accompanying any check or payment of Rent be deemed an accord and satisfaction and Sublessee may accept any such check or payment without prejudice to Sublessor’s right to recover the balance of such Rent or to pursue any other right or remedy of Sublessor herein provided or provided at law or in equity.
 
 15. HEADINGS. The headings to various sections of this Sublease have been inserted for purposes of reference only and shall not limit or define or otherwise affect the express terms and provisions of this Sublease.
 
-16. COUNTERPARTS. This Sublease may be executed in any number of counterparts, each of which shall be deemed an original, but all of which shall constitute one and the same instrument. 
+16. COUNTERPARTS. This Sublease may be executed in any number of counterparts, each of which shall be deemed an original, but all of which shall constitute one and the same instrument.
 
-17. ENTIRE AGREEMENT; MODIFICATION. This Sublease contains the entire and only agreement between the parties concerning the Premises and no prior oral or written statements or representations, if any, of any party hereto or any representative of any party hereof, not contained in this instrument, shall have any force or effect. This Sublease shall not be modified in any way, except by a writing, executed by Sublessor and Sublessee, and no oral agreements or presentations for rental shall be deemed to constitute a Sublease other than this Agreement. This Sublease shall not be binding until it shall have been executed by Sublessor and Sublessee. 
+17. ENTIRE AGREEMENT; MODIFICATION. This Sublease contains the entire and only agreement between the parties concerning the Premises and no prior oral or written statements or representations, if any, of any party hereto or any representative of any party hereof, not contained in this instrument, shall have any force or effect. This Sublease shall not be modified in any way, except by a writing, executed by Sublessor and Sublessee, and no oral agreements or presentations for rental shall be deemed to constitute a Sublease other than this Agreement. This Sublease shall not be binding until it shall have been executed by Sublessor and Sublessee.
 
-18. TIME OF ESSENCE. Time is of the essence of this Sublease. 
+18. TIME OF ESSENCE. Time is of the essence of this Sublease.
 
-IN WITNESS WHEREOF, the parties have executed this Sublease as of the date and year first above written. 
+IN WITNESS WHEREOF, the parties have executed this Sublease as of the date and year first above written.
 
-SUBLESSEE: TABERNA CAPITAL MANAGEMENT, LLC 
+SUBLESSEE: TABERNA CAPITAL MANAGEMENT, LLC
 
-By: TABERNA REALTY FINANCE TRUST, Sole Member By: /s/ James J. Sebra Name: James J. Sebra Title: Vice President and Chief Accounting Officer 
+By: TABERNA REALTY FINANCE TRUST, Sole Member By: /s/ James J. Sebra Name: James J. Sebra Title: Vice President and Chief Accounting Officer
 SUBLESSOR: COHEN BROTHERS, LLC d/b/a COHEN & COMPANY By: /s/ James J. McEntee, III Name: James J. McEntee, III Title: Chief Operating Officer
 
 
@@ -78,7 +78,7 @@ EXHIBIT A
 
 Master Lease
 
- 
+
 
 1
 
@@ -90,18 +90,18 @@ The Premises is comprised of 2,000 square feet of the Master Premises, including
 
 Fixed Rent is as follows:
 
- 
+
 
 Months
 
   	Rent Per
 Square Foot	  	Square Feet
-Rented	  	
+Rented
 Monthly
 
 Fixed Rent
 
-  	
+
 Annualized
 
 Fixed Rent
@@ -143,210 +143,210 @@ Philadelphia, Pennsylvania
 
 TABLE OF CONTENTS
 
- 
 
-1.	  	
+
+1.
 SUMMARY OF DEFINED TERMS
 
   	1
-2.	  	
+2.
 PREMISES
 
   	3
-3.	  	
+3.
 TERM
 
   	3
-4.	  	
+4.
 CONSTRUCTION BY LANDLORD
 
   	3
-5.	  	
+5.
 FIXED RENT; SECURITY DEPOSIT
 
   	3
-6.	  	
+6.
 ADDITIONAL RENT
 
   	4
-7.	  	
+7.
 ELECTRICITY CHARGES
 
   	7
-8.	  	
+8.
 SIGNS; USE OF PREMISES AND COMMON AREAS
 
   	7
-9.	  	
+9.
 ENVIRONMENTAL MATTERS
 
   	8
-10.	  	
+10.
 TENANT’S ALTERATIONS
 
   	9
-11.	  	
+11.
 CONSTRUCTION LIENS
 
   	10
-12.	  	
+12.
 LANDLORD SERVICES
 
   	11
-13.	  	
+13.
 ASSIGNMENT AND SUBLETTING
 
   	13
-14.	  	
+14.
 LANDLORD’S RIGHT OF ENTRY
 
   	15
-15.	  	
+15.
 REPAIRS AND MAINTENANCE
 
   	16
-16.	  	
+16.
 INSURANCE; SUBROGATION RIGHTS
 
   	16
-17.	  	
+17.
 INDEMNIFICATION
 
   	17
-18.	  	
+18.
 QUIET ENJOYMENT
 
   	18
-19.	  	
+19.
 FIRE DAMAGE
 
   	18
-20.	  	
+20.
 SUBORDINATION; RIGHTS OF MORTGAGEE
 
   	19
-21.	  	
+21.
 CONDEMNATION
 
   	20
-22.	  	
+22.
 ESTOPPEL CERTIFICATE
 
   	21
-23.	  	
+23.
 DEFAULT
 
   	21
-24.	  	
+24.
 LANDLORD’S LIEN
 
   	25
-25.	  	
+25.
 LANDLORD’S REPRESENTATIONS AND WARRANTIES
 
   	26
-26.	  	
+26.
 SURRENDER
 
   	26
-27.	  	
+27.
 RULES AND REGULATIONS
 
   	27
-28.	  	
+28.
 GOVERNMENTAL REGULATIONS
 
   	26
-29.	  	
+29.
 NOTICES
 
   	26
-30.	  	
+30.
 BROKERS
 
   	27
-31.	  	
+31.
 LANDLORD’S RIGHTS
 
   	27
-32.	  	
+32.
 LANDLORD’S LIABILITY
 
   	28
-33.	  	
+33.
 AUTHORITY
 
   	29
-34.	  	
+34.
 EXPANSION
 
   	29
-35.	  	
+35.
 RELOCATION
 
   	29
-36.	  	
+36.
 TENANT FINANCIAL INFORMATION
 
   	29
-37.	  	
+37.
 MISCELLANEOUS PROVISIONS
 
   	29
-38.	  	
+38.
 WAIVER OF TRIAL BY JURY
 
   	31
-39.	  	
+39.
 CONSENT TO JURISDICTION
 
   	31
-40.	  	
+40.
 RENEWAL
 
   	31
 EXHIBITS
 
- 
+
 
 EXHIBIT “A”
 
-  	-	  	
+  	-
 SPACE PLAN OF PREMISES
 
 EXHIBIT “B”
 
-  	-	  	
+  	-
 CONFIRMATION OF LEASE TERM
 
 EXHIBIT “C”
 
-  	-	  	
+  	-
 RULES AND REGULATIONS
 
 EXHIBIT “D”
 
-  	-	  	
+  	-
 CLEANING SPECIFICATIONS
 
 EXHIBIT “E”
 
-  	-	  	
+  	-
 LANDLORD WORK LETTER
 
 Schedule E-1
 
-  	
+
 Base Building Specifications
 
 Schedule E-2
 
-  	
+
 Tenant Design Specifications
 
 EXHIBIT “F”
 
-  	-	  	
+  	-
 AMTRAK FORM OF SNDA
 
 LEASE
@@ -371,7 +371,7 @@ The following defined terms, as used in this Lease, shall have the meanings and 
 
 (e) “Fixed Rent”:
 
- 
+
 
 LEASE YEAR
 
@@ -394,10 +394,10 @@ Months 37-48
 Months 49-60
 
   	$	37.34	  	$	42,869.43	  	$	514,433.16
- 
+
 
 *	plus any charges set forth in Articles 6 and 7 below
- 
+
 
 **	and any partial month at the beginning of the Term shall be pro-rated at this rate
 (f) “Security Deposit”: $0
@@ -408,7 +408,7 @@ Months 49-60
 
       “Base Year” 2006
 
- 
+
 
 14
 
@@ -420,90 +420,90 @@ Months 49-60
 
 (l) “Notice Address/Contact”
 
- 
 
-  	
+
+
 Tenant:
 
-  	
+
 Prior to Occupancy:
 
-  		  	
+
 Cohen Brothers, LLC
 
-  		  	
+
 1818 Market Street, 28th Floor
 
-  		  	
+
 Philadelphia, PA 19103
 
-  		  	
+
 Attention: D. Gideon Cohen
 
-  	with a copy to:	  	
-  		  	
+  	with a copy to:
+
 Cohen Brothers, LLC
 
-  		  	
+
 1818 Market Street, 28th Floor
 
-  		  	
+
 Philadelphia, PA 19103
 
-  		  	
+
 Attention: Raphael L. Licht
 
-  		  	
+
 After Occupancy:
 
-  		  	
+
 Cohen Brothers, LLC
 
-  		  	
+
 2929 Arch Street, Suite 1700
 
-  		  	
+
 Philadelphia, PA 19103
 
-  		  	
-Attn:                    
 
-  	with a copy to:	  	
-  		  	
+Attn:
+
+  	with a copy to:
+
 Cohen Brothers, Inc.
 
-  		  	
+
 2929 Arch Street, Suite 1700
 
-  		  	
+
 Philadelphia, PA 19103
 
-  		  	
+
 Attn: Raphael L. Licht
 
-  	Landlord:	  	
+  	Landlord:
 Brandywine Operating Partnership, L.P.
 
-  		  	
+
 401 Plymouth Road, Suite 500
 
-  		  	
+
 Plymouth Meeting, PA 19462
 
-  		  	
+
 Attn: H. Jeffrey DeVuono
 
-  	with a copy to:	  	
-  		  	
+  	with a copy to:
+
 Brandywine Realty Trust
 
-  		  	
+
 401 Plymouth Road, Suite 500
 
-  		  	
+
 Plymouth Meeting, PA 19462
 
-  		  	
+
 Attn: Brad A. Molotsky, General Counsel
 
 (m) “Tenant’s North American Industry Classification Number”: 52
@@ -512,7 +512,7 @@ Attn: Brad A. Molotsky, General Counsel
 
 (o) “Rent”: All Annual Fixed Rent, monthly installments of Annual Fixed Rent, Fixed Rent and Additional Rent payable by Tenant to Landlord under this Lease.
 
- 
+
 
 15
 
@@ -536,7 +536,7 @@ In the event the Commencement Date has not occurred by April 1, 2006 for any rea
 
 (a) Tenant shall pay to Landlord without notice or demand, and without set-off, the annual Fixed Rent payable in the monthly installments of Fixed Rent as set forth in Article 1(e), in advance on the first day of each calendar month during the Term by Term by (i) check sent to Landlord, P.O. Box 8538-363, Philadelphia,
 
- 
+
 
 16
 
@@ -556,7 +556,7 @@ PA 19171 or (ii) wire transfer of immediately available funds to the account at 
 
 Notwithstanding the foregoing, the term Operating Expenses shall not include any of the following: (i) repairs or other work occasioned by fire, windstorm or other insured casualty or by the exercise of the right of eminent domain; (ii) leasing commissions, accountants’, consultants’, auditors or attorneys’ fees, costs and disbursements and other expenses incurred in connection with negotiations or disputes with other tenants or prospective tenants or other occupants, or associated with the enforcement of any other leases or the defense of Landlord’s title to or interest in the real property or any part thereof; (iii) costs (including permit, licenses and inspection fees) incurred in renovating or otherwise improving or decorating, painting, or redecorating space for
 
- 
+
 
 17
 
@@ -568,7 +568,7 @@ other tenants or other occupants or vacant space; (iv) depreciation; (v) costs i
 
 Notwithstanding anything in this Lease to the contrary, provided Tenant is eligible for the benefits of the KOIZ legislation, then until the expiration of the KOIZ Period, Recognized Expenses shall not include any Taxes which are abated under the KOIZ Legislation. “KOIZ Legislation” shall mean means, collectively, the Keystone Opportunity Zone and Keystone Opportunity Expansion Zone Act, Act of 1998, P.L. 705, No. 92, as amended, Philadelphia Ordinance Chapter 19-3200, as amended, and any and all regulations adopted by the Pennsylvania Department of Community and Economic Development, the Pennsylvania Department of Revenue, the Philadelphia Department of Commerce, the Philadelphia Department of Revenue and the Philadelphia Board of Revision of Taxes, pursuant to or with respect to such act or such ordinance. “KOIZ Period” means the period for such tax abatement under the KOIZ Legislation.
 
- 
+
 
 18
 
@@ -586,7 +586,7 @@ Notwithstanding anything in this Lease to the contrary, provided Tenant is eligi
 
 (h) Subject to the limitations set forth in Article 13, Tenant agrees to pay to Landlord on demand reasonable and actual attorney’s fees incurred in connection with the processing and documentation of any
 
- 
+
 
 19
 
@@ -606,7 +606,7 @@ request for Landlord’s approval or consent in connection with assignment, subl
 
 (c) Landlord shall provide Tenant with standard identification signage on all Building directories and at the entrance to the Premises, which Premises entrance sign shall contain the names of all the Permitted Assignments or Sublets. No other signs shall be placed, erected or maintained by Tenant at any place upon the Premises, Building or Project. No tenant in the Building, other than retail tenants, will have nonstandard identification signage inside the Building.
 
- 
+
 
 20
 
@@ -626,7 +626,7 @@ request for Landlord’s approval or consent in connection with assignment, subl
 
 (iii) Tenant shall defend, indemnify and hold harmless Landlord, Brandywine Realty Services Corp. and Brandywine Realty Trust and their respective employees and agents from and against any and all third-party claims, actions, damages, liability and expense (including all attorney’s, consultant’s and expert’s fees, expenses and liabilities incurred in defense of any such claim or any action or proceeding brought thereon) arising from Tenant’s storage and use of hazardous substances on the Premises including, without limitation, any and all costs incurred by Landlord because of any investigation of the Project or any cleanup, removal or restoration of the Project to remove or remediate hazardous or hazardous wastes deposited by Tenant. Without limitation of the foregoing, if Tenant, its officers, employees, agents, contractors, licensees or invitees cause contamination of the Premises by any hazardous substances, Tenant shall promptly at its sole expense, take any and all necessary actions to return the Premises to the condition existing prior to such contamination, or in the alternative take such other remedial steps as may be required by law or recommended by Landlord’s environmental consultant.
 
- 
+
 
 21
 
@@ -652,7 +652,7 @@ request for Landlord’s approval or consent in connection with assignment, subl
 
 Tenant will not cut or drill into or secure any fixture, apparatus or equipment or make alterations, improvements or physical additions (collectively, “Alterations”) of any kind to any part of the Premises without first obtaining the written consent of Landlord, such consent not to be unreasonably withheld. Alterations shall be done at Tenant’s sole cost and expense. Landlord’s consent shall not be required for (i) the installation of any office equipment or fixtures including internal partitions which do not require disturbance of any structural elements or systems (other than attachment thereto) within the Building or (ii) minor work, including decorations, which does not require disturbance of any structural elements or systems (other than attachment thereto) within the Building and which costs in the aggregate less than $25,000. If no approval is required or if Landlord approves Tenant’s Alterations and agrees to permit Tenant’s contractors to do the work, Tenant, prior to the commencement of labor or supply of any materials, must furnish to Landlord (i) a duplicate or original policy or certificates of insurance evidencing (a) general public liability insurance for personal injury and property damage in the minimum amount of
 
- 
+
 
 22
 
@@ -666,7 +666,7 @@ All Alterations (whether temporary or permanent in character) made in or upon th
 
 (b) Nothing in this Lease, or in any consent to the making of alterations or improvements shall be deemed or construed in any way as constituting authorization by Landlord for the making of any alterations or additions by Tenant within the meaning of 49 P.S. Sections 1101-1902, as amended, or under the Contractor and Subcontractor Payment Act or any amendment thereof, or constituting a request by Landlord, express or implied, to any contractor, subcontractor or supplier for the performance of any labor or the furnishing of any materials for the use or benefit of Landlord.
 
- 
+
 
 23
 
@@ -688,7 +688,7 @@ All Alterations (whether temporary or permanent in character) made in or upon th
 
 (vii) Security. From and after the Commencement Date, provide a security program for the Building in accordance with the Standards.
 
- 
+
 
 24
 
@@ -702,7 +702,7 @@ All Alterations (whether temporary or permanent in character) made in or upon th
 
 (b) If any of the services provided for in Article 12 or telecommunications (including equipment and personnel for any of the foregoing) are interrupted or stopped or if there is a defect in supply, character of, adequacy or quality of any of such services (collectively, a “Failure”), Landlord will use reasonable diligence to resume the service and correct the Failure; provided, however, no Failure of any of these services will create any liability for Landlord (including, without limitation, any liability for damages to Tenant’s personal property caused by any such Failure), constitute an actual or constructive eviction or, except as expressly provided below, cause any abatement of the Rent payable under this Lease or in any manner or for any purpose relieve Tenant from any of its obligations under this Lease. If, due to reasons within Landlord’s reasonable control, any of the services required to be provided by Landlord under Article 12 should become subject to a Failure and should remain subject to a Failure for a period in excess of 72 hours after notice of such Failure from Tenant to Landlord, and if such Failure should render all or any portion of the Premises untenantable so that Tenant is actually unable to use any or all of the Premises for the normal conduct of its business (“Untenantable”), then commencing upon the
 
- 
+
 
 25
 
@@ -718,7 +718,7 @@ Landlord reserves the right, without any liability to Tenant, except as otherwis
 
 (c) If Landlord elects to recapture the Premises or a portion thereof as aforesaid, then from and after the effective date thereof as approved by Landlord, after Tenant shall have fully performed such obligations
 
- 
+
 
 26
 
@@ -730,7 +730,7 @@ For purposes of this Section 13(d), and without limiting the basis upon which La
 
 (e) Any sums or other economic consideration received by Tenant as a result of any subletting, assignment or license (except rental or other payments received which are attributable to the amortization of the cost of leasehold improvements made to the sublet or assigned portion of the premises by Tenant for subtenant or assignee, and other reasonable expenses incident to the subletting or assignment, including standard leasing commissions) whether denominated rentals under the sublease or otherwise, which exceed, in the aggregate, the total sums which Tenant is obligated to pay Landlord under this Lease (prorated to reflect obligations allocable to that portion of the premises subject to such sublease or assignment) shall be divided evenly between Landlord and
 
- 
+
 
 27
 
@@ -750,7 +750,7 @@ Tenant, with Landlord’s portion being payable to Landlord as Additional Rental
 
 Landlord and persons authorized by Landlord may enter the Premises at all reasonable times upon reasonable advance notice (except in the case of an emergency in which case no prior notice is necessary) for the
 
- 
+
 
 28
 
@@ -772,7 +772,7 @@ purpose of inspections, repairs, alterations to adjoining space, appraisals, or 
 
 (b) Tenant shall, at its sole cost and expense, maintain in full force and effect on all Tenant’s trade fixtures, equipment and personal property on the Premises, a policy of “special form” property insurance covering the full replacement value of such property.
 
- 
+
 
 29
 
@@ -786,7 +786,7 @@ purpose of inspections, repairs, alterations to adjoining space, appraisals, or 
 
 (a) Tenant shall defend, indemnify and hold harmless Landlord and Brandywine Realty Trust and their respective employees and agents from and against any and all third-party claims, actions, damages, liability and expense (including all reasonable attorney’s fees, expenses and liabilities incurred in defense of any such claim or any action or proceeding brought thereon) arising from (i) Tenant’s improper use of the Premises, (ii) the improper conduct of Tenant’s business, (iii) any activity, work or things done, permitted or suffered by Tenant or its agents, licensees or invitees in or about the Premises or elsewhere contrary to the requirements of the Lease, (iv) any breach or default in the performance of any obligation of Tenant’s part to be performed under the terms of this Lease, and (v) any negligence or willful act of Tenant or any of Tenant’s agents, contractors, or employees. Without limiting the generality of the foregoing, Tenant’s obligations shall include any case in which Landlord or Brandywine Realty Trust shall be made a party to any litigation commenced by or against Tenant, its agents, subtenants, licensees, concessionaires, contractors, customers or employees, then Tenant shall defend, indemnify and hold harmless Landlord, Brandywine Realty Services Corp. and Brandywine Realty Trust and shall pay all costs, expenses and reasonable attorney’s fees incurred or paid by Landlord and Brandywine Realty Trust in connection with such
 
- 
+
 
 30
 
@@ -806,7 +806,7 @@ Provided Tenant has performed all of the terms and conditions of this Lease, inc
 
 (c) If the insurance proceeds received by Landlord as dictated by the terms and conditions of any financing then existing on the Building, (excluding any rent insurance proceeds) would not be sufficient to pay for repairing the damage or are required to be applied on account of any mortgage which encumbers any part of the Premises or Building, or if the nature of loss is not covered by Landlord’s fire insurance coverage, Landlord may elect either to (i) repair the damage as above provided notwithstanding such fact or (ii) terminate this Lease by giving Tenant notice of Landlord’s election as aforesaid.
 
- 
+
 
 31
 
@@ -824,7 +824,7 @@ Provided Tenant has performed all of the terms and conditions of this Lease, inc
 
 (d) Upon attornment, this Lease will continue in full force and effect as a direct lease between the Successor and Tenant upon all of the same terms, conditions and covenants as stated in this Lease except that a Successor shall not be (a) liable for any previous act or omission or negligence of Landlord under this Lease which is not continuing after foreclosure, (b) subject to any counterclaim defense or offset not expressly provided for in this Lease and asserted with reasonable promptness, which theretofore shall have accrued to Tenant against Landlord, (c)
 
- 
+
 
 32
 
@@ -840,7 +840,7 @@ bound by any previous modification or amendment of this Lease or by any previous
 
 (c) If this Lease is not terminated after any such taking or condemnation, the Fixed Rent and the Additional Rent shall be equitably reduced in proportion to the area of the Premises which has been taken for the balance of the Term.
 
- 
+
 
 33
 
@@ -866,7 +866,7 @@ If:
 
 (f) a receiver or other official is appointed for Tenant or for a substantial part of Tenant’s assets or for Tenant’s interests in this Lease,
 
- 
+
 
 34
 
@@ -890,7 +890,7 @@ Following such termination and the notice of same provided above (as well as upo
 
 (i) Unless and until Landlord shall have terminated this Lease under subparagraph (b) above, Tenant shall remain fully liable and responsible to perform all of the covenants and to observe all the conditions of this Lease throughout the remainder of the Term to the early termination date; and, in addition, Tenant shall pay to Landlord, upon demand and as Additional Rent, the total sum of all costs, losses, damages and expenses, including reasonable attorneys’ fees, as Landlord incurs, directly or indirectly, because of any Event of Default having occurred.
 
- 
+
 
 35
 
@@ -914,7 +914,7 @@ Less deducting from the total determined under subparagraphs (A), (B) and (C) al
 
 (iii) Landlord may enforce and protect the rights of Landlord hereunder by a suit or suits in equity or at law for the specific performance of any covenant or agreement contained herein, and for the enforcement of any other appropriate legal or equitable remedy, including, without limitation, injunctive relief, and for recovery of consequential damages and all moneys due or to become due from Tenant under any of the provisions of this Lease.
 
- 
+
 
 36
 
@@ -932,7 +932,7 @@ ___________(INITIAL). TENANT WAIVER. TENANT SPECIFICALLY ACKNOWLEDGES THAT TENAN
 
 (g) Interest on Damage Amounts. Any sums payable by Tenant hereunder, which are not paid after the same shall be due, shall bear interest from that day until paid at the rate of four (4%) percent over the
 
- 
+
 
 37
 
@@ -950,7 +950,7 @@ then Prime Rate as published daily under the heading “Money Rates” in The Wa
 
 Intentionally Omitted.
 
- 
+
 
 38
 
@@ -972,7 +972,7 @@ Tenant agrees that at all times during the terms of this Lease (as same may be e
 
 (b) Without limiting the generality of the foregoing, Tenant shall (i) obtain, at Tenant’s expense, before engaging in Tenant’s business or profession within the Premises, all necessary licenses and permits including (but not limited to) state and local business licenses or permits, and (ii) remain in compliance with and keep in full force and effect at all times all licenses, consents and permits necessary for the lawful conduct of Tenant’s business or profession at the Premises. Tenant shall pay all personal property taxes, income taxes and other taxes, assessments, duties, impositions and similar charges which are or may be assessed, levied or imposed upon Tenant
 
- 
+
 
 39
 
@@ -996,7 +996,7 @@ Landlord and Tenant each represents and warrants to the other that such party ha
 
 (ii) To install, affix and maintain any and all signs on the exterior and on the interior of the Building.
 
- 
+
 
 40
 
@@ -1018,7 +1018,7 @@ Landlord and Tenant each represents and warrants to the other that such party ha
 
 Landlord’s obligations hereunder shall be binding upon Landlord only for the period of time that Landlord is in ownership of the Building; and, upon termination of that ownership, Tenant, except as to any obligations which are then due and owing, shall look solely to Landlord’s successor in interest in the Building for the satisfaction of each and every obligation of Landlord hereunder, provided Landlord transfers any assets of Tenant (such as prepaid rent) to such successor. Landlord shall have no personal liability under any of the terms, conditions or covenants of this Lease and Tenant shall look solely to the equity of Landlord in the Building of which the Premises form a part for the satisfaction of any claim, remedy or cause of action accruing to Tenant as a result of the breach of any section of this Lease by Landlord. In addition to the foregoing, no recourse shall be had for an obligation of Landlord hereunder, or for any claim based thereon or otherwise in respect thereof, against any past, present or future trustee, member, partner, shareholder, officer, director, partner, agent or employee of Landlord, whether by virtue of any statute or rule of law, or by the enforcement of any assessment or penalty or otherwise, all such other liability being expressly waived and released by Tenant with respect to the above-named individuals and entities.
 
- 
+
 
 41
 
@@ -1048,7 +1048,7 @@ Any time and from time to time during the Term but only after an Event of Defaul
 
 (c) Severability. If any provisions of this Lease shall be held to be invalid, void or unenforceable, the remaining provisions hereof shall in no way be affected or impaired and such remaining provisions shall remain in full force and effect.
 
- 
+
 
 42
 
@@ -1072,7 +1072,7 @@ Any time and from time to time during the Term but only after an Event of Defaul
 
 (m) Accord and Satisfaction. No payment by Tenant or receipt by Landlord of a lesser amount than any payment of Fixed Rent or Additional Rent herein stipulated shall be deemed to be other than on account of the earliest stipulated Fixed Rent or Additional Rent due and payable hereunder, nor shall any endorsement or statement or any check or any letter accompanying any check or payment as Rent be deemed an
 
- 
+
 
 43
 
@@ -1098,7 +1098,7 @@ Tenant hereby consents to the exclusive jurisdiction of the state courts located
 
 Subject to the existing right of Dechert LLC and Woodcock Washburn, as outlined below, and provided Tenant is neither in default at the time of exercise nor has Tenant ever been in default of any monetary obligations under this Lease aggregating in excess of $150,000, and Tenant or its Permitted Occupant(s) is fully occupying the Premises and the Lease is in full force and effect, Tenant shall have the right to renew this Lease for one term of five (5) years beyond the end of the initial Term (“Renewal Term”). Tenant shall furnish written notice
 
- 
+
 
 44
 
@@ -1112,32 +1112,32 @@ Landlord represents and warrants to the Tenant that (a) it has granted to Decher
 
 Tenant shall have the sole and exclusive right to terminate this Lease (the “Tenant Termination Right”) if, within thirty (30) days following Tenant’s receipt of the fully executed Lease (the “Qualification Outside Termination Date”), time being of the essence: (a) Tenant has not received one of either a (i) confirmation of modification letter or (ii) qualification confirmation letter, from the Commonwealth of Pennsylvania, Department of Community and Economic Development (“DCED”) stating that the date on which initial employment is measured shall be the date of Lease signing for purposes of eligibility for benefits under 73 P.S. § 820.307(b)(1) or (b) Tenant has not received one of either a (i) confirmation of modification letter or (ii) qualification confirmation letter, from DCED stating that (x) the gross revenue of Tenant for purposes of the capital investment test will be measured as the gross revenues of Tenant and (y) the tenant improvements provided by Landlord under this Lease shall be counted for purposes of fulfilling the capital investment made by Tenant for the Ten% capital investment test, each for purposes of eligibility for benefits under 73 P.S. §820.307(b)(2). Tenant shall use commercially reasonable efforts to pursue directly with DCED and to cooperate with Landlord in obtaining such modification / confirmation letters
 
- 
+
 
 45
 
 from the DCED. For purposes hereof Tenant shall mean Cohen Brothers, LLC and its subsidiaries listed on Schedule 39 attached hereto and they must all be considered together by the DCED as though they were one operating business or separately but all must be eligible for such benefits. Landlord agrees to cooperate in connection with any required or requested applications, letters or other correspondence related to the KOIZ to any state or local agency in connection with the KOIZ. It is understood that Tenant’s efforts in this regard shall include making application for qualification and for modification prior to 5:00 p.m. fifteen (15) business days following the date this Lease is fully executed and delivered, time being of the essence. Tenant’s exercise of the Tenant Termination Right shall be in writing and in order to be effective, shall be delivered to Landlord prior to 5:00 p.m. on the Qualification Outside Termination Date (provided such Qualification Outside Termination Date is a business day and if not, by 5:00 p.m. on the first business day following the Qualification Outside Termination Date). In the event Tenant exercises its Tenant Termination Right to terminate this Lease in accordance with the requirements of this Section, this Lease shall terminate and become null and void and of no further force or effect.
 
- 
+
 
 46
 
 IN WITNESS WHEREOF, the parties hereto have executed this Lease the day and year first above written.
 
- 
+
 
 WITNESS:	 		 	LANDLORD:
  		 	BRANDYWINE CIRA, L.P.
  		 		 	By:	 	Brandywine Cira LLC,
  		 		 		 	its general partner
-  	 		 	By:	 	  
+  	 		 	By:
  		 		 		 	H. Jeffrey DeVuono
  		 		 		 	Senior Vice President
 ATTEST:	 		 	TENANT:
  		 	COHEN BROTHERS, LLC
-  	 		 	By:	 	  
-Name:	 		 		 	Name:	 	
-Title:	 	Secretary	 		 	Title:	 	
- 
+  	 		 	By:
+Name:	 		 		 	Name:
+Title:	 	Secretary	 		 	Title:
+
 
 47

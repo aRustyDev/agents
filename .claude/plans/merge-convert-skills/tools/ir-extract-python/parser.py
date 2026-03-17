@@ -16,19 +16,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 from ir_core.treesitter import (
-    TreeSitterAdapter,
-    TreeNode,
-    ParseTree,
-    TSSourceSpan,
-    QueryMatch,
-    GASTNode,
-    GASTKind,
     ASTNormalizer,
+    GASTKind,
+    GASTNode,
+    ParseTree,
+    TreeNode,
+    TreeSitterAdapter,
 )
-
 
 # Python-specific node types
 FUNCTION_TYPES = frozenset({
@@ -542,9 +538,7 @@ class PythonParser:
         """Extract the name from a decorator node."""
         # Decorator can be: @name, @name.attr, @name(args), @name.attr(args)
         for child in decorator_node.named_children():
-            if child.type == "identifier":
-                return child.text
-            elif child.type == "attribute":
+            if child.type == "identifier" or child.type == "attribute":
                 return child.text
             elif child.type == "call":
                 func = child.child_by_field("function")
@@ -590,9 +584,7 @@ class PythonParser:
         bases: list[str] = []
 
         for child in bases_node.named_children():
-            if child.type == "identifier":
-                bases.append(child.text)
-            elif child.type == "attribute":
+            if child.type == "identifier" or child.type == "attribute":
                 bases.append(child.text)
             elif child.type == "subscript":
                 # Generic base like Generic[T]

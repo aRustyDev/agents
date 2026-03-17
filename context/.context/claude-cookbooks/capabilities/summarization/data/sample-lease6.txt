@@ -72,7 +72,7 @@ Commencement - 10/31/23*		46,250		$43.50		$167,657.67
 11/01/25 - 10/31/26		46,250		$47.53		$183,204.06
 11/01/26 - 10/31/27		46,250		$48.96		$188,700.18
 11/01/27 - 07/31/28		46,250		$50.43		$194,361.18
- 
+
 
 *Provided no event of default occurs during the term of the Sublease (subject to Sublessee’s ability to cure said default per terms of the Sublease and Master Lease), Sublessee’s obligation to pay Basic Rental with respect to the entire Subleased Premises shall be abated from the Commencement Date through 10/31/2022 (hereafter “Abatement Term”), following the expiration of which, Sublessee’s obligation to pay Rent shall commence.
 
@@ -212,7 +212,7 @@ By: /s/ Mike Witte
 Name: Mike Witte
 Title: CEO
 Date: April 23, 2022
- 
+
 
 
 SUBLESSEE
@@ -223,7 +223,7 @@ By: /s/ Michael Lafair
 Name: Michael Lafair
 Title: CFO
 Date: April 23, 2022
- 
+
 12
 
 
@@ -315,7 +315,7 @@ PAGE
 27. Surrender of Demised Premises	20
 28. Hazardous Substances	20
 29. Miscellaneous	21
- 
+
 2
 
 
@@ -330,7 +330,7 @@ Exhibit “G”	Rules and Regulations
 Exhibit “H”	Intentionally Deleted
 Exhibit “P”	Parking
 Exhibit “J”	Special Stipulations
- 
+
 
 
 
@@ -378,16 +378,16 @@ $39.25	$75,693.63
 37-48
 $40.43	$77,969.26
 49-60
-$41.64	
+$41.64
 $80,302.74
 61-72
 $42.89	$82,713.37
 73-84
-$44.18	
+$44.18
 $85,201.13
 85-96
 $45.51	$87,766.04
- 
+
 
 * The first three (3) full calendar months after the Rental Commencement Date are subject to Article 4(d) below.
 
@@ -422,32 +422,32 @@ c/o/ Cousins Properties		c/o/ Cousins Properties
 Suite 1800		Suite 590
 Atlanta, GA 30326		Austin, Texas 78701
 Attn: Corporate Secretary		Attn: Senior Property Manager
-Landlord’s Address for Rent:		
-if by check, mail to:		
-Cousins Properties LP		
-c/o Cousins - San Jacinto Center LLC		
-P.O. Box 207479		
-Dallas, Texas 75320-7479		
-if overnight delivery, send to:		
-Lockbox Services - Cousins Properties LP		
-c/o Cousins - San Jacinto Center LLC		
-2975 Regent Blvd		
-Lockbox #207479		
- 
+Landlord’s Address for Rent:
+if by check, mail to:
+Cousins Properties LP
+c/o Cousins - San Jacinto Center LLC
+P.O. Box 207479
+Dallas, Texas 75320-7479
+if overnight delivery, send to:
+Lockbox Services - Cousins Properties LP
+c/o Cousins - San Jacinto Center LLC
+2975 Regent Blvd
+Lockbox #207479
+
 2
 
 
 
 
-Irving, Texas 75063		
-if by wire transfer or ACH:		
-Account #4447759374		
-ACH Routing Number: 121 000 248		
-Wire Routing Number: 221 000 248		
-Swift Code (International Wires): WFBIUS6S		
-Wire Bank Address: San Francisco, CA		
-Wire Bank Name: Wells Fargo		
- 
+Irving, Texas 75063
+if by wire transfer or ACH:
+Account #4447759374
+ACH Routing Number: 121 000 248
+Wire Routing Number: 221 000 248
+Swift Code (International Wires): WFBIUS6S
+Wire Bank Address: San Francisco, CA
+Wire Bank Name: Wells Fargo
+
 
 (o)Affiliate: Any Person which directly or indirectly controls a party hereto or which is directly or indirectly controlled by or under common control with a party hereto, including any parent or subsidiary of a party hereto (the term "control" for these purposes means the ability through agreement of the parties in interest of the ownership of shares, membership interests or partnership interests, as the case may be, to elect a majority of the directors of a corporation or to make management decisions on behalf of, or to independently select the managing partner or member of, a partnership or limited liability company).
 
@@ -761,7 +761,7 @@ a Delaware corporation
 By:	/s/ John Mark Warren
 John Mark Warren
 VP Finance
- 
+
 25
 
 

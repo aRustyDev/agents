@@ -11,9 +11,9 @@ Author: Scientific Skills
 License: MIT
 """
 
+import argparse
 import os
 import sys
-import argparse
 from pathlib import Path
 
 
@@ -34,7 +34,7 @@ def create_env_file(api_key: str, env_file: str = ".env") -> bool:
         # Read existing content if file exists
         existing_content = []
         if env_path.exists():
-            with open(env_path, 'r') as f:
+            with open(env_path) as f:
                 existing_content = [
                     line for line in f.readlines()
                     if not line.startswith('OPENROUTER_API_KEY=')
@@ -151,7 +151,7 @@ Get your OpenRouter API key from:
         if create_env_file(args.api_key, args.env_file):
             print()
             print("Next steps:")
-            print(f"1. Load the environment variables:")
+            print("1. Load the environment variables:")
             print(f"   source {args.env_file}")
             print("2. Or export directly:")
             print(f"   export OPENROUTER_API_KEY={args.api_key}")

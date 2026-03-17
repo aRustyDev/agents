@@ -6,7 +6,7 @@ Pattern Analysis Tool - Identifies common patterns in the codebase
 import os
 import re
 from collections import Counter, defaultdict
-from pathlib import Path
+
 
 class PatternAnalyzer:
     def __init__(self):
@@ -42,97 +42,97 @@ class PatternAnalyzer:
                 'import_pattern': r'import\s+\S+|from\s+\S+\s+import',
             }
         }
-        
+
     def analyze_file(self, filepath):
         """Analyze patterns in a single file"""
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath) as f:
                 content = f.read()
         except:
             return {}
-            
+
         results = defaultdict(list)
-        
+
         for category, patterns in self.patterns.items():
             for pattern_name, regex in patterns.items():
                 matches = re.findall(regex, content, re.MULTILINE)
                 if matches:
                     results[category].extend(matches)
-                    
+
         return results
-        
+
     def analyze_directory(self, directory):
         """Analyze all files in a directory"""
         all_results = defaultdict(Counter)
         file_count = 0
-        
+
         for root, dirs, files in os.walk(directory):
             for file in files:
                 if file.endswith('.md'):
                     filepath = os.path.join(root, file)
                     file_results = self.analyze_file(filepath)
                     file_count += 1
-                    
+
                     for category, matches in file_results.items():
                         all_results[category].update(matches)
-                        
+
         return all_results, file_count
-        
+
     def generate_report(self, results, file_count):
         """Generate analysis report"""
         report = []
-        report.append(f"# Pattern Analysis Report\n")
+        report.append("# Pattern Analysis Report\n")
         report.append(f"Analyzed {file_count} files\n")
-        
+
         for category, counter in results.items():
             report.append(f"\n## {category.replace('_', ' ').title()}")
             report.append(f"Total instances: {sum(counter.values())}")
             report.append(f"Unique patterns: {len(counter)}\n")
-            
+
             # Top 10 most common
             report.append("### Most Common Patterns:")
             for pattern, count in counter.most_common(10):
                 report.append(f"- `{pattern}`: {count} occurrences")
-                
+
         return '\n'.join(report)
-        
+
     def identify_extraction_candidates(self, results):
         """Identify patterns that are good candidates for extraction"""
         candidates = []
-        
+
         for category, counter in results.items():
             # Find patterns that appear more than 5 times
             common_patterns = [(p, c) for p, c in counter.items() if c > 5]
-            
+
             if common_patterns:
                 candidates.append({
                     'category': category,
                     'patterns': common_patterns,
                     'total_occurrences': sum(c for _, c in common_patterns)
                 })
-                
+
         return candidates
 
 def main():
     analyzer = PatternAnalyzer()
-    
+
     # Analyze commands directory
     print("Analyzing .claude/commands/ directory...")
     results, file_count = analyzer.analyze_directory('.claude/commands/')
-    
+
     # Generate report
     report = analyzer.generate_report(results, file_count)
-    
+
     # Save report
     with open('analysis/pattern-analysis-report.md', 'w') as f:
         f.write(report)
-    
+
     print(f"\nAnalysis complete! Analyzed {file_count} files.")
     print("Report saved to: analysis/pattern-analysis-report.md")
-    
+
     # Identify extraction candidates
     candidates = analyzer.identify_extraction_candidates(results)
-    
+
     print("\n## Extraction Candidates:")
     for candidate in candidates:
         print(f"\n{candidate['category']}:")

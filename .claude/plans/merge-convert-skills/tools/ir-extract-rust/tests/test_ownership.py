@@ -8,7 +8,6 @@ pytest.importorskip("tree_sitter_rust")
 from ir_extract_rust.ownership import (
     OwnershipAnalyzer,
     OwnershipKind,
-    UsageKind,
 )
 from ir_extract_rust.parser import RustParser
 
@@ -36,7 +35,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         assert "x" in analysis.bindings
         assert analysis.bindings["x"].kind == OwnershipKind.OWNED
@@ -50,7 +49,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         assert "x" in analysis.bindings
         assert analysis.bindings["x"].kind == OwnershipKind.BORROWED
@@ -64,7 +63,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         assert "x" in analysis.bindings
         assert analysis.bindings["x"].kind == OwnershipKind.MUT_BORROWED
@@ -78,7 +77,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         # x should still be valid (Copy)
         assert "x" in analysis.bindings
@@ -93,7 +92,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         # s should be moved
         assert "s" in analysis.bindings
@@ -112,7 +111,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         assert "s" in analysis.bindings
         assert len(analysis.bindings["s"].borrows) > 0
@@ -127,7 +126,7 @@ fn test() {
 }
 """
         tree = parser.parse(source)
-        analysis = analyzer.analyze(source, tree.root_node)
+        analysis = analyzer.analyze(source, tree.root)
 
         # Should have no borrow errors
         assert len(analysis.borrow_errors) == 0

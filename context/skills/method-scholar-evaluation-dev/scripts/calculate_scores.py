@@ -14,12 +14,10 @@ Author: ScholarEval Framework
 License: MIT
 """
 
-import json
 import argparse
+import json
 import sys
-from typing import Dict, List, Optional
 from pathlib import Path
-
 
 # Default dimension weights (total = 100%)
 DEFAULT_WEIGHTS = {
@@ -44,10 +42,10 @@ QUALITY_LEVELS = {
 }
 
 
-def load_scores(filepath: Path) -> Dict[str, float]:
+def load_scores(filepath: Path) -> dict[str, float]:
     """Load dimension scores from JSON file."""
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             scores = json.load(f)
 
         # Validate scores
@@ -67,13 +65,13 @@ def load_scores(filepath: Path) -> Dict[str, float]:
         sys.exit(1)
 
 
-def load_weights(filepath: Optional[Path] = None) -> Dict[str, float]:
+def load_weights(filepath: Path | None = None) -> dict[str, float]:
     """Load dimension weights from JSON file or return defaults."""
     if filepath is None:
         return DEFAULT_WEIGHTS
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             weights = json.load(f)
 
         # Validate weights sum to 1.0
@@ -93,7 +91,7 @@ def load_weights(filepath: Optional[Path] = None) -> Dict[str, float]:
         sys.exit(1)
 
 
-def calculate_weighted_average(scores: Dict[str, float], weights: Dict[str, float]) -> float:
+def calculate_weighted_average(scores: dict[str, float], weights: dict[str, float]) -> float:
     """Calculate weighted average score."""
     total_score = 0.0
     total_weight = 0.0
@@ -120,10 +118,10 @@ def get_quality_level(score: float) -> tuple:
     return "Unknown", "Score out of expected range"
 
 
-def generate_bar_chart(scores: Dict[str, float], max_width: int = 50) -> str:
+def generate_bar_chart(scores: dict[str, float], max_width: int = 50) -> str:
     """Generate ASCII bar chart of dimension scores."""
     lines = []
-    max_name_len = max(len(name) for name in scores.keys())
+    max_name_len = max(len(name) for name in scores)
 
     for dimension, score in sorted(scores.items(), key=lambda x: x[1], reverse=True):
         bar_length = int((score / 5.0) * max_width)
@@ -134,7 +132,7 @@ def generate_bar_chart(scores: Dict[str, float], max_width: int = 50) -> str:
     return '\n'.join(lines)
 
 
-def identify_strengths_weaknesses(scores: Dict[str, float]) -> tuple:
+def identify_strengths_weaknesses(scores: dict[str, float]) -> tuple:
     """Identify top strengths and areas for improvement."""
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
@@ -144,8 +142,8 @@ def identify_strengths_weaknesses(scores: Dict[str, float]) -> tuple:
     return strengths, weaknesses
 
 
-def generate_report(scores: Dict[str, float], weights: Dict[str, float],
-                   output_file: Optional[Path] = None) -> str:
+def generate_report(scores: dict[str, float], weights: dict[str, float],
+                   output_file: Path | None = None) -> str:
     """Generate comprehensive evaluation report."""
     overall_score = calculate_weighted_average(scores, weights)
     quality_level, quality_desc = get_quality_level(overall_score)
@@ -236,7 +234,7 @@ def generate_report(scores: Dict[str, float], weights: Dict[str, float],
             with open(output_file, 'w') as f:
                 f.write(report)
             print(f"\nReport saved to: {output_file}")
-        except IOError as e:
+        except OSError as e:
             print(f"Error writing to {output_file}: {e}")
 
     return report

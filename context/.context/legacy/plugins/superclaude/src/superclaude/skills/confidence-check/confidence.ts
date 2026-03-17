@@ -1,4 +1,4 @@
-/** 
+/**
  * Confidence Check - Pre-implementation confidence assessment
  *
  * Prevents wrong-direction execution by assessing confidence BEFORE starting.

@@ -11,11 +11,12 @@ Key features:
 - Result aggregation and error handling
 """
 
-from dataclasses import dataclass
-from typing import List, Dict, Any, Callable, Optional, Set
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from enum import Enum
 import time
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 
 class TaskStatus(Enum):
@@ -32,12 +33,12 @@ class Task:
     id: str
     description: str
     execute: Callable
-    depends_on: List[str]  # Task IDs this depends on
+    depends_on: list[str]  # Task IDs this depends on
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[Exception] = None
+    error: Exception | None = None
 
-    def can_execute(self, completed_tasks: Set[str]) -> bool:
+    def can_execute(self, completed_tasks: set[str]) -> bool:
         """Check if all dependencies are satisfied"""
         return all(dep in completed_tasks for dep in self.depends_on)
 
@@ -46,8 +47,8 @@ class Task:
 class ParallelGroup:
     """Group of tasks that can execute in parallel"""
     group_id: int
-    tasks: List[Task]
-    dependencies: Set[str]  # External task IDs this group depends on
+    tasks: list[Task]
+    dependencies: set[str]  # External task IDs this group depends on
 
     def __repr__(self) -> str:
         return f"Group {self.group_id}: {len(self.tasks)} tasks"
@@ -56,7 +57,7 @@ class ParallelGroup:
 @dataclass
 class ExecutionPlan:
     """Complete execution plan with parallelization strategy"""
-    groups: List[ParallelGroup]
+    groups: list[ParallelGroup]
     total_tasks: int
     sequential_time_estimate: float
     parallel_time_estimate: float
@@ -96,7 +97,7 @@ class ParallelExecutor:
     def __init__(self, max_workers: int = 10):
         self.max_workers = max_workers
 
-    def plan(self, tasks: List[Task]) -> ExecutionPlan:
+    def plan(self, tasks: list[Task]) -> ExecutionPlan:
         """
         Create execution plan with automatic parallelization
 
@@ -165,7 +166,7 @@ class ParallelExecutor:
 
         return plan
 
-    def execute(self, plan: ExecutionPlan) -> Dict[str, Any]:
+    def execute(self, plan: ExecutionPlan) -> dict[str, Any]:
         """
         Execute plan with parallel groups
 
@@ -200,7 +201,7 @@ class ParallelExecutor:
 
         return results
 
-    def _execute_group(self, group: ParallelGroup) -> Dict[str, Any]:
+    def _execute_group(self, group: ParallelGroup) -> dict[str, Any]:
         """Execute single parallel group"""
 
         results = {}
@@ -236,7 +237,7 @@ class ParallelExecutor:
 
 # Convenience functions for common patterns
 
-def parallel_file_operations(files: List[str], operation: Callable) -> List[Any]:
+def parallel_file_operations(files: list[str], operation: Callable) -> list[Any]:
     """
     Execute operation on multiple files in parallel
 
@@ -265,7 +266,7 @@ def parallel_file_operations(files: List[str], operation: Callable) -> List[Any]
     return [results[task.id] for task in tasks]
 
 
-def should_parallelize(items: List[Any], threshold: int = 3) -> bool:
+def should_parallelize(items: list[Any], threshold: int = 3) -> bool:
     """
     Auto-trigger for parallel execution
 

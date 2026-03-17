@@ -1,0 +1,53 @@
+# Plugin build system module
+# Usage: just plugin <command> [args]
+
+set unstable := true
+
+ROOT := source_directory() / "../.."
+
+# Build a plugin (copy sources, verify hashes)
+[group('plugin')]
+build name *flags:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py build "{{ name }}" {{ flags }}
+
+# Verify plugin hashes without building
+[group('plugin')]
+check name *flags:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py check "{{ name }}" {{ flags }}
+
+# Update all hashes in plugin.sources.json
+[group('plugin')]
+update name:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py update "{{ name }}"
+
+# Compute hash for a file or directory
+[group('plugin')]
+hash path *flags:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py hash "{{ path }}" {{ flags }}
+
+# Check all plugins
+[group('plugin')]
+check-all *flags:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py check-all {{ flags }}
+
+# Build all plugins
+[group('plugin')]
+build-all *flags:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py build-all {{ flags }}
+
+# Update all plugin hashes
+[group('plugin')]
+update-all:
+    #!/usr/bin/env bash
+    cd "{{ ROOT }}" && uv run python .scripts/build-plugin.py update-all
+
+# List all plugins with sources
+[group('plugin')]
+list:
+    @ls -1 {{ ROOT }}/context/plugins/*/\.claude-plugin/plugin.sources.json 2>/dev/null | sed 's|.*/context/plugins/||;s|/\.claude-plugin/plugin.sources.json||' | sort

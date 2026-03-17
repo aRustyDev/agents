@@ -37,7 +37,6 @@ from ir_extract_typescript.jsdoc import (
 )
 
 __all__ = [
-    "TypeScriptExtractor",
     "JSDocComment",
     "JSDocExample",
     "JSDocParam",
@@ -45,6 +44,7 @@ __all__ = [
     "JSDocReturns",
     "JSDocTemplate",
     "JSDocTypedef",
+    "TypeScriptExtractor",
     "extract_jsdoc_from_source",
     "get_preceding_jsdoc",
 ]

@@ -30,57 +30,57 @@ log_security_event() {
 check_sensitive_content() {
     local content="$1"
     local pattern_type="$2"
-    
+
     # Get patterns from JSON config
     local patterns=$(jq -r ".patterns.$pattern_type[]" "$PATTERNS_FILE" 2>/dev/null || echo "")
-    
+
     for pattern in $patterns; do
         if echo "$content" | grep -qiE "$pattern"; then
             # Check whitelist
             local whitelisted=false
             local whitelist_patterns=$(jq -r '.whitelist.allowed_mentions[]' "$PATTERNS_FILE" 2>/dev/null || echo "")
-            
+
             for whitelist in $whitelist_patterns; do
                 if echo "$content" | grep -qF "$whitelist"; then
                     whitelisted=true
                     break
                 fi
             done
-            
+
             if [[ "$whitelisted" == "false" ]]; then
                 return 0  # Found sensitive data
             fi
         fi
     done
-    
+
     return 1  # No sensitive data found
 }
 
 # Function to scan file content
 scan_file_content() {
     local file_path="$1"
-    
+
     # Check if file name itself is sensitive
     local filename=$(basename "$file_path")
     if check_sensitive_content "$filename" "sensitive_files"; then
         return 0  # Sensitive file
     fi
-    
+
     # Don't scan files that don't exist or are too large
     if [[ ! -f "$file_path" ]] || [[ $(stat -f%z "$file_path" 2>/dev/null || stat -c%s "$file_path" 2>/dev/null || echo "999999999") -gt 1048576 ]]; then
         return 1
     fi
-    
+
     # Read and scan file content
     local content=$(cat "$file_path" 2>/dev/null || echo "")
-    
+
     # Check all pattern types
     for pattern_type in api_keys credentials regex_patterns; do
         if check_sensitive_content "$content" "$pattern_type"; then
             return 0  # Found sensitive data
         fi
     done
-    
+
     return 1
 }
 
@@ -89,9 +89,9 @@ main() {
     # Extract tool information from stdin
     local tool_name=$(echo "$INPUT_JSON" | jq -r '.tool_name // ""')
     local tool_args=$(echo "$INPUT_JSON" | jq -r '.tool_input // "{}"')
-    
+
     log_security_event "scan_started" "$tool_name" "$tool_name"
-    
+
     # Check code_context for sensitive data
     local code_context=$(echo "$tool_args" | jq -r '.code_context // ""' 2>/dev/null || echo "")
     if [[ -n "$code_context" ]]; then
@@ -103,7 +103,7 @@ main() {
             fi
         done
     fi
-    
+
     # Check problem_description for sensitive data
     local problem_desc=$(echo "$tool_args" | jq -r '.problem_description // ""' 2>/dev/null || echo "")
     if [[ -n "$problem_desc" ]]; then
@@ -115,7 +115,7 @@ main() {
             fi
         done
     fi
-    
+
     # Check attached files
     local attached_files=$(echo "$tool_args" | jq -r '.attached_files[]?' 2>/dev/null || echo "")
     for file in $attached_files; do
@@ -125,7 +125,7 @@ main() {
             exit 2
         fi
     done
-    
+
     # Check specific question for Context7
     if [[ "$tool_name" == "mcp__context7__get-library-docs" ]]; then
         local library_id=$(echo "$tool_args" | jq -r '.context7CompatibleLibraryID // ""' 2>/dev/null || echo "")
@@ -136,9 +136,9 @@ main() {
             exit 2
         fi
     fi
-    
+
     log_security_event "scan_completed" "no_sensitive_data_found" "$tool_name"
-    
+
     # All checks passed, allow the tool to continue
     # No output needed when allowing - just exit 0
 }

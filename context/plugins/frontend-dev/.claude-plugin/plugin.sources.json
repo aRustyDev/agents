@@ -1,0 +1,25 @@
+{
+  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
+  "sources": {
+    "agents/frontend-developer.md": {
+      "source": "context/agents/frontend-developer.md",
+      "hash": "sha256:a75fcfc675403c0490193bff9f579d27eaee710c1ac4b965bcf2d2bdfd8a9623"
+    },
+    "agents/react-specialist.md": {
+      "source": "context/agents/react-specialist.md",
+      "hash": "sha256:c5fd4a524e8ed40e34e4a7bb8154f9d17a880c7d2abd9fd33dbc7efb8f67604d"
+    },
+    "agents/vue-expert.md": {
+      "source": "context/agents/vue-expert.md",
+      "hash": "sha256:6c38902820a63cc560e32e22b05dd7f193bd35ae06f4f7ebdc88e067519ec2fa"
+    },
+    "agents/nextjs-developer.md": {
+      "source": "context/agents/nextjs-developer.md",
+      "hash": "sha256:e2b023e821a19ddea8e6f3696e4ab028d52013f8a03e353dd1a9811e8cf6a035"
+    },
+    "agents/ui-designer.md": {
+      "source": "context/agents/ui-designer.md",
+      "hash": "sha256:84b2cfe1252df723f8495899d4cfae4012defac114602f335bd53cf1619a564f"
+    }
+  }
+}

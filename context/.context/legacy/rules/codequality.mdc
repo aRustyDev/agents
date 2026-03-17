@@ -1,6 +1,6 @@
 ---
 description: Code Quality Guidelines
-globs: 
+globs:
 ---
 # Code Quality Guidelines
 

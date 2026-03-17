@@ -210,4 +210,3 @@ Generate probes at each compression point based on truncated history:
 ### Blinding
 
 The judge should not know which compression method produced the response being evaluated. This prevents bias toward known methods.
-

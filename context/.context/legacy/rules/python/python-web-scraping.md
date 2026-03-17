@@ -74,4 +74,3 @@ alwaysApply: false
 4. Use version control (e.g., git) for tracking changes in scripts and workflows.
 5. Follow ethical web scraping practices, including adhering to robots.txt and rate limiting.
 Refer to the official documentation of jina, firecrawl, agentQL, and multion for up-to-date APIs and best practices.
-

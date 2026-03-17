@@ -19,8 +19,8 @@ Required Checks:
     5. Root cause identified with high certainty
 """
 
-from typing import Dict, Any, Optional
 from pathlib import Path
+from typing import Any
 
 
 class ConfidenceChecker:
@@ -39,7 +39,7 @@ class ConfidenceChecker:
             # Low confidence - STOP and request clarification
     """
 
-    def assess(self, context: Dict[str, Any]) -> float:
+    def assess(self, context: dict[str, Any]) -> float:
         """
         Assess confidence level (0.0 - 1.0)
 
@@ -99,7 +99,7 @@ class ConfidenceChecker:
 
         return score
 
-    def _has_official_docs(self, context: Dict[str, Any]) -> bool:
+    def _has_official_docs(self, context: dict[str, Any]) -> bool:
         """
         Check if official documentation exists
 
@@ -130,7 +130,7 @@ class ConfidenceChecker:
 
         return False
 
-    def _no_duplicates(self, context: Dict[str, Any]) -> bool:
+    def _no_duplicates(self, context: dict[str, Any]) -> bool:
         """
         Check for duplicate implementations
 
@@ -148,7 +148,7 @@ class ConfidenceChecker:
         duplicate_check = context.get("duplicate_check_complete", False)
         return duplicate_check
 
-    def _architecture_compliant(self, context: Dict[str, Any]) -> bool:
+    def _architecture_compliant(self, context: dict[str, Any]) -> bool:
         """
         Check architecture compliance
 
@@ -166,7 +166,7 @@ class ConfidenceChecker:
         architecture_check = context.get("architecture_check_complete", False)
         return architecture_check
 
-    def _has_oss_reference(self, context: Dict[str, Any]) -> bool:
+    def _has_oss_reference(self, context: dict[str, Any]) -> bool:
         """
         Check if working OSS implementations referenced
 
@@ -184,7 +184,7 @@ class ConfidenceChecker:
         oss_check = context.get("oss_reference_complete", False)
         return oss_check
 
-    def _root_cause_identified(self, context: Dict[str, Any]) -> bool:
+    def _root_cause_identified(self, context: dict[str, Any]) -> bool:
         """
         Check if root cause is identified with high certainty
 
@@ -202,7 +202,7 @@ class ConfidenceChecker:
         root_cause_check = context.get("root_cause_identified", False)
         return root_cause_check
 
-    def _has_existing_patterns(self, context: Dict[str, Any]) -> bool:
+    def _has_existing_patterns(self, context: dict[str, Any]) -> bool:
         """
         Check if existing patterns can be followed
 
@@ -225,7 +225,7 @@ class ConfidenceChecker:
 
         return False
 
-    def _has_clear_path(self, context: Dict[str, Any]) -> bool:
+    def _has_clear_path(self, context: dict[str, Any]) -> bool:
         """
         Check if implementation path is clear
 

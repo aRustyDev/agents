@@ -30,12 +30,12 @@ for file in "$@"; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     # Count lines
     lines=$(wc -l < "$file" | tr -d ' ')
-    
+
     echo -e "${YELLOW}Checking size of: $(basename "$file")${NC}"
-    
+
     if [ "$lines" -gt "$MAX_LINES" ]; then
         echo -e "  ${RED}✗ File too large: $lines lines (max: $MAX_LINES)${NC}"
         OVERSIZED_FILES+=("$file: $lines lines")

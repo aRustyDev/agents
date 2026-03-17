@@ -1,0 +1,17 @@
+{
+  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
+  "sources": {
+    "agents/ml-engineer.md": {
+      "source": "context/agents/ml-engineer.md",
+      "hash": "sha256:5230a494ac5db71bbe7901126f74f9b2c757870a5b38a4af965ae71c91763101"
+    },
+    "agents/data-scientist.md": {
+      "source": "context/agents/data-scientist.md",
+      "hash": "sha256:f3078854ad0ad30443e12ce7f03c55fc56bcd75391e3c98ccfba93d061d1651f"
+    },
+    "agents/llm-architect.md": {
+      "source": "context/agents/llm-architect.md",
+      "hash": "sha256:c4cc8645b1ed3ec4331b0f6c94890cf7b25e1f42a8ea86a4673a473b408b499d"
+    }
+  }
+}

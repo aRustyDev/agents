@@ -5,11 +5,10 @@ Health check for SuperClaude installation.
 """
 
 from pathlib import Path
-from typing import Dict, List, Any
-import sys
+from typing import Any
 
 
-def run_doctor(verbose: bool = False) -> Dict[str, Any]:
+def run_doctor(verbose: bool = False) -> dict[str, Any]:
     """
     Run SuperClaude health checks
 
@@ -39,7 +38,7 @@ def run_doctor(verbose: bool = False) -> Dict[str, Any]:
     }
 
 
-def _check_pytest_plugin() -> Dict[str, Any]:
+def _check_pytest_plugin() -> dict[str, Any]:
     """
     Check if pytest plugin is loaded
 
@@ -87,7 +86,7 @@ def _check_pytest_plugin() -> Dict[str, Any]:
         }
 
 
-def _check_skills_installed() -> Dict[str, Any]:
+def _check_skills_installed() -> dict[str, Any]:
     """
     Check if any skills are installed
 
@@ -123,7 +122,7 @@ def _check_skills_installed() -> Dict[str, Any]:
         }
 
 
-def _check_configuration() -> Dict[str, Any]:
+def _check_configuration() -> dict[str, Any]:
     """
     Check SuperClaude configuration
 

@@ -38,4 +38,3 @@ const additionalInstructions = `
 6. Implement graceful shutdown for the server
 7. Use Go modules for dependency management
 `;
-

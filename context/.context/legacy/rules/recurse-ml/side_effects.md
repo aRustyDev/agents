@@ -50,4 +50,3 @@ def sort_and_filter_inplace(items):
 ## Why
 
 Functions that appear to be pure but modify their input arguments create unexpected side effects. This violates the principle of least surprise and can lead to difficult-to-debug issues where data is modified unexpectedly. Functions should either clearly indicate they operate in-place or return new objects without modifying inputs.
-

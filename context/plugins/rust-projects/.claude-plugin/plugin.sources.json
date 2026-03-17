@@ -1,0 +1,9 @@
+{
+  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
+  "sources": {
+    "agents/rust-engineer.md": {
+      "source": "context/agents/rust-engineer.md",
+      "hash": "sha256:f8bbacc2281c74a36c115b4fbb342dc0e008722857f839e85f46fec74b0a7020"
+    }
+  }
+}

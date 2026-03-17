@@ -16,30 +16,32 @@ Usage:
     )
 """
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Callable
-from .reflection import ReflectionEngine, ConfidenceScore, reflect_before_execution
-from .parallel import ParallelExecutor, Task, ExecutionPlan, should_parallelize
-from .self_correction import SelfCorrectionEngine, RootCause, learn_from_failure
+from typing import Any, Dict, List, Optional
+
+from .parallel import ExecutionPlan, ParallelExecutor, Task, should_parallelize
+from .reflection import ConfidenceScore, ReflectionEngine, reflect_before_execution
+from .self_correction import RootCause, SelfCorrectionEngine, learn_from_failure
 
 __all__ = [
-    "intelligent_execute",
-    "ReflectionEngine",
-    "ParallelExecutor",
-    "SelfCorrectionEngine",
     "ConfidenceScore",
     "ExecutionPlan",
+    "ParallelExecutor",
+    "ReflectionEngine",
     "RootCause",
+    "SelfCorrectionEngine",
+    "intelligent_execute",
 ]
 
 
 def intelligent_execute(
     task: str,
-    operations: List[Callable],
-    context: Optional[Dict[str, Any]] = None,
-    repo_path: Optional[Path] = None,
+    operations: list[Callable],
+    context: dict[str, Any] | None = None,
+    repo_path: Path | None = None,
     auto_correct: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Intelligent Task Execution with Reflection, Parallelization, and Self-Correction
 
@@ -189,7 +191,7 @@ def intelligent_execute(
 
 # Convenience functions
 
-def quick_execute(operations: List[Callable]) -> List[Any]:
+def quick_execute(operations: list[Callable]) -> list[Any]:
     """
     Quick parallel execution without reflection
 
@@ -208,7 +210,7 @@ def quick_execute(operations: List[Callable]) -> List[Any]:
     return [results[task.id] for task in tasks]
 
 
-def safe_execute(task: str, operation: Callable, context: Optional[Dict] = None) -> Any:
+def safe_execute(task: str, operation: Callable, context: dict | None = None) -> Any:
     """
     Safe single operation execution with reflection
 

@@ -44,13 +44,13 @@ SECURITY_ISSUES=()
 # Function to check if line is whitelisted
 is_whitelisted() {
     local line=$1
-    
+
     for pattern in "${WHITELIST_PATTERNS[@]}"; do
         if echo "$line" | grep -qE "$pattern"; then
             return 0
         fi
     done
-    
+
     return 1
 }
 
@@ -60,28 +60,28 @@ for file in "$@"; do
     if [ ! -f "$file" ]; then
         continue
     fi
-    
+
     # Skip binary files
     if ! file "$file" | grep -q "text"; then
         continue
     fi
-    
+
     echo -e "${YELLOW}Security scan for: $(basename "$file")${NC}"
     file_clean=true
-    
+
     # Check each security pattern
     for pattern_name in "${!PATTERNS[@]}"; do
         pattern="${PATTERNS[$pattern_name]}"
-        
+
         # Search for pattern
         matches=$(grep -nE "$pattern" "$file" 2>/dev/null || true)
-        
+
         if [ -n "$matches" ]; then
             # Check each match against whitelist
             while IFS= read -r match; do
                 line_num=$(echo "$match" | cut -d: -f1)
                 line_content=$(echo "$match" | cut -d: -f2-)
-                
+
                 if ! is_whitelisted "$line_content"; then
                     echo -e "  ${RED}✗ Potential $pattern_name found at line $line_num${NC}"
                     echo -e "    ${RED}$line_content${NC}"
@@ -92,9 +92,9 @@ for file in "$@"; do
             done <<< "$matches"
         fi
     done
-    
+
     # Additional checks
-    
+
     # Check for email addresses (PII)
     if grep -qE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' "$file"; then
         if ! grep -qE '(example\.com|test\.com|your[_-]?email)' "$file"; then
@@ -102,7 +102,7 @@ for file in "$@"; do
             file_clean=false
         fi
     fi
-    
+
     # Check for IP addresses
     if grep -qE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' "$file"; then
         # Allow common private/example IPs
@@ -111,7 +111,7 @@ for file in "$@"; do
             file_clean=false
         fi
     fi
-    
+
     if $file_clean; then
         echo -e "  ${GREEN}✓ No security issues found${NC}"
     fi

@@ -25,7 +25,7 @@ find .claude/commands/{command,plan,report} -name "*.md" -type f 2>/dev/null | w
 echo -e "\n📏 Total Line Count:"
 old_lines=$(cat <<EOF
 command.md: 481 lines
-plan.md: 741 lines  
+plan.md: 741 lines
 report.md: 671 lines
 Total: 1893 lines
 EOF

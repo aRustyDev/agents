@@ -11,11 +11,11 @@ Usage:
         --metric tokens_used
 """
 
-import json
 import argparse
-from pathlib import Path
-from typing import Dict, List, Tuple
+import json
 import statistics
+from pathlib import Path
+
 from scipy import stats
 
 
@@ -24,7 +24,7 @@ class ABTestAnalyzer:
 
     def __init__(self, metrics_file: Path):
         self.metrics_file = metrics_file
-        self.metrics: List[Dict] = []
+        self.metrics: list[dict] = []
         self._load_metrics()
 
     def _load_metrics(self):
@@ -33,16 +33,16 @@ class ABTestAnalyzer:
             print(f"Error: {self.metrics_file} not found")
             return
 
-        with open(self.metrics_file, 'r') as f:
+        with open(self.metrics_file) as f:
             for line in f:
                 if line.strip():
                     self.metrics.append(json.loads(line))
 
-    def get_variant_metrics(self, workflow_id: str) -> List[Dict]:
+    def get_variant_metrics(self, workflow_id: str) -> list[dict]:
         """Get all metrics for a specific workflow variant"""
         return [m for m in self.metrics if m['workflow_id'] == workflow_id]
 
-    def extract_metric_values(self, metrics: List[Dict], metric: str) -> List[float]:
+    def extract_metric_values(self, metrics: list[dict], metric: str) -> list[float]:
         """Extract specific metric values from metrics list"""
         values = []
         for m in metrics:
@@ -54,7 +54,7 @@ class ABTestAnalyzer:
                 values.append(float(value))
         return values
 
-    def calculate_statistics(self, values: List[float]) -> Dict:
+    def calculate_statistics(self, values: list[float]) -> dict:
         """Calculate statistical measures"""
         if not values:
             return {
@@ -77,9 +77,9 @@ class ABTestAnalyzer:
 
     def perform_ttest(
         self,
-        variant_a_values: List[float],
-        variant_b_values: List[float]
-    ) -> Tuple[float, float]:
+        variant_a_values: list[float],
+        variant_b_values: list[float]
+    ) -> tuple[float, float]:
         """
         Perform independent t-test between two variants.
 
@@ -94,8 +94,8 @@ class ABTestAnalyzer:
 
     def determine_winner(
         self,
-        variant_a_stats: Dict,
-        variant_b_stats: Dict,
+        variant_a_stats: dict,
+        variant_b_stats: dict,
         p_value: float,
         metric: str,
         lower_is_better: bool = True
@@ -132,19 +132,18 @@ class ABTestAnalyzer:
             else:
                 improvement = ((a_mean - b_mean) / a_mean) * 100
                 return f"Variant B wins ({improvement:.1f}% better)"
+        elif a_mean > b_mean:
+            improvement = ((a_mean - b_mean) / b_mean) * 100
+            return f"Variant A wins ({improvement:.1f}% better)"
         else:
-            if a_mean > b_mean:
-                improvement = ((a_mean - b_mean) / b_mean) * 100
-                return f"Variant A wins ({improvement:.1f}% better)"
-            else:
-                improvement = ((b_mean - a_mean) / a_mean) * 100
-                return f"Variant B wins ({improvement:.1f}% better)"
+            improvement = ((b_mean - a_mean) / a_mean) * 100
+            return f"Variant B wins ({improvement:.1f}% better)"
 
     def generate_recommendation(
         self,
         winner: str,
-        variant_a_stats: Dict,
-        variant_b_stats: Dict,
+        variant_a_stats: dict,
+        variant_b_stats: dict,
         p_value: float
     ) -> str:
         """Generate actionable recommendation"""

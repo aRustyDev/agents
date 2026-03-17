@@ -28,7 +28,7 @@ track_module_version() {
       modified: ($mtime | tonumber),
       tracked_at: now
     }')
-  
+
   # Update version registry
   jq --argjson entry "$VERSION_ENTRY" \
     '.modules[$entry.path] = $entry' \
@@ -42,20 +42,20 @@ track_module_version() {
 detect_module_changes() {
   local REGISTRY=".claude/cache/version-registry.json"
   local CHANGED_MODULES=()
-  
+
   # Check all tracked modules
   jq -r '.modules | to_entries[].value.path' "$REGISTRY" | while read module_path; do
     if [ -f "$module_path" ]; then
       local CURRENT_HASH=$(sha256sum "$module_path" | cut -d' ' -f1)
       local TRACKED_HASH=$(jq -r --arg path "$module_path" '.modules[$path].hash' "$REGISTRY")
-      
+
       if [ "$CURRENT_HASH" != "$TRACKED_HASH" ]; then
         CHANGED_MODULES+=("$module_path")
         echo "Changed: $module_path"
       fi
     fi
   done
-  
+
   printf '%s\n' "${CHANGED_MODULES[@]}"
 }
 ```
@@ -66,14 +66,14 @@ resolve_module_dependencies() {
   local MODULE="$1"
   local DEPS_RESOLVED=()
   local DEPS_PENDING=("$MODULE")
-  
+
   while [ ${#DEPS_PENDING[@]} -gt 0 ]; do
     local CURRENT="${DEPS_PENDING[0]}"
     DEPS_PENDING=("${DEPS_PENDING[@]:1}")  # Remove first element
-    
+
     if [[ ! " ${DEPS_RESOLVED[@]} " =~ " ${CURRENT} " ]]; then
       DEPS_RESOLVED+=("$CURRENT")
-      
+
       # Extract dependencies from module
       local MODULE_DEPS=$(extract_module_dependencies "$CURRENT")
       for dep in $MODULE_DEPS; do
@@ -83,7 +83,7 @@ resolve_module_dependencies() {
       done
     fi
   done
-  
+
   echo "${DEPS_RESOLVED[@]}"
 }
 ```
@@ -93,17 +93,17 @@ resolve_module_dependencies() {
 invalidate_stale_caches() {
   local CHANGED_MODULES=("$@")
   local INVALIDATED_ROLES=()
-  
+
   # Find all roles using changed modules
   for role_dir in .claude/cache/roles/*/; do
     [ -d "$role_dir" ] || continue
-    
+
     local ROLE_NAME=$(basename "$role_dir")
     local METADATA="$role_dir/metadata.yaml"
-    
+
     if [ -f "$METADATA" ]; then
       local ROLE_MODULES=$(yq e '.modules[]' "$METADATA" 2>/dev/null || echo "")
-      
+
       for module in $ROLE_MODULES; do
         if [[ " ${CHANGED_MODULES[@]} " =~ " ${module} " ]]; then
           echo "Invalidating cache for role: $ROLE_NAME (module $module updated)"
@@ -114,7 +114,7 @@ invalidate_stale_caches() {
       done
     fi
   done
-  
+
   # Return invalidated roles for re-caching
   echo "${INVALIDATED_ROLES[@]}"
 }
@@ -130,20 +130,20 @@ schedule_version_check() {
   # - Every 4 hours during active use
   # - On explicit user request
   # - Before role activation (quick check)
-  
+
   local LAST_CHECK_FILE=".claude/cache/.last-version-check"
   local CURRENT_TIME=$(date +%s)
   local CHECK_INTERVAL=$((4 * 60 * 60))  # 4 hours
-  
+
   if [ -f "$LAST_CHECK_FILE" ]; then
     local LAST_CHECK=$(cat "$LAST_CHECK_FILE")
     local TIME_SINCE_CHECK=$((CURRENT_TIME - LAST_CHECK))
-    
+
     if [ $TIME_SINCE_CHECK -lt $CHECK_INTERVAL ]; then
       return 0  # Skip check
     fi
   fi
-  
+
   # Perform version check
   check_all_versions
   echo "$CURRENT_TIME" > "$LAST_CHECK_FILE"
@@ -155,10 +155,10 @@ schedule_version_check() {
 smart_recache() {
   local INVALIDATED_ROLES=("$@")
   local USAGE_DATA=".claude/metrics/usage-analysis.json"
-  
+
   # Prioritize re-caching based on usage
   local PRIORITY_ROLES=$(jq -r --arg roles "${INVALIDATED_ROLES[*]}" '
-    .transitions | 
+    .transitions |
     map(.transition | split("->") | .[]) |
     map(select(. as $r | $roles | split(" ") | index($r))) |
     group_by(.) |
@@ -167,18 +167,18 @@ smart_recache() {
     reverse |
     .[].role
   ' "$USAGE_DATA" 2>/dev/null || echo "${INVALIDATED_ROLES[@]}")
-  
+
   # Re-cache in priority order
   for role in $PRIORITY_ROLES; do
     echo "Re-caching $role with updated modules..."
     cache_role "$role" "$(resolve_role "$role")" &
-    
+
     # Limit parallel caching to prevent resource exhaustion
     while [ $(jobs -r | wc -l) -ge 3 ]; do
       sleep 0.1
     done
   done
-  
+
   wait  # Wait for all caching to complete
 }
 ```
@@ -189,7 +189,7 @@ check_version_compatibility() {
   local MODULE="$1"
   local REQUIRED_VERSION="$2"
   local ACTUAL_VERSION=$(extract_module_version "$MODULE")
-  
+
   case "$REQUIRED_VERSION" in
     ">="*)
       VERSION_REQ="${REQUIRED_VERSION#>=}"
@@ -230,7 +230,7 @@ version_compatible() {
 ```bash
 notify_updates() {
   local UPDATES=("$@")
-  
+
   if [ ${#UPDATES[@]} -gt 0 ]; then
     cat << EOF
 ┌─────────────────────────────────────────┐
@@ -254,7 +254,7 @@ EOF
 log_updates() {
   local UPDATE_LOG=".claude/cache/update-log.jsonl"
   local UPDATES=("$@")
-  
+
   for module in "${UPDATES[@]}"; do
     local UPDATE_ENTRY=$(jq -n \
       --arg module "$module" \
@@ -265,7 +265,7 @@ log_updates() {
         version: $version,
         action: "auto-update"
       }')
-    
+
     echo "$UPDATE_ENTRY" >> "$UPDATE_LOG"
   done
 }
@@ -279,10 +279,10 @@ backup_module_version() {
   local MODULE="$1"
   local BACKUP_DIR=".claude/cache/backups/$(date +%Y%m%d)"
   mkdir -p "$BACKUP_DIR"
-  
+
   local MODULE_NAME=$(basename "$MODULE")
   local BACKUP_PATH="$BACKUP_DIR/${MODULE_NAME}.$(date +%s).bak"
-  
+
   cp "$MODULE" "$BACKUP_PATH"
   echo "Backed up to: $BACKUP_PATH"
 }
@@ -290,18 +290,18 @@ backup_module_version() {
 rollback_module() {
   local MODULE="$1"
   local VERSION="${2:-latest}"
-  
+
   local BACKUP_DIR=".claude/cache/backups"
   local MODULE_NAME=$(basename "$MODULE")
-  
+
   # Find available backups
   local BACKUPS=$(find "$BACKUP_DIR" -name "${MODULE_NAME}.*.bak" | sort -r)
-  
+
   if [ -z "$BACKUPS" ]; then
     echo "No backups found for $MODULE"
     return 1
   fi
-  
+
   # Select backup
   local SELECTED_BACKUP
   if [ "$VERSION" = "latest" ]; then
@@ -309,11 +309,11 @@ rollback_module() {
   else
     SELECTED_BACKUP=$(echo "$BACKUPS" | grep "$VERSION" | head -n1)
   fi
-  
+
   if [ -n "$SELECTED_BACKUP" ]; then
     cp "$SELECTED_BACKUP" "$MODULE"
     echo "Rolled back $MODULE to $(basename "$SELECTED_BACKUP")"
-    
+
     # Invalidate affected caches
     invalidate_module_caches "$MODULE"
   fi
@@ -328,18 +328,18 @@ rollback_module() {
 pre_activation_version_check() {
   local ROLE="$1"
   local QUICK_CHECK_ONLY=true
-  
+
   # Quick hash check for role definition
   local ROLE_PATH=$(resolve_role "$ROLE")
   local CURRENT_HASH=$(sha256sum "$ROLE_PATH" | cut -d' ' -f1)
   local CACHED_HASH=$(get_cached_role_hash "$ROLE")
-  
+
   if [ "$CURRENT_HASH" != "$CACHED_HASH" ]; then
     echo "Role definition updated, refreshing..."
     invalidate_role_cache "$ROLE"
     return 1
   fi
-  
+
   return 0
 }
 ```
@@ -366,7 +366,7 @@ background_update_check() {
 # Only check modules modified since last check
 incremental_version_check() {
   local LAST_CHECK=$(cat ".claude/cache/.last-version-check" 2>/dev/null || echo "0")
-  
+
   find .claude -name "*.yaml" -o -name "*.md" -newer "$LAST_CHECK" | while read module; do
     track_module_version "$module"
   done
@@ -379,7 +379,7 @@ incremental_version_check() {
 batch_cache_updates() {
   local BATCH_SIZE=5
   local UPDATES=("$@")
-  
+
   for ((i=0; i<${#UPDATES[@]}; i+=BATCH_SIZE)); do
     local BATCH=("${UPDATES[@]:i:BATCH_SIZE}")
     process_update_batch "${BATCH[@]}"

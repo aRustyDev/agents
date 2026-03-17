@@ -9,13 +9,12 @@ Entry point registered in pyproject.toml:
     superclaude = "superclaude.pytest_plugin"
 """
 
+
 import pytest
-from pathlib import Path
-from typing import Dict, Any, Optional
 
 from .pm_agent.confidence import ConfidenceChecker
-from .pm_agent.self_check import SelfCheckProtocol
 from .pm_agent.reflexion import ReflexionPattern
+from .pm_agent.self_check import SelfCheckProtocol
 from .pm_agent.token_budget import TokenBudgetManager
 
 

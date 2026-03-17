@@ -285,4 +285,3 @@ class BiasMonitor:
 | Self-enhancement | Cross-model evaluation | Anonymization | Model comparison study |
 | Verbosity | Relevance weighting | Rubric penalties | Relevance scoring |
 | Authority | Evidence requirement | Fact-checking layer | Confidence-accuracy correlation |
-

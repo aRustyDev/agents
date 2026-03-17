@@ -7,25 +7,26 @@ Automatically test and optimize prompts using A/B testing and metrics tracking.
 
 import json
 import time
-from typing import List, Dict, Any
 from dataclasses import dataclass
+from typing import Any
+
 import numpy as np
 
 
 @dataclass
 class TestCase:
-    input: Dict[str, Any]
+    input: dict[str, Any]
     expected_output: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 class PromptOptimizer:
-    def __init__(self, llm_client, test_suite: List[TestCase]):
+    def __init__(self, llm_client, test_suite: list[TestCase]):
         self.client = llm_client
         self.test_suite = test_suite
         self.results_history = []
 
-    def evaluate_prompt(self, prompt_template: str, test_cases: List[TestCase] = None) -> Dict[str, float]:
+    def evaluate_prompt(self, prompt_template: str, test_cases: list[TestCase] = None) -> dict[str, float]:
         """Evaluate a prompt template against test cases."""
         if test_cases is None:
             test_cases = self.test_suite
@@ -83,7 +84,7 @@ class PromptOptimizer:
         overlap = len(response_words & expected_words)
         return overlap / len(expected_words)
 
-    def optimize(self, base_prompt: str, max_iterations: int = 5) -> Dict[str, Any]:
+    def optimize(self, base_prompt: str, max_iterations: int = 5) -> dict[str, Any]:
         """Iteratively optimize a prompt."""
         current_prompt = base_prompt
         best_prompt = base_prompt
@@ -134,7 +135,7 @@ class PromptOptimizer:
             'history': self.results_history
         }
 
-    def generate_variations(self, prompt: str, current_metrics: Dict) -> List[str]:
+    def generate_variations(self, prompt: str, current_metrics: dict) -> list[str]:
         """Generate prompt variations to test."""
         variations = []
 
@@ -182,7 +183,7 @@ Input: Sample input
 Output: Sample output
 """
 
-    def compare_prompts(self, prompt_a: str, prompt_b: str) -> Dict[str, Any]:
+    def compare_prompts(self, prompt_a: str, prompt_b: str) -> dict[str, Any]:
         """A/B test two prompts."""
         print("Testing Prompt A...")
         metrics_a = self.evaluate_prompt(prompt_a)

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the database modules
 const mockDbInstance = {
@@ -19,17 +19,17 @@ vi.mock('../../../src/database/utils', () => ({
 // Now import the modules
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { registerDatabaseTools } from '../../../src/tools/database-tools'
-import { mockProps, mockPrivilegedProps } from '../../fixtures/auth.fixtures'
+import { mockPrivilegedProps, mockProps } from '../../fixtures/auth.fixtures'
+import { mockQueryResult, mockTableColumns } from '../../fixtures/database.fixtures'
 import { mockEnv } from '../../mocks/oauth.mock'
-import { mockTableColumns, mockQueryResult } from '../../fixtures/database.fixtures'
 
 describe('Database Tools', () => {
   let mockServer: McpServer
-  
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockServer = new McpServer({ name: 'test', version: '1.0.0' })
-    
+
     // Setup database mocks
     mockDbInstance.unsafe.mockImplementation((query: string) => {
       if (query.includes('information_schema.columns')) {
@@ -48,9 +48,9 @@ describe('Database Tools', () => {
   describe('registerDatabaseTools', () => {
     it('should register listTables and queryDatabase for regular users', () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
-      
+
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
+
       expect(toolSpy).toHaveBeenCalledWith(
         'listTables',
         expect.any(String),
@@ -68,9 +68,9 @@ describe('Database Tools', () => {
 
     it('should register all tools for privileged users', () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
-      
+
       registerDatabaseTools(mockServer, mockEnv as any, mockPrivilegedProps)
-      
+
       expect(toolSpy).toHaveBeenCalledWith(
         'listTables',
         expect.any(String),
@@ -97,13 +97,13 @@ describe('Database Tools', () => {
     it('should return table schema successfully', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
+
       // Get the registered tool handler
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'listTables')
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'listTables')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({})
-      
+
       expect(result.content).toBeDefined()
       expect(result.content[0].type).toBe('text')
       expect(result.content[0].text).toContain('Database Tables and Schema')
@@ -115,12 +115,12 @@ describe('Database Tools', () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       mockDbInstance.unsafe.mockRejectedValue(new Error('Database connection failed'))
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'listTables')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'listTables')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({})
-      
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Error')
     })
@@ -130,12 +130,12 @@ describe('Database Tools', () => {
     it('should execute SELECT queries successfully', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'queryDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'queryDatabase')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({ sql: 'SELECT * FROM users' })
-      
+
       expect(result.content[0].type).toBe('text')
       expect(result.content[0].text).toContain('Query Results')
       expect(result.content[0].text).toContain('SELECT * FROM users')
@@ -144,12 +144,12 @@ describe('Database Tools', () => {
     it('should reject write operations', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'queryDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'queryDatabase')
       const handler = toolCall![3] as Function
-      
-      const result = await handler({ sql: 'INSERT INTO users VALUES (1, \'test\')' })
-      
+
+      const result = await handler({ sql: "INSERT INTO users VALUES (1, 'test')" })
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Write operations are not allowed')
     })
@@ -157,12 +157,12 @@ describe('Database Tools', () => {
     it('should reject invalid SQL', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'queryDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'queryDatabase')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({ sql: 'SELECT * FROM users; DROP TABLE users' })
-      
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Invalid SQL query')
     })
@@ -171,12 +171,12 @@ describe('Database Tools', () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       mockDbInstance.unsafe.mockRejectedValue(new Error('Database connection failed'))
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'queryDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'queryDatabase')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({ sql: 'SELECT * FROM users' })
-      
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Database query error')
     })
@@ -187,28 +187,30 @@ describe('Database Tools', () => {
       // Regular user should not get executeDatabase
       const toolSpy1 = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockProps)
-      
-      const executeToolCall = toolSpy1.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const executeToolCall = toolSpy1.mock.calls.find((call) => call[0] === 'executeDatabase')
       expect(executeToolCall).toBeUndefined()
-      
+
       // Privileged user should get executeDatabase
       const mockServer2 = new McpServer({ name: 'test2', version: '1.0.0' })
       const toolSpy2 = vi.spyOn(mockServer2, 'tool')
       registerDatabaseTools(mockServer2, mockEnv as any, mockPrivilegedProps)
-      
-      const privilegedExecuteToolCall = toolSpy2.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const privilegedExecuteToolCall = toolSpy2.mock.calls.find(
+        (call) => call[0] === 'executeDatabase'
+      )
       expect(privilegedExecuteToolCall).toBeDefined()
     })
 
     it('should execute write operations for privileged users', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockPrivilegedProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'executeDatabase')
       const handler = toolCall![3] as Function
-      
-      const result = await handler({ sql: 'INSERT INTO users VALUES (1, \'test\')' })
-      
+
+      const result = await handler({ sql: "INSERT INTO users VALUES (1, 'test')" })
+
       expect(result.content[0].type).toBe('text')
       expect(result.content[0].text).toContain('Write Operation Executed Successfully')
       expect(result.content[0].text).toContain('coleam00')
@@ -217,12 +219,12 @@ describe('Database Tools', () => {
     it('should execute read operations for privileged users', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockPrivilegedProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'executeDatabase')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({ sql: 'SELECT * FROM users' })
-      
+
       expect(result.content[0].type).toBe('text')
       expect(result.content[0].text).toContain('Read Operation Executed Successfully')
     })
@@ -230,12 +232,12 @@ describe('Database Tools', () => {
     it('should reject invalid SQL', async () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       registerDatabaseTools(mockServer, mockEnv as any, mockPrivilegedProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'executeDatabase')
       const handler = toolCall![3] as Function
-      
+
       const result = await handler({ sql: 'SELECT * FROM users; DROP TABLE users' })
-      
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Invalid SQL statement')
     })
@@ -244,12 +246,12 @@ describe('Database Tools', () => {
       const toolSpy = vi.spyOn(mockServer, 'tool')
       mockDbInstance.unsafe.mockRejectedValue(new Error('Database connection failed'))
       registerDatabaseTools(mockServer, mockEnv as any, mockPrivilegedProps)
-      
-      const toolCall = toolSpy.mock.calls.find(call => call[0] === 'executeDatabase')
+
+      const toolCall = toolSpy.mock.calls.find((call) => call[0] === 'executeDatabase')
       const handler = toolCall![3] as Function
-      
-      const result = await handler({ sql: 'INSERT INTO users VALUES (1, \'test\')' })
-      
+
+      const result = await handler({ sql: "INSERT INTO users VALUES (1, 'test')" })
+
       expect(result.content[0].isError).toBe(true)
       expect(result.content[0].text).toContain('Database execution error')
     })

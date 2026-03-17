@@ -14,7 +14,7 @@ Description: This description summarizes a sublease agreement between Crown Plaz
 
 <term_and_rent>
 - Start date: March 1, 2008
-- End date: February 28, 2009 
+- End date: February 28, 2009
 - Monthly rent: $595.00
 - Security deposit: $595.00 (with $110 retained for carpet care and painting at termination)
 </term_and_rent>

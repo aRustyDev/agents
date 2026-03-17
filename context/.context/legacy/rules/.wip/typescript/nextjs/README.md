@@ -13,4 +13,3 @@ Developers proficient with TypeScript, Node.js, and React can create a web app u
 
 ## Overview of .cursorrules prompt
 The .cursorrules file provides guidelines for developing a TypeScript application using Node.js, Next.js App Router, Drizzle ORM, React, Daisy UI, and Tailwind. It recommends using 'bun' as the package manager and emphasizes the importance of step-by-step planning with detailed pseudocode before writing secure, functional, and efficient code. The file promotes the use of functional and declarative programming patterns, descriptive variable naming, concise syntax, and modularization to enhance code readability. It specifies TypeScript, Daisy UI, and Tailwind CSS usage for styling and encourages performance optimization through server components, dynamic loading, and image optimization. Additionally, it advises on following best practices from the Next.js documentation for data fetching, rendering, and routing.
-

@@ -4,12 +4,12 @@ Citation Verification Script
 Verifies DOIs, URLs, and citation metadata for accuracy.
 """
 
-import re
-import requests
 import json
-from typing import Dict, List, Tuple
-from urllib.parse import urlparse
+import re
 import time
+
+import requests
+
 
 class CitationVerifier:
     def __init__(self):
@@ -18,12 +18,12 @@ class CitationVerifier:
             'User-Agent': 'CitationVerifier/1.0 (Literature Review Tool)'
         })
 
-    def extract_dois(self, text: str) -> List[str]:
+    def extract_dois(self, text: str) -> list[str]:
         """Extract all DOIs from text."""
         doi_pattern = r'10\.\d{4,}/[^\s\]\)"]+'
         return re.findall(doi_pattern, text)
 
-    def verify_doi(self, doi: str) -> Tuple[bool, Dict]:
+    def verify_doi(self, doi: str) -> tuple[bool, dict]:
         """
         Verify a DOI and retrieve metadata.
         Returns (is_valid, metadata)
@@ -41,7 +41,7 @@ class CitationVerifier:
         except Exception as e:
             return False, {"error": str(e)}
 
-    def _get_crossref_metadata(self, doi: str) -> Dict:
+    def _get_crossref_metadata(self, doi: str) -> dict:
         """Get metadata from CrossRef API."""
         try:
             url = f"https://api.crossref.org/works/{doi}"
@@ -66,7 +66,7 @@ class CitationVerifier:
         except Exception as e:
             return {"error": str(e)}
 
-    def _format_authors(self, authors: List[Dict]) -> str:
+    def _format_authors(self, authors: list[dict]) -> str:
         """Format author list."""
         if not authors:
             return ""
@@ -83,7 +83,7 @@ class CitationVerifier:
 
         return ", ".join(formatted)
 
-    def _extract_year(self, message: Dict) -> str:
+    def _extract_year(self, message: dict) -> str:
         """Extract publication year."""
         date_parts = message.get('published-print', {}).get('date-parts', [[]])
         if not date_parts or not date_parts[0]:
@@ -93,7 +93,7 @@ class CitationVerifier:
             return str(date_parts[0][0])
         return ""
 
-    def verify_url(self, url: str) -> Tuple[bool, int]:
+    def verify_url(self, url: str) -> tuple[bool, int]:
         """
         Verify a URL is accessible.
         Returns (is_accessible, status_code)
@@ -102,15 +102,15 @@ class CitationVerifier:
             response = self.session.head(url, timeout=10, allow_redirects=True)
             is_accessible = response.status_code < 400
             return is_accessible, response.status_code
-        except Exception as e:
+        except Exception:
             return False, 0
 
-    def verify_citations_in_file(self, filepath: str) -> Dict:
+    def verify_citations_in_file(self, filepath: str) -> dict:
         """
         Verify all citations in a markdown file.
         Returns a report of verification results.
         """
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
 
         dois = self.extract_dois(content)
@@ -136,7 +136,7 @@ class CitationVerifier:
 
         return report
 
-    def format_citation_apa(self, metadata: Dict) -> str:
+    def format_citation_apa(self, metadata: dict) -> str:
         """Format citation in APA style."""
         authors = metadata.get('authors', '')
         year = metadata.get('year', 'n.d.')
@@ -158,7 +158,7 @@ class CitationVerifier:
 
         return citation
 
-    def format_citation_nature(self, metadata: Dict) -> str:
+    def format_citation_nature(self, metadata: dict) -> str:
         """Format citation in Nature style."""
         authors = metadata.get('authors', '')
         title = metadata.get('title', '')

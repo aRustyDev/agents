@@ -1,0 +1,94 @@
+# Registry API Documentation: GitHub
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "github"
+  base_url: "https://api.github.com"
+  type: "code_repository"
+
+  api:
+    docs_url: "https://docs.github.com/en/rest"
+    spec_format: "openapi"
+
+    authentication:
+      type: "personal_access_token"
+      header: "Authorization: Bearer ghp_..."
+      notes: "Higher rate limits with authentication"
+      signup_url: "https://github.com/settings/tokens"
+
+    endpoints:
+      - path: "/search/repositories"
+        method: "GET"
+        description: "Search repositories"
+        params:
+          - name: "q"
+            type: "string"
+            required: true
+            examples:
+              - "topic:claude-skills"
+              - "topic:mcp-server"
+              - "topic:claude-code"
+          - name: "sort"
+            type: "string"
+            values: ["stars", "forks", "updated"]
+          - name: "per_page"
+            type: "number"
+            max: 100
+        response_format: "json"
+
+      - path: "/search/code"
+        method: "GET"
+        description: "Search code files"
+        params:
+          - name: "q"
+            type: "string"
+            examples:
+              - "filename:SKILL.md"
+              - "filename:CLAUDE.md"
+              - "path:.claude/agents"
+        response_format: "json"
+
+      - path: "/repos/{owner}/{repo}/contents/{path}"
+        method: "GET"
+        description: "Get file contents"
+        response_format: "json (base64 encoded content)"
+
+  access_method:
+    type: "cli"
+    tool: "gh"
+    examples:
+      - command: "gh api search/repositories -f q='topic:claude-skills' -f sort=stars"
+        description: "Search repos by topic"
+      - command: "gh api repos/OWNER/REPO/contents/PATH --jq '.content' | base64 -D"
+        description: "Download file content"
+
+  restrictions:
+    robots_txt:
+      url: "https://github.com/robots.txt"
+      notes: "Standard GitHub robots.txt"
+
+    rate_limits:
+      unauthenticated: "60 requests/hour"
+      authenticated: "5000 requests/hour"
+      search_api: "30 requests/minute"
+      notes: "Search API has separate, lower limit"
+
+    terms_of_service:
+      url: "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
+      api_policy: "allowed with rate limit compliance"
+
+  example:
+    gh_cli: |
+      gh api search/repositories \
+        -f q="topic:claude-skills" \
+        -f sort=stars \
+        -f per_page=30 \
+        --jq '.items[] | {name: .full_name, stars: .stargazers_count}'
+
+  observations:
+    - "Primary source for Claude Code components"
+    - "Well-documented REST API with OpenAPI spec"
+    - "Use gh CLI for simplified access"
+    - "Search API has 30 req/min limit"
+    - "Authentication increases rate limits 83x"

@@ -83,4 +83,4 @@ globs: prisma/**/*, src/db/**/*, **/*.prisma, supabase/**/*
 - Implement proper versioning
 - Handle errors properly
 - Document schema properly
-- Monitor database health 
+- Monitor database health

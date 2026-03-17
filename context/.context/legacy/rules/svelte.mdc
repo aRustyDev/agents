@@ -83,4 +83,4 @@ globs: **/*.svelte, src/**/*.ts, src/**/*.js
 - Use proper environment variables
 - Implement proper code splitting
 - Use proper asset handling
-- Configure proper optimization 
+- Configure proper optimization

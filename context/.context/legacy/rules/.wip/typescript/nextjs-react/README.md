@@ -13,4 +13,3 @@ Developers building AI-driven web applications with Next.js, React, and Tailwind
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines a project structure utilizing TypeScript, Next.js App Router, React, and Tailwind CSS, with a focus on following Next.js 14 App Router documentation for data fetching, rendering, and routing. The setup includes a set of predefined APIs in a template located within the /src directory, organized under various subdirectories for API routes, components, and libraries. It features configurations and utilities for Firebase, OpenAI, Anthropic, Replicate, and Deepgram, offering ready-to-use integrations for authentication, data storage, text streaming, image generation, and audio transcription. The Vercel AI SDK is recommended for handling AI interactions and response streaming.
-

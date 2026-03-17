@@ -43,4 +43,3 @@ def process_user(user):
     else:
         return None
 ```
-

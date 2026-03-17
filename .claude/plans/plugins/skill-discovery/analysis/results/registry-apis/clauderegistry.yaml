@@ -1,0 +1,64 @@
+# Registry API Documentation: Claude Registry
+# Phase 4: API Documentation
+# Documented: 2026-03-08
+
+registry_api:
+  name: "clauderegistry"
+  base_url: "https://clauderegistry.com"
+  type: "curated_plugin_registry"
+
+  api:
+    docs_url: null
+    spec_format: "none"
+
+    authentication:
+      type: "none"
+      notes: "No public API - curated web directory"
+
+    endpoints: []
+
+  access_method:
+    type: "web_scraping"
+    recommended_tool: "WebFetch or crawl4ai"
+    pages:
+      - path: "/"
+        content: "7 featured plugins"
+      - path: "/use-cases"
+        content: "Use case guides"
+      - path: "/blog"
+        content: "News and tutorials"
+
+  restrictions:
+    robots_txt:
+      url: "https://clauderegistry.com/robots.txt"
+      user_agent: "*"
+      allowed: ["/"]
+      disallowed:
+        - "/*?q="
+        - "/*?ref="
+        - "/*?plugin="
+      crawl_delay: 1
+      sitemap: "https://clauderegistry.com/sitemap.xml"
+      notes: "Polite crawling requested (1s delay)"
+
+    rate_limits:
+      documented: "none"
+      recommended: "1 request per second (crawl-delay)"
+
+    terms_of_service:
+      url: null
+      notes: "No ToS page found"
+
+  install_command: "/plugin marketplace add clauderegistry/marketplace"
+
+  example:
+    webfetch: |
+      # Use WebFetch with LLM extraction
+      WebFetch https://clauderegistry.com/ "Extract plugin names and descriptions"
+
+  observations:
+    - "Small curated registry (7 plugins)"
+    - "Focus on use cases and workflows"
+    - "Has blog with guides and news"
+    - "Requests polite crawling (1s delay)"
+    - "Install via marketplace command"

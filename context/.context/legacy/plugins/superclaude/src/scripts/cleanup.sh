@@ -24,7 +24,7 @@ cd "$PROJECT_ROOT"
 safe_remove() {
     local target="$1"
     local description="$2"
-    
+
     if [ -e "$target" ]; then
         rm -rf "$target"
         echo -e "${GREEN}✅ Removed $description${NC}"
@@ -42,7 +42,7 @@ echo -e "${GREEN}✅ Python cache files cleaned${NC}"
 
 echo -e "\n${YELLOW}📦 Removing build artifacts...${NC}"
 safe_remove "build/" "Build directory"
-safe_remove "dist/" "Distribution directory" 
+safe_remove "dist/" "Distribution directory"
 safe_remove "*.egg-info" "Egg-info directories"
 safe_remove ".eggs/" "Eggs directory"
 safe_remove "wheels/" "Wheels directory"
@@ -89,7 +89,7 @@ echo -e "${BLUE}📊 Project is clean and ready for development or publishing${N
 echo -e "\n${BLUE}📈 Summary:${NC}"
 echo -e "  • Python cache files: Removed"
 echo -e "  • Build artifacts: Cleaned"
-echo -e "  • Test artifacts: Removed" 
+echo -e "  • Test artifacts: Removed"
 echo -e "  • Development tool cache: Cleared"
 echo -e "  • Temporary files: Deleted"
 echo -e "  • PyPI artifacts: Cleaned"

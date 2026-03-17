@@ -1,0 +1,278 @@
+# Plugin Structure Analysis
+# Phase 3: Plugin Discovery
+# Executed: 2026-03-08
+
+samples_analyzed: 14
+
+# ============================================
+# PLUGIN MANIFEST PATTERNS
+# ============================================
+
+patterns:
+  minimal:
+    description: "Basic metadata only - no explicit component references"
+    examples:
+      - "claude-mem"
+      - "claude-hud"
+      - "safety-net"
+      - "adversarial-spec"
+      - "arscontexta"
+      - "obsidian-skills"
+      - "superpowers"
+      - "everything-claude-code"
+    fields:
+      required:
+        - name
+        - version
+        - description
+      common:
+        - author
+        - repository
+        - license
+        - keywords
+        - homepage
+
+  component_bundling:
+    description: "Explicit component directories via includes or direct fields"
+    examples:
+      - "claude-forge"
+      - "ralph-wiggum-marketer"
+      - "cc-blueprint-toolkit"
+      - "superpowers-chrome"
+    patterns:
+      includes_object:
+        example: "claude-forge"
+        fields: ["agents", "skills", "hooks", "rules", "commands", "scripts"]
+      direct_paths:
+        example: "ralph-wiggum-marketer"
+        fields: ["commands", "skills", "hooks"]
+      array_paths:
+        example: "cc-blueprint-toolkit"
+        fields: ["commands", "agents"]
+
+  mcp_integration:
+    description: "Plugins that provide MCP servers"
+    examples:
+      - "claude-flow"
+      - "chrome-devtools-mcp"
+      - "superpowers-chrome"
+      - "cc-blueprint-toolkit"
+    pattern:
+      field: "mcpServers"
+      structure: "object with named servers"
+      server_fields:
+        - command
+        - args
+        - description
+        - optional
+
+# ============================================
+# SAMPLED PLUGINS
+# ============================================
+
+plugins:
+  - name: "claude-forge"
+    repo: "sangrokjung/claude-forge"
+    version: "1.0.0"
+    bundled_components:
+      agents: "agents/"
+      skills: "skills/"
+      hooks: "hooks/"
+      rules: "rules/"
+      commands: "commands/"
+      scripts: "scripts/"
+    pattern: "includes_object"
+    total_components: 6
+
+  - name: "claude-mem"
+    repo: "thedotmack/claude-mem"
+    version: "10.4.1"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["memory", "context", "persistence", "hooks", "mcp"]
+    total_components: 0
+
+  - name: "claude-hud"
+    repo: "jarrodwatts/claude-hud"
+    version: "0.0.9"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["hud", "monitoring", "statusline", "context", "tools", "agents", "todos"]
+    total_components: 0
+
+  - name: "safety-net"
+    repo: "kenryu42/claude-code-safety-net"
+    version: "0.7.1"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["git", "safety net", "destructive", "command", "guard", "hook"]
+    total_components: 0
+
+  - name: "adversarial-spec"
+    repo: "zscole/adversarial-spec"
+    version: "1.0.0"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["spec", "prd", "technical-specification", "llm", "debate", "consensus"]
+    total_components: 0
+
+  - name: "superpowers-chrome"
+    repo: "obra/superpowers-chrome"
+    version: "1.6.1"
+    bundled_components:
+      agents: ["./agents/browser-user.md"]
+      mcpServers:
+        chrome:
+          command: "node"
+          args: ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/index.js"]
+    pattern: "mcp_integration"
+    total_components: 2
+
+  - name: "ralph-wiggum-marketer"
+    repo: "muratcankoylan/ralph-wiggum-marketer"
+    version: "1.0.0"
+    bundled_components:
+      commands: "./commands/"
+      skills: "./skills/"
+      hooks: "./hooks/hooks.json"
+    pattern: "direct_paths"
+    total_components: 3
+
+  - name: "arscontexta"
+    repo: "agenticnotetaking/arscontexta"
+    version: "0.8.0"
+    bundled_components: {}
+    pattern: "minimal"
+    description_mentions: "26 commands, 17 feature blocks"
+    total_components: 0
+
+  - name: "cc-blueprint-toolkit"
+    repo: "croffasia/cc-blueprint-toolkit"
+    version: "1.4.1"
+    bundled_components:
+      commands:
+        - "./claude/commands/execute-prp.md"
+        - "./claude/commands/generate-prp.md"
+        - "./claude/commands/execute-task.md"
+        - "./claude/commands/init.md"
+        - "./claude/commands/brainstorm.md"
+      agents:
+        - "./claude/agents/codebase-research.md"
+        - "./claude/agents/preflight-prp.md"
+        - "./claude/agents/research-agent.md"
+        - "./claude/agents/team-lead-task-breakdown.md"
+      mcpServers: "./.mcp.json"
+    pattern: "array_paths"
+    total_components: 10
+
+  - name: "obsidian-skills"
+    repo: "kepano/obsidian-skills"
+    version: "1.0.1"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["obsidian", "markdown", "bases", "canvas", "pkm", "notes"]
+    total_components: 0
+
+  - name: "claude-flow"
+    repo: "ruvnet/claude-flow"
+    version: "2.5.0"
+    bundled_components:
+      mcpServers:
+        claude-flow:
+          command: "npx"
+          args: ["claude-flow@alpha", "mcp", "start"]
+          optional: false
+        ruv-swarm:
+          command: "npx"
+          args: ["ruv-swarm", "mcp", "start"]
+          optional: true
+        flow-nexus:
+          command: "npx"
+          args: ["flow-nexus@latest", "mcp", "start"]
+          optional: true
+    pattern: "mcp_integration"
+    description_mentions: "150+ commands, 74+ agents"
+    total_components: 3
+
+  - name: "chrome-devtools-mcp"
+    repo: "ChromeDevTools/chrome-devtools-mcp"
+    version: "latest"
+    bundled_components:
+      mcpServers:
+        chrome-devtools:
+          command: "npx"
+          args: ["chrome-devtools-mcp@latest"]
+    pattern: "mcp_integration"
+    total_components: 1
+
+  - name: "everything-claude-code"
+    repo: "affaan-m/everything-claude-code"
+    version: "1.8.0"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["agents", "skills", "hooks", "rules", "tdd", "code-review", "security", "workflow"]
+    total_components: 0
+
+  - name: "superpowers"
+    repo: "obra/superpowers"
+    version: "4.3.1"
+    bundled_components: {}
+    pattern: "minimal"
+    keywords: ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows"]
+    total_components: 0
+
+# ============================================
+# STATISTICS
+# ============================================
+
+statistics:
+  total_samples: 14
+
+  by_pattern:
+    minimal: 8
+    component_bundling: 4
+    mcp_integration: 4
+
+  component_counts:
+    plugins_with_explicit_components: 4
+    plugins_with_mcp_servers: 4
+    plugins_with_agents: 3
+    plugins_with_skills: 2
+    plugins_with_commands: 3
+    plugins_with_hooks: 3
+    plugins_with_rules: 1
+
+  average_components_per_plugin: 1.8
+
+  component_types_bundled:
+    agents: 3
+    skills: 2
+    commands: 3
+    hooks: 3
+    rules: 1
+    mcpServers: 4
+    scripts: 1
+
+# ============================================
+# KEY OBSERVATIONS
+# ============================================
+
+observations:
+  - finding: "57% of plugins use minimal pattern (metadata only)"
+    implication: "Component bundling is implicit via directory convention"
+
+  - finding: "MCP servers are the most explicit component (29% of plugins)"
+    implication: "MCP requires explicit config due to runtime requirements"
+
+  - finding: "Many plugins mention components in description but not manifest"
+    examples: ["arscontexta: 26 commands", "claude-flow: 150+ commands"]
+    implication: "Component counts from descriptions != manifest declarations"
+
+  - finding: "Three bundling patterns exist"
+    patterns:
+      - "includes: {type: 'dir/'} - directory mapping"
+      - "type: ['path1', 'path2'] - explicit file arrays"
+      - "type: './dir/' - single path string"
+
+  - finding: "Enterprise plugins have most MCP servers"
+    examples: ["claude-flow: 3 servers", "superpowers-chrome: 1 server"]

@@ -13,4 +13,3 @@ Developers building a TypeScript-based multi-provider architecture for LLMs will
 
 ## Overview of .cursorrules prompt
 The .cursorrules file outlines coding standards and best practices for an elite software engineer and product manager specialized in multi-provider architectures for Large Language Models (LLMs) using TypeScript. It provides guidelines on naming conventions, file organization, and code style, emphasizing the use of const, arrow functions, and TypeScript’s type system. The file advocates for principles like immutability, composability, and the Single Responsibility Principle, as well as best practices such as dependency injection, error handling, unit testing, and using async/await. Additionally, it specifies the effective use of libraries like axios, js-yaml, mime-types, node-gyp, uuid, and zod, and underscores the importance of documentation with JSDoc comments, examples, and updated README files.
-

@@ -27,12 +27,12 @@ print_header() {
 extract_dependencies() {
     local file="$1"
     local deps=""
-    
+
     # Look for various dependency patterns
     grep -E "(processes|patterns|templates|knowledge|roles|commands)/[^/]+\.(md|yaml)" "$file" 2>/dev/null | \
         grep -o -E "(processes|patterns|templates|knowledge|roles|commands)/[^/]+\.(md|yaml)" | \
         sort -u || true
-        
+
     # Also look for explicit imports/requires
     grep -E "^(import|require|load|source)" "$file" 2>/dev/null | \
         grep -o -E "['\"].*['\"]" | \
@@ -42,22 +42,22 @@ extract_dependencies() {
 # Build dependency graph
 build_dependency_graph() {
     print_header "Building Dependency Graph"
-    
+
     local dep_file="$TEMP_DIR/dependencies.txt"
-    
+
     # Find all source files
     find "$REPO_ROOT/.claude" -type f \( -name "*.md" -o -name "*.yaml" \) | \
     while read -r file; do
         local relative_file="${file#$REPO_ROOT/.claude/}"
         local deps=$(extract_dependencies "$file")
-        
+
         if [ -n "$deps" ]; then
             echo "$deps" | while read -r dep; do
                 echo "$relative_file -> $dep"
             done >> "$dep_file"
         fi
     done
-    
+
     # Count dependencies
     local total_deps=$(wc -l < "$dep_file" 2>/dev/null || echo "0")
     echo "Found $total_deps dependencies"
@@ -66,10 +66,10 @@ build_dependency_graph() {
 # Find circular dependencies
 find_circular_dependencies() {
     print_header "Circular Dependency Detection"
-    
+
     local dep_file="$TEMP_DIR/dependencies.txt"
     local circular_found=false
-    
+
     # Simple circular dependency detection
     # This is a basic implementation - could be enhanced with proper graph algorithms
     while IFS=' -> ' read -r source target; do
@@ -79,7 +79,7 @@ find_circular_dependencies() {
             circular_found=true
         fi
     done < "$dep_file"
-    
+
     if [ "$circular_found" = false ]; then
         echo -e "${GREEN}✓ No circular dependencies found${NC}"
     fi
@@ -88,21 +88,21 @@ find_circular_dependencies() {
 # Find orphaned components
 find_orphaned_components() {
     print_header "Orphaned Component Detection"
-    
+
     local count=0
-    
+
     find "$REPO_ROOT/.claude" -type f \( -name "*.md" -o -name "*.yaml" \) | \
     while read -r file; do
         local relative_file="${file#$REPO_ROOT/.claude/}"
         local basename=$(basename "$file")
-        
+
         # Skip special files
         case "$basename" in
             README.md|LICENSE|CONTRIBUTING.md)
                 continue
                 ;;
         esac
-        
+
         # Check if file is referenced as a dependency
         if ! grep -q " -> .*$basename" "$TEMP_DIR/dependencies.txt" 2>/dev/null; then
             # Also check if it's a source of dependencies
@@ -112,7 +112,7 @@ find_orphaned_components() {
             fi
         fi
     done
-    
+
     if [ "$count" -eq 0 ]; then
         echo -e "${GREEN}✓ No orphaned components found${NC}"
     fi
@@ -124,17 +124,17 @@ generate_dot_output() {
 digraph Dependencies {
     rankdir=LR;
     node [shape=box, style=rounded];
-    
+
     // Component types with different colors
-    node [fillcolor=lightblue, style="rounded,filled"] 
+    node [fillcolor=lightblue, style="rounded,filled"]
 EOF
-    
+
     # Add nodes with colors based on type
     find "$REPO_ROOT/.claude" -type f \( -name "*.md" -o -name "*.yaml" \) | \
     while read -r file; do
         local relative_file="${file#$REPO_ROOT/.claude/}"
         local type=$(echo "$relative_file" | cut -d'/' -f1)
-        
+
         case "$type" in
             commands)
                 echo "    \"$relative_file\" [fillcolor=lightgreen];"
@@ -153,33 +153,33 @@ EOF
                 ;;
         esac
     done
-    
+
     echo ""
     echo "    // Dependencies"
     cat "$TEMP_DIR/dependencies.txt" | while IFS=' -> ' read -r source target; do
         echo "    \"$source\" -> \"$target\";"
     done
-    
+
     echo "}"
 }
 
 # Generate JSON output
 generate_json_output() {
     local dep_count=$(wc -l < "$TEMP_DIR/dependencies.txt" 2>/dev/null || echo "0")
-    
+
     echo "{"
     echo '  "summary": {'
     echo "    \"total_dependencies\": $dep_count,"
     echo "    \"files_analyzed\": $(find "$REPO_ROOT/.claude" -type f \( -name "*.md" -o -name "*.yaml" \) | wc -l)"
     echo "  },"
     echo '  "dependencies": ['
-    
+
     local first=true
     cat "$TEMP_DIR/dependencies.txt" | while IFS=' -> ' read -r source target; do
         [ "$first" = true ] && first=false || echo ","
         printf '    {"source": "%s", "target": "%s"}' "$source" "$target"
     done
-    
+
     echo ""
     echo "  ]"
     echo "}"
@@ -188,16 +188,16 @@ generate_json_output() {
 # Calculate dependency metrics
 calculate_metrics() {
     print_header "Dependency Metrics"
-    
+
     local dep_file="$TEMP_DIR/dependencies.txt"
-    
+
     # Files with most dependencies
     echo "Files with most outgoing dependencies:"
     cut -d' ' -f1 "$dep_file" | sort | uniq -c | sort -rn | head -5 | \
     while read -r count file; do
         echo "  $file: $count dependencies"
     done
-    
+
     echo
     echo "Files with most incoming dependencies:"
     cut -d' ' -f3 "$dep_file" | sort | uniq -c | sort -rn | head -5 | \
@@ -210,12 +210,12 @@ calculate_metrics() {
 main() {
     echo "Dependency Analysis for: $REPO_ROOT"
     echo
-    
+
     cd "$REPO_ROOT"
-    
+
     build_dependency_graph
     echo
-    
+
     if [ "$OUTPUT_FORMAT" = "dot" ]; then
         generate_dot_output
     elif [ "$OUTPUT_FORMAT" = "json" ]; then

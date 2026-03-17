@@ -364,4 +364,3 @@ python3 -m SuperClaude install --list-components | grep mcp
 - [플래그 가이드](flags.md) - 명령어 동작 제어
 - [에이전트 가이드](agents.md) - 전문가 활성화
 - [예제 모음](../reference/examples-cookbook.md) - 실제 사용 패턴
-

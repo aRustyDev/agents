@@ -51,4 +51,3 @@ def process_data(data, cache=None):
 ## Why
 
 Python evaluates default arguments only once when the function is defined, not each time it's called. This means mutable defaults are shared across all function calls, leading to unexpected behavior where modifications persist between calls.
-

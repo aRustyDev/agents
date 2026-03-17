@@ -11,6 +11,9 @@ dependencies = [
     "markdownify>=0.14.1",
     "tree-sitter-rust>=0.24.0",
     "tree-sitter-language-pack>=0.13.0",
+    "crawl4ai>=0.8.0",
+    "rich>=14.3.2",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
