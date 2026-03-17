@@ -172,3 +172,5 @@ xelatex
 xetex
 Yesod
 zipf
+carlrannaberg
+cclint
