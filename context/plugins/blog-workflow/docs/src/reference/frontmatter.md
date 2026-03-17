@@ -160,6 +160,14 @@ relationships:
 - Flat list with `type` field
 - See [Relationships](../taxonomy/relationships.md) for all types
 
+## Platform-Specific Fields
+
+Some frontmatter field names vary by platform (e.g., `pubDatetime` vs `date`). The fields documented above use the plugin's generic names. For the exact field names used by your platform, see:
+
+- **Astro/AstroPaper:** `skills/platforms/astro/reference/frontmatter.md`
+
+The active platform skill's frontmatter mapping is loaded when you run `/blog/init`. Commands automatically use the correct field names from the loaded platform skill.
+
 ## Type-Specific Fields
 
 See [Frontmatter Schema](../taxonomy/schema.md#type-specific-fields) for fields specific to each post type.

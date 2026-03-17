@@ -1,8 +1,11 @@
 ---
 name: blog/init
-description: Initialize blog workflow directory structure and copy default templates
-argument-hint: [--force] [--no-templates] [--with-hooks]
+description: Initialize blog workflow directory structure, detect platform, and copy default templates
+argument-hint: [--platform <name>] [--force] [--no-templates] [--with-hooks]
 arguments:
+  - name: platform
+    description: "Specify platform explicitly (e.g., astro, hugo). Skips auto-detection."
+    required: false
   - name: force
     description: Overwrite existing templates
     required: false
@@ -27,11 +30,28 @@ Initialize the blog workflow in the target project by creating directory structu
 
 ## Behavior
 
-1. **Check existing structure**:
+1. **Determine platform**:
+   - If `--platform <name>` is given, use that platform directly
+   - If no `--platform` flag, attempt auto-detection:
+     - Check for `astro.config.mjs` or `astro.config.ts` → Astro
+     - (Future) Check for `hugo.toml` or `config.toml` with Hugo markers → Hugo
+     - (Future) Check for `next.config.js` + `@next/mdx` dependency → Next.js MDX
+   - If auto-detection finds exactly one platform, use it
+   - If multiple platforms detected, prompt user to choose
+   - If no platform detected, prompt user to specify manually
+   - Write platform choice to `.blog-workflow.yaml`:
+
+     ```yaml
+     platform: <name>
+     ```
+
+   - Load the corresponding platform skill from `skills/platforms/<name>/SKILL.md`
+
+2. **Check existing structure**:
    - Use `Glob` to check if `content/_templates/` exists
    - If exists and `--force` not set, list existing files and report
 
-2. **Create directory structure**:
+3. **Create directory structure**:
 
    ```bash
    mkdir -p content/_projects
@@ -43,7 +63,7 @@ Initialize the blog workflow in the target project by creating directory structu
    mkdir -p content/_templates/brainstorm-plans
    ```
 
-3. **Copy bundled templates** (unless `--no-templates`):
+4. **Copy bundled templates** (unless `--no-templates`):
 
    From plugin `.templates/` copy to `content/_templates/`:
 
@@ -61,7 +81,7 @@ Initialize the blog workflow in the target project by creating directory structu
    - Skip if exists (unless `--force`)
    - Track created vs skipped
 
-4. **Generate settings.json** (if `--with-hooks`):
+5. **Generate settings.json** (if `--with-hooks`):
 
    a. Check if `.claude/settings.json` exists
 
@@ -103,12 +123,12 @@ Initialize the blog workflow in the target project by creating directory structu
    }
    ```
 
-5. **Self-review**:
+6. **Self-review**:
    - Verify all directories exist using `Glob`
    - Verify template counts match expected
    - Report any missing files
 
-6. **Report summary**
+7. **Report summary**
 
 ## Output (Success)
 
@@ -139,6 +159,11 @@ Total: 34 templates
 {{else}}
 - [ ] Hooks not configured (use --with-hooks to enable)
 {{/if}}
+
+### Platform
+- [x] Platform detected: {{platform}} (from {{source}})
+- [x] .blog-workflow.yaml created
+- [x] Platform skill loaded
 
 ## Next Steps
 
@@ -194,6 +219,9 @@ Options:
 # Include hook configuration
 /blog/init --with-hooks
 
+# Specify platform explicitly
+/blog/init --platform astro
+
 # Full setup with hooks
-/blog/init --force --with-hooks
+/blog/init --platform astro --force --with-hooks
 ```

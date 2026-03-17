@@ -1,10 +1,10 @@
 ---
 name: blog/publish/validate
-description: Verify Astro build succeeds with published post
+description: Verify platform build succeeds with published post
 argument-hint: <path> [--dev]
 arguments:
   - name: path
-    description: Path to the published post in src/data/blog/
+    description: Path to the published post in the platform's published directory
     required: true
   - name: dev
     description: Start dev server to visually verify
@@ -13,18 +13,23 @@ arguments:
 
 # Validate Command
 
-Verify that the Astro build succeeds with the published post and the post appears correctly in the site output.
+Verify that the platform build succeeds with the published post and the post appears correctly in the site output.
+
+## Prerequisites
+
+- **Requires:** Active platform skill. If no platform skill is loaded, display:
+  "No platform configured. Run `/blog/init` to detect your platform or install a platform skill manually."
 
 ## Tools
 
-- `Bash` - Run astro build and optionally dev server
+- `Bash` - Run build command and optionally dev server (read commands from active platform skill)
 
 ## Behavior
 
-1. **Run Astro build**:
+1. **Run build**: Execute the `platform.commands.build` command from the active platform skill (e.g., `astro build` for Astro):
 
    ```bash
-   astro build 2>&1
+   <platform.commands.build> 2>&1
    ```
 
 2. **Check for errors**:
@@ -32,11 +37,11 @@ Verify that the Astro build succeeds with the published post and the post appear
    - If build succeeds, continue
 
 3. **Verify post in output**:
-   - Check that post appears in `dist/` output
+   - Check that post appears in the `platform.paths.build_output` directory (e.g., `dist/` for Astro)
    - Verify post URL path is correct
 
 4. **Dev server** (if `--dev`):
-   - Start `astro dev`
+   - Start the `platform.commands.dev` command from the active platform skill (e.g., `astro dev`)
    - Report local URL for visual verification
    - Note: requires manual stop
 
@@ -47,13 +52,13 @@ Verify that the Astro build succeeds with the published post and the post appear
 ```text
 ## Build Validation: {{filename}}
 
-### Astro Build
+### Platform Build
 - [x] Build completed successfully - pass
 - [x] No errors - pass
 - [x] No warnings - pass
 
 ### Post Verification
-- [x] Post found in dist/blog/{{slug}}/ - pass
+- [x] Post found in <build_output>/blog/{{slug}}/ - pass
 - [x] HTML generated correctly - pass
 
 Build time: {{N}}s
@@ -69,19 +74,19 @@ Post URL: /blog/{{slug}}/
 ```text
 ## Build Validation: {{filename}}
 
-### Astro Build
+### Platform Build
 - [ ] Build failed - fail
 
 Error:
-  [ERROR] Invalid frontmatter in src/data/blog/{{filename}}
-  pubDatetime is not a valid date
+  [ERROR] Invalid frontmatter in <published_path>/{{filename}}
+  Date field is not a valid date
 
 Status: BUILD FAILED
 
 Fix the error and run `/blog/publish/validate` again.
 
 Rollback options:
-1. Quick: git checkout src/data/blog/{{filename}}
+1. Quick: git checkout <published_path>/{{filename}}
 2. Full: See Rollback Procedure section
 ```
 
@@ -96,10 +101,10 @@ If validation fails or issues discovered after promote:
 git checkout content/_drafts/<slug>.md
 
 # Remove published post (if new)
-rm src/data/blog/<slug>.md
+rm <published_path>/<slug>.md
 
 # Or restore previous version (if update)
-git checkout src/data/blog/<slug>.md
+git checkout <published_path>/<slug>.md
 ```
 
 ### Manual Rollback Steps
@@ -107,7 +112,7 @@ git checkout src/data/blog/<slug>.md
 1. **Copy published post back to drafts**:
 
    ```bash
-   cp src/data/blog/<slug>.md content/_drafts/<slug>.md
+   cp <published_path>/<slug>.md content/_drafts/<slug>.md
    ```
 
 2. **Edit draft** to restore draft state:
@@ -117,36 +122,32 @@ git checkout src/data/blog/<slug>.md
 3. **Remove published post**:
 
    ```bash
-   rm src/data/blog/<slug>.md
+   rm <published_path>/<slug>.md
    ```
 
 4. **Update project `index.md`**:
    - Change Published Posts table status to `drafting`
    - Update project status if needed
 
-5. **Rebuild to verify**:
-
-   ```bash
-   astro build
-   ```
+5. **Rebuild to verify**: Run the `platform.commands.build` command from the active platform skill
 
 ## Error Handling
 
 | Condition | Error Message | Resolution |
 |-----------|---------------|------------|
-| Post not found | "Post not found at {{path}}" | Verify path is in src/data/blog/ |
-| Wrong directory | "Expected path in src/data/blog/, got {{path}}" | Use correct path |
-| Astro not available | "astro command not found. Install with: npm install astro" | Install Astro |
-| Build failed | "Astro build failed: {{error}}" | Fix error, consider rollback |
-| Post not in output | "Post not found in dist/ after build" | Check build config |
+| Post not found | "Post not found at {{path}}" | Verify path is in the platform's published directory |
+| Wrong directory | "Expected path in platform published directory, got {{path}}" | Use correct path |
+| Build tool not available | "Build command not found. Check platform skill for install instructions" | Install platform build tool |
+| Build failed | "Build failed: {{error}}" | Fix error, consider rollback |
+| Post not in output | "Post not found in build output after build" | Check build config |
 | Dev server failed | "Could not start dev server: {{error}}" | Check port availability |
 
 ## Example Usage
 
 ```text
-# Validate build
-/blog/publish/validate src/data/blog/building-ebpf-tracing-tools.md
+# Validate build (path depends on platform)
+/blog/publish/validate <published_path>/building-ebpf-tracing-tools.md
 
 # Start dev server for visual verification
-/blog/publish/validate src/data/blog/building-ebpf-tracing-tools.md --dev
+/blog/publish/validate <published_path>/building-ebpf-tracing-tools.md --dev
 ```

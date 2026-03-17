@@ -5,7 +5,7 @@ The final phase of the workflow moves content from draft to published state.
 ## Overview
 
 ```text
-content/_drafts/<slug>.md     →     src/data/blog/<slug>.md
+content/_drafts/<slug>.md     →     <published_path>/<slug>.md
          ↓                                  ↓
     SEO Review                          Build
          ↓                                  ↓
@@ -54,7 +54,7 @@ Validates:
 
 Actions:
 
-- Copies draft to `src/data/blog/<slug>.md`
+- Copies draft to the platform's published content directory
 - Sets `draft: false`
 - Updates timestamps
 - Archives source from `content/_drafts/`
@@ -96,7 +96,7 @@ After promoting:
 |-------|----------|
 | Project drafts | `content/_projects/<name>/drafts/` |
 | Ready to publish | `content/_drafts/` |
-| Published | `src/data/blog/` |
+| Published | Platform-specific (read `platform.paths.published` from active platform skill) |
 
 ### Promotion Path
 
@@ -105,7 +105,7 @@ content/_projects/rust-ownership/drafts/final.md
     ↓ (move to drafts/)
 content/_drafts/understanding-rust-ownership.md
     ↓ (promote)
-src/data/blog/understanding-rust-ownership.md
+<published_path>/understanding-rust-ownership.md
 ```
 
 ## Frontmatter Changes
@@ -141,10 +141,10 @@ If something goes wrong after publish:
 
 ```bash
 # Restore from git
-git checkout src/data/blog/<slug>.md
+git checkout <published_path>/<slug>.md
 
 # Or remove new post
-rm src/data/blog/<slug>.md
+rm <published_path>/<slug>.md
 ```
 
 ### Full Rollback
@@ -152,24 +152,30 @@ rm src/data/blog/<slug>.md
 1. Copy published post back to drafts:
 
    ```bash
-   cp src/data/blog/<slug>.md content/_drafts/<slug>.md
+   cp <published_path>/<slug>.md content/_drafts/<slug>.md
    ```
 
 2. Edit draft to restore draft state:
    - Set `draft: true`
-   - Remove `modDatetime`
+   - Remove last-modified field
 
 3. Remove published post:
 
    ```bash
-   rm src/data/blog/<slug>.md
+   rm <published_path>/<slug>.md
    ```
 
-4. Rebuild to verify:
+4. Rebuild to verify: Run the `platform.commands.build` command from the active platform skill
 
-   ```bash
-   astro build
-   ```
+## Platform Requirements
+
+This workflow requires an active platform skill. The platform skill provides:
+
+- **Published content path** — where posts are stored for the site generator
+- **Build commands** — how to build and preview the site
+- **Frontmatter field names** — platform-specific naming conventions
+
+See `skills/platforms/` for available platform skills. Run `/blog/init` to configure your platform.
 
 ## Post-Publish Tasks
 

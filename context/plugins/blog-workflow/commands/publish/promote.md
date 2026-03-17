@@ -1,6 +1,6 @@
 ---
 name: blog/publish/promote
-description: Move validated draft to src/data/blog/
+description: Move validated draft to the platform's published content directory
 argument-hint: <path> [--schedule date]
 arguments:
   - name: path
@@ -16,12 +16,17 @@ arguments:
 
 # Promote Command
 
-Move a validated draft to `src/data/blog/` for publication. This is the only intended path to publish content.
+Move a validated draft to the platform's published content directory for publication. This is the only intended path to publish content.
+
+## Prerequisites
+
+- **Requires:** Active platform skill. If no platform skill is loaded, display:
+  "No platform configured. Run `/blog/init` to detect your platform or install a platform skill manually."
 
 ## Tools
 
-- `Read` - Load draft
-- `Write` - Write to `src/data/blog/`
+- `Read` - Load draft and platform skill frontmatter
+- `Write` - Write to published content directory (read `platform.paths.published` from active platform skill)
 - `Bash` - Delete from `_drafts/`
 
 ## Behavior
@@ -47,7 +52,7 @@ Move a validated draft to `src/data/blog/` for publication. This is the only int
    - Set `modDatetime: null` (first publish)
    - Remove `_precheck` field (no longer needed)
 
-5. **Write to** `src/data/blog/<slug>.md`
+5. **Write to** the platform's published directory (read `platform.paths.published` from the active platform skill, e.g., `src/data/blog/` for Astro): `<published_path>/<slug>.md`
 
 6. **Delete from** `content/_drafts/<slug>.md`
 
@@ -106,9 +111,9 @@ Next: Run `/blog/publish/validate` after scheduled time to verify
 | Pre-check not passed | "Pre-check required. Run `/blog/publish/pre-check` first" | Run pre-check |
 | Pre-check stale | "Pre-check is {{N}} hours old (>24h). Re-run to verify" | Run pre-check again |
 | Pre-check failed | "Pre-check status is 'failed'. Fix issues first" | Fix and re-run pre-check |
-| Already promoted | "Post already exists at src/data/blog/{{slug}}.md. Edit in place or use --force" | Edit existing or use --force |
+| Already promoted | "Post already exists at <published_path>/{{slug}}.md. Edit in place or use --force" | Edit existing or use --force |
 | Invalid schedule date | "Schedule date '{{value}}' must be in the future" | Use future date |
-| Write failed | "Failed to write to src/data/blog/: {{error}}" | Check permissions |
+| Write failed | "Failed to write to published directory: {{error}}" | Check permissions |
 | Delete failed | "Failed to remove draft from _drafts/: {{error}}" | Remove manually |
 
 ## Example Usage

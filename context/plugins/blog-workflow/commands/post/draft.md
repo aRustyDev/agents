@@ -16,7 +16,12 @@ arguments:
 
 # Post Draft Command
 
-Write a full post draft from an outline. The draft is created with AstroPaper-compatible frontmatter and stored in the shared drafts directory.
+Write a full post draft from an outline. The draft is created with platform-compatible frontmatter (read field names from the active platform skill) and stored in the shared drafts directory.
+
+## Prerequisites
+
+- **Requires:** Active platform skill. If no platform skill is loaded, display:
+  "No platform configured. Run `/blog/init` to detect your platform or install a platform skill manually."
 
 ## Tools
 
@@ -50,11 +55,11 @@ Write a full post draft from an outline. The draft is created with AstroPaper-co
 
 6. **Track word count** per section vs estimate
 
-7. **Generate AstroPaper frontmatter**:
+7. **Generate platform-compatible frontmatter** (read field names from the active platform skill's frontmatter mapping):
    - `id`: UUIDv4
    - `title`: From spec
    - `description`: From spec
-   - `pubDatetime`: Current timestamp
+   - Date field (read `platform.frontmatter.date_field` from active platform skill): Current timestamp
    - `author`: From project, plugin, or default
    - `draft`: true
    - `tags`: From spec/phase

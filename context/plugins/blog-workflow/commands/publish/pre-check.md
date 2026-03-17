@@ -18,9 +18,14 @@ arguments:
 
 Validate frontmatter and links before publishing. Pre-check must pass before promotion unless `--force` is used on promote.
 
+## Prerequisites
+
+- **Requires:** Active platform skill. If no platform skill is loaded, display:
+  "No platform configured. Run `/blog/init` to detect your platform or install a platform skill manually."
+
 ## Tools
 
-- `Read` - Load draft
+- `Read` - Load draft and platform skill frontmatter
 - `Edit` - Add `_precheck` status to frontmatter
 - `Bash` - Run lychee link checker (if available)
 
@@ -28,11 +33,11 @@ Validate frontmatter and links before publishing. Pre-check must pass before pro
 
 1. **Load draft** at `{{path}}`
 
-2. **Validate frontmatter** against AstroPaper schema:
-   - Required fields present: `id`, `title`, `description`, `pubDatetime`, `tags`
-   - No wrong field names: `date` (should be `pubDatetime`), `image` (should be `ogImage`)
+2. **Validate frontmatter** against the active platform skill's schema (see platform skill's `reference/frontmatter.md`):
+   - Required fields present: `id`, `title`, `description`, date field (read `platform.frontmatter.date_field` from active platform skill), `tags`
+   - No wrong field names: check for common mistakes listed in the platform skill's frontmatter reference
    - `id` is valid UUIDv4
-   - `pubDatetime` is valid ISO 8601
+   - Date field is valid ISO 8601
    - `description` <= 160 characters
 
 3. **Check links** (unless `--skip-links`):
@@ -94,7 +99,7 @@ Next: Run `/blog/publish/promote {{path}}`
 - [x] title: present - pass
 - [ ] description: {{N}} chars (>160) - fail
 - [x] pubDatetime: valid - pass
-- [ ] 'date' field found - fail: use 'pubDatetime' instead
+- [ ] Wrong field name found - fail: see platform skill for correct names
 
 Summary: {{pass}} pass, {{warn}} warn, {{fail}} fail
 Status: NOT READY

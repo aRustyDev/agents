@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-03-17
+
+### Added
+
+- Platform extensibility system with platform skill abstraction
+- Platform interface contract (`skills/platforms/_interface.md`)
+- Astro/AstroPaper platform skill (`skills/platforms/astro/SKILL.md`)
+- Astro reference docs: frontmatter schema, publishing procedures, directory conventions
+- Platform auto-detection in `/blog/init` (checks for `astro.config.mjs`/`astro.config.ts`)
+- `--platform <name>` flag for `/blog/init`
+- `.blog-workflow.yaml` project config file with platform overrides
+- Platform support documentation (`docs/src/platforms/`)
+- Migration guide from v2.x to v3.0.0
+- Test scenarios for platform integration
+- `platformSkills` array in plugin manifest
+
+### Changed
+
+- Commands read paths, field names, and build commands from platform skill frontmatter instead of hardcoding Astro values
+- `rules/blog-frontmatter.md` uses generic field concepts with platform mapping notes
+- `docs/src/workflow/publishing.md` references platform skill for paths and commands
+- `docs/src/reference/frontmatter.md` documents platform-specific field name variations
+- `/blog/init` now handles platform detection and config creation as first step
+- Version bump from 2.0.2 to 3.0.0 (breaking: requires `/blog/init` for platform config)
+
+### Removed
+
+- Legacy commands deprecated in v2.0.0: `draft-post`, `gather-resources`, `outline-post`, `publish-prep`, `refine-research-plan`, `research-topic`, `seo-pass`, `series-plan`
+
+### Migration
+
+Run `/blog/init --platform astro` (or let auto-detection work) to create `.blog-workflow.yaml`. See `docs/src/platforms/migration.md` for details.
+
 ## [2.0.2] - 2026-03-14
 
 ### Added
