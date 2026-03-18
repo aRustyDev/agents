@@ -30,25 +30,37 @@ brew bundle
 
 Add new tools to `brewfile`, not installed ad-hoc.
 
-### Python Dependencies (pyproject.toml)
+### TypeScript Dependencies (.scripts/package.json)
 
-Python packages are managed via uv:
+TypeScript tooling is managed via Bun:
 
 ```bash
-# Install all deps (creates .venv automatically)
-uv sync
+# Install all deps
+cd .scripts && bun install
 
-# Add a new dependency
-uv add <package>
+# Run the CLI tool
+bun run .scripts/bin/ai-tools.ts <noun> <verb> [args]
 
-# Add a dev dependency
-uv add --dev <package>
+# Or via justfile
+just ai-tools <noun> <verb> [args]
 
-# Run a script in the venv
-uv run python .scripts/embed.py
+# Run tests
+cd .scripts && bun test
 ```
 
-The `uv.lock` file is version controlled for reproducible installs.
+The `bun.lock` file is version controlled for reproducible installs.
+
+### Python Dependencies (pyproject.toml) — KG only
+
+Python is used only for the knowledge graph system (sqlite-vec + Ollama embeddings):
+
+```bash
+# Install KG deps (creates .venv automatically)
+uv sync
+
+# Run embedding CLI
+uv run python .scripts/embed.py
+```
 
 ## Knowledge Graph
 
@@ -90,8 +102,11 @@ See `docs/src/adr/` for architecture decisions.
 │   ├── plugins/                # Plugin bundles
 │   └── output-styles/          # Output formatting styles
 ├── .scripts/
-│   ├── embed.py                # Embedding CLI
-│   ├── lib/                    # Python modules
+│   ├── bin/ai-tools.ts         # Unified CLI (Bun + Citty)
+│   ├── lib/                    # TypeScript modules (hash, output, schemas, etc.)
+│   ├── commands/               # CLI subcommands (plugin, skill, kg, registry)
+│   ├── test/                   # bun:test suites
+│   ├── embed.py                # KG embedding CLI (Python, sqlite-vec)
 │   └── sql/                    # SQL query files
 ├── settings/
 │   └── mcp/                    # MCP server configurations
@@ -107,9 +122,10 @@ See `docs/src/adr/` for architecture decisions.
 |------|---------|
 | Initialize project | `just init` |
 | Install to ~/.claude | `just install` |
-| Create a new skill | `just create-skill <name>` |
-| Install a plugin | `just install-plugin <name>` |
-| Search MCP servers | `just mcp-cache-search "query"` |
+| **CLI tool** | `just ai-tools <noun> <verb> [args]` |
+| Plugin check | `just ai-tools plugin check <name>` |
+| Skill validate | `just ai-tools skill validate <name>` |
+| External skill check | `just skill external:check` |
 | Semantic search | `just kg-search "query"` |
 
 ## Issue Tracking with Beads
@@ -161,8 +177,10 @@ See `.claude/skills/beads/` for full documentation.
 
 ## Conventions
 
-- **Brewfile**: Tool-level dependencies only (ollama, uv, yq, etc.)
-- **pyproject.toml**: Python packages (sqlite-vec, watchdog, etc.)
+- **Brewfile**: Tool-level dependencies only (ollama, uv, bun, yq, etc.)
+- **package.json** (`.scripts/`): TypeScript packages for `ai-tools` CLI (Bun)
+- **pyproject.toml**: Python packages for KG only (sqlite-vec, ollama, watchdog)
 - **`just init`**: Must be idempotent — safe to run multiple times
 - **SQL dumps**: `.data/**/*.sql` files are version controlled; `.db` files are gitignored
 - **Plans**: Written as markdown in `.claude/plans/`, converted to beads issues
+- **`ai-tools`**: Unified CLI tool — `just ai-tools <noun> <verb>` for plugin/skill/registry operations
