@@ -5,7 +5,7 @@
     "./context/commands/*.md",
     "./context/output-styles/*.md",
     "./context/plugins/**/*.md",
-    "./context/rules/*.md",
+    "./context/rules/**/*.md",
     "./context/skills/**/*.md",
     "./docs/src/**/*.md"
   ],
