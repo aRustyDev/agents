@@ -32,7 +32,7 @@ ENTITY_PATTERNS = {
     'agent': ['context/agents/*.md'],
     'skill': ['context/skills/*/SKILL.md'],
     'command': ['context/commands/*.md', '.claude/commands/**/*.md'],
-    'rule': ['context/rules/*.md', '.claude/rules/*.md'],
+    'rule': ['context/rules/*.md', 'context/rules/**/*.md', '.claude/rules/*.md'],
     'claude_md': ['**/CLAUDE.md'],
     'plugin': ['context/plugins/*/.claude-plugin/plugin.json'],
     'output_style': ['context/output-styles/*.md'],
