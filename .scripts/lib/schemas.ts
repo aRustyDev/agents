@@ -238,6 +238,93 @@ export const ComponentRecord = v.object({
 export type ComponentRecord = v.InferOutput<typeof ComponentRecord>
 
 // ---------------------------------------------------------------------------
+// External skill schemas
+// ---------------------------------------------------------------------------
+
+/**
+ * A single entry in the external skills manifest (`sources.yaml`).
+ *
+ * Declares how an external skill is used: either as a passthrough symlink
+ * or as the basis for one or more derived local skills.
+ *
+ * Cross-field constraint: `passthrough` and `derived_by` are mutually
+ * exclusive -- a skill cannot be both a live symlink and a drift-tracked
+ * derivation source.
+ *
+ * Example:
+ * ```yaml
+ * beads:
+ *   source: steveyegge/beads
+ *   skill: beads
+ *   passthrough: true
+ * ```
+ */
+export const ExternalSkillEntry = v.pipe(
+  v.object({
+    source: v.string(),
+    skill: v.string(),
+    passthrough: v.boolean(),
+    ref: v.optional(v.string()),
+    derived_by: v.optional(v.array(v.string())),
+  }),
+  v.check(
+    (entry) => !(entry.passthrough && entry.derived_by?.length),
+    'passthrough and derived_by are mutually exclusive',
+  ),
+)
+export type ExternalSkillEntry = v.InferOutput<typeof ExternalSkillEntry>
+
+/**
+ * The full `sources.yaml` manifest for external skills.
+ *
+ * Example:
+ * ```yaml
+ * skills:
+ *   beads:
+ *     source: steveyegge/beads
+ *     skill: beads
+ *     passthrough: true
+ * ```
+ */
+export const ExternalSourcesManifest = v.object({
+  skills: v.record(v.string(), ExternalSkillEntry),
+})
+export type ExternalSourcesManifest = v.InferOutput<typeof ExternalSourcesManifest>
+
+/**
+ * A single entry in the external skills lock file (`sources.lock.json`).
+ *
+ * Keyed by a content-hash of `source/skill` so that manifest renames
+ * do not lose tracking history.
+ *
+ * Example:
+ * ```json
+ * {
+ *   "upstream_commit": "5045496bbe4b42d1...",
+ *   "snapshot_hash": "sha256:16b0efc72b43...",
+ *   "last_synced": "2026-03-18T12:00:00Z"
+ * }
+ * ```
+ */
+export const ExternalLockEntry = v.object({
+  upstream_commit: v.string(),
+  snapshot_hash: v.string(),
+  last_synced: v.string(),
+  last_reviewed_commit: v.optional(v.string()),
+  drift_issue: v.optional(v.number()),
+})
+export type ExternalLockEntry = v.InferOutput<typeof ExternalLockEntry>
+
+/**
+ * The full external skills lock file (`sources.lock.json`).
+ *
+ * A flat record keyed by the first 12 hex chars of
+ * `sha256(source + "/" + skill)`.
+ */
+export const ExternalLockfile = v.record(v.string(), ExternalLockEntry)
+export type ExternalLockfile = v.InferOutput<typeof ExternalLockfile>
+
+// ---------------------------------------------------------------------------
 // Output / status message schema
 // ---------------------------------------------------------------------------
 

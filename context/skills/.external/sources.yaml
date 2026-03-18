@@ -1,0 +1,9 @@
+skills:
+  beads:
+    source: steveyegge/beads
+    skill: beads
+    passthrough: true
+  handoff:
+    source: steveyegge/beads
+    skill: handoff
+    passthrough: true

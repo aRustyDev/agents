@@ -10,6 +10,13 @@ import { createOutput } from '../lib/output'
 import { readSkillFrontmatter } from '../lib/manifest'
 import { hashDirectory, formatHash } from '../lib/hash'
 import { EXIT } from '../lib/types'
+import {
+  checkDrift,
+  syncAll,
+  createDriftIssues,
+  refreshLinks,
+  getStatus,
+} from '../lib/external-skills'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -17,6 +24,7 @@ import { EXIT } from '../lib/types'
 
 const PROJECT_ROOT = resolve(import.meta.dir, '../..')
 const SKILLS_DIR = join(PROJECT_ROOT, 'context/skills')
+const EXTERNAL_DIR = join(SKILLS_DIR, '.external')
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -263,7 +271,7 @@ export default defineCommand({
     }),
 
     // -----------------------------------------------------------------
-    // deps (stub -- Phase 4b)
+    // deps
     // -----------------------------------------------------------------
     deps: defineCommand({
       meta: {
@@ -277,11 +285,35 @@ export default defineCommand({
             description: 'Check upstream drift and symlink health',
           },
           args: { ...globalArgs },
-          run() {
-            console.log(
-              'not yet implemented -- coming in Phase 4b',
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const results = await checkDrift(EXTERNAL_DIR, SKILLS_DIR)
+
+            if (results.length === 0) {
+              out.info('No external skills configured')
+              process.exit(EXIT.OK)
+            }
+
+            if (args.json) {
+              out.raw(results)
+            } else {
+              const rows = results.map((r) => ({
+                Skill: r.skill,
+                Source: r.source,
+                Status: r.status === 'changed' ? 'CHANGED' : r.status === 'unavail' ? 'UNAVAIL' : r.status,
+                'Last Synced': r.lastSynced?.slice(0, 10) ?? '\u2014',
+              }))
+              out.table(rows)
+            }
+
+            const hasProblems = results.some(
+              (r) => r.status === 'changed' || r.status === 'unavail',
             )
-            process.exit(EXIT.OK)
+            process.exit(hasProblems ? EXIT.FAILURES : EXIT.OK)
           },
         }),
         sync: defineCommand({
@@ -293,15 +325,46 @@ export default defineCommand({
             ...globalArgs,
             force: {
               type: 'boolean',
-              description: 'Force sync all',
+              description: 'Force sync all (even current)',
               default: false,
             },
           },
-          run() {
-            console.log(
-              'not yet implemented -- coming in Phase 4b',
-            )
-            process.exit(EXIT.OK)
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const spinner = out.spinner('Syncing external skills...')
+            const { synced, failed } = await syncAll(EXTERNAL_DIR, SKILLS_DIR, {
+              force: args.force as boolean,
+            })
+            const total = synced.length + failed.length
+
+            if (failed.length > 0) {
+              spinner.error({
+                text: `Synced ${synced.length}/${total}, ${failed.length} failed`,
+              })
+            } else if (synced.length > 0) {
+              spinner.success({
+                text: `Synced ${synced.length} skill(s)`,
+              })
+            } else {
+              spinner.success({ text: 'All skills up to date' })
+            }
+
+            if (args.json) {
+              out.raw({ synced, failed })
+            } else {
+              if (synced.length > 0) {
+                out.info(`Synced: ${synced.join(', ')}`)
+              }
+              if (failed.length > 0) {
+                out.error(`Failed: ${failed.join(', ')}`)
+              }
+            }
+
+            process.exit(failed.length > 0 ? EXIT.FAILURES : EXIT.OK)
           },
         }),
         issues: defineCommand({
@@ -311,16 +374,44 @@ export default defineCommand({
           },
           args: {
             ...globalArgs,
-            dryRun: {
+            'dry-run': {
               type: 'boolean',
               description: 'Preview without creating',
               default: false,
             },
+            repo: {
+              type: 'string',
+              description: 'GitHub repo (owner/repo)',
+              default: 'aRustyDev/ai',
+            },
           },
-          run() {
-            console.log(
-              'not yet implemented -- coming in Phase 4b',
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const repoArg = (args.repo as string) || 'aRustyDev/ai'
+            const dryRun = args['dry-run'] as boolean
+
+            const spinner = out.spinner(
+              dryRun ? 'Checking drift issues (dry run)...' : 'Creating drift issues...',
             )
+            const { created, updated } = await createDriftIssues(
+              EXTERNAL_DIR,
+              SKILLS_DIR,
+              repoArg,
+              { dryRun },
+            )
+
+            spinner.success({
+              text: `Issues: ${created} created, ${updated} updated`,
+            })
+
+            if (args.json) {
+              out.raw({ created, updated, dryRun })
+            }
+
             process.exit(EXIT.OK)
           },
         }),
@@ -330,11 +421,38 @@ export default defineCommand({
             description: 'Create/refresh passthrough symlinks',
           },
           args: { ...globalArgs },
-          run() {
-            console.log(
-              'not yet implemented -- coming in Phase 4b',
-            )
-            process.exit(EXIT.OK)
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const result = await refreshLinks(EXTERNAL_DIR, SKILLS_DIR)
+
+            if (args.json) {
+              out.raw(result)
+            } else {
+              const rows: Record<string, unknown>[] = []
+              for (const name of result.created) {
+                rows.push({ Skill: name, Action: 'created' })
+              }
+              for (const name of result.updated) {
+                rows.push({ Skill: name, Action: 'updated' })
+              }
+              for (const name of result.broken) {
+                rows.push({ Skill: name, Action: 'BROKEN (sync needed)' })
+              }
+
+              if (rows.length > 0) {
+                out.table(rows)
+              }
+
+              out.info(
+                `${result.created.length} created, ${result.updated.length} updated, ${result.skipped.length} skipped, ${result.broken.length} broken`,
+              )
+            }
+
+            process.exit(result.broken.length > 0 ? EXIT.FAILURES : EXIT.OK)
           },
         }),
         status: defineCommand({
@@ -343,10 +461,33 @@ export default defineCommand({
             description: 'Show combined dependency status',
           },
           args: { ...globalArgs },
-          run() {
-            console.log(
-              'not yet implemented -- coming in Phase 4b',
-            )
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const results = await getStatus(EXTERNAL_DIR, SKILLS_DIR)
+
+            if (results.length === 0) {
+              out.info('No external skills configured')
+              process.exit(EXIT.OK)
+            }
+
+            if (args.json) {
+              out.raw(results)
+            } else {
+              const rows = results.map((r) => ({
+                Skill: r.skill,
+                Source: r.source,
+                Mode: r.mode,
+                Hash: r.hash ?? '\u2014',
+                Symlink: r.symlink,
+                Issue: r.issue,
+              }))
+              out.table(rows)
+            }
+
             process.exit(EXIT.OK)
           },
         }),

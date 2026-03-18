@@ -81,6 +81,21 @@ export async function computeHash(path: string): Promise<string> {
 }
 
 /**
+ * Compute a short lock key from a source/skill pair.
+ *
+ * Used as the key in `sources.lock.json` so that manifest renames
+ * do not lose tracking history.
+ *
+ * @returns First 12 hex chars of `sha256(source + "/" + skill)`.
+ */
+export function lockKey(source: string, skill: string): string {
+  const input = `${source}/${skill}`
+  const hasher = new Bun.CryptoHasher('sha256')
+  hasher.update(input)
+  return hasher.digest('hex').slice(0, 12)
+}
+
+/**
  * Prepend the `sha256:` prefix to a raw hex digest.
  */
 export function formatHash(hex: string): string {
