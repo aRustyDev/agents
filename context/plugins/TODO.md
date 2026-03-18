@@ -33,3 +33,15 @@ Stubbed plugins removed during restructure (2026-03-18). These were template-onl
 - packer-dev (builders, provisioners, post-processors, data-sources)
 - infrastructure-management (github-repos as tf)
 - macOS App Dev (SwiftUI)
+- MCP Server dev
+  - extending/developing existing mcp server
+  - reviewing/debugging/critiquing existing mcp server
+  - developing new features for mcp server
+  - optimizing performance of mcp server
+  - improving security of mcp server
+  - improving scalability of mcp server
+  - improving maintainability of mcp server
+  - improving usability of mcp server
+  - improving documentation of mcp server
+  - improving testing of mcp server
+  - developing a new mcp server from scratch
