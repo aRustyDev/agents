@@ -148,7 +148,7 @@ repos:
             context/skills/.*/assets/.*|
             context/skills/convert-.*|
             context/skills/analysis\.md$|
-            context/rules/schemas\.md$|
+            context/rules/arustydev/schemas\.md$|
             settings/mcp/.*|
             settings/claude/.*|
             context/skills/pkgmgr-homebrew-formula-dev/.*|
