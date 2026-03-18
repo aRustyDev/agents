@@ -12,6 +12,11 @@ paths:
 - Rules **with** `globs:` or `paths:` frontmatter: loaded always, applied only when working with matching files
 - Rules **without** frontmatter: apply unconditionally to all contexts
 
+## Directory Organization
+
+- Rules in `context/rules/` are organized into category subdirectories (e.g., `pre-commit/`, `agent/`, `github/`)
+- Subdirectory nesting does not affect loading — all `.md` files under `context/rules/` are discovered recursively
+
 ## Implications
 
 - Every rule file consumes context tokens regardless of relevance
