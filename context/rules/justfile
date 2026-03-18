@@ -7,31 +7,29 @@ ROOT := source_directory() / "../.."
 SCRIPTS := ROOT / ".scripts"
 RULES := source_directory()
 
-# Validate a rule file
+# Validate a rule file (accepts category/name or just name)
 [group('rule')]
 validate name:
     #!/usr/bin/env bash
     set -euo pipefail
-    RULE_FILE="{{ RULES }}/{{ name }}.md"
-
+    RULES_DIR="{{ RULES }}"
+    RULE_FILE="$RULES_DIR/{{ name }}.md"
     if [ ! -f "$RULE_FILE" ]; then
-        echo "✗ Rule not found: $RULE_FILE"
-        exit 1
+        # Search nested directories
+        RULE_FILE=$(find "$RULES_DIR" -path "*{{ name }}.md" -not -name 'justfile.md' | head -1)
+        if [ -z "$RULE_FILE" ]; then
+            echo "✗ Rule not found: {{ name }}"
+            exit 1
+        fi
     fi
-
     echo "Validating rule: {{ name }}"
-
-    # Check file is not empty
     if [ ! -s "$RULE_FILE" ]; then
         echo "  ✗ Rule file is empty"
         exit 1
     fi
-
-    # Check for header
-    if ! head -1 "$RULE_FILE" | grep -q "^#"; then
-        echo "  ⚠ Rule should start with a markdown heading"
+    if ! head -1 "$RULE_FILE" | grep -q "^#\|^-"; then
+        echo "  ⚠ Rule should start with a markdown heading or frontmatter"
     fi
-
     echo "  ✓ Rule valid"
 
 # Compute hash for a rule
@@ -39,26 +37,28 @@ validate name:
 hash name:
     @uv run python {{ SCRIPTS }}/build-plugin.py hash "{{ RULES }}/{{ name }}.md"
 
-# List all rules
+# List all rules (nested)
 [group('rule')]
 list:
-    @ls -1 {{ RULES }}/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort
+    #!/usr/bin/env bash
+    RULES_DIR="{{ RULES }}"
+    find "$RULES_DIR" -name '*.md' -not -name 'justfile.md' | \
+        sed "s|$RULES_DIR/||;s|\.md$||" | sort
 
-# Check all rules
+# Check all rules (nested)
 [group('rule')]
 check-all:
     #!/usr/bin/env bash
     set -euo pipefail
     RULES_DIR="{{ RULES }}"
-    rules=$(ls -1 "$RULES_DIR"/*.md 2>/dev/null | sed 's|.*/||;s|\.md||' | sort)
     count=0
-    for rule in $rules; do
-        RULE_FILE="$RULES_DIR/$rule.md"
+    while IFS= read -r RULE_FILE; do
+        rule=$(echo "$RULE_FILE" | sed "s|$RULES_DIR/||;s|\.md$||")
         if [ -s "$RULE_FILE" ]; then
             count=$((count + 1))
         else
             echo "  ⚠ $rule (empty)"
         fi
-    done
+    done < <(find "$RULES_DIR" -name '*.md' -not -name 'justfile.md' | sort)
     echo ""
     echo "✓ $count rules checked"
