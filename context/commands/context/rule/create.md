@@ -13,7 +13,7 @@ Create a new rule file that provides persistent instructions to Claude Code.
 - `$1` - Rule name (lowercase, hyphenated). Example: `commit-conventions`
 - `--location` - Where to create the rule:
   - `project` (default): `.claude/rules/<rule-name>.md`
-  - `context`: `context/rules/<rule-name>.md`
+  - `context`: `context/rules/<category>/<rule-name>.md`
 
 ## Rule vs Command vs Skill
 
@@ -56,7 +56,7 @@ Search for existing rules that might overlap:
 
 ```text
 Glob: .claude/rules/*.md
-Glob: context/rules/*.md
+Glob: context/rules/**/*.md
 ```
 
 If related rules found, ask if this should:

@@ -35,7 +35,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 
    ```bash
    ls "$AI_REPO/.claude/rules/"
-   ls "$AI_REPO/context/rules/"
+   find "$AI_REPO/context/rules/" -name '*.md' | sort
    ```
 
 4. **Check for existing branch/issue/PR**:
@@ -59,7 +59,7 @@ If existing rule found, ask user:
 Based on rule scope:
 
 - Project-wide rules → `.claude/rules/<name>.md`
-- Context library rules → `context/rules/<name>.md`
+- Context library rules → `context/rules/<category>/<name>.md`
 
 ### Phase 4: Create Issue and PR
 
