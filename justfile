@@ -11,6 +11,11 @@ mod command "context/commands/justfile"
 mod agent "context/agents/justfile"
 mod rule "context/rules/justfile"
 
+# TypeScript CLI tooling
+[group('tools')]
+ai-tools *args:
+    @bun run .scripts/bin/ai-tools.ts {{ args }}
+
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"
@@ -18,7 +23,7 @@ EMBEDDING_MODEL := "nomic-embed-text"
 
 # Install project dependencies (idempotent)
 [group('install')]
-init: _init-brew _init-python _init-pre-commit _init-docker _init-ollama _init-db
+init: _init-brew _init-bun _init-python _init-pre-commit _init-docker _init-ollama _init-db
     @echo "✓ Project initialized"
 
 [private]
@@ -30,6 +35,11 @@ _init-brew:
 _init-pre-commit:
     @echo "Installing Pre-commit Hooks..."
     @pre-commit install --install-hooks
+
+[private]
+_init-bun:
+    @echo "Installing TypeScript dependencies..."
+    @cd .scripts && bun install --silent
 
 [private]
 _init-python:
