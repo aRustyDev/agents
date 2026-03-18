@@ -29,3 +29,6 @@ documents/
 .ruff_cache/
 .rumdl_cache/
 .lycheecache
+
+# Dolt database files (added by bd init)
+.dolt/
