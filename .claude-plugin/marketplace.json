@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "homebrew-dev",
-      "source": "./context/plugins/homebrew-dev",
+      "source": "./context/plugins/releases/homebrew-dev",
       "description": "Homebrew formula development toolkit — research packages, generate formulas from JSON schema, validate with brew audit/style, and batch-create formulas for a custom tap.",
       "version": "1.1.1",
       "author": {
@@ -21,7 +21,7 @@
     },
     {
       "name": "browser-extension-dev",
-      "source": "./context/plugins/browser-extension-dev",
+      "source": "./context/plugins/web/browser-extension-dev",
       "description": "Comprehensive end-to-end support for building, testing, and deploying cross-browser extensions across Firefox, Chrome, and Safari with modern patterns, WASM integration, and best practices.",
       "version": "0.3.3",
       "author": {
@@ -89,7 +89,7 @@
     },
     {
       "name": "swiftui-dev",
-      "source": "./context/plugins/swiftui-dev",
+      "source": "./context/plugins/frontend/swiftui-dev",
       "description": "Comprehensive SwiftUI development support for UI testing, integration testing, data-driven apps, and interactive development practices.",
       "version": "0.3.2",
       "author": {
@@ -113,7 +113,7 @@
     },
     {
       "name": "design-to-code",
-      "source": "./context/plugins/design-to-code",
+      "source": "./context/plugins/frontend/design-to-code",
       "description": "Bridge design tools and code generation, enabling seamless translation of design files into production-ready UI code across multiple frameworks.",
       "version": "0.1.5",
       "author": {

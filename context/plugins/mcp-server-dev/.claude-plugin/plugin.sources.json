@@ -1,9 +1,0 @@
-{
-  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
-  "sources": {
-    "agents/mcp-developer.md": {
-      "source": "context/agents/mcp-developer.md",
-      "hash": "sha256:f168a787feb67d14f588fbb36cc4a07dc6d118e03aae4ab09994733016ab1123"
-    }
-  }
-}

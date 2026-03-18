@@ -1,9 +1,0 @@
-{
-  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
-  "sources": {
-    "agents/embedded-systems.md": {
-      "source": "context/agents/embedded-systems.md",
-      "hash": "sha256:ce13f3cd5b7e4b46bbb6ec4586f6d1e92ee327e1fa1f357225d5f99ed3f9cdf4"
-    }
-  }
-}

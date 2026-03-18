@@ -1,9 +1,0 @@
-{
-  "$schema": "Plugin source mapping \u2014 maps local paths to repo source paths",
-  "sources": {
-    "agents/golang-pro.md": {
-      "source": "context/agents/golang-pro.md",
-      "hash": "sha256:901f7753c5a7aea266751d2208799febf2bcdbb5938b38916d3f0f26fdfffaaa"
-    }
-  }
-}
