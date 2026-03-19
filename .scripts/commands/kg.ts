@@ -18,7 +18,7 @@ import { Glob } from 'bun'
 import { defineCommand } from 'citty'
 import { Ollama } from 'ollama'
 import { chunkMarkdown, parseFrontmatter } from '../lib/chunker'
-import { prepareEmbeddingText } from '../lib/embedder'
+import { isOllamaAvailable, prepareEmbeddingText } from '../lib/embedder'
 import { hashFile } from '../lib/hash'
 import {
   checkHealth,
@@ -29,13 +29,12 @@ import {
   type IndexableEntity,
   indexChunks,
   indexEntity,
-  type SearchResult,
   searchKeyword,
   searchSemantic,
 } from '../lib/meilisearch'
 import { createOutput } from '../lib/output'
 import { hybridSearch, type RankedResult } from '../lib/search'
-import { CliError, type EntityType, EXIT } from '../lib/types'
+import { type EntityType, EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
@@ -141,19 +140,6 @@ export async function discoverFiles(
   }
 
   return results
-}
-
-/**
- * Check if Ollama is reachable.
- */
-async function isOllamaAvailable(): Promise<boolean> {
-  try {
-    const ollama = new Ollama()
-    await ollama.list()
-    return true
-  } catch {
-    return false
-  }
 }
 
 /**

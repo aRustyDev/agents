@@ -1,10 +1,41 @@
 /**
  * Embedding utilities module.
  *
- * Provides helpers for preparing text before embedding generation.
- * The actual embedding backends (Ollama, sentence-transformers) remain
- * in the Python implementation (embedder.py).
+ * Provides helpers for preparing text before embedding generation,
+ * and health checks for the Ollama embedding backend.
  */
+
+import { Ollama } from 'ollama'
+
+// ---------------------------------------------------------------------------
+// Health checks
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if Ollama is reachable by listing available models.
+ */
+export async function isOllamaAvailable(): Promise<boolean> {
+  try {
+    const ollama = new Ollama()
+    await ollama.list()
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Check if a specific model is pulled and available in Ollama.
+ */
+export async function hasModel(model: string): Promise<boolean> {
+  try {
+    const ollama = new Ollama()
+    const list = await ollama.list()
+    return list.models.some((m) => m.name === model || m.name.startsWith(`${model}:`))
+  } catch {
+    return false
+  }
+}
 
 // ---------------------------------------------------------------------------
 // prepareEmbeddingText
