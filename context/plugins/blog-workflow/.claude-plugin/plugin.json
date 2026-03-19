@@ -1,6 +1,6 @@
 {
   "name": "blog-workflow",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Multi-phase blog content creation with personas, templates, and iterative review. Supports tutorials, deep dives, research summaries, and development journals.",
   "author": {
     "name": "Adam Smith",
@@ -65,13 +65,6 @@
     "./skills/seo-for-developers/SKILL.md",
     "./skills/technical-writing-style/SKILL.md",
     "./skills/platforms/astro/SKILL.md"
-  ],
-  "platformSkills": [
-    {
-      "name": "astro",
-      "path": "./skills/platforms/astro/SKILL.md",
-      "detection": ["astro.config.mjs", "astro.config.ts"]
-    }
   ],
   "mcpServers": "./.mcp.json",
   "outputStyles": [

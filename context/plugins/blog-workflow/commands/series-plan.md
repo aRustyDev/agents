@@ -1,7 +1,17 @@
 ---
+name: blog/series-plan
 description: Plan a multi-part blog series with coherent structure and progression
 argument-hint: <series-topic> [--parts 3-7] [--type tutorial|deep-dive]
-allowed-tools: Read, Write, Glob, Grep, WebSearch, AskUserQuestion
+arguments:
+  - name: topic
+    description: Series topic
+    required: true
+  - name: parts
+    description: "Number of parts (default: 3-5, max: 7)"
+    required: false
+  - name: type
+    description: "Series type: tutorial or deep-dive"
+    required: false
 ---
 
 # Plan Blog Series
@@ -105,6 +115,7 @@ By the end of this series, readers will be able to:
 ...
 
 ### Part N: [Title]
+
 ...
 
 ## Series Themes
