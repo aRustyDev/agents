@@ -101,17 +101,19 @@ Rate-limited: 50 concurrent requests, 1s delay between batches. GitHub unauthent
 
 For `not_found` entries: flag for follow-up search (repo may have been renamed/moved). A second pass can search GitHub API for the owner's repos matching the skill name.
 
-## Content Analysis Agent
+## Content Analysis: Tiered Agent Model
 
-### Agent Definition
+Analysis is split into two tiers by cognitive demand. Tier 1 handles mechanical/heuristic checks at scale with Haiku. Tier 2 handles qualitative judgment selectively with Sonnet.
 
-`context/agents/catalog/skill-inspector.md`
+### Tier 1: Mechanical Analysis (Haiku)
 
-**Isolation:** Git worktree per batch. Each agent gets a clean repo copy, runs `npx skills add` without colliding, worktree cleaned up after.
+**Agent:** `context/agents/catalog/skill-inspector-t1.md`
+**Model:** Haiku (fast, cheap, sufficient for deterministic checks)
+**Isolation:** Git worktree per batch
+**Batch size:** 15-20 skills per dispatch, 5-10 concurrent agents
+**Dispatches:** ~700-900 (all available, non-fork skills from Phase 2)
 
-**Batch size:** 10-20 skills per agent invocation. At 13K entries, ~700-1400 agent dispatches. Parallelizable to 5-10 concurrent agents.
-
-### Allowed Tools
+#### Allowed Tools
 
 | Tool | Purpose |
 |---|---|
@@ -122,13 +124,11 @@ For `not_found` entries: flag for follow-up search (repo may have been renamed/m
 | `Bash(mktemp:*,rm:*)` | Temp dir management |
 | `Read`, `Glob`, `Grep` | Content inspection |
 
-No `Write`, no `Edit` — agent is read-only against the repo. Returns structured NDJSON to stdout.
+No `Write`, no `Edit` — agent is read-only. Returns NDJSON to stdout.
 
-### Analysis Checklist
+#### Tier 1 Checklist
 
-For each skill the agent downloads and inspects:
-
-#### Metadata Extraction
+##### Metadata Extraction
 
 ```bash
 # Structured section tree + links in one pass
@@ -143,7 +143,7 @@ Extracts:
 - `internalLinks[]` — relative paths from `links` object
 - `externalLinks[]` — absolute URLs from `links` object
 
-#### Keyword Extraction
+##### Keyword Extraction
 
 Sources (in priority order):
 1. Frontmatter `name` and `description`
@@ -153,7 +153,7 @@ Sources (in priority order):
 
 Output: `keywords[]` — deduplicated, lowercase, 5-20 keywords per skill.
 
-#### Complexity Assessment
+##### Complexity Assessment
 
 | Signal | Simple | Moderate | Complex |
 |---|---|---|---|
@@ -165,7 +165,7 @@ Output: `keywords[]` — deduplicated, lowercase, 5-20 keywords per skill.
 
 Score: average of signal grades. Output: `complexity: simple|moderate|complex`
 
-#### Progressive Disclosure Detection
+##### Progressive Disclosure Detection
 
 Check for these patterns:
 - `<details>` / `<summary>` HTML blocks (collapsible sections)
@@ -176,35 +176,56 @@ Check for these patterns:
 
 Output: `progressiveDisclosure: boolean`, `techniques: string[]`
 
-#### Best Practices Scoring (0-5)
+##### Best Practices: Mechanical Checks (0-3.5)
 
 | Check | Points | What |
 |---|---|---|
 | Frontmatter has `name` | +1 | Required field present |
 | Frontmatter has `description` | +1 | Required field present |
-| Description is actionable trigger | +1 | Tells agent WHEN to use (contains "Use when", "Use this when", trigger verbs) |
 | Has examples or code blocks | +1 | Concrete usage patterns |
-| Uses `allowed-tools` frontmatter | +0.5 | Restricts tool access |
-| No hardcoded absolute paths | +0.5 | Portable across machines |
+| Uses `allowed-tools` frontmatter | +0.25 | Restricts tool access |
+| No hardcoded absolute paths | +0.25 | Portable across machines |
 
-Output: `bestPractices: { score: number, violations: string[] }`
+Output: `bestPracticesMechanical: { score: number, violations: string[] }`
 
-#### Security Assessment (0-5)
+##### Security: Regex-Based Checks (0-4)
 
 | Check | Deduction | What |
 |---|---|---|
 | Hardcoded tokens/secrets | -2 | Regex: `sk-`, `ghp_`, `AKIA`, Bearer tokens, API keys |
 | `Bash(*)` in allowed-tools (unrestricted) | -1 | Overly permissive tool access |
 | `eval()` in code blocks | -1 | Code execution risk |
-| External URLs fetched without validation | -0.5 | Fetch from user-controlled URLs |
-| Prompt injection patterns | -1 | Instructions to ignore system prompt, override behavior |
-| No concerns found | 5 | Clean |
+| No regex concerns found | 4 | Clean (Tier 2 adds +1 for injection review) |
 
-Output: `security: { score: number, concerns: string[] }`
+Output: `securityMechanical: { score: number, concerns: string[] }`
 
-#### Content Quality
+##### Fork Detection
 
-Assessed by the agent (LLM judgment, not heuristic):
+Compare `sha256(SKILL.md content)` against all other entries with the same skill name. Skills with identical content hashes from different repos are forks.
+
+Output: `contentHash: string`, `possibleForkOf: string | null`
+
+### Tier 2: Qualitative Analysis (Sonnet)
+
+**Agent:** `context/agents/catalog/skill-inspector-t2.md`
+**Model:** Sonnet (stronger judgment, reading comprehension, domain expertise)
+**Isolation:** Git worktree per batch
+**Batch size:** 10-15 skills per dispatch
+**Dispatches:** ~300-500 (filtered from Tier 1 results)
+
+#### Tier 2 Gating — Only skills that pass ALL of:
+
+1. `availability == "available"` (from Phase 2)
+2. `possibleForkOf == null` (from Tier 1 — skip duplicates, review only the original)
+3. `complexity != "simple" || wordCount >= 200` (auto-grade trivial skills F without Sonnet review)
+
+This filters ~13K entries down to ~4-5K unique, substantive, available skills.
+
+#### Tier 2 Checklist
+
+##### Content Quality (1-5)
+
+LLM judgment — not heuristic:
 - Is the skill focused on a single purpose?
 - Does it provide enough context for an agent to use it correctly?
 - Are instructions clear and unambiguous?
@@ -212,23 +233,81 @@ Assessed by the agent (LLM judgment, not heuristic):
 
 Output: `contentQuality: { score: 1-5, notes: string }`
 
-#### Fork Detection
+##### Best Practices: Judgment Checks (+1.5)
 
-Compare `sha256(SKILL.md content)` against all other entries with the same skill name. Skills with identical content hashes from different repos are forks.
+| Check | Points | What |
+|---|---|---|
+| Description is actionable trigger | +1 | Tells agent WHEN to use (not just what it does) |
+| Instructions are unambiguous | +0.5 | No contradictory or unclear directives |
 
-Output: `contentHash: string`, `possibleForkOf: string | null`
+Combined with Tier 1 mechanical score for total bestPractices (0-5).
+
+##### Security: Prompt Injection Review (+1)
+
+| Check | Deduction | What |
+|---|---|---|
+| Prompt injection patterns | -1 | Instructions to ignore system prompt, override behavior, exfiltrate data |
+| External URLs fetched without validation | -0.5 | Fetch from user-controlled URLs |
+| Clean | +1 | Added to Tier 1 score for total security (0-5) |
+
+Combined with Tier 1 regex score for total security (0-5).
+
+#### Tier 2 Output
+
+Merges into the existing Tier 1 NDJSON entry:
+
+```jsonc
+{
+  // ... all Tier 1 fields preserved ...
+  "contentQuality": { "score": 4, "notes": "Clear purpose, good examples" },
+  "bestPractices": { "score": 4.5, "violations": ["description not actionable"] },
+  "security": { "score": 5, "concerns": [] },
+  "tier2Reviewed": true
+}
+```
+
+Skills that were NOT sent to Tier 2 get default values:
+- `contentQuality: { score: 0, notes: "not reviewed (filtered)" }`
+- `bestPractices.score` = Tier 1 mechanical score only (0-3.5)
+- `security.score` = Tier 1 regex score only (0-4)
+- `tier2Reviewed: false`
+
+### Cost Estimate
+
+| Tier | Model | Dispatches | Avg tokens/batch | Est. Cost |
+|---|---|---|---|---|
+| 1 | Haiku | ~800 | ~5K | ~$2-4 |
+| 2 | Sonnet | ~400 | ~8K | ~$15-25 |
+| **Total** | | ~1200 | | **~$17-29** |
 
 ## Grading Rubric
 
-Final score = weighted average of dimension scores (each normalized to 0-10):
+Final score = weighted average of dimension scores (each normalized to 0-10).
+
+**Two grade modes** depending on whether Tier 2 was applied:
+
+### Tier 2 Reviewed Skills (full grade)
 
 | Dimension | Weight | Source |
 |---|---|---|
-| Best Practices | 30% | bestPractices.score (0-5 → 0-10) |
-| Content Quality | 25% | contentQuality.score (1-5 → 0-10) |
-| Security | 20% | security.score (0-5 → 0-10) |
+| Best Practices | 30% | bestPractices.score (0-5 → 0-10, Tier 1 mechanical + Tier 2 judgment) |
+| Content Quality | 25% | contentQuality.score (1-5 → 0-10, Tier 2 only) |
+| Security | 20% | security.score (0-5 → 0-10, Tier 1 regex + Tier 2 injection review) |
 | Progressive Disclosure | 15% | `min(10, pdTechniques.length * 2.5)` — 0 techniques = 0, 4+ = 10 |
 | Metadata Completeness | 10% | frontmatter fields present / expected |
+
+### Tier 1 Only Skills (partial grade, flagged)
+
+Skills not sent to Tier 2 (forks, trivial, unavailable) receive a **provisional grade** using only mechanical dimensions. Content Quality is excluded and its weight redistributed:
+
+| Dimension | Weight | Source |
+|---|---|---|
+| Best Practices (mechanical) | 35% | bestPracticesMechanical.score (0-3.5 → 0-10) |
+| Security (regex) | 30% | securityMechanical.score (0-4 → 0-10) |
+| Progressive Disclosure | 20% | `min(10, pdTechniques.length * 2.5)` |
+| Metadata Completeness | 15% | frontmatter fields present / expected |
+
+Provisional grades are capped at **C** — a skill cannot receive A or B without Tier 2 human-quality judgment. The `tier2Reviewed: false` flag indicates the grade ceiling.
 
 | Grade | Score Range | Meaning |
 |---|---|---|
@@ -334,8 +413,8 @@ jq -s 'sort_by(-.score) | .[:20] | .[]' .catalog.ndjson
 ### Phase 3: Content Analysis (network + compute, heavy)
 
 **Input:** Available entries from Phase 2
-**Tool:** Dispatch `skill-inspector` agent in worktrees
-**Method:** Batches of 10-20 skills per agent, 5-10 concurrent agents
+**Tool:** Dispatch `skill-inspector-t1` (Haiku) then `skill-inspector-t2` (Sonnet) agents in worktrees
+**Method:** Tier 1: batches of 15-20, 5-10 concurrent. Tier 2: batches of 10-15, 3-5 concurrent (gated by Tier 1 results)
 **Output:** Full `.catalog.ndjson` entries
 **Parallelizable:** Yes — agents run in isolated worktrees
 **Estimated time:** ~4-8 hours (depends on parallelism and network)
@@ -404,7 +483,8 @@ just catalog:search       # Query catalog
 
 | File | Purpose |
 |---|---|
-| `context/agents/catalog/skill-inspector.md` | Batch review agent definition |
+| `context/agents/catalog/skill-inspector-t1.md` | Tier 1 mechanical analysis agent (Haiku) |
+| `context/agents/catalog/skill-inspector-t2.md` | Tier 2 qualitative analysis agent (Sonnet) |
 | `context/skills/.taxonomy.yaml` | Skill name → category mapping (generated) |
 | `context/skills/.catalog.ndjson` | Full catalog data (generated) |
 | `context/skills/.catalog-stats.json` | Summary statistics (generated) |
