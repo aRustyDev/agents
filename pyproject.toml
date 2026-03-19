@@ -1,47 +1,17 @@
 [project]
 name = "ai-context-lib"
 version = "0.1.0"
-description = "AI context library with semantic knowledge graph"
+description = "Knowledge graph embedding system (SQLite + sqlite-vec)"
 requires-python = ">=3.14"
 dependencies = [
     "sqlite-vec>=0.1.6",
     "watchdog>=4.0.0",
     "pyyaml>=6.0",
     "ollama>=0.4.0",
-    "markdownify>=0.14.1",
-    "tree-sitter-rust>=0.24.0",
-    "tree-sitter-language-pack>=0.13.0",
-    "crawl4ai>=0.8.0",
-    "rich>=14.3.2",
-    "httpx>=0.28.1",
-]
-
-[project.optional-dependencies]
-# Fallback embedding model (if Ollama unavailable)
-transformers = [
-    "sentence-transformers>=3.0.0",
-    "torch>=2.0.0",
-]
-# Document conversion for non-markdown files
-docling = [
-    "docling>=2.0.0",
 ]
 
 [project.scripts]
 embed = ".scripts.embed:main"
 
-[dependency-groups]
-dev = [
-    "pytest>=8.0",
-    "ruff>=0.4.0",
-]
-
 [tool.uv]
 python-preference = "only-system"
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "UP"]

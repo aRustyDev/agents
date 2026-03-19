@@ -3,6 +3,8 @@
 
 set unstable := true
 
+mod external ".external/justfile"
+
 ROOT := source_directory() / "../.."
 SCRIPTS := ROOT / ".scripts"
 SKILLS := source_directory()

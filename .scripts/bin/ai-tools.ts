@@ -1,0 +1,14 @@
+#!/usr/bin/env bun
+import { defineCommand, runMain } from 'citty'
+
+const main = defineCommand({
+  meta: { name: 'ai-tools', version: '0.1.0', description: 'AI context library tooling' },
+  subCommands: {
+    plugin: () => import('../commands/plugin').then((m) => m.default),
+    skill: () => import('../commands/skill').then((m) => m.default),
+    kg: () => import('../commands/kg').then((m) => m.default),
+    registry: () => import('../commands/registry').then((m) => m.default),
+  },
+})
+
+runMain(main)

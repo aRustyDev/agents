@@ -1,0 +1,29 @@
+{
+  "name": "ai-tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ai-tools": "bun run bin/ai-tools.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@bomb.sh/tab": "^0.0.14",
+    "@carlrannaberg/cclint": "^0.2.10",
+    "@octokit/auth-oauth-device": "^7.0.0",
+    "@octokit/core": "^6.0.0",
+    "@opentf/cli-pbar": "^0.7.2",
+    "ansis": "^4.0.0",
+    "better-sqlite3": "^11.0.0",
+    "citty": "^0.2.1",
+    "console-table-printer": "^2.15.0",
+    "js-yaml": "^4.1.0",
+    "nanospinner": "^1.2.0",
+    "ollama": "^0.5.0",
+    "valibot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/js-yaml": "^4.0.0"
+  }
+}

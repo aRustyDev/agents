@@ -6,6 +6,7 @@ brew "yq"
 brew "jq"
 brew "dolt"
 brew "beads"
+brew "oven-sh/bun/bun"             # TypeScript runtime for .scripts/
 
 # Python package manager (fast, Rust-based)
 brew "uv"

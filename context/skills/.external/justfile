@@ -1,0 +1,48 @@
+# =============================================================================
+# External Skill Tracking Recipes
+# =============================================================================
+# Manages external skill dependencies: passthrough symlinks and derived tracking.
+# All recipes delegate to: bun run .scripts/bin/ai-tools.ts skill deps <verb>
+#
+# Invoked as: just skill external:check, just skill external:update, etc.
+# =============================================================================
+
+set unstable := true
+
+# ROOT is not inherited from parent module scope, so recompute
+ROOT := source_directory() / "../../.."
+TOOLS := ROOT / ".scripts/bin/ai-tools.ts"
+run := "bun run " + TOOLS + " skill deps"
+
+# Full workflow: sync -> issues -> links -> status
+[group('external')]
+update *FLAGS:
+    {{ run }} sync {{ FLAGS }}
+    {{ run }} issues {{ FLAGS }}
+    just skill external:links
+    {{ run }} status {{ FLAGS }}
+
+# Check for upstream changes (network, no local writes)
+[group('external')]
+check *FLAGS:
+    {{ run }} check {{ FLAGS }}
+
+# Pull fresh copies into .external/ (writes files, no commit)
+[group('external')]
+sync *FLAGS:
+    {{ run }} sync {{ FLAGS }}
+
+# Create/update GH issues for drift, update lock (no commit)
+[group('external')]
+issues *FLAGS:
+    {{ run }} issues {{ FLAGS }}
+
+# Create/refresh passthrough symlinks (declarative)
+[group('external')]
+links:
+    {{ run }} links
+
+# Show current state table (hashes, staleness, symlinks, open issues)
+[group('external')]
+status *FLAGS:
+    {{ run }} status {{ FLAGS }}
