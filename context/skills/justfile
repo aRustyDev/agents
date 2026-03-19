@@ -4,6 +4,7 @@
 set unstable := true
 
 mod external ".external/justfile"
+mod catalog ".catalog/justfile"
 
 ROOT := source_directory() / "../.."
 SCRIPTS := ROOT / ".scripts"

@@ -216,7 +216,8 @@ exclude_loopback = false
 include_mail = false
 
 # Check WikiLinks in Markdown files
-include_wikilinks = true
+# Disabled: wikilink checker requires local base_url, but we use a remote base_url
+include_wikilinks = false
 
 # Only check local files
 offline = false

@@ -1,0 +1,58 @@
+# Skill catalog pipeline recipes
+# Imported by context/skills/justfile as: mod catalog ".catalog/justfile"
+# Invoked as: just catalog:run, just catalog:taxonomy, etc.
+
+set unstable := true
+
+# ROOT is not inherited from parent module scope
+ROOT := source_directory() / "../../.."
+TOOLS := ROOT / ".scripts/bin/ai-tools.ts"
+run := "bun run " + TOOLS + " skill catalog"
+
+# Full pipeline: taxonomy -> availability -> analyze -> grade
+[group('catalog')]
+run *FLAGS:
+    {{ run }} run {{ FLAGS }}
+
+# Phase 1: Generate taxonomy from skill names
+[group('catalog')]
+taxonomy *FLAGS:
+    {{ run }} taxonomy {{ FLAGS }}
+
+# Phase 2: Check availability of all skill sources
+[group('catalog')]
+availability *FLAGS:
+    {{ run }} availability {{ FLAGS }}
+
+# Phase 3+4: Analyze skills (Tier 1 + Tier 2)
+[group('catalog')]
+analyze *FLAGS:
+    {{ run }} analyze {{ FLAGS }}
+
+# Phase 5: Compute grades and generate stats
+[group('catalog')]
+grade *FLAGS:
+    {{ run }} grade {{ FLAGS }}
+
+# Show catalog statistics
+[group('catalog')]
+stats *FLAGS:
+    {{ run }} stats {{ FLAGS }}
+
+# Search the catalog
+[group('catalog')]
+search *FLAGS:
+    {{ run }} search {{ FLAGS }}
+
+# Clean up orphan worktrees from analysis runs
+[group('catalog')]
+cleanup:
+    #!/usr/bin/env bash
+    echo "Cleaning up orphan worktrees..."
+    for wt in /tmp/worktrees/skill-inspect-*; do
+        if [ -d "$wt" ]; then
+            git -C "$wt" worktree remove --force "$wt" 2>/dev/null || rm -rf "$wt"
+            echo "  Removed: $wt"
+        fi
+    done
+    echo "Done"
