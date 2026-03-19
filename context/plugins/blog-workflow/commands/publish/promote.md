@@ -1,5 +1,5 @@
 ---
-name: blog/publish/promote
+name: blog:publish:promote
 description: Move validated draft to the platform's published content directory
 argument-hint: <path> [--schedule date]
 arguments:

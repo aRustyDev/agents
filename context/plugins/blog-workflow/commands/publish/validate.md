@@ -1,5 +1,5 @@
 ---
-name: blog/publish/validate
+name: blog:publish:validate
 description: Verify platform build succeeds with published post
 argument-hint: <path> [--dev]
 arguments:

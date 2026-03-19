@@ -1,5 +1,5 @@
 ---
-name: blog/persona/draft
+name: blog:persona:draft
 description: Create a new authorial persona through voice discovery conversation
 argument-hint: [name]
 arguments:

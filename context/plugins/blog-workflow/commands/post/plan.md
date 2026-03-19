@@ -1,5 +1,5 @@
 ---
-name: blog/post/plan
+name: blog:post:plan
 description: Create structural outline from post spec
 argument-hint: <path> [--template name]
 arguments:

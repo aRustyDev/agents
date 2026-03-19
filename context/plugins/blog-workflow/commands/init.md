@@ -1,5 +1,5 @@
 ---
-name: blog/init
+name: blog:init
 description: Initialize blog workflow directory structure, detect platform, and copy default templates
 argument-hint: [--platform <name>] [--force] [--no-templates] [--with-hooks]
 arguments:

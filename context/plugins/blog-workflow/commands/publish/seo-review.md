@@ -1,5 +1,5 @@
 ---
-name: blog/publish/seo-review
+name: blog:publish:seo-review
 description: SEO optimization check for blog draft
 argument-hint: <path> [--fix]
 arguments:

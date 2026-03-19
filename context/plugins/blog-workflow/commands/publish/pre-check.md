@@ -1,5 +1,5 @@
 ---
-name: blog/publish/pre-check
+name: blog:publish:pre-check
 description: Validate frontmatter and links before publish
 argument-hint: <path> [--skip-links]
 arguments:

@@ -1,5 +1,5 @@
 ---
-name: blog/template/draft
+name: blog:template:draft
 description: Create a new structural template for blog artifacts
 argument-hint: <type> <name>
 arguments:

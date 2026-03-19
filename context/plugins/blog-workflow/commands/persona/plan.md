@@ -1,5 +1,5 @@
 ---
-name: blog/persona/plan
+name: blog:persona:plan
 description: Refine an existing persona with expanded examples and voice phrases
 argument-hint: <path>
 arguments:

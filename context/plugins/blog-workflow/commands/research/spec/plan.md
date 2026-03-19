@@ -1,5 +1,5 @@
 ---
-name: blog/research/spec/plan
+name: blog:research:spec:plan
 description: Refine a research plan with detailed methodology and sources
 argument-hint: <path>
 arguments:

@@ -1,5 +1,5 @@
 ---
-name: blog/template/review
+name: blog:template:review
 description: Dry-run a template against a sample topic to validate fit
 argument-hint: <path> "<topic>"
 arguments:

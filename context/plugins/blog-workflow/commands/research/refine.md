@@ -1,5 +1,5 @@
 ---
-name: blog/research/refine
+name: blog:research:refine
 description: Update any research artifact based on review feedback
 argument-hint: <path> ["feedback"]
 arguments:

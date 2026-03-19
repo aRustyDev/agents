@@ -1,5 +1,5 @@
 ---
-name: blog/persona/review
+name: blog:persona:review
 description: Test a persona against sample content and validate consistency
 argument-hint: <path>
 arguments:

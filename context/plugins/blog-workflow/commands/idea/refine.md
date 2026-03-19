@@ -1,5 +1,5 @@
 ---
-name: blog/idea/refine
+name: blog:idea:refine
 description: Update an idea or plan artifact based on review feedback
 argument-hint: <path> "<feedback>"
 arguments:

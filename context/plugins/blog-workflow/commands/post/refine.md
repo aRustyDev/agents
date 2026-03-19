@@ -1,5 +1,5 @@
 ---
-name: blog/post/refine
+name: blog:post:refine
 description: Update post artifact based on review feedback
 argument-hint: <path> ["feedback"]
 arguments:

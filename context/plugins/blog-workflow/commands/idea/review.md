@@ -1,5 +1,5 @@
 ---
-name: blog/idea/review
+name: blog:idea:review
 description: Evaluate an idea or plan artifact against its review checklist
 argument-hint: <path> [--approve]
 arguments:

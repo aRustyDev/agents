@@ -1,5 +1,5 @@
 ---
-name: blog/idea/brainstorm
+name: blog:idea:brainstorm
 description: Transform a raw concept into a structured idea artifact with project scaffolding
 argument-hint: <topic>
 arguments:

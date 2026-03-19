@@ -1,5 +1,5 @@
 ---
-name: blog/content/plan
+name: blog:content:plan
 description: Decompose content brainstorm into numbered phase files
 argument-hint: <path> [--dry-run]
 arguments:

@@ -1,5 +1,5 @@
 ---
-name: blog/series-plan
+name: blog:series-plan
 description: Plan a multi-part blog series with coherent structure and progression
 argument-hint: <series-topic> [--parts 3-7] [--type tutorial|deep-dive]
 arguments:

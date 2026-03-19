@@ -1,5 +1,5 @@
 ---
-name: blog/research/plan
+name: blog:research:plan
 description: Create analysis from research findings
 argument-hint: <path>
 arguments:

@@ -1,5 +1,5 @@
 ---
-name: blog/content/review
+name: blog:content:review
 description: Evaluate content brainstorm or phase file
 argument-hint: <path> [--approve]
 arguments:

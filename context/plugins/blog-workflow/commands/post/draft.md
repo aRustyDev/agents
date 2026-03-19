@@ -1,5 +1,5 @@
 ---
-name: blog/post/draft
+name: blog:post:draft
 description: Write full post draft from outline
 argument-hint: <path> [--preview]
 arguments:

@@ -1,5 +1,5 @@
 ---
-name: blog/post/review
+name: blog:post:review
 description: Evaluate post artifact (spec, outline, or draft)
 argument-hint: <path> [--approve]
 arguments:
