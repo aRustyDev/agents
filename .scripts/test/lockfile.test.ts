@@ -1,23 +1,23 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { mkdtemp, rm, writeFile, mkdir, readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import * as v from 'valibot'
+import { computeHash, formatHash } from '../lib/hash'
 import {
-  readLockfile,
-  writeLockfile,
   checkStaleness,
-  registerSchema,
   getSchema,
   type LockfileSchema,
+  readLockfile,
+  registerSchema,
   type StalenessReport,
+  writeLockfile,
 } from '../lib/lockfile'
-import { LockfileV1, PluginSourcesManifest } from '../lib/schemas'
-import { computeHash, formatHash } from '../lib/hash'
-import * as v from 'valibot'
+import type { LockfileV1, PluginSourcesManifest } from '../lib/schemas'
 
 // Base paths for real test files
 const REPO_ROOT = '/private/etc/infra/pub/ai'
-const WORKTREE = `${REPO_ROOT}/.worktrees/ts-migration`
+const WORKTREE = `${REPO_ROOT}`
 
 // Temp directory created fresh before each test group
 let tmp: string
@@ -78,10 +78,7 @@ describe('schema registry', () => {
 
 describe('readLockfile', () => {
   test('reads and validates real skills-lock.json', async () => {
-    const result = await readLockfile<LockfileV1>(
-      'skills',
-      `${REPO_ROOT}/skills-lock.json`,
-    )
+    const result = await readLockfile<LockfileV1>('skills', `${REPO_ROOT}/skills-lock.json`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.version).toBe(1)
@@ -92,7 +89,7 @@ describe('readLockfile', () => {
   test('reads and validates real plugin.sources.json', async () => {
     const result = await readLockfile<PluginSourcesManifest>(
       'plugins',
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`,
+      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
     )
     expect(result.ok).toBe(true)
     if (result.ok) {
@@ -239,7 +236,7 @@ describe('checkStaleness (skills)', () => {
             computedHash: hash,
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('skills', lockPath, tmp)
@@ -268,7 +265,7 @@ describe('checkStaleness (skills)', () => {
             computedHash: 'f'.repeat(64),
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('skills', lockPath, tmp)
@@ -292,7 +289,7 @@ describe('checkStaleness (skills)', () => {
             computedHash: '0'.repeat(64),
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('skills', lockPath, tmp)
@@ -327,7 +324,7 @@ describe('checkStaleness (plugins)', () => {
             hash: formatHash(hash),
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('plugins', lockPath, tmp)
@@ -353,7 +350,7 @@ describe('checkStaleness (plugins)', () => {
             hash: 'sha256:' + '0'.repeat(64),
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('plugins', lockPath, tmp)
@@ -375,7 +372,7 @@ describe('checkStaleness (plugins)', () => {
             hash: 'sha256:' + 'a'.repeat(64),
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('plugins', lockPath, tmp)
@@ -399,7 +396,7 @@ describe('checkStaleness (plugins)', () => {
             source: 'context/nohash.md',
           },
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('plugins', lockPath, tmp)
@@ -421,7 +418,7 @@ describe('checkStaleness (plugins)', () => {
         sources: {
           'legacy.md': 'context/legacy.md',
         },
-      }),
+      })
     )
 
     const result = await checkStaleness('plugins', lockPath, tmp)
@@ -455,11 +452,7 @@ describe('error handling', () => {
   })
 
   test('checkStaleness returns error for missing file', async () => {
-    const result = await checkStaleness(
-      'skills',
-      join(tmp, 'nonexistent.json'),
-      tmp,
-    )
+    const result = await checkStaleness('skills', join(tmp, 'nonexistent.json'), tmp)
     expect(result.ok).toBe(false)
   })
 })

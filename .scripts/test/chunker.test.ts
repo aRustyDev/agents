@@ -2,10 +2,12 @@ import { describe, expect, test } from 'bun:test'
 import {
   chunkFile,
   chunkMarkdown,
+  findOverlapBoundary,
   parseFrontmatter,
   splitIntoParagraphs,
   splitIntoSections,
 } from '../lib/chunker'
+import { prepareEmbeddingText } from '../lib/embedder'
 
 // ---------------------------------------------------------------------------
 // parseFrontmatter
@@ -383,7 +385,7 @@ Third paragraph with sufficient content to exceed the fifty character minimum.`
     // chunks[2] = 1st paragraph      <- parentIndex = 1 (section)
     // chunks[3] = 2nd paragraph      <- parentIndex = 2 (1st paragraph)
     const sectionOneIdx = result.chunks.findIndex(
-      (c) => c.level === 'section' && c.heading === 'Section One',
+      (c) => c.level === 'section' && c.heading === 'Section One'
     )
     expect(sectionOneIdx).toBeGreaterThan(0)
 
@@ -453,8 +455,7 @@ ${body}`
 
 describe('chunkFile', () => {
   test('reads and chunks a real SKILL.md file', async () => {
-    const skillPath =
-      '/private/etc/infra/pub/ai/.worktrees/ts-migration/context/skills/beads/SKILL.md'
+    const skillPath = '/private/etc/infra/pub/ai/context/skills/beads/SKILL.md'
 
     const result = await chunkFile(skillPath)
 
@@ -580,7 +581,7 @@ Final paragraph in troubleshooting.`
 
     // Find the Overview section chunk
     const overviewIdx = result.chunks.findIndex(
-      (c) => c.level === 'section' && c.heading === 'Overview',
+      (c) => c.level === 'section' && c.heading === 'Overview'
     )
     expect(overviewIdx).toBeGreaterThan(0)
 
@@ -588,7 +589,7 @@ Final paragraph in troubleshooting.`
     // In the Python code: parent_index = len(chunks) - 1 at time of section append
     // That means paragraph parentIndex equals the section's index in chunks[]
     const overviewParagraphs = result.chunks.filter(
-      (c) => c.level === 'paragraph' && c.parentIndex === overviewIdx,
+      (c) => c.level === 'paragraph' && c.parentIndex === overviewIdx
     )
     expect(overviewParagraphs.length).toBeGreaterThan(0)
   })
@@ -615,9 +616,7 @@ Final paragraph in troubleshooting.`
     expect(file).toHaveLength(1)
     expect(sections).toHaveLength(4)
     // Total should be file + sections + paragraphs
-    expect(result.chunks.length).toBe(
-      file.length + sections.length + paragraphs.length,
-    )
+    expect(result.chunks.length).toBe(file.length + sections.length + paragraphs.length)
   })
 
   test('includeParagraphs: false produces only file and section chunks', () => {
@@ -630,5 +629,222 @@ Final paragraph in troubleshooting.`
 
     // 1 file + 4 sections
     expect(result.chunks).toHaveLength(5)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// findOverlapBoundary
+// ---------------------------------------------------------------------------
+
+describe('findOverlapBoundary', () => {
+  test('returns start of text when maxOffset exceeds text length', () => {
+    const text = 'Short text.'
+    const boundary = findOverlapBoundary(text, 1000)
+    expect(boundary).toBe(0)
+  })
+
+  test('returns text length when maxOffset is 0', () => {
+    const text = 'Some text.'
+    const boundary = findOverlapBoundary(text, 0)
+    expect(boundary).toBe(text.length)
+  })
+
+  test('prefers paragraph break over sentence end', () => {
+    const text = 'First sentence. Second sentence.\n\nThird sentence starts here.'
+    // With a large overlap that covers the paragraph break
+    const boundary = findOverlapBoundary(text, 40)
+    // Should land at "Third sentence starts here."
+    expect(text.slice(boundary)).toBe('Third sentence starts here.')
+  })
+
+  test('uses sentence end when no paragraph break available', () => {
+    const text = 'First sentence. Second sentence. Third sentence starts here.'
+    const boundary = findOverlapBoundary(text, 40)
+    // Should split at a sentence boundary
+    const overlap = text.slice(boundary)
+    expect(overlap).not.toMatch(/^\s/) // No leading whitespace
+    // The overlap should start at a word (after ". ")
+    expect(overlap[0]).toMatch(/[A-Z]/)
+  })
+
+  test('uses word boundary when no sentence end available', () => {
+    const text = 'one two three four five six seven eight nine ten'
+    const boundary = findOverlapBoundary(text, 20)
+    // Should split at a space, not mid-word
+    const overlap = text.slice(boundary)
+    // The overlap should start at a word boundary: the character before the
+    // boundary should be a space (or boundary is 0)
+    expect(boundary === 0 || text[boundary - 1] === ' ').toBe(true)
+    // The overlap text should start with a letter, not a space
+    expect(overlap[0]).toMatch(/[a-z]/)
+    // Verify the overlap is within the requested range
+    expect(overlap.length).toBeLessThanOrEqual(20)
+  })
+
+  test('does not cut mid-word', () => {
+    const text = 'abcdefghijklmnopqrstuvwxyz'
+    // No spaces, no sentence ends, no paragraph breaks — should return text.length (take nothing)
+    const boundary = findOverlapBoundary(text, 10)
+    expect(boundary).toBe(text.length)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// chunkMarkdown with overlapChars
+// ---------------------------------------------------------------------------
+
+describe('chunkMarkdown overlap', () => {
+  const overlapContent = `## Section
+
+First paragraph is long enough to be included and has multiple sentences. It provides context about the topic. This is the end of the first paragraph content here.
+
+Second paragraph is also long enough and should start with overlap content from the first paragraph text.
+
+Third paragraph continues the discussion with additional details that are relevant to the section.`
+
+  test('second paragraph chunk starts with content from end of first paragraph', () => {
+    const result = chunkMarkdown(overlapContent, { overlapChars: 80 })
+    const paragraphs = result.chunks.filter((c) => c.level === 'paragraph')
+    expect(paragraphs.length).toBeGreaterThanOrEqual(2)
+
+    // Second paragraph should contain some text from the first paragraph
+    const firstParaText = paragraphs[0]!.text
+    const secondParaText = paragraphs[1]!.text
+
+    // The second paragraph should start with overlap text from the first
+    // Find what overlap was prepended by checking that part of first para appears at start of second
+    expect(secondParaText).toContain('Second paragraph')
+    // The overlap should include text from the first paragraph
+    expect(secondParaText.length).toBeGreaterThan(
+      'Second paragraph is also long enough and should start with overlap content from the first paragraph text.'
+        .length
+    )
+
+    // The first paragraph text should NOT appear in the first paragraph's chunk
+    // (i.e., the first paragraph should be unchanged)
+    expect(firstParaText).not.toContain('Second paragraph')
+  })
+
+  test('first paragraph chunk has no prepended overlap content', () => {
+    const result = chunkMarkdown(overlapContent, { overlapChars: 80 })
+    const paragraphs = result.chunks.filter((c) => c.level === 'paragraph')
+    expect(paragraphs.length).toBeGreaterThanOrEqual(1)
+
+    // First paragraph should be unchanged (no overlap prepended)
+    const resultWithout = chunkMarkdown(overlapContent, { overlapChars: 0 })
+    const paragraphsWithout = resultWithout.chunks.filter((c) => c.level === 'paragraph')
+
+    expect(paragraphs[0]!.text).toBe(paragraphsWithout[0]!.text)
+  })
+
+  test('overlap does not exceed available content from short previous paragraph', () => {
+    const shortContent = `## Section
+
+This is a paragraph that is exactly long enough to pass the minimum length check.
+
+Second paragraph is also long enough to be included in the output chunk results.`
+
+    const result = chunkMarkdown(shortContent, { overlapChars: 5000 })
+    const paragraphs = result.chunks.filter((c) => c.level === 'paragraph')
+
+    if (paragraphs.length >= 2) {
+      // Even with a huge overlapChars, the overlap text should not exceed
+      // the entire previous paragraph
+      const secondText = paragraphs[1]!.text
+      const firstText = paragraphs[0]!.text
+      // The overlap portion is at most the entire first paragraph
+      // Second chunk = overlap + \n\n + original second paragraph
+      expect(secondText.length).toBeLessThanOrEqual(
+        firstText.length +
+          2 +
+          'Second paragraph is also long enough to be included in the output chunk results.'.length
+      )
+    }
+  })
+
+  test('overlap smart boundary does not cut mid-word', () => {
+    const wordContent = `## Section
+
+First paragraph contains enough words for the overlap boundary to find a clean word split point in the text content.
+
+Second paragraph is also long enough to pass the minimum length threshold for inclusion.`
+
+    const result = chunkMarkdown(wordContent, { overlapChars: 30 })
+    const paragraphs = result.chunks.filter((c) => c.level === 'paragraph')
+
+    if (paragraphs.length >= 2) {
+      const secondText = paragraphs[1]!.text
+      // The overlap text (before \n\n + original content) should start at a word boundary
+      const overlapEnd = secondText.indexOf('\n\nSecond paragraph')
+      if (overlapEnd > 0) {
+        const overlapPart = secondText.slice(0, overlapEnd)
+        // Should not start with a partial word (no leading fragment that
+        // would indicate a mid-word cut)
+        // A word boundary means the first char should be a letter starting a word
+        expect(overlapPart[0]).toMatch(/[A-Za-z]/)
+      }
+    }
+  })
+
+  test('overlapChars: 0 produces same output as no option', () => {
+    const resultDefault = chunkMarkdown(overlapContent)
+    const resultZero = chunkMarkdown(overlapContent, { overlapChars: 0 })
+
+    expect(resultZero.chunks.length).toBe(resultDefault.chunks.length)
+    for (let i = 0; i < resultDefault.chunks.length; i++) {
+      expect(resultZero.chunks[i]!.text).toBe(resultDefault.chunks[i]!.text)
+      expect(resultZero.chunks[i]!.level).toBe(resultDefault.chunks[i]!.level)
+      expect(resultZero.chunks[i]!.index).toBe(resultDefault.chunks[i]!.index)
+    }
+  })
+
+  test('overlap only applies to paragraph chunks, not section chunks', () => {
+    const resultWithOverlap = chunkMarkdown(overlapContent, { overlapChars: 80 })
+    const resultWithout = chunkMarkdown(overlapContent, { overlapChars: 0 })
+
+    // Section and file chunks should be identical
+    const sectionsOverlap = resultWithOverlap.chunks.filter(
+      (c) => c.level === 'section' || c.level === 'file'
+    )
+    const sectionsNoOverlap = resultWithout.chunks.filter(
+      (c) => c.level === 'section' || c.level === 'file'
+    )
+
+    expect(sectionsOverlap.length).toBe(sectionsNoOverlap.length)
+    for (let i = 0; i < sectionsOverlap.length; i++) {
+      expect(sectionsOverlap[i]!.text).toBe(sectionsNoOverlap[i]!.text)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// prepareEmbeddingText
+// ---------------------------------------------------------------------------
+
+describe('prepareEmbeddingText', () => {
+  test('empty title returns chunk text unchanged', () => {
+    const result = prepareEmbeddingText('', 'This is the chunk content.')
+    expect(result).toBe('This is the chunk content.')
+  })
+
+  test('whitespace-only title returns chunk text unchanged', () => {
+    const result = prepareEmbeddingText('   \n\t  ', 'Chunk content here.')
+    expect(result).toBe('Chunk content here.')
+  })
+
+  test('title + chunk produces "title\\n\\nchunk" format', () => {
+    const result = prepareEmbeddingText('My Document', 'This is paragraph content.')
+    expect(result).toBe('My Document\n\nThis is paragraph content.')
+  })
+
+  test('title is trimmed before prepending', () => {
+    const result = prepareEmbeddingText('  Padded Title  ', 'Content.')
+    expect(result).toBe('Padded Title\n\nContent.')
+  })
+
+  test('preserves chunk text exactly', () => {
+    const chunk = 'Line 1\nLine 2\n\nParagraph 2'
+    const result = prepareEmbeddingText('Title', chunk)
+    expect(result).toBe(`Title\n\n${chunk}`)
   })
 })

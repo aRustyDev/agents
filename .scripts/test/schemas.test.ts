@@ -2,17 +2,17 @@ import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import * as v from 'valibot'
 import {
-  SkillLockEntry,
-  LockfileV1,
-  PluginSourceLegacy,
-  PluginSourceExtended,
-  PluginSourcePlanning,
-  PluginSource,
-  PluginSourcesManifest,
-  PluginManifest,
-  PluginAuthor,
-  SkillFrontmatter,
   ComponentRecord,
+  LockfileV1,
+  PluginAuthor,
+  PluginManifest,
+  PluginSource,
+  PluginSourceExtended,
+  PluginSourceLegacy,
+  PluginSourcePlanning,
+  PluginSourcesManifest,
+  SkillFrontmatter,
+  SkillLockEntry,
   StatusMessage,
 } from '../lib/schemas'
 
@@ -28,7 +28,7 @@ async function readJson(path: string): Promise<unknown> {
 
 // Base paths for real test files
 const REPO_ROOT = '/private/etc/infra/pub/ai'
-const WORKTREE = `${REPO_ROOT}/.worktrees/ts-migration`
+const WORKTREE = `${REPO_ROOT}`
 
 // ---------------------------------------------------------------------------
 // SkillLockEntry
@@ -224,7 +224,7 @@ describe('PluginSource (union)', () => {
 describe('PluginSourcesManifest', () => {
   test('parses real blog-workflow plugin.sources.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`,
+      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -235,7 +235,7 @@ describe('PluginSourcesManifest', () => {
 
   test('parses real swiftui-dev plugin.sources.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.sources.json`,
+      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -247,7 +247,7 @@ describe('PluginSourcesManifest', () => {
 
   test('parses empty sources manifest', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/.template/.claude-plugin/plugin.sources.json`,
+      `${WORKTREE}/context/plugins/.template/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -264,7 +264,7 @@ describe('PluginSourcesManifest', () => {
 describe('PluginManifest', () => {
   test('parses real blog-workflow plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`,
+      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -278,7 +278,7 @@ describe('PluginManifest', () => {
 
   test('parses real swiftui-dev plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.json`,
+      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -291,7 +291,7 @@ describe('PluginManifest', () => {
 
   test('parses real blog-workflow plugin.json with platformSkills', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`,
+      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -304,7 +304,7 @@ describe('PluginManifest', () => {
 
   test('parses real job-hunting plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/job-hunting/.claude-plugin/plugin.json`,
+      `${WORKTREE}/context/plugins/job-hunting/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)

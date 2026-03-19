@@ -6,17 +6,17 @@
  */
 
 import { describe, expect, test } from 'bun:test'
-import { join } from 'node:path'
 import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { listSkills } from '../commands/skill'
+import { formatHash, hashDirectory } from '../lib/hash'
 import { readSkillFrontmatter } from '../lib/manifest'
-import { hashDirectory, formatHash } from '../lib/hash'
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const WORKTREE = '/private/etc/infra/pub/ai/.worktrees/ts-migration'
+const WORKTREE = '/private/etc/infra/pub/ai'
 const SKILLS_DIR = join(WORKTREE, 'context/skills')
 
 // ---------------------------------------------------------------------------
@@ -72,9 +72,7 @@ describe('listSkills', () => {
 
 describe('validate (readSkillFrontmatter)', () => {
   test('validates beads SKILL.md successfully', async () => {
-    const result = await readSkillFrontmatter(
-      join(SKILLS_DIR, 'beads', 'SKILL.md'),
-    )
+    const result = await readSkillFrontmatter(join(SKILLS_DIR, 'beads', 'SKILL.md'))
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('beads')
@@ -84,9 +82,7 @@ describe('validate (readSkillFrontmatter)', () => {
   })
 
   test('validates gitlab-cicd SKILL.md successfully', async () => {
-    const result = await readSkillFrontmatter(
-      join(SKILLS_DIR, 'gitlab-cicd', 'SKILL.md'),
-    )
+    const result = await readSkillFrontmatter(join(SKILLS_DIR, 'gitlab-cicd', 'SKILL.md'))
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('gitlab-cicd')
@@ -94,9 +90,7 @@ describe('validate (readSkillFrontmatter)', () => {
   })
 
   test('fails for non-existent skill', async () => {
-    const result = await readSkillFrontmatter(
-      join(SKILLS_DIR, 'nonexistent-skill-xyz', 'SKILL.md'),
-    )
+    const result = await readSkillFrontmatter(join(SKILLS_DIR, 'nonexistent-skill-xyz', 'SKILL.md'))
     expect(result.ok).toBe(false)
   })
 

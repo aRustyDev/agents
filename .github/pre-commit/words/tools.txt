@@ -24,9 +24,12 @@ buildah
 builtins
 capitalisation
 capsys
+carlrannaberg
+cclint
 chrono
 citecolor
 citeproc
+citty
 clojars
 codegen
 colorlinks
@@ -46,6 +49,7 @@ Divi
 docstrings
 doctests
 Doctests
+dotdirs
 dotenvy
 dunder
 Ecto
@@ -64,6 +68,7 @@ FRTB
 gcov
 GenServer
 getattr
+getmeili
 glab
 godotenv
 gongrzhe
@@ -97,6 +102,8 @@ mactex
 MANOVA
 mccabe
 mdbook
+meili
+MEILI
 meilisearch
 metaprogramming
 mlops
@@ -108,18 +115,22 @@ MTTR
 MVVM
 myapp
 mybinary
+nanospinner
 networkidle
 neuropixels
 noexcept
+nohash
 NUMA
 objc
 openmetadata
+opentf
 ORSA
 OTP
 ozzo
 pandoc
 parallelizable
 pathlib
+pbar
 pennylane
 Polybase
 Polylang
@@ -148,6 +159,7 @@ sonoma
 sparql
 SPARQL
 sqlx
+steveyegge
 structopt
 subclassing
 Sucuri
@@ -155,6 +167,7 @@ supabase
 templater
 texlive
 toolkits
+unclecode
 unfixable
 UNPIVOT
 urlcolor
@@ -172,5 +185,3 @@ xelatex
 xetex
 Yesod
 zipf
-carlrannaberg
-cclint

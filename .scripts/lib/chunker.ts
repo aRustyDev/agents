@@ -188,12 +188,74 @@ export function splitIntoParagraphs(content: string, minLength = 50): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// findOverlapBoundary
+// ---------------------------------------------------------------------------
+
+/**
+ * Find a smart split point within the given text, searching backward from
+ * `maxOffset` toward the start. Prefers:
+ *   1. Paragraph break (`\n\n`)
+ *   2. Sentence end (`. ` or `.\n`)
+ *   3. Word boundary (` `)
+ *
+ * If no good boundary is found, returns 0 (take nothing rather than cut
+ * mid-word).
+ *
+ * @param text - Text to search for a split point
+ * @param maxOffset - Maximum number of characters to take from the end
+ * @returns The offset from the start of `text` where the overlap should begin
+ */
+export function findOverlapBoundary(text: string, maxOffset: number): number {
+  if (maxOffset <= 0 || text.length === 0) return text.length
+  if (maxOffset >= text.length) return 0
+
+  const startSearch = text.length - maxOffset
+
+  // 1. Look for paragraph break (\n\n) — search forward from startSearch
+  const paraBreak = text.indexOf('\n\n', startSearch)
+  if (paraBreak !== -1 && paraBreak < text.length) {
+    // Skip past the paragraph break whitespace
+    let pos = paraBreak + 2
+    while (pos < text.length && text[pos] === '\n') pos++
+    if (pos < text.length) return pos
+  }
+
+  // 2. Look for sentence end (". " or ".\n") — search forward from startSearch
+  for (let i = startSearch; i < text.length - 1; i++) {
+    if (text[i] === '.' && (text[i + 1] === ' ' || text[i + 1] === '\n')) {
+      // Start overlap after the period and following whitespace
+      let pos = i + 2
+      while (pos < text.length && (text[pos] === ' ' || text[pos] === '\n')) pos++
+      if (pos < text.length) return pos
+    }
+  }
+
+  // 3. Look for word boundary (space) — search forward from startSearch
+  const spaceIdx = text.indexOf(' ', startSearch)
+  if (spaceIdx !== -1 && spaceIdx < text.length - 1) {
+    return spaceIdx + 1
+  }
+
+  // No good boundary found — take nothing rather than cut mid-word
+  return text.length
+}
+
+// ---------------------------------------------------------------------------
 // chunkMarkdown
 // ---------------------------------------------------------------------------
 
 export interface ChunkOptions {
   /** Whether to create paragraph-level chunks. Defaults to true. */
   includeParagraphs?: boolean
+  /**
+   * Number of characters to overlap between consecutive paragraph chunks.
+   * When > 0, each paragraph chunk (after the first) will include the last
+   * `overlapChars` characters from the previous paragraph's text, prepended
+   * to its own text. The overlap boundary is adjusted to a smart split point
+   * (paragraph break > sentence end > word boundary) to avoid cutting mid-word.
+   * Defaults to 0 (no overlap, backward compatible).
+   */
+  overlapChars?: number
 }
 
 /**
@@ -209,11 +271,9 @@ export interface ChunkOptions {
  * @param opts - Chunking options
  * @returns ParsedMarkdown with frontmatter, body content, and chunks
  */
-export function chunkMarkdown(
-  content: string,
-  opts?: ChunkOptions,
-): ParsedMarkdown {
+export function chunkMarkdown(content: string, opts?: ChunkOptions): ParsedMarkdown {
   const includeParagraphs = opts?.includeParagraphs ?? true
+  const overlapChars = opts?.overlapChars ?? 0
 
   const result: ParsedMarkdown = {
     frontmatter: {},
@@ -257,10 +317,22 @@ export function chunkMarkdown(
     if (includeParagraphs) {
       const paragraphs = splitIntoParagraphs(section.content)
       for (let paraIdx = 0; paraIdx < paragraphs.length; paraIdx++) {
+        let paraText = paragraphs[paraIdx]!
+
+        // Apply overlap: prepend trailing content from previous paragraph
+        if (overlapChars > 0 && paraIdx > 0) {
+          const prevText = paragraphs[paraIdx - 1]!
+          const boundary = findOverlapBoundary(prevText, overlapChars)
+          if (boundary < prevText.length) {
+            const overlapText = prevText.slice(boundary)
+            paraText = `${overlapText}\n\n${paraText}`
+          }
+        }
+
         const paraChunk: Chunk = {
           level: 'paragraph',
           index: paraIdx,
-          text: paragraphs[paraIdx]!,
+          text: paraText,
           parentIndex: chunks.length - 1, // Parent is section chunk
         }
         chunks.push(paraChunk)
@@ -285,10 +357,7 @@ export function chunkMarkdown(
  * @param opts - Chunking options
  * @returns ParsedMarkdown with frontmatter, body content, and chunks
  */
-export async function chunkFile(
-  path: string,
-  opts?: ChunkOptions,
-): Promise<ParsedMarkdown> {
+export async function chunkFile(path: string, opts?: ChunkOptions): Promise<ParsedMarkdown> {
   const content = await Bun.file(path).text()
   return chunkMarkdown(content, opts)
 }

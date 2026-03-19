@@ -22,12 +22,37 @@ services:
     #   OPENAI_API_KEY=sk-...
     #   ANTHROPIC_API_KEY=...
 
-# MCP Endpoints (after starting):
-#   - SSE:       http://localhost:11235/mcp/sse
-#   - WebSocket: ws://localhost:11235/mcp/ws
-#   - Schema:    http://localhost:11235/mcp/schema
-#   - Playground: http://localhost:11235/playground
-#   - Monitor:   http://localhost:11235/monitor
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+    volumes:
+      - ../.data/meilisearch:/meili_data
+    environment:
+      - MEILI_ENV=development
+      - MEILI_NO_ANALYTICS=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+# Service Endpoints (after starting):
+#
+#   crawl4ai:
+#     - SSE:       http://localhost:11235/mcp/sse
+#     - WebSocket: ws://localhost:11235/mcp/ws
+#     - Schema:    http://localhost:11235/mcp/schema
+#     - Playground: http://localhost:11235/playground
+#     - Monitor:   http://localhost:11235/monitor
+#
+#   meilisearch:
+#     - API:       http://localhost:7700
+#     - Health:    http://localhost:7700/health
+#     - Dashboard: http://localhost:7700 (built-in mini dashboard)
 #
 # Add to Claude Code:
 #   claude mcp add --transport sse crawl4ai http://localhost:11235/mcp/sse
