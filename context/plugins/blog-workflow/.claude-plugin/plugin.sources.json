@@ -1,5 +1,5 @@
 {
-  "$schema": "./plugin.sources.schema.json",
+  "$schema": "Plugin source mapping - maps local paths to repo source paths",
   "sources": {
     "styles/feedback-submission.md": {
       "source": "context/output-styles/feedback-submission.md",

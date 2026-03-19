@@ -1,29 +1,25 @@
 ---
 name: platform-astro
 description: Astro/AstroPaper platform configuration for the blog-workflow plugin
-platform:
-  name: astro
-  display_name: "Astro/AstroPaper"
-  paths:
-    published: "src/data/blog/"
-    build_output: "dist/"
-  frontmatter:
-    date_field: pubDatetime
-    updated_field: modDatetime
-    image_field: ogImage
-    canonical_field: canonicalURL
-  commands:
-    build: "astro build"
-    dev: "astro dev"
-  detection:
-    files:
-      - astro.config.mjs
-      - astro.config.ts
+tags: [blog, astro, platform]
 ---
 
 # Astro/AstroPaper Platform Skill
 
 This skill provides Astro and AstroPaper-specific configuration for the blog-workflow plugin.
+
+## Platform Configuration
+
+- **Platform**: Astro/AstroPaper
+- **Published posts path**: `src/data/blog/`
+- **Build output**: `dist/`
+- **Build command**: `astro build`
+- **Dev server**: `astro dev`
+- **Date field**: `pubDatetime`
+- **Updated field**: `modDatetime`
+- **Image field**: `ogImage`
+- **Canonical field**: `canonicalURL`
+- **Detection files**: `astro.config.mjs`, `astro.config.ts`
 
 ## Platform Summary
 
