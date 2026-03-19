@@ -2,21 +2,30 @@
  * Skill management commands: validate, hash, lint, check-all, and deps (stub).
  */
 
-import { defineCommand } from 'citty'
 import { readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { globalArgs } from './shared-args'
-import { createOutput } from '../lib/output'
-import { readSkillFrontmatter } from '../lib/manifest'
-import { hashDirectory, formatHash } from '../lib/hash'
-import { EXIT } from '../lib/types'
+import { defineCommand } from 'citty'
+import {
+  createBatches,
+  detectForks,
+  filterAvailable,
+  formatBatchPrompt,
+  mergeTier1Results,
+  parseTier1Output,
+  readCatalog,
+} from '../lib/catalog'
 import {
   checkDrift,
-  syncAll,
   createDriftIssues,
-  refreshLinks,
   getStatus,
+  refreshLinks,
+  syncAll,
 } from '../lib/external-skills'
+import { formatHash, hashDirectory } from '../lib/hash'
+import { readSkillFrontmatter } from '../lib/manifest'
+import { createOutput } from '../lib/output'
+import { EXIT } from '../lib/types'
+import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -36,10 +45,7 @@ const EXTERNAL_DIR = join(SKILLS_DIR, '.external')
  */
 export function listSkills(): string[] {
   return readdirSync(SKILLS_DIR)
-    .filter(
-      (name) =>
-        !name.startsWith('.') && name !== '.templates' && name !== 'justfile',
-    )
+    .filter((name) => !name.startsWith('.') && name !== '.templates' && name !== 'justfile')
     .filter((name) => {
       try {
         return statSync(join(SKILLS_DIR, name)).isDirectory()
@@ -197,7 +203,7 @@ export default defineCommand({
           }
 
           out.info(
-            `${summary.totalFiles} files, ${summary.totalErrors} errors, ${summary.totalWarnings} warnings`,
+            `${summary.totalFiles} files, ${summary.totalErrors} errors, ${summary.totalWarnings} warnings`
           )
         }
 
@@ -304,14 +310,19 @@ export default defineCommand({
               const rows = results.map((r) => ({
                 Skill: r.skill,
                 Source: r.source,
-                Status: r.status === 'changed' ? 'CHANGED' : r.status === 'unavail' ? 'UNAVAIL' : r.status,
+                Status:
+                  r.status === 'changed'
+                    ? 'CHANGED'
+                    : r.status === 'unavail'
+                      ? 'UNAVAIL'
+                      : r.status,
                 'Last Synced': r.lastSynced?.slice(0, 10) ?? '\u2014',
               }))
               out.table(rows)
             }
 
             const hasProblems = results.some(
-              (r) => r.status === 'changed' || r.status === 'unavail',
+              (r) => r.status === 'changed' || r.status === 'unavail'
             )
             process.exit(hasProblems ? EXIT.FAILURES : EXIT.OK)
           },
@@ -395,13 +406,13 @@ export default defineCommand({
             const dryRun = args['dry-run'] as boolean
 
             const spinner = out.spinner(
-              dryRun ? 'Checking drift issues (dry run)...' : 'Creating drift issues...',
+              dryRun ? 'Checking drift issues (dry run)...' : 'Creating drift issues...'
             )
             const { created, updated } = await createDriftIssues(
               EXTERNAL_DIR,
               SKILLS_DIR,
               repoArg,
-              { dryRun },
+              { dryRun }
             )
 
             spinner.success({
@@ -448,7 +459,7 @@ export default defineCommand({
               }
 
               out.info(
-                `${result.created.length} created, ${result.updated.length} updated, ${result.skipped.length} skipped, ${result.broken.length} broken`,
+                `${result.created.length} created, ${result.updated.length} updated, ${result.skipped.length} skipped, ${result.broken.length} broken`
               )
             }
 
@@ -486,6 +497,455 @@ export default defineCommand({
                 Issue: r.issue,
               }))
               out.table(rows)
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
+      },
+    }),
+
+    // -----------------------------------------------------------------
+    // catalog
+    // -----------------------------------------------------------------
+    catalog: defineCommand({
+      meta: {
+        name: 'catalog',
+        description: 'Skill catalog inspection pipeline operations',
+      },
+      subCommands: {
+        analyze: defineCommand({
+          meta: {
+            name: 'analyze',
+            description: 'Dispatch Tier 1 analysis agents on available skills',
+          },
+          args: {
+            ...globalArgs,
+            'batch-size': {
+              type: 'string',
+              description: 'Skills per agent batch (default: 15)',
+              default: '15',
+            },
+            limit: {
+              type: 'string',
+              description: 'Max batches to process (default: all)',
+            },
+            concurrency: {
+              type: 'string',
+              description: 'Parallel agent dispatches (default: 3)',
+              default: '3',
+            },
+            'dry-run': {
+              type: 'boolean',
+              description: 'Show batches without dispatching agents',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error(
+                'Catalog not found. Run availability check first: bun run .scripts/lib/catalog.ts'
+              )
+              process.exit(EXIT.ERROR)
+            }
+
+            const allEntries = readCatalog(catalogPath)
+            const available = filterAvailable(allEntries)
+            const batchSize = parseInt(args['batch-size'] as string, 10) || 15
+            const batches = createBatches(available, batchSize)
+            const limit = args.limit ? parseInt(args.limit as string, 10) : batches.length
+
+            out.info(`Catalog: ${allEntries.length} total, ${available.length} available`)
+            out.info(`Batches: ${batches.length} (size ${batchSize}), processing ${limit}`)
+
+            if (args['dry-run']) {
+              out.info('\n[DRY RUN] First 3 batches:')
+              for (let i = 0; i < Math.min(3, limit); i++) {
+                const prompt = formatBatchPrompt(batches[i])
+                const lines = prompt.split('\n')
+                out.info(`\nBatch ${i + 1} (${lines.length} skills):`)
+                for (const line of lines.slice(0, 5)) {
+                  out.info(`  ${line}`)
+                }
+                if (lines.length > 5) {
+                  out.info(`  ... and ${lines.length - 5} more`)
+                }
+              }
+              process.exit(EXIT.OK)
+            }
+
+            // Dispatch agents in isolated git worktrees with pre-downloaded skills
+            // All I/O is async to enable true concurrent execution
+            const { exec: execCb, spawn: spawnCb } = require('node:child_process')
+            const {
+              existsSync: fsExists,
+              rmSync,
+              mkdirSync,
+              writeFileSync: fsWriteSync,
+            } = require('node:fs')
+            const { promisify } = require('node:util')
+            const execAsync = promisify(execCb)
+
+            const WORKTREE_BASE = '/tmp/worktrees'
+            const concurrency = parseInt(args.concurrency as string, 10) || 3
+
+            out.info(`Concurrency: ${concurrency} parallel agents`)
+
+            /** Create a git worktree for a batch (async), returns worktree path */
+            async function createWorktree(batchId: number): Promise<string> {
+              const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
+              if (fsExists(wtPath)) {
+                try {
+                  await execAsync(`git worktree unlock ${JSON.stringify(wtPath)}`, {
+                    cwd: PROJECT_ROOT,
+                  })
+                } catch {
+                  /* ignore */
+                }
+                try {
+                  await execAsync(`git worktree remove --force ${JSON.stringify(wtPath)}`, {
+                    cwd: PROJECT_ROOT,
+                  })
+                } catch {
+                  /* ignore */
+                }
+                try {
+                  rmSync(wtPath, { recursive: true, force: true })
+                } catch {
+                  /* ignore */
+                }
+              }
+              await execAsync(`git worktree add --detach ${JSON.stringify(wtPath)} HEAD`, {
+                cwd: PROJECT_ROOT,
+              })
+              return wtPath
+            }
+
+            /** Remove a git worktree (async) */
+            async function removeWorktree(wtPath: string): Promise<void> {
+              try {
+                await execAsync(`git worktree unlock ${JSON.stringify(wtPath)}`, {
+                  cwd: PROJECT_ROOT,
+                })
+              } catch {
+                /* ignore */
+              }
+              try {
+                await execAsync(`git worktree remove --force ${JSON.stringify(wtPath)}`, {
+                  cwd: PROJECT_ROOT,
+                })
+              } catch {
+                /* ignore */
+              }
+              try {
+                rmSync(wtPath, { recursive: true, force: true })
+              } catch {
+                /* ignore */
+              }
+            }
+
+            /**
+             * Pre-download SKILL.md files for a batch (async).
+             * Downloads are sequential within a batch (same worktree) but
+             * batches run concurrently in separate worktrees.
+             */
+            async function preDownloadSkills(
+              batch: import('../lib/catalog').CatalogEntry[],
+              wtPath: string
+            ): Promise<Map<string, string | null>> {
+              const results = new Map<string, string | null>()
+              const skillsDir = join(wtPath, '.claude', 'skills')
+
+              for (const entry of batch) {
+                const ref = `${entry.source}@${entry.skill}`
+                try {
+                  await execAsync(`npx -y skills add -y --copy --full-depth ${ref}`, {
+                    cwd: wtPath,
+                    encoding: 'utf8',
+                    timeout: 30_000,
+                  })
+                  const skillDir = join(skillsDir, entry.skill)
+                  const skillMd = join(skillDir, 'SKILL.md')
+                  if (fsExists(skillMd)) {
+                    results.set(entry.skill, skillMd)
+                  } else {
+                    try {
+                      const { stdout: files } = await execAsync(
+                        `find ${JSON.stringify(skillDir)} -name '*.md' -type f`,
+                        { encoding: 'utf8' }
+                      )
+                      const trimmed = (files as string).trim()
+                      results.set(entry.skill, trimmed ? trimmed.split('\n')[0] : null)
+                    } catch {
+                      results.set(entry.skill, null)
+                    }
+                  }
+                } catch {
+                  results.set(entry.skill, null)
+                }
+              }
+              return results
+            }
+
+            // Ensure worktree base dir exists
+            mkdirSync(WORKTREE_BASE, { recursive: true })
+
+            const ALLOWED_TOOLS =
+              'Bash(mdq:*,wc:*,find:*,stat:*,sha256sum:*,shasum:*) Read Glob Grep'
+
+            let totalProcessed = 0
+            let totalErrors = 0
+            const allResults: import('../lib/catalog').Tier1Result[] = []
+
+            /**
+             * Process a single batch: create worktree, download, analyze, cleanup.
+             * Returns the Tier1Results for this batch.
+             */
+            async function processBatch(
+              batch: import('../lib/catalog').CatalogEntry[],
+              batchNum: number,
+              totalBatches: number
+            ): Promise<import('../lib/catalog').Tier1Result[]> {
+              let wtPath: string | null = null
+
+              try {
+                // Phase 1: Create worktree and pre-download skills (async)
+                wtPath = await createWorktree(batchNum)
+                out.info(
+                  `[${batchNum}/${totalBatches}] Worktree ready, downloading ${batch.length} skills...`
+                )
+
+                const downloaded = await preDownloadSkills(batch, wtPath)
+                const successCount = [...downloaded.values()].filter(Boolean).length
+                const failCount = batch.length - successCount
+
+                if (successCount === 0) {
+                  out.error(`[${batchNum}/${totalBatches}] All downloads failed`)
+                  return batch.map((e) => ({
+                    source: e.source,
+                    skill: e.skill,
+                    error: 'download failed',
+                    tier2Reviewed: false,
+                  }))
+                }
+
+                if (failCount > 0) {
+                  out.info(
+                    `[${batchNum}/${totalBatches}] Downloaded ${successCount}/${batch.length} (${failCount} failed)`
+                  )
+                }
+
+                // Build manifest
+                const manifest = batch.map((entry) => ({
+                  source: entry.source,
+                  skill: entry.skill,
+                  localPath: downloaded.get(entry.skill) ?? 'DOWNLOAD_FAILED',
+                }))
+
+                // Phase 2: Dispatch agent (async — this is the slow part we parallelize)
+                const agentPrompt = [
+                  'You are a skill inspector. Analyze each pre-downloaded skill and output ONE NDJSON line per skill to stdout.',
+                  'Skills are already downloaded in this worktree. Do NOT attempt network downloads.',
+                  '',
+                  'For each skill:',
+                  '1. Read the SKILL.md at the given path',
+                  '2. Run: wc -w on it for word count',
+                  '3. Count sections (## headings)',
+                  '4. Count files in the skill directory with find',
+                  '5. Extract keywords from headings and first paragraph',
+                  '6. Check for <details> blocks (progressive disclosure)',
+                  '7. Check frontmatter for name/description (best practices)',
+                  '8. Grep for hardcoded tokens/paths (security)',
+                  '9. Compute content hash: shasum -a 256 SKILL.md',
+                  '',
+                  'Output format (one JSON line per skill, no markdown, no prose):',
+                  '{"source":"org/repo","skill":"name","wordCount":N,"sectionCount":N,"fileCount":N,"keywords":["k1","k2"],"complexity":"simple|moderate|complex","progressiveDisclosure":bool,"bestPracticesMechanical":{"score":N,"violations":[]},"securityMechanical":{"score":N,"concerns":[]},"contentHash":"sha256:...","tier2Reviewed":false}',
+                  '',
+                  'For failed downloads, output: {"source":"org/repo","skill":"name","error":"download failed","tier2Reviewed":false}',
+                  '',
+                  'Skills to analyze:',
+                  JSON.stringify(manifest, null, 2),
+                ].join('\n')
+
+                // Write prompt to file to avoid shell arg length limits
+                const promptFile = join(wtPath, '.inspect-prompt.txt')
+                fsWriteSync(promptFile, agentPrompt, 'utf8')
+
+                const { stdout } = await execAsync(
+                  `cat ${JSON.stringify(promptFile)} | claude --model haiku --allowedTools ${JSON.stringify(ALLOWED_TOOLS)} -p -`,
+                  {
+                    encoding: 'utf8',
+                    timeout: 300_000,
+                    maxBuffer: 10 * 1024 * 1024,
+                    cwd: wtPath,
+                  }
+                )
+
+                const batchResults = parseTier1Output(stdout)
+                const errors = batchResults.filter((r) => r.error)
+                out.info(
+                  `[${batchNum}/${totalBatches}] Analyzed ${batchResults.length}/${batch.length}${errors.length > 0 ? ` (${errors.length} errors)` : ''}`
+                )
+
+                return batchResults
+              } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err)
+                out.error(`[${batchNum}/${totalBatches}] Failed: ${msg.slice(0, 200)}`)
+                return batch.map((e) => ({
+                  source: e.source,
+                  skill: e.skill,
+                  error: `batch failed: ${msg.slice(0, 100)}`,
+                  tier2Reviewed: false,
+                }))
+              } finally {
+                if (wtPath) await removeWorktree(wtPath)
+              }
+            }
+
+            // Process batches with concurrency pool
+            const batchesToProcess = batches.slice(0, limit)
+
+            // Concurrency-limited execution
+            let nextIdx = 0
+            const totalBatches = batchesToProcess.length
+
+            async function runNext(): Promise<void> {
+              while (nextIdx < totalBatches) {
+                const idx = nextIdx++
+                const batch = batchesToProcess[idx]
+                const results = await processBatch(batch, idx + 1, totalBatches)
+                allResults.push(...results)
+                totalProcessed += results.filter((r) => !r.error).length
+                totalErrors += results.filter((r) => r.error).length
+              }
+            }
+
+            // Launch `concurrency` workers
+            const workers = Array.from({ length: Math.min(concurrency, totalBatches) }, () =>
+              runNext()
+            )
+            await Promise.all(workers)
+
+            // Fork detection pass
+            if (allResults.length > 0) {
+              out.info('\nRunning fork detection...')
+              detectForks(allResults)
+              const forks = allResults.filter((r) => r.possibleForkOf)
+              if (forks.length > 0) {
+                out.info(`  Detected ${forks.length} possible forks`)
+              }
+
+              // Merge results into catalog
+              out.info(`Merging ${allResults.length} results into catalog...`)
+              mergeTier1Results(catalogPath, allResults)
+            }
+
+            out.info(`\nDone: ${totalProcessed} analyzed, ${totalErrors} errors`)
+
+            if (args.json) {
+              out.raw({
+                total: allEntries.length,
+                available: available.length,
+                batches: batches.length,
+                batchSize,
+                limit,
+                processed: totalProcessed,
+                errors: totalErrors,
+                forks: allResults.filter((r) => r.possibleForkOf).length,
+              })
+            }
+
+            process.exit(totalErrors > 0 ? EXIT.FAILURES : EXIT.OK)
+          },
+        }),
+        summary: defineCommand({
+          meta: {
+            name: 'summary',
+            description: 'Show catalog availability summary',
+          },
+          args: { ...globalArgs },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found. Run: bun run .scripts/lib/catalog.ts')
+              process.exit(EXIT.ERROR)
+            }
+
+            const entries = readCatalog(catalogPath)
+            const counts: Record<string, number> = {}
+            for (const e of entries) {
+              counts[e.availability] = (counts[e.availability] || 0) + 1
+            }
+
+            if (args.json) {
+              out.raw({ total: entries.length, ...counts })
+            } else {
+              out.info(`Total entries: ${entries.length}`)
+              for (const [status, count] of Object.entries(counts).sort((a, b) => b[1] - a[1])) {
+                out.info(`  ${status}: ${count}`)
+              }
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
+        forks: defineCommand({
+          meta: {
+            name: 'forks',
+            description: 'Detect forks among analyzed skills by content hash',
+          },
+          args: { ...globalArgs },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            const entries = readCatalog(catalogPath)
+            // Filter to entries that have contentHash (Tier 1 analyzed)
+            const withHash = entries.filter((e: Record<string, unknown>) => e.contentHash)
+
+            if (withHash.length === 0) {
+              out.info('No Tier 1 analyzed entries found. Run `catalog analyze` first.')
+              process.exit(EXIT.OK)
+            }
+
+            const results = detectForks(
+              withHash as unknown as import('../lib/catalog').Tier1Result[]
+            )
+            const forks = results.filter((r) => r.possibleForkOf)
+
+            if (args.json) {
+              out.raw(forks)
+            } else {
+              if (forks.length === 0) {
+                out.info('No forks detected.')
+              } else {
+                out.info(`Found ${forks.length} possible forks:`)
+                for (const f of forks) {
+                  out.info(`  ${f.source}@${f.skill} → fork of ${f.possibleForkOf}`)
+                }
+              }
             }
 
             process.exit(EXIT.OK)

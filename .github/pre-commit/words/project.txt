@@ -217,3 +217,5 @@ yamllint
 yara
 zeroize
 Zotero
+unavail
+UNAVAIL

@@ -54,7 +54,9 @@
     "context/skills/**/assets/**",
     "**/convert-*/**",
     "**/analysis.md",
-    "**/schemas.md"
+    "**/schemas.md",
+    "context/skills/.taxonomy.yaml",
+    "context/skills/.TODO.yaml"
   ],
   "ignoreRegExpList": [
     "```[\\s\\S]*?```",

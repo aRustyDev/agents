@@ -185,3 +185,4 @@ xelatex
 xetex
 Yesod
 zipf
+tinacms

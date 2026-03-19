@@ -597,13 +597,17 @@ function extractSkillNames(todoPath: string): string[] {
 
   const skillNames = new Set<string>()
   for (const entry of data.skills) {
+    // Skip non-string entries (some entries are dicts with descriptions)
+    const raw =
+      typeof entry === 'string' ? entry : typeof entry === 'object' ? Object.keys(entry)[0] : null
+    if (!raw) continue
     // Format: org/repo@skill-name
-    const atIdx = entry.lastIndexOf('@')
+    const atIdx = raw.lastIndexOf('@')
     if (atIdx !== -1) {
-      skillNames.add(entry.slice(atIdx + 1))
+      skillNames.add(raw.slice(atIdx + 1))
     } else {
       // Fallback: use full entry as name
-      skillNames.add(entry)
+      skillNames.add(raw)
     }
   }
 

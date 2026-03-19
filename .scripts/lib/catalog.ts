@@ -25,7 +25,7 @@
  *   {"source":"org/repo","skill":"skill-name","availability":"available"}
  */
 
-import { createWriteStream, existsSync, readFileSync } from 'node:fs'
+import { createWriteStream, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 // ---------------------------------------------------------------------------
@@ -382,6 +382,218 @@ function buildNewEntries(
 }
 
 // ---------------------------------------------------------------------------
+// Phase 4: Tier 1 Analysis — Types
+// ---------------------------------------------------------------------------
+
+export interface Tier1Result {
+  source: string
+  skill: string
+  wordCount?: number
+  sectionCount?: number
+  fileCount?: number
+  headingTree?: Array<{ depth: number; title: string }>
+  keywords?: string[]
+  internalLinks?: string[]
+  externalLinks?: string[]
+  complexity?: 'simple' | 'moderate' | 'complex'
+  progressiveDisclosure?: boolean
+  pdTechniques?: string[]
+  bestPracticesMechanical?: { score: number; violations: string[] }
+  securityMechanical?: { score: number; concerns: string[] }
+  contentHash?: string
+  tier2Reviewed?: boolean
+  error?: string
+  possibleForkOf?: string
+}
+
+/** CatalogEntry extended with optional Tier1 analysis fields. */
+export type CatalogEntryWithTier1 = CatalogEntry & Partial<Tier1Result>
+
+// ---------------------------------------------------------------------------
+// Phase 4: Tier 1 Analysis — Data Transformation Functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Read catalog entries from an NDJSON file.
+ * Re-export of the internal readCatalogEntries for public consumption.
+ */
+export function readCatalog(path: string): CatalogEntry[] {
+  return readCatalogEntries(path)
+}
+
+/**
+ * Filter catalog entries to only those with `availability === 'available'`.
+ */
+export function filterAvailable(entries: CatalogEntry[]): CatalogEntry[] {
+  return entries.filter((e) => e.availability === 'available')
+}
+
+/**
+ * Split entries into batches of `batchSize`, grouping by `source` to
+ * minimize the number of distinct repo downloads per batch.
+ *
+ * Strategy: sort entries by source first so entries from the same repo
+ * are adjacent, then chunk into groups of batchSize.
+ */
+export function createBatches(entries: CatalogEntry[], batchSize: number): CatalogEntry[][] {
+  if (batchSize <= 0) throw new Error(`batchSize must be positive, got ${batchSize}`)
+  if (entries.length === 0) return []
+
+  // Sort by source to group entries from the same repo together
+  const sorted = [...entries].sort((a, b) => a.source.localeCompare(b.source))
+
+  const batches: CatalogEntry[][] = []
+  for (let i = 0; i < sorted.length; i += batchSize) {
+    batches.push(sorted.slice(i, i + batchSize))
+  }
+  return batches
+}
+
+/**
+ * Format a batch of catalog entries as newline-separated `org/repo@skill-name`
+ * strings suitable for the skill-inspector-t1 agent prompt.
+ */
+export function formatBatchPrompt(batch: CatalogEntry[]): string {
+  return batch.map((e) => `${e.source}@${e.skill}`).join('\n')
+}
+
+/**
+ * Parse NDJSON lines from agent stdout into Tier1Result objects.
+ * Skips blank lines and malformed JSON, logging parse errors to stderr.
+ */
+export function parseTier1Output(stdout: string): Tier1Result[] {
+  const results: Tier1Result[] = []
+
+  for (const line of stdout.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+
+    try {
+      const parsed = JSON.parse(trimmed) as Record<string, unknown>
+
+      // Validate minimum required fields
+      if (typeof parsed.source !== 'string' || typeof parsed.skill !== 'string') {
+        process.stderr.write(
+          `[parseTier1Output] skipping line missing source/skill: ${trimmed.slice(0, 120)}\n`
+        )
+        continue
+      }
+
+      results.push(parsed as unknown as Tier1Result)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      process.stderr.write(
+        `[parseTier1Output] skipping malformed JSON: ${msg} — line: ${trimmed.slice(0, 120)}\n`
+      )
+    }
+  }
+
+  return results
+}
+
+/**
+ * Detect possible forks by comparing contentHash values among entries
+ * sharing the same skill name. Entries with identical hashes are marked
+ * with `possibleForkOf` pointing to the first-seen source for that hash.
+ *
+ * Returns a new array with the `possibleForkOf` field set where applicable.
+ * Only entries that have a non-empty `contentHash` participate in detection.
+ */
+export function detectForks(results: Tier1Result[]): Tier1Result[] {
+  // Group by skill name
+  const bySkill = new Map<string, Tier1Result[]>()
+  for (const r of results) {
+    const group = bySkill.get(r.skill)
+    if (group) {
+      group.push(r)
+    } else {
+      bySkill.set(r.skill, [r])
+    }
+  }
+
+  // For each group with >1 entry, check content hashes
+  // Track first-seen hash → source mapping per skill
+  for (const group of bySkill.values()) {
+    if (group.length <= 1) continue
+
+    const hashToFirstSource = new Map<string, string>()
+
+    for (const entry of group) {
+      if (!entry.contentHash) continue
+
+      const firstSource = hashToFirstSource.get(entry.contentHash)
+      if (firstSource === undefined) {
+        // First time seeing this hash for this skill
+        hashToFirstSource.set(entry.contentHash, entry.source)
+      } else if (firstSource !== entry.source) {
+        // Same hash, different source — possible fork
+        entry.possibleForkOf = firstSource
+      }
+    }
+  }
+
+  return results
+}
+
+/**
+ * Merge Tier1Result fields into an existing `.catalog.ndjson` file.
+ *
+ * For each result, finds a matching entry (by source + skill) and merges
+ * the Tier1 fields onto it. Results that don't match an existing entry are
+ * appended. The file is rewritten atomically.
+ */
+export function mergeTier1Results(catalogPath: string, results: Tier1Result[]): void {
+  // Read existing entries — tolerant of missing file
+  const existing: CatalogEntryWithTier1[] = []
+  if (existsSync(catalogPath)) {
+    const content = readFileSync(catalogPath, 'utf8')
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+      try {
+        existing.push(JSON.parse(trimmed) as CatalogEntryWithTier1)
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+
+  // Build a lookup index: "source\0skill" → index in existing array
+  const index = new Map<string, number>()
+  for (let i = 0; i < existing.length; i++) {
+    const key = `${existing[i].source}\0${existing[i].skill}`
+    index.set(key, i)
+  }
+
+  // Merge or append each result
+  for (const result of results) {
+    const key = `${result.source}\0${result.skill}`
+    const idx = index.get(key)
+
+    if (idx !== undefined) {
+      // Merge Tier1 fields into existing entry
+      existing[idx] = { ...existing[idx], ...result }
+    } else {
+      // New entry — create a minimal CatalogEntry + Tier1 fields
+      const newEntry: CatalogEntryWithTier1 = {
+        source: result.source,
+        skill: result.skill,
+        availability: 'available', // if we got T1 results, it was available
+        ...result,
+      }
+      existing.push(newEntry)
+      index.set(key, existing.length - 1)
+    }
+  }
+
+  // Write back atomically: write to temp file, then rename
+  const tmpPath = `${catalogPath}.tmp`
+  const lines = existing.map((e) => JSON.stringify(e)).join('\n') + '\n'
+  writeFileSync(tmpPath, lines, 'utf8')
+  renameSync(tmpPath, catalogPath)
+}
+
+// ---------------------------------------------------------------------------
 // CLI entry point
 // ---------------------------------------------------------------------------
 
@@ -436,8 +648,13 @@ async function main(): Promise<void> {
   printSummary(allWritten)
 }
 
-// Run when executed directly
-main().catch((err) => {
-  console.error('Fatal error:', err)
-  process.exit(1)
-})
+// Run when executed directly (not when imported as a module)
+const isDirectExecution =
+  import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('/catalog.ts')
+
+if (isDirectExecution) {
+  main().catch((err) => {
+    console.error('Fatal error:', err)
+    process.exit(1)
+  })
+}
