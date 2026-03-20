@@ -711,6 +711,18 @@ export default defineCommand({
 
               for (const entry of batch) {
                 const ref = `${entry.source}@${entry.skill}`
+
+                // Guard: validate source is org/repo format
+                if (!entry.source.match(/^[\w.-]+\/[\w./-]+$/) || entry.source.startsWith('/')) {
+                  results.set(entry.skill, {
+                    path: null,
+                    error: `invalid source format: ${entry.source.slice(0, 100)}`,
+                    errorType: 'download_failed',
+                    errorDetail: 'source is not in org/repo format — corrupt catalog entry',
+                  })
+                  continue
+                }
+
                 try {
                   await execAsync(`npx -y skills add -y --copy --full-depth ${ref}`, {
                     cwd: wtPath,
@@ -760,14 +772,36 @@ export default defineCommand({
                       err.message.includes('timed out') ||
                       err.message.includes('killed'))
                   const stderr = (err as { stderr?: string })?.stderr ?? ''
+                  const msg = err instanceof Error ? err.message : String(err)
                   const exitCode = (err as { code?: number })?.code
+                  const combined = `${stderr} ${msg}`.toLowerCase()
+
+                  // Classify the failure reason from stderr/message
+                  const isAuthFailure =
+                    combined.includes('authentication failed') ||
+                    combined.includes('could not read username')
+                  const isNotFound =
+                    combined.includes('not found') ||
+                    combined.includes('404') ||
+                    combined.includes('does not exist')
+                  const isPrivate =
+                    combined.includes('private') ||
+                    combined.includes('permission denied') ||
+                    combined.includes('403')
+
+                  let reason = 'unknown'
+                  if (isTimeout) reason = 'timeout (30s)'
+                  else if (isAuthFailure) reason = 'auth failed (repo may be private or deleted)'
+                  else if (isNotFound) reason = 'repo not found (404)'
+                  else if (isPrivate) reason = 'access denied (private repo)'
+                  else if (stderr) reason = stderr.slice(0, 200)
+                  else reason = msg.slice(0, 200)
+
                   results.set(entry.skill, {
                     path: null,
-                    error: isTimeout
-                      ? 'download timed out (30s)'
-                      : `download failed: ${stderr.slice(0, 300) || (err instanceof Error ? err.message.slice(0, 300) : 'unknown')}`,
+                    error: `download failed: ${reason}`,
                     errorType: isTimeout ? 'download_timeout' : 'download_failed',
-                    errorDetail: stderr.slice(0, 500) || undefined,
+                    errorDetail: stderr.slice(0, 500) || msg.slice(0, 500),
                     errorCode: exitCode,
                   })
                 }
