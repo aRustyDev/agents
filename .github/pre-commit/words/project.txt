@@ -232,3 +232,4 @@ yamllint
 yara
 zeroize
 Zotero
+Sortability
