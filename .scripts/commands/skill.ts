@@ -21,6 +21,7 @@ import {
   readErrorLog,
   validateBatchResults,
 } from '../lib/catalog'
+import { downloadBatch, type SkillDownloadResult } from '../lib/catalog-download'
 import {
   checkDrift,
   createDriftIssues,
@@ -28,6 +29,7 @@ import {
   refreshLinks,
   syncAll,
 } from '../lib/external-skills'
+import { createGit } from '../lib/git'
 import { formatHash, hashDirectory } from '../lib/hash'
 import { readSkillFrontmatter } from '../lib/manifest'
 import { createOutput } from '../lib/output'
@@ -569,6 +571,16 @@ export default defineCommand({
               description: 'Process only retryable failed entries',
               default: false,
             },
+            'legacy-download': {
+              type: 'boolean',
+              description: 'Use legacy npx-skills download path (for rollback)',
+              default: false,
+            },
+            'git-protocol': {
+              type: 'string',
+              description: 'Force git protocol: ssh|https|auto (default: auto)',
+              default: 'auto',
+            },
           },
           async run({ args }) {
             const out = createOutput({
@@ -627,6 +639,7 @@ export default defineCommand({
               rmSync,
               mkdirSync,
               writeFileSync: fsWriteSync,
+              cpSync,
             } = require('node:fs')
             const { promisify } = require('node:util')
             const execAsync = promisify(execCb)
@@ -682,6 +695,53 @@ export default defineCommand({
                 await execAsync(`git worktree remove --force ${JSON.stringify(wtPath)}`, {
                   cwd: PROJECT_ROOT,
                 })
+              } catch {
+                /* ignore */
+              }
+              try {
+                rmSync(wtPath, { recursive: true, force: true })
+              } catch {
+                /* ignore */
+              }
+            }
+
+            /** Create a git worktree using simple-git (new path) */
+            async function createWorktreeNew(batchId: number): Promise<string> {
+              const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
+              const git = createGit(PROJECT_ROOT)
+
+              if (fsExists(wtPath)) {
+                try {
+                  await git.raw(['worktree', 'unlock', wtPath])
+                } catch {
+                  /* ignore */
+                }
+                try {
+                  await git.raw(['worktree', 'remove', '--force', wtPath])
+                } catch {
+                  /* ignore */
+                }
+                try {
+                  rmSync(wtPath, { recursive: true, force: true })
+                } catch {
+                  /* ignore */
+                }
+              }
+
+              await git.raw(['worktree', 'add', '--detach', wtPath, 'HEAD'])
+              return wtPath
+            }
+
+            /** Remove a git worktree using simple-git (new path) */
+            async function removeWorktreeNew(wtPath: string): Promise<void> {
+              const git = createGit(PROJECT_ROOT)
+              try {
+                await git.raw(['worktree', 'unlock', wtPath])
+              } catch {
+                /* ignore */
+              }
+              try {
+                await git.raw(['worktree', 'remove', '--force', wtPath])
               } catch {
                 /* ignore */
               }
@@ -852,13 +912,43 @@ export default defineCommand({
               }
 
               try {
+                const useLegacy = args['legacy-download'] as boolean
+                const gitProtocol = args['git-protocol'] as string
+
                 // Phase 1: Create worktree and pre-download skills (async)
-                wtPath = await createWorktree(batchNum)
+                wtPath = useLegacy
+                  ? await createWorktree(batchNum)
+                  : await createWorktreeNew(batchNum)
                 out.info(
                   `[${batchNum}/${totalBatches}] Worktree ready, downloading ${batch.length} skills...`
                 )
 
-                const downloaded = await preDownloadSkills(batch, wtPath)
+                let downloaded: Map<string, SkillDownloadResult>
+                if (useLegacy) {
+                  // BLUE: legacy npx-skills path (preserved for rollback)
+                  downloaded = (await preDownloadSkills(batch, wtPath)) as Map<
+                    string,
+                    SkillDownloadResult
+                  >
+                } else {
+                  // GREEN: new git.ts + skill-discovery path
+                  const protocol =
+                    gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
+                  downloaded = await downloadBatch(batch, { protocol })
+
+                  // Copy downloaded skills into worktree for agent access
+                  const wtSkillsDir = join(wtPath, '.claude', 'skills')
+                  mkdirSync(wtSkillsDir, { recursive: true })
+                  for (const [skillName, dl] of downloaded) {
+                    if (dl.path) {
+                      const destDir = join(wtSkillsDir, skillName)
+                      mkdirSync(destDir, { recursive: true })
+                      const skillSrcDir = join(dl.path, '..')
+                      cpSync(skillSrcDir, destDir, { recursive: true })
+                      dl.path = join(destDir, 'SKILL.md')
+                    }
+                  }
+                }
                 const successCount = [...downloaded.values()].filter((r) => r.path).length
                 const failCount = batch.length - successCount
 
@@ -1024,7 +1114,10 @@ export default defineCommand({
                   }))
                 )
               } finally {
-                if (wtPath) await removeWorktree(wtPath)
+                if (wtPath) {
+                  const useLegacy = args['legacy-download'] as boolean
+                  useLegacy ? await removeWorktree(wtPath) : await removeWorktreeNew(wtPath)
+                }
               }
             }
 
