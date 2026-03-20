@@ -271,8 +271,7 @@ export interface BatchDownloadOptions {
  * Groups entries by source so repos are cloned once per source.
  * In test mode (localOverrideDir), maps skill names to subdirectories.
  *
- * Map keys are `source\x00skill` composite keys to handle the same skill
- * name appearing from different sources.
+ * Map keys are skill names. In the catalog, skill names are unique per batch.
  */
 export async function downloadBatch(
   entries: CatalogEntry[],
@@ -292,10 +291,9 @@ export async function downloadBatch(
     if (opts.localOverrideDir) {
       // Test mode: use local directories (no network)
       for (const entry of group) {
-        const key = `${entry.source}\x00${entry.skill}`
         const localDir = join(opts.localOverrideDir, entry.skill)
         if (!existsSync(localDir)) {
-          results.set(key, {
+          results.set(entry.skill, {
             path: null,
             error: `local directory not found: ${localDir}`,
             errorType: 'download_failed',
@@ -307,7 +305,7 @@ export async function downloadBatch(
           localOverride: localDir,
           signal: opts.signal,
         })
-        results.set(key, result)
+        results.set(entry.skill, result)
       }
       continue
     }
@@ -326,7 +324,7 @@ function fillGroupWithError(
   errorResult: Omit<SkillDownloadResult, 'path'> & { path: null }
 ): void {
   for (const entry of group) {
-    results.set(`${entry.source}\x00${entry.skill}`, errorResult)
+    results.set(entry.skill, errorResult)
   }
 }
 
@@ -401,9 +399,8 @@ async function downloadBatchForSource(
     )
 
     for (const entry of group) {
-      const key = `${entry.source}\x00${entry.skill}`
       results.set(
-        key,
+        entry.skill,
         resolveSkillFromClone(entry, source, cloneResult.value.tempDir, discoveredMap)
       )
     }

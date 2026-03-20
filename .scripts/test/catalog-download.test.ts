@@ -172,8 +172,8 @@ describe('downloadBatch', () => {
     })
 
     expect(results.size).toBe(2)
-    expect(results.get('org/repo\x00skill-a')?.path).toBeTruthy()
-    expect(results.get('org/repo\x00skill-b')?.contentHash).toMatch(/^sha256:/)
+    expect(results.get('skill-a')?.path).toBeTruthy()
+    expect(results.get('skill-b')?.contentHash).toMatch(/^sha256:/)
   })
 
   it('handles mixed success/failure', async () => {
@@ -194,13 +194,13 @@ describe('downloadBatch', () => {
       localOverrideDir: tmpDir,
     })
 
-    expect(results.get('org/repo\x00good')?.path).toBeTruthy()
-    expect(results.get('org/repo\x00bad')?.error).toBeDefined()
+    expect(results.get('good')?.path).toBeTruthy()
+    expect(results.get('bad')?.error).toBeDefined()
   })
 
   it('groups entries by source for efficient cloning', async () => {
-    // Two different "repos" (simulated via localOverrideDir)
-    for (const skill of ['s1', 's2']) {
+    // Three unique skills (simulated via localOverrideDir)
+    for (const skill of ['s1', 's2', 's3']) {
       const dir = join(tmpDir, skill)
       mkdirSync(dir, { recursive: true })
       writeFileSync(
@@ -212,9 +212,10 @@ describe('downloadBatch', () => {
     const entries = [
       { source: 'org/repo-a', skill: 's1', availability: 'available' as const },
       { source: 'org/repo-b', skill: 's2', availability: 'available' as const },
-      { source: 'org/repo-a', skill: 's2', availability: 'available' as const },
+      { source: 'org/repo-a', skill: 's3', availability: 'available' as const },
     ]
 
+    // s1 and s3 from repo-a, s2 from repo-b — tests source grouping
     const results = await downloadBatch(entries, { localOverrideDir: tmpDir })
     expect(results.size).toBe(3)
   })
