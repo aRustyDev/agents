@@ -6,13 +6,20 @@ import { readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { defineCommand } from 'citty'
 import {
+  computeContentHash,
+  computeFileCount,
+  computeHeadingTree,
+  computeSectionCount,
+  computeWordCount,
   createBatches,
   detectForks,
-  filterAvailable,
+  filterForProcessing,
   formatBatchPrompt,
   mergeTier1Results,
   parseTier1Output,
   readCatalog,
+  readErrorLog,
+  validateBatchResults,
 } from '../lib/catalog'
 import {
   checkDrift,
@@ -542,6 +549,16 @@ export default defineCommand({
               description: 'Show batches without dispatching agents',
               default: false,
             },
+            force: {
+              type: 'boolean',
+              description: 'Process all available entries regardless of state',
+              default: false,
+            },
+            'retry-errors': {
+              type: 'boolean',
+              description: 'Process only retryable failed entries',
+              default: false,
+            },
           },
           async run({ args }) {
             const out = createOutput({
@@ -558,13 +575,22 @@ export default defineCommand({
               process.exit(EXIT.ERROR)
             }
 
-            const allEntries = readCatalog(catalogPath)
-            const available = filterAvailable(allEntries)
+            const allEntries = readCatalog(
+              catalogPath
+            ) as import('../lib/catalog').CatalogEntryWithTier1[]
+            const force = args.force as boolean
+            const retryErrors = args['retry-errors'] as boolean
+            const toProcess = filterForProcessing(allEntries, { force, retryErrors })
+            const totalAvailable = allEntries.filter((e) => e.availability === 'available').length
+            const skipped = totalAvailable - toProcess.length
             const batchSize = parseInt(args['batch-size'] as string, 10) || 15
-            const batches = createBatches(available, batchSize)
+            const batches = createBatches(toProcess, batchSize)
             const limit = args.limit ? parseInt(args.limit as string, 10) : batches.length
 
-            out.info(`Catalog: ${allEntries.length} total, ${available.length} available`)
+            out.info(`Catalog: ${allEntries.length} total, ${totalAvailable} available`)
+            out.info(
+              `Processing: ${toProcess.length} entries (${skipped} skipped)${force ? ' [--force]' : ''}${retryErrors ? ' [--retry-errors]' : ''}`
+            )
             out.info(`Batches: ${batches.length} (size ${batchSize}), processing ${limit}`)
 
             if (args['dry-run']) {
@@ -585,7 +611,7 @@ export default defineCommand({
 
             // Dispatch agents in isolated git worktrees with pre-downloaded skills
             // All I/O is async to enable true concurrent execution
-            const { exec: execCb, spawn: spawnCb } = require('node:child_process')
+            const { exec: execCb } = require('node:child_process')
             const {
               existsSync: fsExists,
               rmSync,
@@ -662,6 +688,12 @@ export default defineCommand({
               errorType?: 'download_failed' | 'download_timeout'
               errorDetail?: string
               errorCode?: number
+              // Mechanical compute fields (populated on successful download)
+              contentHash?: string
+              wordCount?: number
+              sectionCount?: number
+              fileCount?: number
+              headingTree?: Array<{ depth: number; title: string }>
             }
 
             /**
@@ -688,7 +720,15 @@ export default defineCommand({
                   const skillDir = join(skillsDir, entry.skill)
                   const skillMd = join(skillDir, 'SKILL.md')
                   if (fsExists(skillMd)) {
-                    results.set(entry.skill, { path: skillMd })
+                    const content = require('node:fs').readFileSync(skillMd, 'utf8') as string
+                    results.set(entry.skill, {
+                      path: skillMd,
+                      contentHash: computeContentHash(content),
+                      wordCount: computeWordCount(content),
+                      sectionCount: computeSectionCount(content),
+                      fileCount: computeFileCount(skillDir),
+                      headingTree: computeHeadingTree(content),
+                    })
                   } else {
                     try {
                       const { stdout: files } = await execAsync(
@@ -738,8 +778,7 @@ export default defineCommand({
             // Ensure worktree base dir exists
             mkdirSync(WORKTREE_BASE, { recursive: true })
 
-            const ALLOWED_TOOLS =
-              'Bash(mdq:*,wc:*,find:*,stat:*,sha256sum:*,shasum:*) Read Glob Grep'
+            const ALLOWED_TOOLS = 'Read Glob Grep'
 
             let totalProcessed = 0
             let totalErrors = 0
@@ -808,36 +847,38 @@ export default defineCommand({
                   )
                 }
 
-                // Build manifest (only successfully downloaded skills get paths)
+                // Build manifest with mechanical fields pre-computed
                 const manifest = batch.map((entry) => {
                   const dl = downloaded.get(entry.skill)
                   return {
                     source: entry.source,
                     skill: entry.skill,
                     localPath: dl?.path ?? 'DOWNLOAD_FAILED',
+                    wordCount: dl?.wordCount,
+                    sectionCount: dl?.sectionCount,
+                    fileCount: dl?.fileCount,
+                    contentHash: dl?.contentHash,
                   }
                 })
 
-                // Phase 2: Dispatch agent (async — this is the slow part we parallelize)
+                // Phase 2: Dispatch agent (async — judgment-only analysis)
                 const agentPrompt = [
                   'You are a skill inspector. Analyze each pre-downloaded skill and output ONE NDJSON line per skill to stdout.',
-                  'Skills are already downloaded in this worktree. Do NOT attempt network downloads.',
+                  'Skills are already downloaded. Metrics (wordCount, sectionCount, fileCount, contentHash) are pre-computed — use them directly.',
                   '',
-                  'For each skill:',
-                  '1. Read the SKILL.md at the given path',
-                  '2. Run: wc -w on it for word count',
-                  '3. Count sections (## headings)',
-                  '4. Count files in the skill directory with find',
-                  '5. Extract keywords from headings and first paragraph',
-                  '6. Check for <details> blocks (progressive disclosure)',
-                  '7. Check frontmatter for name/description (best practices)',
-                  '8. Grep for hardcoded tokens/paths (security)',
-                  '9. Compute content hash: shasum -a 256 SKILL.md',
+                  'Output ONLY raw JSON lines. No markdown, no code fences, no prose, no explanation.',
                   '',
-                  'Output format (one JSON line per skill, no markdown, no prose):',
-                  '{"source":"org/repo","skill":"name","wordCount":N,"sectionCount":N,"fileCount":N,"keywords":["k1","k2"],"complexity":"simple|moderate|complex","progressiveDisclosure":bool,"bestPracticesMechanical":{"score":N,"violations":[]},"securityMechanical":{"score":N,"concerns":[]},"contentHash":"sha256:...","tier2Reviewed":false}',
+                  'For each skill with a valid localPath:',
+                  '1. Read the SKILL.md and extract keywords from headings + first paragraph',
+                  '2. Check for <details> blocks or collapsible sections (progressive disclosure)',
+                  '3. Check frontmatter for name/description fields (best practices score 0-5)',
+                  '4. Grep for hardcoded tokens, secrets, or absolute paths (security score 0-5)',
+                  '5. Determine complexity using the provided wordCount/sectionCount/fileCount: simple (<500 words, ≤5 sections), moderate (500-2000), complex (>2000 or >15 sections)',
                   '',
-                  'For failed downloads, output: {"source":"org/repo","skill":"name","error":"download failed","tier2Reviewed":false}',
+                  'Output format (one JSON line per skill):',
+                  '{"source":"org/repo","skill":"name","keywords":["k1","k2"],"complexity":"simple|moderate|complex","progressiveDisclosure":false,"pdTechniques":[],"bestPracticesMechanical":{"score":3,"violations":[]},"securityMechanical":{"score":5,"concerns":[]},"tier2Reviewed":false}',
+                  '',
+                  'For DOWNLOAD_FAILED entries, output: {"source":"org/repo","skill":"name","error":"download failed","tier2Reviewed":false}',
                   '',
                   'Skills to analyze:',
                   JSON.stringify(manifest, null, 2),
@@ -857,8 +898,46 @@ export default defineCommand({
                   }
                 )
 
-                const batchResults = parseTier1Output(stdout)
-                // Merge download errors with analysis results
+                const agentResults = parseTier1Output(stdout)
+
+                // Merge orchestrator mechanical data (authoritative) with agent judgment data
+                const batchResults: import('../lib/catalog').Tier1Result[] = []
+                for (const entry of batch) {
+                  const dl = downloaded.get(entry.skill)
+                  const agentResult = agentResults.find(
+                    (r) => r.source === entry.source && r.skill === entry.skill
+                  )
+
+                  if (dl?.path && dl.contentHash) {
+                    // Success: orchestrator mechanical fields + agent judgment fields
+                    batchResults.push({
+                      source: entry.source,
+                      skill: entry.skill,
+                      // Orchestrator mechanical data (authoritative)
+                      contentHash: dl.contentHash,
+                      wordCount: dl.wordCount,
+                      sectionCount: dl.sectionCount,
+                      fileCount: dl.fileCount,
+                      headingTree: dl.headingTree,
+                      // Agent judgment data (overlay)
+                      ...(agentResult
+                        ? {
+                            keywords: agentResult.keywords,
+                            complexity: agentResult.complexity,
+                            progressiveDisclosure: agentResult.progressiveDisclosure,
+                            pdTechniques: agentResult.pdTechniques,
+                            bestPracticesMechanical: agentResult.bestPracticesMechanical,
+                            securityMechanical: agentResult.securityMechanical,
+                            internalLinks: agentResult.internalLinks,
+                            externalLinks: agentResult.externalLinks,
+                          }
+                        : {}),
+                      tier2Reviewed: false,
+                    })
+                  }
+                }
+
+                // Combine with download errors
                 const combined = [...batchResults, ...downloadErrorResults]
                 const errors = combined.filter((r) => r.error)
                 out.info(
@@ -938,9 +1017,22 @@ export default defineCommand({
                 out.info(`  Detected ${forks.length} possible forks`)
               }
 
-              // Merge results into catalog
+              // Merge results into catalog + error log
+              const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
               out.info(`Merging ${allResults.length} results into catalog...`)
-              mergeTier1Results(catalogPath, allResults)
+              mergeTier1Results(catalogPath, errorLogPath, allResults)
+
+              // Validate batch results
+              const validation = validateBatchResults(allResults)
+              if (validation.issues.length > 0) {
+                out.info(`\nValidation warnings (${validation.issues.length}):`)
+                for (const issue of validation.issues.slice(0, 10)) {
+                  process.stderr.write(`  ${issue}\n`)
+                }
+                if (validation.issues.length > 10) {
+                  process.stderr.write(`  ... and ${validation.issues.length - 10} more\n`)
+                }
+              }
             }
 
             out.info(`\nDone: ${totalProcessed} analyzed, ${totalErrors} errors`)
@@ -948,7 +1040,7 @@ export default defineCommand({
             if (args.json) {
               out.raw({
                 total: allEntries.length,
-                available: available.length,
+                available: totalAvailable,
                 batches: batches.length,
                 batchSize,
                 limit,
@@ -964,7 +1056,7 @@ export default defineCommand({
         summary: defineCommand({
           meta: {
             name: 'summary',
-            description: 'Show catalog availability summary',
+            description: 'Show catalog availability and analysis summary',
           },
           args: { ...globalArgs },
           async run({ args }) {
@@ -980,19 +1072,50 @@ export default defineCommand({
               process.exit(EXIT.ERROR)
             }
 
-            const entries = readCatalog(catalogPath)
+            const entries = readCatalog(catalogPath) as Array<Record<string, unknown>>
             const counts: Record<string, number> = {}
             for (const e of entries) {
-              counts[e.availability] = (counts[e.availability] || 0) + 1
+              counts[e.availability as string] = (counts[e.availability as string] || 0) + 1
+            }
+
+            // Analysis status breakdown
+            let analyzed = 0
+            let failedOnce = 0
+            let failedTwicePlus = 0
+            let neverAttempted = 0
+            const attemptDist: Record<number, number> = {}
+
+            for (const e of entries) {
+              if (e.availability !== 'available') continue
+              const attempts = (e.attemptCount as number) ?? 0
+              const hasData = e.wordCount != null
+
+              attemptDist[attempts] = (attemptDist[attempts] || 0) + 1
+
+              if (hasData && attempts === 0) analyzed++
+              else if (attempts === 0) neverAttempted++
+              else if (attempts === 1) failedOnce++
+              else failedTwicePlus++
             }
 
             if (args.json) {
-              out.raw({ total: entries.length, ...counts })
+              out.raw({
+                total: entries.length,
+                availability: counts,
+                analysis: { analyzed, failedOnce, failedTwicePlus, neverAttempted },
+                attemptDistribution: attemptDist,
+              })
             } else {
               out.info(`Total entries: ${entries.length}`)
               for (const [status, count] of Object.entries(counts).sort((a, b) => b[1] - a[1])) {
                 out.info(`  ${status}: ${count}`)
               }
+              out.info('')
+              out.info('Analysis status:')
+              out.info(`  Analyzed (attemptCount=0): ${analyzed}`)
+              out.info(`  Failed once (attemptCount=1): ${failedOnce}`)
+              out.info(`  Failed twice+ (attemptCount>=2): ${failedTwicePlus}`)
+              out.info(`  Never attempted: ${neverAttempted}`)
             }
 
             process.exit(EXIT.OK)
@@ -1185,13 +1308,18 @@ export default defineCommand({
         errors: defineCommand({
           meta: {
             name: 'errors',
-            description: 'Show error breakdown from catalog analysis',
+            description: 'Show error breakdown from error log',
           },
           args: {
             ...globalArgs,
             retryable: {
               type: 'boolean',
               description: 'Show only retryable errors',
+              default: false,
+            },
+            prune: {
+              type: 'boolean',
+              description: 'Remove resolved errors (skills with attemptCount=0)',
               default: false,
             },
           },
@@ -1201,25 +1329,50 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
+            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
             const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
-            if (!require('node:fs').existsSync(catalogPath)) {
-              out.error('Catalog not found.')
-              process.exit(EXIT.ERROR)
+
+            if (args.prune) {
+              // Prune: remove error records for skills that have been resolved (attemptCount=0)
+              const { existsSync: existsS, writeFileSync: writeS } = require('node:fs')
+              if (!existsS(errorLogPath)) {
+                out.info('No error log found. Nothing to prune.')
+                process.exit(EXIT.OK)
+              }
+              const catalog = readCatalog(catalogPath) as Array<Record<string, unknown>>
+              const resolved = new Set<string>()
+              for (const e of catalog) {
+                if ((e.attemptCount ?? 0) === 0 && e.wordCount) {
+                  resolved.add(`${e.source}\0${e.skill}`)
+                }
+              }
+              const errors = readErrorLog(errorLogPath)
+              const kept = errors.filter((e) => !resolved.has(`${e.source}\0${e.skill}`))
+              const pruned = errors.length - kept.length
+              writeS(
+                errorLogPath,
+                kept.map((e) => JSON.stringify(e)).join('\n') + (kept.length > 0 ? '\n' : ''),
+                'utf8'
+              )
+              out.info(`Pruned ${pruned} resolved error records. ${kept.length} remaining.`)
+              process.exit(EXIT.OK)
             }
 
-            const entries = readCatalog(catalogPath) as Array<Record<string, unknown>>
-            const withErrors = entries.filter((e) => e.error)
+            const errors = readErrorLog(errorLogPath)
+            if (errors.length === 0) {
+              out.info('No errors in error log.')
+              process.exit(EXIT.OK)
+            }
 
             if (args.retryable) {
-              const retryable = withErrors.filter((e) => e.retryable === true)
+              const retryable = errors.filter((e) => e.retryable)
               if (args.json) {
                 out.raw({ total: retryable.length, entries: retryable })
               } else {
                 out.info(`Retryable errors: ${retryable.length}`)
                 const byType: Record<string, number> = {}
                 for (const e of retryable) {
-                  const t = (e.errorType as string) || 'unknown'
-                  byType[t] = (byType[t] || 0) + 1
+                  byType[e.errorType] = (byType[e.errorType] || 0) + 1
                 }
                 for (const [t, c] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
                   out.info(`  ${t}: ${c}`)
@@ -1227,19 +1380,178 @@ export default defineCommand({
               }
             } else {
               const byType: Record<string, number> = {}
-              for (const e of withErrors) {
-                const t = (e.errorType as string) || (e.error as string)?.slice(0, 40) || 'unknown'
-                byType[t] = (byType[t] || 0) + 1
+              for (const e of errors) {
+                byType[e.errorType] = (byType[e.errorType] || 0) + 1
               }
 
               if (args.json) {
-                out.raw({ total: withErrors.length, byType })
+                out.raw({ total: errors.length, byType })
               } else {
-                out.info(`Total errors: ${withErrors.length} / ${entries.length} entries`)
+                out.info(`Total error records: ${errors.length}`)
                 out.info('\nBy type:')
                 for (const [t, c] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
                   out.info(`  ${c.toString().padStart(5)}  ${t}`)
                 }
+              }
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
+        scrub: defineCommand({
+          meta: {
+            name: 'scrub',
+            description: 'Backfill: separate error data from catalog into error log',
+          },
+          args: {
+            ...globalArgs,
+            'dry-run': {
+              type: 'boolean',
+              description: 'Show what would change without modifying files',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+            const {
+              existsSync: existsS,
+              readFileSync: readS,
+              writeFileSync: writeS,
+              renameSync: renameS,
+            } = require('node:fs')
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
+            const lockPath = join(PROJECT_ROOT, 'context/skills/.catalog.lock')
+
+            if (!existsS(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            if (existsS(lockPath)) {
+              out.error('Catalog is locked (.catalog.lock exists). Another operation in progress?')
+              process.exit(EXIT.ERROR)
+            }
+
+            const dryRun = args['dry-run'] as boolean
+
+            // Read all entries
+            const content = readS(catalogPath, 'utf8') as string
+            const entries: Array<Record<string, unknown>> = []
+            for (const line of content.split('\n')) {
+              const trimmed = line.trim()
+              if (!trimmed) continue
+              try {
+                entries.push(JSON.parse(trimmed))
+              } catch {
+                // skip
+              }
+            }
+
+            // Classify entries
+            let dataAndError = 0 // has wordCount AND error
+            let errorOnly = 0 // has error but no wordCount
+            const errorRecords: Array<Record<string, unknown>> = []
+
+            for (const e of entries) {
+              const hasData = e.wordCount != null
+              const hasError = e.error != null
+
+              if (hasData && hasError) {
+                dataAndError++
+              } else if (hasError && !hasData) {
+                errorOnly++
+                errorRecords.push({
+                  source: e.source,
+                  skill: e.skill,
+                  runId: e.runId ?? '',
+                  batchId: e.batchId ?? '',
+                  timestamp: (e.analyzedAt as string) ?? new Date().toISOString(),
+                  errorType: e.errorType ?? 'batch_failed',
+                  errorDetail: e.errorDetail ?? e.error ?? '',
+                  errorCode: e.errorCode,
+                  retryable: e.retryable ?? true,
+                })
+              }
+            }
+
+            if (dryRun) {
+              out.info('[DRY RUN] catalog scrub')
+              out.info('')
+              out.info(
+                `Entries to clean (have data + error): ${dataAndError} — error fields stripped, attemptCount reset`
+              )
+              out.info(
+                `Entries to move to error log (error only): ${errorOnly} — moved to .catalog-errors.ndjson`
+              )
+              out.info('')
+              out.info(`Summary:`)
+              out.info(`  Catalog entries modified: ${dataAndError + errorOnly}`)
+              out.info(`  Error log entries created: ${errorOnly}`)
+              out.info(
+                `  Catalog size: ${entries.length} entries (count unchanged, fields stripped)`
+              )
+              process.exit(EXIT.OK)
+            }
+
+            // Acquire lock
+            writeS(lockPath, `pid=${process.pid}\n`, 'utf8')
+
+            try {
+              // Process entries
+              const cleaned: Array<Record<string, unknown>> = []
+              for (const e of entries) {
+                const hasData = e.wordCount != null
+                const hasError = e.error != null
+                const entry = { ...e }
+
+                if (hasData && hasError) {
+                  // Clean: strip error fields, reset attemptCount
+                  delete entry.error
+                  delete entry.errorDetail
+                  delete entry.errorCode
+                  delete entry.errorType
+                  delete entry.retryable
+                  entry.attemptCount = 0
+                } else if (hasError && !hasData) {
+                  // Move error to log, set cache fields
+                  delete entry.error
+                  delete entry.errorDetail
+                  delete entry.errorCode
+                  entry.attemptCount = 1
+                  entry.lastErrorType = entry.errorType ?? 'batch_failed'
+                  entry.retryable = e.retryable ?? true
+                  delete entry.errorType
+                }
+
+                cleaned.push(entry)
+              }
+
+              // Write error log
+              if (errorRecords.length > 0) {
+                const errorLines = `${errorRecords.map((r) => JSON.stringify(r)).join('\n')}\n`
+                const { appendFileSync: appendS } = require('node:fs')
+                appendS(errorLogPath, errorLines, 'utf8')
+              }
+
+              // Write catalog atomically
+              const tmpPath = `${catalogPath}.tmp`
+              writeS(tmpPath, `${cleaned.map((e) => JSON.stringify(e)).join('\n')}\n`, 'utf8')
+              renameS(tmpPath, catalogPath)
+
+              out.info(`Scrub complete:`)
+              out.info(`  ${dataAndError} entries cleaned (error fields stripped)`)
+              out.info(`  ${errorOnly} entries moved to error log`)
+            } finally {
+              // Release lock
+              try {
+                require('node:fs').unlinkSync(lockPath)
+              } catch {
+                /* ignore */
               }
             }
 

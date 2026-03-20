@@ -386,6 +386,14 @@ function buildNewEntries(
 // Phase 4: Tier 1 Analysis — Types
 // ---------------------------------------------------------------------------
 
+export type Tier1ErrorType =
+  | 'download_failed'
+  | 'download_timeout'
+  | 'analysis_failed'
+  | 'analysis_timeout'
+  | 'rate_limited'
+  | 'batch_failed'
+
 export interface Tier1Result {
   source: string
   skill: string
@@ -403,16 +411,9 @@ export interface Tier1Result {
   securityMechanical?: { score: number; concerns: string[] }
   contentHash?: string
   tier2Reviewed?: boolean
-  error?: string
-  errorType?:
-    | 'download_failed'
-    | 'download_timeout'
-    | 'analysis_failed'
-    | 'analysis_timeout'
-    | 'rate_limited'
-    | 'batch_failed'
-  errorDetail?: string
-  errorCode?: number
+  // Error cache fields (detail lives in error log)
+  attemptCount?: number
+  lastErrorType?: Tier1ErrorType
   retryable?: boolean
   possibleForkOf?: string
   runId?: string
@@ -420,8 +421,252 @@ export interface Tier1Result {
   analyzedAt?: string
 }
 
+// ---------------------------------------------------------------------------
+// Error Log — Types + Functions (ADR-019)
+// ---------------------------------------------------------------------------
+
+export interface ErrorRecord {
+  source: string
+  skill: string
+  runId: string
+  batchId: string
+  timestamp: string
+  errorType: Tier1ErrorType
+  errorDetail: string
+  errorCode?: number
+  retryable: boolean
+}
+
+/**
+ * Append a single error record to the error log (NDJSON).
+ */
+export function appendError(errorLogPath: string, record: ErrorRecord): void {
+  const line = `${JSON.stringify(record)}\n`
+  const { appendFileSync } = require('node:fs')
+  appendFileSync(errorLogPath, line, 'utf8')
+}
+
+/**
+ * Append multiple error records in a single write (concurrent-safe).
+ * Concatenates all lines into one string and writes atomically.
+ */
+export function appendErrors(errorLogPath: string, records: ErrorRecord[]): void {
+  if (records.length === 0) return
+  const data = `${records.map((r) => JSON.stringify(r)).join('\n')}\n`
+  const { appendFileSync } = require('node:fs')
+  appendFileSync(errorLogPath, data, 'utf8')
+}
+
+/**
+ * Read all error records from the error log.
+ */
+export function readErrorLog(errorLogPath: string): ErrorRecord[] {
+  if (!existsSync(errorLogPath)) return []
+  const content = readFileSync(errorLogPath, 'utf8')
+  const records: ErrorRecord[] = []
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    try {
+      records.push(JSON.parse(trimmed) as ErrorRecord)
+    } catch {
+      // skip malformed lines
+    }
+  }
+  return records
+}
+
+/**
+ * Get error records for a specific skill.
+ */
+export function getErrorsForSkill(
+  errorLogPath: string,
+  source: string,
+  skill: string
+): ErrorRecord[] {
+  return readErrorLog(errorLogPath).filter((r) => r.source === source && r.skill === skill)
+}
+
+// ---------------------------------------------------------------------------
+// Mechanical Compute Functions (ADR-021)
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute SHA-256 content hash of a string.
+ * Returns `sha256:<hex>` format.
+ */
+export function computeContentHash(content: string): string {
+  const { createSha256Hasher } = require('./runtime') as typeof import('./runtime')
+  const hasher = createSha256Hasher()
+  hasher.update(content)
+  return `sha256:${hasher.digest('hex')}`
+}
+
+/**
+ * Count words in content by splitting on whitespace.
+ */
+export function computeWordCount(content: string): number {
+  const trimmed = content.trim()
+  if (!trimmed) return 0
+  return trimmed.split(/\s+/).length
+}
+
+/**
+ * Count markdown sections (lines starting with # through ######).
+ */
+export function computeSectionCount(content: string): number {
+  let count = 0
+  for (const line of content.split('\n')) {
+    if (/^#{1,6}\s/.test(line)) count++
+  }
+  return count
+}
+
+/**
+ * Extract heading tree from markdown content.
+ * Returns array of {depth, title} for each heading.
+ */
+export function computeHeadingTree(content: string): Array<{ depth: number; title: string }> {
+  const tree: Array<{ depth: number; title: string }> = []
+  for (const line of content.split('\n')) {
+    const match = line.match(/^(#{1,6})\s+(.+)$/)
+    if (match) {
+      tree.push({ depth: match[1].length, title: match[2].trim() })
+    }
+  }
+  return tree
+}
+
+/**
+ * Count files recursively in a directory.
+ * Returns 0 for nonexistent directories.
+ */
+export function computeFileCount(dir: string): number {
+  const { readdirSync } = require('node:fs')
+  try {
+    let count = 0
+    const entries = readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.isFile()) {
+        count++
+      } else if (entry.isDirectory()) {
+        count += computeFileCount(join(dir, entry.name))
+      }
+    }
+    return count
+  } catch {
+    return 0
+  }
+}
+
 /** CatalogEntry extended with optional Tier1 analysis fields. */
 export type CatalogEntryWithTier1 = CatalogEntry & Partial<Tier1Result>
+
+// ---------------------------------------------------------------------------
+// Incremental Processing Filter
+// ---------------------------------------------------------------------------
+
+export interface FilterProcessingOpts {
+  force?: boolean
+  retryErrors?: boolean
+}
+
+/**
+ * Filter catalog entries to determine which should be processed.
+ *
+ * Default: unattempted available entries + retryable under attempt limit.
+ * --force: all available entries regardless of state.
+ * --retry-errors: only retryable entries with attemptCount > 0.
+ * --retry-errors --force: all errored entries, ignoring attempt limits.
+ */
+export function filterForProcessing(
+  entries: CatalogEntryWithTier1[],
+  opts: FilterProcessingOpts = {}
+): CatalogEntryWithTier1[] {
+  const MAX_ATTEMPTS = 2
+
+  // First: only available entries
+  const available = entries.filter((e) => e.availability === 'available')
+
+  if (opts.force && !opts.retryErrors) {
+    return available
+  }
+
+  if (opts.retryErrors) {
+    // Only entries that have been attempted before
+    const errored = available.filter((e) => (e.attemptCount ?? 0) > 0)
+    if (opts.force) {
+      return errored
+    }
+    // Respect attempt limit and retryable flag
+    return errored.filter((e) => e.retryable !== false && (e.attemptCount ?? 0) < MAX_ATTEMPTS)
+  }
+
+  // Default: unattempted entries + retryable under attempt limit
+  return available.filter((e) => {
+    const attempts = e.attemptCount ?? 0
+    const hasData = e.wordCount != null
+
+    // Already analyzed successfully and no errors — skip
+    if (hasData && attempts === 0) return false
+
+    // Never attempted — include
+    if (attempts === 0) return true
+
+    // Attempted but retryable and under limit — include
+    if (e.retryable !== false && attempts < MAX_ATTEMPTS) return true
+
+    return false
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Batch Validation
+// ---------------------------------------------------------------------------
+
+export interface ValidationReport {
+  total: number
+  missingContentHash: number
+  pendingContentHash: number
+  missingWordCount: number
+  missingKeywords: number
+  issues: string[]
+}
+
+/**
+ * Validate a batch of Tier1Results for common issues.
+ * Called after merge to catch quality problems early.
+ */
+export function validateBatchResults(results: Tier1Result[]): ValidationReport {
+  const successes = results.filter((r) => r.wordCount != null)
+  const report: ValidationReport = {
+    total: successes.length,
+    missingContentHash: 0,
+    pendingContentHash: 0,
+    missingWordCount: 0,
+    missingKeywords: 0,
+    issues: [],
+  }
+
+  for (const r of successes) {
+    if (!r.contentHash) {
+      report.missingContentHash++
+      report.issues.push(`${r.source}@${r.skill}: missing contentHash`)
+    } else if (r.contentHash === 'sha256:pending' || r.contentHash.includes('pending')) {
+      report.pendingContentHash++
+      report.issues.push(`${r.source}@${r.skill}: pending contentHash`)
+    }
+    if (r.wordCount == null) {
+      report.missingWordCount++
+    }
+    if (!r.keywords || r.keywords.length === 0) {
+      report.missingKeywords++
+      report.issues.push(`${r.source}@${r.skill}: missing keywords`)
+    }
+  }
+
+  return report
+}
 
 // ---------------------------------------------------------------------------
 // Phase 4: Tier 1 Analysis — Data Transformation Functions
@@ -549,14 +794,34 @@ export function detectForks(results: Tier1Result[]): Tier1Result[] {
   return results
 }
 
+/** Internal fields used during processing but not persisted to catalog. */
+interface TransientErrorFields {
+  error?: string
+  errorType?: Tier1ErrorType
+  errorDetail?: string
+  errorCode?: number
+}
+
+/**
+ * Tier1Result extended with transient error fields from the orchestrator.
+ * These fields are used internally by mergeTier1Results to route errors
+ * to the error log — they are NOT written to the catalog.
+ */
+export type Tier1ResultWithTransient = Tier1Result & TransientErrorFields
+
 /**
  * Merge Tier1Result fields into an existing `.catalog.ndjson` file.
+ * Routes successes to the catalog and failures to the error log.
  *
- * For each result, finds a matching entry (by source + skill) and merges
- * the Tier1 fields onto it. Results that don't match an existing entry are
- * appended. The file is rewritten atomically.
+ * This is the single authority for catalog + error log state coordination.
+ * - Successes (have wordCount): merge into catalog, clear error cache, reset attemptCount
+ * - Failures (no wordCount, have error): append ErrorRecord to log, increment attemptCount
  */
-export function mergeTier1Results(catalogPath: string, results: Tier1Result[]): void {
+export function mergeTier1Results(
+  catalogPath: string,
+  errorLogPath: string,
+  results: Tier1ResultWithTransient[]
+): void {
   // Read existing entries — tolerant of missing file
   const existing: CatalogEntryWithTier1[] = []
   if (existsSync(catalogPath)) {
@@ -579,28 +844,97 @@ export function mergeTier1Results(catalogPath: string, results: Tier1Result[]): 
     index.set(key, i)
   }
 
-  // Merge or append each result
+  // Split results into successes and failures
+  const errorRecords: ErrorRecord[] = []
+
   for (const result of results) {
     const key = `${result.source}\0${result.skill}`
     const idx = index.get(key)
+    const isSuccess = result.wordCount != null && !result.error
 
-    if (idx !== undefined) {
-      // Merge Tier1 fields into existing entry
-      existing[idx] = { ...existing[idx], ...result }
-    } else {
-      // New entry — create a minimal CatalogEntry + Tier1 fields
-      const newEntry: CatalogEntryWithTier1 = {
+    if (isSuccess) {
+      // Success: merge data, clear error cache, reset attemptCount
+      const {
+        error: _e,
+        errorType: _et,
+        errorDetail: _ed,
+        errorCode: _ec,
+        ...cleanResult
+      } = result as TransientErrorFields & Tier1Result
+      const merged: Partial<CatalogEntryWithTier1> = {
+        ...cleanResult,
+        attemptCount: 0,
+        lastErrorType: undefined,
+        retryable: undefined,
+      }
+
+      if (idx !== undefined) {
+        // Strip old error fields from existing entry too
+        const entry = existing[idx]
+        delete (entry as Record<string, unknown>).error
+        delete (entry as Record<string, unknown>).errorDetail
+        delete (entry as Record<string, unknown>).errorCode
+        existing[idx] = { ...entry, ...merged }
+      } else {
+        existing.push({
+          source: result.source,
+          skill: result.skill,
+          availability: 'available',
+          ...merged,
+        } as CatalogEntryWithTier1)
+        index.set(key, existing.length - 1)
+      }
+    } else if (result.error) {
+      // Failure: build error record for error log
+      const errorType = result.errorType ?? ('batch_failed' as Tier1ErrorType)
+      errorRecords.push({
         source: result.source,
         skill: result.skill,
-        availability: 'available', // if we got T1 results, it was available
-        ...result,
+        runId: result.runId ?? '',
+        batchId: result.batchId ?? '',
+        timestamp: result.analyzedAt ?? new Date().toISOString(),
+        errorType,
+        errorDetail: result.errorDetail ?? result.error ?? '',
+        errorCode: result.errorCode,
+        retryable: result.retryable ?? false,
+      })
+
+      // Update catalog entry with error cache fields
+      const prevAttemptCount = idx !== undefined ? (existing[idx].attemptCount ?? 0) : 0
+      const catalogUpdate: Partial<CatalogEntryWithTier1> = {
+        attemptCount: prevAttemptCount + 1,
+        lastErrorType: errorType,
+        retryable: result.retryable ?? false,
+        runId: result.runId,
+        batchId: result.batchId,
+        analyzedAt: result.analyzedAt,
       }
-      existing.push(newEntry)
-      index.set(key, existing.length - 1)
+
+      if (idx !== undefined) {
+        // Strip old error fields
+        const entry = existing[idx]
+        delete (entry as Record<string, unknown>).error
+        delete (entry as Record<string, unknown>).errorDetail
+        delete (entry as Record<string, unknown>).errorCode
+        existing[idx] = { ...entry, ...catalogUpdate }
+      } else {
+        existing.push({
+          source: result.source,
+          skill: result.skill,
+          availability: 'available',
+          ...catalogUpdate,
+        } as CatalogEntryWithTier1)
+        index.set(key, existing.length - 1)
+      }
     }
   }
 
-  // Write back atomically: write to temp file, then rename
+  // Append errors to error log
+  if (errorRecords.length > 0) {
+    appendErrors(errorLogPath, errorRecords)
+  }
+
+  // Write catalog back atomically: write to temp file, then rename
   const tmpPath = `${catalogPath}.tmp`
   const lines = `${existing.map((e) => JSON.stringify(e)).join('\n')}\n`
   writeFileSync(tmpPath, lines, 'utf8')

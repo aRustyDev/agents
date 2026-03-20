@@ -1,3 +1,4 @@
 .claude/
 .agents/
 .catalog.ndjson
+.catalog-errors.ndjson
