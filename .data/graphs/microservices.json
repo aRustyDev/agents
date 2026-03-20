@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "id": "microservices",
+    "version": 1,
+    "created": "2026-03-19T00:00:00Z",
+    "modified": "2026-03-19T21:17:29.623Z"
+  },
+  "nodes": [
+    {
+      "id": "node-api-gateway",
+      "type": "Component",
+      "label": "API Gateway",
+      "properties": {
+        "port": 8080
+      }
+    },
+    {
+      "id": "node-auth-svc",
+      "type": "Component",
+      "label": "Auth Service",
+      "properties": {
+        "protocol": "gRPC"
+      }
+    },
+    {
+      "id": "node-user-svc",
+      "type": "Component",
+      "label": "User Service",
+      "properties": {
+        "db": "postgres"
+      }
+    },
+    {
+      "id": "node-order-svc",
+      "type": "Component",
+      "label": "Order Service",
+      "properties": {
+        "db": "mongo"
+      }
+    },
+    {
+      "id": "node-payment-svc",
+      "type": "Component",
+      "label": "Payment Service",
+      "properties": {
+        "provider": "stripe"
+      }
+    },
+    {
+      "id": "node-kafka",
+      "type": "Component",
+      "label": "Kafka Cluster",
+      "properties": {
+        "partitions": 12
+      }
+    },
+    {
+      "id": "node-redis",
+      "type": "Component",
+      "label": "Redis Cache",
+      "properties": {
+        "mode": "cluster"
+      }
+    },
+    {
+      "id": "node-microservices",
+      "type": "Concept",
+      "label": "Microservices",
+      "properties": {}
+    },
+    {
+      "id": "node-event-driven",
+      "type": "Concept",
+      "label": "Event-Driven Architecture",
+      "properties": {}
+    },
+    {
+      "id": "node-api-spec",
+      "type": "Document",
+      "label": "OpenAPI Spec",
+      "properties": {
+        "version": "3.1"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-gw-auth",
+      "source": "node-api-gateway",
+      "target": "node-auth-svc",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-gw-user",
+      "source": "node-api-gateway",
+      "target": "node-user-svc",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-gw-order",
+      "source": "node-api-gateway",
+      "target": "node-order-svc",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-order-pay",
+      "source": "node-order-svc",
+      "target": "node-payment-svc",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-order-kafka",
+      "source": "node-order-svc",
+      "target": "node-kafka",
+      "type": "relates_to",
+      "properties": {}
+    },
+    {
+      "id": "edge-user-redis",
+      "source": "node-user-svc",
+      "target": "node-redis",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-auth-redis",
+      "source": "node-auth-svc",
+      "target": "node-redis",
+      "type": "depends_on",
+      "properties": {}
+    },
+    {
+      "id": "edge-kafka-event",
+      "source": "node-kafka",
+      "target": "node-event-driven",
+      "type": "relates_to",
+      "properties": {}
+    },
+    {
+      "id": "edge-gw-spec",
+      "source": "node-api-gateway",
+      "target": "node-api-spec",
+      "type": "contains",
+      "properties": {}
+    },
+    {
+      "id": "edge-ms-concept",
+      "source": "node-microservices",
+      "target": "node-event-driven",
+      "type": "relates_to",
+      "properties": {}
+    }
+  ]
+}

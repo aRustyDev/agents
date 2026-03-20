@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Graph Data",
+  "type": "object",
+  "required": ["metadata", "nodes", "edges"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "integer", "minimum": 1 },
+        "created": { "type": "string", "format": "date-time" },
+        "modified": { "type": "string", "format": "date-time" }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^node-[a-zA-Z0-9_-]+$" },
+          "type": { "type": "string", "enum": ["Concept", "Component", "Document", "Fragment"] },
+          "label": { "type": "string", "minLength": 1 },
+          "properties": { "type": "object" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "target", "type"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^edge-[a-zA-Z0-9_-]+$" },
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "type": { "type": "string", "enum": ["depends_on", "relates_to", "contains"] },
+          "properties": { "type": "object" }
+        }
+      }
+    }
+  }
+}

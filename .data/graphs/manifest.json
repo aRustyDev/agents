@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "graphs": [
+    {
+      "id": "example",
+      "file": "example.json",
+      "schema": "schemas/graph.schema.json",
+      "label": "ML Pipeline",
+      "description": "Example ML pipeline graph with training, feature extraction, model serving, and infrastructure components"
+    },
+    {
+      "id": "microservices",
+      "file": "microservices.json",
+      "schema": "schemas/graph.schema.json",
+      "label": "Microservices Architecture",
+      "description": ""
+    }
+  ]
+}

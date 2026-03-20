@@ -1,6 +1,6 @@
 {
   "name": "blog-workflow",
-  "version": "3.0.3",
+  "version": "4.0.0",
   "description": "Multi-phase blog content creation with personas, templates, and iterative review. Supports tutorials, deep dives, research summaries, and development journals.",
   "author": {
     "name": "Adam Smith",
@@ -21,38 +21,8 @@
     "tutorials"
   ],
   "commands": [
-    "./commands/init.md",
-    "./commands/idea/brainstorm.md",
-    "./commands/idea/review.md",
-    "./commands/idea/refine.md",
-    "./commands/idea/draft-plan.md",
-    "./commands/persona/draft.md",
-    "./commands/persona/plan.md",
-    "./commands/persona/review.md",
-    "./commands/template/draft.md",
-    "./commands/template/plan.md",
-    "./commands/template/review.md",
-    "./commands/research/spec/draft.md",
-    "./commands/research/spec/plan.md",
-    "./commands/research/spec/review.md",
-    "./commands/research/draft.md",
-    "./commands/research/plan.md",
-    "./commands/research/refine.md",
-    "./commands/research/review.md",
-    "./commands/content/draft.md",
-    "./commands/content/plan.md",
-    "./commands/content/refine.md",
-    "./commands/content/review.md",
-    "./commands/post/spec.md",
-    "./commands/post/plan.md",
-    "./commands/post/draft.md",
-    "./commands/post/refine.md",
-    "./commands/post/review.md",
-    "./commands/publish/seo-review.md",
-    "./commands/publish/pre-check.md",
-    "./commands/publish/promote.md",
-    "./commands/publish/validate.md",
-    "./commands/series-plan.md"
+    "./commands/blog.md",
+    "./commands/init.md"
   ],
   "agents": [
     "./agents/research-synthesizer.md",

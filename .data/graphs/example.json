@@ -1,0 +1,365 @@
+{
+  "metadata": {
+    "id": "example",
+    "version": 1,
+    "created": "2026-03-19T00:00:00Z",
+    "modified": "2026-03-19T21:56:30.040Z"
+  },
+  "nodes": [
+    {
+      "id": "node-training-data",
+      "type": "Concept",
+      "label": "Training Data",
+      "properties": {
+        "domain": "ML",
+        "stage": "ingestion"
+      }
+    },
+    {
+      "id": "node-feature-extraction",
+      "type": "Concept",
+      "label": "Feature Extraction",
+      "properties": {
+        "domain": "ML",
+        "stage": "preprocessing"
+      }
+    },
+    {
+      "id": "node-model-training",
+      "type": "Concept",
+      "label": "Model Training",
+      "properties": {
+        "domain": "ML",
+        "stage": "training"
+      }
+    },
+    {
+      "id": "node-hyperparameter-tuning",
+      "type": "Concept",
+      "label": "Hyperparameter Tuning",
+      "properties": {
+        "domain": "ML",
+        "stage": "training"
+      }
+    },
+    {
+      "id": "node-model-evaluation",
+      "type": "Concept",
+      "label": "Model Evaluation",
+      "properties": {
+        "domain": "ML",
+        "stage": "validation"
+      }
+    },
+    {
+      "id": "node-model-registry",
+      "type": "Component",
+      "label": "Model Registry",
+      "properties": {
+        "tool": "MLflow",
+        "version": "2.10"
+      }
+    },
+    {
+      "id": "node-inference-server",
+      "type": "Component",
+      "label": "Inference Server",
+      "properties": {
+        "tool": "Triton",
+        "protocol": "gRPC"
+      }
+    },
+    {
+      "id": "node-gpu-cluster",
+      "type": "Component",
+      "label": "GPU Cluster",
+      "properties": {
+        "provider": "on-prem",
+        "gpus": 8,
+        "type": "A100"
+      }
+    },
+    {
+      "id": "node-data-lake",
+      "type": "Component",
+      "label": "Data Lake",
+      "properties": {
+        "storage": "S3",
+        "format": "parquet"
+      }
+    },
+    {
+      "id": "node-feature-store",
+      "type": "Component",
+      "label": "Feature Store",
+      "properties": {
+        "tool": "Feast",
+        "online": true
+      }
+    },
+    {
+      "id": "node-monitoring",
+      "type": "Component",
+      "label": "Model Monitoring",
+      "properties": {
+        "tool": "Evidently",
+        "alerts": true
+      }
+    },
+    {
+      "id": "node-api-spec",
+      "type": "Document",
+      "label": "API Specification",
+      "properties": {
+        "format": "openapi",
+        "version": "3.1"
+      }
+    },
+    {
+      "id": "node-runbook",
+      "type": "Document",
+      "label": "Operations Runbook",
+      "properties": {
+        "format": "markdown",
+        "pages": 24
+      }
+    },
+    {
+      "id": "node-data-schema",
+      "type": "Document",
+      "label": "Data Schema",
+      "properties": {
+        "format": "json-schema",
+        "entities": 12
+      }
+    },
+    {
+      "id": "node-loss-function",
+      "type": "Fragment",
+      "label": "Loss Function",
+      "properties": {
+        "type": "cross-entropy",
+        "weighted": true
+      }
+    },
+    {
+      "id": "node-optimizer",
+      "type": "Fragment",
+      "label": "Optimizer Config",
+      "properties": {
+        "type": "AdamW",
+        "lr": 0.001
+      }
+    },
+    {
+      "id": "node-data-pipeline",
+      "type": "Fragment",
+      "label": "ETL Pipeline Config",
+      "properties": {
+        "schedule": "hourly",
+        "retries": 3
+      }
+    },
+    {
+      "id": "node-serving-config",
+      "type": "Fragment",
+      "label": "Serving Configuration",
+      "properties": {
+        "replicas": 3,
+        "autoscale": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-data-to-features",
+      "source": "node-training-data",
+      "target": "node-feature-extraction",
+      "type": "depends_on",
+      "properties": {
+        "critical": true
+      }
+    },
+    {
+      "id": "edge-features-to-training",
+      "source": "node-feature-extraction",
+      "target": "node-model-training",
+      "type": "depends_on",
+      "properties": {
+        "critical": true
+      }
+    },
+    {
+      "id": "edge-training-to-eval",
+      "source": "node-model-training",
+      "target": "node-model-evaluation",
+      "type": "depends_on",
+      "properties": {
+        "critical": true
+      }
+    },
+    {
+      "id": "edge-tuning-to-training",
+      "source": "node-hyperparameter-tuning",
+      "target": "node-model-training",
+      "type": "relates_to",
+      "properties": {
+        "feedback": true
+      }
+    },
+    {
+      "id": "edge-eval-to-registry",
+      "source": "node-model-evaluation",
+      "target": "node-model-registry",
+      "type": "depends_on",
+      "properties": {
+        "automated": true
+      }
+    },
+    {
+      "id": "edge-registry-to-serving",
+      "source": "node-model-registry",
+      "target": "node-inference-server",
+      "type": "depends_on",
+      "properties": {
+        "automated": true
+      }
+    },
+    {
+      "id": "edge-training-to-gpu",
+      "source": "node-model-training",
+      "target": "node-gpu-cluster",
+      "type": "depends_on",
+      "properties": {
+        "resource": "compute"
+      }
+    },
+    {
+      "id": "edge-data-to-lake",
+      "source": "node-training-data",
+      "target": "node-data-lake",
+      "type": "depends_on",
+      "properties": {
+        "resource": "storage"
+      }
+    },
+    {
+      "id": "edge-features-to-store",
+      "source": "node-feature-extraction",
+      "target": "node-feature-store",
+      "type": "depends_on",
+      "properties": {
+        "online": true
+      }
+    },
+    {
+      "id": "edge-serving-to-monitoring",
+      "source": "node-inference-server",
+      "target": "node-monitoring",
+      "type": "relates_to",
+      "properties": {
+        "realtime": true
+      }
+    },
+    {
+      "id": "edge-serving-to-api",
+      "source": "node-inference-server",
+      "target": "node-api-spec",
+      "type": "relates_to",
+      "properties": {
+        "implements": true
+      }
+    },
+    {
+      "id": "edge-runbook-to-monitoring",
+      "source": "node-runbook",
+      "target": "node-monitoring",
+      "type": "relates_to",
+      "properties": {
+        "references": true
+      }
+    },
+    {
+      "id": "edge-schema-to-data",
+      "source": "node-data-schema",
+      "target": "node-training-data",
+      "type": "relates_to",
+      "properties": {
+        "validates": true
+      }
+    },
+    {
+      "id": "edge-training-contains-loss",
+      "source": "node-model-training",
+      "target": "node-loss-function",
+      "type": "contains",
+      "properties": {}
+    },
+    {
+      "id": "edge-training-contains-optimizer",
+      "source": "node-model-training",
+      "target": "node-optimizer",
+      "type": "contains",
+      "properties": {}
+    },
+    {
+      "id": "edge-data-contains-pipeline",
+      "source": "node-training-data",
+      "target": "node-data-pipeline",
+      "type": "contains",
+      "properties": {}
+    },
+    {
+      "id": "edge-serving-contains-config",
+      "source": "node-inference-server",
+      "target": "node-serving-config",
+      "type": "contains",
+      "properties": {}
+    },
+    {
+      "id": "edge-lake-to-schema",
+      "source": "node-data-lake",
+      "target": "node-data-schema",
+      "type": "relates_to",
+      "properties": {
+        "governed": true
+      }
+    },
+    {
+      "id": "edge-store-to-features",
+      "source": "node-feature-store",
+      "target": "node-feature-extraction",
+      "type": "relates_to",
+      "properties": {
+        "caches": true
+      }
+    },
+    {
+      "id": "edge-tuning-to-eval",
+      "source": "node-hyperparameter-tuning",
+      "target": "node-model-evaluation",
+      "type": "depends_on",
+      "properties": {
+        "feedback-loop": true
+      }
+    },
+    {
+      "id": "edge-api-to-runbook",
+      "source": "node-api-spec",
+      "target": "node-runbook",
+      "type": "relates_to",
+      "properties": {
+        "documented": true
+      }
+    },
+    {
+      "id": "edge-gpu-to-monitoring",
+      "source": "node-gpu-cluster",
+      "target": "node-monitoring",
+      "type": "relates_to",
+      "properties": {
+        "metrics": true
+      }
+    }
+  ]
+}

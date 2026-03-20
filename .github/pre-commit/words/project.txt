@@ -38,9 +38,11 @@ codebases
 codecov
 codegraph
 Composio
+Cpath
 crawl4ai
 crawlable
 cspell
+Csvg
 cupertino
 datasheet
 davepoon
@@ -53,11 +55,13 @@ DTCG
 Duplicat
 elec
 embeddings
+etypes
 fastmcp
 FDTD
 ffuf
 Floorplan
 flowgpt
+forceatlas
 FrancyJGLisboa
 getpid
 gitea
@@ -102,6 +106,7 @@ microarchitectural
 mihaelamj
 modelcontextprotocol
 monorepo
+mousemovebody
 myproject
 neuromorphic
 nomic
@@ -146,6 +151,7 @@ rumdl
 Rxiv
 sandboxer
 secops
+Segoe
 semgrep
 SERP
 serper
@@ -183,12 +189,16 @@ trailofbits
 travisvn
 treesitter
 Trit
+unavail
+UNAVAIL
 underexplored
 underspecified
+unhovered
 unparseable
 unresolve
 Unresolve
 UNRESOLVE
+Unzoom
 uvx
 videocut
 viewmodel
@@ -217,5 +227,3 @@ yamllint
 yara
 zeroize
 Zotero
-unavail
-UNAVAIL
