@@ -22,6 +22,7 @@ blencorp
 brewfile
 buildwithclaude
 bunx
+chunker
 burpsuite
 cchooks
 cclint
@@ -88,6 +89,7 @@ Jeffallan
 jkitchin
 jqueryscript
 justfile
+kwsites
 lackeyjb
 lockfiles
 LAPACK
