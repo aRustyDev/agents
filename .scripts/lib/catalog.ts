@@ -411,6 +411,7 @@ export interface Tier1Result {
   bestPracticesMechanical?: { score: number; violations: string[] }
   securityMechanical?: { score: number; concerns: string[] }
   contentHash?: string
+  treeSha?: string // git tree SHA of the skill folder (for stale detection)
   tier2Reviewed?: boolean
   // Error cache fields (detail lives in error log)
   attemptCount?: number

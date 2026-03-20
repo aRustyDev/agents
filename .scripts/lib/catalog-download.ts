@@ -6,7 +6,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import {
   type CatalogEntry,
   computeContentHash,
@@ -16,7 +16,7 @@ import {
   computeWordCount,
   type Tier1ErrorType,
 } from './catalog'
-import { cloneRepo, type GitCloneError } from './git'
+import { cloneRepo, type GitCloneError, gitRaw } from './git'
 import { discoverSkills } from './skill-discovery'
 import {
   detectGitProtocol,
@@ -106,6 +106,8 @@ export interface SkillDownloadResult {
   sectionCount?: number
   fileCount?: number
   headingTree?: Array<{ depth: number; title: string }>
+  /** Git tree SHA of the skill folder (for stale detection). */
+  treeSha?: string
   /** Parsed frontmatter name (from discovery). */
   discoveredName?: string
   /** Parsed frontmatter description. */
@@ -233,7 +235,26 @@ export async function downloadSkill(
 
   try {
     // Step 3+4: Discover and compute
-    return await findSkillInDir(resolved.value.searchDir, skill, source)
+    const result = await findSkillInDir(resolved.value.searchDir, skill, source)
+
+    // Populate treeSha for stale detection (Phase 4)
+    if (result.path && !opts.localOverride) {
+      const relPath = relative(resolved.value.searchDir, join(result.path, '..')).replace(
+        /\\/g,
+        '/'
+      )
+      if (relPath && !relPath.startsWith('..')) {
+        const treeShaResult = await gitRaw(
+          ['rev-parse', `HEAD:${relPath}`],
+          resolved.value.searchDir
+        )
+        if (treeShaResult.ok) {
+          result.treeSha = treeShaResult.value.trim()
+        }
+      }
+    }
+
+    return result
   } finally {
     if (resolved.value.cleanup) await resolved.value.cleanup()
   }
@@ -399,10 +420,26 @@ async function downloadBatchForSource(
     )
 
     for (const entry of group) {
-      results.set(
-        entry.skill,
-        resolveSkillFromClone(entry, source, cloneResult.value.tempDir, discoveredMap)
-      )
+      const result = resolveSkillFromClone(entry, source, cloneResult.value.tempDir, discoveredMap)
+
+      // Populate treeSha for stale detection (Phase 4)
+      if (result.path) {
+        const relPath = relative(cloneResult.value.tempDir, join(result.path, '..')).replace(
+          /\\/g,
+          '/'
+        )
+        if (relPath && !relPath.startsWith('..')) {
+          const treeShaResult = await gitRaw(
+            ['rev-parse', `HEAD:${relPath}`],
+            cloneResult.value.tempDir
+          )
+          if (treeShaResult.ok) {
+            result.treeSha = treeShaResult.value.trim()
+          }
+        }
+      }
+
+      results.set(entry.skill, result)
     }
   } finally {
     await cloneResult.value.cleanup()
