@@ -284,6 +284,8 @@ export interface BatchDownloadOptions {
   protocol?: GitProtocol
   signal?: AbortSignal
   timeout?: number
+  /** If provided, cleanup functions are pushed here instead of executed. Caller must run them after using dl.path files. */
+  deferCleanup?: (() => Promise<void>)[]
 }
 
 /**
@@ -442,6 +444,10 @@ async function downloadBatchForSource(
       results.set(entry.skill, result)
     }
   } finally {
-    await cloneResult.value.cleanup()
+    if (opts.deferCleanup) {
+      opts.deferCleanup.push(cloneResult.value.cleanup)
+    } else {
+      await cloneResult.value.cleanup()
+    }
   }
 }

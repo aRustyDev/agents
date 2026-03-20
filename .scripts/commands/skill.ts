@@ -932,9 +932,11 @@ export default defineCommand({
                   >
                 } else {
                   // GREEN: new git.ts + skill-discovery path
+                  // deferCleanup keeps temp clone dirs alive until we copy files
+                  const cleanups: (() => Promise<void>)[] = []
                   const protocol =
                     gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
-                  downloaded = await downloadBatch(batch, { protocol })
+                  downloaded = await downloadBatch(batch, { protocol, deferCleanup: cleanups })
 
                   // Copy downloaded skills into worktree for agent access
                   const wtSkillsDir = join(wtPath, '.claude', 'skills')
@@ -948,6 +950,9 @@ export default defineCommand({
                       dl.path = join(destDir, 'SKILL.md')
                     }
                   }
+
+                  // Now clean up temp clone dirs
+                  for (const fn of cleanups) await fn()
                 }
                 const successCount = [...downloaded.values()].filter((r) => r.path).length
                 const failCount = batch.length - successCount
