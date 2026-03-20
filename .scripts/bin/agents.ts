@@ -2,7 +2,7 @@
 import { defineCommand, runMain } from 'citty'
 
 const main = defineCommand({
-  meta: { name: 'ai-tools', version: '0.1.0', description: 'AI context library tooling' },
+  meta: { name: 'agents', version: '0.1.0', description: 'AI context library tooling' },
   subCommands: {
     plugin: () => import('../commands/plugin').then((m) => m.default),
     skill: () => import('../commands/skill').then((m) => m.default),

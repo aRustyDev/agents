@@ -1,10 +1,10 @@
 {
-  "name": "ai-tools",
+  "name": "@arustydev/agents",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "ai-tools": "bun run bin/ai-tools.ts",
+    "agents": "bun run bin/agents.ts",
     "graph-viewer": "bun run bin/graph-viewer.ts",
     "graph-viewer:dev": "concurrently \"bun --watch run bin/graph-viewer.ts\" \"npx vite --config vite.graph-viewer.config.ts\"",
     "graph-viewer:build": "npx vite build --config vite.graph-viewer.config.ts",

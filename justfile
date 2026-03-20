@@ -13,8 +13,8 @@ mod rule "context/rules/justfile"
 
 # TypeScript CLI tooling
 [group('tools')]
-ai-tools *args:
-    @bun run .scripts/bin/ai-tools.ts {{ args }}
+agents *args:
+    @bun run .scripts/bin/agents.ts {{ args }}
 
 # Claude Code configuration directory
 

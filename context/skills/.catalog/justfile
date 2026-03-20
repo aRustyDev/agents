@@ -6,7 +6,7 @@ set unstable := true
 
 # ROOT is not inherited from parent module scope
 ROOT := source_directory() / "../../.."
-TOOLS := ROOT / ".scripts/bin/ai-tools.ts"
+TOOLS := ROOT / ".scripts/bin/agents.ts"
 run := "bun run " + TOOLS + " skill catalog"
 
 # Full pipeline: taxonomy -> availability -> analyze -> grade
