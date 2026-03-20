@@ -336,7 +336,7 @@ describe('SmitheryProvider capabilities', () => {
     expect(provider.capabilities.add).toEqual([])
     expect(provider.capabilities.list).toEqual([])
     expect(provider.capabilities.remove).toEqual([])
-    expect(provider.capabilities.publish).toEqual([])
+    expect(provider.capabilities.publish).toEqual(['mcp_server'])
     expect(provider.capabilities.info).toEqual([])
     expect(provider.capabilities.outdated).toEqual([])
     expect(provider.capabilities.update).toEqual([])
@@ -389,5 +389,82 @@ describe('SmitheryProvider unsupported operations', () => {
     if (!result.ok) return
 
     expect(result.value).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// publish
+// ---------------------------------------------------------------------------
+
+describe('SmitheryProvider publish', () => {
+  test('publishes external URL to Smithery', async () => {
+    mockFetch(async (url: string, init?: RequestInit) => {
+      const urlStr = String(url)
+      // Initial POST to create release
+      if (init?.method === 'POST' && urlStr.includes('/releases')) {
+        return jsonResponse({ deploymentId: 'dep-123' })
+      }
+      // GET poll for deployment status
+      if (urlStr.includes('/releases/dep-123')) {
+        return jsonResponse({ status: 'SUCCESS', mcpUrl: 'https://server.smithery.ai/ns/test/mcp' })
+      }
+      return jsonResponse({}, 404)
+    })
+
+    const provider = new SmitheryProvider()
+    const result = await provider.publish('mcp_server', {
+      name: 'ns/test-server',
+      apiKey: 'test-key',
+      externalUrl: 'https://my-server.com/mcp',
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.value.status).toBe('published')
+      expect(result.value.registryUrl).toContain('smithery.ai')
+    }
+  })
+
+  test('returns error for non-mcp_server type', async () => {
+    const provider = new SmitheryProvider()
+    const result = await provider.publish('skill', { name: 'ns/test', apiKey: 'key' })
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('E_UNSUPPORTED')
+  })
+
+  test('returns error when no API key', async () => {
+    const origEnv = process.env.SMITHERY_API_KEY
+    delete process.env.SMITHERY_API_KEY
+    try {
+      const provider = new SmitheryProvider()
+      const result = await provider.publish('mcp_server', { name: 'ns/test' })
+      expect(result.ok).toBe(false)
+      if (!result.ok) expect(result.error.code).toBe('E_AUTH_REQUIRED')
+    } finally {
+      if (origEnv) process.env.SMITHERY_API_KEY = origEnv
+    }
+  })
+
+  test('returns error when no name provided', async () => {
+    const provider = new SmitheryProvider()
+    const result = await provider.publish('mcp_server', { apiKey: 'key' })
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error.code).toBe('E_MISSING_NAME')
+  })
+
+  test('supports dry run', async () => {
+    const provider = new SmitheryProvider()
+    const result = await provider.publish('mcp_server', {
+      name: 'ns/test',
+      apiKey: 'key',
+      externalUrl: 'https://example.com',
+      dryRun: true,
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.value.warnings).toContain('Dry run -- no changes made')
+  })
+
+  test('capabilities includes mcp_server in publish', () => {
+    const provider = new SmitheryProvider()
+    expect(provider.capabilities.publish).toContain('mcp_server')
   })
 })

@@ -17,6 +17,7 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishOptions,
   PublishResult,
   RemoveResult,
   SearchParams,
@@ -33,7 +34,7 @@ export class SmitheryProvider implements ComponentProvider {
     add: [],
     list: [],
     remove: [],
-    publish: [],
+    publish: ['mcp_server'],
     info: [],
     outdated: [],
     update: [],
@@ -141,7 +142,47 @@ export class SmitheryProvider implements ComponentProvider {
     return err(new CliError('Smithery provider does not support info', 'E_UNSUPPORTED'))
   }
 
-  async publish(): Promise<Result<PublishResult>> {
-    return err(new CliError(`${this.displayName} does not support publish`, 'E_UNSUPPORTED'))
+  async publish(type: ComponentType, opts: PublishOptions): Promise<Result<PublishResult>> {
+    if (type !== 'mcp_server') {
+      return err(
+        new CliError(`Smithery only supports publishing mcp_server, not ${type}`, 'E_UNSUPPORTED')
+      )
+    }
+
+    // Resolve auth
+    const { resolveSmitheryAuth } = await import('./smithery-auth')
+    const authResult = resolveSmitheryAuth({ apiKey: opts.apiKey })
+    if (!authResult.ok) return err(authResult.error)
+
+    // Resolve qualified name
+    const qualifiedName = opts.name ?? (opts.namespace ? `${opts.namespace}/unknown` : undefined)
+    if (!qualifiedName) {
+      return err(
+        new CliError('Qualified name required (--name namespace/server)', 'E_MISSING_NAME')
+      )
+    }
+
+    // Delegate to publish module
+    const { publishToSmithery } = await import('./smithery-publish')
+    const result = await publishToSmithery({
+      qualifiedName,
+      apiKey: authResult.value.apiKey,
+      externalUrl: opts.externalUrl,
+      configSchema: opts.configSchema,
+      bundleDir: opts.bundleDir,
+      dryRun: opts.dryRun,
+      baseUrl: this.baseUrl,
+    })
+
+    if (!result.ok) return err(result.error)
+
+    return ok({
+      ok: result.value.ok,
+      registryUrl: result.value.registryUrl,
+      releaseId: result.value.releaseId,
+      status: result.value.status,
+      error: result.value.error,
+      warnings: result.value.warnings,
+    })
   }
 }
