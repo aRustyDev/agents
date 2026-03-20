@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "agents": "bun run bin/agents.ts",
-    "graph-viewer": "bun run bin/graph-viewer.ts",
-    "graph-viewer:dev": "concurrently \"bun --watch run bin/graph-viewer.ts\" \"npx vite --config vite.graph-viewer.config.ts\"",
-    "graph-viewer:build": "npx vite build --config vite.graph-viewer.config.ts",
+    "graph-viewer": "bun run bin/agents.ts graph-viewer serve",
+    "graph-viewer:dev": "bun run bin/agents.ts graph-viewer dev",
+    "graph-viewer:build": "bun run bin/agents.ts graph-viewer build",
     "test": "bun test"
   },
   "dependencies": {
