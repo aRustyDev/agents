@@ -393,6 +393,7 @@ export type Tier1ErrorType =
   | 'analysis_timeout'
   | 'rate_limited'
   | 'batch_failed'
+  | 'source_invalid'
 
 export interface Tier1Result {
   source: string
