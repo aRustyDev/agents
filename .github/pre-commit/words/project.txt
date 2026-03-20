@@ -111,6 +111,7 @@ mihaelamj
 modelcontextprotocol
 monorepo
 mousemovebody
+myns
 myproject
 myskill
 neuromorphic
@@ -119,6 +120,7 @@ Nygard
 obra
 oldhash
 ollama
+onlynamespace
 opto
 orbstack
 overclaiming
@@ -215,6 +217,7 @@ ViewModel
 vijaythecoder
 voltagent
 Wassette
+wdispatch
 webfetch
 websearch
 Wextra
