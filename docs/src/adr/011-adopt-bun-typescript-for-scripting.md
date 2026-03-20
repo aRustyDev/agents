@@ -81,7 +81,7 @@ graph TD
     end
 
     subgraph "After (1.5 runtimes)"
-        J2[justfile] --> BUN[bun run ai-tools.ts]
+        J2[justfile] --> BUN[bun run agents.ts]
         BUN --> TS1[plugin commands]
         BUN --> TS2[skill commands]
         BUN --> TS3[registry commands]

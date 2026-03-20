@@ -21,6 +21,7 @@ BLAS
 blencorp
 brewfile
 buildwithclaude
+bunx
 burpsuite
 cchooks
 cclint
@@ -88,6 +89,7 @@ jkitchin
 jqueryscript
 justfile
 lackeyjb
+lockfiles
 LAPACK
 litdb
 Livelocks
@@ -130,6 +132,7 @@ polyrepo
 pproenca
 precheck
 productionization
+publishability
 promptbase
 PRRT
 PRRTC
