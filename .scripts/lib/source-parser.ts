@@ -153,3 +153,71 @@ export function sanitizeSubpath(subpath: string): Result<string> {
   }
   return ok(segments.filter(Boolean).join('/'))
 }
+
+// ---------------------------------------------------------------------------
+// Clone URL resolution
+// ---------------------------------------------------------------------------
+
+export type GitProtocol = 'https' | 'ssh'
+
+/**
+ * Build a clone URL for a GitHub owner/repo, respecting the preferred protocol.
+ *
+ * - `https` → `https://github.com/owner/repo.git`
+ * - `ssh` → `git@github.com:owner/repo.git`
+ */
+export function resolveCloneUrl(ownerRepo: string, protocol: GitProtocol = 'https'): string {
+  if (protocol === 'ssh') {
+    return `git@github.com:${ownerRepo}.git`
+  }
+  return `https://github.com/${ownerRepo}.git`
+}
+
+/**
+ * Detect the preferred git protocol by checking (in order):
+ * 1. SSH IdentityAgent in ~/.ssh/config (1Password, Secretive, etc.)
+ * 2. git config url rewrite rules (url."git@github.com:".insteadOf)
+ * 3. gh auth status (if gh CLI is available)
+ *
+ * Falls back to 'https' if no SSH signal is detected.
+ */
+export function detectGitProtocol(): GitProtocol {
+  try {
+    const { readFileSync: readF } = require('node:fs')
+    const { homedir: home } = require('node:os')
+    const { join: joinP } = require('node:path')
+
+    // 1. Check ~/.ssh/config for IdentityAgent (1Password SSH agent, etc.)
+    try {
+      const sshConfig = readF(joinP(home(), '.ssh', 'config'), 'utf-8') as string
+      if (sshConfig.includes('IdentityAgent')) return 'ssh'
+    } catch {
+      /* no ssh config */
+    }
+
+    // 2. Check git config for URL rewrite rules
+    const { spawnSync: spS } = require('node:child_process')
+    const git = spS('git', ['config', '--get', 'url.git@github.com:.insteadOf'], {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 3000,
+    })
+    if (git.stdout?.trim()) return 'ssh'
+
+    // 3. Check gh CLI (optional — works even without gh installed)
+    try {
+      const gh = spS('gh', ['auth', 'status'], {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout: 5000,
+      })
+      const output = `${gh.stdout ?? ''}${gh.stderr ?? ''}`
+      if (output.includes('Git operations protocol: ssh')) return 'ssh'
+    } catch {
+      /* gh not installed */
+    }
+  } catch {
+    // Detection failed entirely
+  }
+  return 'https'
+}

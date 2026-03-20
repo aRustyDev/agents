@@ -1,6 +1,12 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 import type { ParsedSource } from '../lib/source-parser'
-import { getOwnerRepo, parseSource, sanitizeSubpath } from '../lib/source-parser'
+import {
+  detectGitProtocol,
+  getOwnerRepo,
+  parseSource,
+  resolveCloneUrl,
+  sanitizeSubpath,
+} from '../lib/source-parser'
 
 // ---------------------------------------------------------------------------
 // parseSource — short form
@@ -515,5 +521,35 @@ describe('parseSource + getOwnerRepo roundtrip', () => {
     expect(r.ok).toBe(true)
     if (!r.ok) return
     expect(getOwnerRepo(r.value)).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// resolveCloneUrl
+// ---------------------------------------------------------------------------
+
+describe('resolveCloneUrl', () => {
+  it('returns HTTPS URL by default', () => {
+    expect(resolveCloneUrl('anthropics/skills')).toBe('https://github.com/anthropics/skills.git')
+  })
+
+  it('returns SSH URL when protocol is ssh', () => {
+    expect(resolveCloneUrl('anthropics/skills', 'ssh')).toBe('git@github.com:anthropics/skills.git')
+  })
+
+  it('returns HTTPS URL when protocol is https', () => {
+    expect(resolveCloneUrl('anthropics/skills', 'https')).toBe(
+      'https://github.com/anthropics/skills.git'
+    )
+  })
+
+  it('handles owner/repo with dots and hyphens', () => {
+    expect(resolveCloneUrl('my-org/my.repo', 'ssh')).toBe('git@github.com:my-org/my.repo.git')
+  })
+})
+
+describe('detectGitProtocol', () => {
+  it('returns a valid GitProtocol value', () => {
+    expect(['ssh', 'https']).toContain(detectGitProtocol())
   })
 })
