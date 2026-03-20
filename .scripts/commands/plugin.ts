@@ -7,21 +7,22 @@
  * Uses the lib modules for hashing, manifest I/O, and output formatting.
  */
 
-import { defineCommand } from 'citty'
-import { existsSync, readdirSync, statSync, cpSync, rmSync, mkdirSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { globalArgs } from './shared-args'
+import { defineCommand } from 'citty'
 import { computeHash, formatHash, parseHash } from '../lib/hash'
 import { createOutput, type OutputFormatter } from '../lib/output'
+import { currentDir } from '../lib/runtime'
 import { EXIT } from '../lib/types'
+import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 /** Project root -- from .scripts/commands/ it is 2 levels up. */
-const PROJECT_ROOT = resolve(import.meta.dir, '../..')
+const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
 
 /** Directory containing all plugins. */
 const PLUGINS_DIR = join(PROJECT_ROOT, 'context/plugins')
@@ -125,7 +126,7 @@ class Plugin {
   }
 
   async saveSources(data: SourcesFile): Promise<void> {
-    const json = JSON.stringify(data, null, 2) + '\n'
+    const json = `${JSON.stringify(data, null, 2)}\n`
     await writeFile(this.sourcesFile, json, 'utf-8')
   }
 
@@ -354,7 +355,8 @@ class Plugin {
       const sources = data.sources as Record<string, string | SourceDef>
       for (const [localPath, sourceDef] of Object.entries(sources)) {
         if (result.skipped.includes(localPath)) continue
-        const sourcePath = typeof sourceDef === 'string' ? sourceDef : (sourceDef as SourceDef).source
+        const sourcePath =
+          typeof sourceDef === 'string' ? sourceDef : (sourceDef as SourceDef).source
         if (sourcePath && existsSync(resolve(PROJECT_ROOT, sourcePath))) {
           this.copySource(localPath, sourcePath)
           result.copied.push(localPath)
@@ -543,7 +545,7 @@ export default defineCommand({
 
         console.log(
           `\nSummary: ${fresh} fresh, ${stale} stale, ` +
-            `${forked} forked, ${noHash} no-hash, ${missing} missing`,
+            `${forked} forked, ${noHash} no-hash, ${missing} missing`
         )
 
         if (stale || missing) {
@@ -759,7 +761,7 @@ export default defineCommand({
             } else {
               console.log(
                 `  \u2717 ${r.name}: ${r.fresh}/${r.total} fresh, ` +
-                  `${r.stale} stale, ${r.missing} missing`,
+                  `${r.stale} stale, ${r.missing} missing`
               )
             }
           }
@@ -828,14 +830,12 @@ export default defineCommand({
           if (buildResultSuccess(result)) {
             if (!args.json) {
               console.log(
-                `  \u2713 ${name}: ${result.copied.length} copied, ${result.updated.length} updated`,
+                `  \u2713 ${name}: ${result.copied.length} copied, ${result.updated.length} updated`
               )
             }
           } else {
             if (!args.json) {
-              console.log(
-                `  \u2717 ${name}: ${result.errors[0] ?? 'unknown error'}`,
-              )
+              console.log(`  \u2717 ${name}: ${result.errors[0] ?? 'unknown error'}`)
             }
             failed.push(name)
           }

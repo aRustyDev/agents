@@ -27,6 +27,7 @@
 
 import { createWriteStream, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { currentDir } from './runtime'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,7 +53,7 @@ interface CheckOptions {
 // Paths
 // ---------------------------------------------------------------------------
 
-const REPO_ROOT = join(import.meta.dir, '..', '..')
+const REPO_ROOT = join(currentDir(import.meta), '..', '..')
 const TODO_YAML_PATH = join(REPO_ROOT, 'context', 'skills', '.TODO.yaml')
 const CATALOG_PATH = join(REPO_ROOT, 'context', 'skills', '.catalog.ndjson')
 
@@ -403,7 +404,20 @@ export interface Tier1Result {
   contentHash?: string
   tier2Reviewed?: boolean
   error?: string
+  errorType?:
+    | 'download_failed'
+    | 'download_timeout'
+    | 'analysis_failed'
+    | 'analysis_timeout'
+    | 'rate_limited'
+    | 'batch_failed'
+  errorDetail?: string
+  errorCode?: number
+  retryable?: boolean
   possibleForkOf?: string
+  runId?: string
+  batchId?: string
+  analyzedAt?: string
 }
 
 /** CatalogEntry extended with optional Tier1 analysis fields. */
@@ -588,7 +602,7 @@ export function mergeTier1Results(catalogPath: string, results: Tier1Result[]): 
 
   // Write back atomically: write to temp file, then rename
   const tmpPath = `${catalogPath}.tmp`
-  const lines = existing.map((e) => JSON.stringify(e)).join('\n') + '\n'
+  const lines = `${existing.map((e) => JSON.stringify(e)).join('\n')}\n`
   writeFileSync(tmpPath, lines, 'utf8')
   renameSync(tmpPath, catalogPath)
 }
@@ -608,7 +622,7 @@ async function main(): Promise<void> {
 
   if (dryRun) {
     console.log('\n[DRY RUN] Would check these repos (first 10):')
-    repos.slice(0, 10).forEach((r) => console.log(`  ${r}`))
+    for (const r of repos.slice(0, 10)) console.log(`  ${r}`)
     if (repos.length > 10) console.log(`  ... and ${repos.length - 10} more`)
     return
   }

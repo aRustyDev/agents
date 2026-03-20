@@ -13,6 +13,7 @@
 
 import { readdir, stat } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import { createSha256Hasher, fileStream } from './runtime'
 
 // Directories that are never included in a directory hash.
 const SKIP_DIRS = new Set(['.git', 'node_modules', '__pycache__'])
@@ -25,11 +26,10 @@ const SKIP_DIRS = new Set(['.git', 'node_modules', '__pycache__'])
  * SHA256 hash of a single file's contents, returned as a lowercase hex string.
  */
 export async function hashFile(path: string): Promise<string> {
-  const file = Bun.file(path)
-  const hasher = new Bun.CryptoHasher('sha256')
+  const hasher = createSha256Hasher()
 
   // Stream in chunks to keep memory low for large files.
-  const stream = file.stream()
+  const stream = await fileStream(path)
   for await (const chunk of stream) {
     hasher.update(chunk)
   }
@@ -49,7 +49,7 @@ export async function hashDirectory(path: string): Promise<string> {
   // Sort by relative POSIX path for determinism (matches Python's sorted rglob).
   files.sort((a, b) => a.rel.localeCompare(b.rel))
 
-  const hasher = new Bun.CryptoHasher('sha256')
+  const hasher = createSha256Hasher()
   const NULL = new Uint8Array([0])
 
   for (const { abs, rel } of files) {
@@ -58,7 +58,7 @@ export async function hashDirectory(path: string): Promise<string> {
     hasher.update(NULL)
 
     // File contents streamed in chunks
-    const stream = Bun.file(abs).stream()
+    const stream = await fileStream(abs)
     for await (const chunk of stream) {
       hasher.update(chunk)
     }
@@ -90,7 +90,7 @@ export async function computeHash(path: string): Promise<string> {
  */
 export function lockKey(source: string, skill: string): string {
   const input = `${source}/${skill}`
-  const hasher = new Bun.CryptoHasher('sha256')
+  const hasher = createSha256Hasher()
   hasher.update(input)
   return hasher.digest('hex').slice(0, 12)
 }

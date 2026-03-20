@@ -9,28 +9,25 @@
  * (machine-managed).
  */
 
-import yaml from 'js-yaml'
 import {
-  readFileSync,
-  writeFileSync,
   existsSync,
   mkdirSync,
-  rmSync,
   readdirSync,
+  readFileSync,
+  rmSync,
   statSync,
+  writeFileSync,
 } from 'node:fs'
-import { join, resolve, relative } from 'node:path'
 import { tmpdir } from 'node:os'
+import { join, relative, resolve } from 'node:path'
+import yaml from 'js-yaml'
 import * as v from 'valibot'
-import { ok, err, CliError, type Result } from './types'
-import {
-  ExternalSourcesManifest,
-  ExternalLockEntry,
-  type ExternalSkillEntry,
-} from './schemas'
-import { hashDirectory, formatHash, lockKey } from './hash'
+import { addComment, createIssue, type Issue, searchIssues } from './github'
+import { formatHash, hashDirectory, lockKey } from './hash'
+import { spawnSync } from './runtime'
+import { type ExternalLockEntry, type ExternalSkillEntry, ExternalSourcesManifest } from './schemas'
 import { checkSymlink, createSymlink } from './symlink'
-import { searchIssues, createIssue, addComment, type Issue } from './github'
+import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,8 +69,8 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
       new CliError(
         `External sources manifest not found: ${manifestPath}`,
         'E_MANIFEST_NOT_FOUND',
-        'Create sources.yaml in context/skills/.external/',
-      ),
+        'Create sources.yaml in context/skills/.external/'
+      )
     )
   }
 
@@ -82,12 +79,7 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
     raw = readFileSync(manifestPath, 'utf-8')
   } catch (e) {
     return err(
-      new CliError(
-        `Failed to read manifest: ${manifestPath}`,
-        'E_READ_FAILED',
-        undefined,
-        e,
-      ),
+      new CliError(`Failed to read manifest: ${manifestPath}`, 'E_READ_FAILED', undefined, e)
     )
   }
 
@@ -100,8 +92,8 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
         `Invalid YAML in manifest: ${manifestPath}`,
         'E_INVALID_YAML',
         'Check the file for syntax errors',
-        e,
-      ),
+        e
+      )
     )
   }
 
@@ -114,11 +106,7 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
       })
       .join('\n')
     return err(
-      new CliError(
-        `Manifest validation failed: ${manifestPath}`,
-        'E_VALIDATION_FAILED',
-        issues,
-      ),
+      new CliError(`Manifest validation failed: ${manifestPath}`, 'E_VALIDATION_FAILED', issues)
     )
   }
 
@@ -130,9 +118,7 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
  *
  * Returns an empty record if the file does not exist.
  */
-export function readLock(
-  externalDir: string,
-): Record<string, ExternalLockEntry> {
+export function readLock(externalDir: string): Record<string, ExternalLockEntry> {
   const lockPath = join(externalDir, 'sources.lock.json')
   if (!existsSync(lockPath)) return {}
 
@@ -147,13 +133,10 @@ export function readLock(
 /**
  * Write `sources.lock.json` with 2-space indent and trailing newline.
  */
-export function writeLock(
-  externalDir: string,
-  data: Record<string, ExternalLockEntry>,
-): void {
+export function writeLock(externalDir: string, data: Record<string, ExternalLockEntry>): void {
   const lockPath = join(externalDir, 'sources.lock.json')
   mkdirSync(externalDir, { recursive: true })
-  writeFileSync(lockPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+  writeFileSync(lockPath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8')
 }
 
 // ---------------------------------------------------------------------------
@@ -168,31 +151,25 @@ export function writeLock(
  *
  * @returns The commit SHA or an error.
  */
-export async function gitLsRemote(
-  repoUrl: string,
-  ref?: string,
-): Promise<Result<string>> {
+export async function gitLsRemote(repoUrl: string, ref?: string): Promise<Result<string>> {
   const args = ref
     ? ['git', 'ls-remote', '--tags', repoUrl, ref]
     : ['git', 'ls-remote', repoUrl, 'HEAD']
 
-  const proc = Bun.spawnSync(args, {
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
+  const proc = spawnSync(args)
 
   if (proc.exitCode !== 0) {
-    const stderr = proc.stderr.toString().trim()
+    const stderr = proc.stderr.trim()
     return err(
       new CliError(
         `git ls-remote failed for ${repoUrl}`,
         'E_GIT_LS_REMOTE',
-        stderr || 'Check that the repository exists and is accessible',
-      ),
+        stderr || 'Check that the repository exists and is accessible'
+      )
     )
   }
 
-  const stdout = proc.stdout.toString().trim()
+  const stdout = proc.stdout.trim()
   if (!stdout) {
     return err(
       new CliError(
@@ -200,8 +177,8 @@ export async function gitLsRemote(
         'E_NO_REFS',
         ref
           ? `Tag "${ref}" may not exist. Check with: git ls-remote --tags ${repoUrl}`
-          : 'Repository may be empty or inaccessible',
-      ),
+          : 'Repository may be empty or inaccessible'
+      )
     )
   }
 
@@ -212,8 +189,8 @@ export async function gitLsRemote(
       new CliError(
         `Could not parse commit SHA from git ls-remote output`,
         'E_PARSE_FAILED',
-        `Output was: ${stdout}`,
-      ),
+        `Output was: ${stdout}`
+      )
     )
   }
 
@@ -230,10 +207,7 @@ export async function gitLsRemote(
  * Compares the current remote commit SHA (via `git ls-remote`) against
  * the `upstream_commit` stored in the lock file.
  */
-export async function checkDrift(
-  externalDir: string,
-  _skillsDir: string,
-): Promise<CheckResult[]> {
+export async function checkDrift(externalDir: string, _skillsDir: string): Promise<CheckResult[]> {
   const manifestResult = readManifest(externalDir)
   if (!manifestResult.ok) return []
 
@@ -271,8 +245,7 @@ export async function checkDrift(
       continue
     }
 
-    const status: DriftStatus =
-      remoteCommit === lockEntry.upstream_commit ? 'current' : 'changed'
+    const status: DriftStatus = remoteCommit === lockEntry.upstream_commit ? 'current' : 'changed'
 
     results.push({
       skill: name,
@@ -298,7 +271,7 @@ export async function syncSkill(
   entry: ExternalSkillEntry & { name: string },
   externalDir: string,
   _skillsDir: string,
-  _opts?: { force?: boolean },
+  _opts?: { force?: boolean }
 ): Promise<Result<void>> {
   const repoUrl = `https://github.com/${entry.source}.git`
   const destDir = join(externalDir, entry.source, entry.skill)
@@ -309,17 +282,23 @@ export async function syncSkill(
   try {
     if (entry.ref) {
       // Pinned ref: use git clone --depth 1 --branch <ref>
-      const proc = Bun.spawnSync(
-        ['git', 'clone', '--depth', '1', '--branch', entry.ref, repoUrl, tempBase + '/repo'],
-        { stdout: 'pipe', stderr: 'pipe' },
-      )
+      const proc = spawnSync([
+        'git',
+        'clone',
+        '--depth',
+        '1',
+        '--branch',
+        entry.ref,
+        repoUrl,
+        `${tempBase}/repo`,
+      ])
       if (proc.exitCode !== 0) {
         return err(
           new CliError(
             `Failed to clone ${entry.source} at ref ${entry.ref}`,
             'E_CLONE_FAILED',
-            proc.stderr.toString().trim(),
-          ),
+            proc.stderr.trim()
+          )
         )
       }
 
@@ -335,8 +314,8 @@ export async function syncSkill(
             new CliError(
               `Skill "${entry.skill}" not found in cloned repo`,
               'E_SKILL_NOT_FOUND',
-              `Searched: ${skillSrc} and ${altSrc}`,
-            ),
+              `Searched: ${skillSrc} and ${altSrc}`
+            )
           )
         }
       } else {
@@ -344,10 +323,7 @@ export async function syncSkill(
       }
     } else {
       // Try npx skills first, fall back to git clone
-      const npxCheck = Bun.spawnSync(['which', 'npx'], {
-        stdout: 'pipe',
-        stderr: 'pipe',
-      })
+      const npxCheck = spawnSync(['which', 'npx'])
 
       let synced = false
 
@@ -355,9 +331,17 @@ export async function syncSkill(
         const npxDir = join(tempBase, 'npx')
         mkdirSync(npxDir, { recursive: true })
 
-        const proc = Bun.spawnSync(
-          ['npx', 'skills', 'add', '-y', '--copy', '--full-depth', `${entry.source}@${entry.skill}`],
-          { stdout: 'pipe', stderr: 'pipe', cwd: npxDir },
+        const proc = spawnSync(
+          [
+            'npx',
+            'skills',
+            'add',
+            '-y',
+            '--copy',
+            '--full-depth',
+            `${entry.source}@${entry.skill}`,
+          ],
+          { cwd: npxDir }
         )
 
         if (proc.exitCode === 0) {
@@ -371,17 +355,10 @@ export async function syncSkill(
 
       if (!synced) {
         // Fallback: git clone
-        const proc = Bun.spawnSync(
-          ['git', 'clone', '--depth', '1', repoUrl, tempBase + '/repo'],
-          { stdout: 'pipe', stderr: 'pipe' },
-        )
+        const proc = spawnSync(['git', 'clone', '--depth', '1', repoUrl, `${tempBase}/repo`])
         if (proc.exitCode !== 0) {
           return err(
-            new CliError(
-              `Failed to clone ${entry.source}`,
-              'E_CLONE_FAILED',
-              proc.stderr.toString().trim(),
-            ),
+            new CliError(`Failed to clone ${entry.source}`, 'E_CLONE_FAILED', proc.stderr.trim())
           )
         }
 
@@ -397,8 +374,8 @@ export async function syncSkill(
             new CliError(
               `Skill "${entry.skill}" not found in cloned repo`,
               'E_SKILL_NOT_FOUND',
-              `Searched: ${skillSrc} and ${altSrc}`,
-            ),
+              `Searched: ${skillSrc} and ${altSrc}`
+            )
           )
         }
       }
@@ -432,7 +409,7 @@ export async function syncSkill(
 export async function syncAll(
   externalDir: string,
   skillsDir: string,
-  opts?: { force?: boolean },
+  opts?: { force?: boolean }
 ): Promise<{ synced: string[]; failed: string[] }> {
   const manifestResult = readManifest(externalDir)
   if (!manifestResult.ok) return { synced: [], failed: [] }
@@ -444,20 +421,11 @@ export async function syncAll(
 
   for (const [name, entry] of Object.entries(manifestResult.value.skills)) {
     const drift = driftResults.find((d) => d.skill === name)
-    const needsSync =
-      opts?.force ||
-      !drift ||
-      drift.status === 'changed' ||
-      drift.status === 'new'
+    const needsSync = opts?.force || !drift || drift.status === 'changed' || drift.status === 'new'
 
     if (!needsSync) continue
 
-    const result = await syncSkill(
-      { ...entry, name },
-      externalDir,
-      skillsDir,
-      opts,
-    )
+    const result = await syncSkill({ ...entry, name }, externalDir, skillsDir, opts)
 
     if (result.ok) {
       synced.push(name)
@@ -485,9 +453,7 @@ export async function syncAll(
         ...(lock[key]?.last_reviewed_commit
           ? { last_reviewed_commit: lock[key]!.last_reviewed_commit }
           : {}),
-        ...(lock[key]?.drift_issue
-          ? { drift_issue: lock[key]!.drift_issue }
-          : {}),
+        ...(lock[key]?.drift_issue ? { drift_issue: lock[key]!.drift_issue } : {}),
       }
     } else {
       failed.push(name)
@@ -508,7 +474,7 @@ export async function createDriftIssues(
   externalDir: string,
   skillsDir: string,
   repo: string,
-  opts?: { dryRun?: boolean },
+  opts?: { dryRun?: boolean }
 ): Promise<{ created: number; updated: number }> {
   const manifestResult = readManifest(externalDir)
   if (!manifestResult.ok) return { created: 0, updated: 0 }
@@ -518,7 +484,10 @@ export async function createDriftIssues(
   let updated = 0
 
   // Group drifted skills by local derived skill
-  const driftByLocal = new Map<string, { name: string; entry: ExternalSkillEntry; diff: string }[]>()
+  const driftByLocal = new Map<
+    string,
+    { name: string; entry: ExternalSkillEntry; diff: string }[]
+  >()
 
   for (const [name, entry] of Object.entries(manifestResult.value.skills)) {
     if (!entry.derived_by?.length) continue
@@ -527,11 +496,8 @@ export async function createDriftIssues(
     const snapshotPath = join(externalDir, entry.source, entry.skill)
     if (!existsSync(snapshotPath)) continue
 
-    const diffProc = Bun.spawnSync(
-      ['git', 'diff', 'HEAD', '--', snapshotPath],
-      { stdout: 'pipe', stderr: 'pipe' },
-    )
-    const diff = diffProc.stdout.toString().trim()
+    const diffProc = spawnSync(['git', 'diff', 'HEAD', '--', snapshotPath])
+    const diff = diffProc.stdout.trim()
     if (!diff) continue
 
     for (const localSkill of entry.derived_by) {
@@ -551,7 +517,9 @@ export async function createDriftIssues(
   // Upsert issues per local skill
   for (const [localSkill, driftedEntries] of driftByLocal) {
     if (opts?.dryRun) {
-      console.log(`[dry-run] Would create/update issue for "${localSkill}" with ${driftedEntries.length} drifted source(s)`)
+      console.log(
+        `[dry-run] Would create/update issue for "${localSkill}" with ${driftedEntries.length} drifted source(s)`
+      )
       created++
       continue
     }
@@ -568,16 +536,20 @@ export async function createDriftIssues(
     }
 
     // Build checklist items
-    const checklist = driftedEntries.map((d) => {
-      const key = lockKey(d.entry.source, d.entry.skill)
-      const lockEntry = lock[key]
-      const reviewed = lockEntry?.last_reviewed_commit ?? 'unknown'
-      return `- [ ] \`${d.entry.source}@${d.entry.skill}\` changed (detected ${new Date().toISOString().slice(0, 10)}, last reviewed at commit \`${reviewed}\`)`
-    }).join('\n')
+    const checklist = driftedEntries
+      .map((d) => {
+        const key = lockKey(d.entry.source, d.entry.skill)
+        const lockEntry = lock[key]
+        const reviewed = lockEntry?.last_reviewed_commit ?? 'unknown'
+        return `- [ ] \`${d.entry.source}@${d.entry.skill}\` changed (detected ${new Date().toISOString().slice(0, 10)}, last reviewed at commit \`${reviewed}\`)`
+      })
+      .join('\n')
 
-    const details = driftedEntries.map((d) => {
-      return `<details><summary>Diff: ${d.entry.source}@${d.entry.skill}</summary>\n\n\`\`\`diff\n${d.diff.slice(0, 5000)}\n\`\`\`\n\n</details>`
-    }).join('\n\n')
+    const details = driftedEntries
+      .map((d) => {
+        return `<details><summary>Diff: ${d.entry.source}@${d.entry.skill}</summary>\n\n\`\`\`diff\n${d.diff.slice(0, 5000)}\n\`\`\`\n\n</details>`
+      })
+      .join('\n\n')
 
     if (existingIssue) {
       // Append comment with new drift info
@@ -631,7 +603,7 @@ export async function createDriftIssues(
  */
 export async function refreshLinks(
   externalDir: string,
-  skillsDir: string,
+  skillsDir: string
 ): Promise<{
   created: string[]
   updated: string[]
@@ -697,10 +669,7 @@ export async function refreshLinks(
  * Merges data from the manifest, lock file, symlink health, and
  * issue state into a single table view.
  */
-export async function getStatus(
-  externalDir: string,
-  skillsDir: string,
-): Promise<StatusResult[]> {
+export async function getStatus(externalDir: string, skillsDir: string): Promise<StatusResult[]> {
   const manifestResult = readManifest(externalDir)
   if (!manifestResult.ok) return []
 

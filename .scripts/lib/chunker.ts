@@ -11,6 +11,7 @@
  */
 
 import yaml from 'js-yaml'
+import { readText } from './runtime'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -351,13 +352,13 @@ export function chunkMarkdown(content: string, opts?: ChunkOptions): ParsedMarkd
 /**
  * Chunk a markdown file.
  *
- * Reads the file using `Bun.file().text()` and delegates to `chunkMarkdown`.
+ * Reads the file and delegates to `chunkMarkdown`.
  *
  * @param path - Path to the markdown file
  * @param opts - Chunking options
  * @returns ParsedMarkdown with frontmatter, body content, and chunks
  */
 export async function chunkFile(path: string, opts?: ChunkOptions): Promise<ParsedMarkdown> {
-  const content = await Bun.file(path).text()
+  const content = await readText(path)
   return chunkMarkdown(content, opts)
 }

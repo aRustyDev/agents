@@ -1,5 +1,7 @@
 /**
- * Graph Viewer -- Bun.serve entry point.
+ * Graph Viewer -- Node-compatible HTTP + WS entry point.
+ *
+ * Uses `node:http` + `ws` package so this file runs on both Bun and Node.js.
  *
  * Serves the REST API (/api/*), WebSocket (/ws), and static assets (Vite
  * build output). In dev mode Vite proxies to this server; in production
@@ -9,8 +11,11 @@
  * every connected WebSocket client so the UI can live-reload graph data.
  */
 
-import { resolve } from 'node:path'
-import type { ServerWebSocket } from 'bun'
+import { createReadStream, existsSync, statSync } from 'node:fs'
+import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import { extname, resolve } from 'node:path'
+import { WebSocket, WebSocketServer } from 'ws'
+import { currentDir } from '../lib/runtime'
 import { handleGitRoute } from '../server/graph-viewer/routes/git'
 import { handleGraphsRoute, handleSchemasRoute } from '../server/graph-viewer/routes/graphs'
 import { createWatcher, type FileChangeEvent } from '../server/graph-viewer/watcher'
@@ -20,15 +25,38 @@ import { createWatcher, type FileChangeEvent } from '../server/graph-viewer/watc
 // ---------------------------------------------------------------------------
 
 const PORT = Number(process.env.GV_PORT) || 3000
-const DIST_DIR = resolve(import.meta.dir, '../dist/graph-viewer')
-const GRAPHS_DIR = resolve(import.meta.dir, '../../.data/graphs')
+const __dir = currentDir(import.meta)
+const DIST_DIR = resolve(__dir, '../dist/graph-viewer')
+const GRAPHS_DIR = resolve(__dir, '../../.data/graphs')
+
+// ---------------------------------------------------------------------------
+// MIME types for static file serving
+// ---------------------------------------------------------------------------
+
+const MIME_TYPES: Record<string, string> = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.map': 'application/json',
+}
 
 // ---------------------------------------------------------------------------
 // WebSocket client tracking
 // ---------------------------------------------------------------------------
 
 /** All currently connected WebSocket clients. */
-const wsClients = new Set<ServerWebSocket<unknown>>()
+const wsClients = new Set<WebSocket>()
 
 /**
  * Broadcast a message to every connected WebSocket client.
@@ -38,7 +66,9 @@ function broadcast(data: FileChangeEvent): void {
   const payload = JSON.stringify(data)
   for (const ws of wsClients) {
     try {
-      ws.send(payload)
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(payload)
+      }
     } catch {
       wsClients.delete(ws)
     }
@@ -61,85 +91,197 @@ watcher.onFileChange((event) => {
 watcher.start()
 
 // ---------------------------------------------------------------------------
-// HTTP + WebSocket server
+// Helpers: bridge Web API Response to node:http ServerResponse
 // ---------------------------------------------------------------------------
 
-const server = Bun.serve({
-  port: PORT,
+/**
+ * Convert an IncomingMessage to a Web API Request object.
+ *
+ * Reads the full body from the stream so route handlers (which expect the
+ * Web API Request interface) can call `.json()`, `.text()`, etc.
+ */
+function toWebRequest(req: IncomingMessage): Promise<Request> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    req.on('data', (chunk: Buffer) => chunks.push(chunk))
+    req.on('end', () => {
+      const body = Buffer.concat(chunks)
+      const protocol = 'http'
+      const host = req.headers.host ?? `localhost:${PORT}`
+      const url = `${protocol}://${host}${req.url ?? '/'}`
 
-  async fetch(req, server) {
-    const url = new URL(req.url)
-    const { pathname } = url
-
-    // -----------------------------------------------------------------------
-    // WebSocket upgrade
-    // -----------------------------------------------------------------------
-    if (pathname === '/ws') {
-      const upgraded = server.upgrade(req)
-      if (!upgraded) {
-        return new Response('WebSocket upgrade failed', { status: 400 })
+      const init: RequestInit = {
+        method: req.method,
+        headers: req.headers as Record<string, string>,
       }
-      return undefined as unknown as Response
+
+      // Only attach body for methods that may have one
+      if (req.method !== 'GET' && req.method !== 'HEAD' && body.length > 0) {
+        init.body = body
+      }
+
+      resolve(new Request(url, init))
+    })
+    req.on('error', reject)
+  })
+}
+
+/**
+ * Pipe a Web API Response into a node:http ServerResponse.
+ */
+async function sendResponse(webResponse: Response, res: ServerResponse): Promise<void> {
+  const headers: Record<string, string> = {}
+  webResponse.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+  res.writeHead(webResponse.status, headers)
+
+  const body = await webResponse.arrayBuffer()
+  res.end(Buffer.from(body))
+}
+
+/**
+ * Serve a static file from the dist directory.
+ * Returns true if the file was served, false otherwise.
+ */
+function serveStaticFile(filePath: string, res: ServerResponse): boolean {
+  try {
+    if (!existsSync(filePath)) return false
+
+    const stat = statSync(filePath)
+    if (!stat.isFile()) return false
+
+    const ext = extname(filePath)
+    const contentType = MIME_TYPES[ext] ?? 'application/octet-stream'
+
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Length': stat.size,
+    })
+
+    const stream = createReadStream(filePath)
+    stream.pipe(res)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// ---------------------------------------------------------------------------
+// HTTP server
+// ---------------------------------------------------------------------------
+
+const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? `localhost:${PORT}`}`)
+  const { pathname } = url
+
+  try {
+    // -----------------------------------------------------------------
+    // API routes (convert to Web API Request, delegate to handlers)
+    // -----------------------------------------------------------------
+
+    // Health check (fast path, no body parsing needed)
+    if (pathname === '/api/health' && req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ status: 'ok' }))
+      return
     }
 
-    // -----------------------------------------------------------------------
-    // API routes
-    // -----------------------------------------------------------------------
+    // API routes that use Web API Request/Response
+    if (pathname.startsWith('/api/')) {
+      const webReq = await toWebRequest(req)
 
-    // Health check
-    if (pathname === '/api/health') {
-      return Response.json({ status: 'ok' })
+      // Graph CRUD
+      const graphsResponse = await handleGraphsRoute(webReq, pathname, GRAPHS_DIR)
+      if (graphsResponse) {
+        await sendResponse(graphsResponse, res)
+        return
+      }
+
+      // Schema serving
+      const schemasResponse = await handleSchemasRoute(webReq, pathname, GRAPHS_DIR)
+      if (schemasResponse) {
+        await sendResponse(schemasResponse, res)
+        return
+      }
+
+      // Git status
+      const gitResponse = await handleGitRoute(webReq, pathname, GRAPHS_DIR)
+      if (gitResponse) {
+        await sendResponse(gitResponse, res)
+        return
+      }
+
+      // No API route matched
+      res.writeHead(404, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Not found' }))
+      return
     }
 
-    // Graph CRUD
-    const graphsResponse = await handleGraphsRoute(req, pathname, GRAPHS_DIR)
-    if (graphsResponse) return graphsResponse
-
-    // Schema serving
-    const schemasResponse = await handleSchemasRoute(req, pathname, GRAPHS_DIR)
-    if (schemasResponse) return schemasResponse
-
-    // Git status
-    const gitResponse = await handleGitRoute(req, pathname, GRAPHS_DIR)
-    if (gitResponse) return gitResponse
-
-    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------
     // Static file serving (production mode)
-    // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------
     const staticPath = pathname === '/' ? '/index.html' : pathname
     const filePath = `${DIST_DIR}${staticPath}`
-    const file = Bun.file(filePath)
-    if (await file.exists()) {
-      return new Response(file)
-    }
+
+    if (serveStaticFile(filePath, res)) return
 
     // SPA fallback: serve index.html for non-API, non-file paths
-    if (!pathname.startsWith('/api/')) {
-      const indexFile = Bun.file(`${DIST_DIR}/index.html`)
-      if (await indexFile.exists()) {
-        return new Response(indexFile)
-      }
+    const indexPath = `${DIST_DIR}/index.html`
+    if (serveStaticFile(indexPath, res)) return
+
+    res.writeHead(404, { 'Content-Type': 'text/plain' })
+    res.end('Not found')
+  } catch (err) {
+    console.error('[server] Request error:', err)
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Internal server error' }))
     }
+  }
+})
 
-    return new Response('Not found', { status: 404 })
-  },
+// ---------------------------------------------------------------------------
+// WebSocket server (noServer mode -- we handle upgrade manually)
+// ---------------------------------------------------------------------------
 
-  websocket: {
-    open(ws) {
-      wsClients.add(ws)
-      console.log(`[ws] Client connected (${wsClients.size} total)`)
-    },
+const wss = new WebSocketServer({ noServer: true })
 
-    close(ws) {
-      wsClients.delete(ws)
-      console.log(`[ws] Client disconnected (${wsClients.size} total)`)
-    },
+wss.on('connection', (ws: WebSocket) => {
+  wsClients.add(ws)
+  console.log(`[ws] Client connected (${wsClients.size} total)`)
 
-    message(ws, message) {
-      // Echo back for ping/pong or future client-to-server messages
-      ws.send(`echo:${message}`)
-    },
-  },
+  ws.on('close', () => {
+    wsClients.delete(ws)
+    console.log(`[ws] Client disconnected (${wsClients.size} total)`)
+  })
+
+  ws.on('message', (message: Buffer) => {
+    ws.send(`echo:${message.toString()}`)
+  })
+})
+
+server.on('upgrade', (req, socket, head) => {
+  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? `localhost:${PORT}`}`)
+
+  if (url.pathname === '/ws') {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req)
+    })
+  } else {
+    socket.destroy()
+  }
+})
+
+// ---------------------------------------------------------------------------
+// Start listening
+// ---------------------------------------------------------------------------
+
+server.listen(PORT, () => {
+  console.log(`Graph Viewer server running at http://localhost:${PORT}`)
+  console.log(`  API:       http://localhost:${PORT}/api/graphs`)
+  console.log(`  WebSocket: ws://localhost:${PORT}/ws`)
+  console.log(`  Graphs:    ${GRAPHS_DIR}`)
 })
 
 // ---------------------------------------------------------------------------
@@ -149,18 +291,21 @@ const server = Bun.serve({
 function shutdown(): void {
   console.log('\nShutting down...')
   watcher.stop()
-  server.stop()
+
+  // Close all WebSocket connections
+  for (const ws of wsClients) {
+    try {
+      ws.close()
+    } catch {
+      /* ignore */
+    }
+  }
+  wsClients.clear()
+
+  wss.close()
+  server.close()
   process.exit(0)
 }
 
 process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
-
-// ---------------------------------------------------------------------------
-// Startup banner
-// ---------------------------------------------------------------------------
-
-console.log(`Graph Viewer server running at http://localhost:${PORT}`)
-console.log(`  API:       http://localhost:${PORT}/api/graphs`)
-console.log(`  WebSocket: ws://localhost:${PORT}/ws`)
-console.log(`  Graphs:    ${GRAPHS_DIR}`)

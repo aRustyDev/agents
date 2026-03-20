@@ -123,6 +123,7 @@ penpot
 Penpot
 pentesting
 perfboard
+picomatch
 pinme
 pkgmgr
 polyrepo
@@ -199,6 +200,7 @@ unresolve
 Unresolve
 UNRESOLVE
 Unzoom
+upserts
 uvx
 videocut
 viewmodel

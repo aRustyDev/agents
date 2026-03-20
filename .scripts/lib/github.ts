@@ -7,12 +7,13 @@
  * 3. Device Flow OAuth (prompts user to open browser)
  */
 
-import { Octokit } from '@octokit/core'
-import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { ok, err, CliError, tryAsync, type Result } from './types'
+import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
+import { Octokit } from '@octokit/core'
+import { spawnSync } from './runtime'
+import { CliError, type Result, tryAsync } from './types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -91,12 +92,9 @@ export function cacheToken(token: string): void {
  */
 export async function getGhToken(): Promise<string | null> {
   try {
-    const proc = Bun.spawnSync(['gh', 'auth', 'token'], {
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+    const proc = spawnSync(['gh', 'auth', 'token'])
     if (proc.exitCode !== 0) return null
-    const token = proc.stdout.toString().trim()
+    const token = proc.stdout.trim()
     return token.length > 0 ? token : null
   } catch {
     return null
@@ -238,10 +236,7 @@ export async function readIssue(repo: string, number: number): Promise<Issue> {
  * @param opts - Issue creation options
  * @returns Result containing the created issue
  */
-export async function createIssue(
-  repo: string,
-  opts: CreateIssueOpts,
-): Promise<Result<Issue>> {
+export async function createIssue(repo: string, opts: CreateIssueOpts): Promise<Result<Issue>> {
   return tryAsync(
     async () => {
       const client = await getClient()
@@ -262,8 +257,8 @@ export async function createIssue(
         `Failed to create issue in ${repo}`,
         'E_GITHUB_CREATE',
         e instanceof Error ? e.message : String(e),
-        e,
-      ),
+        e
+      )
   )
 }
 
@@ -278,7 +273,7 @@ export async function createIssue(
 export async function updateIssue(
   repo: string,
   number: number,
-  opts: UpdateIssueOpts,
+  opts: UpdateIssueOpts
 ): Promise<Result<void>> {
   return tryAsync(
     async () => {
@@ -300,8 +295,8 @@ export async function updateIssue(
         `Failed to update issue #${number} in ${repo}`,
         'E_GITHUB_UPDATE',
         e instanceof Error ? e.message : String(e),
-        e,
-      ),
+        e
+      )
   )
 }
 
@@ -316,7 +311,7 @@ export async function updateIssue(
 export async function addComment(
   repo: string,
   number: number,
-  body: string,
+  body: string
 ): Promise<Result<void>> {
   return tryAsync(
     async () => {
@@ -335,8 +330,8 @@ export async function addComment(
         `Failed to add comment to issue #${number} in ${repo}`,
         'E_GITHUB_COMMENT',
         e instanceof Error ? e.message : String(e),
-        e,
-      ),
+        e
+      )
   )
 }
 

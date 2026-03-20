@@ -13,6 +13,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as yaml from 'js-yaml'
+import { currentDir } from './runtime'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -707,7 +708,7 @@ function printReport(
 // Entry point
 // ---------------------------------------------------------------------------
 
-const REPO_ROOT = path.resolve(import.meta.dir, '../..')
+const REPO_ROOT = path.resolve(currentDir(import.meta), '../..')
 const TODO_PATH = path.join(REPO_ROOT, 'context/skills/.TODO.yaml')
 const TAXONOMY_PATH = path.join(REPO_ROOT, 'context/skills/.taxonomy.yaml')
 

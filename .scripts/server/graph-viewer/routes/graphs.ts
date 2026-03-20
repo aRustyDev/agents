@@ -5,12 +5,14 @@
  * (`manifest.json`) is the index of all available graphs. Individual graph
  * files and their lock files are read on demand.
  *
- * All file reads go through `Bun.file()` for zero-copy performance.
+ * Uses runtime-agnostic `readJson` / `fileExists` helpers so this works on
+ * both Bun and Node.js.
  */
 
 import { resolve } from 'node:path'
 import type { GraphData } from '../../../lib/graph'
 import type { LockFile } from '../../../lib/graph-lock'
+import { fileExists, readJson } from '../../../lib/runtime'
 import { atomicWrite, directWrite } from '../fs-helpers'
 import { validateGraph } from '../validation'
 
@@ -79,9 +81,9 @@ function errorResponse(message: string, status: number): Response {
  */
 async function readManifest(graphsDir: string): Promise<Manifest | null> {
   try {
-    const file = Bun.file(resolve(graphsDir, 'manifest.json'))
-    if (!(await file.exists())) return null
-    return (await file.json()) as Manifest
+    const manifestPath = resolve(graphsDir, 'manifest.json')
+    if (!(await fileExists(manifestPath))) return null
+    return await readJson<Manifest>(manifestPath)
   } catch {
     return null
   }
@@ -157,14 +159,14 @@ export async function handleGraphsRoute(
     }
 
     // Read graph data
-    const graphFile = Bun.file(resolve(graphsDir, entry.file))
-    if (!(await graphFile.exists())) {
+    const graphPath = resolve(graphsDir, entry.file)
+    if (!(await fileExists(graphPath))) {
       return errorResponse(`Graph file "${entry.file}" not found on disk`, 404)
     }
 
     let graphData: GraphData
     try {
-      graphData = (await graphFile.json()) as GraphData
+      graphData = await readJson<GraphData>(graphPath)
     } catch {
       return errorResponse(`Failed to parse graph file "${entry.file}"`, 500)
     }
@@ -172,10 +174,10 @@ export async function handleGraphsRoute(
     // Read lock file (optional, never fails the request)
     let lock: LockFile | null = null
     const lockFileName = entry.file.replace(/\.json$/, '.graph.lock.json')
-    const lockFile = Bun.file(resolve(graphsDir, lockFileName))
+    const lockPath = resolve(graphsDir, lockFileName)
     try {
-      if (await lockFile.exists()) {
-        lock = (await lockFile.json()) as LockFile
+      if (await fileExists(lockPath)) {
+        lock = await readJson<LockFile>(lockPath)
       }
     } catch {
       // Lock file is optional; corrupt lock files are silently ignored
@@ -353,13 +355,12 @@ export async function handleSchemasRoute(
     return errorResponse('Invalid schema path', 400)
   }
 
-  const file = Bun.file(schemaPath)
-  if (!(await file.exists())) {
+  if (!(await fileExists(schemaPath))) {
     return errorResponse(`Schema "${schemaName}" not found`, 404)
   }
 
   try {
-    const data = await file.json()
+    const data = await readJson(schemaPath)
     return jsonResponse(data)
   } catch {
     return errorResponse(`Failed to parse schema "${schemaName}"`, 500)

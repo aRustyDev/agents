@@ -4,9 +4,13 @@
  * Provides atomic and direct write operations. Atomic writes use a
  * write-then-rename strategy so readers never see partial content --
  * the file either contains the old data or the new data, never a mix.
+ *
+ * Uses the runtime-agnostic `writeText` helper so this works on both
+ * Bun and Node.js.
  */
 
 import { rename } from 'node:fs/promises'
+import { writeText } from '../../lib/runtime'
 
 /**
  * Atomically write data to a file.
@@ -20,7 +24,7 @@ import { rename } from 'node:fs/promises'
  */
 export async function atomicWrite(path: string, data: string): Promise<void> {
   const tmpPath = `${path}.tmp`
-  await Bun.write(tmpPath, data)
+  await writeText(tmpPath, data)
   await rename(tmpPath, path)
 }
 
@@ -35,5 +39,5 @@ export async function atomicWrite(path: string, data: string): Promise<void> {
  * @param data - The string content to write.
  */
 export async function directWrite(path: string, data: string): Promise<void> {
-  await Bun.write(path, data)
+  await writeText(path, data)
 }

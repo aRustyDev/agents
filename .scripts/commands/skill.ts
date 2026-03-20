@@ -24,14 +24,16 @@ import {
 import { formatHash, hashDirectory } from '../lib/hash'
 import { readSkillFrontmatter } from '../lib/manifest'
 import { createOutput } from '../lib/output'
+import { currentDir } from '../lib/runtime'
 import { EXIT } from '../lib/types'
+import { uuid7 } from '../lib/uuid'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const PROJECT_ROOT = resolve(import.meta.dir, '../..')
+const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
 const SKILLS_DIR = join(PROJECT_ROOT, 'context/skills')
 const EXTERNAL_DIR = join(SKILLS_DIR, '.external')
 
@@ -596,7 +598,10 @@ export default defineCommand({
             const WORKTREE_BASE = '/tmp/worktrees'
             const concurrency = parseInt(args.concurrency as string, 10) || 3
 
+            // Generate run-level UUID7 (timestamp-sortable, unique per invocation)
+            const runId = uuid7()
             out.info(`Concurrency: ${concurrency} parallel agents`)
+            out.info(`Run ID: ${runId}`)
 
             /** Create a git worktree for a batch (async), returns worktree path */
             async function createWorktree(batchId: number): Promise<string> {
@@ -651,16 +656,25 @@ export default defineCommand({
               }
             }
 
+            interface DownloadResult {
+              path: string | null
+              error?: string
+              errorType?: 'download_failed' | 'download_timeout'
+              errorDetail?: string
+              errorCode?: number
+            }
+
             /**
              * Pre-download SKILL.md files for a batch (async).
              * Downloads are sequential within a batch (same worktree) but
              * batches run concurrently in separate worktrees.
+             * Returns per-skill download results with detailed error info.
              */
             async function preDownloadSkills(
               batch: import('../lib/catalog').CatalogEntry[],
               wtPath: string
-            ): Promise<Map<string, string | null>> {
-              const results = new Map<string, string | null>()
+            ): Promise<Map<string, DownloadResult>> {
+              const results = new Map<string, DownloadResult>()
               const skillsDir = join(wtPath, '.claude', 'skills')
 
               for (const entry of batch) {
@@ -674,7 +688,7 @@ export default defineCommand({
                   const skillDir = join(skillsDir, entry.skill)
                   const skillMd = join(skillDir, 'SKILL.md')
                   if (fsExists(skillMd)) {
-                    results.set(entry.skill, skillMd)
+                    results.set(entry.skill, { path: skillMd })
                   } else {
                     try {
                       const { stdout: files } = await execAsync(
@@ -682,13 +696,40 @@ export default defineCommand({
                         { encoding: 'utf8' }
                       )
                       const trimmed = (files as string).trim()
-                      results.set(entry.skill, trimmed ? trimmed.split('\n')[0] : null)
+                      results.set(entry.skill, {
+                        path: trimmed ? trimmed.split('\n')[0] : null,
+                        ...(trimmed
+                          ? {}
+                          : {
+                              error: 'no SKILL.md found in downloaded files',
+                              errorType: 'download_failed' as const,
+                            }),
+                      })
                     } catch {
-                      results.set(entry.skill, null)
+                      results.set(entry.skill, {
+                        path: null,
+                        error: 'skill directory not found after download',
+                        errorType: 'download_failed',
+                      })
                     }
                   }
-                } catch {
-                  results.set(entry.skill, null)
+                } catch (err: unknown) {
+                  const isTimeout =
+                    err instanceof Error &&
+                    (err.message.includes('TIMEOUT') ||
+                      err.message.includes('timed out') ||
+                      err.message.includes('killed'))
+                  const stderr = (err as { stderr?: string })?.stderr ?? ''
+                  const exitCode = (err as { code?: number })?.code
+                  results.set(entry.skill, {
+                    path: null,
+                    error: isTimeout
+                      ? 'download timed out (30s)'
+                      : `download failed: ${stderr.slice(0, 300) || (err instanceof Error ? err.message.slice(0, 300) : 'unknown')}`,
+                    errorType: isTimeout ? 'download_timeout' : 'download_failed',
+                    errorDetail: stderr.slice(0, 500) || undefined,
+                    errorCode: exitCode,
+                  })
                 }
               }
               return results
@@ -706,14 +747,26 @@ export default defineCommand({
 
             /**
              * Process a single batch: create worktree, download, analyze, cleanup.
-             * Returns the Tier1Results for this batch.
+             * Returns the Tier1Results for this batch with detailed error info.
              */
             async function processBatch(
               batch: import('../lib/catalog').CatalogEntry[],
               batchNum: number,
               totalBatches: number
             ): Promise<import('../lib/catalog').Tier1Result[]> {
+              const batchId = uuid7()
+              const analyzedAt = new Date().toISOString()
               let wtPath: string | null = null
+
+              /** Stamp run/batch/time metadata onto all results */
+              function stamp(results: import('../lib/catalog').Tier1Result[]) {
+                for (const r of results) {
+                  r.runId = runId
+                  r.batchId = batchId
+                  r.analyzedAt = analyzedAt
+                }
+                return results
+              }
 
               try {
                 // Phase 1: Create worktree and pre-download skills (async)
@@ -723,17 +776,30 @@ export default defineCommand({
                 )
 
                 const downloaded = await preDownloadSkills(batch, wtPath)
-                const successCount = [...downloaded.values()].filter(Boolean).length
+                const successCount = [...downloaded.values()].filter((r) => r.path).length
                 const failCount = batch.length - successCount
+
+                // Collect per-skill download error results immediately
+                const downloadErrorResults: import('../lib/catalog').Tier1Result[] = []
+                for (const entry of batch) {
+                  const dl = downloaded.get(entry.skill)
+                  if (dl && !dl.path && dl.error) {
+                    downloadErrorResults.push({
+                      source: entry.source,
+                      skill: entry.skill,
+                      error: dl.error,
+                      errorType: dl.errorType,
+                      errorDetail: dl.errorDetail,
+                      errorCode: dl.errorCode,
+                      retryable: dl.errorType === 'download_timeout',
+                      tier2Reviewed: false,
+                    })
+                  }
+                }
 
                 if (successCount === 0) {
                   out.error(`[${batchNum}/${totalBatches}] All downloads failed`)
-                  return batch.map((e) => ({
-                    source: e.source,
-                    skill: e.skill,
-                    error: 'download failed',
-                    tier2Reviewed: false,
-                  }))
+                  return stamp(downloadErrorResults)
                 }
 
                 if (failCount > 0) {
@@ -742,12 +808,15 @@ export default defineCommand({
                   )
                 }
 
-                // Build manifest
-                const manifest = batch.map((entry) => ({
-                  source: entry.source,
-                  skill: entry.skill,
-                  localPath: downloaded.get(entry.skill) ?? 'DOWNLOAD_FAILED',
-                }))
+                // Build manifest (only successfully downloaded skills get paths)
+                const manifest = batch.map((entry) => {
+                  const dl = downloaded.get(entry.skill)
+                  return {
+                    source: entry.source,
+                    skill: entry.skill,
+                    localPath: dl?.path ?? 'DOWNLOAD_FAILED',
+                  }
+                })
 
                 // Phase 2: Dispatch agent (async — this is the slow part we parallelize)
                 const agentPrompt = [
@@ -789,21 +858,48 @@ export default defineCommand({
                 )
 
                 const batchResults = parseTier1Output(stdout)
-                const errors = batchResults.filter((r) => r.error)
+                // Merge download errors with analysis results
+                const combined = [...batchResults, ...downloadErrorResults]
+                const errors = combined.filter((r) => r.error)
                 out.info(
                   `[${batchNum}/${totalBatches}] Analyzed ${batchResults.length}/${batch.length}${errors.length > 0 ? ` (${errors.length} errors)` : ''}`
                 )
 
-                return batchResults
-              } catch (err) {
+                return stamp(combined)
+              } catch (err: unknown) {
+                // Classify the batch-level failure
                 const msg = err instanceof Error ? err.message : String(err)
-                out.error(`[${batchNum}/${totalBatches}] Failed: ${msg.slice(0, 200)}`)
-                return batch.map((e) => ({
-                  source: e.source,
-                  skill: e.skill,
-                  error: `batch failed: ${msg.slice(0, 100)}`,
-                  tier2Reviewed: false,
-                }))
+                const stderr = (err as { stderr?: string })?.stderr ?? ''
+                const exitCode = (err as { code?: number })?.code
+
+                const isTimeout =
+                  msg.includes('TIMEOUT') || msg.includes('timed out') || msg.includes('killed')
+                const isRateLimit =
+                  stderr.includes('rate') || stderr.includes('429') || stderr.includes('overloaded')
+
+                const errorType = isTimeout
+                  ? ('analysis_timeout' as const)
+                  : isRateLimit
+                    ? ('rate_limited' as const)
+                    : ('batch_failed' as const)
+
+                out.error(`[${batchNum}/${totalBatches}] ${errorType}: ${msg.slice(0, 200)}`)
+                if (stderr) {
+                  out.error(`  stderr: ${stderr.slice(0, 300)}`)
+                }
+
+                return stamp(
+                  batch.map((e) => ({
+                    source: e.source,
+                    skill: e.skill,
+                    error: `${errorType}: ${msg.slice(0, 200)}`,
+                    errorType,
+                    errorDetail: stderr.slice(0, 500) || msg.slice(0, 500),
+                    errorCode: exitCode,
+                    retryable: isTimeout || isRateLimit,
+                    tier2Reviewed: false,
+                  }))
+                )
               } finally {
                 if (wtPath) await removeWorktree(wtPath)
               }
@@ -944,6 +1040,205 @@ export default defineCommand({
                 out.info(`Found ${forks.length} possible forks:`)
                 for (const f of forks) {
                   out.info(`  ${f.source}@${f.skill} → fork of ${f.possibleForkOf}`)
+                }
+              }
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
+        cleanup: defineCommand({
+          meta: {
+            name: 'cleanup',
+            description: 'Remove stale worktrees and temp files from interrupted runs',
+          },
+          args: {
+            ...globalArgs,
+            'dry-run': {
+              type: 'boolean',
+              description: 'Show what would be cleaned without deleting',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+            const { execSync: execS } = require('node:child_process')
+            const {
+              rmSync: rmS,
+              existsSync: existsS,
+              readdirSync: readdirS,
+              statSync: statS,
+            } = require('node:fs')
+
+            const dryRun = args['dry-run'] as boolean
+            const WORKTREE_BASE = '/tmp/worktrees'
+            const cleaned: { type: string; path: string; size?: string }[] = []
+
+            // 1. Find stale git worktrees
+            try {
+              const wtList = execS('git worktree list --porcelain', {
+                cwd: PROJECT_ROOT,
+                encoding: 'utf8',
+              }) as string
+
+              const staleWorktrees: string[] = []
+              for (const line of wtList.split('\n')) {
+                if (line.startsWith('worktree ') && line.includes('/tmp/worktrees/skill-inspect')) {
+                  staleWorktrees.push(line.replace('worktree ', ''))
+                }
+              }
+
+              for (const wt of staleWorktrees) {
+                if (dryRun) {
+                  cleaned.push({ type: 'worktree', path: wt })
+                } else {
+                  try {
+                    execS(`git worktree unlock ${JSON.stringify(wt)}`, {
+                      cwd: PROJECT_ROOT,
+                      stdio: 'pipe',
+                    })
+                  } catch {
+                    /* ignore */
+                  }
+                  try {
+                    execS(`git worktree remove --force ${JSON.stringify(wt)}`, {
+                      cwd: PROJECT_ROOT,
+                      stdio: 'pipe',
+                    })
+                  } catch {
+                    /* ignore */
+                  }
+                  try {
+                    rmS(wt, { recursive: true, force: true })
+                  } catch {
+                    /* ignore */
+                  }
+                  cleaned.push({ type: 'worktree', path: wt })
+                }
+              }
+            } catch {
+              /* no worktrees */
+            }
+
+            // 2. Find orphaned /tmp/worktrees/skill-inspect-* dirs not tracked by git
+            if (existsS(WORKTREE_BASE)) {
+              try {
+                const dirs = readdirS(WORKTREE_BASE).filter((d: string) =>
+                  d.startsWith('skill-inspect')
+                )
+                for (const dir of dirs) {
+                  const fullPath = join(WORKTREE_BASE, dir)
+                  try {
+                    if (!statS(fullPath).isDirectory()) continue
+                  } catch {
+                    continue
+                  }
+
+                  // Check if already cleaned as a worktree above
+                  if (cleaned.some((c) => c.path === fullPath)) continue
+
+                  if (dryRun) {
+                    cleaned.push({ type: 'orphan-dir', path: fullPath })
+                  } else {
+                    try {
+                      rmS(fullPath, { recursive: true, force: true })
+                    } catch {
+                      /* ignore */
+                    }
+                    cleaned.push({ type: 'orphan-dir', path: fullPath })
+                  }
+                }
+              } catch {
+                /* ignore */
+              }
+            }
+
+            // 3. Prune git worktree refs for already-deleted directories
+            if (!dryRun) {
+              try {
+                execS('git worktree prune', { cwd: PROJECT_ROOT, stdio: 'pipe' })
+                cleaned.push({ type: 'prune', path: 'git worktree prune' })
+              } catch {
+                /* ignore */
+              }
+            }
+
+            if (args.json) {
+              out.raw({ dryRun, cleaned })
+            } else {
+              if (cleaned.length === 0) {
+                out.info('Nothing to clean up.')
+              } else {
+                out.info(`${dryRun ? '[DRY RUN] Would clean' : 'Cleaned'} ${cleaned.length} items:`)
+                for (const c of cleaned) {
+                  out.info(`  ${c.type}: ${c.path}`)
+                }
+              }
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
+        errors: defineCommand({
+          meta: {
+            name: 'errors',
+            description: 'Show error breakdown from catalog analysis',
+          },
+          args: {
+            ...globalArgs,
+            retryable: {
+              type: 'boolean',
+              description: 'Show only retryable errors',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            const entries = readCatalog(catalogPath) as Array<Record<string, unknown>>
+            const withErrors = entries.filter((e) => e.error)
+
+            if (args.retryable) {
+              const retryable = withErrors.filter((e) => e.retryable === true)
+              if (args.json) {
+                out.raw({ total: retryable.length, entries: retryable })
+              } else {
+                out.info(`Retryable errors: ${retryable.length}`)
+                const byType: Record<string, number> = {}
+                for (const e of retryable) {
+                  const t = (e.errorType as string) || 'unknown'
+                  byType[t] = (byType[t] || 0) + 1
+                }
+                for (const [t, c] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
+                  out.info(`  ${t}: ${c}`)
+                }
+              }
+            } else {
+              const byType: Record<string, number> = {}
+              for (const e of withErrors) {
+                const t = (e.errorType as string) || (e.error as string)?.slice(0, 40) || 'unknown'
+                byType[t] = (byType[t] || 0) + 1
+              }
+
+              if (args.json) {
+                out.raw({ total: withErrors.length, byType })
+              } else {
+                out.info(`Total errors: ${withErrors.length} / ${entries.length} entries`)
+                out.info('\nBy type:')
+                for (const [t, c] of Object.entries(byType).sort((a, b) => b[1] - a[1])) {
+                  out.info(`  ${c.toString().padStart(5)}  ${t}`)
                 }
               }
             }

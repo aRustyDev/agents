@@ -6,9 +6,10 @@
  * generation so that output is compatible with the Python version.
  */
 
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { existsSync, mkdirSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs'
-import { type Result, ok, err, CliError } from './types'
+import { spawnSync } from './runtime'
+import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -49,7 +50,7 @@ export class RateLimiter {
 
   constructor(
     private readonly registryName: string,
-    private readonly config: RateLimitConfig,
+    private readonly config: RateLimitConfig
   ) {
     this.resetDate = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
   }
@@ -159,11 +160,7 @@ export function saveState(state: CrawlState, path?: string): void {
 }
 
 /** Get or create registry state within a tier. */
-export function getRegistryState(
-  state: CrawlState,
-  tier: string,
-  registry: string,
-): RegistryState {
+export function getRegistryState(state: CrawlState, tier: string, registry: string): RegistryState {
   if (!state.tiers[tier]) {
     state.tiers[tier] = {}
   }
@@ -234,7 +231,7 @@ export function sanitizeId(rawId: string): string {
 export function transformToComponent(
   raw: unknown,
   componentType: string,
-  sourceName: string,
+  sourceName: string
 ): Result<Component> {
   if (typeof raw !== 'object' || raw === null) {
     return err(new CliError('Expected object for component transform', 'E_TRANSFORM'))
@@ -278,10 +275,7 @@ export function transformToComponent(
  *
  * Returns null on permanent failure (4xx other than 429) or after max retries.
  */
-export async function fetchWithBackoff(
-  url: string,
-  state: CrawlState,
-): Promise<Response | null> {
+export async function fetchWithBackoff(url: string, state: CrawlState): Promise<Response | null> {
   let delay = BACKOFF_CONFIG.initialDelay
 
   for (let attempt = 0; attempt < BACKOFF_CONFIG.maxRetries; attempt++) {
@@ -349,16 +343,16 @@ export interface CrawlOpts {
 export async function crawlSkillsmp(
   state: CrawlState,
   output: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   console.info('Crawling skillsmp.com...')
 
   // Get API key from 1Password
   let apiKey: string
   try {
-    const proc = Bun.spawnSync(['op', 'read', 'op://Developer/skillsmp/credential'])
+    const proc = spawnSync(['op', 'read', 'op://Developer/skillsmp/credential'])
     if (proc.exitCode !== 0) throw new Error('op read failed')
-    apiKey = proc.stdout.toString().trim()
+    apiKey = proc.stdout.trim()
   } catch {
     console.error('Failed to get skillsmp API key from 1Password')
     return 0
@@ -419,7 +413,7 @@ export async function crawlSkillsmp(
 export async function crawlGithubTopics(
   state: CrawlState,
   output: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   console.info('Crawling GitHub topics...')
 
@@ -446,7 +440,7 @@ export async function crawlGithubTopics(
       continue
     }
 
-    const proc = Bun.spawnSync([
+    const proc = spawnSync([
       'gh',
       'search',
       'repos',
@@ -467,7 +461,7 @@ export async function crawlGithubTopics(
 
     let repos: Record<string, unknown>[]
     try {
-      repos = JSON.parse(proc.stdout.toString())
+      repos = JSON.parse(proc.stdout)
     } catch {
       console.error(`Failed to parse gh output for topic:${topic}`)
       logFailure(state, `topic:${topic}`, 'json_parse_error')
@@ -506,7 +500,7 @@ export async function crawlGithubTopics(
 export async function crawlClaudeMarketplaces(
   state: CrawlState,
   output: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   console.info('Crawling claudemarketplaces.com...')
 
@@ -528,7 +522,7 @@ export async function crawlClaudeMarketplaces(
 
   const data = await response.json()
   const marketplaces = (
-    Array.isArray(data) ? data : (data as Record<string, unknown>).marketplaces ?? []
+    Array.isArray(data) ? data : ((data as Record<string, unknown>).marketplaces ?? [])
   ) as Record<string, unknown>[]
 
   appendNdjson(output, marketplaces, 'plugin', 'claudemarketplaces')
@@ -550,7 +544,7 @@ export async function crawlClaudeMarketplaces(
 export async function crawlBuildWithClaude(
   state: CrawlState,
   output: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   console.info('Crawling buildwithclaude.com...')
 
@@ -618,11 +612,7 @@ export async function crawlBuildWithClaude(
  * Automated crawl attempts API endpoints first, then falls back to HTML scraping.
  * For full coverage, use crawl4ai MCP tool manually.
  */
-async function crawlMcpSo(
-  state: CrawlState,
-  output: string,
-  opts?: CrawlOpts,
-): Promise<number> {
+async function crawlMcpSo(state: CrawlState, output: string, opts?: CrawlOpts): Promise<number> {
   console.info('Crawling mcp.so...')
   console.warn('mcp.so requires JS rendering - results may be limited')
 
@@ -652,7 +642,7 @@ async function crawlMcpSo(
       if (response.ok) {
         const data = await response.json()
         const servers = (
-          Array.isArray(data) ? data : (data as Record<string, unknown>).servers ?? []
+          Array.isArray(data) ? data : ((data as Record<string, unknown>).servers ?? [])
         ) as Record<string, unknown>[]
 
         appendNdjson(output, servers, 'mcp_server', 'mcp_so')
@@ -665,9 +655,7 @@ async function crawlMcpSo(
         console.info(`API ${apiUrl}: fetched ${totalFetched} servers`)
         return totalFetched
       }
-    } catch {
-      continue
-    }
+    } catch {}
   }
 
   // Fallback: scrape HTML pages
@@ -683,7 +671,7 @@ async function crawlMcpSo(
 async function scrapeMcpSoHtml(
   state: CrawlState,
   regState: RegistryState,
-  output: string,
+  output: string
 ): Promise<number> {
   const baseUrl = 'https://mcp.so'
   const startPage = regState.lastPage + 1
@@ -750,7 +738,7 @@ async function scrapeMcpSoHtml(
 export async function crawlAwesomeLists(
   state: CrawlState,
   output: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   console.info('Crawling awesome lists...')
 
@@ -777,13 +765,7 @@ export async function crawlAwesomeLists(
     }
 
     // Fetch README.md using gh CLI
-    const proc = Bun.spawnSync([
-      'gh',
-      'api',
-      `repos/${repo}/readme`,
-      '--jq',
-      '.content',
-    ])
+    const proc = spawnSync(['gh', 'api', `repos/${repo}/readme`, '--jq', '.content'])
 
     if (proc.exitCode !== 0) {
       console.error(`Failed to fetch ${repo} README`)
@@ -793,7 +775,7 @@ export async function crawlAwesomeLists(
 
     let readmeContent: string
     try {
-      const base64Content = proc.stdout.toString().trim()
+      const base64Content = proc.stdout.trim()
       readmeContent = atob(base64Content)
     } catch (e) {
       console.error(`Failed to decode ${repo} README: ${e}`)
@@ -840,8 +822,8 @@ export function parseBuildWithClaudeHtml(html: string): Record<string, unknown>[
 
   // Try to find JSON data embedded in script tags
   const jsonPattern = /<script[^>]*type="application\/json"[^>]*>([^<]+)<\/script>/gi
-  let match: RegExpExecArray | null
-  while ((match = jsonPattern.exec(html)) !== null) {
+  let match: RegExpExecArray | null = jsonPattern.exec(html)
+  while (match !== null) {
     try {
       const data = JSON.parse(match[1]!)
       if (typeof data === 'object' && data !== null && 'projects' in data) {
@@ -855,9 +837,8 @@ export function parseBuildWithClaudeHtml(html: string): Record<string, unknown>[
           })
         }
       }
-    } catch {
-      continue
-    }
+    } catch {}
+    match = jsonPattern.exec(html)
   }
 
   // Fallback: parse HTML structure for card patterns
@@ -867,8 +848,8 @@ export function parseBuildWithClaudeHtml(html: string): Record<string, unknown>[
     const descPattern = /<p[^>]*>([^<]{10,200})<\/p>/i
     const linkPattern = /<a[^>]*href="([^"]+)"[^>]*>/i
 
-    let cardMatch: RegExpExecArray | null
-    while ((cardMatch = cardPattern.exec(html)) !== null) {
+    let cardMatch: RegExpExecArray | null = cardPattern.exec(html)
+    while (cardMatch !== null) {
       const cardHtml = cardMatch[1]!
       const titleMatch = titlePattern.exec(cardHtml)
       const descMatch = descPattern.exec(cardHtml)
@@ -882,6 +863,7 @@ export function parseBuildWithClaudeHtml(html: string): Record<string, unknown>[
           author: null,
         })
       }
+      cardMatch = cardPattern.exec(html)
     }
   }
 
@@ -897,8 +879,8 @@ export function parseMcpSoHtml(html: string): Record<string, unknown>[] {
 
   // Look for JSON-LD data
   const jsonLdPattern = /<script[^>]*type="application\/ld\+json"[^>]*>([^<]+)<\/script>/gi
-  let match: RegExpExecArray | null
-  while ((match = jsonLdPattern.exec(html)) !== null) {
+  let match: RegExpExecArray | null = jsonLdPattern.exec(html)
+  while (match !== null) {
     try {
       const data = JSON.parse(match[1]!) as Record<string, unknown>
       if (data['@type'] === 'SoftwareApplication') {
@@ -909,9 +891,8 @@ export function parseMcpSoHtml(html: string): Record<string, unknown>[] {
           author: (data.author as Record<string, unknown>)?.name,
         })
       }
-    } catch {
-      continue
-    }
+    } catch {}
+    match = jsonLdPattern.exec(html)
   }
 
   // Look for Next.js __NEXT_DATA__
@@ -1003,7 +984,7 @@ function appendNdjson(
   outputPath: string,
   records: Record<string, unknown>[],
   componentType: string,
-  sourceName: string,
+  sourceName: string
 ): void {
   const lines: string[] = []
   for (const record of records) {
@@ -1023,7 +1004,11 @@ function appendNdjson(
 // ---------------------------------------------------------------------------
 
 /** Validate component records from an NDJSON file. Returns count of invalid records. */
-export function validateNdjson(filePath: string): { valid: number; invalid: number; errors: string[] } {
+export function validateNdjson(filePath: string): {
+  valid: number
+  invalid: number
+  errors: string[]
+} {
   const errors: string[] = []
   let valid = 0
   let invalid = 0
@@ -1132,7 +1117,7 @@ export async function crawlTier(
   tier: string,
   state: CrawlState,
   outputFile: string,
-  opts?: CrawlOpts,
+  opts?: CrawlOpts
 ): Promise<number> {
   let total = 0
 

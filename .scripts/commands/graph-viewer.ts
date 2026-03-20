@@ -8,6 +8,7 @@
  */
 
 import { defineCommand } from 'citty'
+import { currentDir } from '../lib/runtime'
 
 const serveCommand = defineCommand({
   meta: { name: 'serve', description: 'Start the graph viewer server' },
@@ -25,7 +26,7 @@ const buildCommand = defineCommand({
   async run() {
     const { execSync } = await import('node:child_process')
     const { resolve } = await import('node:path')
-    const scriptsDir = resolve(import.meta.dir, '..')
+    const scriptsDir = resolve(currentDir(import.meta), '..')
     execSync('npx vite build --config vite.graph-viewer.config.ts', {
       cwd: scriptsDir,
       stdio: 'inherit',
@@ -41,7 +42,7 @@ const devCommand = defineCommand({
   async run({ args }) {
     const { execSync } = await import('node:child_process')
     const { resolve } = await import('node:path')
-    const scriptsDir = resolve(import.meta.dir, '..')
+    const scriptsDir = resolve(currentDir(import.meta), '..')
     process.env.GV_PORT = args.port
     execSync(
       `npx concurrently "bun --watch run bin/graph-viewer.ts" "npx vite --config vite.graph-viewer.config.ts"`,

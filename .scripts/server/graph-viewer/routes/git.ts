@@ -4,7 +4,12 @@
  * Shells out to `git status --porcelain` scoped to the graphs data directory
  * to report whether graph files have uncommitted changes. This lets the UI
  * show a dirty/clean indicator.
+ *
+ * Uses the runtime-agnostic `spawnAsync` helper so this works on both
+ * Bun and Node.js.
  */
+
+import { spawnAsync } from '../../../lib/runtime'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,33 +54,28 @@ export async function handleGitRoute(
   if (pathname !== '/api/git/status' || req.method !== 'GET') return null
 
   try {
-    const proc = Bun.spawn(['git', 'status', '--porcelain', graphsDir], {
-      stdout: 'pipe',
-      stderr: 'pipe',
-      // Run from the project root (two levels up from .data/graphs/)
+    const result = await spawnAsync(['git', 'status', '--porcelain', graphsDir], {
       cwd: graphsDir,
     })
 
-    const exitCode = await proc.exited
-    if (exitCode !== 0) {
-      const result: GitStatusResponse = { status: 'unknown' }
-      return jsonResponse(result)
+    if (!result.success) {
+      const response: GitStatusResponse = { status: 'unknown' }
+      return jsonResponse(response)
     }
 
-    const stdout = await new Response(proc.stdout).text()
-    const lines = stdout.trim().split('\n').filter(Boolean)
+    const lines = result.stdout.trim().split('\n').filter(Boolean)
 
     if (lines.length === 0) {
-      const result: GitStatusResponse = { status: 'clean' }
-      return jsonResponse(result)
+      const response: GitStatusResponse = { status: 'clean' }
+      return jsonResponse(response)
     }
 
     // Extract file paths from porcelain output (format: "XY filename")
     const files = lines.map((line) => line.slice(3).trim())
-    const result: GitStatusResponse = { status: 'dirty', files }
-    return jsonResponse(result)
+    const response: GitStatusResponse = { status: 'dirty', files }
+    return jsonResponse(response)
   } catch {
-    const result: GitStatusResponse = { status: 'unknown' }
-    return jsonResponse(result)
+    const response: GitStatusResponse = { status: 'unknown' }
+    return jsonResponse(response)
   }
 }

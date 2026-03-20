@@ -14,9 +14,10 @@
  */
 
 import { resolve } from 'node:path'
-import { Glob } from 'bun'
 import { defineCommand } from 'citty'
+import fg from 'fast-glob'
 import { Ollama } from 'ollama'
+import picomatch from 'picomatch'
 import { chunkMarkdown, parseFrontmatter } from '../lib/chunker'
 import { isOllamaAvailable, prepareEmbeddingText } from '../lib/embedder'
 import { hashFile } from '../lib/hash'
@@ -33,6 +34,7 @@ import {
   searchSemantic,
 } from '../lib/meilisearch'
 import { createOutput } from '../lib/output'
+import { currentDir, readText } from '../lib/runtime'
 import { hybridSearch, type RankedResult } from '../lib/search'
 import { type EntityType, EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
@@ -44,7 +46,7 @@ import { globalArgs } from './shared-args'
 /**
  * Project root, resolved relative to this file's directory (commands/ -> ../..)
  */
-export const PROJECT_ROOT = resolve(import.meta.dir, '../..')
+export const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
 
 /**
  * Glob patterns for discovering context entities by type.
@@ -101,8 +103,8 @@ function entityNameFromMeta(meta: Record<string, unknown>, relPath: string): str
 function detectEntityType(relPath: string): EntityType {
   for (const [type, patterns] of Object.entries(ENTITY_PATTERNS)) {
     for (const pattern of patterns) {
-      const glob = new Glob(pattern)
-      if (glob.match(relPath)) {
+      const isMatch = picomatch(pattern)
+      if (isMatch(relPath)) {
         return type as EntityType
       }
     }
@@ -111,7 +113,7 @@ function detectEntityType(relPath: string): EntityType {
 }
 
 /**
- * Discover files for a given entity type using Bun.Glob.
+ * Discover files for a given entity type using fast-glob.
  * Returns absolute paths.
  */
 export async function discoverFiles(
@@ -125,17 +127,15 @@ export async function discoverFiles(
     const patterns = ENTITY_PATTERNS[entityType]
     if (!patterns) continue
 
-    for (const pattern of patterns) {
-      const glob = new Glob(pattern)
-      for await (const match of glob.scan({ cwd: PROJECT_ROOT, absolute: false })) {
-        if (seen.has(match)) continue
-        seen.add(match)
-        results.push({
-          type: entityType,
-          absPath: resolve(PROJECT_ROOT, match),
-          relPath: match,
-        })
-      }
+    const matches = await fg(patterns, { cwd: PROJECT_ROOT, onlyFiles: true })
+    for (const match of matches) {
+      if (seen.has(match)) continue
+      seen.add(match)
+      results.push({
+        type: entityType,
+        absPath: resolve(PROJECT_ROOT, match),
+        relPath: match,
+      })
     }
   }
 
@@ -263,7 +263,7 @@ const ingestCommand = defineCommand({
 
       try {
         // Read and parse
-        const content = await Bun.file(file.absPath).text()
+        const content = await readText(file.absPath)
         const fileHash = await hashFile(file.absPath)
 
         // Check if already indexed with same hash (incremental)
@@ -475,7 +475,7 @@ const embedCommand = defineCommand({
     if (!ollamaOk) {
       spinner.error({ text: 'Ollama not available' })
       out.error(
-        'Ollama is not running. Install and start Ollama, then run: ollama pull ' + args.model
+        `Ollama is not running. Install and start Ollama, then run: ollama pull ${args.model}`
       )
       process.exit(EXIT.ERROR)
     }
@@ -517,7 +517,7 @@ const embedCommand = defineCommand({
         const absPath = resolve(PROJECT_ROOT, filePath)
         let content: string
         try {
-          content = await Bun.file(absPath).text()
+          content = await readText(absPath)
         } catch {
           continue // skip if file no longer exists
         }
@@ -611,7 +611,7 @@ const similarCommand = defineCommand({
     let content: string
     try {
       const absPath = resolve(PROJECT_ROOT, filePath)
-      content = await Bun.file(absPath).text()
+      content = await readText(absPath)
     } catch {
       out.error(`Cannot read entity file: ${filePath}`)
       process.exit(EXIT.ERROR)
