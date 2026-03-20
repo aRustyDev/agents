@@ -125,6 +125,43 @@ export interface RemoveResult {
 }
 
 // ---------------------------------------------------------------------------
+// Publish
+// ---------------------------------------------------------------------------
+
+/** Options for publishing a component to a registry. */
+export interface PublishOptions {
+  /** Qualified name (e.g. namespace/server for Smithery). */
+  readonly name?: string
+  /** Namespace to publish under. */
+  readonly namespace?: string
+  /** API key for authentication. */
+  readonly apiKey?: string
+  /** URL of an external MCP server (no build needed). */
+  readonly externalUrl?: string
+  /** JSON Schema for server configuration. */
+  readonly configSchema?: Record<string, unknown>
+  /** Pre-built bundle directory path. */
+  readonly bundleDir?: string
+  /** Dry run — validate without uploading. */
+  readonly dryRun?: boolean
+  /** Working directory. */
+  readonly cwd?: string
+}
+
+/** Result of a publish operation. */
+export interface PublishResult {
+  readonly ok: boolean
+  /** Registry URL where the component is now available. */
+  readonly registryUrl?: string
+  /** Deployment/release identifier. */
+  readonly releaseId?: string
+  /** Status: 'published', 'pending', 'failed'. */
+  readonly status: 'published' | 'pending' | 'failed'
+  readonly error?: string
+  readonly warnings: string[]
+}
+
+// ---------------------------------------------------------------------------
 // Provider interface
 // ---------------------------------------------------------------------------
 
@@ -142,4 +179,6 @@ export interface ComponentProvider {
     opts?: { cwd?: string; agent?: string }
   ): Promise<Result<RemoveResult>>
   info(name: string, type: ComponentType, opts?: { cwd?: string }): Promise<Result<Component>>
+  /** Publish a component to a registry. */
+  publish(type: ComponentType, opts: PublishOptions): Promise<Result<PublishResult>>
 }

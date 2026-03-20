@@ -9,6 +9,8 @@ import {
   isComponentType,
   type PaginatedResult,
   type ProviderCapabilities,
+  type PublishOptions,
+  type PublishResult,
   type RemoveResult,
   type SearchParams,
 } from '../../lib/component/types'
@@ -410,6 +412,101 @@ describe('RemoveResult', () => {
 })
 
 // ---------------------------------------------------------------------------
+// PublishOptions
+// ---------------------------------------------------------------------------
+
+describe('PublishOptions', () => {
+  test('all fields are optional', () => {
+    const opts: PublishOptions = {}
+    expect(opts.name).toBeUndefined()
+    expect(opts.namespace).toBeUndefined()
+    expect(opts.apiKey).toBeUndefined()
+    expect(opts.externalUrl).toBeUndefined()
+    expect(opts.configSchema).toBeUndefined()
+    expect(opts.bundleDir).toBeUndefined()
+    expect(opts.dryRun).toBeUndefined()
+    expect(opts.cwd).toBeUndefined()
+  })
+
+  test('accepts all fields', () => {
+    const opts: PublishOptions = {
+      name: 'arustydev/my-server',
+      namespace: 'arustydev',
+      apiKey: 'sk-test-123',
+      externalUrl: 'https://mcp.example.com/sse',
+      configSchema: { port: { type: 'number', default: 3000 } },
+      bundleDir: '/tmp/build/dist',
+      dryRun: true,
+      cwd: '/home/user/project',
+    }
+    expect(opts.name).toBe('arustydev/my-server')
+    expect(opts.namespace).toBe('arustydev')
+    expect(opts.apiKey).toBe('sk-test-123')
+    expect(opts.externalUrl).toBe('https://mcp.example.com/sse')
+    expect(opts.configSchema).toEqual({ port: { type: 'number', default: 3000 } })
+    expect(opts.bundleDir).toBe('/tmp/build/dist')
+    expect(opts.dryRun).toBe(true)
+    expect(opts.cwd).toBe('/home/user/project')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// PublishResult
+// ---------------------------------------------------------------------------
+
+describe('PublishResult', () => {
+  test('successful publish result', () => {
+    const result: PublishResult = {
+      ok: true,
+      registryUrl: 'https://smithery.ai/server/arustydev/my-server',
+      releaseId: 'rel-abc-123',
+      status: 'published',
+      warnings: [],
+    }
+    expect(result.ok).toBe(true)
+    expect(result.status).toBe('published')
+    expect(result.registryUrl).toBe('https://smithery.ai/server/arustydev/my-server')
+    expect(result.releaseId).toBe('rel-abc-123')
+    expect(result.error).toBeUndefined()
+    expect(result.warnings).toHaveLength(0)
+  })
+
+  test('pending publish result', () => {
+    const result: PublishResult = {
+      ok: true,
+      status: 'pending',
+      warnings: ['Build queued, deployment in progress'],
+    }
+    expect(result.ok).toBe(true)
+    expect(result.status).toBe('pending')
+    expect(result.registryUrl).toBeUndefined()
+    expect(result.warnings).toHaveLength(1)
+  })
+
+  test('failed publish result includes error', () => {
+    const result: PublishResult = {
+      ok: false,
+      status: 'failed',
+      error: 'Authentication failed: invalid API key',
+      warnings: ['Config schema validation skipped'],
+    }
+    expect(result.ok).toBe(false)
+    expect(result.status).toBe('failed')
+    expect(result.error).toBe('Authentication failed: invalid API key')
+    expect(result.warnings).toEqual(['Config schema validation skipped'])
+  })
+
+  test('status accepts only valid literal types', () => {
+    const published: PublishResult = { ok: true, status: 'published', warnings: [] }
+    const pending: PublishResult = { ok: true, status: 'pending', warnings: [] }
+    const failed: PublishResult = { ok: false, status: 'failed', warnings: [] }
+    expect(published.status).toBe('published')
+    expect(pending.status).toBe('pending')
+    expect(failed.status).toBe('failed')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // ComponentProvider (structural typing)
 // ---------------------------------------------------------------------------
 
@@ -450,6 +547,10 @@ describe('ComponentProvider', () => {
           source: 'test',
           description: 'test',
         },
+      }),
+      publish: async () => ({
+        ok: true as const,
+        value: { ok: true, status: 'published' as const, warnings: [] },
       }),
     }
 
@@ -505,6 +606,14 @@ describe('ComponentProvider', () => {
         } as any,
       }),
       info: async () => ({
+        ok: false as const,
+        error: {
+          message: 'not implemented',
+          code: 'E_NOT_IMPL',
+          display: () => '',
+        } as any,
+      }),
+      publish: async () => ({
         ok: false as const,
         error: {
           message: 'not implemented',

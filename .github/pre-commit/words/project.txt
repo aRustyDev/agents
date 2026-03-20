@@ -65,6 +65,7 @@ Floorplan
 flowgpt
 forceatlas
 FrancyJGLisboa
+Ftest
 getpid
 gitea
 Gitea

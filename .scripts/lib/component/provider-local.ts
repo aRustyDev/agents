@@ -18,6 +18,7 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from './types'
@@ -207,5 +208,9 @@ export class LocalProvider implements ComponentProvider {
       installedAgents: detail.installedAgents,
       installMode: detail.symlinkStatus === 'symlink' ? 'symlink' : 'copy',
     })
+  }
+
+  async publish(): Promise<Result<PublishResult>> {
+    return err(new CliError(`${this.displayName} does not support publish`, 'E_UNSUPPORTED'))
   }
 }

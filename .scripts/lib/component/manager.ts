@@ -7,6 +7,8 @@ import type {
   ComponentProvider,
   ComponentType,
   PaginatedResult,
+  PublishOptions,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from './types'
@@ -126,5 +128,13 @@ export class ComponentManager {
       return err(new CliError(`No provider supports removing ${type} components`, 'E_NO_PROVIDER'))
     }
     return providers[0]?.remove(name, type, opts)
+  }
+
+  async publish(type: ComponentType, opts: PublishOptions): Promise<Result<PublishResult>> {
+    const providers = this.findProviders('publish', type)
+    if (providers.length === 0) {
+      return err(new CliError(`No provider supports publishing ${type}`, 'E_NO_PROVIDER'))
+    }
+    return providers[0]!.publish(type, opts)
   }
 }

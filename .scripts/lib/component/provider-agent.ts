@@ -21,6 +21,7 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from './types'
@@ -234,5 +235,9 @@ export class LocalAgentProvider implements ComponentProvider {
         'Agents are discovered from context/agents/ — remove .md files directly.'
       )
     )
+  }
+
+  async publish(): Promise<Result<PublishResult>> {
+    return err(new CliError(`${this.displayName} does not support publish`, 'E_UNSUPPORTED'))
   }
 }

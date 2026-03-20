@@ -8,6 +8,8 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishOptions,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from '../../lib/component/types'
@@ -49,6 +51,7 @@ function mockProvider(
     infoResult?: Component | null
     addResult?: ComponentAddResult
     removeResult?: RemoveResult
+    publishResult?: PublishResult
     capabilities?: Partial<ProviderCapabilities>
     searchError?: boolean
   } = {}
@@ -111,6 +114,11 @@ function mockProvider(
         return err(new CliError(`Not found: ${name}`, 'E_NOT_FOUND'))
       }
       return ok(makeComponent({ name, type }))
+    },
+
+    async publish(_type: ComponentType, _opts: PublishOptions): Promise<Result<PublishResult>> {
+      if (opts.publishResult) return ok(opts.publishResult)
+      return err(new CliError('publish not supported', 'E_UNSUPPORTED'))
     },
   }
 }
@@ -471,6 +479,57 @@ describe('ComponentManager', () => {
       if (result.ok) return
       expect(result.error.code).toBe('E_NO_PROVIDER')
       expect(result.error.message).toContain('skill')
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // publish
+  // -------------------------------------------------------------------------
+
+  describe('publish', () => {
+    test('routes to capable provider', async () => {
+      const publishResult: PublishResult = {
+        ok: true,
+        registryUrl: 'https://smithery.ai/server/test-server',
+        releaseId: 'rel-123',
+        status: 'published',
+        warnings: [],
+      }
+      const mgr = new ComponentManager()
+      mgr.register(
+        mockProvider('pub-provider', {
+          capabilities: { publish: ['mcp_server'] },
+          publishResult,
+        })
+      )
+      const result = await mgr.publish('mcp_server', { name: 'test-server' })
+      expect(result.ok).toBe(true)
+      if (!result.ok) return
+      expect(result.value.status).toBe('published')
+      expect(result.value.registryUrl).toBe('https://smithery.ai/server/test-server')
+      expect(result.value.releaseId).toBe('rel-123')
+    })
+
+    test('returns E_NO_PROVIDER when none registered', async () => {
+      const mgr = new ComponentManager()
+      const result = await mgr.publish('mcp_server', {})
+      expect(result.ok).toBe(false)
+      if (result.ok) return
+      expect(result.error.code).toBe('E_NO_PROVIDER')
+      expect(result.error.message).toContain('mcp_server')
+    })
+
+    test('returns E_NO_PROVIDER when no provider supports the type', async () => {
+      const mgr = new ComponentManager()
+      mgr.register(
+        mockProvider('a', {
+          capabilities: { publish: ['skill'] },
+        })
+      )
+      const result = await mgr.publish('mcp_server', { name: 'test' })
+      expect(result.ok).toBe(false)
+      if (result.ok) return
+      expect(result.error.code).toBe('E_NO_PROVIDER')
     })
   })
 })

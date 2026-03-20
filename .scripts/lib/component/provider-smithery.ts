@@ -17,6 +17,7 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from './types'
@@ -138,5 +139,9 @@ export class SmitheryProvider implements ComponentProvider {
     _opts?: { cwd?: string }
   ): Promise<Result<Component>> {
     return err(new CliError('Smithery provider does not support info', 'E_UNSUPPORTED'))
+  }
+
+  async publish(): Promise<Result<PublishResult>> {
+    return err(new CliError(`${this.displayName} does not support publish`, 'E_UNSUPPORTED'))
   }
 }

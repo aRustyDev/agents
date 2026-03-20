@@ -22,6 +22,7 @@ import type {
   ComponentType,
   PaginatedResult,
   ProviderCapabilities,
+  PublishResult,
   RemoveResult,
   SearchParams,
 } from './types'
@@ -199,5 +200,9 @@ export class LocalOutputStyleProvider implements ComponentProvider {
         'E_UNSUPPORTED_OPERATION'
       )
     )
+  }
+
+  async publish(): Promise<Result<PublishResult>> {
+    return err(new CliError(`${this.displayName} does not support publish`, 'E_UNSUPPORTED'))
   }
 }
