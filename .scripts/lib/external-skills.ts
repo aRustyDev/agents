@@ -9,19 +9,12 @@
  * (machine-managed).
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, relative, resolve } from 'node:path'
+import { join, relative } from 'node:path'
 import yaml from 'js-yaml'
 import * as v from 'valibot'
+import { cloneRepo, gitRaw, lsRemote } from './git'
 import { addComment, createIssue, type Issue, searchIssues } from './github'
 import { formatHash, hashDirectory, lockKey } from './hash'
 import { spawnSync } from './runtime'
@@ -146,55 +139,24 @@ export function writeLock(externalDir: string, data: Record<string, ExternalLock
 /**
  * Run `git ls-remote` to resolve a remote ref to a commit SHA.
  *
+ * Delegates to `lsRemote()` from `lib/git.ts` (simple-git).
+ *
  * - If `ref` is provided: queries tags for that ref.
  * - If no `ref`: queries HEAD.
  *
  * @returns The commit SHA or an error.
  */
 export async function gitLsRemote(repoUrl: string, ref?: string): Promise<Result<string>> {
-  const args = ref
-    ? ['git', 'ls-remote', '--tags', repoUrl, ref]
-    : ['git', 'ls-remote', repoUrl, 'HEAD']
+  const result = await lsRemote(repoUrl, ref)
 
-  const proc = spawnSync(args)
-
-  if (proc.exitCode !== 0) {
-    const stderr = proc.stderr.trim()
-    return err(
-      new CliError(
-        `git ls-remote failed for ${repoUrl}`,
-        'E_GIT_LS_REMOTE',
-        stderr || 'Check that the repository exists and is accessible'
-      )
-    )
+  if (!result.ok) {
+    // Map error codes for backward compatibility: lsRemote already uses
+    // E_GIT_LS_REMOTE, E_NO_REFS, and E_PARSE_FAILED which match the
+    // codes this function previously returned.
+    return result
   }
 
-  const stdout = proc.stdout.trim()
-  if (!stdout) {
-    return err(
-      new CliError(
-        `No refs found for ${repoUrl}${ref ? ` at ${ref}` : ''}`,
-        'E_NO_REFS',
-        ref
-          ? `Tag "${ref}" may not exist. Check with: git ls-remote --tags ${repoUrl}`
-          : 'Repository may be empty or inaccessible'
-      )
-    )
-  }
-
-  // First column is the SHA
-  const sha = stdout.split(/\s+/)[0]
-  if (!sha) {
-    return err(
-      new CliError(
-        `Could not parse commit SHA from git ls-remote output`,
-        'E_PARSE_FAILED',
-        `Output was: ${stdout}`
-      )
-    )
-  }
-
-  return ok(sha)
+  return result
 }
 
 // ---------------------------------------------------------------------------
@@ -275,38 +237,28 @@ export async function syncSkill(
 ): Promise<Result<void>> {
   const repoUrl = `https://github.com/${entry.source}.git`
   const destDir = join(externalDir, entry.source, entry.skill)
-  const tempBase = join(tmpdir(), `skill-sync-${Date.now()}`)
 
-  mkdirSync(tempBase, { recursive: true })
-
-  try {
-    if (entry.ref) {
-      // Pinned ref: use git clone --depth 1 --branch <ref>
-      const proc = spawnSync([
-        'git',
-        'clone',
-        '--depth',
-        '1',
-        '--branch',
-        entry.ref,
-        repoUrl,
-        `${tempBase}/repo`,
-      ])
-      if (proc.exitCode !== 0) {
-        return err(
-          new CliError(
-            `Failed to clone ${entry.source} at ref ${entry.ref}`,
-            'E_CLONE_FAILED',
-            proc.stderr.trim()
-          )
+  if (entry.ref) {
+    // Pinned ref: use cloneRepo with ref
+    const cloneResult = await cloneRepo(repoUrl, entry.ref)
+    if (!cloneResult.ok) {
+      // Map GitCloneError to the E_CLONE_FAILED code callers expect
+      return err(
+        new CliError(
+          `Failed to clone ${entry.source} at ref ${entry.ref}`,
+          'E_CLONE_FAILED',
+          cloneResult.error.hint
         )
-      }
+      )
+    }
 
+    const { tempDir: clonedDir, cleanup } = cloneResult.value
+    try {
       // Copy skill directory from cloned repo
-      const skillSrc = join(tempBase, 'repo', entry.skill)
+      const skillSrc = join(clonedDir, entry.skill)
       if (!existsSync(skillSrc)) {
         // Try looking in .claude/skills/ as fallback
-        const altSrc = join(tempBase, 'repo', '.claude', 'skills', entry.skill)
+        const altSrc = join(clonedDir, '.claude', 'skills', entry.skill)
         if (existsSync(altSrc)) {
           copyDir(altSrc, destDir)
         } else {
@@ -321,49 +273,55 @@ export async function syncSkill(
       } else {
         copyDir(skillSrc, destDir)
       }
-    } else {
-      // Try npx skills first, fall back to git clone
-      const npxCheck = spawnSync(['which', 'npx'])
+    } finally {
+      await cleanup()
+    }
+  } else {
+    // Try npx skills first, fall back to cloneRepo
+    // TODO(phase-5.3): Replace with addSkill() from lib/skill-add.ts when Phase 2 is complete
+    const npxCheck = spawnSync(['which', 'npx'])
+    const tempBase = join(tmpdir(), `skill-sync-${Date.now()}`)
 
-      let synced = false
+    let synced = false
 
-      if (npxCheck.exitCode === 0) {
-        const npxDir = join(tempBase, 'npx')
-        mkdirSync(npxDir, { recursive: true })
+    if (npxCheck.exitCode === 0) {
+      const npxDir = join(tempBase, 'npx')
+      mkdirSync(npxDir, { recursive: true })
 
-        const proc = spawnSync(
-          [
-            'npx',
-            'skills',
-            'add',
-            '-y',
-            '--copy',
-            '--full-depth',
-            `${entry.source}@${entry.skill}`,
-          ],
-          { cwd: npxDir }
-        )
+      const proc = spawnSync(
+        ['npx', 'skills', 'add', '-y', '--copy', '--full-depth', `${entry.source}@${entry.skill}`],
+        { cwd: npxDir }
+      )
 
-        if (proc.exitCode === 0) {
-          const npxSkillDir = join(npxDir, '.claude', 'skills', entry.skill)
-          if (existsSync(npxSkillDir)) {
-            copyDir(npxSkillDir, destDir)
-            synced = true
-          }
+      if (proc.exitCode === 0) {
+        const npxSkillDir = join(npxDir, '.claude', 'skills', entry.skill)
+        if (existsSync(npxSkillDir)) {
+          copyDir(npxSkillDir, destDir)
+          synced = true
         }
       }
 
-      if (!synced) {
-        // Fallback: git clone
-        const proc = spawnSync(['git', 'clone', '--depth', '1', repoUrl, `${tempBase}/repo`])
-        if (proc.exitCode !== 0) {
-          return err(
-            new CliError(`Failed to clone ${entry.source}`, 'E_CLONE_FAILED', proc.stderr.trim())
-          )
-        }
+      // Clean up npx temp directory
+      try {
+        rmSync(tempBase, { recursive: true, force: true })
+      } catch {
+        // Best-effort cleanup
+      }
+    }
 
-        const skillSrc = join(tempBase, 'repo', entry.skill)
-        const altSrc = join(tempBase, 'repo', '.claude', 'skills', entry.skill)
+    if (!synced) {
+      // Fallback: cloneRepo without ref (HEAD)
+      const cloneResult = await cloneRepo(repoUrl)
+      if (!cloneResult.ok) {
+        return err(
+          new CliError(`Failed to clone ${entry.source}`, 'E_CLONE_FAILED', cloneResult.error.hint)
+        )
+      }
+
+      const { tempDir: clonedDir, cleanup } = cloneResult.value
+      try {
+        const skillSrc = join(clonedDir, entry.skill)
+        const altSrc = join(clonedDir, '.claude', 'skills', entry.skill)
 
         if (existsSync(skillSrc)) {
           copyDir(skillSrc, destDir)
@@ -378,26 +336,21 @@ export async function syncSkill(
             )
           )
         }
+      } finally {
+        await cleanup()
       }
-    }
-
-    // Clean up artifacts that should not be in the snapshot
-    for (const artifact of ['.claude', '.agents', '.git']) {
-      const artifactPath = join(destDir, artifact)
-      if (existsSync(artifactPath)) {
-        rmSync(artifactPath, { recursive: true, force: true })
-      }
-    }
-
-    return ok(undefined)
-  } finally {
-    // Clean up temp directory
-    try {
-      rmSync(tempBase, { recursive: true, force: true })
-    } catch {
-      // Best-effort cleanup
     }
   }
+
+  // Clean up artifacts that should not be in the snapshot
+  for (const artifact of ['.claude', '.agents', '.git']) {
+    const artifactPath = join(destDir, artifact)
+    if (existsSync(artifactPath)) {
+      rmSync(artifactPath, { recursive: true, force: true })
+    }
+  }
+
+  return ok(undefined)
 }
 
 /**
@@ -451,9 +404,9 @@ export async function syncAll(
         snapshot_hash: snapshotHash,
         last_synced: new Date().toISOString(),
         ...(lock[key]?.last_reviewed_commit
-          ? { last_reviewed_commit: lock[key]!.last_reviewed_commit }
+          ? { last_reviewed_commit: lock[key]?.last_reviewed_commit }
           : {}),
-        ...(lock[key]?.drift_issue ? { drift_issue: lock[key]!.drift_issue } : {}),
+        ...(lock[key]?.drift_issue ? { drift_issue: lock[key]?.drift_issue } : {}),
       }
     } else {
       failed.push(name)
@@ -496,8 +449,8 @@ export async function createDriftIssues(
     const snapshotPath = join(externalDir, entry.source, entry.skill)
     if (!existsSync(snapshotPath)) continue
 
-    const diffProc = spawnSync(['git', 'diff', 'HEAD', '--', snapshotPath])
-    const diff = diffProc.stdout.trim()
+    const diffResult = await gitRaw(['diff', 'HEAD', '--', snapshotPath])
+    const diff = diffResult.ok ? diffResult.value.trim() : ''
     if (!diff) continue
 
     for (const localSkill of entry.derived_by) {
@@ -510,7 +463,7 @@ export async function createDriftIssues(
       if (!driftByLocal.has(localSkill)) {
         driftByLocal.set(localSkill, [])
       }
-      driftByLocal.get(localSkill)!.push({ name, entry, diff })
+      driftByLocal.get(localSkill)?.push({ name, entry, diff })
     }
   }
 
@@ -561,7 +514,7 @@ export async function createDriftIssues(
       for (const d of driftedEntries) {
         const key = lockKey(d.entry.source, d.entry.skill)
         if (lock[key]) {
-          lock[key]!.drift_issue = existingIssue.number
+          lock[key].drift_issue = existingIssue.number
         }
       }
     } else {
@@ -580,7 +533,7 @@ export async function createDriftIssues(
         for (const d of driftedEntries) {
           const key = lockKey(d.entry.source, d.entry.skill)
           if (lock[key]) {
-            lock[key]!.drift_issue = issueResult.value.number
+            lock[key].drift_issue = issueResult.value.number
           }
         }
       }
@@ -653,7 +606,7 @@ export async function refreshLinks(
       try {
         await createSymlink(relTarget, link)
         created.push(name)
-      } catch (e) {
+      } catch (_e) {
         // Path exists but is not a symlink (real directory)
         broken.push(name)
       }
@@ -687,7 +640,7 @@ export async function getStatus(externalDir: string, skillsDir: string): Promise
     if (existsSync(snapshotDir)) {
       try {
         const hex = await hashDirectory(snapshotDir)
-        hash = hex.slice(0, 8) + '..'
+        hash = `${hex.slice(0, 8)}..`
       } catch {
         // Ignore hash errors
       }

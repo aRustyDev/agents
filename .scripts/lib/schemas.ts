@@ -29,7 +29,7 @@ export const SkillLockEntry = v.object({
   sourceType: v.string(),
   computedHash: v.pipe(
     v.string(),
-    v.regex(/^[a-f0-9]{64}$/, 'Must be a 64-character lowercase hex SHA256 digest'),
+    v.regex(/^[a-f0-9]{64}$/, 'Must be a 64-character lowercase hex SHA256 digest')
   ),
 })
 export type SkillLockEntry = v.InferOutput<typeof SkillLockEntry>
@@ -82,8 +82,8 @@ export const PluginSourceExtended = v.object({
   hash: v.optional(
     v.pipe(
       v.string(),
-      v.regex(/^sha256:[a-f0-9]{64}$/, 'Must be a sha256-prefixed 64-char hex digest'),
-    ),
+      v.regex(/^sha256:[a-f0-9]{64}$/, 'Must be a sha256-prefixed 64-char hex digest')
+    )
   ),
   forked: v.optional(v.boolean()),
   forked_at: v.optional(v.string()),
@@ -170,8 +170,8 @@ export const PluginManifest = v.object({
     v.string(),
     v.regex(
       /^\d+\.\d+\.\d+(?:-[\w.]+)?(?:\+[\w.]+)?$/,
-      'Must be a valid semver version (e.g. 1.0.0, 0.1.0-beta.1)',
-    ),
+      'Must be a valid semver version (e.g. 1.0.0, 0.1.0-beta.1)'
+    )
   ),
   description: v.string(),
   author: PluginAuthor,
@@ -269,8 +269,8 @@ export const ExternalSkillEntry = v.pipe(
   }),
   v.check(
     (entry) => !(entry.passthrough && entry.derived_by?.length),
-    'passthrough and derived_by are mutually exclusive',
-  ),
+    'passthrough and derived_by are mutually exclusive'
+  )
 )
 export type ExternalSkillEntry = v.InferOutput<typeof ExternalSkillEntry>
 
@@ -337,3 +337,33 @@ export const StatusMessage = v.object({
   data: v.optional(v.unknown()),
 })
 export type StatusMessage = v.InferOutput<typeof StatusMessage>
+
+// ---------------------------------------------------------------------------
+// Search result schema (Phase 3)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single result from the unified skill search API.
+ *
+ * Backends normalize their responses into this shape so that callers get a
+ * consistent interface regardless of the underlying search engine.
+ */
+export const SkillSearchResult = v.object({
+  name: v.string(),
+  source: v.pipe(v.string(), v.nonEmpty()),
+  description: v.optional(v.string(), ''),
+  installs: v.optional(v.number()),
+  url: v.optional(v.string()),
+})
+export type SkillSearchResult = v.InferOutput<typeof SkillSearchResult>
+
+/**
+ * Supported search backends.
+ *
+ * - `skills-sh`   -- skills.sh public API
+ * - `meilisearch`  -- local Meilisearch instance
+ * - `catalog`      -- offline .catalog.ndjson file
+ * - `auto`         -- try meilisearch -> skills-sh -> catalog
+ */
+export const SearchBackendType = v.picklist(['skills-sh', 'meilisearch', 'catalog', 'auto'])
+export type SearchBackendType = v.InferOutput<typeof SearchBackendType>

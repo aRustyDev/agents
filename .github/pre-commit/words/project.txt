@@ -22,12 +22,12 @@ blencorp
 brewfile
 buildwithclaude
 bunx
-chunker
 burpsuite
 cchooks
 cclint
 ccpm
 CHANGEME
+chunker
 cicd
 claudecode
 claudecodemarketplace
@@ -91,10 +91,10 @@ jqueryscript
 justfile
 kwsites
 lackeyjb
-lockfiles
 LAPACK
 litdb
 Livelocks
+lockfiles
 luofengmacheng
 lychee
 Manim
@@ -112,6 +112,7 @@ modelcontextprotocol
 monorepo
 mousemovebody
 myproject
+myskill
 neuromorphic
 nomic
 Nygard
@@ -134,11 +135,11 @@ polyrepo
 pproenca
 precheck
 productionization
-publishability
 promptbase
 PRRT
 PRRTC
 Pryce
+publishability
 punkpeye
 pybars
 PYBARS
@@ -170,6 +171,7 @@ skillsmp
 slugified
 smithery
 sonnet
+Sortability
 sourcekit
 sqlfluff
 sqlite
@@ -229,9 +231,9 @@ xcuitest
 XCUITest
 xfurai
 Xplore
+xyznonexistent
 yamadashy
 yamllint
 yara
 zeroize
 Zotero
-Sortability
