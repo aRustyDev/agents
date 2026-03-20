@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
+  type CatalogEntry,
   computeContentHash,
   computeFileCount,
   computeHeadingTree,
@@ -248,5 +249,165 @@ function computeResult(skillMdPath: string, skillDir: string): SkillDownloadResu
     sectionCount: computeSectionCount(content),
     fileCount: computeFileCount(skillDir),
     headingTree: computeHeadingTree(content),
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Batch download
+// ---------------------------------------------------------------------------
+
+export interface BatchDownloadOptions {
+  /** Use local directories instead of cloning (for testing). Skill dirs at localOverrideDir/<skill-name>/ */
+  localOverrideDir?: string
+  /** Force git protocol override (default: auto-detect). */
+  protocol?: GitProtocol
+  signal?: AbortSignal
+  timeout?: number
+}
+
+/**
+ * Download all skills in a batch.
+ *
+ * Groups entries by source so repos are cloned once per source.
+ * In test mode (localOverrideDir), maps skill names to subdirectories.
+ *
+ * Map keys are `source\x00skill` composite keys to handle the same skill
+ * name appearing from different sources.
+ */
+export async function downloadBatch(
+  entries: CatalogEntry[],
+  opts: BatchDownloadOptions = {}
+): Promise<Map<string, SkillDownloadResult>> {
+  const results = new Map<string, SkillDownloadResult>()
+
+  // Group entries by source for efficient cloning
+  const bySource = new Map<string, CatalogEntry[]>()
+  for (const entry of entries) {
+    const group = bySource.get(entry.source) ?? []
+    group.push(entry)
+    bySource.set(entry.source, group)
+  }
+
+  for (const [source, group] of bySource) {
+    if (opts.localOverrideDir) {
+      // Test mode: use local directories (no network)
+      for (const entry of group) {
+        const key = `${entry.source}\x00${entry.skill}`
+        const localDir = join(opts.localOverrideDir, entry.skill)
+        if (!existsSync(localDir)) {
+          results.set(key, {
+            path: null,
+            error: `local directory not found: ${localDir}`,
+            errorType: 'download_failed',
+            errorDetail: 'localOverrideDir set but skill directory missing',
+          })
+          continue
+        }
+        const result = await downloadSkill(source, entry.skill, {
+          localOverride: localDir,
+          signal: opts.signal,
+        })
+        results.set(key, result)
+      }
+      continue
+    }
+
+    // Production mode: clone once per source, discover all skills
+    await downloadBatchForSource(source, group, opts, results)
+  }
+
+  return results
+}
+
+/** Fill all group entries in the results map with the same error result. */
+function fillGroupWithError(
+  group: CatalogEntry[],
+  results: Map<string, SkillDownloadResult>,
+  errorResult: Omit<SkillDownloadResult, 'path'> & { path: null }
+): void {
+  for (const entry of group) {
+    results.set(`${entry.source}\x00${entry.skill}`, errorResult)
+  }
+}
+
+/**
+ * Resolve a single skill entry from a cloned repo.
+ * Tries discovery map first, then falls back to well-known path lookup.
+ */
+function resolveSkillFromClone(
+  entry: CatalogEntry,
+  source: string,
+  tempDir: string,
+  discoveredMap: Map<string, { path: string; name: string; frontmatter: { description?: string } }>
+): SkillDownloadResult {
+  const match = discoveredMap.get(entry.skill.toLowerCase())
+  if (match) {
+    const result = computeResult(match.path, join(match.path, '..'))
+    result.discoveredName = match.name
+    result.discoveredDescription = match.frontmatter.description
+    return result
+  }
+
+  // Direct path fallback using well-known paths
+  for (const p of SKILL_LOOKUP_PATHS(entry.skill).map((rel) => join(tempDir, rel))) {
+    if (existsSync(p)) {
+      return computeResult(p, join(p, '..'))
+    }
+  }
+
+  return {
+    path: null,
+    error: `skill "${entry.skill}" not found in ${source}`,
+    errorType: 'download_failed',
+    errorDetail: `Discovered ${discoveredMap.size} skills but none matched "${entry.skill}"`,
+  }
+}
+
+/** Download all skills from a single source (clones once). */
+async function downloadBatchForSource(
+  source: string,
+  group: CatalogEntry[],
+  opts: BatchDownloadOptions,
+  results: Map<string, SkillDownloadResult>
+): Promise<void> {
+  const validated = validateCatalogSource(source, opts.protocol)
+  if (!validated.ok) {
+    fillGroupWithError(group, results, {
+      path: null,
+      error: validated.error.message,
+      errorType: 'source_invalid',
+      errorDetail: validated.error.hint ?? validated.error.message,
+    })
+    return
+  }
+
+  const cloneResult = await cloneRepo(validated.value.cloneUrl, validated.value.ref)
+  if (!cloneResult.ok) {
+    const gitErr = cloneResult.error as GitCloneError
+    fillGroupWithError(group, results, {
+      path: null,
+      error: `clone failed: ${gitErr.message}`,
+      errorType: gitErr.isTimeout ? 'download_timeout' : 'download_failed',
+      errorDetail: gitErr.hint ?? gitErr.message,
+    })
+    return
+  }
+
+  try {
+    // Discover all skills in the cloned repo
+    const discovered = await discoverSkills(cloneResult.value.tempDir)
+    const discoveredMap = new Map(
+      (discovered.ok ? discovered.value : []).map((s) => [s.name.toLowerCase(), s])
+    )
+
+    for (const entry of group) {
+      const key = `${entry.source}\x00${entry.skill}`
+      results.set(
+        key,
+        resolveSkillFromClone(entry, source, cloneResult.value.tempDir, discoveredMap)
+      )
+    }
+  } finally {
+    await cloneResult.value.cleanup()
   }
 }

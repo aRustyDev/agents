@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { downloadSkill, validateCatalogSource } from '../lib/catalog-download'
+import { downloadBatch, downloadSkill, validateCatalogSource } from '../lib/catalog-download'
 
 describe('validateCatalogSource', () => {
   it('accepts valid org/repo format', () => {
@@ -138,5 +138,84 @@ describe('downloadSkill', () => {
     expect(result.fileCount).toBe(2)
     expect(result.headingTree).toHaveLength(3)
     expect(result.headingTree?.[0]).toEqual({ depth: 1, title: 'H1' })
+  })
+})
+
+describe('downloadBatch', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), 'batch-test-'))
+  })
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('downloads multiple skills and returns a Map', async () => {
+    // Create two fake skills
+    for (const name of ['skill-a', 'skill-b']) {
+      const dir = join(tmpDir, name)
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(
+        join(dir, 'SKILL.md'),
+        `---\nname: ${name}\ndescription: test\n---\n# ${name}\ncontent`
+      )
+    }
+
+    const entries = [
+      { source: 'org/repo', skill: 'skill-a', availability: 'available' as const },
+      { source: 'org/repo', skill: 'skill-b', availability: 'available' as const },
+    ]
+
+    const results = await downloadBatch(entries, {
+      localOverrideDir: tmpDir,
+    })
+
+    expect(results.size).toBe(2)
+    expect(results.get('org/repo\x00skill-a')?.path).toBeTruthy()
+    expect(results.get('org/repo\x00skill-b')?.contentHash).toMatch(/^sha256:/)
+  })
+
+  it('handles mixed success/failure', async () => {
+    mkdirSync(join(tmpDir, 'good'), { recursive: true })
+    writeFileSync(
+      join(tmpDir, 'good', 'SKILL.md'),
+      '---\nname: good\ndescription: test\n---\n# Good'
+    )
+    // 'bad' directory exists but has no SKILL.md
+    mkdirSync(join(tmpDir, 'bad'), { recursive: true })
+
+    const entries = [
+      { source: 'org/repo', skill: 'good', availability: 'available' as const },
+      { source: 'org/repo', skill: 'bad', availability: 'available' as const },
+    ]
+
+    const results = await downloadBatch(entries, {
+      localOverrideDir: tmpDir,
+    })
+
+    expect(results.get('org/repo\x00good')?.path).toBeTruthy()
+    expect(results.get('org/repo\x00bad')?.error).toBeDefined()
+  })
+
+  it('groups entries by source for efficient cloning', async () => {
+    // Two different "repos" (simulated via localOverrideDir)
+    for (const skill of ['s1', 's2']) {
+      const dir = join(tmpDir, skill)
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(
+        join(dir, 'SKILL.md'),
+        `---\nname: ${skill}\ndescription: test\n---\n# ${skill}`
+      )
+    }
+
+    const entries = [
+      { source: 'org/repo-a', skill: 's1', availability: 'available' as const },
+      { source: 'org/repo-b', skill: 's2', availability: 'available' as const },
+      { source: 'org/repo-a', skill: 's2', availability: 'available' as const },
+    ]
+
+    const results = await downloadBatch(entries, { localOverrideDir: tmpDir })
+    expect(results.size).toBe(3)
   })
 })
