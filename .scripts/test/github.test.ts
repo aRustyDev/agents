@@ -1,120 +1,79 @@
 /**
  * Tests for lib/github.ts
  *
- * Unit tests use temp directories and mock data.
+ * Unit tests use keyring with test-specific service/account names.
  * Integration tests (real HTTP) are gated by CI env var.
  */
 
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import {
-  getCachedToken,
-  cacheToken,
-  setTokenPath,
-  getTokenPath,
-  parseRepo,
-  resetClient,
-} from '../lib/github'
+import { afterEach, describe, expect, test } from 'bun:test'
+import { Entry } from '@napi-rs/keyring'
+import { GitHubTokenProvider, parseRepo, resetClient } from '../lib/github'
 
-// ---------------------------------------------------------------------------
-// Setup / teardown
-// ---------------------------------------------------------------------------
+const TEST_SERVICE = 'arustydev/agents/test-github-compat'
+const TEST_ACCOUNT = 'test-compat'
 
-let tmp: string
-let originalTokenPath: string
-
-beforeEach(async () => {
-  tmp = await mkdtemp(join(tmpdir(), 'github-test-'))
-  originalTokenPath = getTokenPath()
-  // Point token path to temp dir so tests don't pollute real config
-  setTokenPath(join(tmp, 'github-token'))
-})
-
-afterEach(async () => {
-  // Restore original token path
-  setTokenPath(originalTokenPath)
+afterEach(() => {
   resetClient()
-  await rm(tmp, { recursive: true, force: true })
+  // Clean up test keychain entry
+  try {
+    new Entry(TEST_SERVICE, TEST_ACCOUNT).deletePassword()
+  } catch {
+    /* ignore */
+  }
 })
 
 // ---------------------------------------------------------------------------
-// Token caching
+// GitHubTokenProvider (compat)
 // ---------------------------------------------------------------------------
 
-describe('getCachedToken', () => {
-  test('returns null when no token file exists', () => {
-    const token = getCachedToken()
-    expect(token).toBeNull()
+describe('GitHubTokenProvider (compat)', () => {
+  test('returns token from keyring when cached', async () => {
+    new Entry(TEST_SERVICE, TEST_ACCOUNT).setPassword(
+      JSON.stringify({ token: 'gho_compat_test', expiresAt: Date.now() + 3600000 })
+    )
+
+    const provider = new GitHubTokenProvider({
+      service: TEST_SERVICE,
+      account: TEST_ACCOUNT,
+    })
+    const token = await provider.getToken()
+    expect(token).toBe('gho_compat_test')
   })
 
-  test('returns null for empty token file', async () => {
-    await writeFile(join(tmp, 'github-token'), '')
-    const token = getCachedToken()
-    expect(token).toBeNull()
-  })
+  test('invalidate clears keyring and in-memory cache', async () => {
+    const entry = new Entry(TEST_SERVICE, TEST_ACCOUNT)
+    entry.setPassword(
+      JSON.stringify({ token: 'gho_to_invalidate', expiresAt: Date.now() + 3600000 })
+    )
 
-  test('returns null for whitespace-only token file', async () => {
-    await writeFile(join(tmp, 'github-token'), '   \n  ')
-    const token = getCachedToken()
-    expect(token).toBeNull()
-  })
+    let refreshCount = 0
+    const provider = new GitHubTokenProvider({
+      service: TEST_SERVICE,
+      account: TEST_ACCOUNT,
+      tokenSource: async () => {
+        refreshCount++
+        return 'gho_refreshed'
+      },
+    })
 
-  test('returns token from file', async () => {
-    await writeFile(join(tmp, 'github-token'), 'ghp_test123\n')
-    const token = getCachedToken()
-    expect(token).toBe('ghp_test123')
-  })
+    // First call uses cached token
+    const first = await provider.getToken()
+    expect(first).toBe('gho_to_invalidate')
+    expect(refreshCount).toBe(0)
 
-  test('trims whitespace from token', async () => {
-    await writeFile(join(tmp, 'github-token'), '  ghp_spaces  \n')
-    const token = getCachedToken()
-    expect(token).toBe('ghp_spaces')
-  })
-})
+    // Invalidate
+    provider.invalidate()
 
-describe('cacheToken', () => {
-  test('writes token to file', async () => {
-    cacheToken('ghp_cached_token')
+    // Next call triggers refresh
+    const second = await provider.getToken()
+    expect(second).toBe('gho_refreshed')
+    expect(refreshCount).toBe(1)
 
-    const tokenPath = getTokenPath()
-    expect(existsSync(tokenPath)).toBe(true)
-
-    const content = await readFile(tokenPath, 'utf-8')
-    expect(content).toBe('ghp_cached_token')
-  })
-
-  test('creates parent directories if needed', () => {
-    const deepPath = join(tmp, 'deep', 'nested', 'github-token')
-    setTokenPath(deepPath)
-
-    cacheToken('ghp_deep')
-    expect(existsSync(deepPath)).toBe(true)
-  })
-
-  test('round-trips with getCachedToken', () => {
-    cacheToken('ghp_roundtrip')
-    const result = getCachedToken()
-    expect(result).toBe('ghp_roundtrip')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// setTokenPath / getTokenPath
-// ---------------------------------------------------------------------------
-
-describe('setTokenPath / getTokenPath', () => {
-  test('getTokenPath returns current path', () => {
-    const path = getTokenPath()
-    expect(path).toBe(join(tmp, 'github-token'))
-  })
-
-  test('setTokenPath changes the path', () => {
-    const newPath = join(tmp, 'custom-token')
-    setTokenPath(newPath)
-    expect(getTokenPath()).toBe(newPath)
+    // Verify keyring was cleared then re-populated
+    const raw = entry.getPassword()
+    expect(raw).toBeTruthy()
+    const stored = JSON.parse(raw as string)
+    expect(stored.token).toBe('gho_refreshed')
   })
 })
 

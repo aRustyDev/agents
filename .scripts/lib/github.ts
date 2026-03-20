@@ -2,17 +2,14 @@
  * GitHub API integration via Octokit with Device Flow auth.
  *
  * Auth strategy (in priority order):
- * 1. Cached token at ~/.config/ai-tools/github-token
- * 2. Piggyback on `gh auth token` (GitHub CLI)
- * 3. Device Flow OAuth (prompts user to open browser)
+ * 1. GITHUB_TOKEN env var (CI override)
+ * 2. @napi-rs/keyring cached token (if not expired)
+ * 3. @octokit/auth-oauth-device flow (interactive)
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { Entry } from '@napi-rs/keyring'
 import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
 import { Octokit } from '@octokit/core'
-import { spawnSync } from './runtime'
 import { CliError, type Result, tryAsync } from './types'
 
 // ---------------------------------------------------------------------------
@@ -42,121 +39,170 @@ export interface UpdateIssueOpts {
 }
 
 // ---------------------------------------------------------------------------
-// Token management
+// Constants
 // ---------------------------------------------------------------------------
 
-/** Default token path. Overridable for testing via `setTokenPath`. */
-let TOKEN_PATH = join(homedir(), '.config', 'ai-tools', 'github-token')
+// cspell:disable-next-line -- OAuth App Client ID
+const GITHUB_CLIENT_ID = 'Iv23licWoRnUpjtO0oKM'
+const KEYRING_SERVICE = 'arustydev/agents/github-token'
+const TOKEN_TTL_MS = 55 * 60 * 1000 // 55 minutes (tokens last ~1hr)
 
-/**
- * Override the token cache path. Intended for tests only.
- */
-export function setTokenPath(path: string): void {
-  TOKEN_PATH = path
-  // Reset the cached client when token path changes
-  _client = null
+// ---------------------------------------------------------------------------
+// Token storage (keyring)
+// ---------------------------------------------------------------------------
+
+interface StoredToken {
+  token: string
+  expiresAt: number // epoch ms
+  scopes?: string[]
 }
 
-/**
- * Get the current token path. Useful for tests to verify configuration.
- */
-export function getTokenPath(): string {
-  return TOKEN_PATH
-}
-
-/**
- * Read a cached GitHub token from disk, if one exists.
- */
-export function getCachedToken(): string | null {
+function readKeyring(service: string, account: string): StoredToken | null {
   try {
-    if (!existsSync(TOKEN_PATH)) return null
-    const token = readFileSync(TOKEN_PATH, 'utf-8').trim()
-    return token.length > 0 ? token : null
+    const entry = new Entry(service, account)
+    const raw = entry.getPassword()
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as StoredToken
+    if (!parsed.token || typeof parsed.expiresAt !== 'number') return null
+    return parsed
   } catch {
     return null
   }
 }
 
-/**
- * Persist a GitHub token to disk for reuse across sessions.
- */
-export function cacheToken(token: string): void {
-  const dir = join(TOKEN_PATH, '..')
-  mkdirSync(dir, { recursive: true })
-  writeFileSync(TOKEN_PATH, token, { mode: 0o600 })
+function writeKeyring(service: string, account: string, state: StoredToken): void {
+  try {
+    const entry = new Entry(service, account)
+    entry.setPassword(JSON.stringify(state))
+  } catch {
+    // Keyring write failed -- log but don't crash
+    process.stderr.write('[github] Warning: failed to cache token in keychain\n')
+  }
 }
 
-/**
- * Try to get a token from the GitHub CLI (`gh auth token`).
- * Returns null if `gh` is not installed or not authenticated.
- */
-export async function getGhToken(): Promise<string | null> {
+function deleteKeyring(service: string, account: string): void {
   try {
-    const proc = spawnSync(['gh', 'auth', 'token'])
-    if (proc.exitCode !== 0) return null
-    const token = proc.stdout.trim()
-    return token.length > 0 ? token : null
+    new Entry(service, account).deletePassword()
   } catch {
-    return null
+    /* ignore */
   }
 }
 
 // ---------------------------------------------------------------------------
-// Client initialization
+// Token provider (mutex + TTL + keyring)
 // ---------------------------------------------------------------------------
 
-const GITHUB_CLIENT_ID = process.env.AI_TOOLS_GITHUB_CLIENT_ID ?? 'Iv1.placeholder'
-
-/** Lazy-initialized singleton client. */
-let _client: Octokit | null = null
+export interface TokenProviderOptions {
+  /** Keyring service name (default: arustydev/agents/github-token) */
+  service?: string
+  /** Keyring account name (default: github.com) */
+  account?: string
+  /** Override token source for testing (replaces device flow) */
+  tokenSource?: () => Promise<string>
+  /** Token TTL in ms (default: 55 minutes) */
+  ttlMs?: number
+}
 
 /**
- * Get an authenticated Octokit client.
+ * Mutex-guarded GitHub token provider.
  *
- * Tries auth sources in order:
- * 1. Cached token file
- * 2. GitHub CLI (`gh auth token`)
- * 3. Device Flow OAuth (interactive)
+ * Priority chain:
+ * 1. GITHUB_TOKEN env var (CI override) -- checked every call, never cached
+ * 2. @napi-rs/keyring cached token (if not expired)
+ * 3. @octokit/auth-oauth-device flow -> stores in keyring on success
  *
- * The obtained token is cached for future use.
+ * Concurrent callers: first triggers generation, others await the same Promise.
  */
-export async function getClient(): Promise<Octokit> {
-  if (_client) return _client
+export class GitHubTokenProvider {
+  private readonly service: string
+  private readonly account: string
+  private readonly ttlMs: number
+  private readonly tokenSource: () => Promise<string>
 
-  // 1. Try cached token
-  let token = getCachedToken()
+  /** In-memory cache for the current process */
+  private cached: StoredToken | null = null
+  /** Mutex: pending refresh promise (first caller creates, others await) */
+  private pending: Promise<string> | null = null
 
-  // 2. Try gh CLI
-  if (!token) {
-    token = await getGhToken()
-    if (token) {
-      cacheToken(token)
+  constructor(opts: TokenProviderOptions = {}) {
+    this.service = opts.service ?? KEYRING_SERVICE
+    this.account = opts.account ?? 'github.com'
+    this.ttlMs = opts.ttlMs ?? TOKEN_TTL_MS
+    this.tokenSource = opts.tokenSource ?? (() => performDeviceFlow())
+  }
+
+  /**
+   * Get a valid GitHub token.
+   *
+   * - Returns immediately if GITHUB_TOKEN env var is set
+   * - Returns cached token if not expired
+   * - Otherwise triggers refresh (with mutex for concurrent callers)
+   */
+  async getToken(): Promise<string> {
+    // Priority 1: env var override (always checked, never cached)
+    const envToken = process.env.GITHUB_TOKEN
+    if (envToken) return envToken
+
+    // Priority 2: in-memory cache
+    if (this.cached && Date.now() < this.cached.expiresAt) {
+      return this.cached.token
+    }
+
+    // Priority 3: keyring cache
+    const stored = readKeyring(this.service, this.account)
+    if (stored && Date.now() < stored.expiresAt) {
+      this.cached = stored
+      return stored.token
+    }
+
+    // Priority 4: refresh (mutex-guarded)
+    if (this.pending) return this.pending
+
+    this.pending = this.refresh()
+    try {
+      return await this.pending
+    } finally {
+      this.pending = null
     }
   }
 
-  // 3. Fall back to Device Flow
-  if (!token) {
-    token = await performDeviceFlow()
-    cacheToken(token)
+  /** Clear cached token (forces re-auth on next getToken call) */
+  invalidate(): void {
+    this.cached = null
+    deleteKeyring(this.service, this.account)
   }
 
-  _client = new Octokit({ auth: token })
-  return _client
+  private async refresh(): Promise<string> {
+    const token = await this.tokenSource()
+    const state: StoredToken = {
+      token,
+      expiresAt: Date.now() + this.ttlMs,
+    }
+    this.cached = state
+    writeKeyring(this.service, this.account, state)
+    return token
+  }
 }
 
+// ---------------------------------------------------------------------------
+// Device flow
+// ---------------------------------------------------------------------------
+
 /**
- * Perform OAuth Device Flow authentication.
+ * Perform OAuth Device Flow using the arustydev-agents GitHub App.
  * Prompts the user to visit a URL and enter a code.
  */
 async function performDeviceFlow(): Promise<string> {
   const auth = createOAuthDeviceAuth({
     clientType: 'oauth-app',
     clientId: GITHUB_CLIENT_ID,
-    scopes: ['repo'],
+    scopes: ['public_repo'],
     onVerification(verification) {
-      console.log('\nGitHub authentication required.')
-      console.log(`Open: ${verification.verification_uri}`)
-      console.log(`Enter code: ${verification.user_code}\n`)
+      process.stderr.write('\n')
+      process.stderr.write('GitHub authentication required.\n')
+      process.stderr.write(`Open: ${verification.verification_uri}\n`)
+      process.stderr.write(`Enter code: ${verification.user_code}\n`)
+      process.stderr.write('\n')
     },
   })
 
@@ -164,11 +210,50 @@ async function performDeviceFlow(): Promise<string> {
   return token
 }
 
+// ---------------------------------------------------------------------------
+// Singleton provider + Octokit client
+// ---------------------------------------------------------------------------
+
+/** Global token provider singleton */
+const _provider = new GitHubTokenProvider()
+
+/** Lazy-initialized Octokit client */
+let _client: Octokit | null = null
+let _clientToken: string | null = null
+
+/**
+ * Get an authenticated Octokit client.
+ *
+ * Uses the GitHubTokenProvider singleton:
+ * GITHUB_TOKEN env -> keyring cache -> device flow (mutex-guarded)
+ *
+ * Recreates the client if the token has been refreshed since last call.
+ */
+export async function getClient(): Promise<Octokit> {
+  const token = await _provider.getToken()
+
+  // Reuse existing client if token hasn't changed
+  if (_client && token === _clientToken) return _client
+
+  // Token changed (refreshed) or first call -- create new client
+  _client = new Octokit({ auth: token })
+  _clientToken = token
+  return _client
+}
+
 /**
  * Reset the client singleton. Intended for tests only.
  */
 export function resetClient(): void {
   _client = null
+  _clientToken = null
+}
+
+/**
+ * Get the token provider singleton (for testing or direct access).
+ */
+export function getTokenProvider(): GitHubTokenProvider {
+  return _provider
 }
 
 // ---------------------------------------------------------------------------
