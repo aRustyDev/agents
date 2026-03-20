@@ -1695,6 +1695,74 @@ export default defineCommand({
             process.exit(EXIT.OK)
           },
         }),
+        stale: defineCommand({
+          meta: {
+            name: 'stale',
+            description: 'Find analyzed skills with upstream content changes',
+          },
+          args: {
+            ...globalArgs,
+            limit: {
+              type: 'string',
+              description: 'Max entries to check (default: 100)',
+              default: '100',
+            },
+            concurrency: {
+              type: 'string',
+              description: 'Parallel API requests (default: 5)',
+              default: '5',
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            const { identifyStaleEntries, fetchUpstreamHashes } = await import(
+              '../lib/catalog-stale'
+            )
+            const allEntries = readCatalog(
+              catalogPath
+            ) as import('../lib/catalog').CatalogEntryWithTier1[]
+            const analyzed = allEntries.filter(
+              (e) => e.treeSha && e.wordCount && e.availability === 'available'
+            )
+            const limit = parseInt(args.limit as string, 10) || 100
+            const concurrency = parseInt(args.concurrency as string, 10) || 5
+            const toCheck = analyzed.slice(0, limit)
+
+            out.info(`Checking ${toCheck.length} analyzed skills against upstream...`)
+
+            const upstreamHashes = await fetchUpstreamHashes(toCheck, { concurrency })
+            const results = identifyStaleEntries(toCheck, upstreamHashes)
+            const stale = results.filter((r) => r.status === 'stale')
+
+            if (args.json) {
+              out.raw({ checked: toCheck.length, stale: stale.length, results: stale })
+            } else {
+              out.info(`Checked: ${results.length}, Stale: ${stale.length}`)
+              for (const r of stale) {
+                out.info(
+                  `  ${r.source}@${r.skill} (local: ${r.localHash?.slice(0, 16)}... remote: ${r.remoteHash?.slice(0, 16)}...)`
+                )
+              }
+              if (stale.length > 0) {
+                out.info(
+                  '\nRe-analyze stale skills with: just agents skill catalog analyze --force'
+                )
+              }
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
       },
     }),
 
