@@ -5,6 +5,18 @@
  * the npx-skills shell-out in the analyze pipeline.
  */
 
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import {
+  computeContentHash,
+  computeFileCount,
+  computeHeadingTree,
+  computeSectionCount,
+  computeWordCount,
+  type Tier1ErrorType,
+} from './catalog'
+import { cloneRepo, type GitCloneError } from './git'
+import { discoverSkills } from './skill-discovery'
 import {
   detectGitProtocol,
   type GitProtocol,
@@ -16,6 +28,10 @@ import { CliError, err, ok, type Result } from './types'
 
 /** Well-known subdirectory prefixes where skills may live in a repo. */
 export const SKILL_LOOKUP_DIRS = ['', 'skills/', 'context/skills/', '.claude/skills/']
+
+/** Build full SKILL.md lookup paths for a given skill name. */
+const SKILL_LOOKUP_PATHS = (skillName: string) =>
+  SKILL_LOOKUP_DIRS.map((prefix) => `${prefix}${skillName}/SKILL.md`)
 
 /** Validated catalog source with resolved clone URL. */
 export interface CatalogSource {
@@ -72,4 +88,165 @@ export function validateCatalogSource(
     subpath: parsed.value.subpath,
     skillFilter: parsed.value.skillFilter,
   })
+}
+
+// ---------------------------------------------------------------------------
+// downloadSkill types
+// ---------------------------------------------------------------------------
+
+export interface SkillDownloadResult {
+  path: string | null
+  error?: string
+  errorType?: Tier1ErrorType
+  errorDetail?: string
+  errorCode?: number
+  contentHash?: string
+  wordCount?: number
+  sectionCount?: number
+  fileCount?: number
+  headingTree?: Array<{ depth: number; title: string }>
+  /** Parsed frontmatter name (from discovery). */
+  discoveredName?: string
+  /** Parsed frontmatter description. */
+  discoveredDescription?: string
+}
+
+export interface DownloadOptions {
+  /** Override clone with a local directory (for testing). */
+  localOverride?: string
+  /** AbortSignal for cancellation. */
+  signal?: AbortSignal
+  /** Clone timeout in ms (default: 60000). */
+  timeout?: number
+}
+
+// ---------------------------------------------------------------------------
+// downloadSkill implementation
+// ---------------------------------------------------------------------------
+
+/** Resolve the search directory: use localOverride or clone the repo. */
+async function resolveSearchDir(
+  validated: CatalogSource,
+  opts: DownloadOptions
+): Promise<Result<{ searchDir: string; cleanup?: () => Promise<void> }>> {
+  if (opts.localOverride) {
+    return ok({ searchDir: opts.localOverride })
+  }
+
+  const cloneResult = await cloneRepo(validated.cloneUrl, validated.ref)
+  if (!cloneResult.ok) {
+    const gitErr = cloneResult.error as GitCloneError
+    return err(
+      new CliError(
+        `clone failed: ${gitErr.message}`,
+        gitErr.isTimeout ? 'E_CLONE_TIMEOUT' : 'E_CLONE_FAILED',
+        gitErr.hint
+      )
+    )
+  }
+  return ok({ searchDir: cloneResult.value.tempDir, cleanup: cloneResult.value.cleanup })
+}
+
+/** Discover skills and find a specific one by name, with well-known path fallback. */
+async function findSkillInDir(
+  searchDir: string,
+  skill: string,
+  source: string
+): Promise<SkillDownloadResult> {
+  const discovered = await discoverSkills(searchDir)
+  if (!discovered.ok) {
+    return {
+      path: null,
+      error: `discovery failed: ${discovered.error.message}`,
+      errorType: 'download_failed',
+      errorDetail: discovered.error.hint ?? discovered.error.message,
+    }
+  }
+
+  const match = discovered.value.find((s) => s.name.toLowerCase() === skill.toLowerCase())
+
+  if (match) {
+    const result = computeResult(match.path, join(match.path, '..'))
+    result.discoveredName = match.name
+    result.discoveredDescription = match.frontmatter.description
+    return result
+  }
+
+  // Fallback: look for SKILL.md in well-known paths
+  for (const p of SKILL_LOOKUP_PATHS(skill).map((rel) => join(searchDir, rel))) {
+    if (existsSync(p)) {
+      return computeResult(p, join(p, '..'))
+    }
+  }
+
+  const names = discovered.value
+    .map((s) => s.name)
+    .join(', ')
+    .slice(0, 200)
+  return {
+    path: null,
+    error: `skill "${skill}" not found in ${source} (${discovered.value.length} skills discovered: ${names})`,
+    errorType: 'download_failed',
+    errorDetail: 'SKILL.md not found by discovery or direct path lookup',
+  }
+}
+
+/**
+ * Download and analyze a single skill from a catalog entry.
+ *
+ * Flow:
+ * 1. Validate source with parseSource()
+ * 2. Clone repo (or use localOverride)
+ * 3. Discover SKILL.md via discoverSkills()
+ * 4. Compute mechanical fields
+ *
+ * Never throws -- all errors returned in the result.
+ */
+export async function downloadSkill(
+  source: string,
+  skill: string,
+  opts: DownloadOptions
+): Promise<SkillDownloadResult> {
+  // Step 1: Validate source
+  const validated = validateCatalogSource(source)
+  if (!validated.ok) {
+    return {
+      path: null,
+      error: validated.error.message,
+      errorType: 'source_invalid',
+      errorDetail: validated.error.hint ?? validated.error.message,
+    }
+  }
+
+  // Step 2: Get the skill directory
+  const resolved = await resolveSearchDir(validated.value, opts)
+  if (!resolved.ok) {
+    const isTimeout = resolved.error.code === 'E_CLONE_TIMEOUT'
+    return {
+      path: null,
+      error: resolved.error.message,
+      errorType: isTimeout ? 'download_timeout' : 'download_failed',
+      errorDetail: resolved.error.hint ?? resolved.error.message,
+    }
+  }
+
+  try {
+    // Step 3+4: Discover and compute
+    return await findSkillInDir(resolved.value.searchDir, skill, source)
+  } finally {
+    if (resolved.value.cleanup) await resolved.value.cleanup()
+  }
+}
+
+/** Read SKILL.md and compute all mechanical analysis fields. */
+function computeResult(skillMdPath: string, skillDir: string): SkillDownloadResult {
+  const content = readFileSync(skillMdPath, 'utf8')
+  return {
+    path: skillMdPath,
+    contentHash: computeContentHash(content),
+    wordCount: computeWordCount(content),
+    sectionCount: computeSectionCount(content),
+    fileCount: computeFileCount(skillDir),
+    headingTree: computeHeadingTree(content),
+  }
 }
