@@ -7,6 +7,9 @@
  * 3. @octokit/auth-oauth-device flow (interactive)
  */
 
+import { existsSync, readFileSync, unlinkSync } from 'node:fs'
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 import { Entry } from '@napi-rs/keyring'
 import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
 import { Octokit } from '@octokit/core'
@@ -89,6 +92,56 @@ function deleteKeyring(service: string, account: string): void {
 }
 
 // ---------------------------------------------------------------------------
+// Legacy token migration
+// ---------------------------------------------------------------------------
+
+const LEGACY_TOKEN_PATH = join(homedir(), '.config', 'ai-tools', 'github-token')
+
+/**
+ * One-time migration: if the old file-based token exists, move it to keyring.
+ * Called once on first getToken() if the keyring is empty.
+ */
+async function migrateLegacyToken(service: string, account: string): Promise<string | null> {
+  try {
+    if (!existsSync(LEGACY_TOKEN_PATH)) return null
+    const token = readFileSync(LEGACY_TOKEN_PATH, 'utf-8').trim()
+    if (!token) return null
+
+    // Validate the token is still working before caching with fresh TTL
+    try {
+      const testClient = new Octokit({ auth: token })
+      await testClient.request('GET /rate_limit')
+    } catch {
+      process.stderr.write('[github] Legacy token is expired or invalid — skipping migration\n')
+      try {
+        unlinkSync(LEGACY_TOKEN_PATH)
+      } catch {
+        /* ignore */
+      }
+      return null
+    }
+
+    // Token is valid — store in keyring
+    writeKeyring(service, account, {
+      token,
+      expiresAt: Date.now() + TOKEN_TTL_MS,
+    })
+
+    // Delete the old file
+    try {
+      unlinkSync(LEGACY_TOKEN_PATH)
+    } catch {
+      /* ignore */
+    }
+
+    process.stderr.write('[github] Migrated token from file cache to system keychain\n')
+    return token
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Token provider (mutex + TTL + keyring)
 // ---------------------------------------------------------------------------
 
@@ -153,6 +206,13 @@ export class GitHubTokenProvider {
     if (stored && Date.now() < stored.expiresAt) {
       this.cached = stored
       return stored.token
+    }
+
+    // Priority 3.5: migrate legacy file-based token
+    const migrated = await migrateLegacyToken(this.service, this.account)
+    if (migrated) {
+      this.cached = { token: migrated, expiresAt: Date.now() + this.ttlMs }
+      return migrated
     }
 
     // Priority 4: refresh (mutex-guarded)
