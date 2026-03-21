@@ -65,6 +65,7 @@ Floorplan
 flowgpt
 forceatlas
 FrancyJGLisboa
+Ftest
 getpid
 gitea
 Gitea
@@ -111,6 +112,7 @@ mihaelamj
 modelcontextprotocol
 monorepo
 mousemovebody
+myns
 myproject
 myskill
 neuromorphic
@@ -120,6 +122,7 @@ obra
 octocat
 oldhash
 ollama
+onlynamespace
 opto
 orbstack
 overclaiming
@@ -216,6 +219,7 @@ ViewModel
 vijaythecoder
 voltagent
 Wassette
+wdispatch
 webfetch
 websearch
 Wextra

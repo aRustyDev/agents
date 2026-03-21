@@ -8,6 +8,7 @@ anndata
 ANOVA
 arcname
 ARIMA
+artefacts
 ASGI
 astral
 asyncio
@@ -40,6 +41,7 @@ Columnstore
 configmap
 constexpr
 COSO
+coterm
 cppcheck
 crawlability
 CRTP
@@ -57,6 +59,7 @@ dotenvy
 dunder
 Ecto
 Elementor
+enconvo
 escriptize
 explainability
 Explainability
@@ -98,6 +101,7 @@ ldflags
 Leiningen
 libcluster
 libexec
+librechat
 linkcolor
 livecheck
 lycheecache
@@ -124,12 +128,14 @@ MVVM
 myapp
 mybinary
 nanospinner
+napi
 networkidle
 neuropixels
 noexcept
 nohash
 NUMA
 objc
+opencode
 opendevin
 openmetadata
 opentf
@@ -158,10 +164,12 @@ rebar
 replit
 reqwest
 rlib
+rooveterinaryinc
 RSAT
 Rubo
 rubocop
 rvben
+saoudrizwan
 Savepoint
 searxng
 SFINAE
@@ -176,6 +184,7 @@ structopt
 subclassing
 Sucuri
 supabase
+superinterface
 tabnine
 templater
 texlive
@@ -192,6 +201,7 @@ webextension
 webstore
 Werror
 wikilinks
+witsy
 Wordfence
 WPML
 WSGI
@@ -200,4 +210,3 @@ xelatex
 xetex
 Yesod
 zipf
-napi

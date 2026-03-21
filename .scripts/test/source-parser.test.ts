@@ -553,3 +553,46 @@ describe('detectGitProtocol', () => {
     expect(['ssh', 'https']).toContain(detectGitProtocol())
   })
 })
+
+// ---------------------------------------------------------------------------
+// parseSource — smithery URIs
+// ---------------------------------------------------------------------------
+
+describe('parseSource — smithery URIs', () => {
+  test('parses smithery://namespace/slug', () => {
+    const result = parseSource('smithery://myns/postgres-mcp')
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.type).toBe('smithery')
+    expect(result.value.namespace).toBe('myns')
+    expect(result.value.subpath).toBe('postgres-mcp')
+    expect(result.value.url).toContain('smithery.ai')
+  })
+
+  test('parses smithery://org/my-skill', () => {
+    const result = parseSource('smithery://org/my-skill')
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.type).toBe('smithery')
+    expect(result.value.namespace).toBe('org')
+    expect(result.value.subpath).toBe('my-skill')
+  })
+
+  test('rejects smithery:// without slug', () => {
+    const result = parseSource('smithery://onlynamespace')
+    // Does not match smithery regex (requires namespace/slug) and falls
+    // through to the catch-all error since it matches no other pattern.
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('E_INVALID_SOURCE')
+  })
+
+  test('rejects smithery:// with too many segments', () => {
+    const result = parseSource('smithery://ns/slug/extra')
+    // Does not match smithery regex (exactly two path segments required)
+    // and falls through to the catch-all error.
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.code).toBe('E_INVALID_SOURCE')
+  })
+})

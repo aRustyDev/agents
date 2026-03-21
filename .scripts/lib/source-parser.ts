@@ -11,7 +11,7 @@ import { CliError, err, ok, type Result } from './types'
 // Types & schemas
 // ---------------------------------------------------------------------------
 
-export const SourceType = v.picklist(['github', 'gitlab', 'git', 'local', 'well-known'])
+export const SourceType = v.picklist(['github', 'gitlab', 'git', 'local', 'well-known', 'smithery'])
 export type SourceType = v.InferOutput<typeof SourceType>
 
 export const ParsedSource = v.object({
@@ -21,6 +21,7 @@ export const ParsedSource = v.object({
   subpath: v.optional(v.string()),
   skillFilter: v.optional(v.string()),
   localPath: v.optional(v.string()),
+  namespace: v.optional(v.string()),
 })
 export type ParsedSource = v.InferOutput<typeof ParsedSource>
 
@@ -33,6 +34,7 @@ const GITHUB_TREE_RE = /^(?:https?:\/\/)?github\.com\/([^/]+\/[^/]+)\/tree\/([^/
 const GITLAB_TREE_RE = /^(?:https?:\/\/)?gitlab\.com\/([^/]+\/[^/]+)\/-\/tree\/([^/]+)(?:\/(.+))?$/
 const SSH_RE = /^git@[^:]+:.+\.git$/
 const HTTPS_GIT_RE = /^https?:\/\/.+\.git$/
+const SMITHERY_RE = /^smithery:\/\/([^/]+)\/([^/]+)$/
 const LOCAL_RE = /^[./]/
 
 // ---------------------------------------------------------------------------
@@ -49,6 +51,7 @@ const LOCAL_RE = /^[./]/
  * - SSH URL: `git@host:repo.git`
  * - HTTPS .git URL: `https://host/repo.git`
  * - Local path: `./path` or `../path` or `/absolute`
+ * - Smithery URI: `smithery://namespace/slug`
  * - Well-known URL: any other `https://` or `http://` URL
  */
 export function parseSource(source: string): Result<ParsedSource> {
@@ -111,6 +114,17 @@ export function parseSource(source: string): Result<ParsedSource> {
     }
     if (short[4]) parsed.skillFilter = short[4]
     return ok(parsed)
+  }
+
+  // Smithery URI: smithery://namespace/slug
+  const smithery = SMITHERY_RE.exec(trimmed)
+  if (smithery) {
+    return ok({
+      type: 'smithery' as const,
+      url: `https://smithery.ai/server/${smithery[1]}/${smithery[2]}`,
+      namespace: smithery[1],
+      subpath: smithery[2],
+    })
   }
 
   // Well-known HTTPS URL (no .git suffix)

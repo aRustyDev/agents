@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { afterEach, describe, expect, test } from 'bun:test'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { SearchError, searchSkillsAPI } from '../lib/skill-search-api'
@@ -44,7 +44,11 @@ describe('skills-sh backend', () => {
               description: 'Issue tracker',
               installs: 42,
             },
-            { name: 'terraform', repo: 'hashicorp/terraform', url: 'https://example.com' },
+            {
+              name: 'terraform',
+              repo: 'hashicorp/terraform',
+              url: 'https://example.com',
+            },
           ]),
           { status: 200, headers: { 'content-type': 'application/json' } }
         )
@@ -148,10 +152,15 @@ describe('limit clamping', () => {
       const u = new URL(typeof url === 'string' ? url : (url as Request).url)
       const limit = Number(u.searchParams.get('limit'))
       expect(limit).toBe(1)
-      return new Response(JSON.stringify([{ name: 'a', source: 'x' }]), { status: 200 })
+      return new Response(JSON.stringify([{ name: 'a', source: 'x' }]), {
+        status: 200,
+      })
     })
 
-    const results = await searchSkillsAPI('test', { source: 'skills-sh', limit: 0 })
+    const results = await searchSkillsAPI('test', {
+      source: 'skills-sh',
+      limit: 0,
+    })
     expect(results).toHaveLength(1)
   })
 
@@ -163,7 +172,10 @@ describe('limit clamping', () => {
       return new Response(JSON.stringify([]), { status: 200 })
     })
 
-    const results = await searchSkillsAPI('test', { source: 'skills-sh', limit: 500 })
+    const results = await searchSkillsAPI('test', {
+      source: 'skills-sh',
+      limit: 500,
+    })
     expect(results.length).toBeLessThanOrEqual(100)
   })
 
@@ -175,7 +187,10 @@ describe('limit clamping', () => {
       return new Response(JSON.stringify([]), { status: 200 })
     })
 
-    const results = await searchSkillsAPI('test', { source: 'skills-sh', limit: NaN })
+    const results = await searchSkillsAPI('test', {
+      source: 'skills-sh',
+      limit: NaN,
+    })
     expect(results).toEqual([])
   })
 })
@@ -203,8 +218,16 @@ describe('empty query', () => {
 describe('catalog backend', () => {
   test('matches case-insensitively on name', async () => {
     const catalogPath = makeCatalog([
-      JSON.stringify({ name: 'TypeScript-Pro', source: 'org/ts', description: 'TS skill' }),
-      JSON.stringify({ name: 'golang-dev', source: 'org/go', description: 'Go skill' }),
+      JSON.stringify({
+        name: 'TypeScript-Pro',
+        source: 'org/ts',
+        description: 'TS skill',
+      }),
+      JSON.stringify({
+        name: 'golang-dev',
+        source: 'org/go',
+        description: 'Go skill',
+      }),
     ])
 
     const results = await searchSkillsAPI('typescript', {
@@ -237,7 +260,11 @@ describe('catalog backend', () => {
   test('skips malformed JSON lines', async () => {
     const catalogPath = makeCatalog([
       '{ broken json',
-      JSON.stringify({ name: 'valid-skill', source: 'org/repo', description: 'OK' }),
+      JSON.stringify({
+        name: 'valid-skill',
+        source: 'org/repo',
+        description: 'OK',
+      }),
       '',
       'not json at all',
     ])
@@ -261,7 +288,11 @@ describe('catalog backend', () => {
 
   test('respects limit', async () => {
     const lines = Array.from({ length: 20 }, (_, i) =>
-      JSON.stringify({ name: `skill-${i}`, source: 'org/repo', description: `match skill-${i}` })
+      JSON.stringify({
+        name: `skill-${i}`,
+        source: 'org/repo',
+        description: `match skill-${i}`,
+      })
     )
     const catalogPath = makeCatalog(lines)
 
@@ -272,6 +303,111 @@ describe('catalog backend', () => {
     })
 
     expect(results).toHaveLength(5)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// page parameter
+// ---------------------------------------------------------------------------
+
+describe('page parameter', () => {
+  afterEach(restoreFetch)
+
+  test('catalog backend supports page parameter', async () => {
+    const lines = Array.from({ length: 5 }, (_, i) =>
+      JSON.stringify({
+        name: `skill-${i}`,
+        source: 'org/repo',
+        description: `match skill-${i}`,
+      })
+    )
+    const catalogPath = makeCatalog(lines)
+
+    const results = await searchSkillsAPI('skill', {
+      source: 'catalog',
+      catalogPath,
+      limit: 2,
+      page: 2,
+    })
+
+    expect(results).toHaveLength(2)
+    expect(results[0].name).toBe('skill-2')
+    expect(results[1].name).toBe('skill-3')
+  })
+
+  test('page defaults to 1 when not specified', async () => {
+    const lines = Array.from({ length: 5 }, (_, i) =>
+      JSON.stringify({
+        name: `skill-${i}`,
+        source: 'org/repo',
+        description: `match skill-${i}`,
+      })
+    )
+    const catalogPath = makeCatalog(lines)
+
+    const results = await searchSkillsAPI('skill', {
+      source: 'catalog',
+      catalogPath,
+      limit: 2,
+    })
+
+    expect(results).toHaveLength(2)
+    expect(results[0].name).toBe('skill-0')
+    expect(results[1].name).toBe('skill-1')
+  })
+
+  test('page beyond available results returns empty', async () => {
+    const lines = Array.from({ length: 3 }, (_, i) =>
+      JSON.stringify({
+        name: `skill-${i}`,
+        source: 'org/repo',
+        description: `match skill-${i}`,
+      })
+    )
+    const catalogPath = makeCatalog(lines)
+
+    const results = await searchSkillsAPI('skill', {
+      source: 'catalog',
+      catalogPath,
+      limit: 2,
+      page: 5,
+    })
+
+    expect(results).toEqual([])
+  })
+
+  test('skills-sh backend passes page param when > 1', async () => {
+    mockFetch(async (url) => {
+      const u = new URL(typeof url === 'string' ? url : (url as Request).url)
+      const page = u.searchParams.get('page')
+      expect(page).toBe('3')
+      return new Response(JSON.stringify([{ name: 'a', source: 'x' }]), {
+        status: 200,
+      })
+    })
+
+    const results = await searchSkillsAPI('test', {
+      source: 'skills-sh',
+      page: 3,
+    })
+    expect(results).toHaveLength(1)
+  })
+
+  test('skills-sh backend omits page param when 1', async () => {
+    mockFetch(async (url) => {
+      const u = new URL(typeof url === 'string' ? url : (url as Request).url)
+      const page = u.searchParams.get('page')
+      expect(page).toBeNull()
+      return new Response(JSON.stringify([{ name: 'a', source: 'x' }]), {
+        status: 200,
+      })
+    })
+
+    const results = await searchSkillsAPI('test', {
+      source: 'skills-sh',
+      page: 1,
+    })
+    expect(results).toHaveLength(1)
   })
 })
 

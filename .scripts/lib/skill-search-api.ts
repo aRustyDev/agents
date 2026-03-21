@@ -12,6 +12,7 @@
  */
 
 import { join } from 'node:path'
+import { clampLimit, clampPage } from './component/pagination'
 import { checkHealth, createClient, searchKeyword } from './meilisearch'
 import { readText } from './runtime'
 import type { SearchBackendType, SkillSearchResult } from './schemas'
@@ -37,6 +38,8 @@ export class SearchError extends CliError {
 export interface SearchOptions {
   /** Maximum number of results to return (1..100, default 10). */
   limit?: number
+  /** Page number for paginated results (>= 1, default 1). */
+  page?: number
   /** Which backend to use (`auto` tries all in order). */
   source?: SearchBackendType
   /** Cancellation signal forwarded to network requests. */
@@ -50,17 +53,6 @@ export interface SearchOptions {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Clamp `limit` into the safe range [1, 100], defaulting to 10. */
-function clampLimit(limit: number | undefined): number {
-  const raw = limit ?? 10
-  if (Number.isNaN(raw)) return 10
-  return Math.max(1, Math.min(100, raw))
-}
-
-// ---------------------------------------------------------------------------
 // Backend: skills.sh
 // ---------------------------------------------------------------------------
 
@@ -70,19 +62,25 @@ const SKILLS_SH_TIMEOUT_MS = 3_000
 async function searchSkillsSh(
   query: string,
   limit: number,
+  page: number,
   signal?: AbortSignal
 ): Promise<Result<SkillSearchResult[]>> {
   try {
     const url = new URL(SKILLS_SH_BASE)
     url.searchParams.set('q', query)
     url.searchParams.set('limit', String(limit))
+    if (page > 1) {
+      url.searchParams.set('page', String(page))
+    }
 
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), SKILLS_SH_TIMEOUT_MS)
 
     // Combine caller's signal with our timeout
     if (signal) {
-      signal.addEventListener('abort', () => controller.abort(), { once: true })
+      signal.addEventListener('abort', () => controller.abort(), {
+        once: true,
+      })
     }
 
     let response: Response
@@ -169,6 +167,7 @@ async function searchMeili(query: string, limit: number): Promise<Result<SkillSe
 async function searchCatalog(
   query: string,
   limit: number,
+  page: number,
   catalogPath?: string
 ): Promise<Result<SkillSearchResult[]>> {
   const path = catalogPath ?? join(process.cwd(), '.catalog.ndjson')
@@ -181,7 +180,9 @@ async function searchCatalog(
     }
 
     const lowerQuery = query.toLowerCase()
+    const skip = (page - 1) * limit
     const results: SkillSearchResult[] = []
+    let matched = 0
 
     for (const line of content.split('\n')) {
       const trimmed = line.trim()
@@ -202,6 +203,8 @@ async function searchCatalog(
         name.toLowerCase().includes(lowerQuery) ||
         description.toLowerCase().includes(lowerQuery)
       ) {
+        matched++
+        if (matched <= skip) continue
         results.push({
           name,
           source,
@@ -226,16 +229,17 @@ async function searchCatalog(
 async function searchBackend(
   query: string,
   limit: number,
+  page: number,
   backend: SearchBackend,
   opts?: SearchOptions
 ): Promise<Result<SkillSearchResult[]>> {
   switch (backend) {
     case 'skills-sh':
-      return searchSkillsSh(query, limit, opts?.signal)
+      return searchSkillsSh(query, limit, page, opts?.signal)
     case 'meilisearch':
       return searchMeili(query, limit)
     case 'catalog':
-      return searchCatalog(query, limit, opts?.catalogPath)
+      return searchCatalog(query, limit, page, opts?.catalogPath)
   }
 }
 
@@ -260,16 +264,17 @@ export async function searchSkillsAPI(
   if (!query.trim()) return []
 
   const limit = clampLimit(opts?.limit)
+  const page = clampPage(opts?.page)
   const source: SearchBackendType = opts?.source ?? 'auto'
 
   if (source !== 'auto') {
-    const result = await searchBackend(query, limit, source, opts)
+    const result = await searchBackend(query, limit, page, source, opts)
     return result.ok ? result.value : []
   }
 
   // Auto mode: try each backend in sequence
   for (const backend of AUTO_CHAIN) {
-    const result = await searchBackend(query, limit, backend, opts)
+    const result = await searchBackend(query, limit, page, backend, opts)
     if (result.ok && result.value.length > 0) {
       return result.value
     }
