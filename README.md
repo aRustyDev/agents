@@ -1,234 +1,144 @@
-# AI Configuration Library
+# Agents — AI Context Library
 
-Shareable source of truth for AI-related configurations: rules, skills, commands, hooks, context, and MCP server definitions.
+Reusable Claude Code components: skills, agents, commands, rules, plugins, MCP server configurations, and a universal component management system.
+
+## Quick Start
+
+```bash
+just init          # Install deps, init knowledge graph, pull embedding model
+just agents --help # CLI tool for component management
+```
 
 ## Architecture
 
-```text
-Project .claude/  ──promote──▶  ai/ (source)  ──build──▶  global (~/.claude/)
-                                    │
-                                    ▼
-                              dotfiles/
-                          (deployment layer)
+```
+context/               Component source of truth
+├── skills/            SKILL.md files (130+)
+├── agents/            Agent definitions (markdown + frontmatter)
+├── commands/          Slash commands (markdown + frontmatter)
+├── rules/             Instruction rules (markdown)
+├── plugins/           Plugin bundles (.claude-plugin/plugin.json)
+├── hooks/             Hook configurations
+├── output-styles/     Output formatting templates
+└── reference/         Reference documentation
+
+.scripts/              TypeScript tooling (Bun + Citty)
+├── bin/agents.ts      CLI entrypoint
+├── commands/          CLI command trees (skill, mcp, component, plugin, ...)
+├── lib/               Library modules
+│   ├── component/     Universal component model (7 providers)
+│   ├── skill-*.ts     Skill lifecycle (add/find/list/outdated/update/remove/info/init)
+│   └── ...            Hash, lockfile, output, runtime, schemas, etc.
+└── test/              bun:test suites (900+ tests)
+
+settings/mcp/          MCP server configurations
+docs/src/adr/          Architecture Decision Records
 ```
 
-This repo contains atomic, reusable components that can be composed into tool-specific configurations based on machine profiles.
+## CLI Commands
 
-## Directory Structure
-
-```text
-ai/
-├── components/          # Atomic, reusable pieces
-│   ├── rules/           # Instruction rules (schema'd JSON, future)
-│   ├── skills/          # Claude Code skills (SKILL.md + files)
-│   ├── commands/        # Slash command templates
-│   ├── hooks/           # Hook definitions
-│   └── context/         # Shared context fragments
-│
-├── profiles/            # Machine/use-case profiles (future)
-│   ├── personal.profile.json
-│   ├── work.profile.json
-│   └── minimal.profile.json
-│
-├── tools/               # Tool-specific output schemas (future)
-│   ├── claude-code/
-│   ├── zed/
-│   ├── claude-desktop/
-│   └── vscode/
-│
-├── mcp/                 # MCP server definitions
-│   ├── global/          # Remote/HTTP MCP servers
-│   └── local/           # Project-scoped MCP templates
-│
-├── schemas/             # JSON schemas for validation (future)
-├── build/               # Build/compile tooling (future)
-├── dist/                # Generated output (gitignored)
-│
-└── legacy/              # Previous content (migrating from)
-```
-
-## Usage
-
-### As a Submodule (Recommended)
+### Skill Management
 
 ```bash
-# In your dotfiles repo
-git submodule add git@github.com:aRustyDev/agents.git ai/
-git submodule update --init --recursive
+just agents skill add owner/repo@skill   # Install a skill
+just agents skill find "kubernetes"       # Search registries
+just agents skill list                    # List installed skills
+just agents skill list --agent claude-code # Filter by agent
+just agents skill outdated                # Check for updates
+just agents skill update                  # Update outdated skills
+just agents skill remove skill-name       # Remove a skill
+just agents skill info skill-name         # Detailed metadata
+just agents skill init my-skill           # Scaffold new skill
 ```
 
-### Installing Components
-
-For now, manually copy components to target locations:
+### MCP Server Management
 
 ```bash
-# Claude Code
-cp -r ai/components/commands/* ~/.claude/commands/
-cp -r ai/components/skills/* ~/.claude/skills/
-cp -r ai/components/rules/* ~/.claude/rules/
+just agents mcp search "postgres"                        # Search Smithery registry
+just agents mcp add smithery://ns/server --client cursor  # Add to client config
+just agents mcp list --client claude-desktop              # List in client config
+just agents mcp remove server-name --client cursor        # Remove from client
+just agents mcp info ns/server-name                       # Server details
+just agents mcp publish --name ns/server --url https://...# Publish to Smithery
 ```
 
-Future: Use `just ai-build` and `just ai-deploy` from dotfiles repo.
+### Cross-Type Component Search
+
+```bash
+just agents component search "kubernetes"   # Search all types
+just agents component list                  # List all installed
+just agents component list --type agent     # Filter by type
+```
+
+### Other Commands
+
+```bash
+just agents plugin check <name>    # Validate a plugin
+just agents skill validate <name>  # Validate skill frontmatter
+just kg-search "query"             # Semantic search (knowledge graph)
+```
+
+## Component Model
+
+All entity types flow through a universal `ComponentProvider` interface:
+
+| Provider | ID | Entity Types | Backend |
+|----------|----|-------------|---------|
+| LocalProvider | `local` | skill | Filesystem (wraps skill-* modules) |
+| LocalAgentProvider | `local-agent` | agent | `context/agents/**/*.md` |
+| LocalPluginProvider | `local-plugin` | plugin | `context/plugins/**/.claude-plugin/` |
+| LocalRuleProvider | `local-rule` | rule | `context/rules/**/*.md` |
+| LocalCommandProvider | `local-command` | command | `context/commands/**/*.md` |
+| LocalOutputStyleProvider | `local-output-style` | output_style | `context/output-styles/**/*.md` |
+| SmitheryProvider | `smithery` | mcp_server | registry.smithery.ai API |
+
+The `ComponentManager` aggregates search across all providers, deduplicates results, and handles pagination.
+
+## AI Client Config Support
+
+MCP servers can be installed to 19 AI client config files:
+
+| Client | Method | Format |
+|--------|--------|--------|
+| Claude Desktop | file | JSON |
+| Claude Code | command | `claude mcp add` |
+| Cursor | file | JSON |
+| Windsurf | file | JSON |
+| VS Code | command | `code --add-mcp` |
+| Cline, Roo Code, Continue, Zed, Goose, OpenCode, ... | file | JSON/YAML/JSONC |
 
 ## Plugin Marketplace
 
-This repo includes a plugin marketplace at `.claude-plugin/marketplace.json` with curated plugin bundles.
-
-### Available Plugins
+Curated plugins at `.claude-plugin/marketplace.json`:
 
 | Plugin | Description |
 |--------|-------------|
-| `homebrew-dev` | Homebrew formula development toolkit |
-| `browser-extension-dev` | Cross-browser extension development (Firefox, Chrome, Safari) |
-| `blog-workflow` | Technical blog post creation workflow |
-| `job-hunting` | Job hunting toolkit (resume, applications, research) |
-| `swiftui-dev` | SwiftUI development with testing and data analytics |
+| `homebrew-dev` | Homebrew formula development |
+| `browser-extension-dev` | Cross-browser extension development |
+| `blog-workflow` | Technical blog post creation |
+| `job-hunting` | Job hunting toolkit |
+| `swiftui-dev` | SwiftUI development |
+| `design-to-code` | Design-to-code conversion |
 
-### Installing a Plugin
+## Dependencies
 
-```bash
-# Clone or add as submodule
-git clone https://github.com/aRustyDev/agents.git ~/ai-plugins
+| Layer | Tool | Config |
+|-------|------|--------|
+| System tools | Homebrew | `brewfile` |
+| TypeScript | Bun | `.scripts/package.json` |
+| Python (KG only) | uv | `pyproject.toml` |
+| Task runner | just | `justfile` |
+| Issue tracking | beads (bd) | `.beads/config.yaml` |
 
-# Copy a plugin to your Claude Code config
-cp -r ~/ai-plugins/context/plugins/homebrew-dev ~/.claude/plugins/
-
-# Or symlink for auto-updates
-ln -s ~/ai-plugins/context/plugins/homebrew-dev ~/.claude/plugins/homebrew-dev
-```
-
-### Adding This Marketplace
-
-To use this marketplace as a plugin source:
-
-1. **Via settings.json** (Claude Code):
-
-```json
-{
-  "pluginMarketplaces": [
-    {
-      "name": "arustydev",
-      "url": "https://raw.githubusercontent.com/aRustyDev/agents/main/.claude-plugin/marketplace.json"
-    }
-  ]
-}
-```
-
-2. **Via ccpm** (Claude Code Plugin Manager):
+## Development
 
 ```bash
-ccpm registry add arustydev https://raw.githubusercontent.com/aRustyDev/agents/main/.claude-plugin/marketplace.json
-ccpm search swiftui
-ccpm install arustydev/swiftui-dev
+just init                          # One-time setup
+cd .scripts && bun test            # Run all tests
+cd .scripts && bun test test/component/  # Component tests only
+just agents skill validate <name>  # Validate a skill
+just agents plugin check <name>    # Validate a plugin
 ```
-
-3. **Via local clone**:
-
-```bash
-# Add to your .claude/settings.json
-{
-  "pluginMarketplaces": [
-    {
-      "name": "arustydev-local",
-      "path": "~/repos/ai/.claude-plugin/marketplace.json"
-    }
-  ]
-}
-```
-
-### Marketplace Schema
-
-Each plugin entry in `marketplace.json` follows this structure:
-
-```json
-{
-  "name": "plugin-name",
-  "source": "./context/plugins/plugin-name",
-  "description": "What the plugin does",
-  "version": "1.0.0",
-  "keywords": ["keyword1", "keyword2"],
-  "license": "MIT",
-  "homepage": "https://docs.arusty.dev/ai/plugins/plugin-name",
-  "repository": "https://github.com/aRustyDev/agents.git"
-}
-```
-
-## Workflow
-
-### 1. Develop in Project
-
-Create/test configs in your project's `.claude/` directory.
-
-### 2. Promote to Source
-
-```bash
-# Future: promote-component script
-cp -r .claude/skills/new-skill/ ~/repos/configs/ai/components/skills/
-cd ~/repos/configs/ai
-git add -A && git commit -m "feat: add new-skill"
-git push
-```
-
-### 3. Deploy to Global
-
-```bash
-# On each machine
-cd ~/repos/configs/dotfiles
-git submodule update --remote ai/
-just install-ai
-```
-
-## Roadmap
-
-- [x] Phase 1: Directory structure and legacy migration
-- [ ] Phase 2: Basic promote/build/deploy workflow
-- [ ] Phase 3: JSON schemas and compilation
-- [ ] Phase 4: Profiles and dynamic MCP config generation
-
-See [Issue #1](https://github.com/aRustyDev/agents/issues/1) for full details.
-
-## Legacy Content
-
-Previous content is preserved in `legacy/` during migration. This includes:
-
-### From arustydev/agents (archived)
-
-- `agents/` - Agent definitions
-
-### From arustydev/prompts (archived)
-
-- `prompts/commands/` - Slash commands (/audit, /plan, /report, etc.)
-- `prompts/processes/` - Workflow processes (CI/CD, code-review, testing)
-- `prompts/core/` - Core patterns (error handling, validation, git operations)
-- `prompts/patterns/` - Development patterns (BDD, TDD, CDD)
-- `prompts/templates/` - Issue, report, and documentation templates
-- `prompts/roles/` - Role definitions (developer levels, security engineer)
-- `prompts/guides/` - Tool usage guides
-- `prompts/knowledge/` - Knowledge bases
-- `prompts/hooks/` - Validation hooks and scripts
-- `prompts/automation/` - Automation scripts
-- `prompts/docs/` - Architecture and planning documentation
-
-### Original legacy
-
-- `commands/` - Slash commands
-- `rules/` - Instruction rules
-- `skills/` - Skill definitions
-- `plugins/` - Various plugins
-- `roles/` - Role definitions
-- `context/` - Context documents
-- And more...
-
-Content will be migrated to the new structure over time. Valuable content can be promoted to `components/` using the `/promote-skill` command or similar workflows.
-
-## Merged Repositories
-
-The following repositories have been archived and merged into this repo:
-
-- **arustydev/agents** → `legacy/agents/`
-- **arustydev/prompts** → `legacy/prompts/`
-
-See `.ai/plans/merge-agents-prompts.md` for the full merge plan and history.
 
 ## License
 
