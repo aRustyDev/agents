@@ -571,11 +571,6 @@ export default defineCommand({
               description: 'Process only retryable failed entries',
               default: false,
             },
-            'legacy-download': {
-              type: 'boolean',
-              description: 'Use legacy npx-skills download path (for rollback)',
-              default: false,
-            },
             'git-protocol': {
               type: 'string',
               description: 'Force git protocol: ssh|https|auto (default: auto)',
@@ -652,61 +647,8 @@ export default defineCommand({
             out.info(`Concurrency: ${concurrency} parallel agents`)
             out.info(`Run ID: ${runId}`)
 
-            /** Create a git worktree for a batch (async), returns worktree path */
+            /** Create a git worktree for a batch using simple-git, returns worktree path */
             async function createWorktree(batchId: number): Promise<string> {
-              const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
-              if (fsExists(wtPath)) {
-                try {
-                  await execAsync(`git worktree unlock ${JSON.stringify(wtPath)}`, {
-                    cwd: PROJECT_ROOT,
-                  })
-                } catch {
-                  /* ignore */
-                }
-                try {
-                  await execAsync(`git worktree remove --force ${JSON.stringify(wtPath)}`, {
-                    cwd: PROJECT_ROOT,
-                  })
-                } catch {
-                  /* ignore */
-                }
-                try {
-                  rmSync(wtPath, { recursive: true, force: true })
-                } catch {
-                  /* ignore */
-                }
-              }
-              await execAsync(`git worktree add --detach ${JSON.stringify(wtPath)} HEAD`, {
-                cwd: PROJECT_ROOT,
-              })
-              return wtPath
-            }
-
-            /** Remove a git worktree (async) */
-            async function removeWorktree(wtPath: string): Promise<void> {
-              try {
-                await execAsync(`git worktree unlock ${JSON.stringify(wtPath)}`, {
-                  cwd: PROJECT_ROOT,
-                })
-              } catch {
-                /* ignore */
-              }
-              try {
-                await execAsync(`git worktree remove --force ${JSON.stringify(wtPath)}`, {
-                  cwd: PROJECT_ROOT,
-                })
-              } catch {
-                /* ignore */
-              }
-              try {
-                rmSync(wtPath, { recursive: true, force: true })
-              } catch {
-                /* ignore */
-              }
-            }
-
-            /** Create a git worktree using simple-git (new path) */
-            async function createWorktreeNew(batchId: number): Promise<string> {
               const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
               const git = createGit(PROJECT_ROOT)
 
@@ -732,8 +674,8 @@ export default defineCommand({
               return wtPath
             }
 
-            /** Remove a git worktree using simple-git (new path) */
-            async function removeWorktreeNew(wtPath: string): Promise<void> {
+            /** Remove a git worktree using simple-git */
+            async function removeWorktree(wtPath: string): Promise<void> {
               const git = createGit(PROJECT_ROOT)
               try {
                 await git.raw(['worktree', 'unlock', wtPath])
@@ -750,133 +692,6 @@ export default defineCommand({
               } catch {
                 /* ignore */
               }
-            }
-
-            interface DownloadResult {
-              path: string | null
-              error?: string
-              errorType?: 'download_failed' | 'download_timeout'
-              errorDetail?: string
-              errorCode?: number
-              // Mechanical compute fields (populated on successful download)
-              contentHash?: string
-              wordCount?: number
-              sectionCount?: number
-              fileCount?: number
-              headingTree?: Array<{ depth: number; title: string }>
-            }
-
-            /**
-             * Pre-download SKILL.md files for a batch (async).
-             * Downloads are sequential within a batch (same worktree) but
-             * batches run concurrently in separate worktrees.
-             * Returns per-skill download results with detailed error info.
-             */
-            async function preDownloadSkills(
-              batch: import('../lib/catalog').CatalogEntry[],
-              wtPath: string
-            ): Promise<Map<string, DownloadResult>> {
-              const results = new Map<string, DownloadResult>()
-              const skillsDir = join(wtPath, '.claude', 'skills')
-
-              for (const entry of batch) {
-                const ref = `${entry.source}@${entry.skill}`
-
-                // Guard: validate source is org/repo format
-                if (!entry.source.match(/^[\w.-]+\/[\w./-]+$/) || entry.source.startsWith('/')) {
-                  results.set(entry.skill, {
-                    path: null,
-                    error: `invalid source format: ${entry.source.slice(0, 100)}`,
-                    errorType: 'download_failed',
-                    errorDetail: 'source is not in org/repo format — corrupt catalog entry',
-                  })
-                  continue
-                }
-
-                try {
-                  await execAsync(`npx -y skills add -y --copy --full-depth ${ref}`, {
-                    cwd: wtPath,
-                    encoding: 'utf8',
-                    timeout: 30_000,
-                  })
-                  const skillDir = join(skillsDir, entry.skill)
-                  const skillMd = join(skillDir, 'SKILL.md')
-                  if (fsExists(skillMd)) {
-                    const content = require('node:fs').readFileSync(skillMd, 'utf8') as string
-                    results.set(entry.skill, {
-                      path: skillMd,
-                      contentHash: computeContentHash(content),
-                      wordCount: computeWordCount(content),
-                      sectionCount: computeSectionCount(content),
-                      fileCount: computeFileCount(skillDir),
-                      headingTree: computeHeadingTree(content),
-                    })
-                  } else {
-                    try {
-                      const { stdout: files } = await execAsync(
-                        `find ${JSON.stringify(skillDir)} -name '*.md' -type f`,
-                        { encoding: 'utf8' }
-                      )
-                      const trimmed = (files as string).trim()
-                      results.set(entry.skill, {
-                        path: trimmed ? trimmed.split('\n')[0] : null,
-                        ...(trimmed
-                          ? {}
-                          : {
-                              error: 'no SKILL.md found in downloaded files',
-                              errorType: 'download_failed' as const,
-                            }),
-                      })
-                    } catch {
-                      results.set(entry.skill, {
-                        path: null,
-                        error: 'skill directory not found after download',
-                        errorType: 'download_failed',
-                      })
-                    }
-                  }
-                } catch (err: unknown) {
-                  const isTimeout =
-                    err instanceof Error &&
-                    (err.message.includes('TIMEOUT') ||
-                      err.message.includes('timed out') ||
-                      err.message.includes('killed'))
-                  const stderr = (err as { stderr?: string })?.stderr ?? ''
-                  const msg = err instanceof Error ? err.message : String(err)
-                  const exitCode = (err as { code?: number })?.code
-                  const combined = `${stderr} ${msg}`.toLowerCase()
-
-                  // Classify the failure reason from stderr/message
-                  const isAuthFailure =
-                    combined.includes('authentication failed') ||
-                    combined.includes('could not read username')
-                  const isNotFound =
-                    combined.includes('not found') ||
-                    combined.includes('404') ||
-                    combined.includes('does not exist')
-                  const isPrivate =
-                    combined.includes('private') ||
-                    combined.includes('permission denied') ||
-                    combined.includes('403')
-
-                  let reason = 'unknown'
-                  if (isTimeout) reason = 'timeout (30s)'
-                  else if (isAuthFailure) reason = 'auth failed (repo may be private or deleted)'
-                  else if (isNotFound) reason = 'repo not found (404)'
-                  else if (isPrivate) reason = 'access denied (private repo)'
-                  else if (stderr) reason = stderr.slice(0, 200)
-                  else reason = msg.slice(0, 200)
-
-                  results.set(entry.skill, {
-                    path: null,
-                    error: `download failed: ${reason}`,
-                    errorType: isTimeout ? 'download_timeout' : 'download_failed',
-                    errorDetail: stderr.slice(0, 500) || msg.slice(0, 500),
-                    errorCode: exitCode,
-                  })
-                }
-              }
-              return results
             }
 
             // Ensure worktree base dir exists
@@ -912,48 +727,36 @@ export default defineCommand({
               }
 
               try {
-                const useLegacy = args['legacy-download'] as boolean
                 const gitProtocol = args['git-protocol'] as string
 
                 // Phase 1: Create worktree and pre-download skills (async)
-                wtPath = useLegacy
-                  ? await createWorktree(batchNum)
-                  : await createWorktreeNew(batchNum)
+                wtPath = await createWorktree(batchNum)
                 out.info(
                   `[${batchNum}/${totalBatches}] Worktree ready, downloading ${batch.length} skills...`
                 )
 
-                let downloaded: Map<string, SkillDownloadResult>
-                if (useLegacy) {
-                  // BLUE: legacy npx-skills path (preserved for rollback)
-                  downloaded = (await preDownloadSkills(batch, wtPath)) as Map<
-                    string,
-                    SkillDownloadResult
-                  >
-                } else {
-                  // GREEN: new git.ts + skill-discovery path
-                  // deferCleanup keeps temp clone dirs alive until we copy files
-                  const cleanups: (() => Promise<void>)[] = []
-                  const protocol =
-                    gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
-                  downloaded = await downloadBatch(batch, { protocol, deferCleanup: cleanups })
+                // Download skills via git.ts + skill-discovery
+                // deferCleanup keeps temp clone dirs alive until we copy files
+                const cleanups: (() => Promise<void>)[] = []
+                const protocol =
+                  gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
+                const downloaded = await downloadBatch(batch, { protocol, deferCleanup: cleanups })
 
-                  // Copy downloaded skills into worktree for agent access
-                  const wtSkillsDir = join(wtPath, '.claude', 'skills')
-                  mkdirSync(wtSkillsDir, { recursive: true })
-                  for (const [skillName, dl] of downloaded) {
-                    if (dl.path) {
-                      const destDir = join(wtSkillsDir, skillName)
-                      mkdirSync(destDir, { recursive: true })
-                      const skillSrcDir = join(dl.path, '..')
-                      cpSync(skillSrcDir, destDir, { recursive: true })
-                      dl.path = join(destDir, 'SKILL.md')
-                    }
+                // Copy downloaded skills into worktree for agent access
+                const wtSkillsDir = join(wtPath, '.claude', 'skills')
+                mkdirSync(wtSkillsDir, { recursive: true })
+                for (const [skillName, dl] of downloaded) {
+                  if (dl.path) {
+                    const destDir = join(wtSkillsDir, skillName)
+                    mkdirSync(destDir, { recursive: true })
+                    const skillSrcDir = join(dl.path, '..')
+                    cpSync(skillSrcDir, destDir, { recursive: true })
+                    dl.path = join(destDir, 'SKILL.md')
                   }
-
-                  // Now clean up temp clone dirs
-                  for (const fn of cleanups) await fn()
                 }
+
+                // Now clean up temp clone dirs
+                for (const fn of cleanups) await fn()
                 const successCount = [...downloaded.values()].filter((r) => r.path).length
                 const failCount = batch.length - successCount
 
@@ -1120,8 +923,7 @@ export default defineCommand({
                 )
               } finally {
                 if (wtPath) {
-                  const useLegacy = args['legacy-download'] as boolean
-                  useLegacy ? await removeWorktree(wtPath) : await removeWorktreeNew(wtPath)
+                  await removeWorktree(wtPath)
                 }
               }
             }
