@@ -2,12 +2,12 @@
 id: bcb4f31b-e0a1-4bf5-af73-d36426442250
 project:
   id: 00000000-0000-0000-0000-000000000000
-title: Python to TypeScript Migration (.scripts/)
+title: Python to TypeScript Migration (cli/)
 status: archived
 tags: [migration, typescript, bun, cli]
 ---
 
-# Python to TypeScript Migration (.scripts/)
+# Python to TypeScript Migration (cli/)
 
 **Created:** 2026-03-18
 **Updated:** 2026-03-18
@@ -18,7 +18,7 @@ tags: [migration, typescript, bun, cli]
 | # | Objective | Measurable | Success Metric |
 |---|-----------|------------|----------------|
 | 1 | Consolidate to a single runtime (Bun) for all project scripting | Yes | `uv` and `pyproject.toml` removed from toolchain (or reduced to KG-only fallback) |
-| 2 | Unified CLI tool (`ai-tools`) replacing individual Python scripts | Yes | All justfile recipes call `bun run .scripts/bin/ai-tools.ts` instead of `uv run python` |
+| 2 | Unified CLI tool (`ai-tools`) replacing individual Python scripts | Yes | All justfile recipes call `bun run cli/bin/ai-tools.ts` instead of `uv run python` |
 | 3 | Add external skill tracking (passthrough/derived modes, drift detection, GH issues) | Yes | `ai-tools skill deps check/sync/issues/links/status` commands functional e2e |
 
 ## Current State
@@ -62,7 +62,7 @@ tags: [migration, typescript, bun, cli]
 ### Directory Structure
 
 ```
-.scripts/
+cli/
 ├── package.json                 # Bun project, private, type: "module"
 ├── tsconfig.json
 ├── bun.lock
@@ -174,10 +174,10 @@ Used throughout the migration to confirm TS output matches Python:
 
 ```bash
 # Python output
-uv run python .scripts/<script>.py <args> --json > /tmp/py.json
+uv run python cli/<script>.py <args> --json > /tmp/py.json
 
 # TypeScript output
-bun run .scripts/bin/ai-tools.ts <noun> <verb> <args> --json > /tmp/ts.json
+bun run cli/bin/ai-tools.ts <noun> <verb> <args> --json > /tmp/ts.json
 
 # Diff
 diff /tmp/py.json /tmp/ts.json

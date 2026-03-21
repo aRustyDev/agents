@@ -31,20 +31,20 @@ Filter graph visibility by node/edge properties. Search by label. Combine filter
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Filter engine | `.scripts/client/graph-viewer/filter/engine.ts` | Predicate-based filtering |
-| Sigma reducers | `.scripts/client/graph-viewer/filter/reducers.ts` | nodeReducer/edgeReducer |
-| Filter UI | `.scripts/client/graph-viewer/ui/sidebar.ts` | Auto-generated from schema |
+| Filter engine | `cli/client/graph-viewer/filter/engine.ts` | Predicate-based filtering |
+| Sigma reducers | `cli/client/graph-viewer/filter/reducers.ts` | nodeReducer/edgeReducer |
+| Filter UI | `cli/client/graph-viewer/ui/sidebar.ts` | Auto-generated from schema |
 
 ## Files
 
 **Create:**
-- `.scripts/client/graph-viewer/filter/engine.ts`
-- `.scripts/client/graph-viewer/filter/reducers.ts`
+- `cli/client/graph-viewer/filter/engine.ts`
+- `cli/client/graph-viewer/filter/reducers.ts`
 
 **Modify:**
-- `.scripts/client/graph-viewer/ui/sidebar.ts` — add filter panel (type checkboxes, search input)
-- `.scripts/client/graph-viewer/ui/controls.ts` — add active filter count badge, clear button
-- `.scripts/client/graph-viewer/state/store.ts` — add activeFilters state
+- `cli/client/graph-viewer/ui/sidebar.ts` — add filter panel (type checkboxes, search input)
+- `cli/client/graph-viewer/ui/controls.ts` — add active filter count badge, clear button
+- `cli/client/graph-viewer/state/store.ts` — add activeFilters state
 
 ## Tasks
 

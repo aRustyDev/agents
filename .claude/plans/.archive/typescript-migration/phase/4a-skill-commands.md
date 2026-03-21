@@ -34,20 +34,20 @@ Migrate existing skill validation/hashing commands to TypeScript and build the G
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| GitHub integration | `.scripts/lib/github.ts` | TypeScript |
-| Skill commands | `.scripts/commands/skill.ts` | TypeScript |
+| GitHub integration | `cli/lib/github.ts` | TypeScript |
+| Skill commands | `cli/commands/skill.ts` | TypeScript |
 | Updated justfile | `context/skills/justfile` | Just |
-| Test suites | `.scripts/test/{github,skill}.test.ts` | TypeScript |
+| Test suites | `cli/test/{github,skill}.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/github.ts`
-- `.scripts/test/github.test.ts`
-- `.scripts/test/skill.test.ts`
+- `cli/lib/github.ts`
+- `cli/test/github.test.ts`
+- `cli/test/skill.test.ts`
 
 **Modify:**
-- `.scripts/commands/skill.ts` (replace stub with validate/hash/lint/check-all + deps stub)
+- `cli/commands/skill.ts` (replace stub with validate/hash/lint/check-all + deps stub)
 - `context/skills/justfile` (update skill recipes to use `ai-tools`)
 
 ## Tasks

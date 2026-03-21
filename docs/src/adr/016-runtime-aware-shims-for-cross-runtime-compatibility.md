@@ -17,7 +17,7 @@ Accepted (2026-03-19)
 
 ## Context
 
-ADR-011 chose Bun as the sole runtime for `.scripts/`, using Bun-specific APIs throughout: `Bun.file()`, `Bun.write()`, `Bun.spawnSync()`, `Bun.spawn()`, `Bun.CryptoHasher`, `Bun.Glob`, and `import.meta.dir`. This worked well for local development but created a hard dependency — the `@arustydev/agents` package could not run under Node.js at all.
+ADR-011 chose Bun as the sole runtime for `cli/`, using Bun-specific APIs throughout: `Bun.file()`, `Bun.write()`, `Bun.spawnSync()`, `Bun.spawn()`, `Bun.CryptoHasher`, `Bun.Glob`, and `import.meta.dir`. This worked well for local development but created a hard dependency — the `@arustydev/agents` package could not run under Node.js at all.
 
 Publishing to npm requires Node.js compatibility. Users installing via `npx @arustydev/agents` would get immediate runtime failures because `globalThis.Bun` is undefined under Node.
 

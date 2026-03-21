@@ -30,28 +30,28 @@ Build a hybrid classification engine that categorizes 9,429 unique skill names i
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Taxonomy rule engine | `.scripts/lib/taxonomy.ts` | TypeScript |
+| Taxonomy rule engine | `cli/lib/taxonomy.ts` | TypeScript |
 | Taxonomy output | `context/skills/.taxonomy.yaml` | YAML |
-| Valibot schemas | `.scripts/lib/schemas.ts` (additions) | TypeScript |
-| CLI subcommand | `.scripts/commands/skill.ts` (additions) | TypeScript |
-| Tests | `.scripts/test/taxonomy.test.ts` | TypeScript |
+| Valibot schemas | `cli/lib/schemas.ts` (additions) | TypeScript |
+| CLI subcommand | `cli/commands/skill.ts` (additions) | TypeScript |
+| Tests | `cli/test/taxonomy.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/taxonomy.ts` — rule engine + LLM batch classification
-- `.scripts/test/taxonomy.test.ts` — unit tests for rule matching
+- `cli/lib/taxonomy.ts` — rule engine + LLM batch classification
+- `cli/test/taxonomy.test.ts` — unit tests for rule matching
 - `context/skills/.taxonomy.yaml` — generated output
 
 **Modify:**
-- `.scripts/lib/schemas.ts` — add `TaxonomyEntry`, `TaxonomyManifest` schemas
-- `.scripts/commands/skill.ts` — add `catalog taxonomy` subcommand
-- `.scripts/package.json` — add `@anthropic-ai/sdk` dependency
+- `cli/lib/schemas.ts` — add `TaxonomyEntry`, `TaxonomyManifest` schemas
+- `cli/commands/skill.ts` — add `catalog taxonomy` subcommand
+- `cli/package.json` — add `@anthropic-ai/sdk` dependency
 
 ## Tasks
 
 ### Dependencies
-- [ ] Add `@anthropic-ai/sdk` to `.scripts/package.json` via `bun add @anthropic-ai/sdk`
+- [ ] Add `@anthropic-ai/sdk` to `cli/package.json` via `bun add @anthropic-ai/sdk`
 
 ### Rule Engine
 - [ ] Define the 19 categories with subcategory lists in `taxonomy.ts`

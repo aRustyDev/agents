@@ -217,7 +217,7 @@ Repository = "https://github.com/username/my-awesome-package"
 "Bug Tracker" = "https://github.com/username/my-awesome-package/issues"
 Changelog = "https://github.com/username/my-awesome-package/blob/main/CHANGELOG.md"
 
-[project.scripts]
+[projectcli]
 my-cli = "my_package.cli:main"
 awesome-tool = "my_package.tools:run"
 
@@ -345,7 +345,7 @@ if __name__ == "__main__":
 
 **Register in pyproject.toml:**
 ```toml
-[project.scripts]
+[projectcli]
 my-tool = "my_package.cli:main"
 ```
 

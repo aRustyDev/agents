@@ -61,7 +61,7 @@
           },
           {
             "type": "command",
-            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) .scripts/lint-context.sh;; esac; true'",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) cli/lint-context.sh;; esac; true'",
             "timeout": 30
           }
         ]

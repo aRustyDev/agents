@@ -150,7 +150,7 @@ $ uv run superclaude doctor
 
 ### Issue 3: Entry points syntax error
 - **Problem**: Used old setuptools format `[project.entry-points.console_scripts]`
-- **Fix**: Changed to hatchling format `[project.scripts]`
+- **Fix**: Changed to hatchling format `[projectcli]`
 
 ### Issue 4: Old package location
 - **Problem**: Package installing from old `superclaude/` instead of `src/superclaude/`

@@ -25,10 +25,10 @@ Make `analyze` skip already-analyzed skills by default and add `--retry-errors` 
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| `filterForProcessing` function | `.scripts/lib/catalog.ts` | TypeScript |
-| Updated CLI args | `.scripts/commands/skill.ts` | TypeScript |
-| Progress output | `.scripts/commands/skill.ts` | TypeScript |
-| Filter tests | `.scripts/test/catalog-tier1.test.ts` | TypeScript |
+| `filterForProcessing` function | `cli/lib/catalog.ts` | TypeScript |
+| Updated CLI args | `cli/commands/skill.ts` | TypeScript |
+| Progress output | `cli/commands/skill.ts` | TypeScript |
+| Filter tests | `cli/test/catalog-tier1.test.ts` | TypeScript |
 
 ## Files
 
@@ -36,9 +36,9 @@ Make `analyze` skip already-analyzed skills by default and add `--retry-errors` 
 - None
 
 **Modify:**
-- `.scripts/lib/catalog.ts` — add `filterForProcessing` function
-- `.scripts/commands/skill.ts` — replace `filterAvailable` call with `filterForProcessing`, add `--retry-errors` flag, update progress output, update `--force` flag semantics
-- `.scripts/test/catalog-tier1.test.ts` — tests for all flag combinations and edge cases
+- `cli/lib/catalog.ts` — add `filterForProcessing` function
+- `cli/commands/skill.ts` — replace `filterAvailable` call with `filterForProcessing`, add `--retry-errors` flag, update progress output, update `--force` flag semantics
+- `cli/test/catalog-tier1.test.ts` — tests for all flag combinations and edge cases
 
 ## Tasks
 

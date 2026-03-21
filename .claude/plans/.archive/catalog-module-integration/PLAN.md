@@ -16,18 +16,18 @@
 
 | File | Action | Responsibility |
 |------|--------|----------------|
-| `.scripts/lib/github.ts` | **Modify** | Replace file-based token cache with `@napi-rs/keyring`, add `GitHubTokenProvider` with mutex + TTL, wire real OAuth App client ID |
-| `.scripts/lib/source-parser.ts` | **Modify** | Add `resolveCloneUrl`, `detectGitProtocol` for SSH/HTTPS URL generation |
-| `.scripts/lib/catalog-download.ts` | **Create** | Download orchestrator: validate, clone via `git.ts`, discover via `skill-discovery.ts`, compute mechanical fields |
-| `.scripts/lib/catalog-stale.ts` | **Create** | Stale detection: compare treeSha vs upstream via GitHub Trees API |
-| `.scripts/commands/skill.ts` | **Modify** | Blue/green download switch, `simple-git` worktree alongside exec, `--git-protocol` flag, `catalog stale` command |
-| `.scripts/lib/catalog.ts` | **Modify** (minor) | Add `Tier1ErrorType` value `'source_invalid'`, add `treeSha` field to `Tier1Result` |
-| `.scripts/test/github-token.test.ts` | **Create** | Unit tests for `GitHubTokenProvider` (keyring mock, mutex behavior, TTL) |
-| `.scripts/test/github.test.ts` | **Modify** | Replace file-cache tests with keyring-based tests, keep `parseRepo` + integration tests |
-| `.scripts/test/catalog-download.test.ts` | **Create** | Unit + component tests for download orchestrator |
-| `.scripts/test/catalog-stale.test.ts` | **Create** | Unit tests for stale detection |
-| `.scripts/test/catalog-integration.test.ts` | **Create** | Smoke test: end-to-end with real repo (uses SSH per 1Password agent) |
-| `.scripts/test/source-parser.test.ts` | **Modify** | Add tests for `resolveCloneUrl`, `detectGitProtocol` |
+| `cli/lib/github.ts` | **Modify** | Replace file-based token cache with `@napi-rs/keyring`, add `GitHubTokenProvider` with mutex + TTL, wire real OAuth App client ID |
+| `cli/lib/source-parser.ts` | **Modify** | Add `resolveCloneUrl`, `detectGitProtocol` for SSH/HTTPS URL generation |
+| `cli/lib/catalog-download.ts` | **Create** | Download orchestrator: validate, clone via `git.ts`, discover via `skill-discovery.ts`, compute mechanical fields |
+| `cli/lib/catalog-stale.ts` | **Create** | Stale detection: compare treeSha vs upstream via GitHub Trees API |
+| `cli/commands/skill.ts` | **Modify** | Blue/green download switch, `simple-git` worktree alongside exec, `--git-protocol` flag, `catalog stale` command |
+| `cli/lib/catalog.ts` | **Modify** (minor) | Add `Tier1ErrorType` value `'source_invalid'`, add `treeSha` field to `Tier1Result` |
+| `cli/test/github-token.test.ts` | **Create** | Unit tests for `GitHubTokenProvider` (keyring mock, mutex behavior, TTL) |
+| `cli/test/github.test.ts` | **Modify** | Replace file-cache tests with keyring-based tests, keep `parseRepo` + integration tests |
+| `cli/test/catalog-download.test.ts` | **Create** | Unit + component tests for download orchestrator |
+| `cli/test/catalog-stale.test.ts` | **Create** | Unit tests for stale detection |
+| `cli/test/catalog-integration.test.ts` | **Create** | Smoke test: end-to-end with real repo (uses SSH per 1Password agent) |
+| `cli/test/source-parser.test.ts` | **Modify** | Add tests for `resolveCloneUrl`, `detectGitProtocol` |
 
 ## Phases
 
@@ -61,12 +61,12 @@ Refactor `lib/github.ts` to:
 
 **Files:**
 
-- Create: `.scripts/test/github-token.test.ts`
+- Create: `cli/test/github-token.test.ts`
 
 - [ ] **Step 1: Write the failing tests**
 
 ```typescript
-// .scripts/test/github-token.test.ts
+// cli/test/github-token.test.ts
 import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 
 // We test the keyring wrapper and token provider logic.
@@ -220,13 +220,13 @@ describe('GitHubTokenProvider', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test github-token`
+Run: `cd cli && bun test github-token`
 Expected: FAIL — `GitHubTokenProvider` not exported
 
 - [ ] **Step 3: Commit test file**
 
 ```bash
-git add .scripts/test/github-token.test.ts
+git add cli/test/github-token.test.ts
 git commit -m "test(github): add token provider tests with keyring + mutex"
 ```
 
@@ -234,7 +234,7 @@ git commit -m "test(github): add token provider tests with keyring + mutex"
 
 **Files:**
 
-- Modify: `.scripts/lib/github.ts`
+- Modify: `cli/lib/github.ts`
 
 - [ ] **Step 1: Replace token management section**
 
@@ -559,18 +559,18 @@ Keep `parseRepo` tests (lines 125-161) and integration test (lines 167-190) unch
 
 - [ ] **Step 5: Run tests**
 
-Run: `cd .scripts && bun test github-token github`
+Run: `cd cli && bun test github-token github`
 Expected: All pass (both new and updated test files)
 
 - [ ] **Step 6: Run full test suite**
 
-Run: `cd .scripts && bun test`
+Run: `cd cli && bun test`
 Expected: No regressions
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add .scripts/lib/github.ts .scripts/test/github-token.test.ts .scripts/test/github.test.ts .scripts/package.json .scripts/bun.lock
+git add cli/lib/github.ts cli/test/github-token.test.ts cli/test/github.test.ts cli/package.json cli/bun.lock
 git commit -m "refactor(github): replace file cache with keyring + mutex token provider
 
 - Replace ~/.config/ai-tools/github-token with @napi-rs/keyring
@@ -584,7 +584,7 @@ git commit -m "refactor(github): replace file cache with keyring + mutex token p
 
 **Files:**
 
-- Modify: `.scripts/lib/github.ts`
+- Modify: `cli/lib/github.ts`
 
 One-time migration: if the old file-based token exists, import it into the keyring and delete the file.
 
@@ -649,13 +649,13 @@ if (migrated) {
 
 - [ ] **Step 3: Run tests**
 
-Run: `cd .scripts && bun test github-token`
+Run: `cd cli && bun test github-token`
 Expected: All pass
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add .scripts/lib/github.ts
+git add cli/lib/github.ts
 git commit -m "feat(github): auto-migrate file-based token to keychain"
 ```
 
@@ -669,7 +669,7 @@ Replace the inline regex guard in `preDownloadSkills` with `parseSource()` from 
 
 **Files:**
 
-- Modify: `.scripts/lib/catalog.ts` — `Tier1ErrorType` union
+- Modify: `cli/lib/catalog.ts` — `Tier1ErrorType` union
 
 - [ ] **Step 1: Update the type**
 
@@ -688,13 +688,13 @@ export type Tier1ErrorType =
 
 - [ ] **Step 2: Run existing tests**
 
-Run: `cd .scripts && bun test catalog-tier1`
+Run: `cd cli && bun test catalog-tier1`
 Expected: 75 pass, 0 fail
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .scripts/lib/catalog.ts
+git add cli/lib/catalog.ts
 git commit -m "feat(catalog): add source_invalid error type"
 ```
 
@@ -707,8 +707,8 @@ failures in the current pipeline.
 
 **Files:**
 
-- Modify: `.scripts/lib/source-parser.ts`
-- Modify: `.scripts/test/source-parser.test.ts`
+- Modify: `cli/lib/source-parser.ts`
+- Modify: `cli/test/source-parser.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -754,7 +754,7 @@ describe('detectGitProtocol', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test source-parser`
+Run: `cd cli && bun test source-parser`
 Expected: FAIL — `resolveCloneUrl` not exported
 
 - [ ] **Step 3: Implement**
@@ -826,13 +826,13 @@ export function detectGitProtocol(): GitProtocol {
 
 - [ ] **Step 4: Run tests**
 
-Run: `cd .scripts && bun test source-parser`
+Run: `cd cli && bun test source-parser`
 Expected: All pass (existing + 4 new)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/source-parser.ts .scripts/test/source-parser.test.ts
+git add cli/lib/source-parser.ts cli/test/source-parser.test.ts
 git commit -m "feat(source-parser): add resolveCloneUrl with SSH/HTTPS protocol support"
 ```
 
@@ -848,13 +848,13 @@ Rejects local paths, SSH URLs, and non-GitHub sources.
 
 **Files:**
 
-- Create: `.scripts/lib/catalog-download.ts`
-- Create: `.scripts/test/catalog-download.test.ts`
+- Create: `cli/lib/catalog-download.ts`
+- Create: `cli/test/catalog-download.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```typescript
-// .scripts/test/catalog-download.test.ts
+// cli/test/catalog-download.test.ts
 import { describe, expect, it } from 'bun:test'
 import { validateCatalogSource } from '../lib/catalog-download'
 
@@ -918,13 +918,13 @@ describe('validateCatalogSource', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Write implementation**
 
 ```typescript
-// .scripts/lib/catalog-download.ts
+// cli/lib/catalog-download.ts
 /**
  * Catalog download orchestrator.
  *
@@ -1011,13 +1011,13 @@ export function validateCatalogSource(
 
 - [ ] **Step 4: Run tests**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: 9 pass, 0 fail
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/catalog-download.ts .scripts/test/catalog-download.test.ts
+git add cli/lib/catalog-download.ts cli/test/catalog-download.test.ts
 git commit -m "feat(catalog): add validateCatalogSource with tree URL + SSH support"
 ```
 
@@ -1036,8 +1036,8 @@ Replace `npx skills add` + `find` fallback with `cloneRepo()` + `discoverSkills(
 
 **Files:**
 
-- Modify: `.scripts/lib/catalog-download.ts`
-- Modify: `.scripts/test/catalog-download.test.ts`
+- Modify: `cli/lib/catalog-download.ts`
+- Modify: `cli/test/catalog-download.test.ts`
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1123,13 +1123,13 @@ describe('downloadSkill', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: FAIL — `downloadSkill` not exported
 
 - [ ] **Step 3: Implement `downloadSkill`**
 
 ```typescript
-// Add to .scripts/lib/catalog-download.ts
+// Add to cli/lib/catalog-download.ts
 
 import {
   computeContentHash,
@@ -1276,13 +1276,13 @@ function computeResult(skillMdPath: string, skillDir: string): SkillDownloadResu
 
 - [ ] **Step 4: Run tests**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: 10 pass (5 from Task 1.2 + 5 new)
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/catalog-download.ts .scripts/test/catalog-download.test.ts
+git add cli/lib/catalog-download.ts cli/test/catalog-download.test.ts
 git commit -m "feat(catalog): add downloadSkill using git.ts + skill-discovery"
 ```
 
@@ -1290,8 +1290,8 @@ git commit -m "feat(catalog): add downloadSkill using git.ts + skill-discovery"
 
 **Files:**
 
-- Modify: `.scripts/lib/catalog-download.ts`
-- Modify: `.scripts/test/catalog-download.test.ts`
+- Modify: `cli/lib/catalog-download.ts`
+- Modify: `cli/test/catalog-download.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1382,7 +1382,7 @@ describe('downloadBatch', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: FAIL — `downloadBatch` not exported
 
 - [ ] **Step 3: Implement `downloadBatch`**
@@ -1518,13 +1518,13 @@ export async function downloadBatch(
 
 - [ ] **Step 4: Run tests**
 
-Run: `cd .scripts && bun test catalog-download`
+Run: `cd cli && bun test catalog-download`
 Expected: All pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/catalog-download.ts .scripts/test/catalog-download.test.ts
+git add cli/lib/catalog-download.ts cli/test/catalog-download.test.ts
 git commit -m "feat(catalog): add downloadBatch with per-source clone grouping"
 ```
 
@@ -1541,7 +1541,7 @@ Wire `downloadBatch` into `processBatch` alongside the existing `preDownloadSkil
 
 **Files:**
 
-- Modify: `.scripts/commands/skill.ts`
+- Modify: `cli/commands/skill.ts`
 
 - [ ] **Step 1: Add import and `--legacy-download` flag**
 
@@ -1607,7 +1607,7 @@ if (useLegacy) {
 
 - [ ] **Step 3: Run catalog tests**
 
-Run: `cd .scripts && bun test catalog-tier1 catalog-download`
+Run: `cd cli && bun test catalog-tier1 catalog-download`
 Expected: All pass
 
 - [ ] **Step 4: Smoke test both paths**
@@ -1631,7 +1631,7 @@ Expected: All produce results. SSH path uses `git@github.com:` URLs, HTTPS uses 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/commands/skill.ts
+git add cli/commands/skill.ts
 git commit -m "feat(catalog): add blue/green download switch (--legacy-download)"
 ```
 
@@ -1639,7 +1639,7 @@ git commit -m "feat(catalog): add blue/green download switch (--legacy-download)
 
 **Files:**
 
-- Modify: `.scripts/commands/skill.ts`
+- Modify: `cli/commands/skill.ts`
 
 The worktree is still needed for the Haiku agent. Add the `simple-git` version alongside the exec version, gated by the same `--legacy-download` flag.
 
@@ -1704,7 +1704,7 @@ Expected: Both work, worktrees created/cleaned
 - [ ] **Step 4: Commit**
 
 ```bash
-git add .scripts/commands/skill.ts
+git add cli/commands/skill.ts
 git commit -m "feat(catalog): add simple-git worktree alongside exec version"
 ```
 
@@ -1712,14 +1712,14 @@ git commit -m "feat(catalog): add simple-git worktree alongside exec version"
 
 **Files:**
 
-- Create: `.scripts/test/catalog-integration.test.ts`
+- Create: `cli/test/catalog-integration.test.ts`
 
 **Note:** These tests use `cloneRepo` which respects `detectGitProtocol()` — it will use SSH if `gh auth status` reports SSH protocol, HTTPS otherwise. No GitHub token env var required when SSH keys are configured.
 
 - [ ] **Step 1: Write the test**
 
 ```typescript
-// .scripts/test/catalog-integration.test.ts
+// cli/test/catalog-integration.test.ts
 import { describe, expect, it } from 'bun:test'
 import { downloadSkill } from '../lib/catalog-download'
 
@@ -1754,13 +1754,13 @@ describe('catalog-download integration', () => {
 
 - [ ] **Step 2: Run**
 
-Run: `cd .scripts && bun test catalog-integration`
+Run: `cd cli && bun test catalog-integration`
 Expected: 2 pass (requires network + git SSH keys or HTTPS credentials)
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .scripts/test/catalog-integration.test.ts
+git add cli/test/catalog-integration.test.ts
 git commit -m "test(catalog): add integration tests for downloadSkill"
 ```
 
@@ -1789,7 +1789,7 @@ bd dep add <compare-id> <phase3b-id>
 
 **Files:**
 
-- Modify: `.scripts/commands/skill.ts`
+- Modify: `cli/commands/skill.ts`
 
 - [ ] **Step 1: Remove `--legacy-download` flag from args**
 
@@ -1805,7 +1805,7 @@ bd dep add <compare-id> <phase3b-id>
 
 - [ ] **Step 6: Run full test suite**
 
-Run: `cd .scripts && bun test catalog-tier1 catalog-download catalog-integration`
+Run: `cd cli && bun test catalog-tier1 catalog-download catalog-integration`
 Expected: All pass
 
 - [ ] **Step 7: Run production batch**
@@ -1819,7 +1819,7 @@ Expected: Works identically to pre-removal
 - [ ] **Step 8: Commit**
 
 ```bash
-git add .scripts/commands/skill.ts
+git add cli/commands/skill.ts
 git commit -m "refactor(catalog): remove legacy npx-skills download path"
 ```
 
@@ -1838,8 +1838,8 @@ Add a `catalog stale` command that identifies analyzed skills whose upstream con
 
 **Files:**
 
-- Modify: `.scripts/lib/catalog.ts` — add `treeSha` to `Tier1Result`
-- Modify: `.scripts/lib/catalog-download.ts` — populate `treeSha` in `SkillDownloadResult`
+- Modify: `cli/lib/catalog.ts` — add `treeSha` to `Tier1Result`
+- Modify: `cli/lib/catalog-download.ts` — populate `treeSha` in `SkillDownloadResult`
 
 - [ ] **Step 1: Add `treeSha` to `Tier1Result`**
 
@@ -1886,13 +1886,13 @@ if (relPath && !relPath.startsWith('..')) {
 
 - [ ] **Step 3: Run tests**
 
-Run: `cd .scripts && bun test catalog-tier1 catalog-download`
+Run: `cd cli && bun test catalog-tier1 catalog-download`
 Expected: All pass
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add .scripts/lib/catalog.ts .scripts/lib/catalog-download.ts
+git add cli/lib/catalog.ts cli/lib/catalog-download.ts
 git commit -m "feat(catalog): add treeSha field for stale detection"
 ```
 
@@ -1900,13 +1900,13 @@ git commit -m "feat(catalog): add treeSha field for stale detection"
 
 **Files:**
 
-- Create: `.scripts/lib/catalog-stale.ts`
-- Create: `.scripts/test/catalog-stale.test.ts`
+- Create: `cli/lib/catalog-stale.ts`
+- Create: `cli/test/catalog-stale.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```typescript
-// .scripts/test/catalog-stale.test.ts
+// cli/test/catalog-stale.test.ts
 import { describe, expect, it } from 'bun:test'
 import { identifyStaleEntries, type StaleCheckResult } from '../lib/catalog-stale'
 import type { CatalogEntryWithTier1 } from '../lib/catalog'
@@ -1971,13 +1971,13 @@ describe('identifyStaleEntries', () => {
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `cd .scripts && bun test catalog-stale`
+Run: `cd cli && bun test catalog-stale`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement**
 
 ```typescript
-// .scripts/lib/catalog-stale.ts
+// cli/lib/catalog-stale.ts
 /**
  * Stale detection for catalog entries.
  *
@@ -2077,13 +2077,13 @@ export async function fetchUpstreamHashes(
 
 - [ ] **Step 4: Run tests**
 
-Run: `cd .scripts && bun test catalog-stale`
+Run: `cd cli && bun test catalog-stale`
 Expected: 3 pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/catalog-stale.ts .scripts/test/catalog-stale.test.ts
+git add cli/lib/catalog-stale.ts cli/test/catalog-stale.test.ts
 git commit -m "feat(catalog): add stale detection with GitHub Trees API"
 ```
 
@@ -2091,7 +2091,7 @@ git commit -m "feat(catalog): add stale detection with GitHub Trees API"
 
 **Files:**
 
-- Modify: `.scripts/commands/skill.ts`
+- Modify: `cli/commands/skill.ts`
 
 - [ ] **Step 1: Add the subcommand**
 
@@ -2166,7 +2166,7 @@ Expected: Checks 5 entries, reports stale/current counts
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .scripts/commands/skill.ts
+git add cli/commands/skill.ts
 git commit -m "feat(catalog): add catalog stale command for content-change detection"
 ```
 

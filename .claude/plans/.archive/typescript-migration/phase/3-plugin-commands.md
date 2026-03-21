@@ -32,17 +32,17 @@ Wire library modules into the first full vertical: plugin build, check, hash, an
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Plugin commands | `.scripts/commands/plugin.ts` | TypeScript |
+| Plugin commands | `cli/commands/plugin.ts` | TypeScript |
 | Updated justfile | `justfile` | Just |
-| Integration tests | `.scripts/test/plugin.test.ts` | TypeScript |
+| Integration tests | `cli/test/plugin.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/test/plugin.test.ts`
+- `cli/test/plugin.test.ts`
 
 **Modify:**
-- `.scripts/commands/plugin.ts` (replace stub with full implementation)
+- `cli/commands/plugin.ts` (replace stub with full implementation)
 - `justfile` (update plugin recipes to use `ai-tools`)
 
 ## Tasks

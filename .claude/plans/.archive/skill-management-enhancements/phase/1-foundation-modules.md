@@ -24,36 +24,36 @@ Create the five new library modules that all subsequent phases depend on: source
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Source parser module | `.scripts/lib/source-parser.ts` | TypeScript |
-| Source parser tests | `.scripts/test/source-parser.test.ts` | bun:test |
-| Agent registry module | `.scripts/lib/agents.ts` | TypeScript |
-| Agent registry tests | `.scripts/test/agents.test.ts` | bun:test |
-| Git wrapper module | `.scripts/lib/git.ts` | TypeScript |
-| Git wrapper tests | `.scripts/test/git.test.ts` | bun:test |
-| Skill discovery module | `.scripts/lib/skill-discovery.ts` | TypeScript |
-| Skill discovery tests | `.scripts/test/skill-discovery.test.ts` | bun:test |
-| Prompt library | `.scripts/lib/prompts/index.ts` | TypeScript |
-| Prompt: search multiselect | `.scripts/lib/prompts/search-multiselect.ts` | TypeScript |
-| Prompt: confirm | `.scripts/lib/prompts/confirm.ts` | TypeScript |
-| Schema additions | `.scripts/lib/schemas.ts` | TypeScript (additions) |
+| Source parser module | `cli/lib/source-parser.ts` | TypeScript |
+| Source parser tests | `cli/test/source-parser.test.ts` | bun:test |
+| Agent registry module | `cli/lib/agents.ts` | TypeScript |
+| Agent registry tests | `cli/test/agents.test.ts` | bun:test |
+| Git wrapper module | `cli/lib/git.ts` | TypeScript |
+| Git wrapper tests | `cli/test/git.test.ts` | bun:test |
+| Skill discovery module | `cli/lib/skill-discovery.ts` | TypeScript |
+| Skill discovery tests | `cli/test/skill-discovery.test.ts` | bun:test |
+| Prompt library | `cli/lib/prompts/index.ts` | TypeScript |
+| Prompt: search multiselect | `cli/lib/prompts/search-multiselect.ts` | TypeScript |
+| Prompt: confirm | `cli/lib/prompts/confirm.ts` | TypeScript |
+| Schema additions | `cli/lib/schemas.ts` | TypeScript (additions) |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/source-parser.ts`
-- `.scripts/lib/agents.ts`
-- `.scripts/lib/git.ts`
-- `.scripts/lib/skill-discovery.ts`
-- `.scripts/lib/prompts/index.ts`
-- `.scripts/lib/prompts/search-multiselect.ts`
-- `.scripts/lib/prompts/confirm.ts`
-- `.scripts/test/source-parser.test.ts`
-- `.scripts/test/agents.test.ts`
-- `.scripts/test/git.test.ts`
-- `.scripts/test/skill-discovery.test.ts`
+- `cli/lib/source-parser.ts`
+- `cli/lib/agents.ts`
+- `cli/lib/git.ts`
+- `cli/lib/skill-discovery.ts`
+- `cli/lib/prompts/index.ts`
+- `cli/lib/prompts/search-multiselect.ts`
+- `cli/lib/prompts/confirm.ts`
+- `cli/test/source-parser.test.ts`
+- `cli/test/agents.test.ts`
+- `cli/test/git.test.ts`
+- `cli/test/skill-discovery.test.ts`
 
 **Modify:**
-- `.scripts/lib/schemas.ts` (add `ParsedSource`, `AgentType`, `AgentConfig` schemas)
+- `cli/lib/schemas.ts` (add `ParsedSource`, `AgentType`, `AgentConfig` schemas)
 
 ## Tasks
 
@@ -127,7 +127,7 @@ import { CliError } from './types'
 #### Code Examples
 
 ```typescript
-// .scripts/lib/source-parser.ts
+// cli/lib/source-parser.ts
 import * as v from 'valibot'
 import { CliError, type Result, ok, err } from './types'
 
@@ -301,7 +301,7 @@ export function sanitizeSubpath(subpath: string): Result<string> {
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/source-parser.test.ts
+// cli/test/source-parser.test.ts
 import { describe, expect, test } from 'bun:test'
 import { getOwnerRepo, parseSource, sanitizeSubpath } from '../lib/source-parser'
 
@@ -489,7 +489,7 @@ Depends on: none (standalone module; uses `existsSync` from `node:fs`, not runti
 #### Code Examples
 
 ```typescript
-// .scripts/lib/agents.ts
+// cli/lib/agents.ts
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -683,7 +683,7 @@ export function getAgentBaseDir(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/agents.test.ts
+// cli/test/agents.test.ts
 import { describe, expect, test } from 'bun:test'
 import {
   agents,
@@ -882,7 +882,7 @@ export class GitCloneError extends CliError {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/git.ts
+// cli/lib/git.ts
 import { simpleGit, type SimpleGit, type SimpleGitOptions } from 'simple-git'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -1120,7 +1120,7 @@ export async function fetchSkillFolderHash(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/git.test.ts
+// cli/test/git.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
@@ -1290,7 +1290,7 @@ Depends on: none (uses existing `lib/manifest.ts` `readSkillFrontmatter` and `li
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-discovery.ts
+// cli/lib/skill-discovery.ts
 import { readdir, stat } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -1453,7 +1453,7 @@ async function findSkillFiles(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-discovery.test.ts
+// cli/test/skill-discovery.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -1667,7 +1667,7 @@ export type CancelSymbol = typeof cancelSymbol
 #### Code Examples
 
 ```typescript
-// .scripts/lib/prompts/confirm.ts
+// cli/lib/prompts/confirm.ts
 import { createInterface } from 'node:readline'
 import { cancelSymbol, type CancelSymbol } from './index'
 
@@ -1721,7 +1721,7 @@ export async function confirm(
 ```
 
 ```typescript
-// .scripts/lib/prompts/search-multiselect.ts
+// cli/lib/prompts/search-multiselect.ts
 import { cancelSymbol, type CancelSymbol } from './index'
 
 /** A selectable item in the multiselect list. */
@@ -1878,7 +1878,7 @@ export async function searchMultiselect<T>(
 ```
 
 ```typescript
-// .scripts/lib/prompts/index.ts
+// cli/lib/prompts/index.ts
 /**
  * Interactive terminal prompt library.
  *
@@ -1901,7 +1901,7 @@ export {
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/prompts.test.ts
+// cli/test/prompts.test.ts
 import { describe, expect, test } from 'bun:test'
 import { cancelSymbol } from '../lib/prompts/index'
 

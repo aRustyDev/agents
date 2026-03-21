@@ -32,19 +32,19 @@ Eliminate integration risk before committing to the full build. Validate that Vi
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Graphology round-trip test | `.scripts/test/graph-spike.test.ts` | bun:test |
-| Spike validation scripts | `.scripts/spike/` | Throwaway TypeScript scripts |
+| Graphology round-trip test | `cli/test/graph-spike.test.ts` | bun:test |
+| Spike validation scripts | `cli/spike/` | Throwaway TypeScript scripts |
 | Phase 0 results report | (conversation output) | Markdown table |
 
 ## Files
 
 **Create:**
-- `.scripts/test/graph-spike.test.ts` (Graphology round-trip validation — kept)
-- `.scripts/spike/ws-test.ts` (WebSocket upgrade test — throwaway)
-- `.scripts/spike/watch-test.ts` (fs.watch reliability test — throwaway)
-- `.scripts/spike/worker-test.ts` (ForceAtlas2 worker test — throwaway)
-- `.scripts/vite.graph-viewer.config.ts` (Vite config for client build)
-- `.scripts/bin/graph-viewer.ts` (placeholder Bun.serve)
+- `cli/test/graph-spike.test.ts` (Graphology round-trip validation — kept)
+- `cli/spike/ws-test.ts` (WebSocket upgrade test — throwaway)
+- `cli/spike/watch-test.ts` (fs.watch reliability test — throwaway)
+- `cli/spike/worker-test.ts` (ForceAtlas2 worker test — throwaway)
+- `cli/vite.graph-viewer.config.ts` (Vite config for client build)
+- `cli/bin/graph-viewer.ts` (placeholder Bun.serve)
 
 **Modify:**
 - None

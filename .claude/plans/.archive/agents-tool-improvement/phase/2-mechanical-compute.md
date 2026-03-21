@@ -24,9 +24,9 @@ Implement native TypeScript functions for mechanical analysis (content hash, wor
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| 5 compute functions | `.scripts/lib/catalog.ts` | TypeScript |
-| Updated `DownloadResult` type | `.scripts/lib/catalog.ts` | TypeScript |
-| Compute function tests | `.scripts/test/catalog-tier1.test.ts` | TypeScript |
+| 5 compute functions | `cli/lib/catalog.ts` | TypeScript |
+| Updated `DownloadResult` type | `cli/lib/catalog.ts` | TypeScript |
+| Compute function tests | `cli/test/catalog-tier1.test.ts` | TypeScript |
 
 ## Files
 
@@ -36,8 +36,8 @@ Implement native TypeScript functions for mechanical analysis (content hash, wor
 
 **Modify:**
 
-- `.scripts/lib/catalog.ts` — add 5 exported compute functions, expand `DownloadResult` type
-- `.scripts/test/catalog-tier1.test.ts` — tests for each compute function including edge cases (empty content, nonexistent dir, headings at various depths)
+- `cli/lib/catalog.ts` — add 5 exported compute functions, expand `DownloadResult` type
+- `cli/test/catalog-tier1.test.ts` — tests for each compute function including edge cases (empty content, nonexistent dir, headings at various depths)
 
 ## Tasks
 

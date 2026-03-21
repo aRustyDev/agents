@@ -232,7 +232,7 @@ packages = ["src/library_name"]
 
 ```python
 # pyproject.toml
-[project.scripts]
+[projectcli]
 cli-name = "project_name.cli:main"
 
 [project]

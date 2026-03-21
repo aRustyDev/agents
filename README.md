@@ -22,7 +22,7 @@ context/               Component source of truth
 ├── output-styles/     Output formatting templates
 └── reference/         Reference documentation
 
-.scripts/              TypeScript tooling (Bun + Citty)
+cli/              TypeScript tooling (Bun + Citty)
 ├── bin/agents.ts      CLI entrypoint
 ├── commands/          CLI command trees (skill, mcp, component, plugin, ...)
 ├── lib/               Library modules
@@ -125,7 +125,7 @@ Curated plugins at `.claude-plugin/marketplace.json`:
 | Layer | Tool | Config |
 |-------|------|--------|
 | System tools | Homebrew | `brewfile` |
-| TypeScript | Bun | `.scripts/package.json` |
+| TypeScript | Bun | `cli/package.json` |
 | Python (KG only) | uv | `pyproject.toml` |
 | Task runner | just | `justfile` |
 | Issue tracking | beads (bd) | `.beads/config.yaml` |
@@ -134,8 +134,8 @@ Curated plugins at `.claude-plugin/marketplace.json`:
 
 ```bash
 just init                          # One-time setup
-cd .scripts && bun test            # Run all tests
-cd .scripts && bun test test/component/  # Component tests only
+cd cli && bun test            # Run all tests
+cd cli && bun test test/component/  # Component tests only
 just agents skill validate <name>  # Validate a skill
 just agents plugin check <name>    # Validate a plugin
 ```

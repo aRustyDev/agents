@@ -32,20 +32,20 @@ Production-quality UX — keyboard shortcuts, visual polish, edge case handling.
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Keyboard shortcuts | `.scripts/client/graph-viewer/interaction/shortcuts.ts` | Key handler |
-| Visual styling | `.scripts/client/graph-viewer/styles.css` | Type-based colors |
-| Multi-graph overlay | `.scripts/client/graph-viewer/graph/serializer.ts` | _source partitioning |
+| Keyboard shortcuts | `cli/client/graph-viewer/interaction/shortcuts.ts` | Key handler |
+| Visual styling | `cli/client/graph-viewer/styles.css` | Type-based colors |
+| Multi-graph overlay | `cli/client/graph-viewer/graph/serializer.ts` | _source partitioning |
 
 ## Files
 
 **Create:**
-- `.scripts/client/graph-viewer/interaction/shortcuts.ts`
+- `cli/client/graph-viewer/interaction/shortcuts.ts`
 
 **Modify:**
-- `.scripts/client/graph-viewer/styles.css` — type-based node/edge colors
-- `.scripts/client/graph-viewer/filter/reducers.ts` — source-based visibility toggle
-- `.scripts/client/graph-viewer/graph/serializer.ts` — partition by _source on save
-- `.scripts/client/graph-viewer/ui/controls.ts` — keyboard shortcut help overlay
+- `cli/client/graph-viewer/styles.css` — type-based node/edge colors
+- `cli/client/graph-viewer/filter/reducers.ts` — source-based visibility toggle
+- `cli/client/graph-viewer/graph/serializer.ts` — partition by _source on save
+- `cli/client/graph-viewer/ui/controls.ts` — keyboard shortcut help overlay
 
 ## Tasks
 

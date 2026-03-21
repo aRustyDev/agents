@@ -2,7 +2,7 @@
 # External Skill Tracking Recipes
 # =============================================================================
 # Manages external skill dependencies: passthrough symlinks and derived tracking.
-# All recipes delegate to: bun run .scripts/bin/agents.ts skill deps <verb>
+# All recipes delegate to: bun run cli/bin/agents.ts skill deps <verb>
 #
 # Invoked as: just skill external:check, just skill external:update, etc.
 # =============================================================================
@@ -11,7 +11,7 @@ set unstable := true
 
 # ROOT is not inherited from parent module scope, so recompute
 ROOT := source_directory() / "../../.."
-TOOLS := ROOT / ".scripts/bin/agents.ts"
+TOOLS := ROOT / "cli/bin/agents.ts"
 run := "bun run " + TOOLS + " skill deps"
 
 # Full workflow: sync -> issues -> links -> status

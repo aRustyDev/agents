@@ -31,14 +31,14 @@ Create a standalone search module that combines keyword and semantic results usi
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Search module | `.scripts/lib/search.ts` | TypeScript |
-| Test suite | `.scripts/test/search.test.ts` | TypeScript |
+| Search module | `cli/lib/search.ts` | TypeScript |
+| Test suite | `cli/test/search.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/search.ts`
-- `.scripts/test/search.test.ts`
+- `cli/lib/search.ts`
+- `cli/test/search.test.ts`
 
 **Modify:**
 - None

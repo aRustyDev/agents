@@ -32,20 +32,20 @@ Create, edit, and delete nodes and edges through the UI. Undo/redo support.
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| CRUD handlers | `.scripts/client/graph-viewer/interaction/crud.ts` | Graphology mutations |
-| Property editor | `.scripts/client/graph-viewer/ui/sidebar.ts` | Sidebar inspector |
-| Undo/redo system | `.scripts/client/graph-viewer/interaction/undo.ts` | Command pattern |
+| CRUD handlers | `cli/client/graph-viewer/interaction/crud.ts` | Graphology mutations |
+| Property editor | `cli/client/graph-viewer/ui/sidebar.ts` | Sidebar inspector |
+| Undo/redo system | `cli/client/graph-viewer/interaction/undo.ts` | Command pattern |
 
 ## Files
 
 **Create:**
-- `.scripts/client/graph-viewer/interaction/crud.ts`
-- `.scripts/client/graph-viewer/interaction/undo.ts`
-- `.scripts/client/graph-viewer/ui/sidebar.ts`
+- `cli/client/graph-viewer/interaction/crud.ts`
+- `cli/client/graph-viewer/interaction/undo.ts`
+- `cli/client/graph-viewer/ui/sidebar.ts`
 
 **Modify:**
-- `.scripts/client/graph-viewer/ui/controls.ts` — add action buttons (delete, undo, redo)
-- `.scripts/client/graph-viewer/state/store.ts` — add undo stack
+- `cli/client/graph-viewer/ui/controls.ts` — add action buttons (delete, undo, redo)
+- `cli/client/graph-viewer/state/store.ts` — add undo stack
 
 ## Tasks
 

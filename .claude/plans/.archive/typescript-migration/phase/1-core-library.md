@@ -31,23 +31,23 @@ Migrate the zero-dependency library modules that form the foundation for all com
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Hash module | `.scripts/lib/hash.ts` | TypeScript |
-| Symlink module | `.scripts/lib/symlink.ts` | TypeScript |
-| Output formatter | `.scripts/lib/output.ts` | TypeScript |
-| Chunker module | `.scripts/lib/chunker.ts` | TypeScript |
-| Test suites | `.scripts/test/{hash,symlink,output,chunker}.test.ts` | TypeScript |
+| Hash module | `cli/lib/hash.ts` | TypeScript |
+| Symlink module | `cli/lib/symlink.ts` | TypeScript |
+| Output formatter | `cli/lib/output.ts` | TypeScript |
+| Chunker module | `cli/lib/chunker.ts` | TypeScript |
+| Test suites | `cli/test/{hash,symlink,output,chunker}.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/hash.ts`
-- `.scripts/lib/symlink.ts`
-- `.scripts/lib/output.ts`
-- `.scripts/lib/chunker.ts`
-- `.scripts/test/hash.test.ts`
-- `.scripts/test/symlink.test.ts`
-- `.scripts/test/output.test.ts`
-- `.scripts/test/chunker.test.ts`
+- `cli/lib/hash.ts`
+- `cli/lib/symlink.ts`
+- `cli/lib/output.ts`
+- `cli/lib/chunker.ts`
+- `cli/test/hash.test.ts`
+- `cli/test/symlink.test.ts`
+- `cli/test/output.test.ts`
+- `cli/test/chunker.test.ts`
 
 **Modify:**
 - None

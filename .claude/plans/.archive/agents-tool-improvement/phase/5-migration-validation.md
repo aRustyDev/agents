@@ -29,10 +29,10 @@ Implement the `catalog scrub` backfill command, run it to clean existing data, v
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| `catalog scrub` subcommand | `.scripts/commands/skill.ts` | TypeScript |
-| Updated `catalog cleanup` | `.scripts/commands/skill.ts` | TypeScript |
-| Updated `catalog forks` | `.scripts/commands/skill.ts` | TypeScript |
-| Updated `catalog summary` | `.scripts/commands/skill.ts` | TypeScript |
+| `catalog scrub` subcommand | `cli/commands/skill.ts` | TypeScript |
+| Updated `catalog cleanup` | `cli/commands/skill.ts` | TypeScript |
+| Updated `catalog forks` | `cli/commands/skill.ts` | TypeScript |
+| Updated `catalog summary` | `cli/commands/skill.ts` | TypeScript |
 | Backfilled catalog | `context/skills/.catalog.ndjson` | NDJSON (gitignored) |
 | Backfilled error log | `context/skills/.catalog-errors.ndjson` | NDJSON (gitignored) |
 | Validation test batch output | Manual | Console output |
@@ -45,8 +45,8 @@ Implement the `catalog scrub` backfill command, run it to clean existing data, v
 
 **Modify:**
 
-- `.scripts/commands/skill.ts` — add `catalog scrub` subcommand, update `catalog cleanup`, `catalog forks`, and `catalog summary` for new data model
-- `.scripts/test/catalog-tier1.test.ts` — tests for scrub logic
+- `cli/commands/skill.ts` — add `catalog scrub` subcommand, update `catalog cleanup`, `catalog forks`, and `catalog summary` for new data model
+- `cli/test/catalog-tier1.test.ts` — tests for scrub logic
 
 ## Tasks
 
@@ -114,7 +114,7 @@ Implement the `catalog scrub` backfill command, run it to clean existing data, v
 - [ ] Verify: `catalog summary` shows accurate counts with attemptCount distribution
 - [ ] Run test batch: `just agents skill catalog analyze --force --limit 1 --batch-size 5`
 - [ ] Verify test batch: real content hashes, no stale errors, attemptCount reset on success, `validateBatchResults` reports 0 issues
-- [ ] Run all tests: `cd .scripts && bun test`
+- [ ] Run all tests: `cd cli && bun test`
 
 ## Notes
 

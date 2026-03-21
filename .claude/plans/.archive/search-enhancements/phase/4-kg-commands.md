@@ -33,17 +33,17 @@ Replace the `ai-tools kg` command stubs with working implementations that use Me
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Updated KG commands | `.scripts/commands/kg.ts` | TypeScript |
+| Updated KG commands | `cli/commands/kg.ts` | TypeScript |
 | Updated justfile | `justfile` | Just |
-| Integration tests | `.scripts/test/kg-commands.test.ts` | TypeScript |
+| Integration tests | `cli/test/kg-commands.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/test/kg-commands.test.ts`
+- `cli/test/kg-commands.test.ts`
 
 **Modify:**
-- `.scripts/commands/kg.ts` — replace stubs with Meilisearch-backed implementations
+- `cli/commands/kg.ts` — replace stubs with Meilisearch-backed implementations
 - `justfile` — add `kg-search-ts` recipe (or update existing recipes with backend flag)
 
 ## Tasks

@@ -22,22 +22,22 @@ Implement the `find` command for searching external skill registries, with JSON 
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Find command logic | `.scripts/lib/skill-find.ts` | TypeScript |
-| Search API client | `.scripts/lib/skill-search-api.ts` | TypeScript |
-| CLI subcommand wiring | `.scripts/commands/skill.ts` | TypeScript (additions) |
-| Tests | `.scripts/test/skill-find.test.ts` | bun:test |
+| Find command logic | `cli/lib/skill-find.ts` | TypeScript |
+| Search API client | `cli/lib/skill-search-api.ts` | TypeScript |
+| CLI subcommand wiring | `cli/commands/skill.ts` | TypeScript (additions) |
+| Tests | `cli/test/skill-find.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
 
-- `.scripts/lib/skill-find.ts`
-- `.scripts/lib/skill-search-api.ts`
-- `.scripts/test/skill-find.test.ts`
+- `cli/lib/skill-find.ts`
+- `cli/lib/skill-search-api.ts`
+- `cli/test/skill-find.test.ts`
 
 **Modify:**
 
-- `.scripts/commands/skill.ts` (add `find` subcommand)
+- `cli/commands/skill.ts` (add `find` subcommand)
 
 ## Error Types
 
@@ -228,7 +228,7 @@ export async function searchSkillsAPI(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-find.test.ts (search API section)
+// cli/test/skill-find.test.ts (search API section)
 import { describe, expect, mock, test } from 'bun:test'
 import { searchSkillsAPI } from '../lib/skill-search-api'
 
@@ -473,7 +473,7 @@ Non-interactive JSON output (`--json`):
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-find.test.ts (find command section)
+// cli/test/skill-find.test.ts (find command section)
 import { describe, expect, mock, test, beforeEach, afterEach } from 'bun:test'
 import { findSkills } from '../lib/skill-find'
 
@@ -570,7 +570,7 @@ describe('findSkills', () => {
 
 #### Code Examples
 
-**Citty subcommand wiring (addition to `.scripts/commands/skill.ts`):**
+**Citty subcommand wiring (addition to `cli/commands/skill.ts`):**
 
 ```typescript
 import { findSkills } from '../lib/skill-find'
@@ -629,7 +629,7 @@ find: defineCommand({
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-find.test.ts (CLI wiring section)
+// cli/test/skill-find.test.ts (CLI wiring section)
 import { describe, expect, test } from 'bun:test'
 
 describe('skill find CLI wiring', () => {

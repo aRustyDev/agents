@@ -30,20 +30,20 @@ Add service health detection and user-friendly error messages so search commands
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Health check utilities | `.scripts/lib/meilisearch.ts` (additions) | TypeScript |
-| Ollama health check | `.scripts/lib/embedder.ts` (additions) | TypeScript |
-| Mode reporting | `.scripts/commands/kg.ts` (modifications) | TypeScript |
-| Tests | `.scripts/test/degradation.test.ts` | TypeScript |
+| Health check utilities | `cli/lib/meilisearch.ts` (additions) | TypeScript |
+| Ollama health check | `cli/lib/embedder.ts` (additions) | TypeScript |
+| Mode reporting | `cli/commands/kg.ts` (modifications) | TypeScript |
+| Tests | `cli/test/degradation.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/test/degradation.test.ts`
+- `cli/test/degradation.test.ts`
 
 **Modify:**
-- `.scripts/lib/meilisearch.ts` — add `isAvailable()`, `hasEmbeddings()`
-- `.scripts/lib/embedder.ts` — add `isOllamaAvailable()`, `hasModel()`
-- `.scripts/commands/kg.ts` — add mode reporting to search output
+- `cli/lib/meilisearch.ts` — add `isAvailable()`, `hasEmbeddings()`
+- `cli/lib/embedder.ts` — add `isOllamaAvailable()`, `hasModel()`
+- `cli/commands/kg.ts` — add mode reporting to search output
 
 ## Tasks
 

@@ -65,7 +65,7 @@ Before creating a formula, gather this information:
 | Build system | Look at Makefile, go.mod, Cargo.toml, pyproject.toml, etc. |
 | Dependencies | Check build docs, CI files, or dependency manifests |
 | Default branch | Check repo settings — may be `main` or `master` |
-| Binary name | May differ from formula name — check Cargo.toml `[[bin]]`, Go `cmd/`, or pyproject.toml `[project.scripts]` |
+| Binary name | May differ from formula name — check Cargo.toml `[[bin]]`, Go `cmd/`, or pyproject.toml `[projectcli]` |
 
 ### Determine Formula Type
 
@@ -205,7 +205,7 @@ See `reference/faq/common.md` for details on deprecated patterns.
 
 | Problem | Symptom | Solution |
 |---------|---------|----------|
-| Binary name mismatch | Test can't find binary | Check `Cargo.toml [[bin]]` or `pyproject.toml [project.scripts]` for actual name |
+| Binary name mismatch | Test can't find binary | Check `Cargo.toml [[bin]]` or `pyproject.toml [projectcli]` for actual name |
 | Help text mismatch | `assert_match` fails | Run binary locally to verify actual output before writing test |
 | Output to stderr | `shell_output` returns empty | Add `2>&1` redirect: `shell_output("#{bin}/tool --help 2>&1")` |
 

@@ -4,7 +4,7 @@
 set unstable := true
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / ".scripts"
+SCRIPTS := ROOT / "cli"
 COMMANDS := source_directory()
 
 # Validate a command's frontmatter structure

@@ -1261,7 +1261,7 @@ entry_points={
 }
 
 # Running scripts
-$ python -m my_app.scripts.migrate
+$ python -m my_appcli.migrate
 ```
 
 ### Elixir IEx and Development

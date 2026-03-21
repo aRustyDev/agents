@@ -21,8 +21,8 @@ Set up the TypeScript project alongside existing Python scripts. Establish the p
 
 ## Success Criteria
 
-- [ ] `bun run .scripts/bin/ai-tools.ts --help` prints all four noun groups (plugin, skill, kg, registry)
-- [ ] `bun run .scripts/bin/ai-tools.ts plugin --help` shows stub subcommands
+- [ ] `bun run cli/bin/ai-tools.ts --help` prints all four noun groups (plugin, skill, kg, registry)
+- [ ] `bun run cli/bin/ai-tools.ts plugin --help` shows stub subcommands
 - [ ] `bun test` runs successfully (even if test suite is empty)
 - [ ] `just ai-tools --help` works as an alias
 - [ ] `lib/types.ts` exports Result<T,E>, ok(), err(), CliError, unwrapOrExit(), tryAsync()
@@ -32,30 +32,30 @@ Set up the TypeScript project alongside existing Python scripts. Establish the p
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Bun project config | `.scripts/package.json` | JSON |
-| TypeScript config | `.scripts/tsconfig.json` | JSON |
-| CLI entry point | `.scripts/bin/ai-tools.ts` | TypeScript |
-| Result type module | `.scripts/lib/types.ts` | TypeScript |
-| UUID module | `.scripts/lib/uuid.ts` | TypeScript |
-| Shared CLI args | `.scripts/commands/shared-args.ts` | TypeScript |
-| Command stubs | `.scripts/commands/{plugin,skill,kg,registry}.ts` | TypeScript |
-| Unit tests | `.scripts/test/types.test.ts`, `.scripts/test/uuid.test.ts` | TypeScript |
+| Bun project config | `cli/package.json` | JSON |
+| TypeScript config | `cli/tsconfig.json` | JSON |
+| CLI entry point | `cli/bin/ai-tools.ts` | TypeScript |
+| Result type module | `cli/lib/types.ts` | TypeScript |
+| UUID module | `cli/lib/uuid.ts` | TypeScript |
+| Shared CLI args | `cli/commands/shared-args.ts` | TypeScript |
+| Command stubs | `cli/commands/{plugin,skill,kg,registry}.ts` | TypeScript |
+| Unit tests | `cli/test/types.test.ts`, `cli/test/uuid.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/package.json`
-- `.scripts/tsconfig.json`
-- `.scripts/bin/ai-tools.ts`
-- `.scripts/lib/types.ts`
-- `.scripts/lib/uuid.ts`
-- `.scripts/commands/shared-args.ts`
-- `.scripts/commands/plugin.ts` (stub)
-- `.scripts/commands/skill.ts` (stub)
-- `.scripts/commands/kg.ts` (stub)
-- `.scripts/commands/registry.ts` (stub)
-- `.scripts/test/types.test.ts`
-- `.scripts/test/uuid.test.ts`
+- `cli/package.json`
+- `cli/tsconfig.json`
+- `cli/bin/ai-tools.ts`
+- `cli/lib/types.ts`
+- `cli/lib/uuid.ts`
+- `cli/commands/shared-args.ts`
+- `cli/commands/plugin.ts` (stub)
+- `cli/commands/skill.ts` (stub)
+- `cli/commands/kg.ts` (stub)
+- `cli/commands/registry.ts` (stub)
+- `cli/test/types.test.ts`
+- `cli/test/uuid.test.ts`
 
 **Modify:**
 - `brewfile` — add `bun` under Core tools
@@ -63,7 +63,7 @@ Set up the TypeScript project alongside existing Python scripts. Establish the p
 
 ## Tasks
 
-- [ ] Run `bun init` in `.scripts/`, configure `package.json` (private, type: module)
+- [ ] Run `bun init` in `cli/`, configure `package.json` (private, type: module)
 - [ ] Configure `tsconfig.json` (strict, moduleResolution: bundler, target: esnext)
 - [ ] Add `bun` to `brewfile` under Core tools section
 - [ ] Run `brew bundle` to install Bun (or verify already installed)

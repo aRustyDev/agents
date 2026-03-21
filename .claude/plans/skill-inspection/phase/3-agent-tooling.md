@@ -36,7 +36,7 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
 | Tier 1 agent | `context/agents/catalog/skill-inspector-t1.md` | Markdown (agent def) |
 | Tier 2 agent | `context/agents/catalog/skill-inspector-t2.md` | Markdown (agent def) |
 | Catalog justfile | `context/skills/.catalog/justfile` | Just |
-| CLI stubs | `.scripts/commands/skill.ts` (additions) | TypeScript |
+| CLI stubs | `cli/commands/skill.ts` (additions) | TypeScript |
 
 ## Files
 
@@ -47,7 +47,7 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
 
 **Modify:**
 - `context/skills/justfile` — add `mod catalog ".catalog/justfile"`
-- `.scripts/commands/skill.ts` — add `catalog analyze|grade|stats|search|run` stubs
+- `cli/commands/skill.ts` — add `catalog analyze|grade|stats|search|run` stubs
 - `brewfile` — add `mdq`
 
 ## Tasks
@@ -79,7 +79,7 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
   - `stats *FLAGS` — show summary
   - `search *FLAGS` — query catalog
   - `cleanup` — remove orphan worktrees
-- [ ] All recipes delegate to `bun run .scripts/bin/ai-tools.ts skill catalog <verb>`
+- [ ] All recipes delegate to `bun run cli/bin/ai-tools.ts skill catalog <verb>`
 - [ ] Add `mod catalog ".catalog/justfile"` to `context/skills/justfile`
 
 ### CLI Stubs

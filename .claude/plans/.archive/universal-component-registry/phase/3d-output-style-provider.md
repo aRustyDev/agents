@@ -20,14 +20,14 @@ Create a `LocalOutputStyleProvider` that discovers output style markdown files f
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Output style provider | `.scripts/lib/component/provider-output-style.ts` | TypeScript |
-| Tests | `.scripts/test/component/provider-output-style.test.ts` | bun:test |
+| Output style provider | `cli/lib/component/provider-output-style.ts` | TypeScript |
+| Tests | `cli/test/component/provider-output-style.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/component/provider-output-style.ts`
-- `.scripts/test/component/provider-output-style.test.ts`
+- `cli/lib/component/provider-output-style.ts`
+- `cli/test/component/provider-output-style.test.ts`
 
 ## On-Disk Structure
 

@@ -21,18 +21,18 @@ Create `LocalRuleProvider` and `LocalCommandProvider` that discover markdown fil
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Rule provider | `.scripts/lib/component/provider-rule.ts` | TypeScript |
-| Command provider | `.scripts/lib/component/provider-command.ts` | TypeScript |
-| Rule provider tests | `.scripts/test/component/provider-rule.test.ts` | bun:test |
-| Command provider tests | `.scripts/test/component/provider-command.test.ts` | bun:test |
+| Rule provider | `cli/lib/component/provider-rule.ts` | TypeScript |
+| Command provider | `cli/lib/component/provider-command.ts` | TypeScript |
+| Rule provider tests | `cli/test/component/provider-rule.test.ts` | bun:test |
+| Command provider tests | `cli/test/component/provider-command.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/component/provider-rule.ts`
-- `.scripts/lib/component/provider-command.ts`
-- `.scripts/test/component/provider-rule.test.ts`
-- `.scripts/test/component/provider-command.test.ts`
+- `cli/lib/component/provider-rule.ts`
+- `cli/lib/component/provider-command.ts`
+- `cli/test/component/provider-rule.test.ts`
+- `cli/test/component/provider-command.test.ts`
 
 ## On-Disk Structure
 

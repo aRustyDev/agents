@@ -1412,7 +1412,7 @@ docs = [
 ]
 
 # Entry points (CLI commands)
-[project.scripts]
+[projectcli]
 mytool = "myproject.cli:main"
 
 # URLs

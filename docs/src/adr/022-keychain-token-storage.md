@@ -48,7 +48,7 @@ Functionally equivalent to `@napi-rs/keyring`.
 
 **Replace the plaintext file cache with `@napi-rs/keyring` and a `GitHubTokenProvider` class.**
 
-The `GitHubTokenProvider` class (in `.scripts/lib/github-token.ts`) has three responsibilities:
+The `GitHubTokenProvider` class (in `cli/lib/github-token.ts`) has three responsibilities:
 
 1. **Priority chain:** `GITHUB_TOKEN` env var → keychain → device flow prompt
 2. **Promise-based mutex:** concurrent callers `await` the same in-flight `Promise<string>` rather than each triggering a new device flow

@@ -6,7 +6,7 @@ default:
 
 # Validate blog workflow directory structure in target project
 validate target_dir=".":
-    @.scripts/validate-blog-structure.sh "{{ target_dir }}"
+    @cli/validate-blog-structure.sh "{{ target_dir }}"
 
 # Initialize blog workflow in target project (copies templates)
 init target_dir:
@@ -34,7 +34,7 @@ test:
     @test -f .claude-plugin/plugin.json || (echo "Missing: .claude-plugin/plugin.json" && exit 1)
     @test -d rules || (echo "Missing: rules/" && exit 1)
     @test -d .templates || (echo "Missing: .templates/" && exit 1)
-    @test -d .scripts || (echo "Missing: .scripts/" && exit 1)
+    @test -d cli || (echo "Missing: cli/" && exit 1)
     @echo "All plugin structure tests passed."
 
 install: _agents _commands _configs _hooks _scripts _skills _styles _rules _templates

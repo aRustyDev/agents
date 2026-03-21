@@ -23,14 +23,14 @@ Create a `LocalAgentProvider` that discovers agent definition markdown files fro
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Agent provider | `.scripts/lib/component/provider-agent.ts` | TypeScript |
-| Agent provider tests | `.scripts/test/component/provider-agent.test.ts` | bun:test |
+| Agent provider | `cli/lib/component/provider-agent.ts` | TypeScript |
+| Agent provider tests | `cli/test/component/provider-agent.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/component/provider-agent.ts`
-- `.scripts/test/component/provider-agent.test.ts`
+- `cli/lib/component/provider-agent.ts`
+- `cli/test/component/provider-agent.test.ts`
 
 ## On-Disk Structure
 
@@ -82,7 +82,7 @@ Fields: `name` (required), `description` (required), `tools` (optional, comma-se
 - [ ] **Step 1: Write failing tests**
 
 ```typescript
-// .scripts/test/component/provider-agent.test.ts
+// cli/test/component/provider-agent.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -130,7 +130,7 @@ Tests:
 - [ ] **Step 3: Implement provider**
 
 ```typescript
-// .scripts/lib/component/provider-agent.ts
+// cli/lib/component/provider-agent.ts
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative, basename } from 'node:path'

@@ -34,22 +34,22 @@ Port the knowledge graph system (SQLite + sqlite-vec embeddings) from Python to 
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Database module | `.scripts/lib/db.ts` | TypeScript |
-| Embedder module | `.scripts/lib/embedder.ts` | TypeScript |
-| KG commands | `.scripts/commands/kg.ts` | TypeScript |
-| Integration tests | `.scripts/test/{db,embedder,kg}.test.ts` | TypeScript |
+| Database module | `cli/lib/db.ts` | TypeScript |
+| Embedder module | `cli/lib/embedder.ts` | TypeScript |
+| KG commands | `cli/commands/kg.ts` | TypeScript |
+| Integration tests | `cli/test/{db,embedder,kg}.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/db.ts`
-- `.scripts/lib/embedder.ts`
-- `.scripts/test/db.test.ts`
-- `.scripts/test/embedder.test.ts`
-- `.scripts/test/kg.test.ts`
+- `cli/lib/db.ts`
+- `cli/lib/embedder.ts`
+- `cli/test/db.test.ts`
+- `cli/test/embedder.test.ts`
+- `cli/test/kg.test.ts`
 
 **Modify:**
-- `.scripts/commands/kg.ts` (replace stub with full implementation)
+- `cli/commands/kg.ts` (replace stub with full implementation)
 - `justfile` (update kg-* recipes)
 
 ## Tasks

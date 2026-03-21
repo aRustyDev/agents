@@ -143,7 +143,7 @@ packages = ["src/my_package"]
 ### With Entry Points (CLI Tools)
 
 ```toml
-[project.scripts]
+[projectcli]
 my-cli = "my_package.cli:main"
 
 # Or for plugins

@@ -26,22 +26,22 @@ Implement `outdated` (detect available updates) and `update` (apply updates) com
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Outdated command logic | `.scripts/lib/skill-outdated.ts` | TypeScript |
-| Update command logic | `.scripts/lib/skill-update.ts` | TypeScript |
-| CLI subcommand wiring | `.scripts/commands/skill.ts` | TypeScript (additions) |
-| Tests | `.scripts/test/skill-outdated.test.ts` | bun:test |
-| Tests | `.scripts/test/skill-update.test.ts` | bun:test |
+| Outdated command logic | `cli/lib/skill-outdated.ts` | TypeScript |
+| Update command logic | `cli/lib/skill-update.ts` | TypeScript |
+| CLI subcommand wiring | `cli/commands/skill.ts` | TypeScript (additions) |
+| Tests | `cli/test/skill-outdated.test.ts` | bun:test |
+| Tests | `cli/test/skill-update.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/skill-outdated.ts`
-- `.scripts/lib/skill-update.ts`
-- `.scripts/test/skill-outdated.test.ts`
-- `.scripts/test/skill-update.test.ts`
+- `cli/lib/skill-outdated.ts`
+- `cli/lib/skill-update.ts`
+- `cli/test/skill-outdated.test.ts`
+- `cli/test/skill-update.test.ts`
 
 **Modify:**
-- `.scripts/commands/skill.ts` (add `outdated`, `update` subcommands)
+- `cli/commands/skill.ts` (add `outdated`, `update` subcommands)
 
 ## Error Types
 
@@ -320,7 +320,7 @@ export async function checkOutdated(opts: OutdatedOptions): Promise<OutdatedResu
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-outdated.test.ts
+// cli/test/skill-outdated.test.ts
 
 import { describe, expect, mock, test, beforeEach } from 'bun:test'
 import { checkOutdated, type OutdatedOptions, type OutdatedResult } from '../lib/skill-outdated'
@@ -717,7 +717,7 @@ export async function updateSkills(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-update.test.ts
+// cli/test/skill-update.test.ts
 
 import { describe, expect, mock, test, beforeEach } from 'bun:test'
 import { updateSkills, type UpdateOptions, type UpdateResult } from '../lib/skill-update'
@@ -942,7 +942,7 @@ describe('updateSkills — partial failure', () => {
 #### Code Examples
 
 ```typescript
-// Additions to .scripts/commands/skill.ts
+// Additions to cli/commands/skill.ts
 
 import { defineCommand } from 'citty'
 import { checkOutdated } from '../lib/skill-outdated'
@@ -1091,13 +1091,13 @@ const updateCommand = defineCommand({
 import { describe, expect, test } from 'bun:test'
 import { spawnSync } from '../lib/runtime'
 
-// These test the CLI entry point via `bun run .scripts/bin/agents.ts`
+// These test the CLI entry point via `bun run cli/bin/agents.ts`
 // to verify argument parsing and subcommand routing.
 
 describe('CLI — skill outdated', () => {
   test('--json flag produces valid JSON output', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'outdated', '--json',
     ], { cwd: '/private/etc/infra/pub/ai' })
     // Should exit 0 or 2, but output must be valid JSON
@@ -1108,7 +1108,7 @@ describe('CLI — skill outdated', () => {
 
   test('--from-file with missing path exits with error', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'outdated', '--from-file', '/nonexistent/path.json',
     ], { cwd: '/private/etc/infra/pub/ai' })
     expect(proc.exitCode).not.toBe(0)
@@ -1117,7 +1117,7 @@ describe('CLI — skill outdated', () => {
 
   test('--help outputs usage information', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'outdated', '--help',
     ], { cwd: '/private/etc/infra/pub/ai' })
     expect(proc.stdout).toContain('outdated')
@@ -1130,7 +1130,7 @@ describe('CLI — skill outdated', () => {
 describe('CLI — skill update', () => {
   test('--json flag produces valid JSON output', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'update', '--json', '--yes',
     ], { cwd: '/private/etc/infra/pub/ai' })
     if (proc.exitCode === 0) {
@@ -1140,7 +1140,7 @@ describe('CLI — skill update', () => {
 
   test('accepts skill names as positional arguments', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'update', 'beads', '--yes', '--json',
     ], { cwd: '/private/etc/infra/pub/ai' })
     // Should not crash with positional arg
@@ -1149,7 +1149,7 @@ describe('CLI — skill update', () => {
 
   test('--help outputs usage information', () => {
     const proc = spawnSync([
-      'bun', 'run', '.scripts/bin/agents.ts',
+      'bun', 'run', 'cli/bin/agents.ts',
       'skill', 'update', '--help',
     ], { cwd: '/private/etc/infra/pub/ai' })
     expect(proc.stdout).toContain('update')

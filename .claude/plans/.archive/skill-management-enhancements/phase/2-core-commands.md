@@ -28,35 +28,35 @@ Implement the three most-used skill management commands: `add` (install skills f
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Filter utilities | `.scripts/lib/skill-filters.ts` | TypeScript |
-| Filter tests | `.scripts/test/skill-filters.test.ts` | bun:test |
-| Add command logic | `.scripts/lib/skill-add.ts` | TypeScript |
-| Init command logic | `.scripts/lib/skill-init.ts` | TypeScript |
-| List command logic | `.scripts/lib/skill-list.ts` | TypeScript |
-| Skill init template | `.scripts/templates/SKILL.md.tmpl` | Markdown template |
-| CLI subcommand wiring | `.scripts/commands/skill.ts` | TypeScript (additions) |
-| Tests | `.scripts/test/skill-add.test.ts` | bun:test |
-| Tests | `.scripts/test/skill-init.test.ts` | bun:test |
-| Tests | `.scripts/test/skill-list.test.ts` | bun:test |
+| Filter utilities | `cli/lib/skill-filters.ts` | TypeScript |
+| Filter tests | `cli/test/skill-filters.test.ts` | bun:test |
+| Add command logic | `cli/lib/skill-add.ts` | TypeScript |
+| Init command logic | `cli/lib/skill-init.ts` | TypeScript |
+| List command logic | `cli/lib/skill-list.ts` | TypeScript |
+| Skill init template | `cli/templates/SKILL.md.tmpl` | Markdown template |
+| CLI subcommand wiring | `cli/commands/skill.ts` | TypeScript (additions) |
+| Tests | `cli/test/skill-add.test.ts` | bun:test |
+| Tests | `cli/test/skill-init.test.ts` | bun:test |
+| Tests | `cli/test/skill-list.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
 
-- `.scripts/lib/skill-filters.ts`
-- `.scripts/lib/skill-add.ts`
-- `.scripts/lib/skill-init.ts`
-- `.scripts/lib/skill-list.ts`
-- `.scripts/templates/SKILL.md.tmpl`
-- `.scripts/test/skill-filters.test.ts`
-- `.scripts/test/skill-add.test.ts`
-- `.scripts/test/skill-init.test.ts`
-- `.scripts/test/skill-list.test.ts`
+- `cli/lib/skill-filters.ts`
+- `cli/lib/skill-add.ts`
+- `cli/lib/skill-init.ts`
+- `cli/lib/skill-list.ts`
+- `cli/templates/SKILL.md.tmpl`
+- `cli/test/skill-filters.test.ts`
+- `cli/test/skill-add.test.ts`
+- `cli/test/skill-init.test.ts`
+- `cli/test/skill-list.test.ts`
 
 **Modify:**
 
-- `.scripts/commands/skill.ts` (add `add`, `init`, `list` subcommands)
-- `.scripts/lib/lockfile.ts` (extend skills schema if needed for ref/sourceUrl fields)
+- `cli/commands/skill.ts` (add `add`, `init`, `list` subcommands)
+- `cli/lib/lockfile.ts` (extend skills schema if needed for ref/sourceUrl fields)
 
 ## Tasks
 
@@ -74,7 +74,7 @@ Implement the three most-used skill management commands: `add` (install skills f
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-filters.ts (new shared helper)
+// cli/lib/skill-filters.ts (new shared helper)
 
 import type { AgentType } from './agents'
 import { agents, detectInstalledAgents } from './agents'
@@ -150,7 +150,7 @@ export const filterArgs = {
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-filters.test.ts
+// cli/test/skill-filters.test.ts
 import { describe, expect, test } from 'bun:test'
 import { filterByAgent, filterBySkill, validateAgentFilter } from '../lib/skill-filters'
 
@@ -300,7 +300,7 @@ interface AddError {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-add.ts
+// cli/lib/skill-add.ts
 
 import type { ParsedSource } from './source-parser'
 import type { Skill } from './skill-discovery'
@@ -440,7 +440,7 @@ export async function addSkill(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-add.test.ts
+// cli/test/skill-add.test.ts
 
 import { afterAll, beforeAll, describe, expect, mock, test } from 'bun:test'
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises'
@@ -542,7 +542,7 @@ describe('addSkill', () => {
 - [ ] Export `initSkill(name: string, opts: InitOptions): Promise<void>`
 - [ ] Template resolution order:
   1. `opts.template` (explicit path)
-  2. `.scripts/templates/SKILL.md.tmpl` (project template)
+  2. `cli/templates/SKILL.md.tmpl` (project template)
   3. Built-in hardcoded template (fallback)
 - [ ] Generate frontmatter with `name`, `description` (prompted or from `--description`)
 - [ ] Optionally generate additional sections based on template
@@ -574,7 +574,7 @@ interface InitError {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-init.ts
+// cli/lib/skill-init.ts
 
 import { join, resolve } from 'node:path'
 import { mkdir } from 'node:fs/promises'
@@ -632,7 +632,7 @@ tags: []
 /**
  * Resolve and read a template, following the priority chain:
  * 1. Explicit path from opts
- * 2. Project-local .scripts/templates/SKILL.md.tmpl
+ * 2. Project-local cli/templates/SKILL.md.tmpl
  * 3. Built-in hardcoded template
  */
 async function resolveTemplate(
@@ -650,7 +650,7 @@ async function resolveTemplate(
   }
 
   if (projectRoot) {
-    const projectTemplate = join(projectRoot, '.scripts/templates/SKILL.md.tmpl')
+    const projectTemplate = join(projectRoot, 'cli/templates/SKILL.md.tmpl')
     if (existsSync(projectTemplate)) {
       return ok(await readText(projectTemplate))
     }
@@ -754,7 +754,7 @@ export async function initSkill(
 ```
 
 ```markdown
-<!-- .scripts/templates/SKILL.md.tmpl -->
+<!-- cli/templates/SKILL.md.tmpl -->
 ---
 name: {{name}}
 description: {{description}}
@@ -780,7 +780,7 @@ version: 0.1.0
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-init.test.ts
+// cli/test/skill-init.test.ts
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtemp, rm, readFile } from 'node:fs/promises'
@@ -920,7 +920,7 @@ interface ListError {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-list.ts
+// cli/lib/skill-list.ts
 
 import { join, resolve } from 'node:path'
 import { readdirSync, statSync, lstatSync } from 'node:fs'
@@ -1090,7 +1090,7 @@ export async function listSkills(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-list.test.ts
+// cli/test/skill-list.test.ts
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { mkdtemp, mkdir, writeFile, rm, symlink } from 'node:fs/promises'
@@ -1211,12 +1211,12 @@ describe('listSkills', () => {
 - [ ] Add `skill add <source> [--agent] [--skill] [--copy] [--global] [--yes]` subcommand
 - [ ] Add `skill init <name> [--description] [--template] [--path]` subcommand
 - [ ] Add `skill list [path] [--agent] [--skill] [--json] [--global]` subcommand
-- [ ] Ensure `mkdir -p .scripts/templates` in phase setup
+- [ ] Ensure `mkdir -p cli/templates` in phase setup
 
 #### Code Examples
 
 ```typescript
-// Additions to .scripts/commands/skill.ts
+// Additions to cli/commands/skill.ts
 
 import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
@@ -1414,7 +1414,7 @@ const listCommand = defineCommand({
 #### Example Test Cases
 
 ```typescript
-// CLI wiring tests can be added to .scripts/test/skill-commands.test.ts
+// CLI wiring tests can be added to cli/test/skill-commands.test.ts
 // (extends existing file)
 
 import { describe, expect, test } from 'bun:test'
@@ -1481,7 +1481,7 @@ describe('skill CLI subcommands', () => {
 - [ ] `--json` produces structured output for all three commands
 - [ ] Exit codes follow `EXIT.OK` (0) / `EXIT.FAILURES` (1) / `EXIT.ERROR` (2) convention
 - [ ] Error messages use `createOutput` (never raw `console.log` in command handlers)
-- [ ] `.scripts/templates/` directory is created as part of phase setup
+- [ ] `cli/templates/` directory is created as part of phase setup
 - [ ] Existing subcommands (`validate`, `hash`, `lint`, `check-all`, `deps`) are not affected
 
 ## Notes

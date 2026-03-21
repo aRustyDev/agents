@@ -53,7 +53,7 @@ Store the HEAD commit SHA of the repository; compare against upstream latest com
 
 **Store `treeSha` (from `git rev-parse HEAD:<skill-subdir>`) on catalog entries during download; compare against upstream via GitHub Trees API for stale detection.**
 
-Two new functions in `.scripts/lib/stale.ts`:
+Two new functions in `cli/lib/stale.ts`:
 
 - `fetchUpstreamHashes(entries, concurrency)` — batches `GET /repos/{owner}/{repo}/git/trees/{sha}?recursive=1` calls; groups entries by repo to minimize API requests; uses the keychain token provider from ADR-022
 - `identifyStaleEntries(local, upstream)` — pure comparison function; returns entries where `local.treeSha !== upstream.treeSha`

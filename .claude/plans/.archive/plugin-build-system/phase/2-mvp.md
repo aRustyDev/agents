@@ -91,7 +91,7 @@ plugin-check name:
 | Deliverable | Location |
 |-------------|----------|
 | Stale detection in build | `justfile` (`build-plugin` task) |
-| Interactive prompts | `.scripts/plugin-hash.py` (`--interactive` mode) |
+| Interactive prompts | `cli/plugin-hash.py` (`--interactive` mode) |
 | Check command | `justfile` (`plugin-check` task) |
 | Update command | `justfile` (`plugin-update` task) |
 | Migration documentation | `.claude/rules/plugin-sources-format.md` |

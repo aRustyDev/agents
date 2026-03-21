@@ -241,15 +241,15 @@ The Python CLI provides additional flags:
 
 ```bash
 # Single plugin operations
-uv run python .scripts/build-plugin.py check <name> [--json] [--verbose]
-uv run python .scripts/build-plugin.py build <name> [--force] [--check-only] [--update-hashes]
-uv run python .scripts/build-plugin.py update <name>
-uv run python .scripts/build-plugin.py hash <path> [--hex-only]
+uv run python cli/build-plugin.py check <name> [--json] [--verbose]
+uv run python cli/build-plugin.py build <name> [--force] [--check-only] [--update-hashes]
+uv run python cli/build-plugin.py update <name>
+uv run python cli/build-plugin.py hash <path> [--hex-only]
 
 # Batch operations
-uv run python .scripts/build-plugin.py check-all [--json]
-uv run python .scripts/build-plugin.py build-all [--force] [--check-only] [--update-hashes]
-uv run python .scripts/build-plugin.py update-all
+uv run python cli/build-plugin.py check-all [--json]
+uv run python cli/build-plugin.py build-all [--force] [--check-only] [--update-hashes]
+uv run python cli/build-plugin.py update-all
 ```
 
 | Flag | Description |
@@ -288,10 +288,10 @@ Plugin validation runs automatically on push/PR when plugin-related files change
 ```yaml
 # .github/workflows/plugin-validation.yml
 - name: Validate all plugins
-  run: uv run python .scripts/build-plugin.py check-all
+  run: uv run python cli/build-plugin.py check-all
 
 - name: Build all plugins (check-only)
-  run: uv run python .scripts/build-plugin.py build-all --check-only
+  run: uv run python cli/build-plugin.py build-all --check-only
 ```
 
 ### Planning Format

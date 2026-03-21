@@ -31,24 +31,24 @@ Switch between multiple graph files. Save graph data and view state back to disk
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Graph CRUD API | `.scripts/server/graph-viewer/routes/graphs.ts` | REST endpoints |
-| Serializer | `.scripts/client/graph-viewer/graph/serializer.ts` | Graphology → JSON |
-| Lock reconciliation | `.scripts/lib/graph-lock.ts` | Orphan cleanup + default positions (extends Phase 1) |
-| File picker UI | `.scripts/client/graph-viewer/ui/controls.ts` | Dropdown component |
-| Schema validation | `.scripts/server/graph-viewer/validation.ts` | Ajv-based (wraps lib/graph-schema.ts) |
+| Graph CRUD API | `cli/server/graph-viewer/routes/graphs.ts` | REST endpoints |
+| Serializer | `cli/client/graph-viewer/graph/serializer.ts` | Graphology → JSON |
+| Lock reconciliation | `cli/lib/graph-lock.ts` | Orphan cleanup + default positions (extends Phase 1) |
+| File picker UI | `cli/client/graph-viewer/ui/controls.ts` | Dropdown component |
+| Schema validation | `cli/server/graph-viewer/validation.ts` | Ajv-based (wraps lib/graph-schema.ts) |
 
 ## Files
 
 **Create:**
-- `.scripts/server/graph-viewer/validation.ts`
-- `.scripts/server/graph-viewer/fs-helpers.ts`
-- `.scripts/client/graph-viewer/graph/serializer.ts`
+- `cli/server/graph-viewer/validation.ts`
+- `cli/server/graph-viewer/fs-helpers.ts`
+- `cli/client/graph-viewer/graph/serializer.ts`
 
 **Modify:**
-- `.scripts/server/graph-viewer/routes/graphs.ts` — add PUT/POST with validation
-- `.scripts/client/graph-viewer/ui/controls.ts` — add file picker
-- `.scripts/client/graph-viewer/state/store.ts` — add dirty flag, active graph ID
-- `.scripts/bin/graph-viewer.ts` — wire new API routes
+- `cli/server/graph-viewer/routes/graphs.ts` — add PUT/POST with validation
+- `cli/client/graph-viewer/ui/controls.ts` — add file picker
+- `cli/client/graph-viewer/state/store.ts` — add dirty flag, active graph ID
+- `cli/bin/graph-viewer.ts` — wire new API routes
 
 ## Tasks
 

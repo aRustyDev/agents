@@ -49,7 +49,7 @@ dev = [
     "ruff>=0.2.0",
 ]
 
-[project.scripts]
+[projectcli]
 skill-pr-addresser = "skill_pr_addresser.main:main"
 ```
 

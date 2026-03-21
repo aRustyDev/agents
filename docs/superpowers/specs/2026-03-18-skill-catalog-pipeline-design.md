@@ -489,13 +489,13 @@ just catalog:search       # Query catalog
 | `context/skills/.catalog.ndjson` | Full catalog data (generated) |
 | `context/skills/.catalog-stats.json` | Summary statistics (generated) |
 | `context/skills/.catalog/justfile` | Catalog pipeline recipes |
-| `.scripts/commands/skill.ts` | Add `catalog` subcommand tree |
-| `.scripts/lib/taxonomy.ts` | Rule engine + LLM batch classification |
-| `.scripts/lib/catalog.ts` | Catalog I/O, grading, fork detection |
+| `cli/commands/skill.ts` | Add `catalog` subcommand tree |
+| `cli/lib/taxonomy.ts` | Rule engine + LLM batch classification |
+| `cli/lib/catalog.ts` | Catalog I/O, grading, fork detection |
 
 ## Dependencies
 
-**Existing (already in `.scripts/lib/`):**
+**Existing (already in `cli/lib/`):**
 - `hash.ts` — content hashing for fork detection
 - `output.ts` — table + JSON output
 - `schemas.ts` — Valibot schemas for catalog entries
@@ -513,7 +513,7 @@ just catalog:search       # Query catalog
 - `mdq` (yshavit/mdq) — structured markdown analysis (`brew install yshavit/mdq/mdq`)
   - Fallback: existing `lib/chunker.ts` handles frontmatter + section extraction if mdq unavailable
 
-**NPM dependencies (to add to `.scripts/package.json`):**
+**NPM dependencies (to add to `cli/package.json`):**
 - `@anthropic-ai/sdk` — Claude API for LLM batch classification in Phase 1
   - Model: `claude-haiku-4-5-20251001` (fast, cheap, sufficient for name classification)
   - Estimated cost: ~19 batches × ~1K tokens ≈ <$0.50 total

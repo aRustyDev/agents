@@ -17,17 +17,17 @@ Demonstrate that content-addressed hashing works for plugin components.
 
 ### 1. Hash computation script
 
-Create `.scripts/plugin-hash.py` that:
+Create `cli/plugin-hash.py` that:
 - Computes SHA256 hash of a file or directory
 - For directories, hashes all files recursively (sorted, deterministic)
 - Outputs hash in format: `sha256:<hex>`
 
 ```bash
 # Usage
-uv run python .scripts/plugin-hash.py context/commands/add-formula.md
+uv run python cli/plugin-hash.py context/commands/add-formula.md
 # Output: sha256:a1b2c3d4e5f6...
 
-uv run python .scripts/plugin-hash.py context/skills/pkgmgr-homebrew-formula-dev/
+uv run python cli/plugin-hash.py context/skills/pkgmgr-homebrew-formula-dev/
 # Output: sha256:1a2b3c4d5e6f...
 ```
 
@@ -36,7 +36,7 @@ uv run python .scripts/plugin-hash.py context/skills/pkgmgr-homebrew-formula-dev
 ```just
 [group('plugins')]
 plugin-hash path:
-    @uv run python .scripts/plugin-hash.py "{{ path }}"
+    @uv run python cli/plugin-hash.py "{{ path }}"
 ```
 
 ### 3. Extended plugin.sources.json schema
@@ -57,18 +57,18 @@ Define new format with hash field:
 
 ### 4. Hash verification function
 
-Add to `.scripts/plugin-hash.py`:
+Add to `cli/plugin-hash.py`:
 - `verify_sources(plugin_dir)` - Check all hashes match
 - Returns list of mismatched components
 
 ## Tasks
 
-- [x] Create `.scripts/plugin-hash.py` with hash computation
+- [x] Create `cli/plugin-hash.py` with hash computation
 - [x] Add directory hashing (recursive, deterministic)
 - [x] Add `plugin-hash` justfile task
 - [x] Document extended `plugin.sources.json` schema (`.claude/rules/plugin-sources-format.md`)
 - [x] Add `verify_sources()` function
-- [x] Write tests for hash computation (`.scripts/test-plugin-hash.py`)
+- [x] Write tests for hash computation (`cli/test-plugin-hash.py`)
 - [x] Test with homebrew-dev plugin
 
 ## Success Criteria
@@ -82,8 +82,8 @@ Add to `.scripts/plugin-hash.py`:
 
 | Deliverable | Location |
 |-------------|----------|
-| Hash computation script | `.scripts/plugin-hash.py` |
-| Tests | `.scripts/test-plugin-hash.py` |
+| Hash computation script | `cli/plugin-hash.py` |
+| Tests | `cli/test-plugin-hash.py` |
 | Schema documentation | `.claude/rules/plugin-sources-format.md` |
 | Justfile tasks | `justfile` (`plugin-hash`, `plugin-hash-verify`, `plugin-verify-sources`) |
 

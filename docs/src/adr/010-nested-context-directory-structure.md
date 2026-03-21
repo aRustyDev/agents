@@ -74,8 +74,8 @@ All glob patterns that reference context components must use recursive globs (`*
 
 Files updated:
 - `.claude/devrag.json` — document patterns
-- `.scripts/embed.py` — entity type patterns
-- `.scripts/watch-embed.py` — uses recursive watchdog (no change needed)
+- `cli/embed.py` — entity type patterns
+- `cli/watch-embed.py` — uses recursive watchdog (no change needed)
 - `.pre-commit-config.yaml` — exclusion patterns
 - `.claude/settings.json` — cclint hook patterns (expanded for absolute paths)
 - `context/commands/context/rule/create.md` — target path documentation

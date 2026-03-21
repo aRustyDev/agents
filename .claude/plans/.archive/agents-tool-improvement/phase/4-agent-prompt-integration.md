@@ -25,11 +25,11 @@ Wire the mechanical compute functions (Phase 2) into `preDownloadSkills`, reduce
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Updated `preDownloadSkills` | `.scripts/commands/skill.ts` | TypeScript |
-| Reduced agent prompt | `.scripts/commands/skill.ts` | TypeScript |
-| Updated merge logic in `processBatch` | `.scripts/commands/skill.ts` | TypeScript |
-| `validateBatchResults` function | `.scripts/lib/catalog.ts` | TypeScript |
-| Validation tests | `.scripts/test/catalog-tier1.test.ts` | TypeScript |
+| Updated `preDownloadSkills` | `cli/commands/skill.ts` | TypeScript |
+| Reduced agent prompt | `cli/commands/skill.ts` | TypeScript |
+| Updated merge logic in `processBatch` | `cli/commands/skill.ts` | TypeScript |
+| `validateBatchResults` function | `cli/lib/catalog.ts` | TypeScript |
+| Validation tests | `cli/test/catalog-tier1.test.ts` | TypeScript |
 | Integration test results | Manual test batch | NDJSON |
 
 ## Files
@@ -40,9 +40,9 @@ Wire the mechanical compute functions (Phase 2) into `preDownloadSkills`, reduce
 
 **Modify:**
 
-- `.scripts/lib/catalog.ts` — add `validateBatchResults` function
-- `.scripts/commands/skill.ts` — update `preDownloadSkills` to call compute functions, update manifest format, rewrite agent prompt, change `ALLOWED_TOOLS`, update `processBatch` merge logic and error routing, call `validateBatchResults` after merge
-- `.scripts/test/catalog-tier1.test.ts` — tests for validation function
+- `cli/lib/catalog.ts` — add `validateBatchResults` function
+- `cli/commands/skill.ts` — update `preDownloadSkills` to call compute functions, update manifest format, rewrite agent prompt, change `ALLOWED_TOOLS`, update `processBatch` merge logic and error routing, call `validateBatchResults` after merge
+- `cli/test/catalog-tier1.test.ts` — tests for validation function
 
 ## Tasks
 

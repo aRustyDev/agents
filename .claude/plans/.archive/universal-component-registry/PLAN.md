@@ -97,32 +97,32 @@ Deferred to future plans:
 
 | File | Responsibility |
 |------|---------------|
-| `.scripts/lib/component/types.ts` | Universal `Component` type, `ComponentType` enum, `ComponentProvider` interface, `ProviderCapabilities`. Uses `mcp_server` (not `mcp`) to align with existing `EntityType` in `lib/types.ts`. |
-| `.scripts/lib/component/schemas.ts` | Valibot schemas for `Component`, `ComponentType`, `PaginatedResult`, `SearchParams` — runtime validators matching the TS interfaces |
-| `.scripts/lib/component/manager.ts` | `ComponentManager` — provider registry, routing, multi-provider search aggregation |
-| `.scripts/lib/component/provider-local.ts` | Local filesystem provider (reads `context/` dirs) |
-| `.scripts/lib/component/provider-smithery.ts` | Smithery API provider (search skills + MCP servers) |
-| `.scripts/lib/component/provider-github.ts` | GitHub-based provider (owner/repo resolution, skills.sh passthrough) |
-| `.scripts/lib/component/provider-registry.ts` | Self-hosted registry provider (configurable base URL, future) |
-| `.scripts/lib/component/pagination.ts` | Shared pagination types and helpers |
-| `.scripts/lib/component/client-config.ts` | AI client config file I/O (19 clients from Smithery's pattern) |
-| `.scripts/lib/component/clients.ts` | Static registry of AI client definitions (paths per OS, format, transport) |
-| `.scripts/test/component/types.test.ts` | Tests for type guards and schema validation |
-| `.scripts/test/component/manager.test.ts` | Tests for provider routing and aggregation |
-| `.scripts/test/component/provider-local.test.ts` | Tests for local filesystem provider |
-| `.scripts/test/component/provider-smithery.test.ts` | Tests for Smithery API provider |
-| `.scripts/test/component/client-config.test.ts` | Tests for client config I/O |
-| `.scripts/test/component/pagination.test.ts` | Tests for pagination helpers |
+| `cli/lib/component/types.ts` | Universal `Component` type, `ComponentType` enum, `ComponentProvider` interface, `ProviderCapabilities`. Uses `mcp_server` (not `mcp`) to align with existing `EntityType` in `lib/types.ts`. |
+| `cli/lib/component/schemas.ts` | Valibot schemas for `Component`, `ComponentType`, `PaginatedResult`, `SearchParams` — runtime validators matching the TS interfaces |
+| `cli/lib/component/manager.ts` | `ComponentManager` — provider registry, routing, multi-provider search aggregation |
+| `cli/lib/component/provider-local.ts` | Local filesystem provider (reads `context/` dirs) |
+| `cli/lib/component/provider-smithery.ts` | Smithery API provider (search skills + MCP servers) |
+| `cli/lib/component/provider-github.ts` | GitHub-based provider (owner/repo resolution, skills.sh passthrough) |
+| `cli/lib/component/provider-registry.ts` | Self-hosted registry provider (configurable base URL, future) |
+| `cli/lib/component/pagination.ts` | Shared pagination types and helpers |
+| `cli/lib/component/client-config.ts` | AI client config file I/O (19 clients from Smithery's pattern) |
+| `cli/lib/component/clients.ts` | Static registry of AI client definitions (paths per OS, format, transport) |
+| `cli/test/component/types.test.ts` | Tests for type guards and schema validation |
+| `cli/test/component/manager.test.ts` | Tests for provider routing and aggregation |
+| `cli/test/component/provider-local.test.ts` | Tests for local filesystem provider |
+| `cli/test/component/provider-smithery.test.ts` | Tests for Smithery API provider |
+| `cli/test/component/client-config.test.ts` | Tests for client config I/O |
+| `cli/test/component/pagination.test.ts` | Tests for pagination helpers |
 
 ### Modified files
 
 | File | Change |
 |------|--------|
-| `.scripts/lib/schemas.ts` | Add `Component`, `ComponentType`, `PaginatedResult` schemas |
-| `.scripts/lib/types.ts` | Extend `EntityType` with `'hook'` if missing |
-| `.scripts/commands/skill.ts` | Refactor search/add to route through `ComponentManager` |
-| `.scripts/lib/skill-search-api.ts` | Add `page` param to `SearchOptions`; import `clampLimit` from `component/pagination` |
-| `.scripts/lib/source-parser.ts` | Add `smithery` source type for `smithery://namespace/slug` URIs |
+| `cli/lib/schemas.ts` | Add `Component`, `ComponentType`, `PaginatedResult` schemas |
+| `cli/lib/types.ts` | Extend `EntityType` with `'hook'` if missing |
+| `cli/commands/skill.ts` | Refactor search/add to route through `ComponentManager` |
+| `cli/lib/skill-search-api.ts` | Add `page` param to `SearchOptions`; import `clampLimit` from `component/pagination` |
+| `cli/lib/source-parser.ts` | Add `smithery` source type for `smithery://namespace/slug` URIs |
 
 ---
 
@@ -145,13 +145,13 @@ Deferred to future plans:
 The core abstraction — every entity in the system is a `Component`.
 
 **Files:**
-- Create: `.scripts/lib/component/types.ts`
-- Create: `.scripts/test/component/types.test.ts`
+- Create: `cli/lib/component/types.ts`
+- Create: `cli/test/component/types.test.ts`
 
 - [ ] **Step 1: Write failing tests for Component type guards**
 
 ```typescript
-// .scripts/test/component/types.test.ts
+// cli/test/component/types.test.ts
 import { describe, expect, test } from 'bun:test'
 import {
   type Component,
@@ -280,13 +280,13 @@ describe('ProviderCapabilities', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd .scripts && bun test test/component/types.test.ts`
+Run: `cd cli && bun test test/component/types.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Write the Component type system**
 
 ```typescript
-// .scripts/lib/component/types.ts
+// cli/lib/component/types.ts
 
 /**
  * Universal component model for the AI Context Library.
@@ -513,13 +513,13 @@ export interface ComponentProvider {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd .scripts && bun test test/component/types.test.ts`
+Run: `cd cli && bun test test/component/types.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .scripts/lib/component/types.ts .scripts/test/component/types.test.ts
+git add cli/lib/component/types.ts cli/test/component/types.test.ts
 git commit -m "feat(component): add universal Component type and ComponentProvider interface"
 ```
 
@@ -530,13 +530,13 @@ git commit -m "feat(component): add universal Component type and ComponentProvid
 Shared pagination logic used by all providers.
 
 **Files:**
-- Create: `.scripts/lib/component/pagination.ts`
-- Create: `.scripts/test/component/pagination.test.ts`
+- Create: `cli/lib/component/pagination.ts`
+- Create: `cli/test/component/pagination.test.ts`
 
 - [ ] **Step 1: Write failing tests**
 
 ```typescript
-// .scripts/test/component/pagination.test.ts
+// cli/test/component/pagination.test.ts
 import { describe, expect, test } from 'bun:test'
 import { clampPage, clampLimit, paginateArray, emptyPage } from '../../lib/component/pagination'
 
@@ -595,7 +595,7 @@ describe('emptyPage', () => {
 - [ ] **Step 3: Implement**
 
 ```typescript
-// .scripts/lib/component/pagination.ts
+// cli/lib/component/pagination.ts
 
 import type { PaginatedResult } from './types'
 
@@ -647,13 +647,13 @@ export function emptyPage<T>(page: number, pageSize: number): PaginatedResult<T>
 Routes operations to registered providers. Aggregates multi-provider search results.
 
 **Files:**
-- Create: `.scripts/lib/component/manager.ts`
-- Create: `.scripts/test/component/manager.test.ts`
+- Create: `cli/lib/component/manager.ts`
+- Create: `cli/test/component/manager.test.ts`
 
 - [ ] **Step 1: Write failing tests**
 
 ```typescript
-// .scripts/test/component/manager.test.ts
+// cli/test/component/manager.test.ts
 import { describe, expect, test } from 'bun:test'
 import { ComponentManager } from '../../lib/component/manager'
 import type { ComponentProvider, SearchParams, PaginatedResult, Component, ComponentAddOptions, ComponentAddResult, RemoveResult, ComponentType } from '../../lib/component/types'
@@ -781,7 +781,7 @@ describe('ComponentManager', () => {
 - [ ] **Step 3: Implement**
 
 ```typescript
-// .scripts/lib/component/manager.ts
+// cli/lib/component/manager.ts
 
 import { ok, err, CliError, type Result } from '../types'
 import type {
@@ -964,8 +964,8 @@ export class ComponentManager {
 Reads installed components from `context/` directories.
 
 **Files:**
-- Create: `.scripts/lib/component/provider-local.ts`
-- Create: `.scripts/test/component/provider-local.test.ts`
+- Create: `cli/lib/component/provider-local.ts`
+- Create: `cli/test/component/provider-local.test.ts`
 
 - [ ] **Step 1: Write failing tests**
 
@@ -990,10 +990,10 @@ The local provider wraps existing `discoverSkills()`, `listSkills()`, `skillInfo
 ### Task 1.5: Barrel Export + Index (`lib/component/index.ts`)
 
 **Files:**
-- Create: `.scripts/lib/component/index.ts`
+- Create: `cli/lib/component/index.ts`
 
 ```typescript
-// .scripts/lib/component/index.ts
+// cli/lib/component/index.ts
 export * from './types'
 export * from './pagination'
 export { ComponentManager } from './manager'
@@ -1014,8 +1014,8 @@ export { ComponentManager } from './manager'
 Wraps the Smithery public API for searching skills and MCP servers.
 
 **Files:**
-- Create: `.scripts/lib/component/provider-smithery.ts`
-- Create: `.scripts/test/component/provider-smithery.test.ts`
+- Create: `cli/lib/component/provider-smithery.ts`
+- Create: `cli/test/component/provider-smithery.test.ts`
 
 Key logic:
 - `search(params)`: calls `GET https://registry.smithery.ai/api/v1/servers?q=...&pageSize=N&page=N` for MCP servers
@@ -1036,9 +1036,9 @@ Test with mocked `globalThis.fetch`.
 Extend the existing search API to include Smithery as a 4th backend and add `page` parameter.
 
 **Files:**
-- Modify: `.scripts/lib/skill-search-api.ts`
-- Modify: `.scripts/lib/schemas.ts` (add `'smithery'` to `SearchBackendType`)
-- Modify: `.scripts/test/skill-find.test.ts`
+- Modify: `cli/lib/skill-search-api.ts`
+- Modify: `cli/lib/schemas.ts` (add `'smithery'` to `SearchBackendType`)
+- Modify: `cli/test/skill-find.test.ts`
 
 Changes:
 - Add `page` field to `SearchOptions` (page-based pagination for all backends)
@@ -1055,8 +1055,8 @@ Changes:
 Static registry of 19+ AI client definitions — their config file paths per OS, file format, transport capabilities, and field mappings.
 
 **Files:**
-- Create: `.scripts/lib/component/clients.ts`
-- Create: `.scripts/test/component/clients.test.ts`
+- Create: `cli/lib/component/clients.ts`
+- Create: `cli/test/component/clients.test.ts`
 
 ```typescript
 // Key types
@@ -1097,8 +1097,8 @@ claude-desktop, claude-code, cursor, windsurf, vscode, vscode-insiders, cline, r
 Read and write MCP server entries in client config files.
 
 **Files:**
-- Create: `.scripts/lib/component/client-config.ts`
-- Create: `.scripts/test/component/client-config.test.ts`
+- Create: `cli/lib/component/client-config.ts`
+- Create: `cli/test/component/client-config.test.ts`
 
 ```typescript
 // Key exports
@@ -1139,8 +1139,8 @@ Test with temp files for each format.
 Add `smithery` source type for `smithery://namespace/slug` URIs.
 
 **Files:**
-- Modify: `.scripts/lib/source-parser.ts`
-- Modify: `.scripts/test/source-parser.test.ts`
+- Modify: `cli/lib/source-parser.ts`
+- Modify: `cli/test/source-parser.test.ts`
 
 New test cases:
 | Input | type | namespace | name |

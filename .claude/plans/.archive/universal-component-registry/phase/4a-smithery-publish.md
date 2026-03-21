@@ -23,26 +23,26 @@ Add a `publish` operation to the component system and implement it for Smithery'
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Publish types + interface extension | `.scripts/lib/component/types.ts` | TypeScript (additions) |
-| Smithery publish implementation | `.scripts/lib/component/smithery-publish.ts` | TypeScript |
-| Smithery auth module | `.scripts/lib/component/smithery-auth.ts` | TypeScript |
-| Updated SmitheryProvider | `.scripts/lib/component/provider-smithery.ts` | TypeScript (modifications) |
-| Updated ComponentManager | `.scripts/lib/component/manager.ts` | TypeScript (additions) |
-| Tests | `.scripts/test/component/smithery-publish.test.ts` | bun:test |
-| Tests | `.scripts/test/component/smithery-auth.test.ts` | bun:test |
+| Publish types + interface extension | `cli/lib/component/types.ts` | TypeScript (additions) |
+| Smithery publish implementation | `cli/lib/component/smithery-publish.ts` | TypeScript |
+| Smithery auth module | `cli/lib/component/smithery-auth.ts` | TypeScript |
+| Updated SmitheryProvider | `cli/lib/component/provider-smithery.ts` | TypeScript (modifications) |
+| Updated ComponentManager | `cli/lib/component/manager.ts` | TypeScript (additions) |
+| Tests | `cli/test/component/smithery-publish.test.ts` | bun:test |
+| Tests | `cli/test/component/smithery-auth.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/component/smithery-publish.ts`
-- `.scripts/lib/component/smithery-auth.ts`
-- `.scripts/test/component/smithery-publish.test.ts`
-- `.scripts/test/component/smithery-auth.test.ts`
+- `cli/lib/component/smithery-publish.ts`
+- `cli/lib/component/smithery-auth.ts`
+- `cli/test/component/smithery-publish.test.ts`
+- `cli/test/component/smithery-auth.test.ts`
 
 **Modify:**
-- `.scripts/lib/component/types.ts` (add `publish()` to `ComponentProvider`, add `PublishOptions`/`PublishResult`)
-- `.scripts/lib/component/provider-smithery.ts` (add `publish` capability + delegate to smithery-publish)
-- `.scripts/lib/component/manager.ts` (add `publish()` method)
+- `cli/lib/component/types.ts` (add `publish()` to `ComponentProvider`, add `PublishOptions`/`PublishResult`)
+- `cli/lib/component/provider-smithery.ts` (add `publish` capability + delegate to smithery-publish)
+- `cli/lib/component/manager.ts` (add `publish()` method)
 
 ## Design
 
@@ -88,7 +88,7 @@ For MVP: support env var + manual input only. Device-code flow deferred.
 
 ### Task 4a.1: Extend ComponentProvider with publish()
 
-**Files:** Modify `.scripts/lib/component/types.ts`, `.scripts/lib/component/manager.ts`
+**Files:** Modify `cli/lib/component/types.ts`, `cli/lib/component/manager.ts`
 
 Add to `types.ts`:
 
@@ -152,7 +152,7 @@ Tests:
 
 ### Task 4a.2: Smithery Authentication Module
 
-**Files:** Create `.scripts/lib/component/smithery-auth.ts`, `.scripts/test/component/smithery-auth.test.ts`
+**Files:** Create `cli/lib/component/smithery-auth.ts`, `cli/test/component/smithery-auth.test.ts`
 
 ```typescript
 export interface SmitheryAuth {
@@ -178,7 +178,7 @@ Tests (mock fetch):
 
 ### Task 4a.3: Smithery Publish Implementation
 
-**Files:** Create `.scripts/lib/component/smithery-publish.ts`, `.scripts/test/component/smithery-publish.test.ts`
+**Files:** Create `cli/lib/component/smithery-publish.ts`, `cli/test/component/smithery-publish.test.ts`
 
 ```typescript
 export interface SmitheryPublishOptions {
@@ -223,7 +223,7 @@ Tests (mock fetch):
 
 ### Task 4a.4: Update SmitheryProvider
 
-**Files:** Modify `.scripts/lib/component/provider-smithery.ts`
+**Files:** Modify `cli/lib/component/provider-smithery.ts`
 
 Add `publish: ['mcp_server']` to capabilities. Implement `publish()` method that:
 1. Resolves auth via `resolveSmitheryAuth()`

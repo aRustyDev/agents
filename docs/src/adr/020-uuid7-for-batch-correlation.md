@@ -52,14 +52,14 @@ Error messages embedded worktree paths like `skill-inspect-107`, but worktree nu
 
 ### Option 4: UUID v7 (Chosen)
 
-`runId: "019..."`. Timestamp-sortable, unique, already implemented in `.scripts/lib/uuid.ts`.
+`runId: "019..."`. Timestamp-sortable, unique, already implemented in `cli/lib/uuid.ts`.
 
 - Pro: Chronologically sortable (first 48 bits are millisecond timestamp), globally unique (random suffix), already in the codebase with tests
 - Con: Not human-readable at a glance (but the embedded timestamp can be extracted)
 
 ## Decision Outcome
 
-**Use UUID v7** for `runId` and `batchId` fields. The implementation already exists at `.scripts/lib/uuid.ts` with full test coverage.
+**Use UUID v7** for `runId` and `batchId` fields. The implementation already exists at `cli/lib/uuid.ts` with full test coverage.
 
 ```mermaid
 graph TD
@@ -124,4 +124,4 @@ graph TD
 - Not human-readable at a glance — mitigated by `analyzedAt` ISO timestamp alongside
 
 **Neutral:**
-- The `uuid7()` implementation uses `Bun.randomUUIDv7()` under the hood if available, falling back to a manual implementation. Already tested in `.scripts/test/uuid.test.ts`.
+- The `uuid7()` implementation uses `Bun.randomUUIDv7()` under the hood if available, falling back to a manual implementation. Already tested in `cli/test/uuid.test.ts`.

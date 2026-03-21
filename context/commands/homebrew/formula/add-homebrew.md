@@ -24,7 +24,7 @@ Follow these steps to create a complete, working Homebrew formula.
    - Determine the **binary name** — may differ from formula name:
      - Rust: check `Cargo.toml` `[[bin]]` section
      - Go: check `main.go` location (`root` vs `cmd/<name>/`)
-     - Python: check `pyproject.toml` `[project.scripts]`
+     - Python: check `pyproject.toml` `[projectcli]`
 
 3. **Calculate SHA256** for the source tarball (skip for HEAD-only):
 

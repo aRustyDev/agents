@@ -5,7 +5,7 @@
 | What | Where to Look | Command / File |
 |------|---------------|----------------|
 | Build system | Repo root | `pyproject.toml` (modern), `setup.py`/`setup.cfg` (legacy) |
-| Binary name(s) | `pyproject.toml` `[project.scripts]` or `setup.py` `entry_points` | The key is the binary name, the value is the module path |
+| Binary name(s) | `pyproject.toml` `[projectcli]` or `setup.py` `entry_points` | The key is the binary name, the value is the module path |
 | Python version | `pyproject.toml` `requires-python` | Map to Homebrew's `python@3.XX` — use latest compatible |
 | Direct dependencies | `pyproject.toml` `[project.dependencies]` or `requirements.txt` | Each becomes a `resource` block unless already in homebrew-core |
 | Resource URLs | PyPI | `https://pypi.org/project/<pkg>/#files` — use the `.tar.gz` sdist, not wheel |
@@ -17,7 +17,7 @@
 
 ```bash
 # Confirm Python project, find entry points
-gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep -A10 '\[project.scripts\]'
+gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep -A10 '\[projectcli\]'
 
 # Find Python version requirement
 gh api repos/OWNER/REPO/contents/pyproject.toml --jq '.content' | base64 -d | grep 'requires-python'
@@ -122,10 +122,10 @@ brew update-python-resources <formula-name>
 
 ### Entry Points
 
-Check `pyproject.toml` `[project.scripts]` for the binary names the formula will install:
+Check `pyproject.toml` `[projectcli]` for the binary names the formula will install:
 
 ```toml
-[project.scripts]
+[projectcli]
 my-tool = "my_package.cli:main"
 ```
 

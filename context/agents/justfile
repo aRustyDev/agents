@@ -4,7 +4,7 @@
 set unstable := true
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / ".scripts"
+SCRIPTS := ROOT / "cli"
 AGENTS := source_directory()
 
 # Validate an agent definition

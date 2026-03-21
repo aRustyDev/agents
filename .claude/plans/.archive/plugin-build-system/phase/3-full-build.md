@@ -34,7 +34,7 @@ mod rule      # just rule:validate
 
 ### 2. Plugin Build Command
 
-Full rewrite in Python (`.scripts/build-plugin.py`) with:
+Full rewrite in Python (`cli/build-plugin.py`) with:
 
 ```bash
 just plugin:build <name> [--force] [--check-only] [--update-hashes]
@@ -147,7 +147,7 @@ Create module files:
 
 - [x] Create justfile module structure (`just/*.just`)
 - [x] Migrate Phase 2 tasks to `plugin` module
-- [x] Create `.scripts/build-plugin.py` (already existed, verified)
+- [x] Create `cli/build-plugin.py` (already existed, verified)
 - [x] Implement all CLI flags (build, check, update, hash, check-all, build-all, update-all)
 - [x] Add fork tracking (forked flag in plugin.sources.json)
 - [x] Add batch operations (build-all, check-all, update-all)

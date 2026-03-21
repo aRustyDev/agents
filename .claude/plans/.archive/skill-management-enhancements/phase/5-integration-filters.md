@@ -23,23 +23,23 @@ Implement remaining commands (`remove`, `info`), refactor existing code to use n
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Remove command logic | `.scripts/lib/skill-remove.ts` | TypeScript |
-| Info command logic | `.scripts/lib/skill-info.ts` | TypeScript |
-| Integration tests | `.scripts/test/skill-integration.test.ts` | bun:test |
-| CLI help/docs updates | `.scripts/commands/skill.ts` | TypeScript |
-| Refactored external-skills | `.scripts/lib/external-skills.ts` | TypeScript (modifications) |
+| Remove command logic | `cli/lib/skill-remove.ts` | TypeScript |
+| Info command logic | `cli/lib/skill-info.ts` | TypeScript |
+| Integration tests | `cli/test/skill-integration.test.ts` | bun:test |
+| CLI help/docs updates | `cli/commands/skill.ts` | TypeScript |
+| Refactored external-skills | `cli/lib/external-skills.ts` | TypeScript (modifications) |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/skill-remove.ts`
-- `.scripts/lib/skill-info.ts`
-- `.scripts/test/skill-integration.test.ts`
+- `cli/lib/skill-remove.ts`
+- `cli/lib/skill-info.ts`
+- `cli/test/skill-integration.test.ts`
 
 **Modify:**
-- `.scripts/commands/skill.ts` (add `remove`, `info` subcommands, add filters to all commands)
-- `.scripts/lib/external-skills.ts` (replace inline git calls with `lib/git.ts`)
-- `.scripts/lib/catalog.ts` (optionally use `addSkill` instead of `npx skills add`)
+- `cli/commands/skill.ts` (add `remove`, `info` subcommands, add filters to all commands)
+- `cli/lib/external-skills.ts` (replace inline git calls with `lib/git.ts`)
+- `cli/lib/catalog.ts` (optionally use `addSkill` instead of `npx skills add`)
 
 ## Error Types
 
@@ -96,7 +96,7 @@ export class InfoError extends CliError {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-remove.ts
+// cli/lib/skill-remove.ts
 
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -195,7 +195,7 @@ async function removeFromAgent(
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-remove.test.ts
+// cli/test/skill-remove.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
@@ -323,7 +323,7 @@ describe('removeSkills', () => {
 #### Code Examples
 
 ```typescript
-// .scripts/lib/skill-info.ts
+// cli/lib/skill-info.ts
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -491,7 +491,7 @@ const infoCommand = defineCommand({
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-info.test.ts
+// cli/test/skill-info.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -713,7 +713,7 @@ const addResult = await addSkill(`${entry.source}@${entry.skill}`, {
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/external-skills-refactor.test.ts
+// cli/test/external-skills-refactor.test.ts
 import { describe, expect, test, mock } from 'bun:test'
 
 describe('gitLsRemote after refactor', () => {
@@ -771,7 +771,7 @@ describe('gitLsRemote after refactor', () => {
 #### Code Examples
 
 ```typescript
-// .scripts/test/skill-integration.test.ts
+// cli/test/skill-integration.test.ts
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, rm, writeFile, readFile } from 'node:fs/promises'
@@ -902,7 +902,7 @@ describe('multi-agent integration', () => {
 - [ ] Copy vs symlink test verifies correct filesystem state for each mode
 - [ ] JSON output test validates all commands produce parseable JSON
 - [ ] All integration tests use temp directories (no pollution of real `context/skills/`)
-- [ ] Tests are in `.scripts/test/skill-integration.test.ts`
+- [ ] Tests are in `cli/test/skill-integration.test.ts`
 - [ ] At least 6 test scenarios covering the lifecycle and edge cases
 
 ---
@@ -980,7 +980,7 @@ const infoCommand = defineCommand({
 #### Example Test Cases
 
 ```typescript
-// .scripts/test/skill-commands.test.ts (additions)
+// cli/test/skill-commands.test.ts (additions)
 import { describe, expect, test } from 'bun:test'
 
 describe('CLI help output', () => {

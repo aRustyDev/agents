@@ -91,5 +91,5 @@ The `.TODO.yaml` source is never modified. All generated files can be regenerate
 - Phase 3 (agent definitions + CLI scaffolding) can also run in parallel with 1 and 2
 - This plan maps to Phase 4c in the TypeScript migration plan (depends on Phase 4b External Skill Tracking for `.external/` infrastructure)
 - `mdq` (yshavit/mdq) must be added to brewfile before Phase 4 execution
-- `@anthropic-ai/sdk` must be added to `.scripts/package.json` before Phase 1 execution
+- `@anthropic-ai/sdk` must be added to `cli/package.json` before Phase 1 execution
 - `.catalog.ndjson` is gitignored (generated artifact); `.taxonomy.yaml` and `.catalog-stats.json` are committed

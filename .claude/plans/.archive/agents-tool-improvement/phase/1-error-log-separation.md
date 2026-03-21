@@ -27,10 +27,10 @@ Separate error records from the catalog into an append-only error log file. Cata
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Error log types + functions | `.scripts/lib/catalog.ts` | TypeScript |
-| Updated merge function | `.scripts/lib/catalog.ts` | TypeScript |
-| Updated errors CLI | `.scripts/commands/skill.ts` | TypeScript |
-| Error log tests | `.scripts/test/catalog-tier1.test.ts` | TypeScript |
+| Error log types + functions | `cli/lib/catalog.ts` | TypeScript |
+| Updated merge function | `cli/lib/catalog.ts` | TypeScript |
+| Updated errors CLI | `cli/commands/skill.ts` | TypeScript |
+| Error log tests | `cli/test/catalog-tier1.test.ts` | TypeScript |
 | Gitignore update | `context/skills/.gitignore` | Text |
 
 ## Files
@@ -39,9 +39,9 @@ Separate error records from the catalog into an append-only error log file. Cata
 - None (error log file created at runtime)
 
 **Modify:**
-- `.scripts/lib/catalog.ts` — `ErrorRecord` type, error log functions, update `Tier1Result`, update `mergeTier1Results` signature and implementation
-- `.scripts/commands/skill.ts` — update `processBatch` to pass `errorLogPath` to merge, update `catalog errors` subcommand, add `--prune` flag
-- `.scripts/test/catalog-tier1.test.ts` — tests for error log append/read, merge success-clears-errors, merge failure-increments-attemptCount, merge routes errors to log
+- `cli/lib/catalog.ts` — `ErrorRecord` type, error log functions, update `Tier1Result`, update `mergeTier1Results` signature and implementation
+- `cli/commands/skill.ts` — update `processBatch` to pass `errorLogPath` to merge, update `catalog errors` subcommand, add `--prune` flag
+- `cli/test/catalog-tier1.test.ts` — tests for error log append/read, merge success-clears-errors, merge failure-increments-attemptCount, merge routes errors to log
 - `context/skills/.gitignore` — add `.catalog-errors.ndjson`
 
 ## Tasks

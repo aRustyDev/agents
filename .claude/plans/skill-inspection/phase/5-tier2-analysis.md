@@ -31,18 +31,18 @@ Dispatch Tier 2 (Sonnet) agents for qualitative analysis of non-fork, non-trivia
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Tier 2 orchestrator | `.scripts/lib/catalog.ts` (additions) | TypeScript |
+| Tier 2 orchestrator | `cli/lib/catalog.ts` (additions) | TypeScript |
 | Updated catalog | `context/skills/.catalog.ndjson` | NDJSON |
-| Tests | `.scripts/test/catalog-tier2.test.ts` | TypeScript |
+| Tests | `cli/test/catalog-tier2.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/test/catalog-tier2.test.ts`
+- `cli/test/catalog-tier2.test.ts`
 
 **Modify:**
-- `.scripts/lib/catalog.ts` — add Tier 2 orchestrator, gating logic, result merging
-- `.scripts/commands/skill.ts` — extend `catalog analyze` to support `--tier 1|2|all`
+- `cli/lib/catalog.ts` — add Tier 2 orchestrator, gating logic, result merging
+- `cli/commands/skill.ts` — extend `catalog analyze` to support `--tier 1|2|all`
 
 ## Tasks
 

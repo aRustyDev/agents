@@ -35,7 +35,7 @@ Plugin sources files MUST use the extended format with content-addressed hashing
 ```bash
 just plugin-hash <path>
 # or
-uv run python .scripts/build-plugin.py hash <path>
+uv run python cli/build-plugin.py hash <path>
 ```
 
 ## Validation

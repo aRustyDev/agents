@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Several modules in `.scripts/` used shell-out patterns (`exec`, `spawn`, `npx`) to perform operations that could be expressed as structured TypeScript function calls. Shell-outs have recurring costs:
+Several modules in `cli/` used shell-out patterns (`exec`, `spawn`, `npx`) to perform operations that could be expressed as structured TypeScript function calls. Shell-outs have recurring costs:
 
 - **Opaque errors** — stderr parsing is fragile; all failures collapse into a single generic error type
 - **No type safety** — inputs and outputs are untyped strings; callers must parse and validate manually

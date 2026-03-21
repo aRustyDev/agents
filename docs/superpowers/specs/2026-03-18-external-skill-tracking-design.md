@@ -40,7 +40,7 @@ context/skills/
   justfile                            # Imports .external/justfile as module
   .gitignore                          # .claude/ .agents/ (existing)
 
-.scripts/
+cli/
   bin/ai-tools.ts                     # CLI entry (Citty router)
   commands/skill.ts                   # skill deps check|sync|issues|status
   lib/
@@ -167,7 +167,7 @@ set unstable := true
 
 # ROOT is not inherited from parent module scope, so recompute
 ROOT := source_directory() / "../../.."
-TOOLS := ROOT / ".scripts/bin/ai-tools.ts"
+TOOLS := ROOT / "cli/bin/ai-tools.ts"
 run := "bun run " + TOOLS + " skill deps"
 
 # Full workflow: sync -> issues -> links -> status
@@ -204,7 +204,7 @@ status *FLAGS:
     {{ run }} status {{ FLAGS }}
 ```
 
-All recipes delegate to `bun run .scripts/bin/ai-tools.ts skill deps <verb>`.
+All recipes delegate to `bun run cli/bin/ai-tools.ts skill deps <verb>`.
 
 ### Integration with `context/skills/justfile`
 
@@ -420,9 +420,9 @@ git diff HEAD~1 -- context/skills/.external/some-org/repo/their-skill/
 | `context/skills/.external/sources.lock.yaml` | Create | Lock file (machine-managed) |
 | `context/skills/.external/justfile` | Create | Module with external:* recipes |
 | `context/skills/justfile` | Modify | Add `mod external ".external/justfile"` |
-| `.scripts/commands/skill.ts` | Modify | Add `deps` subcommand tree |
-| `.scripts/lib/schemas.ts` | Modify | Add ExternalSkillEntry, ExternalSourcesManifest schemas |
-| `.scripts/lib/lockfile.ts` | Modify | Register external-skills lock schema |
+| `cli/commands/skill.ts` | Modify | Add `deps` subcommand tree |
+| `cli/lib/schemas.ts` | Modify | Add ExternalSkillEntry, ExternalSourcesManifest schemas |
+| `cli/lib/lockfile.ts` | Modify | Register external-skills lock schema |
 | `context/skills/.gitignore` | Verify | Ensure `.external/` is NOT listed |
 
 ## Dependencies (already in migration spec)

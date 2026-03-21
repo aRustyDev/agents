@@ -158,13 +158,13 @@ repos:
           )$
 
   # =============================================================================
-  # Claude Context Linting (cclint) - Local, requires .scripts/lint-context.sh
+  # Claude Context Linting (cclint) - Local, requires cli/lint-context.sh
   # =============================================================================
   - repo: local
     hooks:
       - id: cclint
         name: "cclint: validate claude context files"
-        entry: bash -c '.scripts/lint-context.sh'
+        entry: bash -c 'cli/lint-context.sh'
         language: system
         files: |
           (?x)^(

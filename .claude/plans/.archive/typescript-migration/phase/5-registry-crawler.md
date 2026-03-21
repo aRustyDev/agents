@@ -34,18 +34,18 @@ Port the multi-tier registry crawler from Python to TypeScript, replacing `httpx
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Registry module | `.scripts/lib/registry.ts` | TypeScript |
-| Registry commands | `.scripts/commands/registry.ts` | TypeScript |
-| Integration tests | `.scripts/test/registry.test.ts` | TypeScript |
+| Registry module | `cli/lib/registry.ts` | TypeScript |
+| Registry commands | `cli/commands/registry.ts` | TypeScript |
+| Integration tests | `cli/test/registry.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/registry.ts`
-- `.scripts/test/registry.test.ts`
+- `cli/lib/registry.ts`
+- `cli/test/registry.test.ts`
 
 **Modify:**
-- `.scripts/commands/registry.ts` (replace stub with full implementation)
+- `cli/commands/registry.ts` (replace stub with full implementation)
 - `justfile` (update registry recipes if any exist)
 
 ## Tasks

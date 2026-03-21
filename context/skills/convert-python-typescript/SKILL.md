@@ -1208,7 +1208,7 @@ dev = [
     "mypy>=1.6.0",
 ]
 
-[project.scripts]
+[projectcli]
 mytool = "myproject.cli:main"
 
 [build-system]

@@ -30,22 +30,22 @@ brew bundle
 
 Add new tools to `brewfile`, not installed ad-hoc.
 
-### TypeScript Dependencies (.scripts/package.json)
+### TypeScript Dependencies (cli/package.json)
 
 TypeScript tooling is managed via Bun:
 
 ```bash
 # Install all deps
-cd .scripts && bun install
+cd cli && bun install
 
 # Run the CLI tool
-bun run .scripts/bin/agents.ts <noun> <verb> [args]
+bun run cli/bin/agents.ts <noun> <verb> [args]
 
 # Or via justfile
 just agents <noun> <verb> [args]
 
 # Run tests
-cd .scripts && bun test
+cd cli && bun test
 ```
 
 The `bun.lock` file is version controlled for reproducible installs.
@@ -59,7 +59,7 @@ Python is used only for the knowledge graph system (sqlite-vec + Ollama embeddin
 uv sync
 
 # Run embedding CLI
-uv run python .scripts/embed.py
+uv run python cli/embed.py
 ```
 
 ## Knowledge Graph
@@ -101,7 +101,7 @@ See `docs/src/adr/` for architecture decisions.
 │   ├── rules/                  # Rule files
 │   ├── plugins/                # Plugin bundles
 │   └── output-styles/          # Output formatting styles
-├── .scripts/
+├── cli/
 │   ├── bin/agents.ts         # Unified CLI (Bun + Citty)
 │   ├── lib/                    # TypeScript modules (hash, output, schemas, etc.)
 │   ├── commands/               # CLI subcommands (plugin, skill, kg, registry)
@@ -178,7 +178,7 @@ See `.claude/skills/beads/` for full documentation.
 ## Conventions
 
 - **Brewfile**: Tool-level dependencies only (ollama, uv, bun, yq, etc.)
-- **package.json** (`.scripts/`): TypeScript packages for `agents` CLI (Bun)
+- **package.json** (`cli/`): TypeScript packages for `agents` CLI (Bun)
 - **pyproject.toml**: Python packages for KG only (sqlite-vec, ollama, watchdog)
 - **`just init`**: Must be idempotent — safe to run multiple times
 - **SQL dumps**: `.data/**/*.sql` files are version controlled; `.db` files are gitignored

@@ -4,7 +4,7 @@
 set unstable := true
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / ".scripts"
+SCRIPTS := ROOT / "cli"
 RULES := source_directory()
 
 # Validate a rule file (accepts category/name or just name)

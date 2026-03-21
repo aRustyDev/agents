@@ -248,9 +248,9 @@ const BUILD_CONFIGS = [
     file: "package.json",
     type: "npm",
     getCommands: (pkg) => ({
-      test: pkg.scripts?.test,
-      build: pkg.scripts?.build,
-      lint: pkg.scripts?.lint,
+      test: pkgcli?.test,
+      build: pkgcli?.build,
+      lint: pkgcli?.lint,
     }),
   },
 ];

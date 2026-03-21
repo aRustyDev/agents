@@ -31,20 +31,20 @@ Build the Valibot schema definitions and the lockfile/manifest I/O layer that pl
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Schema definitions | `.scripts/lib/schemas.ts` | TypeScript |
-| Lockfile operations | `.scripts/lib/lockfile.ts` | TypeScript |
-| Manifest I/O | `.scripts/lib/manifest.ts` | TypeScript |
-| Test suites | `.scripts/test/{schemas,lockfile,manifest}.test.ts` | TypeScript |
+| Schema definitions | `cli/lib/schemas.ts` | TypeScript |
+| Lockfile operations | `cli/lib/lockfile.ts` | TypeScript |
+| Manifest I/O | `cli/lib/manifest.ts` | TypeScript |
+| Test suites | `cli/test/{schemas,lockfile,manifest}.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/schemas.ts`
-- `.scripts/lib/lockfile.ts`
-- `.scripts/lib/manifest.ts`
-- `.scripts/test/schemas.test.ts`
-- `.scripts/test/lockfile.test.ts`
-- `.scripts/test/manifest.test.ts`
+- `cli/lib/schemas.ts`
+- `cli/lib/lockfile.ts`
+- `cli/lib/manifest.ts`
+- `cli/test/schemas.test.ts`
+- `cli/test/lockfile.test.ts`
+- `cli/test/manifest.test.ts`
 
 **Modify:**
 - None

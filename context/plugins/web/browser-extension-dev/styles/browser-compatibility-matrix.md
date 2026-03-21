@@ -107,7 +107,7 @@ Use for manifest.json key support:
 | `manifest_version` | ✓ | ✓ | ✓ | Yes |
 | `browser_specific_settings` | — | ✓ | — | Firefox |
 | `background.service_worker` | ✓ | ✓ | ✓ | Yes (MV3) |
-| `background.scripts` | MV2 | ✓ | MV2 | No |
+| `backgroundcli` | MV2 | ✓ | MV2 | No |
 | `side_panel` | ✓ | ✗ | ✗ | No |
 | `minimum_chrome_version` | ✓ | — | — | Recommended |
 | `content_security_policy` | ✓ | ✓ | ✓ | Recommended |
@@ -124,7 +124,7 @@ Use for MV2 to MV3 transitions:
 |---------|-----------------|:------:|:-------:|:------:|
 | `browserAction` | `action` | ✓ | ✓ | ✓ |
 | `pageAction` | `action` | ✓ | ✓ | ✓ |
-| `background.scripts` | `background.service_worker` | ✓ | ✓ | ✓ |
+| `backgroundcli` | `background.service_worker` | ✓ | ✓ | ✓ |
 | `background.persistent` | — (use alarms) | — | ◐ | — |
 | `webRequestBlocking` | `declarativeNetRequest` | ✓ | ◐ | ◐ |
 | `chrome.extension.*` | `chrome.runtime.*` | ✓ | ✓ | ✓ |

@@ -54,8 +54,8 @@
 | File | What Changes |
 |---|---|
 | `.claude/devrag.json` | Glob `./context/rules/*.md` → `./context/rules/**/*.md` |
-| `.scripts/embed.py:35` | Add `context/rules/**/*.md` pattern (keep flat pattern for `justfile.md`) |
-| `.scripts/watch-embed.py:125` | Watch dir stays `context/rules` (unchanged — watches recursively) |
+| `cli/embed.py:35` | Add `context/rules/**/*.md` pattern (keep flat pattern for `justfile.md`) |
+| `cli/watch-embed.py:125` | Watch dir stays `context/rules` (unchanged — watches recursively) |
 | `.pre-commit-config.yaml:151` | Exclusion `context/rules/schemas\.md$` → `context/rules/arustydev/schemas\.md$` |
 | `.claude/settings.json:64` | `cclint` hook `context/*.md` glob won't match nested rules — update pattern |
 | `context/commands/context/rule/create.md` | Path references, glob patterns, and target path for new rules |
@@ -367,13 +367,13 @@ git commit -m "fix(devrag): update rules glob for nested directory structure"
 ### Task 12: Update embed.py glob
 
 **Files:**
-- Modify: `.scripts/embed.py:35`
+- Modify: `cli/embed.py:35`
 
 Note: Python's `Path.glob('context/rules/**/*.md')` does NOT match flat files like `context/rules/justfile.md` — the `**` requires at least one directory level. Keep the flat pattern alongside the recursive one.
 
 - [ ] **Step 1: Update the pattern**
 
-In `.scripts/embed.py`, change line 35:
+In `cli/embed.py`, change line 35:
 ```python
 'rule': ['context/rules/*.md', '.claude/rules/*.md'],
 ```
@@ -384,13 +384,13 @@ to:
 
 - [ ] **Step 2: Verify syntax**
 
-Run: `python3 -c "import ast; ast.parse(open('.scripts/embed.py').read())"`
+Run: `python3 -c "import ast; ast.parse(open('cli/embed.py').read())"`
 Expected: No output (valid Python)
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .scripts/embed.py
+git add cli/embed.py
 git commit -m "fix(embed): update rules glob for nested directory structure"
 ```
 
@@ -513,18 +513,18 @@ If the path is **absolute** (e.g., `/private/etc/infra/pub/ai/context/rules/foo.
 
 In `.claude/settings.json`, change line 64:
 ```json
-"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in context/*.md|.claude/*.md|CLAUDE.md) .scripts/lint-context.sh;; esac; true'"
+"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in context/*.md|.claude/*.md|CLAUDE.md) cli/lint-context.sh;; esac; true'"
 ```
 to:
 ```json
-"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in context/*.md|context/*/*.md|context/*/*/*.md|context/*/*/*/*.md|.claude/*.md|CLAUDE.md) .scripts/lint-context.sh;; esac; true'"
+"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in context/*.md|context/*/*.md|context/*/*/*.md|context/*/*/*/*.md|.claude/*.md|CLAUDE.md) cli/lint-context.sh;; esac; true'"
 ```
 
 - [ ] **Step 2b: Update pattern (absolute paths)**
 
 If paths are absolute, use a suffix match approach instead:
 ```json
-"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) .scripts/lint-context.sh;; esac; true'"
+"command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) cli/lint-context.sh;; esac; true'"
 ```
 
 Note: Bash `case` doesn't support `**`, so we expand to match up to 3 levels of nesting (covers `context/rules/agent/plugin/*.md`).
@@ -573,7 +573,7 @@ Replace the entire `context/rules/justfile` with:
 set unstable := true
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / ".scripts"
+SCRIPTS := ROOT / "cli"
 RULES := source_directory()
 
 # Validate a rule file (accepts category/name or just name)
@@ -727,12 +727,12 @@ context/rules/pre-commit/yaml.md
 
 - [ ] **Step 2: Run embed.py to verify patterns work**
 
-Run: `uv run python .scripts/embed.py check`
+Run: `uv run python cli/embed.py check`
 Expected: Rules are discovered through the updated glob
 
 - [ ] **Step 3: Verify no broken references remain**
 
-Run: `grep -rn 'context/rules/[a-z].*\.md' .scripts/ .claude/devrag.json .claude/settings.json .pre-commit-config.yaml context/commands/ --include='*.py' --include='*.json' --include='*.yaml' --include='*.md' | grep -v '/\*\*/' | grep -v '/\*/' | grep -v 'context/rules/\*\.md'`
+Run: `grep -rn 'context/rules/[a-z].*\.md' cli/ .claude/devrag.json .claude/settings.json .pre-commit-config.yaml context/commands/ --include='*.py' --include='*.json' --include='*.yaml' --include='*.md' | grep -v '/\*\*/' | grep -v '/\*/' | grep -v 'context/rules/\*\.md'`
 Expected: No matches (all direct file references updated, only glob patterns remain)
 
 - [ ] **Step 4: Verify cclint hook matches nested paths**

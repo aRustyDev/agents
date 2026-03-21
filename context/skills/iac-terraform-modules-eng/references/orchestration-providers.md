@@ -291,7 +291,7 @@ locals {
         store: true
 
       - id: transform
-        type: io.kestra.plugin.scripts.python.Script
+        type: io.kestra.plugincli.python.Script
         script: |
           import pandas as pd
           df = pd.read_csv('{{ outputs.extract.uri }}')
@@ -360,7 +360,7 @@ resource "kestra_flow" "webhook_triggered" {
 
     tasks:
       - id: process
-        type: io.kestra.plugin.scripts.shell.Commands
+        type: io.kestra.plugincli.shell.Commands
         commands:
           - echo "Processing webhook payload"
 

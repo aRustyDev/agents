@@ -32,17 +32,17 @@ Create a TypeScript Meilisearch client module that handles indexing, searching, 
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Meilisearch client module | `.scripts/lib/meilisearch.ts` | TypeScript |
-| Test suite | `.scripts/test/meilisearch.test.ts` | TypeScript |
+| Meilisearch client module | `cli/lib/meilisearch.ts` | TypeScript |
+| Test suite | `cli/test/meilisearch.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/meilisearch.ts`
-- `.scripts/test/meilisearch.test.ts`
+- `cli/lib/meilisearch.ts`
+- `cli/test/meilisearch.test.ts`
 
 **Modify:**
-- `.scripts/package.json` — add `meilisearch` dependency
+- `cli/package.json` — add `meilisearch` dependency
 
 ## Tasks
 

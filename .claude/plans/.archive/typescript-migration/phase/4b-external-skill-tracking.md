@@ -41,11 +41,11 @@ Build the external skill tracking system: vendored snapshots in `.external/`, tw
 | External skills manifest | `context/skills/.external/sources.yaml` | YAML |
 | External skills lock | `context/skills/.external/sources.lock.json` | JSON |
 | External justfile module | `context/skills/.external/justfile` | Just |
-| Updated skill commands | `.scripts/commands/skill.ts` | TypeScript |
-| Updated schemas | `.scripts/lib/schemas.ts` | TypeScript |
-| Updated lockfile registry | `.scripts/lib/lockfile.ts` | TypeScript |
-| Updated hash module | `.scripts/lib/hash.ts` | TypeScript |
-| Test suites | `.scripts/test/skill-deps.test.ts` | TypeScript |
+| Updated skill commands | `cli/commands/skill.ts` | TypeScript |
+| Updated schemas | `cli/lib/schemas.ts` | TypeScript |
+| Updated lockfile registry | `cli/lib/lockfile.ts` | TypeScript |
+| Updated hash module | `cli/lib/hash.ts` | TypeScript |
+| Test suites | `cli/test/skill-deps.test.ts` | TypeScript |
 
 ## Files
 
@@ -53,13 +53,13 @@ Build the external skill tracking system: vendored snapshots in `.external/`, tw
 - `context/skills/.external/sources.yaml` (initial manifest with existing external skills)
 - `context/skills/.external/sources.lock.json` (machine-managed, initially empty)
 - `context/skills/.external/justfile` (module with external:* recipes)
-- `.scripts/test/skill-deps.test.ts`
+- `cli/test/skill-deps.test.ts`
 
 **Modify:**
-- `.scripts/commands/skill.ts` (replace deps stubs with full implementation)
-- `.scripts/lib/schemas.ts` (add ExternalSkillEntry, ExternalSourcesManifest, ExternalLockEntry)
-- `.scripts/lib/lockfile.ts` (register external-skills lock schema)
-- `.scripts/lib/hash.ts` (add lockKey function)
+- `cli/commands/skill.ts` (replace deps stubs with full implementation)
+- `cli/lib/schemas.ts` (add ExternalSkillEntry, ExternalSourcesManifest, ExternalLockEntry)
+- `cli/lib/lockfile.ts` (register external-skills lock schema)
+- `cli/lib/hash.ts` (add lockKey function)
 - `context/skills/justfile` (add `mod external ".external/justfile"`)
 
 ## Architecture
@@ -169,7 +169,7 @@ Content-hash of `source/skill`: `sha256("steveyegge/beads/beads").slice(0, 12)`.
   - `issues *FLAGS` — create/update GH issues
   - `links` — create/refresh symlinks
   - `status *FLAGS` — show combined state
-- [ ] All delegate to `bun run .scripts/bin/ai-tools.ts skill deps <verb>`
+- [ ] All delegate to `bun run cli/bin/ai-tools.ts skill deps <verb>`
 - [ ] Add `mod external ".external/justfile"` to `context/skills/justfile`
 - [ ] Invoked as: `just external:check`, `just external:update`, etc.
 

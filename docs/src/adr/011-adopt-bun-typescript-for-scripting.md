@@ -17,7 +17,7 @@ Accepted (2026-03-18)
 
 ## Context
 
-The project's `.scripts/` directory contained 8 Python scripts for plugin building, knowledge graph embedding, registry crawling, and utility operations. The project also requires Node.js/Bun for JavaScript/TypeScript linting (biome) and the Claude Code ecosystem (plugins, skills, commands) is JavaScript/TypeScript-native.
+The project's `cli/` directory contained 8 Python scripts for plugin building, knowledge graph embedding, registry crawling, and utility operations. The project also requires Node.js/Bun for JavaScript/TypeScript linting (biome) and the Claude Code ecosystem (plugins, skills, commands) is JavaScript/TypeScript-native.
 
 Running both Python (`uv`) and Node/Bun runtimes increases the toolchain surface, slows `just init`, and creates cognitive friction when the domain (Claude Code components) is TypeScript-native.
 

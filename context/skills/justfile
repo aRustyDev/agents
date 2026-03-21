@@ -7,7 +7,7 @@ mod external ".external/justfile"
 mod catalog ".catalog/justfile"
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / ".scripts"
+SCRIPTS := ROOT / "cli"
 SKILLS := source_directory()
 
 # Validate a skill's SKILL.md structure

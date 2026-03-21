@@ -49,7 +49,7 @@ Attempt HTTPS clone; if it fails, retry with SSH.
 
 ## Decision
 
-**Add `detectGitProtocol()` and `resolveCloneUrl(ownerRepo, protocol)` to `.scripts/lib/git.ts`.**
+**Add `detectGitProtocol()` and `resolveCloneUrl(ownerRepo, protocol)` to `cli/lib/git.ts`.**
 
 `detectGitProtocol()` checks in order:
 

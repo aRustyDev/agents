@@ -21,14 +21,14 @@ Create a `LocalPluginProvider` that discovers plugins via their `plugin.json` ma
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Plugin provider | `.scripts/lib/component/provider-plugin.ts` | TypeScript |
-| Plugin provider tests | `.scripts/test/component/provider-plugin.test.ts` | bun:test |
+| Plugin provider | `cli/lib/component/provider-plugin.ts` | TypeScript |
+| Plugin provider tests | `cli/test/component/provider-plugin.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/component/provider-plugin.ts`
-- `.scripts/test/component/provider-plugin.test.ts`
+- `cli/lib/component/provider-plugin.ts`
+- `cli/test/component/provider-plugin.test.ts`
 
 ## On-Disk Structure
 

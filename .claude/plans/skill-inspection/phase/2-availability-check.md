@@ -29,21 +29,21 @@ Check the availability of all 13,644 skill source repos via HTTP HEAD requests, 
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Availability checker | `.scripts/lib/catalog.ts` | TypeScript |
+| Availability checker | `cli/lib/catalog.ts` | TypeScript |
 | Catalog NDJSON output | `context/skills/.catalog.ndjson` | NDJSON |
-| CLI subcommand | `.scripts/commands/skill.ts` (additions) | TypeScript |
-| Tests | `.scripts/test/catalog-availability.test.ts` | TypeScript |
+| CLI subcommand | `cli/commands/skill.ts` (additions) | TypeScript |
+| Tests | `cli/test/catalog-availability.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/lib/catalog.ts` — NDJSON I/O, availability checking, rate limiting
-- `.scripts/test/catalog-availability.test.ts`
+- `cli/lib/catalog.ts` — NDJSON I/O, availability checking, rate limiting
+- `cli/test/catalog-availability.test.ts`
 - `context/skills/.catalog.ndjson` — generated output (gitignored)
 
 **Modify:**
-- `.scripts/commands/skill.ts` — add `catalog availability` subcommand
-- `.scripts/lib/schemas.ts` — add `CatalogEntry` schema
+- `cli/commands/skill.ts` — add `catalog availability` subcommand
+- `cli/lib/schemas.ts` — add `CatalogEntry` schema
 - `context/skills/.gitignore` — add `.catalog.ndjson`
 
 ## Tasks

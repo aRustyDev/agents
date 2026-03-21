@@ -21,9 +21,9 @@ Remove Python infrastructure once all commands are migrated to TypeScript. If Ph
 
 ## Success Criteria
 
-- [ ] No justfile recipe calls `uv run python .scripts/` (except KG fallback if applicable)
+- [ ] No justfile recipe calls `uv run python cli/` (except KG fallback if applicable)
 - [ ] `just init` installs Bun deps instead of (or in addition to) Python deps
-- [ ] All pre-commit hooks reference correct tools for `.scripts/**/*.ts`
+- [ ] All pre-commit hooks reference correct tools for `cli/**/*.ts`
 - [ ] CLAUDE.md reflects the new toolchain
 - [ ] Repository passes all existing CI checks
 
@@ -31,7 +31,7 @@ Remove Python infrastructure once all commands are migrated to TypeScript. If Ph
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Cleaned .scripts/ | `.scripts/` | Directory |
+| Cleaned cli/ | `cli/` | Directory |
 | Updated justfile | `justfile` | Just |
 | Updated CLAUDE.md | `CLAUDE.md` | Markdown |
 | Updated settings | `.claude/settings.json` | JSON |
@@ -49,25 +49,25 @@ Remove Python infrastructure once all commands are migrated to TypeScript. If Ph
 - `.pre-commit-config.yaml` — remove ruff hooks if no Python remains
 
 **Delete (full migration):**
-- `.scripts/*.py`
-- `.scripts/lib/*.py`
-- `.scripts/tests/` (Python test dir)
+- `cli/*.py`
+- `cli/lib/*.py`
+- `cli/tests/` (Python test dir)
 - `pyproject.toml`
 - `uv.lock`
 - `.venv/`
 
 **Delete (KG fallback — keep these if Phase 6 was skipped):**
-- Keep: `.scripts/embed.py`, `.scripts/init-db.py`, `.scripts/kg-stats.py`, `.scripts/watch-embed.py`
-- Keep: `.scripts/lib/embedder.py`, `.scripts/lib/chunker.py`
+- Keep: `cli/embed.py`, `cli/init-db.py`, `cli/kg-stats.py`, `cli/watch-embed.py`
+- Keep: `cli/lib/embedder.py`, `cli/lib/chunker.py`
 - Keep: `pyproject.toml` (trimmed to sqlite-vec + ollama + watchdog only)
-- Delete: everything else in `.scripts/*.py`
+- Delete: everything else in `cli/*.py`
 
 ## Tasks
 
 ### If Phase 6 succeeded (full migration)
-- [ ] Delete all Python scripts in `.scripts/`
-- [ ] Delete `.scripts/lib/` Python modules
-- [ ] Delete `.scripts/tests/` Python tests
+- [ ] Delete all Python scripts in `cli/`
+- [ ] Delete `cli/lib/` Python modules
+- [ ] Delete `cli/tests/` Python tests
 - [ ] Delete `pyproject.toml`
 - [ ] Delete `uv.lock`
 - [ ] Delete `.venv/` directory
@@ -84,9 +84,9 @@ Remove Python infrastructure once all commands are migrated to TypeScript. If Ph
 - [ ] Keep `_init-python` in `just init` but scope to KG deps only
 
 ### Common tasks (both paths)
-- [ ] Add `_init-bun` step to `just init` (`cd .scripts && bun install`)
+- [ ] Add `_init-bun` step to `just init` (`cd cli && bun install`)
 - [ ] Update CLAUDE.md: document Bun/TS toolchain, `ai-tools` CLI, updated dependency management
-- [ ] Update `.claude/settings.json`: add biome hook for `.scripts/**/*.ts` files
+- [ ] Update `.claude/settings.json`: add biome hook for `cli/**/*.ts` files
 - [ ] Verify `just init` is still idempotent
 - [ ] Run full pre-commit suite: `pre-commit run --all-files`
 - [ ] Verify all justfile recipes work end-to-end
@@ -98,4 +98,4 @@ Remove Python infrastructure once all commands are migrated to TypeScript. If Ph
 - Do not execute this phase until all command groups are validated
 - The `.claude/plans/merge-convert-skills/` Python code is out of scope — it stays regardless
 - If both Python and Bun are needed (KG fallback), `just init` runs both `_init-python` and `_init-bun`
-- Consider keeping Python test fixtures (`.scripts/tests/`) for reference during early TS maintenance, deleting after confidence is established
+- Consider keeping Python test fixtures (`cli/tests/`) for reference during early TS maintenance, deleting after confidence is established

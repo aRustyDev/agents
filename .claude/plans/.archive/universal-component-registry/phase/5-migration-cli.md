@@ -26,26 +26,26 @@ Wire the component system into the CLI. Create new `mcp` top-level command. Crea
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| MCP command tree | `.scripts/commands/mcp.ts` | TypeScript |
-| Component command tree | `.scripts/commands/component.ts` | TypeScript |
-| Manager factory | `.scripts/lib/component/factory.ts` | TypeScript |
-| CLI wiring for agents.ts | `.scripts/bin/agents.ts` | TypeScript (modification) |
-| MCP command tests | `.scripts/test/commands/mcp.test.ts` | bun:test |
-| Component command tests | `.scripts/test/commands/component.test.ts` | bun:test |
-| Manager factory tests | `.scripts/test/component/factory.test.ts` | bun:test |
+| MCP command tree | `cli/commands/mcp.ts` | TypeScript |
+| Component command tree | `cli/commands/component.ts` | TypeScript |
+| Manager factory | `cli/lib/component/factory.ts` | TypeScript |
+| CLI wiring for agents.ts | `cli/bin/agents.ts` | TypeScript (modification) |
+| MCP command tests | `cli/test/commands/mcp.test.ts` | bun:test |
+| Component command tests | `cli/test/commands/component.test.ts` | bun:test |
+| Manager factory tests | `cli/test/component/factory.test.ts` | bun:test |
 
 ## Files
 
 **Create:**
-- `.scripts/commands/mcp.ts`
-- `.scripts/commands/component.ts`
-- `.scripts/lib/component/factory.ts`
-- `.scripts/test/commands/mcp.test.ts`
-- `.scripts/test/commands/component.test.ts`
-- `.scripts/test/component/factory.test.ts`
+- `cli/commands/mcp.ts`
+- `cli/commands/component.ts`
+- `cli/lib/component/factory.ts`
+- `cli/test/commands/mcp.test.ts`
+- `cli/test/commands/component.test.ts`
+- `cli/test/component/factory.test.ts`
 
 **Modify:**
-- `.scripts/bin/agents.ts` (add `mcp` and `component` subcommands)
+- `cli/bin/agents.ts` (add `mcp` and `component` subcommands)
 - `CLAUDE.md` (add new commands to Common Tasks table)
 
 ## Design
@@ -55,7 +55,7 @@ Wire the component system into the CLI. Create new `mcp` top-level command. Crea
 All CLI commands need a configured `ComponentManager` with all providers registered. Instead of repeating the registration in every command, create a factory:
 
 ```typescript
-// .scripts/lib/component/factory.ts
+// cli/lib/component/factory.ts
 import { ComponentManager } from './manager'
 import { LocalProvider } from './provider-local'
 import { LocalAgentProvider } from './provider-agent'
@@ -136,7 +136,7 @@ Cross-type search using `manager.search({ query })` with no type filter:
 
 ### Task 5.1: Manager Factory
 
-**Files:** Create `.scripts/lib/component/factory.ts`, `.scripts/test/component/factory.test.ts`
+**Files:** Create `cli/lib/component/factory.ts`, `cli/test/component/factory.test.ts`
 
 Tests:
 1. `createComponentManager()` returns a ComponentManager
@@ -148,7 +148,7 @@ Tests:
 
 ### Task 5.2: MCP Command Tree
 
-**Files:** Create `.scripts/commands/mcp.ts`, `.scripts/test/commands/mcp.test.ts`
+**Files:** Create `cli/commands/mcp.ts`, `cli/test/commands/mcp.test.ts`
 
 Each subcommand follows the Citty pattern:
 
@@ -234,7 +234,7 @@ Tests:
 
 ### Task 5.3: Component Command Tree
 
-**Files:** Create `.scripts/commands/component.ts`, `.scripts/test/commands/component.test.ts`
+**Files:** Create `cli/commands/component.ts`, `cli/test/commands/component.test.ts`
 
 ```typescript
 export default defineCommand({
@@ -318,7 +318,7 @@ Tests:
 
 ### Task 5.4: Wire into Main CLI
 
-**Files:** Modify `.scripts/bin/agents.ts`
+**Files:** Modify `cli/bin/agents.ts`
 
 Add `mcp` and `component` to the subCommands:
 

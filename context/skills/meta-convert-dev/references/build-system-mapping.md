@@ -57,7 +57,7 @@ dev = [
     "mypy>=1.0.0",
 ]
 
-[project.scripts]
+[projectcli]
 my-cli = "my_project:main"
 ```
 
@@ -206,7 +206,7 @@ use (
 
 ### Python
 ```toml
-[project.scripts]
+[projectcli]
 my-cli = "my_package.cli:main"
 
 [project.gui-scripts]

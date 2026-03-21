@@ -92,10 +92,10 @@ Each phase produces a working artifact. If a phase fails, revert to the prior ph
 
 ## Project Location
 
-Everything lives inside `.scripts/` alongside `ai-tools`. The entry point is `.scripts/bin/graph-viewer.ts` (Bun server). Vite builds the frontend client from `.scripts/client/graph-viewer/` into `.scripts/dist/graph-viewer/`. The Bun server serves those static assets in production mode.
+Everything lives inside `cli/` alongside `ai-tools`. The entry point is `cli/bin/graph-viewer.ts` (Bun server). Vite builds the frontend client from `cli/client/graph-viewer/` into `cli/dist/graph-viewer/`. The Bun server serves those static assets in production mode.
 
 ```
-.scripts/
+cli/
 ├── bin/
 │   ├── ai-tools.ts           # Existing CLI
 │   └── graph-viewer.ts       # Bun.serve entry — API + WebSocket + static assets
@@ -141,7 +141,7 @@ Everything lives inside `.scripts/` alongside `ai-tools`. The entry point is `.s
 
 - Claude Code cannot open a browser — all programmatic verification uses CLI tools (curl, bun test). Visual verification deferred to human after each phase.
 - Estimated total effort: 8–11 working days
-- Core graph logic in `.scripts/lib/` is testable via `bun test` without the frontend
+- Core graph logic in `cli/lib/` is testable via `bun test` without the frontend
 - Browser deps (`sigma`, `graphology-layout-forceatlas2`) added to shared `package.json` — cosmetic concern only, tree-shakes out of CLI code
 - `concurrently` needed as dev dep for `bun run dev:graph` (Vite + Bun server in one terminal)
 - See [refs/prompt.md](./refs/prompt.md) for implementation brief and session workflow

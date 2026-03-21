@@ -31,9 +31,9 @@ Add chunk overlap and title-context prepending to improve embedding quality. The
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Updated chunker | `.scripts/lib/chunker.ts` | TypeScript |
-| Updated embedder | `.scripts/lib/embedder.ts` | TypeScript |
-| Updated tests | `.scripts/test/chunker.test.ts` | TypeScript |
+| Updated chunker | `cli/lib/chunker.ts` | TypeScript |
+| Updated embedder | `cli/lib/embedder.ts` | TypeScript |
+| Updated tests | `cli/test/chunker.test.ts` | TypeScript |
 
 ## Files
 
@@ -41,9 +41,9 @@ Add chunk overlap and title-context prepending to improve embedding quality. The
 - None
 
 **Modify:**
-- `.scripts/lib/chunker.ts` — add `overlapChars` option to `chunkMarkdown()` and `splitIntoParagraphs()`
-- `.scripts/lib/embedder.ts` — add `prepareEmbeddingText(title: string, chunk: string): string` helper
-- `.scripts/test/chunker.test.ts` — add overlap tests
+- `cli/lib/chunker.ts` — add `overlapChars` option to `chunkMarkdown()` and `splitIntoParagraphs()`
+- `cli/lib/embedder.ts` — add `prepareEmbeddingText(title: string, chunk: string): string` helper
+- `cli/test/chunker.test.ts` — add overlap tests
 
 ## Tasks
 

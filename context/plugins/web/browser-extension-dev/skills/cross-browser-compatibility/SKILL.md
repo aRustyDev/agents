@@ -382,7 +382,7 @@ export default defineConfig({
 
 | Feature | MV2 | MV3 |
 |---------|-----|-----|
-| Background | `background.scripts` | `background.service_worker` |
+| Background | `backgroundcli` | `background.service_worker` |
 | Remote code | Allowed | Forbidden |
 | `executeScript` | Eval strings allowed | Functions only |
 | Content security | Relaxed CSP | Strict CSP |

@@ -31,20 +31,20 @@ Compute final weighted grades for all catalog entries, generate summary statisti
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Grading logic | `.scripts/lib/catalog.ts` (additions) | TypeScript |
+| Grading logic | `cli/lib/catalog.ts` (additions) | TypeScript |
 | Stats output | `context/skills/.catalog-stats.json` | JSON |
-| CLI commands | `.scripts/commands/skill.ts` (additions) | TypeScript |
-| Tests | `.scripts/test/catalog-grading.test.ts` | TypeScript |
+| CLI commands | `cli/commands/skill.ts` (additions) | TypeScript |
+| Tests | `cli/test/catalog-grading.test.ts` | TypeScript |
 
 ## Files
 
 **Create:**
-- `.scripts/test/catalog-grading.test.ts`
+- `cli/test/catalog-grading.test.ts`
 - `context/skills/.catalog-stats.json` — generated output (committed)
 
 **Modify:**
-- `.scripts/lib/catalog.ts` — add grading formula, stats aggregation
-- `.scripts/commands/skill.ts` — implement `catalog grade`, `catalog stats`, `catalog search`
+- `cli/lib/catalog.ts` — add grading formula, stats aggregation
+- `cli/commands/skill.ts` — implement `catalog grade`, `catalog stats`, `catalog search`
 
 ## Tasks
 

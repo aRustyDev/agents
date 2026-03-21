@@ -9,8 +9,8 @@ on:
       - 'context/skills/**'
       - 'context/commands/**'
       - 'context/agents/**'
-      - '.scripts/build-plugin.py'
-      - '.scripts/plugin-hash.py'
+      - 'cli/build-plugin.py'
+      - 'cli/plugin-hash.py'
   pull_request:
     branches: [main]
     paths:
@@ -18,8 +18,8 @@ on:
       - 'context/skills/**'
       - 'context/commands/**'
       - 'context/agents/**'
-      - '.scripts/build-plugin.py'
-      - '.scripts/plugin-hash.py'
+      - 'cli/build-plugin.py'
+      - 'cli/plugin-hash.py'
   workflow_dispatch:
 
 permissions:
@@ -46,7 +46,7 @@ jobs:
         run: uv sync --quiet
 
       - name: Validate all plugins
-        run: uv run python .scripts/build-plugin.py check-all
+        run: uv run python cli/build-plugin.py check-all
 
       - name: Build all plugins (check-only)
-        run: uv run python .scripts/build-plugin.py build-all --check-only
+        run: uv run python cli/build-plugin.py build-all --check-only

@@ -17,14 +17,14 @@ All plugins use content-addressed builds with hash verification.
 
 ### 1. Migration script
 
-Create `.scripts/migrate-plugin-sources.py`:
+Create `cli/migrate-plugin-sources.py`:
 
 ```bash
 # Migrate single plugin
-uv run python .scripts/migrate-plugin-sources.py context/plugins/terraform
+uv run python cli/migrate-plugin-sources.py context/plugins/terraform
 
 # Migrate all plugins
-uv run python .scripts/migrate-plugin-sources.py --all
+uv run python cli/migrate-plugin-sources.py --all
 ```
 
 Migration steps:
@@ -39,11 +39,11 @@ Migration steps:
 ```just
 [group('plugins')]
 migrate-plugin name:
-    @uv run python .scripts/migrate-plugin-sources.py "context/plugins/{{ name }}"
+    @uv run python cli/migrate-plugin-sources.py "context/plugins/{{ name }}"
 
 [group('plugins')]
 migrate-all-plugins:
-    @uv run python .scripts/migrate-plugin-sources.py --all
+    @uv run python cli/migrate-plugin-sources.py --all
 ```
 
 ### 3. Plugin Status (20 total)
