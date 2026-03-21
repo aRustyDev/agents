@@ -159,4 +159,3 @@ deploy:
 
 - [Pipeline efficiency](https://docs.gitlab.com/ci/pipelines/pipeline_efficiency/)
 - [GitLab CI optimization tips](https://dev.to/zenika/gitlab-ci-optimization-15-tips-for-faster-pipelines-55al)
-

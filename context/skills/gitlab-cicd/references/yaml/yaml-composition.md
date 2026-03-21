@@ -157,4 +157,3 @@ my_job:
 
 - [GitLab YAML optimization](https://docs.gitlab.com/ci/yaml/yaml_optimization/)
 - Context cards: NEW-15, PL-2, WF-2
-

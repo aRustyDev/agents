@@ -1,21 +1,19 @@
 """Tests for the Rust code generator."""
 
 import pytest
-
 from ir_core.models import (
     Field_,
     Function,
     Param,
+    TypeBody,
     TypeDef,
     TypeKind,
     TypeParam,
     TypeRef,
     TypeRefKind,
-    TypeBody,
     Variant,
     Visibility,
 )
-
 from ir_synthesize_rust.generator import RustCodeGenerator, SynthesisContext
 
 

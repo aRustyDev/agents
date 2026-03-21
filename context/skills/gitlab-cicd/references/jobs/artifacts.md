@@ -167,4 +167,3 @@ build-docs:
 
 - [Job artifacts](https://docs.gitlab.com/ci/jobs/job_artifacts/)
 - [Artifact reports](https://docs.gitlab.com/ci/yaml/artifacts_reports/)
-

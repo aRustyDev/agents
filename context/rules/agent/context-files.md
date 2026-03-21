@@ -11,7 +11,7 @@ paths:
 
 ## Source of Truth
 
-`aRustyDev/ai` is the central repository for all AI context files.
+`aRustyDev/agents` is the central repository for all AI context files.
 
 Structure: `components/<type>/<name>/` where type is one of:
 - `skills/` - Domain expertise and methodology
@@ -25,7 +25,7 @@ Structure: `components/<type>/<name>/` where type is one of:
 1. **Develop locally** in `.claude/` during project work
 2. **Stabilize** through use across sessions
 3. **Generalize** by removing project-specific details
-4. **PR to `aRustyDev/ai`** targeting `components/<type>/<name>/`
+4. **PR to `aRustyDev/agents`** targeting `components/<type>/<name>/`
 5. **Reference centrally** once merged
 
 ## When to Upstream

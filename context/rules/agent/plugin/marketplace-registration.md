@@ -43,7 +43,7 @@ When creating a new plugin, always register it in `.claude-plugin/marketplace.js
   "keywords": ["terraform", "infrastructure", "iac"],
   "license": "MIT",
   "homepage": "https://docs.arusty.dev/ai/plugins/terraform-dev",
-  "repository": "https://github.com/aRustyDev/ai.git"
+  "repository": "https://github.com/aRustyDev/agents.git"
 }
 ```
 

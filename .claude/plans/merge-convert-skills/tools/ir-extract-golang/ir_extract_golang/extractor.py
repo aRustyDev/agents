@@ -27,9 +27,9 @@ from ir_core.models import (
 )
 
 from ir_extract_golang.parser import (
-    GolangParser,
     GoFunction,
     GoInterface,
+    GolangParser,
     GoStruct,
     GoTypeAlias,
 )

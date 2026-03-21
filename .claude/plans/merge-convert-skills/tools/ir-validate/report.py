@@ -6,7 +6,7 @@ output formats for validation results.
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from .errors import ValidationError
@@ -101,7 +101,7 @@ class ValidationReport:
         return cls(
             file_path=file_path,
             schema_version=schema_version,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             summary=ValidationSummary.from_errors(errors),
             errors=errors,
             metadata=metadata,

@@ -4,7 +4,7 @@ description: Roc-specific library and platform development patterns. Use when cr
 created: 2025-12-28T22:00
 updated: 2025-12-28T22:00
 tags: [lang, roc, library, dev]
-source: arustydev/ai
+source: arustydev/agents
 ---
 
 # Roc Library Development

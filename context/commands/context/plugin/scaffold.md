@@ -47,7 +47,7 @@ Read the template `context/plugins/.template/.claude-plugin/plugin.json` and pop
     "url": "https://im.arusty.dev"
   },
   "homepage": "https://docs.arusty.dev/ai/plugins/<plugin-name>",
-  "repository": "https://github.com/aRustyDev/ai.git",
+  "repository": "https://github.com/aRustyDev/agents.git",
   "license": "MIT",
   "keywords": ["<domain>", "<relevant keywords>"],
   "commands": [],
@@ -196,7 +196,7 @@ Add a new entry to `.claude-plugin/marketplace.json` in the `plugins` array:
   "keywords": ["<keywords from brainstorm>"],
   "license": "MIT",
   "homepage": "https://docs.arusty.dev/ai/plugins/<plugin-name>",
-  "repository": "https://github.com/aRustyDev/ai.git"
+  "repository": "https://github.com/aRustyDev/agents.git"
 }
 ```
 

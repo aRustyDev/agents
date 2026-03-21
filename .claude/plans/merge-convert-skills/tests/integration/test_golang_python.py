@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 
 class TestGolangToPython:
     """Test Go to Python conversion."""
@@ -20,8 +18,8 @@ type User struct {
 }
 '''
         # Extract IR from Go
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "user.go", ExtractConfig())
@@ -45,8 +43,8 @@ func Divide(a, b int) (int, error) {
     return a / b, nil
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "math.go", ExtractConfig())
@@ -77,8 +75,8 @@ type ReadWriter interface {
     Writer
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig, TypeKind
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "io.go", ExtractConfig())
@@ -115,8 +113,8 @@ func ProcessConcurrently(items []int) {
 
 func process(n int) {}
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "concurrent.go", ExtractConfig())
@@ -136,8 +134,8 @@ func Worker(jobs <-chan int, results chan<- int) {
     }
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "worker.go", ExtractConfig())
@@ -161,9 +159,9 @@ class User:
     email: str
     age: int
 '''
+        from ir_core.base import ExtractConfig, SynthConfig
         from ir_extract_python import PythonExtractor
         from ir_synthesize_golang import GolangSynthesizer
-        from ir_core.base import ExtractConfig, SynthConfig
 
         # Extract from Python
         extractor = PythonExtractor()
@@ -185,9 +183,9 @@ def divide(a: int, b: int) -> int:
         raise ValueError("division by zero")
     return a // b
 '''
+        from ir_core.base import ExtractConfig, SynthConfig
         from ir_extract_python import PythonExtractor
         from ir_synthesize_golang import GolangSynthesizer
-        from ir_core.base import ExtractConfig, SynthConfig
 
         # Extract from Python
         extractor = PythonExtractor()
@@ -218,8 +216,8 @@ func Map[T, U any](items []T, fn func(T) U) []U {
     return result
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "generics.go", ExtractConfig())
@@ -243,8 +241,8 @@ func (b *Box[T]) Get() T {
     return b.Value
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "box.go", ExtractConfig())
@@ -268,8 +266,8 @@ func Max[T cmp.Ordered](a, b T) T {
     return b
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "ordered.go", ExtractConfig())
@@ -294,8 +292,8 @@ func Complex() {
     go func() {}()
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "complex.go", ExtractConfig())
@@ -318,8 +316,8 @@ type Derived struct {
     Name string
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "embedded.go", ExtractConfig())
@@ -338,8 +336,8 @@ type User struct {
     Email string `json:"email" validate:"email"`
 }
 '''
-        from ir_extract_golang import GolangExtractor
         from ir_core.base import ExtractConfig
+        from ir_extract_golang import GolangExtractor
 
         extractor = GolangExtractor()
         ir = extractor.extract(go_source, "tags.go", ExtractConfig())

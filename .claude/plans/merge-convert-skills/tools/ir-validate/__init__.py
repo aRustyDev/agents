@@ -24,12 +24,12 @@ Example usage:
 
 __version__ = "1.0.0"
 
-from .validator import IRValidator, ValidationResult
 from .errors import ValidationError, ValidationErrorCode
+from .validator import IRValidator, ValidationResult
 
 __all__ = [
     "IRValidator",
-    "ValidationResult",
     "ValidationError",
     "ValidationErrorCode",
+    "ValidationResult",
 ]

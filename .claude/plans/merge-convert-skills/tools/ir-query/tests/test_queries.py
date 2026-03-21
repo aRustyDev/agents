@@ -6,7 +6,6 @@ import sqlite3
 from pathlib import Path
 
 import pytest
-
 from ir_query.connection import DatabaseConnection
 from ir_query.queries import IRQueryInterface
 

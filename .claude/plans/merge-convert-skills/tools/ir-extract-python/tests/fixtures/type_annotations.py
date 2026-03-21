@@ -1,22 +1,18 @@
 """Type annotation examples for testing type extraction."""
 
+from collections.abc import Callable, Iterator, Sequence
 from typing import (
     Any,
-    Callable,
     ClassVar,
     Final,
     Generic,
     Literal,
-    Optional,
     Protocol,
     TypeAlias,
     TypedDict,
     TypeVar,
-    Union,
     overload,
 )
-from collections.abc import Iterator, Sequence
-
 
 # Type variables
 T = TypeVar("T")
@@ -36,12 +32,12 @@ def simple_types(a: int, b: str, c: float) -> bool:
     return len(b) > a * c
 
 
-def optional_types(value: Optional[str]) -> str:
+def optional_types(value: str | None) -> str:
     """Function with Optional type."""
     return value or "default"
 
 
-def union_types_old(value: Union[int, str]) -> str:
+def union_types_old(value: int | str) -> str:
     """Function with Union type (old syntax)."""
     return str(value)
 
@@ -55,7 +51,7 @@ def union_types_new(value: int | str | None) -> str:
 
 def generic_types(items: list[int], mapping: dict[str, float]) -> set[str]:
     """Function with generic collection types."""
-    return {str(k) for k in mapping.keys()}
+    return {str(k) for k in mapping}
 
 
 def nested_generics(data: dict[str, list[tuple[int, str]]]) -> list[str]:

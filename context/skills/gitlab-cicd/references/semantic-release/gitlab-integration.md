@@ -207,4 +207,3 @@ semantic-release:
 - [@semantic-release/gitlab (GitHub)](https://github.com/semantic-release/gitlab)
 - [to-be-continuous/semantic-release](https://to-be-continuous.gitlab.io/doc/ref/semantic-release/)
 - [semantic-release Documentation](https://semantic-release.gitbook.io/)
-

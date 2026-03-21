@@ -129,4 +129,3 @@ nightly-security:
 - [Security scanning](https://docs.gitlab.com/user/application_security/)
 - [SAST](https://docs.gitlab.com/user/application_security/sast/)
 - [Container scanning](https://docs.gitlab.com/user/application_security/container_scanning/)
-

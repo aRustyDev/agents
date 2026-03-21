@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import pytest
-
 from ir_core.base import ExtractConfig, ExtractionMode, SemanticEnrichmentLevel
 from ir_core.models import (
+    EffectKind,
+    GapType,
     TypeKind,
     TypeRefKind,
     Visibility,
-    EffectKind,
-    GapType,
 )
-
 from ir_extract_python import PythonExtractor
 
 

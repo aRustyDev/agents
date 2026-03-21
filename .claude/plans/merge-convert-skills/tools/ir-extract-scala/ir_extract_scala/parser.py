@@ -15,7 +15,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 
 class Variance(Enum):
@@ -38,8 +37,8 @@ class TypeParam:
     variance: Variance = Variance.INVARIANT
     kind: TypeParamKind = TypeParamKind.SIMPLE
     arity: int = 0  # For HKT: F[_] has arity 1, F[_, _] has arity 2
-    upper_bound: Optional[str] = None
-    lower_bound: Optional[str] = None
+    upper_bound: str | None = None
+    lower_bound: str | None = None
     context_bounds: list[str] = field(default_factory=list)
 
 
@@ -48,7 +47,7 @@ class ScalaField:
     """Case class or class field."""
     name: str
     type_annotation: str
-    default_value: Optional[str] = None
+    default_value: str | None = None
     is_val: bool = True
     is_private: bool = False
 
@@ -60,8 +59,8 @@ class ScalaMethod:
     type_params: list[TypeParam] = field(default_factory=list)
     params: list[ScalaField] = field(default_factory=list)
     implicit_params: list[ScalaField] = field(default_factory=list)
-    return_type: Optional[str] = None
-    body: Optional[str] = None
+    return_type: str | None = None
+    body: str | None = None
     is_abstract: bool = False
 
 
@@ -72,7 +71,7 @@ class ScalaTrait:
     type_params: list[TypeParam] = field(default_factory=list)
     extends: list[str] = field(default_factory=list)
     methods: list[ScalaMethod] = field(default_factory=list)
-    self_type: Optional[str] = None
+    self_type: str | None = None
 
 
 @dataclass
@@ -109,9 +108,9 @@ class ScalaObject:
 @dataclass
 class ScalaGiven:
     """Given instance (Scala 3)."""
-    name: Optional[str]
+    name: str | None
     type_expr: str
-    body: Optional[str] = None
+    body: str | None = None
 
 
 @dataclass
@@ -129,14 +128,14 @@ class ScalaFunction:
     type_params: list[TypeParam] = field(default_factory=list)
     params: list[ScalaField] = field(default_factory=list)
     implicit_params: list[ScalaField] = field(default_factory=list)
-    return_type: Optional[str] = None
-    body: Optional[str] = None
+    return_type: str | None = None
+    body: str | None = None
 
 
 @dataclass
 class ScalaModule:
     """Parsed Scala module."""
-    package: Optional[str] = None
+    package: str | None = None
     imports: list[ScalaImport] = field(default_factory=list)
     traits: list[ScalaTrait] = field(default_factory=list)
     case_classes: list[ScalaCaseClass] = field(default_factory=list)
@@ -304,7 +303,7 @@ class ScalaParser:
 
         return result
 
-    def _parse_single_type_param(self, param_str: str) -> Optional[TypeParam]:
+    def _parse_single_type_param(self, param_str: str) -> TypeParam | None:
         """Parse a single type parameter."""
         param_str = param_str.strip()
         if not param_str:
@@ -390,7 +389,7 @@ class ScalaParser:
 
         return fields
 
-    def _parse_single_param(self, param_str: str) -> Optional[ScalaField]:
+    def _parse_single_param(self, param_str: str) -> ScalaField | None:
         """Parse a single parameter."""
         param_str = param_str.strip()
         if not param_str:
@@ -619,7 +618,7 @@ class ScalaParser:
 
         return givens
 
-    def _find_block_body(self, source: str, start: int) -> Optional[str]:
+    def _find_block_body(self, source: str, start: int) -> str | None:
         """Find the body of a block starting with {."""
         if start >= len(source) or source[start] != '{':
             return None

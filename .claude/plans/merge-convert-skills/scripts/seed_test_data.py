@@ -38,7 +38,6 @@ import re
 import sqlite3
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, TypeAlias
@@ -311,7 +310,7 @@ def parse_ir_validation_md(path: Path) -> list[PatternData]:
             patterns.append(pattern)
             logger.debug(f"Parsed pattern: {pattern.pattern_id}")
         else:
-            logger.warning(f"Failed to parse pattern section")
+            logger.warning("Failed to parse pattern section")
 
     logger.info(f"Successfully parsed {len(patterns)} patterns")
     return patterns

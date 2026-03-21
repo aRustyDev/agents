@@ -275,7 +275,7 @@ Uses `lib/github.ts` (Octokit wrapper).
 2. For each skill with `derived_by` AND changed files in `.external/` (detected via `git diff HEAD -- context/skills/.external/<source>/<skill>/`):
    - Group by local skill (`derived_by` value)
    - For each local skill:
-     - Search: `gh api search/issues` for `[SKILL DRIFT] upstream changes (<local_skill>) is:open` in `aRustyDev/ai`
+     - Search: `gh api search/issues` for `[SKILL DRIFT] upstream changes (<local_skill>) is:open` in `aRustyDev/agents`
      - If open issue exists: append checklist item + diff as `<details>` block
      - If no open issue: create new issue
      - Record issue number in `sources.lock.yaml` -> `drift_issue`

@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-
 from ir_core.base import ExtractConfig, ExtractionMode, SemanticEnrichmentLevel
 
 if TYPE_CHECKING:
@@ -24,21 +23,21 @@ def fixtures_dir() -> Path:
 
 
 @pytest.fixture
-def extractor() -> "PythonExtractor":
+def extractor() -> PythonExtractor:
     """Create a PythonExtractor instance."""
     from ir_extract_python import PythonExtractor
     return PythonExtractor()
 
 
 @pytest.fixture
-def parser() -> "PythonParser":
+def parser() -> PythonParser:
     """Create a PythonParser instance."""
     from ir_extract_python import PythonParser
     return PythonParser()
 
 
 @pytest.fixture
-def matcher() -> "PythonPatternMatcher":
+def matcher() -> PythonPatternMatcher:
     """Create a PythonPatternMatcher instance."""
     from ir_extract_python import PythonPatternMatcher
     return PythonPatternMatcher()

@@ -1,6 +1,6 @@
 """Async code fixture for testing async pattern extraction."""
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 
 async def fetch_data(url: str) -> bytes:

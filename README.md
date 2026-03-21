@@ -53,7 +53,7 @@ ai/
 
 ```bash
 # In your dotfiles repo
-git submodule add git@github.com:aRustyDev/ai.git ai/
+git submodule add git@github.com:aRustyDev/agents.git ai/
 git submodule update --init --recursive
 ```
 
@@ -88,7 +88,7 @@ This repo includes a plugin marketplace at `.claude-plugin/marketplace.json` wit
 
 ```bash
 # Clone or add as submodule
-git clone https://github.com/aRustyDev/ai.git ~/ai-plugins
+git clone https://github.com/aRustyDev/agents.git ~/ai-plugins
 
 # Copy a plugin to your Claude Code config
 cp -r ~/ai-plugins/context/plugins/homebrew-dev ~/.claude/plugins/
@@ -108,7 +108,7 @@ To use this marketplace as a plugin source:
   "pluginMarketplaces": [
     {
       "name": "arustydev",
-      "url": "https://raw.githubusercontent.com/aRustyDev/ai/main/.claude-plugin/marketplace.json"
+      "url": "https://raw.githubusercontent.com/aRustyDev/agents/main/.claude-plugin/marketplace.json"
     }
   ]
 }
@@ -117,7 +117,7 @@ To use this marketplace as a plugin source:
 2. **Via ccpm** (Claude Code Plugin Manager):
 
 ```bash
-ccpm registry add arustydev https://raw.githubusercontent.com/aRustyDev/ai/main/.claude-plugin/marketplace.json
+ccpm registry add arustydev https://raw.githubusercontent.com/aRustyDev/agents/main/.claude-plugin/marketplace.json
 ccpm search swiftui
 ccpm install arustydev/swiftui-dev
 ```
@@ -149,7 +149,7 @@ Each plugin entry in `marketplace.json` follows this structure:
   "keywords": ["keyword1", "keyword2"],
   "license": "MIT",
   "homepage": "https://docs.arusty.dev/ai/plugins/plugin-name",
-  "repository": "https://github.com/aRustyDev/ai.git"
+  "repository": "https://github.com/aRustyDev/agents.git"
 }
 ```
 
@@ -185,7 +185,7 @@ just install-ai
 - [ ] Phase 3: JSON schemas and compilation
 - [ ] Phase 4: Profiles and dynamic MCP config generation
 
-See [Issue #1](https://github.com/aRustyDev/ai/issues/1) for full details.
+See [Issue #1](https://github.com/aRustyDev/agents/issues/1) for full details.
 
 ## Legacy Content
 

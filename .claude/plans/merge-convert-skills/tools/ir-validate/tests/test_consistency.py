@@ -1,10 +1,7 @@
 """Tests for cross-layer consistency checking."""
 
-import pytest
-from typing import Any
 
 from ir_validate.consistency import (
-    ConsistencyChecker,
     check_consistency,
 )
 from ir_validate.errors import ValidationErrorCode

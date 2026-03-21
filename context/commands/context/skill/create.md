@@ -14,7 +14,7 @@ Create a new skill with proper structure, SKILL.md frontmatter, and optional sup
 - `--location` - Where to create the skill:
   - `project` (default): `.claude/skills/<skill-name>/`
   - `personal`: `~/.claude/skills/<skill-name>/`
-  - `ai`: Create in aRustyDev/ai repo for distribution
+  - `ai`: Create in aRustyDev/agents repo for distribution
 - `--template` - Template type:
   - `minimal` (default): Just SKILL.md
   - `full`: SKILL.md + scripts/, references/, assets/ directories

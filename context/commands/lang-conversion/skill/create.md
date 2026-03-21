@@ -963,7 +963,7 @@ For each resource with actionable feedback:
 1. **Search for existing parent issues:**
 
    ```bash
-   gh issue list --repo aRustyDev/ai --search "<skill-or-command-name>" --state open
+   gh issue list --repo aRustyDev/agents --search "<skill-or-command-name>" --state open
    ```
 
 2. **If parent issue exists** (about the skill/command in question):
@@ -1005,7 +1005,7 @@ Feedback from: `/create-lang-conversion-skill $1 $2`
 
 ```bash
 # If parent issue #205 exists for meta-convert-dev
-gh issue create --repo aRustyDev/ai \
+gh issue create --repo aRustyDev/agents \
   --title "feedback(meta-convert-dev): from convert-$1-$2 creation" \
   --body "$(cat <<'EOF'
 ## Feedback: meta-convert-dev

@@ -5,26 +5,25 @@ Common issues encountered when using bd and how to resolve them.
 ## Interface-Specific Troubleshooting
 
 **MCP tools (local environment):**
-- MCP tools require bd daemon running
-- Check daemon status: `bd daemon status` (CLI)
-- If MCP tools fail, verify daemon is running and restart if needed
-- MCP tools automatically use daemon mode (no --no-daemon option)
+- MCP tools require Dolt server running
+- Check server status: `bd doctor` (CLI)
+- If MCP tools fail, verify Dolt server is running and restart if needed
 
 **CLI (web environment or local):**
-- CLI can use daemon mode (default) or direct mode (--no-daemon)
-- Direct mode has 3-5 second sync delay
+- CLI can use server mode (default) or embedded mode (direct database access)
+- Embedded mode has 3-5 second sync delay
 - Web environment: Install via `npm install -g @beads/cli`
 - Web environment: Initialize via `bd init <prefix>` before first use
 
-**Most issues below apply to both interfaces** - the underlying database and daemon behavior is the same.
+**Most issues below apply to both interfaces** - the underlying database and server behavior is the same.
 
 ## Contents
 
 - [Dependencies Not Persisting](#dependencies-not-persisting)
 - [Status Updates Not Visible](#status-updates-not-visible)
-- [Daemon Won't Start](#daemon-wont-start)
+- [Dolt Server Won't Start](#dolt-server-wont-start)
 - [Database Errors on Cloud Storage](#database-errors-on-cloud-storage)
-- [JSONL File Not Created](#jsonl-file-not-created)
+- [Database Not Initialized](#database-not-initialized)
 - [Version Requirements](#version-requirements)
 
 ---
@@ -40,7 +39,7 @@ bd show issue-2
 ```
 
 ### Root Cause (Fixed in v0.15.0+)
-This was a **bug in bd** (GitHub issue #101) where the daemon ignored dependencies during issue creation. **Fixed in bd v0.15.0** (Oct 21, 2025).
+This was a **bug in bd** (GitHub issue #101) where dependencies were ignored during issue creation. **Fixed in bd v0.15.0** (Oct 21, 2025).
 
 ### Resolution
 
@@ -52,7 +51,7 @@ bd version
 **2. If version < 0.15.0, update bd:**
 ```bash
 # Via Homebrew (macOS/Linux)
-brew upgrade bd
+brew upgrade beads
 
 # Via go install
 go install github.com/steveyegge/beads/cmd/bd@latest
@@ -61,10 +60,10 @@ go install github.com/steveyegge/beads/cmd/bd@latest
 # See https://github.com/steveyegge/beads#installing
 ```
 
-**3. Restart daemon after upgrade:**
+**3. Restart Dolt server after upgrade:**
 ```bash
-pkill -f "bd daemon"  # Kill old daemon
-bd daemon start       # Start new daemon with fix
+bd dolt stop          # Stop old server
+bd dolt start         # Start new server with fix
 ```
 
 **4. Test dependency creation:**
@@ -80,21 +79,20 @@ bd show <B-id>
 
 If dependencies still don't persist after updating:
 
-1. **Check daemon is running:**
+1. **Check Dolt server is running:**
    ```bash
-   ps aux | grep "bd daemon"
+   bd doctor
    ```
 
-2. **Try without --no-daemon flag:**
+2. **Try in server mode:**
    ```bash
-   # Instead of: bd --no-daemon dep add ...
-   # Use: bd dep add ...  (let daemon handle it)
+   # Use: bd dep add ...  (let the Dolt server handle it)
    ```
 
-3. **Check JSONL file:**
+3. **Check database directly:**
    ```bash
-   cat .beads/issues.jsonl | jq '.dependencies'
-   # Should show dependency array
+   bd sql "SELECT * FROM dependencies WHERE issue_id = '<id>'"
+   # Should show dependency rows
    ```
 
 4. **Report to beads GitHub** with:
@@ -108,79 +106,77 @@ If dependencies still don't persist after updating:
 
 ### Symptom
 ```bash
-bd --no-daemon update issue-1 --status in_progress
-# Reports: ✓ Updated issue: issue-1
+# In embedded mode, updates may not reflect immediately
+bd update issue-1 --claim
 bd show issue-1
 # Shows: Status: open (not in_progress!)
 ```
 
 ### Root Cause
-This is **expected behavior**, not a bug. Understanding requires knowing bd's architecture:
+This is **expected behavior** when using embedded mode. Understanding requires knowing bd's architecture:
 
 **BD Architecture:**
-- **JSONL files** (`.beads/issues.jsonl`): Human-readable export format
-- **SQLite database** (`.beads/*.db`): Source of truth for queries
-- **Daemon**: Syncs JSONL ↔ SQLite every 5 minutes
+- **Dolt database** (`.beads/dolt/`): Source of truth for all data
+- **Dolt server**: Handles concurrent access and replication
 
-**What `--no-daemon` actually does:**
-- **Writes**: Go directly to JSONL file
-- **Reads**: Still come from SQLite database
-- **Sync delay**: Daemon imports JSONL → SQLite periodically
+**In embedded mode (without Dolt server):**
+- **Writes**: Go directly to the Dolt database
+- **Reads**: Also from the Dolt database
+- **Sync delay**: Embedded mode may have brief delays reflecting writes
 
 ### Resolution
 
-**Option 1: Use daemon mode (recommended)**
+**Option 1: Use server mode (recommended)**
 ```bash
-# Don't use --no-daemon for CRUD operations
-bd update issue-1 --status in_progress
+# With the Dolt server running, operations reflect immediately
+bd update issue-1 --claim
 bd show issue-1
-# ✓ Status reflects immediately
+# Status reflects immediately
 ```
 
-**Option 2: Wait for sync (if using --no-daemon)**
+**Option 2: Wait for sync (if using embedded mode)**
 ```bash
-bd --no-daemon update issue-1 --status in_progress
-# Wait 3-5 seconds for daemon to sync
+bd update issue-1 --claim
+# Wait for server to sync
 sleep 5
 bd show issue-1
-# ✓ Status should reflect now
+# Status should reflect now
 ```
 
 **Option 3: Manual sync trigger**
 ```bash
-bd --no-daemon update issue-1 --status in_progress
+bd update issue-1 --claim
 # Trigger sync by exporting/importing
 bd export > /dev/null 2>&1  # Forces sync
 bd show issue-1
 ```
 
-### When to Use `--no-daemon`
+### When to Use Embedded Mode
 
-**Use --no-daemon for:**
+**Use embedded mode for:**
 - Batch import scripts (performance)
-- CI/CD environments (no persistent daemon)
+- CI/CD environments (no persistent server)
 - Testing/debugging
 
-**Don't use --no-daemon for:**
+**Don't use embedded mode for:**
 - Interactive development
 - Real-time status checks
 - When you need immediate query results
 
 ---
 
-## Daemon Won't Start
+## Dolt Server Won't Start
 
 ### Symptom
 ```bash
-bd daemon start
+bd dolt start
 # Error: not in a git repository
 # Hint: run 'git init' to initialize a repository
 ```
 
 ### Root Cause
-bd daemon requires a **git repository** because it uses git for:
+The Dolt server requires a **git repository** because it uses git for:
 - Syncing issues to git remote (optional)
-- Version control of `.beads/*.jsonl` files
 - Commit history of issue changes
 
 ### Resolution
@@ -189,20 +185,13 @@ bd daemon requires a **git repository** because it uses git for:
 ```bash
 # In your project directory
 git init
-bd daemon start
-# ✓ Daemon should start now
+bd dolt start
+# Dolt server should start now
 ```
 
-**Run in local-only mode (no git required):**
-```bash
-# If you don't want daemon to use git at all
-bd daemon start --local
-```
-
-**Flags:**
-- `--local`: Run in local-only mode (no git required, no sync)
-- `--interval=10m`: Custom sync interval (default: 5s)
-- `--auto-commit=true`: Auto-commit JSONL changes
+**Configuration:**
+- `dolt.auto-commit: on`: Auto-commit changes
+- See `bd config --help` for all Dolt server options
 
 ---
 
@@ -252,9 +241,9 @@ This is a **known SQLite limitation**, not a bd bug.
    bd init myproject
    ```
 
-3. **Import existing issues (if you had JSONL export):**
+3. **Import existing issues (if you have a JSONL backup):**
    ```bash
-   bd import < issues-backup.jsonl
+   bd init myproject --from-jsonl issues-backup.jsonl
    ```
 
 **Alternative: Use global `~/.beads/` database**
@@ -277,42 +266,26 @@ bd create "My task"
 
 ---
 
-## JSONL File Not Created
+## Database Not Initialized
 
 ### Symptom
 ```bash
-bd init myproject
-bd --no-daemon create "Test" -t task
-ls .beads/
-# Only shows: .gitignore, myproject.db
-# Missing: issues.jsonl
+bd create "Test" -t task
+# Error: database not found
 ```
 
 ### Root Cause
-**JSONL initialization coupling.** The `issues.jsonl` file is created by daemon on first startup, not by `bd init`.
+`bd init` was not run in the project directory.
 
 ### Resolution
 
-**Start daemon once to initialize JSONL:**
+**Initialize bd in the project:**
 ```bash
-bd daemon start --local &
-# Wait for initialization
-sleep 2
-
-# Now JSONL file exists
-ls .beads/issues.jsonl
-# ✓ File created
-
-# Subsequent --no-daemon operations work
-bd --no-daemon create "Task 1" -t task
-cat .beads/issues.jsonl
-# ✓ Shows task data
+bd init myproject
+bd create "Task 1" -t task
+bd show <id>
+# Shows task data
 ```
-
-**Why this matters:**
-- Daemon owns the JSONL export format
-- First daemon run creates empty JSONL skeleton
-- `--no-daemon` operations assume JSONL exists
 
 **Pattern for batch scripts:**
 ```bash
@@ -320,16 +293,13 @@ cat .beads/issues.jsonl
 # Batch import script
 
 bd init myproject
-bd daemon start --local &   # Start daemon
+bd dolt start               # Start Dolt server
 sleep 3                     # Wait for initialization
 
-# Now safe to use --no-daemon for performance
+# Create issues
 for item in "${items[@]}"; do
-    bd --no-daemon create "$item" -t feature
+    bd create "$item" -t feature
 done
-
-# Daemon syncs JSONL → SQLite in background
-sleep 5  # Wait for final sync
 
 # Query results
 bd stats
@@ -361,11 +331,11 @@ claude plugin update beads
 
 **v0.15.0:**
 - MCP parameter names changed from `from_id/to_id` to `issue_id/depends_on_id`
-- Dependency creation now persists correctly in daemon mode
+- Dependency creation now persists correctly in server mode
 
 **v0.14.0:**
-- Daemon architecture changes
-- Auto-sync JSONL behavior introduced
+- Architecture changes
+- Dolt storage backend introduced
 
 ---
 
@@ -427,8 +397,8 @@ Before reporting issues, collect this information:
 # 1. Version
 bd version
 
-# 2. Daemon status
-ps aux | grep "bd daemon"
+# 2. Dolt server status
+bd doctor
 
 # 3. Database location
 echo $PWD/.beads/*.db
@@ -438,8 +408,8 @@ ls -la .beads/
 git status
 git log --oneline -1
 
-# 5. JSONL contents (for dependency issues)
-cat .beads/issues.jsonl | jq '.' | head -50
+# 5. Database contents (for dependency issues)
+bd sql "SELECT * FROM dependencies" --json | head -50
 ```
 
 ### Report to beads GitHub
@@ -473,10 +443,10 @@ If the **bd-issue-tracking skill** provides incorrect guidance:
 | Problem | Quick Fix |
 |---------|-----------|
 | Dependencies not saving | Upgrade to bd v0.15.0+ |
-| Status updates lag | Use daemon mode (not `--no-daemon`) |
-| Daemon won't start | Run `git init` first |
+| Status updates lag | Use server mode (ensure Dolt server is running) |
+| Dolt server won't start | Run `git init` first |
 | Database errors on Google Drive | Move to local filesystem |
-| JSONL file missing | Start daemon once: `bd daemon start &` |
+| Database not initialized | Run `bd init` in the project directory |
 | Dependencies backwards (MCP) | Update to v0.15.0+, use `issue_id/depends_on_id` correctly |
 
 ---

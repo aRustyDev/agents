@@ -29,20 +29,16 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 
 from ir_core import (
-    IRVersion,
     ExtractConfig,
-    ExtractionMode,
     ExtractionError,
-    SynthesisError,
-    ValidationError as IRValidationError,
     ExtractionErrorCode,
-    SynthesisErrorCode,
-    ValidationErrorCode,
+    IRVersion,
     Module,
     ModuleMetadata,
+    SynthesisError,
+    SynthesisErrorCode,
 )
-from ir_core.base import SynthConfig, OutputFormat
-
+from ir_core.base import SynthConfig
 
 # =============================================================================
 # Import Tools with Graceful Fallback
@@ -64,7 +60,8 @@ except ImportError:
 
 try:
     from ir_validate import IRValidator
-    from ir_validate.errors import ValidationError, ValidationErrorCode as ValidatorErrorCode
+    from ir_validate.errors import ValidationError
+    from ir_validate.errors import ValidationErrorCode as ValidatorErrorCode
     HAS_VALIDATOR = True
 except ImportError:
     HAS_VALIDATOR = False

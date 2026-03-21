@@ -2,46 +2,36 @@
 
 from __future__ import annotations
 
-import pytest
-from datetime import datetime
-
 from ir_core.models import (
-    # Enums
-    GapType,
-    Severity,
-    PreservationLevel,
-    Visibility,
-    Mutability,
-    LifetimeKind,
-    TypeKind,
-    TypeRefKind,
-    EffectKind,
-    ExtractionMode,
-    # Models
-    SourceSpan,
-    TypeRef,
-    TypeParam,
-    TypeDef,
-    TypeBody,
-    Effect,
-    Param,
-    Function,
     Binding,
-    Lifetime,
-    Module,
-    ModuleMetadata,
-    Import,
-    Export,
-    Definition,
-    DefinitionRef,
-    SemanticAnnotation,
-    GapMarker,
-    PreservationStatus,
-    LevelEvidence,
-    IRVersion,
-    # Errors
+    Effect,
+    EffectKind,
     ExtractionError,
     ExtractionErrorCode,
+    Function,
+    GapMarker,
+    # Enums
+    GapType,
+    Import,
+    IRVersion,
+    LevelEvidence,
+    Lifetime,
+    LifetimeKind,
+    Module,
+    ModuleMetadata,
+    Mutability,
+    Param,
+    PreservationLevel,
+    PreservationStatus,
+    Severity,
+    # Models
+    SourceSpan,
+    TypeBody,
+    TypeDef,
+    TypeKind,
+    TypeParam,
+    TypeRef,
+    TypeRefKind,
     ValidationError,
     ValidationErrorCode,
 )

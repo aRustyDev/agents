@@ -28,11 +28,10 @@ from pathlib import Path
 from typing import TextIO
 
 import yaml
-
-from ir_core.base import SynthConfig, OutputFormat
+from ir_core.base import OutputFormat, SynthConfig
 from ir_core.models import IRVersion
 
-from .synthesizer import PythonSynthesizer, PreservationMode
+from .synthesizer import PythonSynthesizer
 
 
 def create_parser() -> argparse.ArgumentParser:

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai`.
+Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/agents`.
 
 ## Analysis Summary
 
@@ -143,12 +143,12 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
    ```markdown
    # ⚠️ DEPRECATED - This repository has been archived
 
-   This repository has been merged into [arustydev/ai](https://github.com/arustydev/ai).
+   This repository has been merged into [arustydev/agents](https://github.com/arustydev/agents).
 
    ## New Location
 
    All content from this repository now lives at:
-   - `arustydev/ai/legacy/prompts/`
+   - `arustydev/agents/legacy/prompts/`
 
    ## Migration
 
@@ -158,13 +158,13 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
    git clone https://github.com/arustydev/prompts.git
 
    # New
-   git clone https://github.com/arustydev/ai.git
+   git clone https://github.com/arustydev/agents.git
    cd ai/legacy/prompts
    ```
 
    ## Why?
 
-   This repository was consolidated into `arustydev/ai` to:
+   This repository was consolidated into `arustydev/agents` to:
    - Centralize AI-related configuration and tooling
    - Simplify maintenance across fewer repositories
    - Enable better cross-referencing between agents, prompts, and skills
@@ -176,7 +176,7 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
 2. **Update GitHub repo description**:
    ```bash
    gh repo edit arustydev/prompts \
-     --description "⚠️ ARCHIVED - Merged into arustydev/ai. See legacy/prompts/"
+     --description "⚠️ ARCHIVED - Merged into arustydev/agents. See legacy/prompts/"
    ```
 
 3. **Archive the repository**:
@@ -190,12 +190,12 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
    ```markdown
    # ⚠️ DEPRECATED - This repository has been archived
 
-   This repository has been merged into [arustydev/ai](https://github.com/arustydev/ai).
+   This repository has been merged into [arustydev/agents](https://github.com/arustydev/agents).
 
    ## New Location
 
    All content from this repository now lives at:
-   - `arustydev/ai/legacy/agents/`
+   - `arustydev/agents/legacy/agents/`
 
    ## Migration
 
@@ -205,13 +205,13 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
    git clone https://github.com/arustydev/agents.git
 
    # New
-   git clone https://github.com/arustydev/ai.git
+   git clone https://github.com/arustydev/agents.git
    cd ai/legacy/agents
    ```
 
    ## Why?
 
-   This repository was consolidated into `arustydev/ai` to:
+   This repository was consolidated into `arustydev/agents` to:
    - Centralize AI-related configuration and tooling
    - Simplify maintenance across fewer repositories
    - Enable better cross-referencing between agents, prompts, and skills
@@ -223,7 +223,7 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
 2. **Update GitHub repo description**:
    ```bash
    gh repo edit arustydev/agents \
-     --description "⚠️ ARCHIVED - Merged into arustydev/ai. See legacy/agents/"
+     --description "⚠️ ARCHIVED - Merged into arustydev/agents. See legacy/agents/"
    ```
 
 3. **Archive the repository**:
@@ -253,7 +253,7 @@ Merge `arustydev/agents` and `arustydev/prompts` repositories into `arustydev/ai
 
 ## Checklist
 
-### Merge Phases (PRs to arustydev/ai)
+### Merge Phases (PRs to arustydev/agents)
 - [ ] Phase 1: Prepare directory structure
 - [ ] Phase 2: Merge core prompts content
 - [ ] Phase 3: Merge templates & roles

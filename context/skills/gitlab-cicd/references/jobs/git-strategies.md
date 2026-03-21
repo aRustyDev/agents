@@ -208,4 +208,3 @@ deploy:
 
 - [GitLab Runner — Configure Git Strategy](https://docs.gitlab.com/ci/runners/configure_runners/)
 - [GitLab Runner Advanced Configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
-

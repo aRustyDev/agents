@@ -4,7 +4,7 @@ description: Clojure library development patterns covering functional design idi
 created: 2025-12-28T22:00
 updated: 2025-12-28T22:00
 tags: [lang, clojure, library, dev]
-source: https://github.com/arustydev/ai
+source: https://github.com/arustydev/agents
 ---
 
 # Clojure Library Development

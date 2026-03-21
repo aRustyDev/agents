@@ -103,7 +103,7 @@ Skill gap identified: No coverage for <domain>.
 ### GitHub CLI Command
 
 ```bash
-gh issue create --repo aRustyDev/ai \
+gh issue create --repo aRustyDev/agents \
   --title "feat(skills): add <skill-name> skill" \
   --body "<issue-body>" \
   --label "skill-gap"
@@ -281,7 +281,7 @@ Before creating derivative:
 | Task | Action |
 |------|--------|
 | Check for gaps | Search `components/skills/*<keyword>*` |
-| Create gap issue | `gh issue create --repo aRustyDev/ai ...` |
+| Create gap issue | `gh issue create --repo aRustyDev/agents ...` |
 | Evaluate skill | Score relevance, coverage, precision, accuracy |
 | Refactor large skill | Extract to `references/` |
 | Create derivative | Follow `meta-skill-authoring-dev` → Derivatives section |

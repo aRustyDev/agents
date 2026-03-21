@@ -2,21 +2,20 @@
 
 from __future__ import annotations
 
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+import pytest
 from ir_core.models import (
+    ExtractionMode,
+    Function,
     IRVersion,
     Module,
     ModuleMetadata,
-    Function,
     TypeRef,
     TypeRefKind,
     Visibility,
-    ExtractionMode,
 )
-
-from ir_synthesize_python.formatter import PythonFormatter, FormatResult, FormatterConfig
+from ir_synthesize_python.formatter import FormatResult, FormatterConfig, PythonFormatter
 
 
 @pytest.fixture
@@ -131,7 +130,7 @@ class TestDocstringAddition:
                     source_language="python",
                     extraction_version="ir-v1.0",
                     extraction_mode=ExtractionMode.FULL_MODULE,
-                    extraction_timestamp=datetime.now(timezone.utc),
+                    extraction_timestamp=datetime.now(UTC),
                     documentation="This is the module docstring.",
                 ),
             ),

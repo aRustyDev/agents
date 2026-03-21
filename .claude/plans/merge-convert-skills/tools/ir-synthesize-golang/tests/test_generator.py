@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from ir_synthesize_golang.generator import GolangCodeGenerator, TYPE_MAP
+from ir_synthesize_golang.generator import GolangCodeGenerator
 
 
 @pytest.fixture

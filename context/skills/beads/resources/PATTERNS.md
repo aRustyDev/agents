@@ -57,11 +57,11 @@ NEXT: Need user input on budget constraints before finalizing recommendations"
 
 **Pattern**:
 1. Create issue immediately: `bd create "Found: inventory system needs refactoring"`
-2. Link provenance: `bd dep add main-task new-issue --type discovered-from`
+2. Link provenance: `bd dep add new-issue main-task --type discovered-from`
 3. Assess urgency: blocker or can defer?
 4. **If blocker**:
    - `bd update main-task --status blocked`
-   - `bd update new-issue --status in_progress`
+   - `bd update new-issue --claim`
    - Work on the blocker
 5. **If deferrable**:
    - Note in new issue's design field
@@ -70,14 +70,14 @@ NEXT: Need user input on budget constraints before finalizing recommendations"
 
 **Why this works**: Captures context immediately (before forgetting), preserves relationship to main work, allows flexible prioritization.
 
-**Example (with MCP):**
+**Example (MCP + atomic CLI claim):**
 
 Working on "Implement checkout flow" (checkout-1), discover payment validation security hole:
 
 1. Create bug issue: `mcp__plugin_beads_beads__create` with `{title: "Fix: payment validation bypasses card expiry check", type: "bug", priority: 0}`
 2. Link discovery: `mcp__plugin_beads_beads__dep` with `{from_issue: "checkout-1", to_issue: "payment-bug-2", type: "discovered-from"}`
 3. Block current work: `mcp__plugin_beads_beads__update` with `{issue_id: "checkout-1", status: "blocked", notes: "Blocked by payment-bug-2: security hole in validation"}`
-4. Start new work: `mcp__plugin_beads_beads__update` with `{issue_id: "payment-bug-2", status: "in_progress"}`
+4. Start new work atomically: `mcp__plugin_beads_beads__claim` with `{issue_id: "payment-bug-2"}`
 
 (CLI: `bd create "Fix: payment validation..." -t bug -p 0` then `bd dep add` and `bd update` commands)
 
@@ -92,10 +92,10 @@ Working on "Implement checkout flow" (checkout-1), discover payment validation s
 2. **Check what's stuck**: Use `mcp__plugin_beads_beads__blocked` to understand blockers
 3. **Check recent progress**: Use `mcp__plugin_beads_beads__list` with `status:"closed"` to see completions
 4. **Read detailed context**: Use `mcp__plugin_beads_beads__show` for the issue you'll work on
-5. **Update status**: Use `mcp__plugin_beads_beads__update` with `status:"in_progress"`
+5. **Claim issue**: Use `mcp__plugin_beads_beads__claim` (or CLI `bd update <id> --claim`) for atomic start
 6. **Begin work**: Create TodoWrite from notes field's NEXT section
 
-(CLI: `bd ready`, `bd blocked`, `bd list --status closed`, `bd show <id>`, `bd update <id> --status in_progress`)
+(CLI: `bd ready`, `bd blocked`, `bd list --status closed`, `bd show <id>`, `bd update <id> --claim`)
 
 **Example**:
 ```bash
@@ -116,7 +116,7 @@ IN PROGRESS: Need to add token refresh
 NEXT: Implement rotation per OWASP guidelines (7-day refresh tokens)
 BLOCKER: None - ready to proceed
 
-$ bd update auth-5 --status in_progress
+$ bd update auth-5 --claim
 # Now create TodoWrite based on NEXT section
 ```
 
@@ -148,7 +148,7 @@ blocked   blocked
 - Actively working on this issue right now
 - Has been read and understood
 - Making commits or changes related to this
-- **Command**: `bd update issue-id --status in_progress`
+- **Command**: `bd update issue-id --claim`
 - **When**: Start of work session on this issue
 
 **blocked**:
@@ -173,7 +173,7 @@ blocked   blocked
 **Starting work**:
 ```bash
 bd ready  # See what's available
-bd update auth-5 --status in_progress
+bd update auth-5 --claim
 # Begin working
 ```
 
@@ -317,7 +317,7 @@ When closing reveals new work:
 bd create "Optimize token lookup query" -t task -p 2
 
 # Link the provenance
-bd dep add auth-5 perf-99 --type discovered-from
+bd dep add perf-99 auth-5 --type discovered-from
 
 # Now close original
 bd close auth-5 --reason "OAuth refresh implemented. Discovered perf optimization needed (filed perf-99)."

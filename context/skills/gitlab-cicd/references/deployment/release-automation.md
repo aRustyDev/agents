@@ -159,4 +159,3 @@ release:
 
 - [GitLab Releases](https://docs.gitlab.com/user/project/releases/)
 - [release keyword](https://docs.gitlab.com/ci/yaml/#release)
-

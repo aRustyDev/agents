@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -24,24 +23,22 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-extract-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 
 from ir_core import (
-    IRVersion,
+    AutomationLevel,
     ExtractConfig,
     GapDetector,
     GapMarker,
     GapType,
+    IRVersion,
     Severity,
-    PreservationLevel,
-    AutomationLevel,
 )
 from ir_core.gaps import (
-    GapPattern,
-    TYPE_SYSTEM_PATTERNS,
-    MEMORY_MODEL_PATTERNS,
-    EFFECT_SYSTEM_PATTERNS,
-    CONCURRENCY_PATTERNS,
     ALL_PATTERNS,
+    CONCURRENCY_PATTERNS,
+    EFFECT_SYSTEM_PATTERNS,
+    MEMORY_MODEL_PATTERNS,
+    TYPE_SYSTEM_PATTERNS,
+    GapPattern,
 )
-
 
 # =============================================================================
 # Import Tools with Graceful Fallback

@@ -131,4 +131,3 @@ optional_smoke_test:
 
 - [GitLab CI/CD YAML reference](https://docs.gitlab.com/ci/yaml/)
 - Context card: NEW-14
-

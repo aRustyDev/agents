@@ -7,8 +7,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from ir_query.__main__ import (
     create_parser,
     format_output,

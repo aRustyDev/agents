@@ -4,7 +4,7 @@ description: Work an open issue with 'review' and 'skills' labels from Backlog -
 
 # Review Skill Issue
 
-Work an open issue from `aRustyDev/ai` that has both the `review` and `skills` labels AND is in the **Backlog** status of the AI Components project.
+Work an open issue from `aRustyDev/agents` that has both the `review` and `skills` labels AND is in the **Backlog** status of the AI Components project.
 
 ## Phase 1: Issue Discovery
 
@@ -12,7 +12,7 @@ Work an open issue from `aRustyDev/ai` that has both the `review` and `skills` l
 
    ```bash
    # List issues with review+skills labels
-   gh issue list --repo aRustyDev/ai --label review --label skills --state open --json number,title,createdAt
+   gh issue list --repo aRustyDev/agents --label review --label skills --state open --json number,title,createdAt
    ```
 
 2. For each candidate issue, check if it's in Backlog status:

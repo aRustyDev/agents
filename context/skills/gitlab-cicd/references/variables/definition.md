@@ -124,4 +124,3 @@ minimal_job:
 
 - [GitLab CI/CD variables](https://docs.gitlab.com/ci/variables/)
 - Context card: VA-5
-

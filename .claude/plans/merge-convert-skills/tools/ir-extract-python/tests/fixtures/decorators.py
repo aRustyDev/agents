@@ -1,10 +1,10 @@
 """Decorator examples for testing decorator pattern extraction."""
 
-from functools import wraps, lru_cache, cached_property
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Any, Callable, TypeVar, ParamSpec
 from dataclasses import dataclass
-
+from functools import cached_property, lru_cache, wraps
+from typing import Any, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 R = TypeVar("R")

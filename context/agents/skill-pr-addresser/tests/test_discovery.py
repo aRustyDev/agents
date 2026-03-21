@@ -24,7 +24,7 @@ def mock_pr_details():
     return PRDetails(
         number=795,
         title="feat(skills): add lang-rust-dev skill",
-        url="https://github.com/aRustyDev/ai/pull/795",
+        url="https://github.com/aRustyDev/agents/pull/795",
         state="OPEN",
         branch="feat/lang-rust-dev",
         body="Closes #123\n\nAdds the lang-rust-dev skill.",

@@ -141,7 +141,7 @@ def main() -> int:
     print("-" * 60)
 
     # Run pytest
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     return result.returncode
 
 

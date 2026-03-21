@@ -142,4 +142,3 @@ test:
 - [Debugging CI/CD](https://docs.gitlab.com/ci/debugging/)
 - [Pipeline Editor](https://docs.gitlab.com/ci/pipeline_editor/)
 - [CI Lint API](https://docs.gitlab.com/api/lint/)
-

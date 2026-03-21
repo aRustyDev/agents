@@ -146,8 +146,8 @@ See README.md for migration guide from v1.x commands.
 - MCP server configuration
 - Documentation templates
 
-[Unreleased]: https://github.com/aRustyDev/ai/compare/blog-workflow-v0.1.0...HEAD
-[0.1.0]: https://github.com/aRustyDev/ai/releases/tag/blog-workflow-v0.1.0
+[Unreleased]: https://github.com/aRustyDev/agents/compare/blog-workflow-v0.1.0...HEAD
+[0.1.0]: https://github.com/aRustyDev/agents/releases/tag/blog-workflow-v0.1.0
 
 ## Git History
 

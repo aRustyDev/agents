@@ -1,7 +1,7 @@
 """Async/await patterns for testing effect extraction."""
 
 import asyncio
-from typing import AsyncIterator, Coroutine
+from collections.abc import AsyncIterator, Coroutine
 
 
 async def fetch_data(url: str) -> str:
@@ -30,7 +30,7 @@ async def timeout_wrapper(
     """Wrap a coroutine with timeout."""
     try:
         return await asyncio.wait_for(coro, timeout=timeout)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return "timeout"
 
 

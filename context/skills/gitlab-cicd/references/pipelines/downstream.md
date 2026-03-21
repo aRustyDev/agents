@@ -140,4 +140,3 @@ trigger-deploy:
 
 - [Downstream pipelines](https://docs.gitlab.com/ci/pipelines/downstream_pipelines/)
 - [Parent-child pipelines](https://docs.gitlab.com/ci/pipelines/downstream_pipelines/#parent-child-pipelines)
-

@@ -186,4 +186,3 @@ deploy-production:
 - [Job control](https://docs.gitlab.com/ci/jobs/job_control/)
 - [DAG pipelines](https://docs.gitlab.com/ci/jobs/job_control/#directed-acyclic-graph)
 - [Resource groups](https://docs.gitlab.com/ci/resource_groups/)
-

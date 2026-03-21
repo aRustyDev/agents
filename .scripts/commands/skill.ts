@@ -414,7 +414,7 @@ export default defineCommand({
             repo: {
               type: 'string',
               description: 'GitHub repo (owner/repo)',
-              default: 'aRustyDev/ai',
+              default: 'aRustyDev/agents',
             },
           },
           async run({ args }) {
@@ -423,7 +423,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const repoArg = (args.repo as string) || 'aRustyDev/ai'
+            const repoArg = (args.repo as string) || 'aRustyDev/agents'
             const dryRun = args['dry-run'] as boolean
 
             const spinner = out.spinner(

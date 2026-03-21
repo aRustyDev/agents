@@ -36,13 +36,13 @@ from __future__ import annotations
 
 from .extractor import PythonExtractor
 from .parser import PythonParser
-from .semantic import SemanticEnricher
 from .patterns import PythonPatternMatcher
+from .semantic import SemanticEnricher
 
 __version__ = "0.1.0"
 __all__ = [
     "PythonExtractor",
     "PythonParser",
-    "SemanticEnricher",
     "PythonPatternMatcher",
+    "SemanticEnricher",
 ]

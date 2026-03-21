@@ -114,7 +114,7 @@ Add the plugin to `.claude-plugin/marketplace.json`:
   "keywords": ["<keywords from plugin.json>"],
   "license": "MIT",
   "homepage": "https://docs.arusty.dev/ai/plugins/<plugin-name>",
-  "repository": "https://github.com/aRustyDev/ai.git"
+  "repository": "https://github.com/aRustyDev/agents.git"
 }
 ```
 

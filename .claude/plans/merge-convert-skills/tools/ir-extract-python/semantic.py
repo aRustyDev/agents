@@ -28,11 +28,11 @@ from pathlib import Path
 from typing import Any
 
 from ir_core.models import (
+    AnnotationSource,
     IRVersion,
+    SemanticAnnotation,
     TypeRef,
     TypeRefKind,
-    SemanticAnnotation,
-    AnnotationSource,
 )
 
 
@@ -173,7 +173,7 @@ class SemanticEnricher:
                     ["pyright", "--version"],
                     capture_output=True,
                     text=True,
-                    timeout=5,
+                    timeout=5, check=False,
                 )
                 self._pyright_available = result.returncode == 0
             except (subprocess.SubprocessError, FileNotFoundError):
@@ -330,7 +330,7 @@ class SemanticEnricher:
                 capture_output=True,
                 text=True,
                 timeout=30,
-                cwd=str(project_root) if project_root else None,
+                cwd=str(project_root) if project_root else None, check=False,
             )
 
             # Parse pyright output

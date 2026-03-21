@@ -232,4 +232,3 @@ variables:
 - [trigger:forward](https://docs.gitlab.com/ci/yaml/#triggerforward)
 - [SO: Variable override confusion](https://stackoverflow.com/questions/72009402)
 - [SO: trigger:forward precedence](https://stackoverflow.com/questions/77484773)
-

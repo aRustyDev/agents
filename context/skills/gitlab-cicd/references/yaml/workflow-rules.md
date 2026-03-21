@@ -172,4 +172,3 @@ workflow:
 
 - [workflow keyword](https://docs.gitlab.com/ci/yaml/workflow/)
 - [Auto-cancel pipelines](https://docs.gitlab.com/ci/pipelines/settings/#auto-cancel-redundant-pipelines)
-

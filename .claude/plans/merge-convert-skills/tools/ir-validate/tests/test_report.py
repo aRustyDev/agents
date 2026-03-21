@@ -1,7 +1,6 @@
 """Tests for report generation."""
 
 import json
-import pytest
 
 from ir_validate.errors import ValidationError
 from ir_validate.report import (

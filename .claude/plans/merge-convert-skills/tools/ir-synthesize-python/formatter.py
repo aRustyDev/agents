@@ -12,7 +12,6 @@ Example:
 from __future__ import annotations
 
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -114,7 +113,7 @@ class PythonFormatter:
         # Fall back to basic formatting
         return self._basic_format(code)
 
-    def add_docstrings(self, code: str, ir: "IRVersion") -> str:
+    def add_docstrings(self, code: str, ir: IRVersion) -> str:
         """Add docstrings from IR metadata to code.
 
         This method parses the code and inserts docstrings from the IR where
@@ -280,7 +279,7 @@ class PythonFormatter:
                 input=code,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=30, check=False,
             )
             if result.returncode == 0:
                 return FormatResult(
@@ -376,7 +375,7 @@ class PythonFormatter:
                 input=code,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=30, check=False,
             )
             if result.returncode == 0:
                 return result.stdout
@@ -399,7 +398,7 @@ class PythonFormatter:
                 input=code,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=30, check=False,
             )
             if result.returncode == 0:
                 return result.stdout
@@ -420,7 +419,7 @@ class PythonFormatter:
             result = subprocess.run(
                 [tool, "--version"],
                 capture_output=True,
-                timeout=5,
+                timeout=5, check=False,
             )
             return result.returncode == 0
         except Exception:
@@ -544,7 +543,7 @@ class FormatterConfig:
         self.target_version = target_version
 
     @classmethod
-    def from_pyproject(cls, path: Path) -> "FormatterConfig":
+    def from_pyproject(cls, path: Path) -> FormatterConfig:
         """Load configuration from pyproject.toml.
 
         Args:

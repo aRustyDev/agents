@@ -17,7 +17,7 @@
       "keywords": ["homebrew", "formula", "tap", "package-manager", "macos"],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/homebrew-dev",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     },
     {
       "name": "browser-extension-dev",
@@ -40,7 +40,7 @@
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/browser-extension-dev",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     },
     {
       "name": "blog-workflow",
@@ -63,7 +63,7 @@
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     },
     {
       "name": "job-hunting",
@@ -85,7 +85,7 @@
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/job-hunting",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     },
     {
       "name": "swiftui-dev",
@@ -109,7 +109,7 @@
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/swiftui-dev",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     },
     {
       "name": "design-to-code",
@@ -134,7 +134,7 @@
       ],
       "license": "MIT",
       "homepage": "https://docs.arusty.dev/ai/plugins/design-to-code",
-      "repository": "https://github.com/aRustyDev/ai.git"
+      "repository": "https://github.com/aRustyDev/agents.git"
     }
   ]
 }

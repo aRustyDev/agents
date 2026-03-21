@@ -30,5 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MCP server configuration
 - Documentation templates
 
-[Unreleased]: https://github.com/aRustyDev/ai/compare/design-to-code-v0.1.0...HEAD
-[0.1.0]: https://github.com/aRustyDev/ai/releases/tag/design-to-code-v0.1.0
+[Unreleased]: https://github.com/aRustyDev/agents/compare/design-to-code-v0.1.0...HEAD
+[0.1.0]: https://github.com/aRustyDev/agents/releases/tag/design-to-code-v0.1.0

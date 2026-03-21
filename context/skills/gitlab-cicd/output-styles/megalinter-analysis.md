@@ -63,4 +63,3 @@ grouping findings by severity, suggesting fixes, and linking to config reference
 ## Sources
 
 - Context card: OS-1
-

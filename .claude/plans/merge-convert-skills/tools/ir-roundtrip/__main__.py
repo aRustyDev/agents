@@ -22,10 +22,9 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .validator import RoundTripValidator, PreservationLevel, RoundTripResult
 from .comparison import CodeComparator
-from .executor import SafeExecutor
-from .report import RoundTripReport, ReportFormat
+from .report import ReportFormat, RoundTripReport
+from .validator import PreservationLevel, RoundTripValidator
 
 
 def main() -> int:

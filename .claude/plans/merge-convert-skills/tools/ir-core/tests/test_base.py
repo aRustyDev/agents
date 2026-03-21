@@ -3,22 +3,20 @@
 from __future__ import annotations
 
 import pytest
-from pathlib import Path
-
 from ir_core.base import (
-    Extractor,
-    Synthesizer,
     ExtractConfig,
-    SynthConfig,
     ExtractionMode,
-    SemanticEnrichmentLevel,
-    OutputFormat,
+    Extractor,
     ExtractorRegistry,
+    OutputFormat,
+    SemanticEnrichmentLevel,
+    SynthConfig,
+    Synthesizer,
     SynthesizerRegistry,
-    register_extractor,
-    register_synthesizer,
     get_extractor,
     get_synthesizer,
+    register_extractor,
+    register_synthesizer,
 )
 from ir_core.models import IRVersion, Module, ModuleMetadata
 

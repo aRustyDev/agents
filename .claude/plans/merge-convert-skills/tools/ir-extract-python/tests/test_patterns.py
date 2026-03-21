@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
 from ir_core.models import AutomationLevel
-
 from ir_extract_python import PythonParser, PythonPatternMatcher
 from ir_extract_python.patterns import PatternKind
 

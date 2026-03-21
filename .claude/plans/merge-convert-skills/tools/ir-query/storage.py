@@ -25,12 +25,7 @@ import hashlib
 import json
 import logging
 import sqlite3
-from datetime import datetime
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
-
-if TYPE_CHECKING:
-    from types import TracebackType
+from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
 

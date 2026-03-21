@@ -152,7 +152,7 @@ def context_manager_exception() -> None:
             content = f.read()
     except FileNotFoundError:
         print("File not found")
-    except IOError as e:
+    except OSError as e:
         print(f"IO error: {e}")
 
 

@@ -4,8 +4,9 @@ This module validates that all references within an IR document resolve
 correctly, detects circular references, and validates cross-file references.
 """
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 from .errors import (
     ValidationError,

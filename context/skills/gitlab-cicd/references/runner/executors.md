@@ -197,4 +197,3 @@ description: Docker, Kubernetes, shell executor configuration, comparison table,
 - [GitLab Runner Advanced Configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
 - [GitLab Runner Security](https://docs.gitlab.com/runner/security/)
 - [GitLab Runner Executors](https://docs.gitlab.com/runner/executors/)
-

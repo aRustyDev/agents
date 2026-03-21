@@ -25,7 +25,7 @@ from __future__ import annotations
 import ast
 import difflib
 from dataclasses import dataclass, field
-from enum import Enum, auto
+from enum import Enum
 from typing import Any
 
 
@@ -519,7 +519,7 @@ class CodeComparator:
                         )
                     )
 
-                for i, (s, t) in enumerate(zip(source_value, target_value)):
+                for i, (s, t) in enumerate(zip(source_value, target_value, strict=False)):
                     if isinstance(s, ast.AST) and isinstance(t, ast.AST):
                         differences.extend(
                             self._find_ast_differences(

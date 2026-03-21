@@ -121,4 +121,3 @@ include:
 
 - [GitLab CI/CD YAML reference](https://docs.gitlab.com/ci/yaml/)
 - Context card: GL-1
-

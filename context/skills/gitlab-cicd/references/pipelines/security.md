@@ -152,4 +152,3 @@ install:
 
 - [Pipeline security](https://docs.gitlab.com/ci/pipeline_security/)
 - [Using external secrets](https://docs.gitlab.com/ci/secrets/)
-

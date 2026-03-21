@@ -10,7 +10,7 @@ import pytest
 pytest.importorskip("tree_sitter")
 pytest.importorskip("tree_sitter_python")
 
-from ir_core.base import ExtractConfig, SynthConfig, OutputFormat
+from ir_core.base import ExtractConfig, OutputFormat, SynthConfig
 
 
 class TestPythonToRust:

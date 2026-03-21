@@ -1,6 +1,7 @@
 """Generic type patterns for testing type extraction."""
 
-from typing import Generic, TypeVar, Callable, Sequence, Mapping, Iterable
+from collections.abc import Callable, Iterable, Sequence
+from typing import Generic, TypeVar
 
 T = TypeVar("T")
 U = TypeVar("U")

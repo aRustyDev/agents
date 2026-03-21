@@ -163,4 +163,3 @@ apply:
 
 - [Infrastructure as Code](https://docs.gitlab.com/user/infrastructure/iac/)
 - [OpenTofu CI/CD component](https://gitlab.com/components/opentofu)
-

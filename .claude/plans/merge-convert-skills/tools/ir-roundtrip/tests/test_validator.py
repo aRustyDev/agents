@@ -11,13 +11,12 @@ Tests cover:
 from __future__ import annotations
 
 import pytest
-
 from ir_roundtrip.validator import (
-    RoundTripValidator,
-    RoundTripResult,
     PreservationLevel,
-    ValidationStatus,
+    RoundTripResult,
+    RoundTripValidator,
     SemanticResult,
+    ValidationStatus,
 )
 
 from .conftest import requires_full_toolchain
@@ -154,7 +153,7 @@ class TestRoundTripValidatorInit:
 
     def test_custom_configs(self) -> None:
         """Test initialization with custom configs."""
-        from ir_core.base import ExtractConfig, SynthConfig, OutputFormat
+        from ir_core.base import ExtractConfig, OutputFormat, SynthConfig
 
         extract_config = ExtractConfig()
         synth_config = SynthConfig(output_format=OutputFormat.SOURCE)

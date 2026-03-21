@@ -5,13 +5,15 @@ JSON Schema validation with custom validators for semantic rules.
 """
 
 import json
+from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 try:
     import jsonschema
-    from jsonschema import Draft7Validator, ValidationError as JsonSchemaError
+    from jsonschema import Draft7Validator
+    from jsonschema import ValidationError as JsonSchemaError
 except ImportError:
     jsonschema = None  # type: ignore
     Draft7Validator = None  # type: ignore
@@ -23,7 +25,6 @@ from .errors import (
     ValidationException,
     create_error,
 )
-
 
 # Default schema path relative to this file
 DEFAULT_SCHEMA_PATH = Path(__file__).parent.parent.parent / "schemas" / "ir-v1.json"

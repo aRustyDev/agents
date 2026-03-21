@@ -6,10 +6,10 @@ synthesizing it back to Python, and verifying the behavior matches.
 
 from __future__ import annotations
 
-import pytest
 from typing import Any
 
-from ir_core.base import ExtractConfig, SynthConfig, OutputFormat
+import pytest
+from ir_core.base import ExtractConfig, OutputFormat, SynthConfig
 
 # Try to import extractor - may not be available
 try:
@@ -20,7 +20,6 @@ except ImportError:
 
 from ir_synthesize_python import PythonSynthesizer
 
-
 pytestmark = pytest.mark.skipif(
     not HAS_EXTRACTOR,
     reason="ir-extract-python not installed",
@@ -28,7 +27,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.fixture
-def extractor() -> "PythonExtractor":
+def extractor() -> PythonExtractor:
     """Create an extractor instance."""
     if HAS_EXTRACTOR:
         return PythonExtractor()
@@ -80,7 +79,7 @@ class TestSimpleRoundtrip:
 
     def test_identity_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -106,7 +105,7 @@ def identity(x: int) -> int:
 
     def test_add_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -128,7 +127,7 @@ def add(a: int, b: int) -> int:
 
     def test_conditional_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -157,7 +156,7 @@ class TestDataclassRoundtrip:
 
     def test_simple_dataclass(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -188,7 +187,7 @@ class TestAsyncRoundtrip:
 
     def test_async_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -212,7 +211,7 @@ class TestTypeAnnotationRoundtrip:
 
     def test_generic_types(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -231,7 +230,7 @@ def process(items: list[str]) -> dict[str, int]:
 
     def test_optional_types(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -259,14 +258,15 @@ class TestPropertyBasedRoundtrip:
 
     def test_arithmetic_equivalence(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
     ) -> None:
         """Test that arithmetic operations are semantically equivalent."""
         try:
-            from hypothesis import given, strategies as st, settings
+            from hypothesis import given, settings
+            from hypothesis import strategies as st
         except ImportError:
             pytest.skip("hypothesis not installed")
 
@@ -294,7 +294,7 @@ class TestEdgeCases:
 
     def test_empty_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -313,7 +313,7 @@ def noop() -> None:
 
     def test_multiple_functions(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,
@@ -341,7 +341,7 @@ def combined() -> int:
 
     def test_private_function(
         self,
-        extractor: "PythonExtractor",
+        extractor: PythonExtractor,
         synthesizer: PythonSynthesizer,
         extract_config: ExtractConfig,
         synth_config: SynthConfig,

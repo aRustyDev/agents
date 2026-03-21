@@ -55,7 +55,7 @@ Report a skill bug with automatically gathered context.
 4. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml&title=[BUG][skill:<name>]%20<title>&labels=bug,triage,skills
+   https://github.com/aRustyDev/agents/issues/new?template=bug-report.yml&title=[BUG][skill:<name>]%20<title>&labels=bug,triage,skills
    ```
 
 5. **Present to User**:
@@ -79,7 +79,7 @@ Request a skill feature or enhancement.
 3. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=feature-request.yml&title=[FEATURE][skill:<name>]%20<title>&labels=enhancement,skills
+   https://github.com/aRustyDev/agents/issues/new?template=feature-request.yml&title=[FEATURE][skill:<name>]%20<title>&labels=enhancement,skills
    ```
 
 4. **Present to User**:
@@ -104,7 +104,7 @@ Share a success story about how a skill helped you.
 3. **Generate GitHub Discussions URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/discussions/new?category=show-and-tell&title=[Skill]%20<title>
+   https://github.com/aRustyDev/agents/discussions/new?category=show-and-tell&title=[Skill]%20<title>
    ```
 
 4. **Present to User**:

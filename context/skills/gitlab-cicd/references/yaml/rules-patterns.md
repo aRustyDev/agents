@@ -133,4 +133,3 @@ test:
 
 - [rules keyword](https://docs.gitlab.com/ci/yaml/#rules)
 - [CI/CD YAML reference](https://docs.gitlab.com/ci/yaml/)
-

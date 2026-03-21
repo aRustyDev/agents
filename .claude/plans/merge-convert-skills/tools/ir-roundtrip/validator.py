@@ -22,11 +22,12 @@ from __future__ import annotations
 import hashlib
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum, auto
+from datetime import UTC, datetime
+from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 # Add sibling tools to path
 TOOLS_DIR = Path(__file__).parent.parent
@@ -35,11 +36,11 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-extract-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 
-from ir_core.base import ExtractConfig, SynthConfig, OutputFormat, ExtractionMode
-from ir_core.models import IRVersion, GapMarker
+from ir_core.base import ExtractConfig, ExtractionMode, OutputFormat, SynthConfig
+from ir_core.models import GapMarker, IRVersion
 
 from .comparison import CodeComparator, CompareResult
-from .executor import SafeExecutor, ExecutionResult
+from .executor import ExecutionResult, SafeExecutor
 
 
 class PreservationLevel(str, Enum):
@@ -104,7 +105,7 @@ class RoundTripResult:
         default_factory=list
     )
     duration_ms: float = 0.0
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     failure_reason: str | None = None
     gaps: list[GapMarker] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)

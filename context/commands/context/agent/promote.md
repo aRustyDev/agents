@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Bash(git:*), Bash(gh:*), Bash(mkdir:*), Bash(cp:*), 
 
 # Promote Agent
 
-Promote an agent from the current project to the aRustyDev/ai repository.
+Promote an agent from the current project to the aRustyDev/agents repository.
 
 ## Arguments
 
@@ -49,8 +49,8 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 
    ```bash
    git -C "$AI_REPO" branch --list "feat/add-agent-<name>"
-   gh issue list --repo aRustyDev/ai --search "[AGENT] <name> in:title"
-   gh pr list --repo aRustyDev/ai --search "feat(agent): add <name> in:title"
+   gh issue list --repo aRustyDev/agents --search "[AGENT] <name> in:title"
+   gh pr list --repo aRustyDev/agents --search "feat(agent): add <name> in:title"
    ```
 
 ### Phase 2: User Decision (if existing)
@@ -98,7 +98,7 @@ Create GitHub Issue with:
 4. **Create PR**:
 
    ```bash
-   gh pr create --repo aRustyDev/ai \
+   gh pr create --repo aRustyDev/agents \
      --head feat/add-agent-<name> --base main \
      --title "feat(agent): add <name>" \
      --body "..."

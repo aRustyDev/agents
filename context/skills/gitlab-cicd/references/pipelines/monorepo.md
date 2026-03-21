@@ -139,4 +139,3 @@ run-changed:
 
 - [GitLab CI/CD Monorepo Patterns](https://about.gitlab.com/blog/building-a-gitlab-ci-cd-pipeline-for-a-monorepo-the-easy-way/)
 - [rules:changes](https://docs.gitlab.com/ci/yaml/#ruleschanges)
-

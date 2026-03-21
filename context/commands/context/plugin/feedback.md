@@ -53,7 +53,7 @@ Report a plugin bug with automatically gathered context.
 4. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml&title=[BUG][plugin:<name>]%20<title>&labels=bug,triage,plugin
+   https://github.com/aRustyDev/agents/issues/new?template=bug-report.yml&title=[BUG][plugin:<name>]%20<title>&labels=bug,triage,plugin
    ```
 
 5. **Present to User**:
@@ -77,7 +77,7 @@ Request a plugin feature or enhancement.
 3. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=feature-request.yml&title=[FEATURE][plugin:<name>]%20<title>&labels=enhancement,plugin
+   https://github.com/aRustyDev/agents/issues/new?template=feature-request.yml&title=[FEATURE][plugin:<name>]%20<title>&labels=enhancement,plugin
    ```
 
 4. **Present to User**:
@@ -101,7 +101,7 @@ Share a success story about how a plugin helped you.
 3. **Generate GitHub Discussions URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/discussions/new?category=show-and-tell&title=[Plugin]%20<title>
+   https://github.com/aRustyDev/agents/discussions/new?category=show-and-tell&title=[Plugin]%20<title>
    ```
 
 4. **Present to User**:

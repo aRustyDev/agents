@@ -2,37 +2,33 @@
 
 from __future__ import annotations
 
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from ir_core.base import SynthConfig, OutputFormat
+import pytest
+from ir_core.base import OutputFormat, SynthConfig
 from ir_core.models import (
+    Block,
+    ControlFlowGraph,
+    Effect,
+    EffectKind,
+    ExtractionMode,
+    Field_,
+    Function,
+    Import,
+    ImportedItem,
     IRVersion,
     Module,
     ModuleMetadata,
-    Function,
     Param,
-    TypeRef,
-    TypeRefKind,
-    TypeDef,
-    TypeKind,
-    TypeBody,
-    Effect,
-    EffectKind,
-    Visibility,
-    ControlFlowGraph,
-    Block,
-    Statement,
     Terminator,
     TerminatorKind,
-    Expression,
-    ExpressionKind,
-    Field_,
-    Import,
-    ImportedItem,
-    ExtractionMode,
+    TypeBody,
+    TypeDef,
+    TypeKind,
+    TypeRef,
+    TypeRefKind,
+    Visibility,
 )
-
 from ir_synthesize_python import PythonSynthesizer
 
 
@@ -72,7 +68,7 @@ def minimal_ir() -> IRVersion:
                 source_language="python",
                 extraction_version="ir-v1.0",
                 extraction_mode=ExtractionMode.FULL_MODULE,
-                extraction_timestamp=datetime.now(timezone.utc),
+                extraction_timestamp=datetime.now(UTC),
             ),
         ),
         types=[],

@@ -25,15 +25,10 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 
 from ir_core import (
-    IRVersion,
     ExtractConfig,
-    ExtractionMode,
-    PreservationLevel,
-    GapType,
-    Severity,
+    IRVersion,
 )
-from ir_core.base import SynthConfig, OutputFormat
-
+from ir_core.base import SynthConfig
 
 # =============================================================================
 # Import Tools with Graceful Fallback

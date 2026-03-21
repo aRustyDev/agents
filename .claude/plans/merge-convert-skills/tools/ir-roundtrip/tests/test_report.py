@@ -11,20 +11,18 @@ Tests cover:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
 
 import pytest
-
-from ir_roundtrip.validator import (
-    RoundTripResult,
-    PreservationLevel,
-    ValidationStatus,
-)
-from ir_roundtrip.comparison import CompareResult, ASTDifference, DifferenceKind
+from ir_roundtrip.comparison import ASTDifference, CompareResult, DifferenceKind
 from ir_roundtrip.report import (
-    RoundTripReport,
     ReportFormat,
     ReportSummary,
+    RoundTripReport,
+)
+from ir_roundtrip.validator import (
+    PreservationLevel,
+    RoundTripResult,
+    ValidationStatus,
 )
 
 

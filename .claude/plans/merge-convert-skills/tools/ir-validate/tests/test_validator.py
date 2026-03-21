@@ -1,6 +1,5 @@
 """Tests for the main IRValidator class."""
 
-import pytest
 from typing import Any
 
 from ir_validate import IRValidator, ValidationResult

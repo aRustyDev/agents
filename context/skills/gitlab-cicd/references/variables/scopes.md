@@ -189,4 +189,3 @@ deploy:
 - [Variable Expansion Mechanisms](https://docs.gitlab.com/ci/variables/where_variables_can_be_used/#expansion-mechanisms)
 - [Persisted Variables](https://docs.gitlab.com/ci/variables/where_variables_can_be_used/#persisted-variables)
 - [GitLab CI/CD Debugging](https://docs.gitlab.com/ci/debugging/)
-

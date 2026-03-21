@@ -123,4 +123,3 @@ See [../examples/map-pipeline.md](../examples/map-pipeline.md) for a real-world 
 ## Sources
 
 - Context card: OS-4
-

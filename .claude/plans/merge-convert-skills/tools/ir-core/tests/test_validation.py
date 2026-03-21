@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
 from ir_core.models import (
+    AnnotationSource,
+    Definition,
+    DefinitionRef,
+    Export,
     GapMarker,
     GapType,
     IRVersion,
@@ -14,19 +16,15 @@ from ir_core.models import (
     PreservationStatus,
     SemanticAnnotation,
     Severity,
+    TypeBody,
     TypeDef,
     TypeKind,
-    TypeBody,
-    Definition,
-    Export,
-    DefinitionRef,
-    AnnotationSource,
 )
 from ir_core.validation import (
     SchemaValidator,
+    ValidationIssue,
     ValidationResult,
     ValidationSeverity,
-    ValidationIssue,
     validate_ir,
 )
 

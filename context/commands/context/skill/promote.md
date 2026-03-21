@@ -1,6 +1,6 @@
 # Promote Skill to AI Config Library
 
-Promote a skill from the current project to the aRustyDev/ai repository.
+Promote a skill from the current project to the aRustyDev/agents repository.
 
 ## Arguments
 
@@ -75,10 +75,10 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
    git -C "$AI_REPO" ls-remote --heads origin "feat/add-skill-<skill-name>"
 
    # Check for existing issues
-   gh issue list --repo aRustyDev/ai --search "[SKILL] <skill-name> in:title"
+   gh issue list --repo aRustyDev/agents --search "[SKILL] <skill-name> in:title"
 
    # Check for existing PRs
-   gh pr list --repo aRustyDev/ai --search "feat(skill): add <skill-name> in:title"
+   gh pr list --repo aRustyDev/agents --search "feat(skill): add <skill-name> in:title"
    ```
 
    If any exist, ask user whether to continue, update existing, or abort.
@@ -164,7 +164,7 @@ If an existing skill was found, present options to the user using AskUserQuestio
 
    ```bash
    gh pr create \
-     --repo aRustyDev/ai \
+     --repo aRustyDev/agents \
      --head feat/add-skill-<skill-name> \
      --base main \
      --title "feat(skill): add <skill-name>" \
@@ -240,7 +240,7 @@ If the SKILL.md contains triple backticks, they may break the issue/PR body form
 ## Notes
 
 - The ai repo location is configurable (see Configuration section)
-- You must have push access to aRustyDev/ai
+- You must have push access to aRustyDev/agents
 - The skill will be added to `components/skills/` (not legacy/)
 - If promoting an upgrade, the old skill in legacy/ is preserved
 - All git commands use `-C "$AI_REPO"` to avoid working directory issues

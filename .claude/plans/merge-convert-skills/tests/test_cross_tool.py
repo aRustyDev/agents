@@ -11,11 +11,9 @@ These tests verify that tools produce output compatible with their consumers.
 
 from __future__ import annotations
 
-import json
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -28,17 +26,13 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-query"))
 
 from ir_core import (
-    IRVersion,
     ExtractConfig,
-    ExtractionMode,
     GapDetector,
-    GapMarker,
     GapType,
+    IRVersion,
     Severity,
-    PreservationLevel,
 )
-from ir_core.base import SynthConfig, OutputFormat
-
+from ir_core.base import SynthConfig
 
 # =============================================================================
 # Import Tools with Graceful Fallback

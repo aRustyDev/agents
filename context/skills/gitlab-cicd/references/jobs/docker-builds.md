@@ -139,4 +139,3 @@ build-image:
 - [Docker builds in CI](https://docs.gitlab.com/ci/docker/using_docker_build/)
 - [Kaniko](https://docs.gitlab.com/ci/docker/using_kaniko/)
 - [Container Registry](https://docs.gitlab.com/user/packages/container_registry/)
-

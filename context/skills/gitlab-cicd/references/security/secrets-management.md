@@ -192,4 +192,3 @@ deploy-aws:
 
 - [External secrets](https://docs.gitlab.com/ci/secrets/)
 - [OIDC authentication](https://docs.gitlab.com/ci/secrets/id_token_authentication/)
-

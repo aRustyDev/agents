@@ -420,9 +420,9 @@ describe('getOwnerRepo', () => {
   test('handles GitHub HTTPS .git URL', () => {
     const parsed: ParsedSource = {
       type: 'git',
-      url: 'https://github.com/aRustyDev/ai.git',
+      url: 'https://github.com/aRustyDev/agents.git',
     }
-    expect(getOwnerRepo(parsed)).toBe('aRustyDev/ai')
+    expect(getOwnerRepo(parsed)).toBe('aRustyDev/agents')
   })
 })
 
@@ -501,17 +501,17 @@ describe('sanitizeSubpath', () => {
 
 describe('parseSource + getOwnerRepo roundtrip', () => {
   test('short form round-trips owner/repo', () => {
-    const r = parseSource('aRustyDev/ai')
+    const r = parseSource('aRustyDev/agents')
     expect(r.ok).toBe(true)
     if (!r.ok) return
-    expect(getOwnerRepo(r.value)).toBe('aRustyDev/ai')
+    expect(getOwnerRepo(r.value)).toBe('aRustyDev/agents')
   })
 
   test('GitHub tree URL round-trips owner/repo', () => {
-    const r = parseSource('https://github.com/aRustyDev/ai/tree/main/context/skills')
+    const r = parseSource('https://github.com/aRustyDev/agents/tree/main/context/skills')
     expect(r.ok).toBe(true)
     if (!r.ok) return
-    expect(getOwnerRepo(r.value)).toBe('aRustyDev/ai')
+    expect(getOwnerRepo(r.value)).toBe('aRustyDev/agents')
     expect(r.value.ref).toBe('main')
     expect(r.value.subpath).toBe('context/skills')
   })

@@ -130,4 +130,3 @@ concurrent = 20
 
 - [Runner advanced configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
 - Context card: RN-5
-

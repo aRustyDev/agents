@@ -2,7 +2,8 @@
 
 import functools
 import time
-from typing import Callable, TypeVar, ParamSpec
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -51,7 +52,7 @@ def validate_args(*validators: Callable[[any], bool]):
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            for i, (arg, validator) in enumerate(zip(args, validators)):
+            for i, (arg, validator) in enumerate(zip(args, validators, strict=False)):
                 if not validator(arg):
                     raise ValueError(f"Argument {i} failed validation")
             return func(*args, **kwargs)

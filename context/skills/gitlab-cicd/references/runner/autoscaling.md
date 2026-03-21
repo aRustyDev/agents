@@ -225,4 +225,3 @@ check_interval = 3
 - [GitLab Runner Advanced Configuration — Autoscaler](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
 - [GitLab Runner Fleet Scaling](https://docs.gitlab.com/runner/fleet_scaling/)
 - [Fleeting Plugins](https://gitlab.com/gitlab-org/fleeting/)
-

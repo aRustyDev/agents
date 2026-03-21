@@ -83,7 +83,7 @@ describe('GitHubTokenProvider (compat)', () => {
 
 describe('parseRepo', () => {
   test('parses owner/repo correctly', () => {
-    const result = parseRepo('aRustyDev/ai')
+    const result = parseRepo('aRustyDev/agents')
     expect(result.owner).toBe('aRustyDev')
     expect(result.repo).toBe('ai')
   })
@@ -136,7 +136,7 @@ describe('integration', () => {
     // If no token is available, this test may fail with a 401.
     // That is acceptable -- the test is meant for local dev use.
     try {
-      const issue = await readIssue('aRustyDev/ai', 1)
+      const issue = await readIssue('aRustyDev/agents', 1)
       expect(issue.number).toBe(1)
       expect(issue.title).toBeDefined()
       expect(typeof issue.title).toBe('string')

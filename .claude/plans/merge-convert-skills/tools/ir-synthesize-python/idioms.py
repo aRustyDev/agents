@@ -17,20 +17,13 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from ir_core.models import (
-    TypeDef,
-    TypeKind,
-    TypeRef,
-    TypeRefKind,
-    Function,
-    Expression,
-    ExpressionKind,
     ControlFlowGraph,
-    Block,
-    Statement,
-    Terminator,
-    TerminatorKind,
     EffectKind,
+    ExpressionKind,
     Field_,
+    Function,
+    Statement,
+    TypeDef,
 )
 
 if TYPE_CHECKING:
@@ -178,7 +171,7 @@ class PythonIdiomGenerator:
         )
 
     def gen_dataclass(
-        self, type_def: TypeDef, context: "SynthesisContext"
+        self, type_def: TypeDef, context: SynthesisContext
     ) -> IdiomResult:
         """Generate a dataclass from a struct TypeDef.
 
@@ -482,7 +475,7 @@ class PythonIdiomGenerator:
         return None
 
     def suggest_idiom(
-        self, func: Function, context: "SynthesisContext"
+        self, func: Function, context: SynthesisContext
     ) -> list[Pattern]:
         """Suggest idiomatic improvements for a function.
 
@@ -769,7 +762,7 @@ class PythonIdiomGenerator:
         )
 
     def _gen_dataclass_field(
-        self, field: Field_, context: "SynthesisContext"
+        self, field: Field_, context: SynthesisContext
     ) -> str:
         """Generate a dataclass field definition."""
         from .generator import PythonCodeGenerator

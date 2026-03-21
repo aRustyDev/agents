@@ -1,14 +1,11 @@
 """Tests for reference integrity checking."""
 
-import pytest
-from typing import Any
 
+from ir_validate.errors import ValidationErrorCode
 from ir_validate.references import (
-    ReferenceIntegrityChecker,
     ReferenceRegistry,
     check_reference_integrity,
 )
-from ir_validate.errors import ValidationErrorCode
 
 
 class TestReferenceRegistry:

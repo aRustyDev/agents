@@ -175,4 +175,3 @@ deploy-prod:
 - [GitLab CI/CD Variables — Protected Variables](https://docs.gitlab.com/ci/variables/#protect-a-cicd-variable)
 - [File-Type Variables](https://docs.gitlab.com/ci/variables/#use-file-type-cicd-variables)
 - [Where Variables Can Be Used](https://docs.gitlab.com/ci/variables/where_variables_can_be_used/)
-

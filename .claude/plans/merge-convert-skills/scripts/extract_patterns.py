@@ -15,13 +15,12 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import re
 import sqlite3
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Optional
-import hashlib
 
 
 @dataclass
@@ -653,7 +652,7 @@ class PatternExtractor:
             content += f"| {skill} | {count} |\n"
 
         if len(skill_counts) > 20:
-            content += f"| ... | ... |\n"
+            content += "| ... | ... |\n"
 
         if self.failed:
             content += """

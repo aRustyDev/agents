@@ -24,12 +24,12 @@ Example:
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
-from .validator import RoundTripResult, ValidationStatus, PreservationLevel
+from .validator import RoundTripResult, ValidationStatus
 
 
 class ReportFormat(str, Enum):
@@ -178,7 +178,7 @@ class RoundTripReport:
 
         return {
             "title": self.title,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "summary": {
                 "total": summary.total,
                 "passed": summary.passed,
@@ -271,7 +271,7 @@ class RoundTripReport:
         # Header
         lines.append(f"# {self.title}")
         lines.append("")
-        lines.append(f"Generated: {datetime.now(timezone.utc).isoformat()}")
+        lines.append(f"Generated: {datetime.now(UTC).isoformat()}")
         lines.append("")
 
         # Summary table

@@ -46,7 +46,7 @@ Report a command bug with automatically gathered context.
 4. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml&title=[BUG][command:<namespace>:<name>]%20<title>&labels=bug,triage,command
+   https://github.com/aRustyDev/agents/issues/new?template=bug-report.yml&title=[BUG][command:<namespace>:<name>]%20<title>&labels=bug,triage,command
    ```
 
 5. **Present to User**:
@@ -71,7 +71,7 @@ Request a command feature or enhancement.
 3. **Generate GitHub Issue URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/issues/new?template=feature-request.yml&title=[FEATURE][command:<namespace>:<name>]%20<title>&labels=enhancement,command
+   https://github.com/aRustyDev/agents/issues/new?template=feature-request.yml&title=[FEATURE][command:<namespace>:<name>]%20<title>&labels=enhancement,command
    ```
 
 4. **Present to User**:
@@ -95,7 +95,7 @@ Share a success story about how a command helped you.
 3. **Generate GitHub Discussions URL**:
 
    ```text
-   https://github.com/aRustyDev/ai/discussions/new?category=show-and-tell&title=[Command]%20<title>
+   https://github.com/aRustyDev/agents/discussions/new?category=show-and-tell&title=[Command]%20<title>
    ```
 
 4. **Present to User**:

@@ -18,7 +18,6 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -30,13 +29,10 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-synthesize-python"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 
 from ir_core import (
-    IRVersion,
     ExtractConfig,
-    ExtractionMode,
     PreservationLevel,
 )
-from ir_core.base import SynthConfig, OutputFormat
-
+from ir_core.base import SynthConfig
 
 # =============================================================================
 # Import Tools with Graceful Fallback

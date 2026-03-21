@@ -50,7 +50,7 @@ class GofmtFormatter:
                     [formatter_path, str(temp_path)],
                     capture_output=True,
                     text=True,
-                    timeout=30,
+                    timeout=30, check=False,
                 )
 
                 if result.returncode == 0:

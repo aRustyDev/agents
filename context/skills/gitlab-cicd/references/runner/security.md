@@ -187,4 +187,3 @@ description: Runner tokens, allowed_images, debug_trace_disabled, privileged mod
 - [GitLab Runner Security](https://docs.gitlab.com/runner/security/)
 - [GitLab Runner Advanced Configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
 - [Runner Authentication Tokens](https://docs.gitlab.com/ci/runners/new_creation_workflow/)
-

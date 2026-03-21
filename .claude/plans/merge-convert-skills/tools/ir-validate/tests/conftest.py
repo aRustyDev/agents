@@ -1,7 +1,8 @@
 """Pytest fixtures for ir-validate tests."""
 
-import pytest
 from typing import Any
+
+import pytest
 
 
 @pytest.fixture

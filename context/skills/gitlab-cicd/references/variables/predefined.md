@@ -172,4 +172,3 @@ build-image:
 - [GitLab Predefined Variables Reference](https://docs.gitlab.com/ci/variables/predefined_variables/)
 - [GitLab CI/CD Variables](https://docs.gitlab.com/ci/variables/)
 - [Where Variables Can Be Used](https://docs.gitlab.com/ci/variables/where_variables_can_be_used/)
-

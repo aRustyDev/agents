@@ -7,8 +7,9 @@ This module validates that IR layers are internally consistent:
 - Gap markers reference valid IR elements
 """
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 from .errors import (
     ValidationError,
@@ -257,7 +258,7 @@ class ConsistencyChecker:
         """
         # struct/class should have fields
         if kind in ("struct", "class"):
-            if "variants" in body and body["variants"]:
+            if body.get("variants"):
                 yield create_error(
                     code=ValidationErrorCode.V003_LAYER_MISMATCH,
                     message=f"Type '{type_id}' is {kind} but has enum variants",

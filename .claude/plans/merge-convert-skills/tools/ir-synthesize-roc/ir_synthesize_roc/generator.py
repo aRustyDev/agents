@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 # Type mapping from common types to Roc
 TYPE_MAP: dict[str, str] = {
     # Python types
@@ -183,10 +182,10 @@ class RocCodeGenerator:
         if param_names:
             params_str = ", ".join(param_names)
             lines.append(f"{func_def.name} = \\{params_str} ->")
-            lines.append(f"    # TODO: Implement")
+            lines.append("    # TODO: Implement")
         else:
             lines.append(f"{func_def.name} =")
-            lines.append(f"    # TODO: Implement")
+            lines.append("    # TODO: Implement")
 
         return "\n".join(lines) + "\n"
 

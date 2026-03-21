@@ -6,10 +6,9 @@ Generates idiomatic Scala source code from IR representation.
 from __future__ import annotations
 
 import re
-from typing import Any, Optional
+from typing import Any
 
-from ir_core.models import FunctionDef, TypeDef, TypeKind
-
+from ir_core.models import FunctionDef, TypeDef
 
 # Type mapping from various languages to Scala
 TYPE_MAP: dict[str, str] = {
@@ -194,7 +193,7 @@ class ScalaCodeGenerator:
     def generate_import(
         self,
         path: str,
-        selectors: Optional[list[str]] = None,
+        selectors: list[str] | None = None,
         is_wildcard: bool = False,
     ) -> str:
         """Generate import statement."""
@@ -470,7 +469,7 @@ class ScalaCodeGenerator:
 
     def generate_given(
         self,
-        name: Optional[str],
+        name: str | None,
         type_expr: str,
         indent: int = 0,
     ) -> str:

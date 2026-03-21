@@ -165,4 +165,3 @@ downstream-rebuild:
 - [GitLab CI/CD Pipelines](https://docs.gitlab.com/ci/pipelines/)
 - [Pipeline efficiency](https://docs.gitlab.com/ci/pipelines/pipeline_efficiency/)
 - [Downstream pipelines](https://docs.gitlab.com/ci/pipelines/downstream_pipelines/)
-

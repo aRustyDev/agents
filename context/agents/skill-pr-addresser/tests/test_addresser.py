@@ -44,7 +44,7 @@ def mock_pr_details():
     return PRDetails(
         number=795,
         title="feat(skills): improve lang-rust-dev",
-        url="https://github.com/aRustyDev/ai/pull/795",
+        url="https://github.com/aRustyDev/agents/pull/795",
         state="OPEN",
         branch="feat/lang-rust-dev",
         review_decision="CHANGES_REQUESTED",

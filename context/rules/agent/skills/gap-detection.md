@@ -11,7 +11,7 @@ When beginning any implementation task:
 3. **Flag gaps** - If no skill covers a domain, inform the user:
    ```
    No skill found for <domain>. Create one?
-   - Yes: Create issue in aRustyDev/ai + local todo
+   - Yes: Create issue in aRustyDev/agents + local todo
    - No: Proceed without skill
    ```
 
@@ -29,7 +29,7 @@ When beginning any implementation task:
 
 When user confirms gap creation:
 
-1. **Create GitHub issue** in `aRustyDev/ai`:
+1. **Create GitHub issue** in `aRustyDev/agents`:
    ```
    Title: feat(skills): add <skill-name> skill
    Body: Identified during task: "<brief context>"

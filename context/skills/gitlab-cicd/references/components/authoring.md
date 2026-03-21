@@ -180,4 +180,3 @@ include:
 
 - [CI/CD components](https://docs.gitlab.com/ci/components/)
 - [CI/CD Catalog](https://docs.gitlab.com/ci/components/#cicd-catalog)
-

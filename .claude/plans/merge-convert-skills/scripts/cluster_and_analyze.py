@@ -12,10 +12,8 @@ Usage:
 import json
 import re
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Optional
-
 
 # Language family mappings
 LANGUAGE_FAMILIES = {
@@ -69,7 +67,7 @@ class ClusterResult:
     """Result of pattern clustering."""
     cluster: str  # universal, family, language, inherited
     reason: str
-    family: Optional[str] = None  # For family-specific patterns
+    family: str | None = None  # For family-specific patterns
     languages: list[str] = field(default_factory=list)  # For language-specific
 
 
@@ -496,13 +494,13 @@ def main():
 
     # Print summary
     cluster_counts = Counter(d["cluster"] for d in analyzer.clusters.values())
-    print(f"\nClustering complete:")
+    print("\nClustering complete:")
     print(f"  - Universal: {cluster_counts.get('universal', 0)}")
     print(f"  - Family-specific: {cluster_counts.get('family', 0)}")
     print(f"  - Language-specific: {cluster_counts.get('language', 0)}")
 
     gap_counts = Counter(g.gap_type for g in analyzer.gaps)
-    print(f"\nGap analysis complete:")
+    print("\nGap analysis complete:")
     print(f"  - Negative patterns: {gap_counts.get('negative', 0)}")
     print(f"  - Human decisions: {gap_counts.get('human_decision', 0)}")
     print(f"  - Lossy conversions: {gap_counts.get('lossy', 0)}")

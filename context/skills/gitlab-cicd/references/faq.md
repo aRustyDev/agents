@@ -160,4 +160,3 @@ debug-vars:
 - [GitLab CI/CD FAQ](https://docs.gitlab.com/ci/debugging/)
 - [GitLab CI/CD Troubleshooting](https://docs.gitlab.com/ci/jobs/job_troubleshooting/)
 - [Stack Overflow — gitlab-ci tag](https://stackoverflow.com/questions/tagged/gitlab-ci)
-

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from ir_synthesize_roc.generator import RocCodeGenerator, TYPE_MAP
+from ir_synthesize_roc.generator import RocCodeGenerator
 
 
 @pytest.fixture

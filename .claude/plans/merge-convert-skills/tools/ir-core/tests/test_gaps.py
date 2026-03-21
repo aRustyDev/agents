@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
-import pytest
-
+from ir_core.gaps import (
+    ALL_PATTERNS,
+    DetectionContext,
+    GapDetector,
+    GapPattern,
+    detect_gaps,
+)
 from ir_core.models import (
     Binding,
     Effect,
     EffectKind,
+    Field_,
     Function,
     GapType,
     IRVersion,
@@ -17,19 +23,11 @@ from ir_core.models import (
     Param,
     PreservationLevel,
     Severity,
+    TypeBody,
     TypeDef,
     TypeKind,
     TypeRef,
     TypeRefKind,
-    TypeBody,
-    Field_,
-)
-from ir_core.gaps import (
-    GapDetector,
-    GapPattern,
-    DetectionContext,
-    ALL_PATTERNS,
-    detect_gaps,
 )
 
 
@@ -299,7 +297,7 @@ class TestGapDetector:
         )
 
         def custom_detector(ctx: DetectionContext) -> list:
-            from ir_core.models import GapMarker, AutomationLevel
+            from ir_core.models import GapMarker
             return [
                 GapMarker(
                     id="custom-gap",

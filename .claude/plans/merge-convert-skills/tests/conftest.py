@@ -15,10 +15,11 @@ import json
 import sqlite3
 import sys
 import tempfile
+from collections.abc import Generator
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 import pytest
 
@@ -31,39 +32,33 @@ sys.path.insert(0, str(TOOLS_DIR / "ir-validate"))
 sys.path.insert(0, str(TOOLS_DIR / "ir-query"))
 
 from ir_core import (
+    AnnotationSource,
+    Block,
+    ControlFlowGraph,
+    Effect,
+    EffectKind,
+    ExtractConfig,
+    ExtractionMode,
+    Function,
+    GapMarker,
+    GapType,
     IRVersion,
     Module,
     ModuleMetadata,
-    TypeDef,
-    TypeKind,
-    TypeBody,
-    TypeRef,
-    TypeRefKind,
-    Function,
     Param,
-    Binding,
-    Lifetime,
-    LifetimeKind,
-    Mutability,
-    Visibility,
-    ControlFlowGraph,
-    Block,
-    Terminator,
-    TerminatorKind,
-    Effect,
-    EffectKind,
-    GapMarker,
-    GapType,
-    Severity,
     PreservationLevel,
     PreservationStatus,
-    SemanticAnnotation,
-    AnnotationSource,
-    ExtractionMode,
-    ExtractConfig,
+    Severity,
+    Terminator,
+    TerminatorKind,
+    TypeBody,
+    TypeDef,
+    TypeKind,
+    TypeRef,
+    TypeRefKind,
+    Visibility,
 )
-from ir_core.base import SynthConfig, OutputFormat
-
+from ir_core.base import OutputFormat, SynthConfig
 
 # =============================================================================
 # Marker Definitions
@@ -384,7 +379,7 @@ def sample_ir() -> IRVersion:
         extraction_version="ir-v1.0",
         extraction_mode=ExtractionMode.FULL_MODULE,
         source_hash="abc123",
-        extraction_timestamp=datetime.now(timezone.utc),
+        extraction_timestamp=datetime.now(UTC),
         documentation="Sample module for testing.",
     )
 
@@ -858,7 +853,7 @@ except Exception as e:
                     [sys.executable, f.name],
                     capture_output=True,
                     timeout=timeout,
-                    text=True
+                    text=True, check=False
                 )
 
                 try:

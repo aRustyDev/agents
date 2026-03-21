@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from ir_extract_roc.parser import Purity, RocParser
 
 

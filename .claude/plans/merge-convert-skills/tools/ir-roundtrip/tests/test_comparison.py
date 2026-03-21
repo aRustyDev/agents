@@ -11,13 +11,12 @@ Tests cover:
 from __future__ import annotations
 
 import pytest
-
 from ir_roundtrip.comparison import (
+    ASTDifference,
+    ASTNormalizer,
     CodeComparator,
     CompareResult,
-    ASTDifference,
     DifferenceKind,
-    ASTNormalizer,
 )
 
 

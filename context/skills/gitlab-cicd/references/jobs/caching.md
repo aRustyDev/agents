@@ -172,4 +172,3 @@ build:
 
 - [Caching in GitLab CI/CD](https://docs.gitlab.com/ci/caching/)
 - [Cache key configuration](https://docs.gitlab.com/ci/caching/#cache-key)
-

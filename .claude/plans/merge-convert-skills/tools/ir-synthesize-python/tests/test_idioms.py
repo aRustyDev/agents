@@ -2,30 +2,29 @@
 
 from __future__ import annotations
 
-import pytest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+import pytest
 from ir_core.base import SynthConfig
 from ir_core.models import (
+    ExtractionMode,
+    Field_,
     IRVersion,
     Module,
     ModuleMetadata,
+    TypeBody,
     TypeDef,
     TypeKind,
-    TypeBody,
     TypeRef,
     TypeRefKind,
-    Field_,
     Visibility,
-    ExtractionMode,
 )
-
-from ir_synthesize_python.synthesizer import SynthesisContext, PreservationMode
 from ir_synthesize_python.idioms import (
-    PythonIdiomGenerator,
     IdiomKind,
     Pattern,
+    PythonIdiomGenerator,
 )
+from ir_synthesize_python.synthesizer import PreservationMode, SynthesisContext
 
 
 @pytest.fixture
@@ -54,7 +53,7 @@ def context() -> SynthesisContext:
                 source_language="python",
                 extraction_version="ir-v1.0",
                 extraction_mode=ExtractionMode.FULL_MODULE,
-                extraction_timestamp=datetime.now(timezone.utc),
+                extraction_timestamp=datetime.now(UTC),
             ),
         ),
         types=[],

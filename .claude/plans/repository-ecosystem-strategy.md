@@ -46,7 +46,7 @@ Then serve via:
 
 ### 2. Claude Plugin Marketplace Analysis
 
-**Current state of `arustydev/ai`:**
+**Current state of `arustydev/agents`:**
 
 - Has `.claude-plugin/` directory with `marketplace.json` (empty) and a README outlining intended structure
 - Has `legacy/plugins/` with **50+ plugin directories** already structured with `agents/`, `commands/`, `skills/`
@@ -66,7 +66,7 @@ Then serve via:
 **Recommended structure for marketplace:**
 
 ```
-arustydev/ai/
+arustydev/agents/
 ├── .claude-plugin/
 │   ├── marketplace.json      # Registry of all available plugins
 │   └── README.md
@@ -190,7 +190,7 @@ Based on our discussion, here are the refined notes:
 
 | Repo                 | Purpose                                       | Serves                    |
 | -------------------- | --------------------------------------------- | ------------------------- |
-| `arustydev/ai`       | Central AI config library, plugin marketplace | `ai.arusty.dev` (planned) |
+| `arustydev/agents`       | Central AI config library, plugin marketplace | `ai.arusty.dev` (planned) |
 | `arustydev/dotfiles` | Source of truth for personal dotfiles         | N/A                       |
 | `arustydev/just`     | Central justfile library with std modules     | `just.arusty.dev`         |
 | `arustydev/schemas`  | Central JSON/YAML schema registry             | `schemas.arusty.dev`      |
@@ -215,7 +215,7 @@ Based on our discussion, here are the refined notes:
 ### Exceptions to dotfiles
 
 - `arustydev/just` - Justfiles managed separately
-- `arustydev/ai` - AI configs managed separately
+- `arustydev/agents` - AI configs managed separately
 
 ---
 
@@ -232,13 +232,13 @@ When working in any of my repositories, be aware of these central resources:
 
 **Infrastructure & Config:**
 
-- **arustydev/ai** - Central AI configuration library and Claude plugin marketplace
+- **arustydev/agents** - Central AI configuration library and Claude plugin marketplace
   - Install plugins via marketplace at `ai.arusty.dev` (planned)
   - Components: skills, commands, agents, hooks, rules
   - See `legacy/plugins/` for available plugin bundles
 
 - **arustydev/dotfiles** - Central dotfiles repository
-  - Exceptions: justfiles (`arustydev/just`) and AI configs (`arustydev/ai`) managed separately
+  - Exceptions: justfiles (`arustydev/just`) and AI configs (`arustydev/agents`) managed separately
 
 - **arustydev/just** - Central justfile library
   - Serves: `just.arusty.dev`
@@ -349,7 +349,7 @@ mcp ──────────── (MCP server index) ──────�
 
 | Repo                 | Purpose                                       | Serves                    |
 | -------------------- | --------------------------------------------- | ------------------------- |
-| `arustydev/ai`       | Central AI config library, plugin marketplace | `ai.arusty.dev` (planned) |
+| `arustydev/agents`       | Central AI config library, plugin marketplace | `ai.arusty.dev` (planned) |
 | `arustydev/dotfiles` | Source of truth for personal dotfiles         | N/A                       |
 | `arustydev/just`     | Central justfile library with std modules     | `just.arusty.dev`         |
 | `arustydev/schemas`  | Central JSON/YAML schema registry             | `schemas.arusty.dev`      |
@@ -378,7 +378,7 @@ mcp ──────────── (MCP server index) ──────�
 ### Exceptions to dotfiles
 
 - `arustydev/just` - Justfiles managed separately; the `just/` dir in dotfiles installs contents from https://just.arusty.dev
-- `arustydev/ai` - AI configs managed separately; lives in dotfiles as a git-submodule
+- `arustydev/agents` - AI configs managed separately; lives in dotfiles as a git-submodule
 
 ---
 
@@ -386,5 +386,5 @@ mcp ──────────── (MCP server index) ──────�
 
 - [x] Update this strategy document with decisions
 - [x] Create issue in `arustydev/brand` for hybrid assets implementation ([#1](https://github.com/aRustyDev/brand/issues/1))
-- [x] Create issue in `arustydev/ai` for plugin marketplace structure ([#17](https://github.com/aRustyDev/ai/issues/17))
+- [x] Create issue in `arustydev/agents` for plugin marketplace structure ([#17](https://github.com/aRustyDev/agents/issues/17))
 - [x] Create rule file `components/rules/repository-ecosystem.md`

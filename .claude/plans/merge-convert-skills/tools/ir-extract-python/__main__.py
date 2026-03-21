@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import TextIO
 
 import yaml
-
 from ir_core.base import ExtractConfig, ExtractionMode, SemanticEnrichmentLevel
 from ir_core.models import IRVersion
 
@@ -226,9 +225,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Build configuration
     semantic_level = SemanticEnrichmentLevel.NONE
-    if args.enrich:
-        semantic_level = semantic_level_from_string(args.semantic_level)
-    elif args.semantic_level != "none":
+    if args.enrich or args.semantic_level != "none":
         semantic_level = semantic_level_from_string(args.semantic_level)
 
     config = ExtractConfig(

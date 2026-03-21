@@ -99,7 +99,7 @@ Discovery Workflow:
 - [ ] Notice bug, improvement, or follow-up work
 - [ ] Assess: Can defer or is blocker?
 - [ ] Create issue with bd create "Issue title"
-- [ ] Add discovered-from dependency: bd dep add current-id new-id --type discovered-from
+- [ ] Add discovered-from dependency: bd dep add new-id current-id --type discovered-from
 - [ ] If blocker: pause and switch; if not: continue current work
 - [ ] Issue persists for future sessions
 ```
@@ -124,7 +124,7 @@ Discovery Workflow:
 
 ```
 Issue Lifecycle:
-- [ ] Start: Update status to in_progress
+- [ ] Start: Claim issue with `bd update <id> --claim`
 - [ ] During: Add design notes as decisions made
 - [ ] During: Update acceptance criteria if requirements clarify
 - [ ] During: Add dependencies if blockers discovered
@@ -302,7 +302,7 @@ Resume Workflow:
 - [ ] List recent closed issues for context
 - [ ] Show details on issue to work on
 - [ ] Review design notes and acceptance criteria
-- [ ] Update status to in_progress
+- [ ] Claim issue (`bd update <id> --claim`)
 - [ ] Begin work with full context
 ```
 
@@ -532,7 +532,7 @@ Research or investigation work:
 - [ ] Report status to user
 - [ ] Get user input on what to work on
 - [ ] Show issue details
-- [ ] Update to in_progress
+- [ ] Claim issue (`bd update <id> --claim`)
 - [ ] Begin work
 ```
 

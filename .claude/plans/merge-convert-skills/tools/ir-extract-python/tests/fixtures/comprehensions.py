@@ -1,6 +1,5 @@
 """Comprehension examples for testing pattern detection."""
 
-from typing import Iterable
 
 
 def list_comprehension_examples() -> None:

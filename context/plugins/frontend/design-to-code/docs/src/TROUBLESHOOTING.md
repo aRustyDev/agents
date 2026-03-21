@@ -144,9 +144,9 @@ tail -f ~/.claude/logs/mcp-sketch-context.log
 
 If you can't resolve your issue:
 
-1. **Search existing issues**: [GitHub Issues](https://github.com/aRustyDev/ai/issues?q=is%3Aissue+label%3Abug)
-2. **Ask in Discussions**: [GitHub Discussions Q&A](https://github.com/aRustyDev/ai/discussions/categories/q-a)
-3. **Report a bug**: [Bug Report](https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml)
+1. **Search existing issues**: [GitHub Issues](https://github.com/aRustyDev/agents/issues?q=is%3Aissue+label%3Abug)
+2. **Ask in Discussions**: [GitHub Discussions Q&A](https://github.com/aRustyDev/agents/discussions/categories/q-a)
+3. **Report a bug**: [Bug Report](https://github.com/aRustyDev/agents/issues/new?template=bug-report.yml)
 
 When reporting, include:
 
@@ -160,7 +160,7 @@ When reporting, include:
 
 Had a great experience with this plugin? We'd love to hear about it!
 
-- **Share a success story**: [Show and Tell](https://github.com/aRustyDev/ai/discussions/categories/show-and-tell)
-- **Suggest improvements**: [Ideas](https://github.com/aRustyDev/ai/discussions/categories/ideas)
+- **Share a success story**: [Show and Tell](https://github.com/aRustyDev/agents/discussions/categories/show-and-tell)
+- **Suggest improvements**: [Ideas](https://github.com/aRustyDev/agents/discussions/categories/ideas)
 
 Use the `/feedback` command or the `feedback-submission` output style to format your feedback.

@@ -96,4 +96,3 @@ test:
 
 - [GitLab CI testing](https://docs.gitlab.com/ci/testing/)
 - Context card: OS-3
-

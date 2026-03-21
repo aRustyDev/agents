@@ -6,7 +6,7 @@ When working in any of my repositories, be aware of these central resources:
 
 ### Infrastructure & Config
 
-- **arustydev/ai** - Central AI configuration library and Claude plugin marketplace
+- **arustydev/agents** - Central AI configuration library and Claude plugin marketplace
   - Plugin marketplace at `ai.arusty.dev/plugins` (planned)
   - Components: skills, commands, agents, hooks, rules
   - See `legacy/plugins/` for available plugin bundles
@@ -155,4 +155,4 @@ mcp ──────────── (MCP server management) ─────
 The following are managed separately from dotfiles:
 
 - `arustydev/just` - Justfiles (installed via https://just.arusty.dev)
-- `arustydev/ai` - AI configs (lives in dotfiles as a git-submodule)
+- `arustydev/agents` - AI configs (lives in dotfiles as a git-submodule)

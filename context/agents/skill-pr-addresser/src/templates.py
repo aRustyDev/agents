@@ -191,7 +191,7 @@ def format_summary_comment(
             "---",
             f"📊 **Summary**: {total_addressed} locations addressed, {threads_resolved} threads resolved",
             "",
-            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
+            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/agents)*",
         ]
     )
 
@@ -224,7 +224,7 @@ If critical feedback remains unaddressed, consider:
 3. Requesting reviewer clarification
 
 ---
-*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*
+*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/agents)*
 """
 
 
@@ -252,7 +252,7 @@ The addresser encountered an error during the **{stage}** stage:
 Please check the logs for more details or try running again.
 
 ---
-*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*
+*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/agents)*
 """
 
 
@@ -267,7 +267,7 @@ def format_no_feedback_comment() -> str:
 All feedback has been addressed or there's nothing new to process.
 
 ---
-*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*
+*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/agents)*
 """
 
 
@@ -317,7 +317,7 @@ def format_partial_progress_comment(
             "The addresser will resume from here on the next run.",
             "",
             "---",
-            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/ai)*",
+            "*🤖 Automated by [skill-pr-addresser](https://github.com/aRustyDev/agents)*",
         ]
     )
 

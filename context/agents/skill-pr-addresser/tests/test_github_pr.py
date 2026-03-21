@@ -27,7 +27,7 @@ from src.github_pr import (
 SAMPLE_PR_JSON = {
     "number": 795,
     "title": "feat(skills): add lang-rust-dev skill",
-    "url": "https://github.com/aRustyDev/ai/pull/795",
+    "url": "https://github.com/aRustyDev/agents/pull/795",
     "state": "OPEN",
     "headRefName": "feat/lang-rust-dev",
     "body": "Closes #123",
@@ -67,7 +67,7 @@ SAMPLE_COMMENTS_JSON = {
             "author": {"login": "commenter1"},
             "body": "Great work!",
             "createdAt": "2024-01-15T09:00:00Z",
-            "url": "https://github.com/aRustyDev/ai/pull/795#issuecomment-1",
+            "url": "https://github.com/aRustyDev/agents/pull/795#issuecomment-1",
         }
     ]
 }

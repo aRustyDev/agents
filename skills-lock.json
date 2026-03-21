@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "beads": {
+      "source": "steveyegge/beads",
+      "sourceType": "github",
+      "computedHash": "16b0efc72b43177e1ad05e3f2e04132d266033e220834fd692369c65a15f8f39"
+    },
+    "handoff": {
+      "source": "steveyegge/beads",
+      "sourceType": "github",
+      "computedHash": "6ed7425ed3fefa3bbee4a2eb7cd13201a38d45b3f510afe85362be4cad1291e9"
+    },
+    "pnpm": {
+      "source": "0froq/skills",
+      "sourceType": "github",
+      "computedHash": "318f9fca2441a3e06fedc336e195dd18be5dbe901064e4fa71b76b40b096ab3a"
+    }
+  }
+}

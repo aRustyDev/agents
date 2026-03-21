@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
-from ir_synthesize_scala.generator import ScalaCodeGenerator, TYPE_MAP
+from ir_synthesize_scala.generator import ScalaCodeGenerator
 
 
 @pytest.fixture

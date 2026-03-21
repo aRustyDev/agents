@@ -39,15 +39,15 @@ See Also:
 
 from __future__ import annotations
 
-from .synthesizer import PythonSynthesizer
-from .generator import PythonCodeGenerator
 from .formatter import PythonFormatter
+from .generator import PythonCodeGenerator
 from .idioms import PythonIdiomGenerator
+from .synthesizer import PythonSynthesizer
 
 __version__ = "0.1.0"
 __all__ = [
-    "PythonSynthesizer",
     "PythonCodeGenerator",
     "PythonFormatter",
     "PythonIdiomGenerator",
+    "PythonSynthesizer",
 ]

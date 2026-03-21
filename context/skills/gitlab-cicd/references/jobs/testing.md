@@ -151,4 +151,3 @@ code-quality:
 - [Unit test reports](https://docs.gitlab.com/ci/testing/unit_test_reports/)
 - [Code coverage](https://docs.gitlab.com/ci/testing/code_coverage/)
 - [Test failure tracking](https://docs.gitlab.com/ci/testing/test_failure_tracking/)
-

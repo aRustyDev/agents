@@ -1,7 +1,6 @@
 """Tests for error handling and error taxonomy."""
 
 import pytest
-
 from ir_validate.errors import (
     ValidationError,
     ValidationErrorCode,

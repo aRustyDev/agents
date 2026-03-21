@@ -165,4 +165,3 @@ deploy:
 - [Manual jobs](https://docs.gitlab.com/ci/jobs/job_control/#create-a-job-that-must-be-run-manually)
 - [Protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
 - [Deploy freezes](https://docs.gitlab.com/user/project/releases/#deploy-freezes)
-

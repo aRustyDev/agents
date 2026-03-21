@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Bash(git:*), Bash(gh:*), Bash(mkdir:*), Bash(cp:*), 
 
 # Promote Rule
 
-Promote a rule from the current project to the aRustyDev/ai repository.
+Promote a rule from the current project to the aRustyDev/agents repository.
 
 ## Arguments
 
@@ -42,7 +42,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 
    ```bash
    git -C "$AI_REPO" branch --list "feat/add-rule-<name>"
-   gh issue list --repo aRustyDev/ai --search "[RULE] <name> in:title"
+   gh issue list --repo aRustyDev/agents --search "[RULE] <name> in:title"
    ```
 
 ### Phase 2: User Decision (if existing)

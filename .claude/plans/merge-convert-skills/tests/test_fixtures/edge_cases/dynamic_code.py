@@ -1,6 +1,7 @@
 """Dynamic code patterns that are challenging for static analysis."""
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def dynamic_attribute_access(obj: Any, attr_name: str) -> Any:

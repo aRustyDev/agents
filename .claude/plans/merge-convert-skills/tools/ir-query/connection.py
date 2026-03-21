@@ -27,10 +27,6 @@ import logging
 import sqlite3
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Self
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +147,7 @@ class DatabaseConnection:
 
         except sqlite3.Error as e:
             raise DatabaseError(
-                f"Failed to connect to database",
+                "Failed to connect to database",
                 cause=e,
                 path=self._path,
             ) from e
@@ -305,7 +301,7 @@ class DatabaseConnection:
             return conn.executescript(sql_script)
         except sqlite3.Error as e:
             raise DatabaseError(
-                f"SQL script execution failed",
+                "SQL script execution failed",
                 cause=e,
                 path=self._path,
             ) from e

@@ -10,9 +10,7 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
-from ir_roundtrip.executor import SafeExecutor, ExecutionResult, ExecutionError
+from ir_roundtrip.executor import ExecutionResult, SafeExecutor
 
 
 class TestExecutionResult:

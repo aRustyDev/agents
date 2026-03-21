@@ -77,4 +77,3 @@ Every troubleshooting report should follow this flow:
 ## Sources
 
 - Context card: OS-2
-

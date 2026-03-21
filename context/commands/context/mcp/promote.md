@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Bash(git:*), Bash(gh:*), Bash(mkdir:*), Bash(cp:*), 
 
 # Promote MCP Config
 
-Promote an MCP server configuration from the current project to the aRustyDev/ai repository.
+Promote an MCP server configuration from the current project to the aRustyDev/agents repository.
 
 ## Arguments
 
@@ -46,7 +46,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
 
    ```bash
    git -C "$AI_REPO" branch --list "feat/add-mcp-<name>"
-   gh issue list --repo aRustyDev/ai --search "[MCP] <name> in:title"
+   gh issue list --repo aRustyDev/agents --search "[MCP] <name> in:title"
    ```
 
 ### Phase 2: User Decision (if existing)

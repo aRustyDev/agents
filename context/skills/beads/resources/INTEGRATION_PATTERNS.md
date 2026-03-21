@@ -93,7 +93,7 @@ See BOUNDARIES.md for bd vs TodoWrite decision.
 "
 
 # Mark in_progress
-bd update oauth-1 --status in_progress
+bd update oauth-1 --claim
 
 # Create TodoWrite for today's work
 TodoWrite:
@@ -270,7 +270,7 @@ TESTS: All 12 tests passing (auth, rotation, expiry, error handling)"
 1. Create bd issue for tracking:
    ```bash
    bd create "Q4 strategic planning document" -t task -p 0
-   bd update strat-1 --status in_progress
+   bd update strat-1 --claim
    ```
 
 2. Use developing-strategic-documents skill for research and writing
@@ -307,11 +307,13 @@ TESTS: All 12 tests passing (auth, rotation, expiry, error handling)"
    bd create "Update middleware" -t task
    bd create "Update tests" -t task
 
-   # Link hierarchy
-   bd dep add auth-epic login-1 --type parent-child
-   bd dep add auth-epic validation-2 --type parent-child
-   bd dep add auth-epic middleware-3 --type parent-child
-   bd dep add auth-epic tests-4 --type parent-child
+   # Link hierarchy (child depends on parent)
+   bd dep add login-1 auth-epic --type parent-child
+   bd dep add validation-2 auth-epic --type parent-child
+   bd dep add middleware-3 auth-epic --type parent-child
+   bd dep add tests-4 auth-epic --type parent-child
+   # Or use --parent at creation time:
+   # bd create "Update login endpoint" -t task --parent auth-epic
 
    # Add ordering
    bd dep add validation-2 login-1  # validation depends on login

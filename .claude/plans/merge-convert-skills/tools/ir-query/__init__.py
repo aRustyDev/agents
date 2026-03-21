@@ -33,14 +33,14 @@ See Also:
 __version__ = "1.0.0"
 
 from .connection import DatabaseConnection, DatabaseError
-from .queries import IRQueryInterface
 from .patterns import PatternRepository
+from .queries import IRQueryInterface
 from .storage import IRStorage
 
 __all__ = [
     "DatabaseConnection",
     "DatabaseError",
     "IRQueryInterface",
-    "PatternRepository",
     "IRStorage",
+    "PatternRepository",
 ]

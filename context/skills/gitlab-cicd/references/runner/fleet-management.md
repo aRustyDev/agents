@@ -202,4 +202,3 @@ connection_max_age = "15m"
 - [GitLab Runner Advanced Configuration](https://docs.gitlab.com/runner/configuration/advanced-configuration/)
 - [GitLab Runner Fleet Scaling](https://docs.gitlab.com/runner/fleet_scaling/)
 - [GitLab.com Runbooks (Grafana Dashboards)](https://gitlab.com/gitlab-com/runbooks)
-

@@ -118,6 +118,6 @@ After formatting the feedback:
 
 Provide the appropriate link:
 
-- Bug Report: `https://github.com/aRustyDev/ai/issues/new?template=bug-report.yml`
-- Feature Request: `https://github.com/aRustyDev/ai/issues/new?template=feature-request.yml`
-- Success Story: `https://github.com/aRustyDev/ai/discussions/new?category=success-stories`
+- Bug Report: `https://github.com/aRustyDev/agents/issues/new?template=bug-report.yml`
+- Feature Request: `https://github.com/aRustyDev/agents/issues/new?template=feature-request.yml`
+- Success Story: `https://github.com/aRustyDev/agents/discussions/new?category=success-stories`

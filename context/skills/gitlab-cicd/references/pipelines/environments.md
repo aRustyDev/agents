@@ -178,4 +178,3 @@ deploy-production:
 
 - [Environments and deployments](https://docs.gitlab.com/ci/environments/)
 - [Resource groups](https://docs.gitlab.com/ci/resource_groups/)
-

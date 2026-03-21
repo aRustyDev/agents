@@ -60,7 +60,7 @@ def worktree_dir(tmp_path):
   "isDraft": true,
   "body": "Closes #692\n\n## Summary\n...",
   "headRefName": "fix/github-app-dev-692",
-  "url": "https://github.com/aRustyDev/ai/pull/795"
+  "url": "https://github.com/aRustyDev/agents/pull/795"
 }
 ```
 
