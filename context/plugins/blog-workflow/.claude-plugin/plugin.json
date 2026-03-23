@@ -1,9 +1,5 @@
 {
   "name": "blog-workflow",
-  "version": "4.0.1-test1",
-  "description": "Blog workflow — binary search test: bare minimum (commands only)",
-  "commands": [
-    "./commands/blog.md",
-    "./commands/init.md"
-  ]
+  "version": "4.0.1-test2",
+  "description": "Blog workflow — binary search test: no commands"
 }
