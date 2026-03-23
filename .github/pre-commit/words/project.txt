@@ -244,3 +244,4 @@ zeroize
 Zotero
 reclassifiable
 backfillable
+subdirs
