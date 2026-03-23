@@ -11,9 +11,11 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'no
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { defineCommand } from 'citty'
+import * as v from 'valibot'
 import { computeHash, formatHash, parseHash } from '../lib/hash'
 import { createOutput, type OutputFormatter } from '../lib/output'
 import { currentDir } from '../lib/runtime'
+import { detectUnknownPluginFields, KNOWN_PLUGIN_FIELDS, PluginManifest } from '../lib/schemas'
 import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
@@ -664,6 +666,91 @@ export default defineCommand({
       },
     }),
 
+    validate: defineCommand({
+      meta: { name: 'validate', description: 'Validate plugin.json manifest and referenced files' },
+      args: {
+        ...globalArgs,
+        name: { type: 'positional', description: 'Plugin name', required: true },
+      },
+      async run({ args }) {
+        const out = createOutput({ json: args.json, quiet: args.quiet })
+        const result = await validatePlugin(args.name)
+
+        if (args.json) {
+          out.raw(result)
+        } else {
+          printValidationResult(out, result)
+        }
+
+        process.exit(result.valid ? EXIT.OK : EXIT.FAILURES)
+      },
+    }),
+
+    'validate-all': defineCommand({
+      meta: { name: 'validate-all', description: 'Validate all plugin manifests' },
+      args: { ...globalArgs },
+      async run({ args }) {
+        const out = createOutput({ json: args.json, quiet: args.quiet })
+        const plugins = listPlugins()
+
+        if (plugins.length === 0) {
+          if (args.json) {
+            out.raw({ plugins: [], ok: true })
+          } else {
+            out.info('No plugins found')
+          }
+          process.exit(EXIT.OK)
+        }
+
+        const spinner = out.spinner(`Validating ${plugins.length} plugins...`)
+        const results: ValidationResult[] = []
+        const failed: string[] = []
+
+        for (const name of plugins) {
+          spinner.update({ text: `Validating ${name}...` })
+          const result = await validatePlugin(name)
+          results.push(result)
+          if (!result.valid) failed.push(name)
+        }
+
+        spinner.success({ text: `Validated ${plugins.length} plugins` })
+
+        if (args.json) {
+          out.raw({
+            plugins: results,
+            summary: {
+              total: plugins.length,
+              ok: plugins.length - failed.length,
+              failed: failed.length,
+            },
+            failed,
+            ok: failed.length === 0,
+          })
+        } else {
+          for (const r of results) {
+            if (r.valid && r.warnings.length === 0) {
+              console.log(`  \u2713 ${r.plugin}: OK`)
+            } else if (r.valid) {
+              console.log(`  \u26A0 ${r.plugin}: ${r.warnings.length} warning(s)`)
+            } else {
+              console.log(
+                `  \u2717 ${r.plugin}: ${r.errors.length} error(s), ${r.warnings.length} warning(s)`
+              )
+            }
+          }
+
+          const okCount = plugins.length - failed.length
+          const icon = failed.length ? '\u2717' : '\u2713'
+          console.log(`\n${icon} ${okCount}/${plugins.length} plugins valid`)
+          if (failed.length) {
+            console.log(`\nFailed: ${failed.join(', ')}`)
+          }
+        }
+
+        process.exit(failed.length ? EXIT.FAILURES : EXIT.OK)
+      },
+    }),
+
     update: defineCommand({
       meta: { name: 'update', description: 'Update all hashes for a plugin' },
       args: {
@@ -921,6 +1008,144 @@ export default defineCommand({
     }),
   },
 })
+
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+export interface ValidationResult {
+  plugin: string
+  valid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+export async function validatePlugin(name: string): Promise<ValidationResult> {
+  const pluginDir = join(PLUGINS_DIR, name)
+  const manifestPath = join(pluginDir, '.claude-plugin', 'plugin.json')
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  // 1. Check plugin directory exists
+  if (!existsSync(pluginDir)) {
+    return {
+      plugin: name,
+      valid: false,
+      errors: [`Plugin directory not found: ${pluginDir}`],
+      warnings,
+    }
+  }
+
+  // 2. Check manifest exists
+  if (!existsSync(manifestPath)) {
+    return {
+      plugin: name,
+      valid: false,
+      errors: [`plugin.json not found: ${manifestPath}`],
+      warnings,
+    }
+  }
+
+  // 3. Parse and validate manifest against schema
+  let rawData: Record<string, unknown>
+  try {
+    const raw = await readFile(manifestPath, 'utf-8')
+    rawData = JSON.parse(raw) as Record<string, unknown>
+  } catch (e) {
+    return { plugin: name, valid: false, errors: [`Invalid JSON in plugin.json: ${e}`], warnings }
+  }
+
+  const parseResult = v.safeParse(PluginManifest, rawData)
+  if (!parseResult.success) {
+    for (const issue of parseResult.issues) {
+      const path =
+        issue.path?.map((p) => (typeof p === 'object' && 'key' in p ? p.key : p)).join('.') ?? ''
+      errors.push(`Schema error${path ? ` at ${path}` : ''}: ${issue.message}`)
+    }
+  }
+
+  // 4. Detect unknown fields
+  const unknownFields = detectUnknownPluginFields(rawData)
+  for (const field of unknownFields) {
+    warnings.push(`Unknown field "${field}" — not recognized by Claude Code plugin loader`)
+  }
+
+  // 5. Verify referenced paths exist
+  const pathArrays = ['commands', 'agents', 'skills', 'outputStyles'] as const
+  for (const key of pathArrays) {
+    const arr = rawData[key]
+    if (Array.isArray(arr)) {
+      for (const entry of arr) {
+        if (typeof entry === 'string') {
+          const resolved = join(pluginDir, entry)
+          if (!existsSync(resolved)) {
+            errors.push(`Missing ${key} file: ${entry} (resolved to ${resolved})`)
+          }
+        }
+      }
+    }
+  }
+
+  // 6. Check .lsp.json if present
+  const lspPath = join(pluginDir, '.lsp.json')
+  if (existsSync(lspPath)) {
+    try {
+      const lspRaw = await readFile(lspPath, 'utf-8')
+      JSON.parse(lspRaw)
+      warnings.push(
+        '.lsp.json exists — ensure it has valid LSP server config (command, extensionToLanguage) or delete it'
+      )
+    } catch {
+      errors.push('.lsp.json contains invalid JSON')
+    }
+  }
+
+  // 7. Check .mcp.json if present
+  const mcpPath = join(pluginDir, '.mcp.json')
+  if (existsSync(mcpPath)) {
+    try {
+      const mcpRaw = await readFile(mcpPath, 'utf-8')
+      const mcpData = JSON.parse(mcpRaw) as Record<string, unknown>
+      const servers = (mcpData.mcpServers ?? mcpData.mcp) as Record<string, unknown> | undefined
+      if (servers && Object.keys(servers).length === 0) {
+        warnings.push('.mcp.json has empty servers — consider deleting if no MCP servers are used')
+      }
+    } catch {
+      errors.push('.mcp.json contains invalid JSON')
+    }
+  }
+
+  return { plugin: name, valid: errors.length === 0, errors, warnings }
+}
+
+function printValidationResult(out: OutputFormatter, result: ValidationResult): void {
+  if (result.valid && result.warnings.length === 0) {
+    out.success(`Plugin "${result.plugin}" is valid`)
+    return
+  }
+
+  out.info(`Validating plugin: ${result.plugin}\n`)
+
+  if (result.errors.length > 0) {
+    console.log('Errors:')
+    for (const e of result.errors) {
+      console.log(`  \u2717 ${e}`)
+    }
+  }
+
+  if (result.warnings.length > 0) {
+    console.log('Warnings:')
+    for (const w of result.warnings) {
+      console.log(`  \u26A0 ${w}`)
+    }
+  }
+
+  if (result.valid) {
+    out.warn(`Plugin valid with ${result.warnings.length} warning(s)`)
+  } else {
+    out.error(`Plugin validation failed: ${result.errors.length} error(s)`)
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Print helpers (human mode only)

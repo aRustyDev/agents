@@ -150,19 +150,44 @@ export const PluginAuthor = v.object({
 export type PluginAuthor = v.InferOutput<typeof PluginAuthor>
 
 /**
- * Platform skill detection entry within a plugin manifest.
+ * Known valid fields in plugin.json.
+ *
+ * Used for unknown-field detection -- any key not in this set is flagged
+ * as a warning during validation.
  */
-export const PlatformSkill = v.object({
-  name: v.string(),
-  path: v.string(),
-  detection: v.optional(v.array(v.string())),
-})
-export type PlatformSkill = v.InferOutput<typeof PlatformSkill>
+export const KNOWN_PLUGIN_FIELDS = new Set([
+  'name',
+  'version',
+  'description',
+  'author',
+  'homepage',
+  'repository',
+  'license',
+  'keywords',
+  'commands',
+  'agents',
+  'skills',
+  'outputStyles',
+])
+
+/**
+ * Detect unknown fields in a parsed plugin manifest.
+ *
+ * @returns Array of field names not in KNOWN_PLUGIN_FIELDS
+ */
+export function detectUnknownPluginFields(data: Record<string, unknown>): string[] {
+  return Object.keys(data).filter((k) => !KNOWN_PLUGIN_FIELDS.has(k))
+}
 
 /**
  * The full `plugin.json` manifest.
  *
  * Semver regex allows typical semver versions like 0.1.0, 1.0.0-beta.1, etc.
+ *
+ * Fields removed in v4.1.0 (blog-workflow debugging):
+ * - platformSkills: not a valid Claude Code field
+ * - mcpServers: Claude Code auto-discovers .mcp.json from plugin directory
+ * - lspServers: Claude Code auto-discovers .lsp.json from plugin directory
  */
 export const PluginManifest = v.object({
   name: v.string(),
@@ -174,7 +199,7 @@ export const PluginManifest = v.object({
     )
   ),
   description: v.string(),
-  author: PluginAuthor,
+  author: v.optional(PluginAuthor),
   homepage: v.optional(v.string()),
   repository: v.optional(v.string()),
   license: v.optional(v.string()),
@@ -182,10 +207,7 @@ export const PluginManifest = v.object({
   commands: v.optional(v.array(v.string())),
   agents: v.optional(v.array(v.string())),
   skills: v.optional(v.array(v.string())),
-  platformSkills: v.optional(v.array(PlatformSkill)),
-  mcpServers: v.optional(v.string()),
   outputStyles: v.optional(v.array(v.string())),
-  lspServers: v.optional(v.string()),
 })
 export type PluginManifest = v.InferOutput<typeof PluginManifest>
 

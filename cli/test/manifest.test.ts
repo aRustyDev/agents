@@ -34,9 +34,9 @@ describe('readPluginManifest', () => {
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('blog-workflow')
-      expect(result.value.version).toBe('3.0.0')
+      expect(result.value.version).toBe('4.1.0')
       expect(result.value.description).toContain('blog')
-      expect(result.value.author.name).toBe('Adam Smith')
+      expect(result.value.author?.name).toBe('Adam Smith')
       expect(result.value.commands!.length).toBeGreaterThan(0)
     }
   })
@@ -48,16 +48,6 @@ describe('readPluginManifest', () => {
       expect(result.value.name).toBe('swiftui-dev')
       expect(result.value.keywords).toContain('swiftui')
       expect(result.value.skills!.length).toBe(7)
-    }
-  })
-
-  test('reads real blog-workflow plugin with platformSkills', async () => {
-    const result = await readPluginManifest(`${WORKTREE}/context/plugins/blog-workflow`)
-    expect(result.ok).toBe(true)
-    if (result.ok) {
-      expect(result.value.platformSkills).toBeDefined()
-      expect(result.value.platformSkills!.length).toBeGreaterThan(0)
-      expect(result.value.platformSkills![0]!.name).toBe('astro')
     }
   })
 
