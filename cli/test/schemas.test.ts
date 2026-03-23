@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import * as v from 'valibot'
 import {
   ComponentRecord,
+  detectUnknownPluginFields,
+  KNOWN_PLUGIN_FIELDS,
   LockfileV1,
   PluginAuthor,
   PluginManifest,
@@ -270,8 +272,8 @@ describe('PluginManifest', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.output.name).toBe('blog-workflow')
-      expect(result.output.version).toBe('3.0.0')
-      expect(result.output.author.name).toBe('Adam Smith')
+      expect(result.output.version).toBe('4.1.0')
+      expect(result.output.author?.name).toBe('Adam Smith')
       expect(result.output.keywords).toContain('blog')
     }
   })
@@ -289,19 +291,6 @@ describe('PluginManifest', () => {
     }
   })
 
-  test('parses real blog-workflow plugin.json with platformSkills', async () => {
-    const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`
-    )
-    const result = v.safeParse(PluginManifest, data)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.output.platformSkills).toBeDefined()
-      expect(result.output.platformSkills!.length).toBeGreaterThan(0)
-      expect(result.output.platformSkills![0]!.name).toBe('astro')
-    }
-  })
-
   test('parses real job-hunting plugin.json', async () => {
     const data = await readJson(
       `${WORKTREE}/context/plugins/job-hunting/.claude-plugin/plugin.json`
@@ -314,12 +303,7 @@ describe('PluginManifest', () => {
   })
 
   test('rejects invalid semver', () => {
-    const data = {
-      name: 'test',
-      version: 'not-semver',
-      description: 'Test',
-      author: { name: 'Test' },
-    }
+    const data = { name: 'test', version: 'not-semver', description: 'Test' }
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(false)
   })
@@ -330,15 +314,52 @@ describe('PluginManifest', () => {
     expect(result.success).toBe(false)
   })
 
-  test('accepts minimal manifest', () => {
+  test('accepts minimal manifest (no author)', () => {
+    const data = { name: 'minimal', version: '1.0.0', description: 'A minimal plugin' }
+    const result = v.safeParse(PluginManifest, data)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts manifest with author', () => {
     const data = {
-      name: 'minimal',
+      name: 'with-author',
       version: '1.0.0',
-      description: 'A minimal plugin',
+      description: 'Plugin with author',
       author: { name: 'Test Author' },
     }
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Unknown field detection
+// ---------------------------------------------------------------------------
+
+describe('detectUnknownPluginFields', () => {
+  test('returns empty for valid fields only', () => {
+    const data = { name: 'test', version: '1.0.0', description: 'Test', commands: [] }
+    expect(detectUnknownPluginFields(data)).toEqual([])
+  })
+
+  test('detects platformSkills as unknown', () => {
+    const data = { name: 'test', platformSkills: [] }
+    expect(detectUnknownPluginFields(data)).toContain('platformSkills')
+  })
+
+  test('detects mcpServers and lspServers as unknown', () => {
+    const data = { name: 'test', mcpServers: './.mcp.json', lspServers: './.lsp.json' }
+    const unknown = detectUnknownPluginFields(data)
+    expect(unknown).toContain('mcpServers')
+    expect(unknown).toContain('lspServers')
+  })
+
+  test('ignores all known fields', () => {
+    const data: Record<string, unknown> = {}
+    for (const field of KNOWN_PLUGIN_FIELDS) {
+      data[field] = 'test'
+    }
+    expect(detectUnknownPluginFields(data)).toEqual([])
   })
 })
 
