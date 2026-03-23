@@ -576,6 +576,11 @@ export default defineCommand({
               description: 'Force git protocol: ssh|https|auto (default: auto)',
               default: 'auto',
             },
+            missing: {
+              type: 'string',
+              description:
+                'Only process analyzed entries missing this field (e.g., complexity, keywords)',
+            },
           },
           async run({ args }) {
             const out = createOutput({
@@ -597,7 +602,20 @@ export default defineCommand({
             ) as import('../lib/catalog').CatalogEntryWithTier1[]
             const force = args.force as boolean
             const retryErrors = args['retry-errors'] as boolean
-            const toProcess = filterForProcessing(allEntries, { force, retryErrors })
+            const missingField = args.missing as string | undefined
+
+            let toProcess: import('../lib/catalog').CatalogEntryWithTier1[]
+            if (missingField) {
+              // Target only analyzed entries missing a specific field
+              toProcess = allEntries.filter(
+                (e) =>
+                  e.availability === 'available' &&
+                  e.wordCount != null &&
+                  (e as Record<string, unknown>)[missingField] == null
+              )
+            } else {
+              toProcess = filterForProcessing(allEntries, { force, retryErrors })
+            }
             const totalAvailable = allEntries.filter((e) => e.availability === 'available').length
             const skipped = totalAvailable - toProcess.length
             const batchSize = parseInt(args['batch-size'] as string, 10) || 15
