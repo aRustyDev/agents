@@ -8,12 +8,15 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import {
+  type BackfillResult,
   type CatalogEntry,
+  type CatalogEntryWithTier1,
   computeContentHash,
   computeFileCount,
   computeHeadingTree,
   computeSectionCount,
   computeWordCount,
+  extractKeywords,
   type Tier1ErrorType,
 } from './catalog'
 import { cloneRepo, type GitCloneError, gitRaw } from './git'
@@ -450,4 +453,176 @@ async function downloadBatchForSource(
       await cloneResult.value.cleanup()
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Backfill — compute missing fields without agent dispatch
+// ---------------------------------------------------------------------------
+
+export interface BackfillOptions {
+  protocol?: GitProtocol
+  concurrency?: number
+  onProgress?: (done: number, total: number) => void
+}
+
+/**
+ * Backfill missing mechanical fields on catalog entries.
+ *
+ * Downloads each skill (grouped by source), computes only the fields
+ * that are missing, and returns partial results for merging.
+ * Also reclassifies `batch_failed` errors with the green path's
+ * structured error types.
+ *
+ * No agent dispatch — purely mechanical.
+ */
+export async function backfillEntries(
+  entries: CatalogEntryWithTier1[],
+  opts: BackfillOptions = {}
+): Promise<BackfillResult[]> {
+  const results: BackfillResult[] = []
+  const concurrency = opts.concurrency ?? 5
+
+  // Group by source for efficient cloning
+  const bySource = new Map<string, CatalogEntryWithTier1[]>()
+  for (const entry of entries) {
+    const group = bySource.get(entry.source) ?? []
+    group.push(entry)
+    bySource.set(entry.source, group)
+  }
+
+  const sourceQueue = [...bySource.entries()]
+  let done = 0
+
+  async function worker() {
+    while (sourceQueue.length > 0) {
+      const item = sourceQueue.shift()
+      if (!item) break
+      const [source, group] = item
+
+      const sourceResults = await backfillSource(source, group, opts.protocol)
+      results.push(...sourceResults)
+      done += group.length
+      opts.onProgress?.(done, entries.length)
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()))
+  return results
+}
+
+/** Backfill all entries from a single source (one clone). */
+async function backfillSource(
+  source: string,
+  group: CatalogEntryWithTier1[],
+  protocol?: GitProtocol
+): Promise<BackfillResult[]> {
+  const results: BackfillResult[] = []
+
+  const validated = validateCatalogSource(source, protocol)
+  if (!validated.ok) {
+    for (const entry of group) {
+      results.push({
+        source: entry.source,
+        skill: entry.skill,
+        error: validated.error.message,
+        errorType: 'source_invalid',
+        errorDetail: validated.error.hint ?? validated.error.message,
+      })
+    }
+    return results
+  }
+
+  const cloneResult = await cloneRepo(validated.value.cloneUrl, validated.value.ref)
+  if (!cloneResult.ok) {
+    const gitErr = cloneResult.error as GitCloneError
+    for (const entry of group) {
+      results.push({
+        source: entry.source,
+        skill: entry.skill,
+        error: `clone failed: ${gitErr.message}`,
+        errorType: gitErr.isTimeout ? 'download_timeout' : 'download_failed',
+        errorDetail: gitErr.hint ?? gitErr.message,
+      })
+    }
+    return results
+  }
+
+  try {
+    const discovered = await discoverSkills(cloneResult.value.tempDir)
+    const discoveredMap = new Map(
+      (discovered.ok ? discovered.value : []).map((s) => [s.name.toLowerCase(), s])
+    )
+
+    for (const entry of group) {
+      const result = await computeBackfillFields(entry, cloneResult.value.tempDir, discoveredMap)
+      results.push(result)
+    }
+  } finally {
+    await cloneResult.value.cleanup()
+  }
+
+  return results
+}
+
+/** Compute only the missing fields for a single entry. */
+async function computeBackfillFields(
+  entry: CatalogEntryWithTier1,
+  tempDir: string,
+  discoveredMap: Map<string, { path: string; name: string; frontmatter: { description?: string } }>
+): Promise<BackfillResult> {
+  const match = discoveredMap.get(entry.skill.toLowerCase())
+
+  // Try well-known paths if discovery didn't find it
+  let skillMdPath: string | null = match?.path ?? null
+  if (!skillMdPath) {
+    for (const p of SKILL_LOOKUP_DIRS.map((prefix) =>
+      join(tempDir, `${prefix}${entry.skill}/SKILL.md`)
+    )) {
+      if (existsSync(p)) {
+        skillMdPath = p
+        break
+      }
+    }
+  }
+
+  if (!skillMdPath) {
+    return {
+      source: entry.source,
+      skill: entry.skill,
+      error: `skill "${entry.skill}" not found in ${entry.source}`,
+      errorType: 'download_failed',
+      errorDetail: `Discovered ${discoveredMap.size} skills, none matched`,
+    }
+  }
+
+  const content = readFileSync(skillMdPath, 'utf8')
+  const skillDir = join(skillMdPath, '..')
+  const result: BackfillResult = { source: entry.source, skill: entry.skill }
+
+  // Only compute fields that are missing on the entry
+  if (!entry.headingTree) {
+    result.headingTree = computeHeadingTree(content)
+  }
+  if (!entry.keywords || entry.keywords.length === 0) {
+    result.keywords = extractKeywords(content)
+  }
+  if (!entry.sectionCount) {
+    result.sectionCount = computeSectionCount(content)
+  }
+  if (!entry.fileCount) {
+    result.fileCount = computeFileCount(skillDir)
+  }
+
+  // treeSha always needs the clone
+  if (!entry.treeSha) {
+    const relPath = relative(tempDir, skillDir).replace(/\\/g, '/')
+    if (relPath && !relPath.startsWith('..')) {
+      const treeShaResult = await gitRaw(['rev-parse', `HEAD:${relPath}`], tempDir)
+      if (treeShaResult.ok) {
+        result.treeSha = treeShaResult.value.trim()
+      }
+    }
+  }
+
+  return result
 }

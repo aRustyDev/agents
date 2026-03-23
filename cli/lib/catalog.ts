@@ -561,6 +561,154 @@ export function computeFileCount(dir: string): number {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Keyword Extraction (Mechanical)
+// ---------------------------------------------------------------------------
+
+const STOP_WORDS = new Set([
+  'a',
+  'an',
+  'the',
+  'and',
+  'or',
+  'but',
+  'in',
+  'on',
+  'at',
+  'to',
+  'for',
+  'of',
+  'with',
+  'by',
+  'from',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'have',
+  'has',
+  'had',
+  'do',
+  'does',
+  'did',
+  'will',
+  'would',
+  'could',
+  'should',
+  'may',
+  'might',
+  'shall',
+  'can',
+  'not',
+  'no',
+  'nor',
+  'so',
+  'if',
+  'then',
+  'than',
+  'that',
+  'this',
+  'these',
+  'those',
+  'it',
+  'its',
+  'as',
+  'up',
+  'out',
+  'about',
+  'into',
+  'over',
+  'after',
+  'before',
+  'between',
+  'under',
+  'above',
+  'such',
+  'each',
+  'every',
+  'all',
+  'any',
+  'both',
+  'few',
+  'more',
+  'most',
+  'other',
+  'some',
+  'only',
+  'own',
+  'same',
+  'how',
+  'what',
+  'when',
+  'where',
+  'which',
+  'who',
+  'whom',
+  'why',
+  'use',
+  'using',
+  'used',
+  'also',
+  'just',
+  'like',
+  'make',
+  'get',
+])
+
+/**
+ * Extract keywords mechanically from markdown content.
+ *
+ * Sources (in priority order):
+ * 1. Heading titles (h1-h3) — split into individual terms
+ * 2. Frontmatter description — significant terms
+ * 3. Code fence language identifiers (e.g., typescript, python, rust)
+ *
+ * Filters stop words, deduplicates, lowercases.
+ */
+export function extractKeywords(content: string): string[] {
+  const terms = new Set<string>()
+
+  // 1. Headings (h1-h3 only — deeper headings are too specific)
+  for (const line of content.split('\n')) {
+    const match = line.match(/^#{1,3}\s+(.+)$/)
+    if (match) {
+      for (const word of tokenize(match[1])) {
+        terms.add(word)
+      }
+    }
+  }
+
+  // 2. Frontmatter description
+  const descMatch = content.match(/^---[\s\S]*?description:\s*(.+?)$/m)
+  if (descMatch) {
+    for (const word of tokenize(descMatch[1])) {
+      terms.add(word)
+    }
+  }
+
+  // 3. Code fence languages
+  for (const match of content.matchAll(/^```(\w+)/gm)) {
+    const lang = match[1].toLowerCase()
+    if (lang !== 'text' && lang !== 'markdown' && lang !== 'md' && lang !== 'plaintext') {
+      terms.add(lang)
+    }
+  }
+
+  return [...terms].slice(0, 30) // cap at 30 keywords
+}
+
+/** Tokenize a string into lowercase terms, filtering stop words and short tokens. */
+function tokenize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w))
+}
+
 /** CatalogEntry extended with optional Tier1 analysis fields. */
 export type CatalogEntryWithTier1 = CatalogEntry & Partial<Tier1Result>
 
@@ -941,6 +1089,122 @@ export function mergeTier1Results(
   const lines = `${existing.map((e) => JSON.stringify(e)).join('\n')}\n`
   writeFileSync(tmpPath, lines, 'utf8')
   renameSync(tmpPath, catalogPath)
+}
+
+/**
+ * Merge backfill results into catalog — fills missing fields only.
+ *
+ * Unlike `mergeTier1Results`, this does NOT overwrite existing data.
+ * For each entry, only undefined/null fields are filled from the backfill result.
+ * Error entries with `lastErrorType === 'batch_failed'` are reclassified
+ * if the backfill provides a more specific error type.
+ */
+export function mergeBackfillResults(
+  catalogPath: string,
+  errorLogPath: string,
+  results: BackfillResult[]
+): { updated: number; reclassified: number; failed: number } {
+  const existing: CatalogEntryWithTier1[] = []
+  if (existsSync(catalogPath)) {
+    const content = readFileSync(catalogPath, 'utf8')
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+      try {
+        existing.push(JSON.parse(trimmed) as CatalogEntryWithTier1)
+      } catch {
+        /* skip */
+      }
+    }
+  }
+
+  const index = new Map<string, number>()
+  for (let i = 0; i < existing.length; i++) {
+    index.set(`${existing[i].source}\0${existing[i].skill}`, i)
+  }
+
+  let updated = 0
+  let reclassified = 0
+  let failed = 0
+  const errorRecords: ErrorRecord[] = []
+
+  for (const result of results) {
+    const key = `${result.source}\0${result.skill}`
+    const idx = index.get(key)
+    if (idx === undefined) continue // entry not in catalog
+
+    const entry = existing[idx]
+
+    if (result.error) {
+      // Reclassify batch_failed → more specific type
+      if (
+        entry.lastErrorType === 'batch_failed' &&
+        result.errorType &&
+        result.errorType !== 'batch_failed'
+      ) {
+        entry.lastErrorType = result.errorType
+        entry.retryable = result.errorType === 'download_timeout'
+        reclassified++
+        errorRecords.push({
+          source: result.source,
+          skill: result.skill,
+          runId: result.runId ?? '',
+          batchId: '',
+          timestamp: new Date().toISOString(),
+          errorType: result.errorType,
+          errorDetail: result.errorDetail ?? result.error,
+          retryable: result.errorType === 'download_timeout',
+        })
+      }
+      failed++
+      continue
+    }
+
+    // Fill missing fields only (null, undefined, or empty arrays)
+    let changed = false
+    const fillFields: (keyof Tier1Result)[] = [
+      'headingTree',
+      'treeSha',
+      'keywords',
+      'fileCount',
+      'sectionCount',
+    ]
+    for (const field of fillFields) {
+      const current = entry[field]
+      const isEmpty = current == null || (Array.isArray(current) && current.length === 0)
+      if (isEmpty && result[field] != null) {
+        ;(entry as Record<string, unknown>)[field] = result[field]
+        changed = true
+      }
+    }
+    if (changed) updated++
+  }
+
+  if (errorRecords.length > 0) {
+    appendErrors(errorLogPath, errorRecords)
+  }
+
+  const tmpPath = `${catalogPath}.tmp`
+  const lines = `${existing.map((e) => JSON.stringify(e)).join('\n')}\n`
+  writeFileSync(tmpPath, lines, 'utf8')
+  renameSync(tmpPath, catalogPath)
+
+  return { updated, reclassified, failed }
+}
+
+/** Result from a backfill operation — partial fields only. */
+export interface BackfillResult {
+  source: string
+  skill: string
+  headingTree?: Array<{ depth: number; title: string }>
+  treeSha?: string
+  keywords?: string[]
+  fileCount?: number
+  sectionCount?: number
+  error?: string
+  errorType?: Tier1ErrorType
+  errorDetail?: string
+  runId?: string
 }
 
 // ---------------------------------------------------------------------------

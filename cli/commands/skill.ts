@@ -1570,6 +1570,124 @@ export default defineCommand({
             process.exit(EXIT.OK)
           },
         }),
+
+        backfill: defineCommand({
+          meta: {
+            name: 'backfill',
+            description:
+              'Fill missing mechanical fields (headingTree, treeSha, keywords) on analyzed entries',
+          },
+          args: {
+            ...globalArgs,
+            limit: {
+              type: 'string',
+              description: 'Max entries to backfill (default: all)',
+            },
+            concurrency: {
+              type: 'string',
+              description: 'Parallel clone operations (default: 5)',
+              default: '5',
+            },
+            'include-errors': {
+              type: 'boolean',
+              description: 'Also reclassify batch_failed errors',
+              default: true,
+            },
+            'dry-run': {
+              type: 'boolean',
+              description: 'Show what would be backfilled without doing it',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            const { backfillEntries } = await import('../lib/catalog-download')
+            const { mergeBackfillResults } = await import('../lib/catalog')
+            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
+
+            const allEntries = readCatalog(
+              catalogPath
+            ) as import('../lib/catalog').CatalogEntryWithTier1[]
+
+            // Select entries needing backfill
+            const needsBackfill = allEntries.filter((e) => {
+              if (e.availability !== 'available') return false
+              const missingFields =
+                e.wordCount != null &&
+                (!e.headingTree || !e.treeSha || !e.keywords || e.keywords.length === 0)
+              const needsReclassify = args['include-errors'] && e.lastErrorType === 'batch_failed'
+              return missingFields || needsReclassify
+            })
+
+            const limit = args.limit ? parseInt(args.limit as string, 10) : needsBackfill.length
+            const toProcess = needsBackfill.slice(0, limit)
+            const concurrency = parseInt(args.concurrency as string, 10) || 5
+
+            const missingHeadingTree = toProcess.filter(
+              (e) => e.wordCount != null && !e.headingTree
+            ).length
+            const missingTreeSha = toProcess.filter((e) => e.wordCount != null && !e.treeSha).length
+            const missingKeywords = toProcess.filter(
+              (e) => e.wordCount != null && (!e.keywords || e.keywords.length === 0)
+            ).length
+            const batchFailed = toProcess.filter((e) => e.lastErrorType === 'batch_failed').length
+
+            out.info(
+              `Backfill candidates: ${needsBackfill.length} (processing ${toProcess.length})`
+            )
+            out.info(`  Missing headingTree: ${missingHeadingTree}`)
+            out.info(`  Missing treeSha:     ${missingTreeSha}`)
+            out.info(`  Missing keywords:    ${missingKeywords}`)
+            out.info(`  batch_failed errors: ${batchFailed}`)
+
+            if (args['dry-run']) {
+              process.exit(EXIT.OK)
+            }
+
+            out.info(`\nBackfilling with concurrency ${concurrency}...`)
+
+            const results = await backfillEntries(toProcess, {
+              concurrency,
+              onProgress: (done, total) => {
+                if (done % 50 === 0 || done === total) {
+                  out.info(`  Progress: ${done}/${total}`)
+                }
+              },
+            })
+
+            out.info(`\nMerging ${results.length} results into catalog...`)
+            const { updated, reclassified, failed } = mergeBackfillResults(
+              catalogPath,
+              errorLogPath,
+              results
+            )
+
+            if (args.json) {
+              out.raw({
+                processed: toProcess.length,
+                updated,
+                reclassified,
+                failed,
+              })
+            } else {
+              out.info(
+                `Done: ${updated} updated, ${reclassified} reclassified, ${failed} download failures`
+              )
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
       },
     }),
 
