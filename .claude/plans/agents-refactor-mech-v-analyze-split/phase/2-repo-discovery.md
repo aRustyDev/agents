@@ -1,3 +1,12 @@
+---
+id: 945af810-a69c-450a-ba64-7e5024e579d3
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+status: pending
+related:
+  depends-on: [eeb7137a-e202-485b-881f-8ed38e853f1f]
+---
+
 # Phase 2: Repo-level Mechanical Discovery
 
 **ID:** `phase-2`
@@ -21,6 +30,8 @@ Replace the per-skill-name download model with a per-repo discovery engine. Clon
 - [ ] Reports skills in catalog not found in repo
 - [ ] Handles non-standard skill locations (recursive discovery)
 - [ ] Progress reporting with concurrency control
+- [ ] Incremental discovery: skip repos where HEAD SHA matches `.catalog-repos.ndjson` (full run ~2.5h → incremental <5min)
+- [ ] `--dry-run` produces structured JSON summary: `{ newSkills, movedSkills, removedSkills, unchangedSkills, reposToClone, reposSkipped }`
 
 ## Deliverables
 
@@ -55,7 +66,9 @@ Replace the per-skill-name download model with a per-repo discovery engine. Clon
 - [ ] Write repo manifest to `.catalog-repos.ndjson`
 - [ ] Enrich existing catalog entries with newly computed fields (via `mergeBackfillResults` pattern)
 - [ ] Handle `--auto-discover` flag for adding new skills to catalog (default: report only)
-- [ ] Tests: local directory mocking (no network), repo metadata parsing, discovery report generation
+- [ ] Implement incremental discovery: read `.catalog-repos.ndjson`, compare `headSha` with `git ls-remote`, skip repos that haven't changed
+- [ ] Implement `--dry-run` with structured JSON output (counts of new/moved/removed/unchanged)
+- [ ] Tests: local directory mocking (no network), repo metadata parsing, discovery report generation, incremental skip logic
 
 ## Design Notes
 

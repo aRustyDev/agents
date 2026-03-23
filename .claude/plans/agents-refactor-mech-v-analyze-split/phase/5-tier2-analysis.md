@@ -1,3 +1,12 @@
+---
+id: 439acab1-ab80-4ccd-97b6-ab250a39c8a0
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+status: pending
+related:
+  depends-on: [8f03a234-a8f6-45a8-ab63-5515fee9706d]
+---
+
 # Phase 5: Tier 2 Deep Analysis
 
 **ID:** `phase-5`
@@ -43,10 +52,10 @@ Implement Sonnet-level deep analysis for non-trivial, non-fork skills. Produces 
 - [ ] Define `filterForTier2(entries)`: available, Tier 1 complete, non-fork, >500 words, not already Tier 2 reviewed
 - [ ] Design Sonnet agent prompt: receives full SKILL.md content + mechanical data, produces structured quality assessment
 - [ ] Implement `catalog analyze-deep` with `--limit`, `--concurrency`, `--dry-run`
-- [ ] Re-download skills for Tier 2 (independent of Tier 1 analysis to avoid bias)
+- [ ] Use `SkillManifest` from Phase 4 with Tier 1 judgment fields stripped (avoids redundant re-download while preserving Sonnet independence — only re-download if discovery data >7 days old)
 - [ ] Merge Tier 2 results into catalog (additive, doesn't overwrite Tier 1)
 - [ ] Cost tracking: log input/output tokens per skill, report batch totals
-- [ ] Blue/green validation: run 50 skills, review Sonnet output quality manually
+- [ ] Validation: run 50 skills — grade distribution must be approximately normal (no single grade >40% of sample), no stub skills graded above D
 
 ## Tier 2 Grading Rubric
 

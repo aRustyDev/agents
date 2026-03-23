@@ -1,3 +1,14 @@
+---
+id: 678131a9-6bd5-4cd0-9728-610fbc8044df
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+title: "Catalog Pipeline Refactor: Mechanical Discovery vs. LLM Analysis Split"
+status: draft
+tags: [catalog, pipeline, discovery, analysis, refactor]
+related:
+  supersedes: [d4e8f2a1-7c3b-4f5e-9a1d-8e6c4b2a0f3d]
+---
+
 # Catalog Pipeline Refactor: Mechanical Discovery vs. LLM Analysis Split
 
 **Created:** 2026-03-23
@@ -73,6 +84,34 @@
 - Phase 3: Reconciliation uses `mergeBackfillResults`-style partial merge; existing data preserved
 - Phase 4: Blue/green pattern (ADR-026) — `--legacy-analyze` flag if needed
 - Phase 5: New command, no impact on existing pipeline
+
+## Cross-Plan Dependencies
+
+| This Plan Phase | Skill-Inspection Phase | Constraint |
+|---|---|---|
+| phase-4 (Tier 1 Refactor) | phase-4 (Tier 1 Analysis) | This plan's phase-4 must complete before skill-inspection phase-4 starts — both modify `processBatch` in `skill.ts` |
+| phase-5 (Tier 2) | phase-5 (Tier 2 Analysis) | This plan's phase-5 must complete before skill-inspection phase-5 starts |
+
+**Execution order:** This plan's phases 1-3 can run independently. Phase 4+ blocks skill-inspection phases 4+.
+
+## Design Decisions
+
+### CLI Contract
+
+`catalog discover` and `catalog analyze` are separate commands. `catalog analyze` auto-invokes discovery when results are stale (>24h) or missing, unless `--skip-discovery` is passed. `--skip-discovery` errors if `.catalog-repos.ndjson` does not exist; warns if last discovery was >24h ago.
+
+### File Persistence
+
+- `.catalog-repos.ndjson` is **gitignored** (changes on every discovery run, like `.catalog.ndjson`)
+- `.catalog-repos.ndjson.sql` dump is version-controlled if a SQL export is needed
+
+### Grading of `removed_from_repo` Entries
+
+Entries with `status: removed_from_repo` retain their last-known analysis data and grade. They are excluded from active search results but preserved for historical reference. The skill-inspection Phase 6 grading pipeline treats them as "last known grade, flagged as removed."
+
+### `isSimple` Usage
+
+`isSimple` is included in `SkillManifest` (Phase 4) and used in the Tier 2 gate filter (Phase 5) as an additional signal alongside the >500 words threshold. Simple skills (SKILL.md only) with >500 words still qualify for Tier 2 but are deprioritized in batch ordering.
 
 ## Architecture Notes
 

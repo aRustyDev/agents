@@ -1,3 +1,12 @@
+---
+id: b62a5469-b722-4cee-ad9a-41c7f446d0ad
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+status: pending
+related:
+  depends-on: [945af810-a69c-450a-ba64-7e5024e579d3]
+---
+
 # Phase 3: Catalog Reconciliation & State Management
 
 **ID:** `phase-3`
@@ -38,6 +47,7 @@ Match discovery results against the existing catalog to detect moves, renames, a
 **Modify:**
 - `cli/lib/catalog.ts` — add `removed_from_repo` availability status, reconciliation report type
 - `cli/commands/skill.ts` — wire reconciliation into `catalog discover` output
+- `cli/lib/catalog-stale.ts` — use `discoveredPath` when available for stale checks
 - `docs/src/catalog-state-machine.md` — add new states and transitions
 
 ## Tasks
@@ -53,7 +63,11 @@ Match discovery results against the existing catalog to detect moves, renames, a
 - [ ] Implement `--auto-discover` behavior: auto-add new skills with `availability: available`
 - [ ] Implement `--include-removed` flag: re-check `removed_from_repo` entries
 - [ ] Update state machine diagram with new states: `removed_from_repo`, `discovered_new`, move transitions
-- [ ] Tests: move detection, addition detection, removal detection, rename detection, idempotency
+- [ ] Reclassify remaining `batch_failed` entries via discovery (moved from Phase 1 — needs repo access)
+- [ ] Update `catalog-stale.ts` to use `discoveredPath` when available, falling back to `SKILL_LOOKUP_DIRS` for pre-discovery entries
+- [ ] Handle simultaneous move+rename: compare `contentHash` before classifying as removal+addition — if content matches, copy analysis data to new entry
+- [ ] Specify catalog key mutation for renames: old `source@old-name` entry gets `removed_from_repo` status, new `source@new-name` entry created with copied analysis data
+- [ ] Tests: move detection, addition detection, removal detection, rename detection, move+rename with contentHash preservation, idempotency
 
 ## State Transitions (New)
 

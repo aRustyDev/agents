@@ -1,3 +1,12 @@
+---
+id: 8f03a234-a8f6-45a8-ab63-5515fee9706d
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+status: pending
+related:
+  depends-on: [b62a5469-b722-4cee-ad9a-41c7f446d0ad]
+---
+
 # Phase 4: Tier 1 Analysis Refactor
 
 **ID:** `phase-4`
@@ -41,15 +50,15 @@ Refactor the Tier 1 Haiku agent to receive ALL mechanical data pre-computed and 
 ## Tasks
 
 - [ ] Define `Tier1Judgment` interface: complexity, progressiveDisclosure, pdTechniques, bestPracticesMechanical, securityMechanical, refinedKeywords
-- [ ] Define `SkillManifest` interface: source, skill, content (full SKILL.md text), wordCount, sectionCount, fileCount, headingTree, sectionMap, fileTree, contentHash, mechanicalKeywords
+- [ ] Define `SkillManifest` interface: source, skill, content (full SKILL.md text), wordCount, sectionCount, fileCount, headingTree, sectionMap, fileTree, contentHash, mechanicalKeywords, isSimple
 - [ ] Implement `buildManifest(entry, discoveryResult)` — assembles the manifest from discovery data
 - [ ] Rewrite agent prompt to receive manifest and return judgment-only NDJSON
 - [ ] Remove ALLOWED_TOOLS from agent dispatch (agent needs no tools)
 - [ ] Refactor `processBatch` to: (1) read discovery results, (2) build manifests, (3) dispatch agent, (4) merge judgments
-- [ ] Add `--skip-discovery` flag for when discovery was already run separately
+- [ ] Add `--skip-discovery` flag: errors if `.catalog-repos.ndjson` absent, warns if last discovery >24h old, uses cached discovery data
 - [ ] Validate agent output schema (reject malformed NDJSON before merging)
-- [ ] Compare quality: run 100 skills through old vs new prompt, verify judgment consistency
-- [ ] Blue/green: `--legacy-analyze` flag during validation (ADR-026 pattern)
+- [ ] Compare quality: run 100 skills through old vs new prompt — validation criterion: >90% agreement on `complexity` classification, zero regressions in FullyComplete count
+- [ ] Blue/green: `--legacy-analyze` flag during validation (ADR-026 pattern) — removal criterion: 2+ successful batch runs (500+ skills), no regressions vs baseline
 
 ## Agent Prompt Design
 

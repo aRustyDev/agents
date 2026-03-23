@@ -1,3 +1,12 @@
+---
+id: eeb7137a-e202-485b-881f-8ed38e853f1f
+project:
+  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+status: pending
+related:
+  depends-on: []
+---
+
 # Phase 1: Schema & Data Model Evolution
 
 **ID:** `phase-1`
@@ -54,7 +63,6 @@ Evolve the catalog data model to support repo-level tracking, enhanced component
 - [ ] Add `computeFileTree(dir): string[]`
 - [ ] Add `computeSkillSizeBytes(dir): number`
 - [ ] Add `isSimpleSkill(dir): boolean` (true if SKILL.md only, no subdirs)
-- [ ] Re-run 458 `batch_failed` entries with `--retry-errors` to reclassify
 - [ ] Write migration function that renames `source_invalid` → `invalid_source_entry` on all existing entries
 - [ ] Remove orphaned `AgentAnalysis → BatchFailed` transition from state diagram
 - [ ] Write tests for all new compute functions
