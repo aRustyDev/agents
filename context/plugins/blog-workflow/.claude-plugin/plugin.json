@@ -1,5 +1,46 @@
 {
   "name": "blog-workflow",
-  "version": "4.0.1-test2",
-  "description": "Blog workflow — binary search test: no commands"
+  "version": "4.1.0",
+  "description": "Multi-phase blog content creation with personas, templates, and iterative review. Supports tutorials, deep dives, research summaries, and development journals.",
+  "author": {
+    "name": "Adam Smith",
+    "email": "developer@gh.arusty.dev",
+    "url": "https://im.arusty.dev"
+  },
+  "homepage": "https://docs.arusty.dev/ai/plugins/blog-workflow",
+  "repository": "https://github.com/aRustyDev/agents.git",
+  "license": "MIT",
+  "keywords": [
+    "blog",
+    "content",
+    "writing",
+    "persona",
+    "workflow",
+    "technical-writing",
+    "seo",
+    "tutorials"
+  ],
+  "commands": [
+    "./commands/blog.md",
+    "./commands/init.md"
+  ],
+  "agents": [
+    "./agents/research-synthesizer.md",
+    "./agents/series-architect.md",
+    "./agents/technical-editor.md"
+  ],
+  "skills": [
+    "./skills/code-example-best-practices/SKILL.md",
+    "./skills/content-structure-patterns/SKILL.md",
+    "./skills/seo-for-developers/SKILL.md",
+    "./skills/technical-writing-style/SKILL.md",
+    "./skills/platforms/astro/SKILL.md"
+  ],
+  "outputStyles": [
+    "./styles/deep-dive-format.md",
+    "./styles/dev-journal-format.md",
+    "./styles/feedback-submission.md",
+    "./styles/research-summary-format.md",
+    "./styles/tutorial-format.md"
+  ]
 }
