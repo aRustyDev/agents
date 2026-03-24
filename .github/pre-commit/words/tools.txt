@@ -210,3 +210,4 @@ xelatex
 xetex
 Yesod
 zipf
+shortlog
