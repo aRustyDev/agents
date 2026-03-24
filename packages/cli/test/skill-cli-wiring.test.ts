@@ -16,13 +16,13 @@ describe('skill CLI wiring', () => {
     }
   })
 
-  test('verb subcommands have been extracted to top-level modules', async () => {
+  test('verb subcommands exist as backward-compat aliases', async () => {
     const mod = await import('../src/commands/skill')
     const subs = mod.default.subCommands ?? {}
-    // These verb commands were moved to top-level verb modules in Phase 7
-    const extracted = ['add', 'init', 'list', 'find', 'outdated', 'update', 'remove', 'info']
-    for (const name of extracted) {
-      expect(subs[name]).toBeUndefined()
+    // These verb commands are now backward-compat aliases that proxy to verb-first modules
+    const aliased = ['add', 'init', 'list', 'search', 'find', 'outdated', 'update', 'remove', 'info']
+    for (const name of aliased) {
+      expect(subs[name]).toBeDefined()
     }
   })
 })

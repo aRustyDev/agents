@@ -20,6 +20,7 @@ import { readSkillFrontmatter } from '../lib/manifest'
 import { createOutput } from '../lib/output'
 import { currentDir } from '../lib/runtime'
 import { EXIT } from '../lib/types'
+import { deprecatedCommand, nounAlias } from './compat'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
@@ -499,6 +500,118 @@ export default defineCommand({
         }),
       },
     }),
+
+    // -----------------------------------------------------------------
+    // Backward-compat aliases (noun-first → verb-first migration)
+    // These proxy to the verb-first modules with a deprecation warning.
+    // Remove in the next major version.
+    // -----------------------------------------------------------------
+    add: nounAlias('skill', 'add', {
+      source: { type: 'positional', description: 'Source path, URL, or registry id', required: true },
+      copy: { type: 'boolean', description: 'Copy files instead of symlinking', default: false },
+      yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
+      agent: { type: 'string', alias: 'a', description: 'Target agent' },
+      client: { type: 'string', alias: 'c', description: 'Target client' },
+    }),
+    init: nounAlias('skill', 'init', {
+      name: { type: 'positional', description: 'Skill name (kebab-case)', required: false },
+      description: { type: 'string', alias: 'd', description: 'Short description' },
+      template: { type: 'string', alias: 't', description: 'Template file path' },
+    }),
+    list: nounAlias('skill', 'list', {
+      agent: { type: 'string', alias: 'a', description: 'Filter by agent' },
+    }),
+    search: nounAlias('skill', 'search', {
+      query: { type: 'positional', description: 'Search query', required: true },
+      limit: { type: 'string', description: 'Max results (default: 10)', default: '10' },
+      page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
+      verified: { type: 'boolean', description: 'Only verified', default: false },
+    }),
+    info: nounAlias('skill', 'info', {
+      name: { type: 'positional', description: 'Skill name', required: true },
+    }),
+    update: nounAlias('skill', 'update', {
+      name: { type: 'positional', description: 'Skill name', required: false },
+      copy: { type: 'boolean', description: 'Copy files on update', default: false },
+      yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
+    }),
+    remove: nounAlias('skill', 'remove', {
+      name: { type: 'positional', description: 'Skill name', required: true },
+      agent: { type: 'string', alias: 'a', description: 'Agent to remove from' },
+      yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
+    }),
+    find: deprecatedCommand(
+      'agents skill find', 'agents search skill', 'find',
+      {
+        query: { type: 'positional', description: 'Search query' },
+        limit: { type: 'string', description: 'Max results', default: '10' },
+        source: { type: 'string', description: 'Backend: auto, skills-sh, meilisearch, catalog' },
+        agent: { type: 'string', description: 'Target agent' },
+        yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
+      },
+      async (args) => {
+        const { findSkills } = await import('../lib/skill-find')
+        await findSkills(
+          args.query ? [args.query as string] : [],
+          {
+            limit: args.limit ? Number.parseInt(args.limit as string, 10) : undefined,
+            json: args.json as boolean,
+            quiet: args.quiet as boolean,
+            source: args.source as 'auto' | 'skills-sh' | 'meilisearch' | 'catalog' | undefined,
+            agent: args.agent as string | undefined,
+            yes: args.yes as boolean,
+          },
+        )
+      },
+    ),
+    outdated: deprecatedCommand(
+      'agents skill outdated', 'agents update skill --check', 'outdated',
+      {
+        stdin: { type: 'boolean', description: 'Read lockfile from stdin', default: false },
+        'from-file': { type: 'string', description: 'Lockfile path' },
+        'from-url': { type: 'string', description: 'Lockfile URL' },
+      },
+      async (args) => {
+        const { checkOutdated } = await import('../lib/skill-outdated')
+        const out = (await import('../lib/output')).createOutput({
+          json: args.json as boolean,
+          quiet: args.quiet as boolean,
+        })
+        const results = await checkOutdated({
+          stdin: args.stdin as boolean,
+          fromFile: args['from-file'] as string | undefined,
+          fromUrl: args['from-url'] as string | undefined,
+          json: args.json as boolean,
+          quiet: args.quiet as boolean,
+        })
+
+        if (args.json) {
+          out.raw(results)
+          return
+        }
+
+        if (results.length === 0) {
+          out.info('No skills in lockfile')
+          return
+        }
+
+        out.table(
+          results.map((r) => ({
+            skill: r.skill,
+            source: r.source,
+            status: r.status,
+            error: r.error ?? '',
+          })),
+          ['skill', 'source', 'status', 'error'],
+        )
+
+        const outdated = results.filter((r) => r.status === 'outdated')
+        if (outdated.length > 0) {
+          out.warn(`${outdated.length} skill(s) outdated`)
+          process.exit(1)
+        }
+      },
+    ),
 
     // -----------------------------------------------------------------
     // catalog (lazy — canonical home is commands/catalog.ts)
