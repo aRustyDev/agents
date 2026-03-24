@@ -104,9 +104,9 @@ describe('readConfigFile', () => {
     }
   })
 
-  test('parses valid TOML', async () => {
+  test('parses valid TOML with snake_case keys', async () => {
     const path = join(root, 'valid.toml')
-    await writeTextFile(path, '[general]\ndebug = true\noutputFormat = "json"\n')
+    await writeTextFile(path, '[general]\ndebug = true\noutput_format = "json"\n')
 
     const result = await readConfigFile(path)
     expect(result.ok).toBe(true)
@@ -155,6 +155,50 @@ describe('writeConfigFile', () => {
       expect(parsed.general?.failOn).toBe('warning')
       expect(parsed.search?.backends).toEqual(['local'])
       expect(parsed.search?.defaultLimit).toBe(20)
+    }
+  })
+
+  test('produces snake_case keys in TOML output', async () => {
+    const path = join(root, 'snake-output.toml')
+    const config: Partial<AgentsConfig> = {
+      general: {
+        debug: false,
+        outputFormat: 'json',
+        failOn: 'warning',
+      },
+      search: {
+        backends: ['local'],
+        defaultLimit: 25,
+      },
+    }
+
+    await writeConfigFile(path, config)
+    const raw = await (await import('../../src/lib/file-io')).readTextFile(path)
+    expect(raw.ok).toBe(true)
+    if (raw.ok) {
+      expect(raw.value).toContain('output_format')
+      expect(raw.value).toContain('fail_on')
+      expect(raw.value).toContain('default_limit')
+      // Should NOT contain camelCase keys
+      expect(raw.value).not.toContain('outputFormat')
+      expect(raw.value).not.toContain('failOn')
+      expect(raw.value).not.toContain('defaultLimit')
+    }
+  })
+})
+
+describe('readConfigFile snake_case support', () => {
+  test('reads snake_case TOML and maps to camelCase', async () => {
+    const path = join(root, 'snake-input.toml')
+    await writeTextFile(path, '[general]\noutput_format = "json"\nfail_on = "warning"\n\n[search]\ndefault_limit = 42\n')
+
+    const result = await readConfigFile(path)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      const parsed = result.value as AgentsConfig
+      expect(parsed.general?.outputFormat).toBe('json')
+      expect(parsed.general?.failOn).toBe('warning')
+      expect(parsed.search?.defaultLimit).toBe(42)
     }
   })
 })
@@ -261,7 +305,7 @@ describe('loadConfig', () => {
 
     await writeTextFile(
       join(dir, '.agents.toml'),
-      '[general]\ndebug = true\n\n[search]\ndefaultLimit = 50\n'
+      '[general]\ndebug = true\n\n[search]\ndefault_limit = 50\n'
     )
 
     const result = await loadConfig({ cwd: dir })

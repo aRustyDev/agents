@@ -49,7 +49,7 @@ export async function readJsonFile<T = unknown>(path: string): Promise<Result<T>
 /** Read directory entries. */
 export async function listDirectory(
   path: string,
-  opts?: { recursive?: boolean; withFileTypes?: true }
+  opts?: { recursive?: boolean }
 ): Promise<Result<import('node:fs').Dirent[]>> {
   try {
     const entries = await readdir(path, { withFileTypes: true, recursive: opts?.recursive })

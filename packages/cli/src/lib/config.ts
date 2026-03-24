@@ -78,6 +78,34 @@ export function getProjectConfigPath(cwd?: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Key transformation (TOML snake_case <-> TypeScript camelCase)
+// ---------------------------------------------------------------------------
+
+/** Convert camelCase key to snake_case for TOML convention. */
+function camelToSnake(str: string): string {
+  return str.replace(/[A-Z]/g, (m) => '_' + m.toLowerCase())
+}
+
+/** Convert snake_case key to camelCase for internal use. */
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+}
+
+/** Recursively transform all keys in an object. */
+function transformKeys(obj: Record<string, unknown>, fn: (key: string) => string): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    const newKey = fn(key)
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      result[newKey] = transformKeys(value as Record<string, unknown>, fn)
+    } else {
+      result[newKey] = value
+    }
+  }
+  return result
+}
+
+// ---------------------------------------------------------------------------
 // Read / Write TOML
 // ---------------------------------------------------------------------------
 
@@ -90,7 +118,8 @@ export async function readConfigFile(path: string): Promise<Result<Partial<Agent
   if (!text.ok) return text as Result<never>
   try {
     const parsed = TOML.parse(text.value)
-    return ok(parsed as Partial<AgentsConfig>)
+    const camelCased = transformKeys(parsed as Record<string, unknown>, snakeToCamel)
+    return ok(camelCased as Partial<AgentsConfig>)
   } catch (e) {
     return err(new CliError(
       `Failed to parse TOML config at ${path}: ${e instanceof Error ? e.message : String(e)}`,
@@ -105,7 +134,8 @@ export async function writeConfigFile(
   config: Partial<AgentsConfig>
 ): Promise<Result<void>> {
   try {
-    const content = TOML.stringify(config as Record<string, unknown>)
+    const snakeCased = transformKeys(config as Record<string, unknown>, camelToSnake)
+    const content = TOML.stringify(snakeCased)
     return writeTextFile(path, content)
   } catch (e) {
     return err(new CliError(
@@ -186,19 +216,23 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
  * CLI flags are NOT applied here -- they override at the command handler level.
  */
 export async function loadConfig(opts?: { cwd?: string }): Promise<Result<AgentsConfig>> {
-  let config: AgentsConfig = { ...DEFAULT_CONFIG }
+  let config: AgentsConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG)) as AgentsConfig
 
   // Layer 1: User config (~/.config/agents/config.toml)
   const userPath = getUserConfigPath()
   const userConfig = await readConfigFile(userPath)
-  if (userConfig.ok && Object.keys(userConfig.value).length > 0) {
+  if (!userConfig.ok) {
+    console.error(`Warning: Failed to parse user config at ${userPath}: ${userConfig.error.message}`)
+  } else if (Object.keys(userConfig.value).length > 0) {
     config = deepMerge(config, userConfig.value)
   }
 
   // Layer 2: Project config (.agents.toml)
   const projectPath = getProjectConfigPath(opts?.cwd)
   const projectConfig = await readConfigFile(projectPath)
-  if (projectConfig.ok && Object.keys(projectConfig.value).length > 0) {
+  if (!projectConfig.ok) {
+    console.error(`Warning: Failed to parse project config at ${projectPath}: ${projectConfig.error.message}`)
+  } else if (Object.keys(projectConfig.value).length > 0) {
     config = deepMerge(config, projectConfig.value)
   }
 
