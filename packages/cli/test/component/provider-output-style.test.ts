@@ -33,7 +33,7 @@ async function createStyle(dir: string, name: string, content: string): Promise<
 // ---------------------------------------------------------------------------
 
 describe('LocalOutputStyleProvider capabilities', () => {
-  test('declares output_style support for search, list, info', () => {
+  test('declares output-style support for search, list, info', () => {
     const provider = new LocalOutputStyleProvider(tmp)
 
     expect(provider.id).toBe('local-output-style')
@@ -158,7 +158,7 @@ describe('LocalOutputStyleProvider search', () => {
     expect(result.value.items[0]?.name).toBe('feedback-submission')
   })
 
-  test('returns empty for non-output_style type', async () => {
+  test('returns empty for non-output-style type', async () => {
     await createStyle(tmp, 'feedback-submission', '# Feedback\n\nStyle for feedback.')
 
     const provider = new LocalOutputStyleProvider(tmp)

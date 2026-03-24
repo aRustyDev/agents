@@ -54,7 +54,7 @@ describe('createComponentManager', () => {
     expect(manager.getProvider('local-output-style')!.capabilities.search).toContain('output-style')
   })
 
-  test('has smithery provider for mcp_server', () => {
+  test('has smithery provider for mcp-server', () => {
     const manager = createComponentManager()
     expect(manager.getProvider('smithery')).toBeDefined()
     expect(manager.getProvider('smithery')!.capabilities.search).toContain('mcp-server')
@@ -67,7 +67,7 @@ describe('createComponentManager', () => {
     expect(providers.some((p) => p.id === 'local')).toBe(true)
   })
 
-  test('findProviders routes mcp_server search to smithery', () => {
+  test('findProviders routes mcp-server search to smithery', () => {
     const manager = createComponentManager()
     const providers = manager.findProviders('search', 'mcp-server')
     expect(providers.some((p) => p.id === 'smithery')).toBe(true)
@@ -97,7 +97,7 @@ describe('createComponentManager', () => {
     expect(providers.some((p) => p.id === 'local-command')).toBe(true)
   })
 
-  test('findProviders routes output_style search to local-output-style', () => {
+  test('findProviders routes output-style search to local-output-style', () => {
     const manager = createComponentManager()
     const providers = manager.findProviders('search', 'output-style')
     expect(providers.some((p) => p.id === 'local-output-style')).toBe(true)
@@ -114,7 +114,7 @@ describe('createComponentManager', () => {
     expect(smithery).toBeDefined()
   })
 
-  test('findProviders routes publish mcp_server to smithery', () => {
+  test('findProviders routes publish mcp-server to smithery', () => {
     const manager = createComponentManager()
     const providers = manager.findProviders('publish', 'mcp-server')
     expect(providers.some((p) => p.id === 'smithery')).toBe(true)

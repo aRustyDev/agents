@@ -77,10 +77,10 @@ describe('SmitheryProvider search', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // search: returns empty for non-mcp_server type
+  // search: returns empty for non-mcp-server type
   // ---------------------------------------------------------------------------
 
-  test('returns empty for non-mcp_server type', async () => {
+  test('returns empty for non-mcp-server type', async () => {
     // fetch should NOT be called for type mismatches
     mockFetch(async () => {
       throw new Error('fetch should not be called')
@@ -327,7 +327,7 @@ describe('SmitheryProvider search', () => {
 // ---------------------------------------------------------------------------
 
 describe('SmitheryProvider capabilities', () => {
-  test('only supports mcp_server search', () => {
+  test('only supports mcp-server search', () => {
     const provider = new SmitheryProvider()
 
     expect(provider.id).toBe('smithery')
@@ -424,7 +424,7 @@ describe('SmitheryProvider publish', () => {
     }
   })
 
-  test('returns error for non-mcp_server type', async () => {
+  test('returns error for non-mcp-server type', async () => {
     const provider = new SmitheryProvider()
     const result = await provider.publish('skill', { name: 'ns/test', apiKey: 'key' })
     expect(result.ok).toBe(false)
@@ -463,7 +463,7 @@ describe('SmitheryProvider publish', () => {
     if (result.ok) expect(result.value.warnings).toContain('Dry run -- no changes made')
   })
 
-  test('capabilities includes mcp_server in publish', () => {
+  test('capabilities includes mcp-server in publish', () => {
     const provider = new SmitheryProvider()
     expect(provider.capabilities.publish).toContain('mcp-server')
   })

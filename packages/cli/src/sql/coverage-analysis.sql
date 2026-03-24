@@ -18,7 +18,7 @@ server_tool_coverage AS (
   FROM entities e
   JOIN mcp_server_tools t ON e.id = t.server_id
   JOIN required_tools rt ON t.name = rt.name
-  WHERE e.entity_type = 'mcp-server'
+  WHERE e.entity_type = 'mcp_server'
   GROUP BY e.id
 ),
 
