@@ -336,6 +336,34 @@ describe('PluginManifest', () => {
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
   })
+
+  test('platformSkills field passes schema but detectUnknownPluginFields catches it', () => {
+    // This was the v3.0.0 blog-workflow bug
+    const data = {
+      name: 'test',
+      version: '1.0.0',
+      description: 'Test',
+      platformSkills: [{ name: 'astro', path: './skills/astro/SKILL.md' }],
+    }
+    // Schema accepts it (extra fields pass through via safeParse)
+    const result = v.safeParse(PluginManifest, data)
+    expect(result.success).toBe(true)
+    // But detectUnknownPluginFields catches it
+    const unknown = detectUnknownPluginFields(data)
+    expect(unknown).toContain('platformSkills')
+  })
+
+  test('mcpServers field in plugin.json is detected as unknown', () => {
+    const data = { name: 'test', version: '1.0.0', description: 'Test', mcpServers: './.mcp.json' }
+    const unknown = detectUnknownPluginFields(data)
+    expect(unknown).toContain('mcpServers')
+  })
+
+  test('lspServers field in plugin.json is detected as unknown', () => {
+    const data = { name: 'test', version: '1.0.0', description: 'Test', lspServers: './.lsp.json' }
+    const unknown = detectUnknownPluginFields(data)
+    expect(unknown).toContain('lspServers')
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -605,6 +633,34 @@ describe('LspConfig', () => {
     const result = v.safeParse(LspConfig, config)
     expect(result.success).toBe(false)
   })
+
+  test('empty lspServers object is valid schema-wise but validatePlugin warns', () => {
+    // This was the actual blog-workflow bug: {"lspServers": {}} passed JSON parse
+    // but Claude Code expected command + extensionToLanguage
+    const data = { lspServers: {} }
+    const result = v.safeParse(LspConfig, data)
+    expect(result.success).toBe(true)
+    // validatePlugin separately warns about empty servers
+  })
+
+  test('rejects server entry missing command', () => {
+    const data = { lspServers: { 'my-lsp': { extensionToLanguage: { '.ts': 'typescript' } } } }
+    const result = v.safeParse(LspConfig, data)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects server entry missing extensionToLanguage', () => {
+    const data = { lspServers: { 'my-lsp': { command: 'typescript-language-server' } } }
+    const result = v.safeParse(LspConfig, data)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects wrong top-level key', () => {
+    // Someone writes "lsp" instead of "lspServers"
+    const data = { lsp: { 'my-lsp': { command: 'tsc', extensionToLanguage: {} } } }
+    const result = v.safeParse(LspConfig, data)
+    expect(result.success).toBe(false)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -680,6 +736,18 @@ describe('McpConfig', () => {
   test('rejects config with neither format', () => {
     const config = { servers: {} }
     const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects server entry missing command', () => {
+    const data = { mcpServers: { 'my-mcp': { args: ['--port', '3000'] } } }
+    const result = v.safeParse(McpConfig, data)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects empty object (no mcpServers or mcp key)', () => {
+    const data = {}
+    const result = v.safeParse(McpConfig, data)
     expect(result.success).toBe(false)
   })
 })
@@ -838,5 +906,20 @@ describe('SkillFrontmatter (edge cases)', () => {
     }
     const result = v.safeParse(SkillFrontmatter, fm)
     expect(result.success).toBe(false)
+  })
+
+  test('allows nested objects via passthrough for extra fields (Astro platform bug)', () => {
+    // This was the blog-workflow platform skill bug -- nested `platform:` object
+    // The schema accepts it since 'platform' is not a defined field and Valibot
+    // strips unknown keys by default with v.object.
+    // The validator would warn on non-standard nested objects at runtime.
+    const fm = {
+      name: 'platform-astro',
+      description: 'Astro config',
+      platform: { name: 'astro', paths: { published: 'src/' } },
+    }
+    const result = v.safeParse(SkillFrontmatter, fm)
+    // Valibot v.object strips unknown keys, so this succeeds (platform key ignored)
+    expect(result.success).toBe(true)
   })
 })
