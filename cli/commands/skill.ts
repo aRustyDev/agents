@@ -1706,6 +1706,121 @@ export default defineCommand({
             process.exit(EXIT.OK)
           },
         }),
+
+        discover: defineCommand({
+          meta: {
+            name: 'discover',
+            description: 'Clone unique repos, discover all skills, compute mechanical fields',
+          },
+          args: {
+            ...globalArgs,
+            limit: {
+              type: 'string',
+              description: 'Max repos to discover (default: all)',
+            },
+            concurrency: {
+              type: 'string',
+              description: 'Parallel clone operations (default: 5)',
+              default: '5',
+            },
+            incremental: {
+              type: 'boolean',
+              description: 'Skip repos whose HEAD matches cached manifest',
+              default: true,
+            },
+            'dry-run': {
+              type: 'boolean',
+              description: 'Show repo count without cloning',
+              default: false,
+            },
+          },
+          async run({ args }) {
+            const out = createOutput({
+              json: args.json as boolean,
+              quiet: args.quiet as boolean,
+            })
+
+            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            if (!require('node:fs').existsSync(catalogPath)) {
+              out.error('Catalog not found.')
+              process.exit(EXIT.ERROR)
+            }
+
+            const { discoverAllRepos } = await import('../lib/catalog-discover')
+            const { readRepoManifest, mergeRepoManifest, writeRepoManifest } = await import(
+              '../lib/catalog'
+            )
+            const manifestPath = join(PROJECT_ROOT, 'context/skills/.catalog-repos.ndjson')
+
+            const allEntries = readCatalog(
+              catalogPath
+            ) as import('../lib/catalog').CatalogEntryWithTier1[]
+            const available = allEntries.filter((e) => e.availability === 'available')
+            const uniqueRepos = new Set(available.map((e) => e.source))
+            const concurrency = parseInt(args.concurrency as string, 10) || 5
+            const incremental = args.incremental as boolean
+            const cachedManifests = incremental ? readRepoManifest(manifestPath) : []
+
+            out.info(`Catalog: ${allEntries.length} entries, ${uniqueRepos.size} unique repos`)
+            out.info(
+              `Mode: ${incremental ? 'incremental' : 'full'} (${cachedManifests.length} cached)`
+            )
+
+            if (args['dry-run']) {
+              if (args.json) {
+                out.raw({ repos: uniqueRepos.size, cached: cachedManifests.length })
+              }
+              process.exit(EXIT.OK)
+            }
+
+            const limit = args.limit ? parseInt(args.limit as string, 10) : undefined
+            const toProcess = limit
+              ? available.filter((_, i) => i < limit * 25) // rough: limit repos * avg skills
+              : available
+
+            out.info(`\nDiscovering with concurrency ${concurrency}...`)
+
+            const summary = await discoverAllRepos(toProcess, {
+              concurrency,
+              incremental,
+              cachedManifests,
+              onProgress: (done, total, repo) => {
+                if (done % 10 === 0 || done === total) {
+                  out.info(`  Progress: ${done}/${total} repos (${repo})`)
+                }
+              },
+            })
+
+            // Write repo manifests
+            for (const result of summary.results) {
+              mergeRepoManifest(manifestPath, result.manifest)
+            }
+
+            // Summary
+            const totalSkills = summary.results.reduce((n, r) => n + r.skills.length, 0)
+            const totalMissing = summary.results.reduce((n, r) => n + r.missing.length, 0)
+            const totalErrors = summary.results.reduce((n, r) => n + r.errors.length, 0)
+
+            if (args.json) {
+              out.raw({
+                repos: summary.totalRepos,
+                cloned: summary.cloned,
+                skipped: summary.skipped,
+                skillsFound: totalSkills,
+                missing: totalMissing,
+                errors: totalErrors,
+              })
+            } else {
+              out.info(`\nDiscovery complete:`)
+              out.info(`  Repos: ${summary.cloned} cloned, ${summary.skipped} skipped (unchanged)`)
+              out.info(`  Skills found: ${totalSkills}`)
+              out.info(`  Missing from repos: ${totalMissing}`)
+              out.info(`  Clone errors: ${totalErrors}`)
+            }
+
+            process.exit(EXIT.OK)
+          },
+        }),
       },
     }),
 
