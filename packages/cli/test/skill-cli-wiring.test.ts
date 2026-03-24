@@ -8,22 +8,21 @@ describe('skill CLI wiring', () => {
     expect(cmd.subCommands).toBeDefined()
   })
 
-  test('all new subcommands are registered', async () => {
-    const mod = await import('../src/commands/skill')
-    const subs = mod.default.subCommands ?? {}
-    const expected = ['add', 'init', 'list', 'find', 'outdated', 'update', 'remove', 'info']
-    for (const name of expected) {
-      expect(subs[name]).toBeDefined()
-      expect(subs[name].meta?.name).toBe(name)
-      expect(subs[name].meta?.description?.length).toBeGreaterThan(0)
-    }
-  })
-
-  test('existing subcommands still present', async () => {
+  test('foundation subcommands are registered', async () => {
     const mod = await import('../src/commands/skill')
     const subs = mod.default.subCommands ?? {}
     for (const name of ['validate', 'hash', 'lint', 'check-all', 'deps', 'catalog']) {
       expect(subs[name]).toBeDefined()
+    }
+  })
+
+  test('verb subcommands have been extracted to top-level modules', async () => {
+    const mod = await import('../src/commands/skill')
+    const subs = mod.default.subCommands ?? {}
+    // These verb commands were moved to top-level verb modules in Phase 7
+    const extracted = ['add', 'init', 'list', 'find', 'outdated', 'update', 'remove', 'info']
+    for (const name of extracted) {
+      expect(subs[name]).toBeUndefined()
     }
   })
 })

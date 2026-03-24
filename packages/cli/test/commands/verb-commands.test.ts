@@ -202,3 +202,49 @@ describe('update command', () => {
     expect(args.yes).toBeDefined()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Entrypoint wiring — verify agents.ts registers all expected subcommands
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Entrypoint wiring — verify verb modules are accessible via lazy import
+// ---------------------------------------------------------------------------
+// Note: We cannot import agents.ts directly because it calls runMain() at
+// module scope. Instead we verify the lazy import pattern it uses works.
+// We also avoid importing modules like catalog/kg that have side-effects
+// sensitive to the import.meta context of the test runner.
+
+describe('agents.ts entrypoint wiring', () => {
+  test('all 8 verb modules resolve via the lazy import pattern', async () => {
+    for (const verb of VERB_MODULES) {
+      const cmd = await import(`../../src/commands/${verb}`).then((m) => m.default)
+      expect(cmd).toBeDefined()
+      expect(cmd.meta?.name).toBe(verb)
+      expect(typeof cmd.run).toBe('function')
+    }
+  })
+
+  test('agents.ts source contains all expected subcommand registrations', async () => {
+    const fs = await import('node:fs')
+    const path = await import('node:path')
+    const agentsPath = path.resolve(
+      import.meta.dir,
+      '../../src/bin/agents.ts'
+    )
+    const source = fs.readFileSync(agentsPath, 'utf-8')
+
+    // Verify verb-first commands
+    for (const verb of VERB_MODULES) {
+      expect(source).toContain(`${verb}: () => import('../commands/${verb}')`)
+    }
+
+    // Verify legacy noun commands
+    for (const noun of ['plugin', 'skill', 'mcp', 'component', 'kg', 'registry']) {
+      expect(source).toContain(`${noun}: () => import('../commands/${noun}')`)
+    }
+
+    // Verify pipeline commands
+    expect(source).toContain("catalog: () => import('../commands/catalog')")
+  })
+})
