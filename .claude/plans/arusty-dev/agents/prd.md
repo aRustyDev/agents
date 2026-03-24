@@ -1,0 +1,31 @@
+## Desired Features
+
+- Keyword lookup
+  - Typesense Cloud | Meilisearch | Edgebased
+- Vector Search
+  - Cloudflare Vectors
+- Graph Relationships
+  - GraphQL
+- MCP
+  - tool:check_account
+  - tool:vector_query
+  - tool:keyword_query
+  - tool:search_query
+  - tool:show_related
+  - tool:list_archived
+  - tool:check_document
+  - tool:rag_*
+- Context Docs Analysis
+  - Document Forking
+  - Document Topics (Doc/Section/Paragraph/Sentence levels)
+  - Document AST / Graph
+  - What skills related to "X" exist?
+  - Topic graphs
+  - Document-Document relationship graphs
+  - Document Scope Analysis
+  - Document Prose Analysis
+  - Document Formatting Analysis
+  - Document Linting Scores per AI Coder Tool
+  - Document historical analysis
+  - Document sentiment analysis
+  - Document BoW analysis

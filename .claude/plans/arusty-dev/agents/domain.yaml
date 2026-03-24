@@ -1,0 +1,50 @@
+---
+arusty.dev:
+  ai:
+    - path: /ui/ctx/skills
+    - path: /ui/ctx/plugins
+    - path: /ui/ctx/styles
+    - path: /ui/ctx/rules
+    - path: /ui/ctx/agents
+    - path: /ui/ctx/hooks
+    - path: /ui/ctx/commands
+    - path: /ui/mcp/
+    - path: /ui/docs/
+    - path: /api/v1
+    - path: /mcp
+  registry:
+    - path: /ui
+      description: User Interface
+      children:
+        - path: /mcp
+          description: MCP server marketplace
+        - path: /docs
+          description: Site Docs
+        - path: /oci
+          description: Docker Container marketplace
+        - path: /charts
+          description: Helm Chart marketplace
+        - path: /releases
+          description: Release marketplace
+        - path: /ai
+          description: AI Context docs marketplace
+          children:
+            - path: /skills
+              description: Agent Skills marketplace
+            - path: /plugins
+              description: Agent Plugin marketplace
+            - path: /styles
+              description: Agent Output Styles marketplace
+            - path: /rules
+              description: Agent Rules marketplace
+            - path: /agents
+              description: Agent Docs marketplace
+            - path: /hooks
+              description: AI Client Hooks marketplace
+            - path: /commands
+              description: Agent Commands marketplace
+    - path: /api
+      children:
+        - path: /api/v1
+        - path: /api/graphql
+    - path: /mcp

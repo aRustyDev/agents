@@ -14,7 +14,7 @@ mod rule "content/rules/justfile"
 # TypeScript CLI tooling
 [group('tools')]
 agents *args:
-    @bun run cli/bin/agents.ts {{ args }}
+    @bun run packages/cli/src/bin/agents.ts {{ args }}
 
 # Claude Code configuration directory
 
@@ -39,7 +39,7 @@ _init-pre-commit:
 [private]
 _init-bun:
     @echo "Installing TypeScript dependencies..."
-    @cd cli && bun install --silent
+    @cd packages/cli && bun install --silent
 
 [private]
 _init-python:
@@ -810,7 +810,7 @@ build-plugin name:
     # Check for stale sources before building
     echo "Checking source hashes..."
     verify_exit=0
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "$PLUGIN_DIR" --interactive || verify_exit=$?
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "$PLUGIN_DIR" --interactive || verify_exit=$?
     if [ "$verify_exit" -eq 1 ]; then
       echo ""
       echo "✗ Build aborted"
@@ -999,18 +999,18 @@ add-feedback-infra-all:
 # Compute content-addressed hash for a file or directory
 [group('plugins')]
 plugin-hash path:
-    @"{{ which("uv") }}" run python cli/plugin-hash.py "{{ path }}"
+    @"{{ which("uv") }}" run python packages/cli/plugin-hash.py "{{ path }}"
 
 # Verify a component hash matches expected value
 [group('plugins')]
 plugin-hash-verify path expected:
-    @"{{ which("uv") }}" run python cli/plugin-hash.py "{{ path }}" --verify "{{ expected }}"
+    @"{{ which("uv") }}" run python packages/cli/plugin-hash.py "{{ path }}" --verify "{{ expected }}"
 
 # Verify all sources in a plugin's plugin.sources.json (exit 0=ok, 1=stale, 2=no-hash warning)
 [group('plugins')]
 plugin-verify-sources name:
     #!/usr/bin/env bash
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
     exit_code=$?
     if [ $exit_code -eq 2 ]; then
       echo "⚠ Warning: Plugin uses legacy format without hashes"
@@ -1022,7 +1022,7 @@ plugin-verify-sources name:
 [group('plugins')]
 plugin-check name:
     #!/usr/bin/env bash
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
     exit_code=$?
     if [ $exit_code -eq 2 ]; then
       echo ""
@@ -1044,7 +1044,7 @@ plugin-update name:
     echo "Updating hashes for {{ name }}..."
     # Update hash for each source component
     jq -r '.sources | to_entries[] | .key' "$SOURCES" | while read -r local_path; do
-      "{{ which("uv") }}" run python cli/plugin-hash.py \
+      "{{ which("uv") }}" run python packages/cli/plugin-hash.py \
         --verify-sources "$PLUGIN_DIR" \
         --update-hash "$local_path" || true
     done
@@ -1055,90 +1055,90 @@ plugin-update name:
 # Check all plugins (for CI)
 [group('plugins')]
 plugin-check-all:
-    @"{{ which("uv") }}" run python cli/build-plugin.py check-all
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py check-all
 
 # Build all plugins
 [group('plugins')]
 plugin-build-all *args='':
-    @"{{ which("uv") }}" run python cli/build-plugin.py build-all {{ args }}
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py build-all {{ args }}
 
 # Update all plugin hashes
 [group('plugins')]
 plugin-update-all:
-    @"{{ which("uv") }}" run python cli/build-plugin.py update-all
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py update-all
 
 # Check migration status of all plugins
 [group('plugins')]
 migrate-check:
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py --check
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py --check
 
 # Migrate a single plugin to extended format
 [group('plugins')]
 migrate-plugin name:
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py "content/plugins/{{ name }}"
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py "content/plugins/{{ name }}"
 
 # Migrate all plugins to extended format
 [group('plugins')]
 migrate-all-plugins *args='':
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py --all {{ args }}
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py --all {{ args }}
 
 # Knowledge graph operations
 
 # Initialize knowledge graph database
 [group('kg')]
 kg-init:
-    @"{{ which("uv") }}" run python cli/init-db.py
+    @"{{ which("uv") }}" run python packages/cli/init-db.py
 
 # Ingest all context files into knowledge graph
 [group('kg')]
 kg-ingest:
-    @"{{ which("uv") }}" run python cli/embed.py ingest --all
+    @"{{ which("uv") }}" run python packages/cli/embed.py ingest --all
 
 # Check for stale entities
 [group('kg')]
 kg-check:
-    @"{{ which("uv") }}" run python cli/embed.py check
+    @"{{ which("uv") }}" run python packages/cli/embed.py check
 
 # Semantic search
 [group('kg')]
 kg-search query:
-    @"{{ which("uv") }}" run python cli/embed.py search "{{ query }}"
+    @"{{ which("uv") }}" run python packages/cli/embed.py search "{{ query }}"
 
 # Find similar entities
 [group('kg')]
 kg-similar entity:
-    @"{{ which("uv") }}" run python cli/embed.py similar "{{ entity }}"
+    @"{{ which("uv") }}" run python packages/cli/embed.py similar "{{ entity }}"
 
 # Compute similarity cache
 [group('kg')]
 kg-similarity:
-    @"{{ which("uv") }}" run python cli/embed.py similarity
+    @"{{ which("uv") }}" run python packages/cli/embed.py similarity
 
 # Watch for changes and auto-embed
 [group('kg')]
 kg-watch:
-    @"{{ which("uv") }}" run python cli/watch-embed.py
+    @"{{ which("uv") }}" run python packages/cli/watch-embed.py
 
 # Dump knowledge graph to SQL (essential tables only, ~40MB)
 [group('kg')]
 kg-dump:
-    @"{{ which("uv") }}" run python cli/init-db.py --dump
+    @"{{ which("uv") }}" run python packages/cli/init-db.py --dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
-    @"{{ which("uv") }}" run python cli/init-db.py --load
+    @"{{ which("uv") }}" run python packages/cli/init-db.py --load
 
 # Rebuild vector embeddings from existing chunks (after loading from dump)
 [group('kg')]
 kg-rebuild-embeddings:
-    @"{{ which("uv") }}" run python cli/embed.py rebuild-embeddings
+    @"{{ which("uv") }}" run python packages/cli/embed.py rebuild-embeddings
     @just kg-similarity
 
 # Show knowledge graph statistics
 [group('kg')]
 kg-stats:
-    @"{{ which("uv") }}" run python cli/kg-stats.py
+    @"{{ which("uv") }}" run python packages/cli/kg-stats.py
 
 # Force re-embed all entities
 [group('kg')]

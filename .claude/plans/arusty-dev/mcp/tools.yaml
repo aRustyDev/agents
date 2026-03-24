@@ -1,0 +1,71 @@
+---
+time:
+  Sources:
+    - https://a.currenttimeutc.com/mcp
+    - https://www.pulsemcp.com/servers/mcpcentral-time
+    - https://www.pulsemcp.com/servers/modelcontextprotocol-time
+    - https://www.pulsemcp.com/servers/terminalman-timeserver
+    - https://www.pulsemcp.com/servers/yokingma-time
+    - https://www.pulsemcp.com/servers/pylogmon-time
+  Wait:
+    - sleep
+    - wait
+  Timezone:
+    - list_timezones
+    - get-current-timezone
+  Timestamp:
+    - get_utc_time
+    - get-time-in-timezone
+    - get_current_time(timezone); # IANA timezone name
+    - current_time_multi # Show current time in multiple timezones at once
+  Timezone Converter:
+    - convert_timezone -- Convert a date/time from one timezone to another
+    - list_timezones -- List common timezones with current UTC offsets
+    - current_time_multi -- Show current time in multiple timezones at once
+    - time_difference -- Calculate the time difference between two timezones
+  Date Calculator:
+    - date_add_subtract -- Add or subtract days, weeks, months, or years from a date
+    - date_difference -- Calculate the difference between two dates in various units
+    - business_days -- Count business days between dates or add business days to a date
+  Cron Parser:
+    - parse_cron -- Parse a cron expression into a human-readable description
+    - cron_next_runs -- Calculate the next N execution times for a cron expression
+    - validate_cron -- Validate a cron expression and explain any errors
+    - generate_cron -- Generate a cron expression from a human-readable description
+  Timestamp Converter:
+    - timestamp_to_date -- Convert Unix timestamp (seconds or milliseconds) to readable formats
+    - date_to_timestamp -- Convert a date/time string to Unix timestamps
+    - current_timestamp -- Get the current Unix timestamp and formatted date/time
+  Duration Formatter:
+    - format_duration -- Convert seconds to human-readable duration (e.g. 2h 30m 15s)
+    - parse_duration -- Parse a human-readable duration string to seconds
+    - time_ago -- Calculate relative time description (e.g. "5 minutes ago")
+    - countdown -- Calculate time remaining until a target date/time
+utils:
+  formatters:
+    - https://www.pulsemcp.com/servers/zeparhyfar-mcp-datetime
+  encoding:
+    - encode(data,scheme,[id]) # QR
+    - decode(data,scheme,[id]) # QR
+  crypto:
+    - uuid(data,version)
+    - hash(data,algo)
+  network:
+    - check_connectivity() # Ping, Traceroute, SpeedTest, etc
+    - geolocate()
+  weather:
+    - get_weather()
+  convert:
+    - convert_color_code() # Hex, CYMA, RGB conversion
+    - convert_data_format() # JSON, XML, YAML, SQL, TOML, Markdown ↔ HTML
+  regex:
+    - test_regex()
+  prettify:
+    - json
+math:
+  - calculate()
+json:
+  - compare_json()
+  - minify_json()
+  - format_json()
+  - prettify_json()

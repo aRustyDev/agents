@@ -66,7 +66,7 @@
           },
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\" 2>/dev/null); [ -z \"$FILE\" ] && exit 0; case \"$FILE\" in */plugins/*/.claude-plugin/plugin.json) NAME=$(echo \"$FILE\" | sed -E \"s|.*/plugins/([^/]+(/[^/]+)?)/\\.claude-plugin/plugin\\.json|\\1|\"); cd /private/etc/infra/pub/ai/cli && bun run bin/agents.ts plugin validate \"$NAME\" --quiet 2>&1 | tail -5;; */.claude-plugin/marketplace.json) cd /private/etc/infra/pub/ai/cli && bun run bin/agents.ts plugin validate-marketplace --quiet 2>&1 | tail -5;; */plugins/*/.lsp.json|*/plugins/*/.mcp.json) echo \"⚠ .lsp.json/.mcp.json edited — run: bun run cli/bin/agents.ts plugin validate-all\";; esac; true'",
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\" 2>/dev/null); [ -z \"$FILE\" ] && exit 0; case \"$FILE\" in */plugins/*/.claude-plugin/plugin.json) NAME=$(echo \"$FILE\" | sed -E \"s|.*/plugins/([^/]+(/[^/]+)?)/\\.claude-plugin/plugin\\.json|\\1|\"); cd /private/etc/infra/pub/ai/packages/cli && bun run src/bin/agents.ts plugin validate \"$NAME\" --quiet 2>&1 | tail -5;; */.claude-plugin/marketplace.json) cd /private/etc/infra/pub/ai/packages/cli && bun run src/bin/agents.ts plugin validate-marketplace --quiet 2>&1 | tail -5;; */plugins/*/.lsp.json|*/plugins/*/.mcp.json) echo \"⚠ .lsp.json/.mcp.json edited — run: bun run packages/cli/src/bin/agents.ts plugin validate-all\";; esac; true'",
             "timeout": 15
           }
         ]
