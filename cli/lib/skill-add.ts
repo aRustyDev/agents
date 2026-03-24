@@ -8,7 +8,7 @@
  * 3. Discover SKILL.md files in the source
  * 4. Filter to requested skill(s)
  * 5. Detect installed agents and determine target directories
- * 6. Copy skill to canonical `context/skills/<name>/` directory
+ * 6. Copy skill to canonical `content/skills/<name>/` directory
  * 7. Create symlinks from each agent's skills dir to the canonical copy
  * 8. Update the skills lockfile
  *
@@ -45,7 +45,7 @@ export interface InstalledEntry {
   name: string
   /** Source string that was used. */
   source: string
-  /** Canonical install path (context/skills/<name>). */
+  /** Canonical install path (content/skills/<name>). */
   canonicalPath: string
   /** Agent directories where symlinks were created. */
   agentLinks: string[]
@@ -167,7 +167,7 @@ export async function addSkill(source: string, opts: AddOptions = {}): Promise<A
     }
 
     // Step 6 & 7: Install each skill
-    const canonicalBase = join(cwd, 'context', 'skills')
+    const canonicalBase = join(cwd, 'content', 'skills')
 
     for (const skill of skills) {
       const skillName = skill.name

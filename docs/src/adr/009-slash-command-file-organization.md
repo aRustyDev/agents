@@ -6,12 +6,12 @@ Accepted
 
 ## Context
 
-Claude Code discovers slash commands by scanning `.claude/commands/` for markdown files. This project symlinks `.claude/commands/` to `context/commands/` to organize commands alongside other context components (agents, rules, skills).
+Claude Code discovers slash commands by scanning `.claude/commands/` for markdown files. This project symlinks `.claude/commands/` to `content/commands/` to organize commands alongside other context components (agents, rules, skills).
 
 We encountered an issue where non-command files (schema specifications, example plans) were appearing in the slash command autocomplete menu. These files:
 
-- `context/commands/context/plan/SCHEMA.md` - Schema specification document
-- `context/commands/context/plan/examples/*.md` - Example/test plan files
+- `content/commands/content/plan/SCHEMA.md` - Schema specification document
+- `content/commands/content/plan/examples/*.md` - Example/test plan files
 
 We needed to hide these from the command picker while keeping them accessible for reference.
 
@@ -23,8 +23,8 @@ We needed to hide these from the command picker while keeping them accessible fo
 
 | Content Type | Location | Appears in `/` menu |
 |--------------|----------|---------------------|
-| Slash commands | `context/commands/**/*.md` | Yes |
-| Schema specifications | `docs/src/context/*/schema.md` | No |
+| Slash commands | `content/commands/**/*.md` | Yes |
+| Schema specifications | `docs/src/content/*/schema.md` | No |
 | Test/example files | `tests/**/*.md` | No |
 
 ### Tested Approaches
@@ -38,7 +38,7 @@ We needed to hide these from the command picker while keeping them accessible fo
 
 ### Key Finding
 
-Claude Code follows symlinks during command discovery. A symlink at `context/commands/foo/bar.md` pointing to `../../docs/bar.md` will still include `bar.md` in the command picker.
+Claude Code follows symlinks during command discovery. A symlink at `content/commands/foo/bar.md` pointing to `../../docs/bar.md` will still include `bar.md` in the command picker.
 
 ## Consequences
 
@@ -58,7 +58,7 @@ Claude Code follows symlinks during command discovery. A symlink at `context/com
 
 ```bash
 # Schema specifications
-docs/src/context/
+docs/src/content/
 └── plan/
     └── schema.md
 
@@ -71,11 +71,11 @@ tests/
     └── invalid-phase-missing-files.md
 
 # Commands reference these locations
-context/commands/context/plan/create.md → refs docs/src/context/plan/schema.md
-context/commands/context/plan/review.md → refs docs/src/context/plan/schema.md
+content/commands/content/plan/create.md → refs docs/src/content/plan/schema.md
+content/commands/content/plan/review.md → refs docs/src/content/plan/schema.md
 ```
 
 ## Related
 
 - ADR-001: Primary Data Store (project organization context)
-- `.claude/commands/` symlink to `context/commands/`
+- `.claude/commands/` symlink to `content/commands/`

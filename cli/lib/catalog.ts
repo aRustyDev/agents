@@ -2,9 +2,9 @@
 /**
  * catalog.ts — Phase 2: Availability Check
  *
- * Reads context/skills/.TODO.yaml (entries in format `org/repo@skill-name`),
+ * Reads content/skills/.TODO.yaml (entries in format `org/repo@skill-name`),
  * checks GitHub availability for each unique repo via HTTP HEAD, and writes
- * one NDJSON line per entry to context/skills/.catalog.ndjson.
+ * one NDJSON line per entry to content/skills/.catalog.ndjson.
  *
  * Usage:
  *   bun run cli/lib/catalog.ts
@@ -20,7 +20,7 @@
  *     - `org/repo@skill-name`   (standard entry — processed)
  *     - A URL, comment, or other text  (skipped)
  *
- * Output: context/skills/.catalog.ndjson
+ * Output: content/skills/.catalog.ndjson
  *   One JSON line per .TODO.yaml entry:
  *   {"source":"org/repo","skill":"skill-name","availability":"available"}
  */
@@ -97,7 +97,7 @@ export interface RepoManifest {
  * All fields are optional — entries from before discovery won't have them.
  */
 export interface ComponentMetadata {
-  /** Actual path where SKILL.md was found (e.g., "context/skills/foo") */
+  /** Actual path where SKILL.md was found (e.g., "content/skills/foo") */
   discoveredPath?: string
   /** ISO timestamp when this skill was last seen in a discovery run */
   lastSeenAt?: string
@@ -134,8 +134,8 @@ interface CheckOptions {
 // ---------------------------------------------------------------------------
 
 const REPO_ROOT = join(currentDir(import.meta), '..', '..')
-const TODO_YAML_PATH = join(REPO_ROOT, 'context', 'skills', '.TODO.yaml')
-const CATALOG_PATH = join(REPO_ROOT, 'context', 'skills', '.catalog.ndjson')
+const TODO_YAML_PATH = join(REPO_ROOT, 'content', 'skills', '.TODO.yaml')
+const CATALOG_PATH = join(REPO_ROOT, 'content', 'skills', '.catalog.ndjson')
 
 // ---------------------------------------------------------------------------
 // Parsing

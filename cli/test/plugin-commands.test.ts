@@ -92,7 +92,7 @@ describe('listPlugins', () => {
     }
   })
 
-  test('finds at least one plugin in real context/plugins/', () => {
+  test('finds at least one plugin in real content/plugins/', () => {
     // The worktree has several real plugins (blog-workflow, swiftui-dev, etc.)
     const result = listPlugins()
     expect(result.length).toBeGreaterThan(0)
@@ -175,12 +175,12 @@ describe('plugin fixture operations', () => {
 
   beforeEach(async () => {
     // Create a fake plugin directory structure under tmp
-    fixturePluginDir = join(tmp, 'context', 'plugins', 'test-plugin')
+    fixturePluginDir = join(tmp, 'content', 'plugins', 'test-plugin')
     const claudePluginDir = join(fixturePluginDir, '.claude-plugin')
     await mkdir(claudePluginDir, { recursive: true })
 
     // Create a source file that the plugin "sources" from
-    fixtureSourceDir = join(tmp, 'context', 'skills')
+    fixtureSourceDir = join(tmp, 'content', 'skills')
     await mkdir(fixtureSourceDir, { recursive: true })
     await writeFile(join(fixtureSourceDir, 'test-skill.md'), '# Test Skill\n\nContent here.\n')
   })
@@ -193,7 +193,7 @@ describe('plugin fixture operations', () => {
       $schema: './plugin.sources.schema.json',
       sources: {
         'skills/test-skill.md': {
-          source: 'context/skills/test-skill.md',
+          source: 'content/skills/test-skill.md',
           hash: formatHash(hex),
         },
       },
@@ -231,7 +231,7 @@ describe('plugin fixture operations', () => {
     // Legacy format uses bare string values
     const sourcesData = {
       sources: {
-        'commands/foo.md': 'context/commands/foo.md',
+        'commands/foo.md': 'content/commands/foo.md',
       },
     }
     const sourcesFile = join(fixturePluginDir, '.claude-plugin', 'plugin.sources.json')
@@ -344,7 +344,7 @@ describe('sourceToDict output shape', () => {
   test('produces expected keys for JSON output', () => {
     const s: SourceStatus = {
       localPath: 'skills/test',
-      sourcePath: 'context/skills/test/SKILL.md',
+      sourcePath: 'content/skills/test/SKILL.md',
       expectedHash: `abcd1234${'0'.repeat(56)}`,
       actualHash: `abcd1234${'0'.repeat(56)}`,
       forked: false,
@@ -366,7 +366,7 @@ describe('sourceToDict output shape', () => {
     }
 
     expect(dict.local_path).toBe('skills/test')
-    expect(dict.source_path).toBe('context/skills/test/SKILL.md')
+    expect(dict.source_path).toBe('content/skills/test/SKILL.md')
     expect(dict.status).toBe('fresh')
     expect(dict.expected_hash).toMatch(SHA256_PREFIXED_REGEX)
     expect(dict.actual_hash).toMatch(SHA256_PREFIXED_REGEX)

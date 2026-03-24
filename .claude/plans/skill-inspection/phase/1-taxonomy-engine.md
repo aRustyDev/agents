@@ -31,7 +31,7 @@ Build a hybrid classification engine that categorizes 9,429 unique skill names i
 | Deliverable | Location | Format |
 |-------------|----------|--------|
 | Taxonomy rule engine | `cli/lib/taxonomy.ts` | TypeScript |
-| Taxonomy output | `context/skills/.taxonomy.yaml` | YAML |
+| Taxonomy output | `content/skills/.taxonomy.yaml` | YAML |
 | Valibot schemas | `cli/lib/schemas.ts` (additions) | TypeScript |
 | CLI subcommand | `cli/commands/skill.ts` (additions) | TypeScript |
 | Tests | `cli/test/taxonomy.test.ts` | TypeScript |
@@ -41,7 +41,7 @@ Build a hybrid classification engine that categorizes 9,429 unique skill names i
 **Create:**
 - `cli/lib/taxonomy.ts` — rule engine + LLM batch classification
 - `cli/test/taxonomy.test.ts` — unit tests for rule matching
-- `context/skills/.taxonomy.yaml` — generated output
+- `content/skills/.taxonomy.yaml` — generated output
 
 **Modify:**
 - `cli/lib/schemas.ts` — add `TaxonomyEntry`, `TaxonomyManifest` schemas

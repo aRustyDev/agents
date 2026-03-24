@@ -19,9 +19,9 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
 
 ## Success Criteria
 
-- [ ] `context/agents/catalog/skill-inspector-t1.md` agent definition complete with tool permissions and NDJSON output format
-- [ ] `context/agents/catalog/skill-inspector-t2.md` agent definition complete with gating criteria and merge semantics
-- [ ] `context/skills/.catalog/justfile` module created with all recipes delegating to `ai-tools`
+- [ ] `content/agents/catalog/skill-inspector-t1.md` agent definition complete with tool permissions and NDJSON output format
+- [ ] `content/agents/catalog/skill-inspector-t2.md` agent definition complete with gating criteria and merge semantics
+- [ ] `content/skills/.catalog/justfile` module created with all recipes delegating to `ai-tools`
 - [ ] `ai-tools skill catalog analyze --help` works (stub implementation)
 - [ ] `ai-tools skill catalog grade --help` works (stub implementation)
 - [ ] `ai-tools skill catalog stats --help` works (stub implementation)
@@ -33,20 +33,20 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
 
 | Deliverable | Location | Format |
 |-------------|----------|--------|
-| Tier 1 agent | `context/agents/catalog/skill-inspector-t1.md` | Markdown (agent def) |
-| Tier 2 agent | `context/agents/catalog/skill-inspector-t2.md` | Markdown (agent def) |
-| Catalog justfile | `context/skills/.catalog/justfile` | Just |
+| Tier 1 agent | `content/agents/catalog/skill-inspector-t1.md` | Markdown (agent def) |
+| Tier 2 agent | `content/agents/catalog/skill-inspector-t2.md` | Markdown (agent def) |
+| Catalog justfile | `content/skills/.catalog/justfile` | Just |
 | CLI stubs | `cli/commands/skill.ts` (additions) | TypeScript |
 
 ## Files
 
 **Create:**
-- `context/agents/catalog/skill-inspector-t1.md`
-- `context/agents/catalog/skill-inspector-t2.md`
-- `context/skills/.catalog/justfile`
+- `content/agents/catalog/skill-inspector-t1.md`
+- `content/agents/catalog/skill-inspector-t2.md`
+- `content/skills/.catalog/justfile`
 
 **Modify:**
-- `context/skills/justfile` — add `mod catalog ".catalog/justfile"`
+- `content/skills/justfile` — add `mod catalog ".catalog/justfile"`
 - `cli/commands/skill.ts` — add `catalog analyze|grade|stats|search|run` stubs
 - `brewfile` — add `mdq`
 
@@ -70,7 +70,7 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
   - Include gating criteria: only review if `availability==available && possibleForkOf==null && (complexity!="simple" || wordCount>=200)`
 
 ### Catalog Justfile Module
-- [ ] Create `context/skills/.catalog/justfile` with recipes:
+- [ ] Create `content/skills/.catalog/justfile` with recipes:
   - `run *FLAGS` — full pipeline: taxonomy → availability → analyze → grade
   - `taxonomy *FLAGS` — Phase 1
   - `availability *FLAGS` — Phase 2
@@ -80,7 +80,7 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
   - `search *FLAGS` — query catalog
   - `cleanup` — remove orphan worktrees
 - [ ] All recipes delegate to `bun run cli/bin/ai-tools.ts skill catalog <verb>`
-- [ ] Add `mod catalog ".catalog/justfile"` to `context/skills/justfile`
+- [ ] Add `mod catalog ".catalog/justfile"` to `content/skills/justfile`
 
 ### CLI Stubs
 - [ ] Add `catalog` subcommand to `commands/skill.ts` with Citty subcommands:
@@ -95,6 +95,6 @@ Create the two inspector agent definitions (Tier 1 Haiku, Tier 2 Sonnet), the ca
 ## Notes
 
 - This phase has no data dependencies — can run in parallel with Phases 1 and 2
-- Agent definitions follow the pattern in `context/agents/` (see existing agents for format reference)
+- Agent definitions follow the pattern in `content/agents/` (see existing agents for format reference)
 - The justfile module pattern matches `.external/justfile` from the external skill tracking design
 - CLI stubs allow other phases to be developed against the command interface without blocking

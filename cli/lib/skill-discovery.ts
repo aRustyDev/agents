@@ -6,7 +6,7 @@
  *
  * Discovery follows a two-phase strategy:
  * 1. **Priority search** -- check well-known directories first (skills/,
- *    context/skills/, .agents/skills/, .claude/skills/).
+ *    content/skills/, .agents/skills/, .claude/skills/).
  * 2. **Fallback scan** -- if no skills are found in priority dirs, do a full
  *    recursive walk from the search root (up to `maxDepth`).
  *
@@ -48,7 +48,7 @@ export interface DiscoverOptions {
 // ---------------------------------------------------------------------------
 
 /** Well-known directories where skills are typically stored. */
-const PRIORITY_DIRS = ['skills', 'context/skills', '.agents/skills', '.claude/skills']
+const PRIORITY_DIRS = ['skills', 'content/skills', '.agents/skills', '.claude/skills']
 
 const DEFAULT_MAX_DEPTH = 5
 

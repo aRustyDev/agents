@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Plugin | browser-extension-dev |
-| Location | `context/plugins/browser-extension-dev/` |
+| Location | `content/plugins/browser-extension-dev/` |
 | Components | 25 total (2 reuse, 5 extend, 18 create) |
 | Issues Created | 23 (excludes 2 reuse items) |
 | Ready to Work | 10 unblocked issues |
@@ -17,14 +17,14 @@
 | `.plans/plugins/browser-extension-dev/brainstorm.md` | Initial component brainstorm |
 | `.plans/plugins/browser-extension-dev/research.md` | Component research results |
 | `.plans/plugins/browser-extension-dev/roadmap.md` | Prioritized implementation roadmap |
-| `context/plugins/browser-extension-dev/README.md` | Plugin documentation |
-| `context/plugins/browser-extension-dev/TODO.md` | Implementation checklist |
-| `context/plugins/browser-extension-dev/.claude-plugin/plugin.json` | Plugin metadata |
-| `context/plugins/browser-extension-dev/.claude-plugin/plugin.sources.json` | Source mappings |
-| `context/plugins/browser-extension-dev/.mcp.json` | MCP server configs |
-| `context/plugins/browser-extension-dev/.lsp.json` | LSP server configs |
-| `context/plugins/browser-extension-dev/brewfile` | Homebrew dependencies |
-| `context/plugins/browser-extension-dev/hooks/hooks.json` | Hook definitions |
+| `content/plugins/browser-extension-dev/README.md` | Plugin documentation |
+| `content/plugins/browser-extension-dev/TODO.md` | Implementation checklist |
+| `content/plugins/browser-extension-dev/.claude-plugin/plugin.json` | Plugin metadata |
+| `content/plugins/browser-extension-dev/.claude-plugin/plugin.sources.json` | Source mappings |
+| `content/plugins/browser-extension-dev/.mcp.json` | MCP server configs |
+| `content/plugins/browser-extension-dev/.lsp.json` | LSP server configs |
+| `content/plugins/browser-extension-dev/brewfile` | Homebrew dependencies |
+| `content/plugins/browser-extension-dev/hooks/hooks.json` | Hook definitions |
 
 ## Issues by Priority
 

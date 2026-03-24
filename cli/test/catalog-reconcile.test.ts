@@ -95,14 +95,14 @@ describe('reconcile', () => {
     const catalog = [makeCatalogEntry('org/repo', 'foo', { discoveredPath: 'skills/foo' })]
     const discovery = [
       makeDiscoveryResult('org/repo', [
-        makeDiscoveredSkill('org/repo', 'foo', 'context/skills/foo'),
+        makeDiscoveredSkill('org/repo', 'foo', 'content/skills/foo'),
       ]),
     ]
 
     const report = reconcile(catalog, discovery)
     expect(report.moved).toHaveLength(1)
     expect(report.moved[0].movedFrom).toBe('skills/foo')
-    expect(report.moved[0].discovered?.mechanical.discoveredPath).toBe('context/skills/foo')
+    expect(report.moved[0].discovered?.mechanical.discoveredPath).toBe('content/skills/foo')
   })
 
   test('detects added skills (in repo but not catalog)', () => {

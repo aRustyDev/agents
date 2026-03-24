@@ -19,19 +19,19 @@ evidence:
     plugins: 21
 
   paths:
-    skills: "context/skills/"
-    agents: "context/agents/"
-    commands: "context/commands/"
-    rules: ".claude/rules/, context/rules/"
-    prompts: "context/output-styles/"
-    hooks: "context/hooks/"
-    mcp: "context/plugins/*/.mcp.json, .mcp.json"
-    plugins: "context/plugins/"
+    skills: "content/skills/"
+    agents: "content/agents/"
+    commands: "content/commands/"
+    rules: ".claude/rules/, content/rules/"
+    prompts: "content/output-styles/"
+    hooks: "content/hooks/"
+    mcp: "content/plugins/*/.mcp.json, .mcp.json"
+    plugins: "content/plugins/"
 
   notes:
     - "Skills counted by SKILL.md files"
-    - "Agents counted by *.md files in context/agents/"
-    - "Rules includes both .claude/rules/ and context/rules/"
+    - "Agents counted by *.md files in content/agents/"
+    - "Rules includes both .claude/rules/ and content/rules/"
     - "MCP configs found in plugin directories"
     - "Large agent count suggests many subagent definitions"
 

@@ -15,7 +15,7 @@ status: draft
 | Fix broken components/ recipes | phase-0 | TBD | | patch |
 | Cleanup dead directories | phase-1 | TBD | | patch |
 | CLI to packages/cli with src/test | phase-2 | TBD | | minor |
-| Rename context/ → content/ | phase-3 | TBD | | minor |
+| Rename content/ → content/ | phase-3 | TBD | | minor |
 | Root workspace configuration | phase-4 | TBD | | minor |
 | Part A verification | phase-5 | TBD | | — |
 | Shared library modules | phase-6 | TBD | | minor |
@@ -32,7 +32,7 @@ Issues to be created via `/beads:string` after plan approval.
 | This Plan | Other Plan | Constraint |
 |-----------|-----------|------------|
 | phase-7 (decomposition) | agents-refactor phases 1-4 | Refactor plan phases 1-4 implemented (beads closed), phase docs need status update. skill.ts processBatch refactored. Phase 7 must not start until refactor is fully verified. |
-| phase-5 (Part A done) | All other plans | All plans referencing `cli/` or `context/` paths break until Part A updates them |
+| phase-5 (Part A done) | All other plans | All plans referencing `cli/` or `content/` paths break until Part A updates them |
 
 ## Version Strategy
 

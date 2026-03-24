@@ -50,9 +50,9 @@ from watchdog.events import FileSystemEventHandler
 
 class ContextFileHandler(FileSystemEventHandler):
     PATTERNS = {
-        'context/agents/*.md': 'agent',
-        'context/skills/*/SKILL.md': 'skill',
-        'context/rules/*.md': 'rule',
+        'content/agents/*.md': 'agent',
+        'content/skills/*/SKILL.md': 'skill',
+        'content/rules/*.md': 'rule',
         '.claude/rules/*.md': 'rule',
         '**/CLAUDE.md': 'claude_md',
     }
@@ -72,7 +72,7 @@ class ContextFileHandler(FileSystemEventHandler):
 
 # Run watcher
 observer = Observer()
-observer.schedule(ContextFileHandler(), path='context/', recursive=True)
+observer.schedule(ContextFileHandler(), path='content/', recursive=True)
 observer.schedule(ContextFileHandler(), path='.claude/', recursive=True)
 observer.start()
 ```

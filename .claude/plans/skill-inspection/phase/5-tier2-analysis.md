@@ -32,7 +32,7 @@ Dispatch Tier 2 (Sonnet) agents for qualitative analysis of non-fork, non-trivia
 | Deliverable | Location | Format |
 |-------------|----------|--------|
 | Tier 2 orchestrator | `cli/lib/catalog.ts` (additions) | TypeScript |
-| Updated catalog | `context/skills/.catalog.ndjson` | NDJSON |
+| Updated catalog | `content/skills/.catalog.ndjson` | NDJSON |
 | Tests | `cli/test/catalog-tier2.test.ts` | TypeScript |
 
 ## Files

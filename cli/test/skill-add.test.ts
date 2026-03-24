@@ -28,7 +28,7 @@ async function createSkillSource(
   skillName: string,
   description = 'Test skill'
 ): Promise<string> {
-  const skillDir = join(baseDir, 'context', 'skills', skillName)
+  const skillDir = join(baseDir, 'content', 'skills', skillName)
   await mkdir(skillDir, { recursive: true })
   await writeFile(
     join(skillDir, 'SKILL.md'),
@@ -39,7 +39,7 @@ async function createSkillSource(
 
 async function setupProject(dir: string): Promise<void> {
   // Create the canonical skills directory
-  await mkdir(join(dir, 'context', 'skills'), { recursive: true })
+  await mkdir(join(dir, 'content', 'skills'), { recursive: true })
 }
 
 // ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ describe('addSkill -- local source', () => {
     expect(result.installed[0]!.source).toBe(join(sourceDir))
 
     // Verify the skill was copied to canonical location
-    const canonicalSkillMd = join(projectDir, 'context', 'skills', 'test-skill', 'SKILL.md')
+    const canonicalSkillMd = join(projectDir, 'content', 'skills', 'test-skill', 'SKILL.md')
     expect(existsSync(canonicalSkillMd)).toBe(true)
 
     // Verify lockfile was written

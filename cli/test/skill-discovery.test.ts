@@ -35,9 +35,9 @@ async function createSkill(dir: string, name: string, description = 'Test skill'
 // ---------------------------------------------------------------------------
 
 describe('discoverSkills', () => {
-  test('discovers skills in context/skills/ directory', async () => {
-    await createSkill(join(tmp, 'context/skills/my-skill'), 'my-skill', 'First test skill')
-    await createSkill(join(tmp, 'context/skills/other'), 'other', 'Second test skill')
+  test('discovers skills in content/skills/ directory', async () => {
+    await createSkill(join(tmp, 'content/skills/my-skill'), 'my-skill', 'First test skill')
+    await createSkill(join(tmp, 'content/skills/other'), 'other', 'Second test skill')
 
     const result = await discoverSkills(tmp)
     expect(result.ok).toBe(true)
@@ -50,7 +50,7 @@ describe('discoverSkills', () => {
 
     // Verify relative paths are computed from basePath
     for (const skill of result.value) {
-      expect(skill.relativePath).toStartWith('context/skills/')
+      expect(skill.relativePath).toStartWith('content/skills/')
       expect(skill.path).toStartWith(tmp)
       expect(skill.frontmatter.name).toBe(skill.name)
     }
@@ -106,10 +106,10 @@ describe('discoverSkills', () => {
 
   test('skips SKILL.md files with invalid frontmatter', async () => {
     // One valid skill
-    await createSkill(join(tmp, 'context/skills/good'), 'good-skill')
+    await createSkill(join(tmp, 'content/skills/good'), 'good-skill')
 
     // One SKILL.md without any frontmatter
-    const badDir = join(tmp, 'context/skills/bad')
+    const badDir = join(tmp, 'content/skills/bad')
     await mkdir(badDir, { recursive: true })
     await writeFile(join(badDir, 'SKILL.md'), '# No Frontmatter\n\nJust content.\n')
 

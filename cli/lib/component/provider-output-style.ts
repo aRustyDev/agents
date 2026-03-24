@@ -1,7 +1,7 @@
 /**
  * Local output-style provider for the Component system.
  *
- * Discovers output styles by scanning `context/output-styles/` for `.md` files.
+ * Discovers output styles by scanning `content/output-styles/` for `.md` files.
  * Each file becomes a component whose name is the filename without `.md` and
  * whose description is the first non-heading, non-empty paragraph line.
  *
@@ -68,7 +68,7 @@ export class LocalOutputStyleProvider implements ComponentProvider {
 
   constructor(cwd?: string) {
     this.cwd = cwd ?? process.cwd()
-    this.stylesDir = join(this.cwd, 'context', 'output-styles')
+    this.stylesDir = join(this.cwd, 'content', 'output-styles')
   }
 
   // -------------------------------------------------------------------------
@@ -76,7 +76,7 @@ export class LocalOutputStyleProvider implements ComponentProvider {
   // -------------------------------------------------------------------------
 
   /**
-   * Discover output style files under `context/output-styles/`.
+   * Discover output style files under `content/output-styles/`.
    *
    * Reads all `.md` files, excluding `TODO.md` and dot-prefixed files.
    * Each file is parsed to extract a description from the first paragraph.
@@ -172,7 +172,7 @@ export class LocalOutputStyleProvider implements ComponentProvider {
         new CliError(
           `Output style not found: ${name}`,
           'E_OUTPUT_STYLE_NOT_FOUND',
-          'Check the name and ensure it exists under context/output-styles/'
+          'Check the name and ensure it exists under content/output-styles/'
         )
       )
     }

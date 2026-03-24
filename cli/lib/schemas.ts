@@ -60,7 +60,7 @@ export type LockfileV1 = v.InferOutput<typeof LockfileV1>
 /**
  * Legacy source format -- a bare string path.
  *
- * Example: `"context/commands/foo.md"`
+ * Example: `"content/commands/foo.md"`
  */
 export const PluginSourceLegacy = v.string()
 export type PluginSourceLegacy = v.InferOutput<typeof PluginSourceLegacy>
@@ -71,7 +71,7 @@ export type PluginSourceLegacy = v.InferOutput<typeof PluginSourceLegacy>
  * Example:
  * ```json
  * {
- *   "source": "context/skills/lang-swift-dev/SKILL.md",
+ *   "source": "content/skills/lang-swift-dev/SKILL.md",
  *   "hash": "sha256:964e09bc408c52c70ffbc99884131a0c6065a2455aefef0294a30b74bc104d1b",
  *   "forked": false
  * }

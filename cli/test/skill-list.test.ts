@@ -27,7 +27,7 @@ async function createSkill(
   name: string,
   opts: { description?: string; version?: string; tags?: string[] } = {}
 ): Promise<void> {
-  const skillDir = join(baseDir, 'context', 'skills', name)
+  const skillDir = join(baseDir, 'content', 'skills', name)
   await mkdir(skillDir, { recursive: true })
 
   const description = opts.description ?? `${name} skill`
@@ -46,7 +46,7 @@ async function createAgentSkillLink(
   skillName: string
 ): Promise<void> {
   const agentSkillPath = join(projectDir, agentDir, skillName)
-  const canonicalPath = join(projectDir, 'context', 'skills', skillName)
+  const canonicalPath = join(projectDir, 'content', 'skills', skillName)
   await mkdir(join(projectDir, agentDir), { recursive: true })
   await symlink(canonicalPath, agentSkillPath)
 }
@@ -56,7 +56,7 @@ async function createAgentSkillLink(
 // ---------------------------------------------------------------------------
 
 describe('listSkills -- discovery', () => {
-  test('discovers skills in context/skills/', async () => {
+  test('discovers skills in content/skills/', async () => {
     await createSkill(tmp, 'beads', {
       description: 'Issue tracker',
       version: '1.0.0',
@@ -78,11 +78,11 @@ describe('listSkills -- discovery', () => {
     const beads = result.skills.find((s) => s.name === 'beads')!
     expect(beads.description).toBe('Issue tracker')
     expect(beads.version).toBe('1.0.0')
-    expect(beads.path).toBe(join(tmp, 'context', 'skills', 'beads'))
+    expect(beads.path).toBe(join(tmp, 'content', 'skills', 'beads'))
   })
 
   test('returns empty array for nonexistent skills directory', async () => {
-    // tmp has no context/skills/ directory
+    // tmp has no content/skills/ directory
     const result = await listSkills({ cwd: tmp })
 
     expect(result.ok).toBe(true)
@@ -90,7 +90,7 @@ describe('listSkills -- discovery', () => {
   })
 
   test('returns empty array for empty skills directory', async () => {
-    await mkdir(join(tmp, 'context', 'skills'), { recursive: true })
+    await mkdir(join(tmp, 'content', 'skills'), { recursive: true })
 
     const result = await listSkills({ cwd: tmp })
 
@@ -100,8 +100,8 @@ describe('listSkills -- discovery', () => {
 
   test('skips directories without SKILL.md', async () => {
     // Create a directory that is not a skill
-    await mkdir(join(tmp, 'context', 'skills', 'not-a-skill'), { recursive: true })
-    await writeFile(join(tmp, 'context', 'skills', 'not-a-skill', 'README.md'), '# Not a skill\n')
+    await mkdir(join(tmp, 'content', 'skills', 'not-a-skill'), { recursive: true })
+    await writeFile(join(tmp, 'content', 'skills', 'not-a-skill', 'README.md'), '# Not a skill\n')
 
     // Create a real skill
     await createSkill(tmp, 'real-skill')
@@ -118,7 +118,7 @@ describe('listSkills -- discovery', () => {
     await createSkill(tmp, 'good-skill')
 
     // Create a skill with invalid frontmatter (missing required fields)
-    const badDir = join(tmp, 'context', 'skills', 'bad-skill')
+    const badDir = join(tmp, 'content', 'skills', 'bad-skill')
     await mkdir(badDir, { recursive: true })
     await writeFile(
       join(badDir, 'SKILL.md'),

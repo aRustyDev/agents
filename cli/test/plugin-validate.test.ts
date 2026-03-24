@@ -28,11 +28,11 @@ describe('validateMarketplace', () => {
 })
 
 // ---------------------------------------------------------------------------
-// validateRules -- tested against real context/rules/
+// validateRules -- tested against real content/rules/
 // ---------------------------------------------------------------------------
 
 describe('validateRules', () => {
-  test('finds rule files in real context/rules/', async () => {
+  test('finds rule files in real content/rules/', async () => {
     const result = await validateRules()
     expect(result.plugin).toBe('rules')
     // The real rules directory should exist and have files

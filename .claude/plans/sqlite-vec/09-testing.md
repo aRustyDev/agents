@@ -84,8 +84,8 @@ just kg-ingest
 just kg-watch
 
 # Terminal 2
-echo "# Test" >> context/agents/mcp-server-profiler.md
-git checkout context/agents/mcp-server-profiler.md
+echo "# Test" >> content/agents/mcp-server-profiler.md
+git checkout content/agents/mcp-server-profiler.md
 ```
 
 **Verify:**

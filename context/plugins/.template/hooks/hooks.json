@@ -1,8 +1,0 @@
-{
-  "hooks": {},
-  "_comments": {
-    "format": "Add hooks under event type keys: PostToolUse, PreToolUse, SessionStart, etc.",
-    "example": "See context/plugins/homebrew-dev/hooks/hooks.json for a working example",
-    "note": "This file is auto-loaded by Claude Code - do not reference it in plugin.json"
-  }
-}

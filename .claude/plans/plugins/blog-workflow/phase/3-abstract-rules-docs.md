@@ -46,10 +46,10 @@ Make rules and documentation platform-agnostic by replacing Astro-specific conte
 
 **Create:**
 
-- `context/plugins/blog-workflow/docs/src/platforms/index.md`
+- `content/plugins/blog-workflow/docs/src/platforms/index.md`
 
 **Modify:**
 
-- `context/plugins/blog-workflow/rules/blog-frontmatter.md`
-- `context/plugins/blog-workflow/docs/src/workflow/publishing.md`
-- `context/plugins/blog-workflow/docs/src/reference/frontmatter.md`
+- `content/plugins/blog-workflow/rules/blog-frontmatter.md`
+- `content/plugins/blog-workflow/docs/src/workflow/publishing.md`
+- `content/plugins/blog-workflow/docs/src/reference/frontmatter.md`

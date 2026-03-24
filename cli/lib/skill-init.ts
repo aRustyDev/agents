@@ -28,7 +28,7 @@ export interface InitOptions {
   description?: string
   /** Explicit template file path. */
   template?: string
-  /** Base directory for the new skill. Defaults to `context/skills/`. */
+  /** Base directory for the new skill. Defaults to `content/skills/`. */
   baseDir?: string
 }
 
@@ -86,7 +86,7 @@ tags: []
 export async function initSkill(name: string, opts: InitOptions = {}): Promise<InitResult> {
   const cwd = opts.cwd ?? process.cwd()
   const description = opts.description ?? `A new skill called ${name}`
-  const baseDir = opts.baseDir ?? join(cwd, 'context', 'skills')
+  const baseDir = opts.baseDir ?? join(cwd, 'content', 'skills')
 
   // Step 1: Validate name
   const nameError = validateSkillName(name)

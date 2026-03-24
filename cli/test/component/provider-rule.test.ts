@@ -23,7 +23,7 @@ afterEach(async () => {
 // ---------------------------------------------------------------------------
 
 async function createRule(baseDir: string, path: string, heading = 'Test Rule'): Promise<void> {
-  const fullPath = join(baseDir, 'context', 'rules', path)
+  const fullPath = join(baseDir, 'content', 'rules', path)
   await mkdir(dirname(fullPath), { recursive: true })
   await writeFile(fullPath, `# ${heading}\n\nRule content here.\n`)
 }
@@ -179,7 +179,7 @@ describe('LocalRuleProvider info', () => {
     expect(result.value.type).toBe('rule')
     expect(result.value.name).toBe('agent/hooks')
     expect(result.value.description).toBe('Claude Code Hooks')
-    expect(result.value.localPath).toBe(join(tmp, 'context', 'rules', 'agent', 'hooks.md'))
+    expect(result.value.localPath).toBe(join(tmp, 'content', 'rules', 'agent', 'hooks.md'))
   })
 
   test('returns error for missing rule', async () => {

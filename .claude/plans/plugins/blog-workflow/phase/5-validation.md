@@ -58,9 +58,9 @@ Validate that the refactoring preserves all existing workflows and document the 
 
 **Create:**
 
-- `context/plugins/blog-workflow/docs/src/platforms/testing.md`
-- `context/plugins/blog-workflow/docs/src/platforms/migration.md`
+- `content/plugins/blog-workflow/docs/src/platforms/testing.md`
+- `content/plugins/blog-workflow/docs/src/platforms/migration.md`
 
 **Modify:**
 
-- `context/plugins/blog-workflow/CHANGELOG.md`
+- `content/plugins/blog-workflow/CHANGELOG.md`

@@ -1,7 +1,7 @@
 /**
  * Skill listing module.
  *
- * Scans `context/skills/` (or a custom path) for installed skills, checks
+ * Scans `content/skills/` (or a custom path) for installed skills, checks
  * which agents have each skill installed (via symlink or directory presence),
  * and returns a filterable list.
  *
@@ -27,7 +27,7 @@ import { CliError } from './types'
 export interface ListOptions {
   /** Working directory (project root). Defaults to cwd. */
   cwd?: string
-  /** Base directory containing skills. Defaults to `context/skills/`. */
+  /** Base directory containing skills. Defaults to `content/skills/`. */
   skillsDir?: string
   /** Filter to a specific agent. */
   agent?: string
@@ -70,7 +70,7 @@ export interface ListResult {
  */
 export async function listSkills(opts: ListOptions = {}): Promise<ListResult> {
   const cwd = opts.cwd ?? process.cwd()
-  const skillsDir = opts.skillsDir ?? join(cwd, 'context', 'skills')
+  const skillsDir = opts.skillsDir ?? join(cwd, 'content', 'skills')
 
   if (!existsSync(skillsDir)) {
     return {

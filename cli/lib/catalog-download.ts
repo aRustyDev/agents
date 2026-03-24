@@ -31,7 +31,7 @@ import {
 import { CliError, err, ok, type Result } from './types'
 
 /** Well-known subdirectory prefixes where skills may live in a repo. */
-export const SKILL_LOOKUP_DIRS = ['', 'skills/', 'context/skills/', '.claude/skills/']
+export const SKILL_LOOKUP_DIRS = ['', 'skills/', 'content/skills/', '.claude/skills/']
 
 /** Build full SKILL.md lookup paths for a given skill name. */
 const SKILL_LOOKUP_PATHS = (skillName: string) =>

@@ -1,11 +1,11 @@
 /**
  * Local rule provider for the Component system.
  *
- * Discovers markdown files under `context/rules/` and exposes them
+ * Discovers markdown files under `content/rules/` and exposes them
  * as `rule` components via the ComponentProvider interface.
  *
  * Name derivation: relative path with `.md` stripped, using `/` separator.
- *   e.g. `context/rules/agent/hooks.md` -> `"agent/hooks"`
+ *   e.g. `content/rules/agent/hooks.md` -> `"agent/hooks"`
  *
  * Description extraction: first `# ` heading text in the file body.
  */
@@ -76,10 +76,10 @@ export class LocalRuleProvider implements ComponentProvider {
   }
 
   private get rulesDir(): string {
-    return join(this.cwd, 'context', 'rules')
+    return join(this.cwd, 'content', 'rules')
   }
 
-  /** Discover all rule components under context/rules/. */
+  /** Discover all rule components under content/rules/. */
   private async discoverRules(): Promise<Component[]> {
     const base = this.rulesDir
     if (!existsSync(base)) return []

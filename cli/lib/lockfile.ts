@@ -241,8 +241,8 @@ const skillsSchema: LockfileSchema<LockfileV1> = {
     const entries: StalenessEntry[] = []
 
     for (const [name, entry] of Object.entries(data.skills)) {
-      // Skills are typically stored under context/skills/<name>
-      const skillPath = join(basePath, 'context', 'skills', name)
+      // Skills are typically stored under content/skills/<name>
+      const skillPath = join(basePath, 'content', 'skills', name)
 
       if (!existsSync(skillPath)) {
         entries.push({

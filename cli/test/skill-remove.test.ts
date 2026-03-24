@@ -27,7 +27,7 @@ afterEach(async () => {
  * Create a canonical skill directory with a minimal SKILL.md.
  */
 async function createCanonicalSkill(cwd: string, name: string): Promise<string> {
-  const dir = join(cwd, 'context', 'skills', name)
+  const dir = join(cwd, 'content', 'skills', name)
   await mkdir(dir, { recursive: true })
   await writeFile(
     join(dir, 'SKILL.md'),
@@ -61,7 +61,7 @@ async function createAgentLink(
 ): Promise<string> {
   const agentDir = join(cwd, agentSkillsDir)
   await mkdir(agentDir, { recursive: true })
-  const canonicalDir = join(cwd, 'context', 'skills', skillName)
+  const canonicalDir = join(cwd, 'content', 'skills', skillName)
   const linkPath = join(agentDir, skillName)
   await symlink(canonicalDir, linkPath)
   return linkPath
@@ -104,8 +104,8 @@ describe('removeSkills -- canonical removal', () => {
     expect(results).toHaveLength(2)
     expect(results[0]!.canonicalRemoved).toBe(true)
     expect(results[1]!.canonicalRemoved).toBe(true)
-    expect(existsSync(join(tmp, 'context', 'skills', 'alpha'))).toBe(false)
-    expect(existsSync(join(tmp, 'context', 'skills', 'beta'))).toBe(false)
+    expect(existsSync(join(tmp, 'content', 'skills', 'alpha'))).toBe(false)
+    expect(existsSync(join(tmp, 'content', 'skills', 'beta'))).toBe(false)
   })
 })
 

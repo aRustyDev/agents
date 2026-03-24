@@ -1,11 +1,11 @@
 /**
  * Local command provider for the Component system.
  *
- * Discovers markdown files under `context/commands/` and exposes them
+ * Discovers markdown files under `content/commands/` and exposes them
  * as `command` components via the ComponentProvider interface.
  *
  * Name derivation: relative path with `.md` stripped, `/` replaced by `:`.
- *   e.g. `context/commands/skill/create.md` -> `"skill:create"`
+ *   e.g. `content/commands/skill/create.md` -> `"skill:create"`
  *
  * Metadata extraction: YAML frontmatter parsed via `parseFrontmatter`.
  *   - `description` field -> Component.description
@@ -70,10 +70,10 @@ export class LocalCommandProvider implements ComponentProvider {
   }
 
   private get commandsDir(): string {
-    return join(this.cwd, 'context', 'commands')
+    return join(this.cwd, 'content', 'commands')
   }
 
-  /** Discover all command components under context/commands/. */
+  /** Discover all command components under content/commands/. */
   private async discoverCommands(): Promise<Component[]> {
     const base = this.commandsDir
     if (!existsSync(base)) return []

@@ -1,7 +1,7 @@
 /**
  * Local plugin provider for the Component system.
  *
- * Discovers plugins by recursively scanning `context/plugins/` for directories
+ * Discovers plugins by recursively scanning `content/plugins/` for directories
  * that contain a `.claude-plugin/plugin.json` manifest. Reuses the shared
  * `readPluginManifest` function for parsing and validation.
  *
@@ -55,13 +55,13 @@ export class LocalPluginProvider implements ComponentProvider {
   // -------------------------------------------------------------------------
 
   /**
-   * Recursively discover plugin directories under `context/plugins/`.
+   * Recursively discover plugin directories under `content/plugins/`.
    *
    * A directory is considered a plugin when it contains
    * `.claude-plugin/plugin.json`. The `.template/` directory is excluded.
    */
   private async discoverPlugins(): Promise<Component[]> {
-    const pluginsRoot = join(this.cwd, 'context', 'plugins')
+    const pluginsRoot = join(this.cwd, 'content', 'plugins')
 
     if (!existsSync(pluginsRoot)) return []
 
@@ -154,7 +154,7 @@ export class LocalPluginProvider implements ComponentProvider {
         new CliError(
           `Plugin not found: ${name}`,
           'E_PLUGIN_NOT_FOUND',
-          'Check the plugin name and ensure it exists under context/plugins/'
+          'Check the plugin name and ensure it exists under content/plugins/'
         )
       )
     }

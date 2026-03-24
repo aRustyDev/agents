@@ -40,7 +40,7 @@ async function writeLockfile(
 
 /** Create a skill directory with a single SKILL.md file. */
 async function createSkillDir(base: string, name: string, content: string): Promise<void> {
-  const dir = join(base, 'context', 'skills', name)
+  const dir = join(base, 'content', 'skills', name)
   await mkdir(dir, { recursive: true })
   await writeFile(join(dir, 'SKILL.md'), content)
 }
@@ -123,7 +123,7 @@ describe('local source', () => {
 
     // Compute the real hash of the directory we just created
     const { hashDirectory } = await import('../lib/hash')
-    const realHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-skill'))
+    const realHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-skill'))
 
     // No need to mock hash module for local -- use real implementation
     mock.module('../lib/git', () => ({
@@ -374,7 +374,7 @@ describe('mixed sources', () => {
     await createSkillDir(tmp, 'local-one', '# Local Skill')
 
     const { hashDirectory } = await import('../lib/hash')
-    const localHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-one'))
+    const localHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-one'))
 
     const GITHUB_HASH = 'b'.repeat(64)
 

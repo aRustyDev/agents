@@ -23,7 +23,7 @@ afterEach(async () => {
 // ---------------------------------------------------------------------------
 
 async function createCommand(baseDir: string, path: string, desc = 'Test command'): Promise<void> {
-  const fullPath = join(baseDir, 'context', 'commands', path)
+  const fullPath = join(baseDir, 'content', 'commands', path)
   await mkdir(dirname(fullPath), { recursive: true })
   await writeFile(
     fullPath,
@@ -32,7 +32,7 @@ async function createCommand(baseDir: string, path: string, desc = 'Test command
 }
 
 async function createCommandRaw(baseDir: string, path: string, content: string): Promise<void> {
-  const fullPath = join(baseDir, 'context', 'commands', path)
+  const fullPath = join(baseDir, 'content', 'commands', path)
   await mkdir(dirname(fullPath), { recursive: true })
   await writeFile(fullPath, content)
 }
@@ -207,7 +207,7 @@ describe('LocalCommandProvider info', () => {
     expect(result.value.name).toBe('skill:create')
     expect(result.value.description).toBe('Create a new skill')
     expect(result.value.tags).toEqual(['Read', 'Write'])
-    expect(result.value.localPath).toBe(join(tmp, 'context', 'commands', 'skill', 'create.md'))
+    expect(result.value.localPath).toBe(join(tmp, 'content', 'commands', 'skill', 'create.md'))
   })
 
   test('returns error for missing command', async () => {

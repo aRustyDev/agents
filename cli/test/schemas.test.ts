@@ -104,8 +104,8 @@ describe('LockfileV1', () => {
     }
   })
 
-  test('parses real skills-lock.json from context/skills/', async () => {
-    const data = await readJson(`${REPO_ROOT}/context/skills/skills-lock.json`)
+  test('parses real skills-lock.json from content/skills/', async () => {
+    const data = await readJson(`${REPO_ROOT}/content/skills/skills-lock.json`)
     const result = v.safeParse(LockfileV1, data)
     expect(result.success).toBe(true)
     if (result.success) {
@@ -139,7 +139,7 @@ describe('LockfileV1', () => {
 
 describe('PluginSourceLegacy', () => {
   test('accepts a string path', () => {
-    const result = v.safeParse(PluginSourceLegacy, 'context/commands/foo.md')
+    const result = v.safeParse(PluginSourceLegacy, 'content/commands/foo.md')
     expect(result.success).toBe(true)
   })
 
@@ -152,7 +152,7 @@ describe('PluginSourceLegacy', () => {
 describe('PluginSourceExtended', () => {
   test('accepts full extended entry', () => {
     const entry = {
-      source: 'context/skills/lang-swift-dev/SKILL.md',
+      source: 'content/skills/lang-swift-dev/SKILL.md',
       hash: 'sha256:964e09bc408c52c70ffbc99884131a0c6065a2455aefef0294a30b74bc104d1b',
       forked: false,
     }
@@ -161,14 +161,14 @@ describe('PluginSourceExtended', () => {
   })
 
   test('accepts entry with only source', () => {
-    const entry = { source: 'context/skills/foo/SKILL.md' }
+    const entry = { source: 'content/skills/foo/SKILL.md' }
     const result = v.safeParse(PluginSourceExtended, entry)
     expect(result.success).toBe(true)
   })
 
   test('accepts forked entry with forked_at', () => {
     const entry = {
-      source: 'context/skills/foo/SKILL.md',
+      source: 'content/skills/foo/SKILL.md',
       hash: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
       forked: true,
       forked_at: '2025-01-15T12:00:00Z',
@@ -179,7 +179,7 @@ describe('PluginSourceExtended', () => {
 
   test('rejects invalid hash format', () => {
     const entry = {
-      source: 'context/skills/foo/SKILL.md',
+      source: 'content/skills/foo/SKILL.md',
       hash: 'md5:abc123',
     }
     const result = v.safeParse(PluginSourceExtended, entry)
@@ -207,13 +207,13 @@ describe('PluginSourcePlanning', () => {
 
 describe('PluginSource (union)', () => {
   test('accepts legacy string', () => {
-    const result = v.safeParse(PluginSource, 'context/foo.md')
+    const result = v.safeParse(PluginSource, 'content/foo.md')
     expect(result.success).toBe(true)
   })
 
   test('accepts extended object', () => {
     const result = v.safeParse(PluginSource, {
-      source: 'context/foo.md',
+      source: 'content/foo.md',
       hash: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
     })
     expect(result.success).toBe(true)
@@ -232,7 +232,7 @@ describe('PluginSource (union)', () => {
 describe('PluginSourcesManifest', () => {
   test('parses real blog-workflow plugin.sources.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
+      `${WORKTREE}/content/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -243,7 +243,7 @@ describe('PluginSourcesManifest', () => {
 
   test('parses real swiftui-dev plugin.sources.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.sources.json`
+      `${WORKTREE}/content/plugins/frontend/swiftui-dev/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -255,7 +255,7 @@ describe('PluginSourcesManifest', () => {
 
   test('parses empty sources manifest', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/.template/.claude-plugin/plugin.sources.json`
+      `${WORKTREE}/content/plugins/.template/.claude-plugin/plugin.sources.json`
     )
     const result = v.safeParse(PluginSourcesManifest, data)
     expect(result.success).toBe(true)
@@ -272,7 +272,7 @@ describe('PluginSourcesManifest', () => {
 describe('PluginManifest', () => {
   test('parses real blog-workflow plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.json`
+      `${WORKTREE}/content/plugins/blog-workflow/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -286,7 +286,7 @@ describe('PluginManifest', () => {
 
   test('parses real swiftui-dev plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/frontend/swiftui-dev/.claude-plugin/plugin.json`
+      `${WORKTREE}/content/plugins/frontend/swiftui-dev/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -299,7 +299,7 @@ describe('PluginManifest', () => {
 
   test('parses real job-hunting plugin.json', async () => {
     const data = await readJson(
-      `${WORKTREE}/context/plugins/job-hunting/.claude-plugin/plugin.json`
+      `${WORKTREE}/content/plugins/job-hunting/.claude-plugin/plugin.json`
     )
     const result = v.safeParse(PluginManifest, data)
     expect(result.success).toBe(true)
@@ -760,7 +760,7 @@ describe('MarketplaceEntry', () => {
   test('accepts valid entry', () => {
     const entry = {
       name: 'test-plugin',
-      source: './context/plugins/test-plugin',
+      source: './content/plugins/test-plugin',
       description: 'A test plugin',
       version: '1.0.0',
       author: { name: 'Test Author', email: 'test@example.com' },
@@ -776,7 +776,7 @@ describe('MarketplaceEntry', () => {
   test('accepts entry with prerelease semver', () => {
     const entry = {
       name: 'beta-plugin',
-      source: './context/plugins/beta',
+      source: './content/plugins/beta',
       description: 'Beta',
       version: '1.0.0-beta.1',
       author: { name: 'Author' },
@@ -792,7 +792,7 @@ describe('MarketplaceEntry', () => {
   test('rejects invalid semver version', () => {
     const entry = {
       name: 'bad-version',
-      source: './context/plugins/bad',
+      source: './content/plugins/bad',
       description: 'Bad',
       version: 'not-semver',
       author: { name: 'Author' },

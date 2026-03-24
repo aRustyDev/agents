@@ -49,13 +49,13 @@ DUMP_PATH = Path('.data/mcp/knowledge-graph.sql')
 
 # Entity type to file pattern mapping
 ENTITY_PATTERNS = {
-    'agent': ['context/agents/*.md'],
-    'skill': ['context/skills/*/SKILL.md'],
-    'command': ['context/commands/*.md', '.claude/commands/**/*.md'],
-    'rule': ['context/rules/*.md', '.claude/rules/*.md'],
+    'agent': ['content/agents/*.md'],
+    'skill': ['content/skills/*/SKILL.md'],
+    'command': ['content/commands/*.md', '.claude/commands/**/*.md'],
+    'rule': ['content/rules/*.md', '.claude/rules/*.md'],
     'claude_md': ['**/CLAUDE.md'],
-    'plugin': ['context/plugins/*/.claude-plugin/plugin.json'],
-    'output_style': ['context/output-styles/*.md'],
+    'plugin': ['content/plugins/*/.claude-plugin/plugin.json'],
+    'output_style': ['content/output-styles/*.md'],
     'mcp_server': [],  # Loaded from registry, not files
 }
 
@@ -372,7 +372,7 @@ if __name__ == '__main__':
 uv run python scripts/init-db.py
 
 # Ingest a single file
-uv run python scripts/embed.py ingest --file context/agents/mcp-server-profiler.md
+uv run python scripts/embed.py ingest --file content/agents/mcp-server-profiler.md
 
 # Check what was created
 uv run python -c "

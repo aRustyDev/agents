@@ -9,9 +9,9 @@
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| `/report` command system | `context/.context/legacy/prompts/commands/report*` | Legacy, not migrated |
-| Bug memory filesystem | `context/.context/legacy/memory/bugs/` | Legacy pattern |
-| Bug report template | `context/.context/legacy/prompts/templates/issues/bug-report.md` | Legacy |
+| `/report` command system | `content/.content/legacy/prompts/commands/report*` | Legacy, not migrated |
+| Bug memory filesystem | `content/.content/legacy/memory/bugs/` | Legacy pattern |
+| Bug report template | `content/.content/legacy/prompts/templates/issues/bug-report.md` | Legacy |
 | GitHub issue templates | `.github/ISSUE_TEMPLATE/*.yml` | Active, component-focused |
 
 ### What's Missing
@@ -124,7 +124,7 @@ Categories to create:
 
 #### 1.5 Create feedback-submission output style
 
-Location: `context/output-styles/feedback-submission.md`
+Location: `content/output-styles/feedback-submission.md`
 
 Output style for formatting feedback submissions with templates for:
 
@@ -144,7 +144,7 @@ Output style for formatting feedback submissions with templates for:
 
 #### 2.1 Create USAGE.md template
 
-Location: `context/plugins/.template/docs/USAGE.md`
+Location: `content/plugins/.template/docs/USAGE.md`
 
 Sections:
 
@@ -162,7 +162,7 @@ Sections:
 
 #### 2.2 Create TROUBLESHOOTING.md template
 
-Location: `context/plugins/.template/docs/TROUBLESHOOTING.md`
+Location: `content/plugins/.template/docs/TROUBLESHOOTING.md`
 
 Sections:
 
@@ -178,7 +178,7 @@ Sections:
 
 #### 2.3 Create CHANGELOG.md template
 
-Location: `context/plugins/.template/CHANGELOG.md`
+Location: `content/plugins/.template/CHANGELOG.md`
 
 Format: [Keep a Changelog](https://keepachangelog.com/)
 
@@ -204,7 +204,7 @@ All notable changes to this plugin will be documented in this file.
 
 #### 2.4 Create CONTRIBUTING.md template
 
-Location: `context/plugins/.template/CONTRIBUTING.md`
+Location: `content/plugins/.template/CONTRIBUTING.md`
 
 Sections:
 
@@ -251,7 +251,7 @@ Replace stub with:
 
 #### 3.1 Create /feedback command
 
-Location: `context/commands/feedback.md`
+Location: `content/commands/feedback.md`
 
 Subcommands:
 

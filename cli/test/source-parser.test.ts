@@ -508,12 +508,12 @@ describe('parseSource + getOwnerRepo roundtrip', () => {
   })
 
   test('GitHub tree URL round-trips owner/repo', () => {
-    const r = parseSource('https://github.com/aRustyDev/agents/tree/main/context/skills')
+    const r = parseSource('https://github.com/aRustyDev/agents/tree/main/content/skills')
     expect(r.ok).toBe(true)
     if (!r.ok) return
     expect(getOwnerRepo(r.value)).toBe('aRustyDev/agents')
     expect(r.value.ref).toBe('main')
-    expect(r.value.subpath).toBe('context/skills')
+    expect(r.value.subpath).toBe('content/skills')
   })
 
   test('local path has no owner/repo', () => {

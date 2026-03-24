@@ -89,7 +89,7 @@ describe('readLockfile', () => {
   test('reads and validates real plugin.sources.json', async () => {
     const result = await readLockfile<PluginSourcesManifest>(
       'plugins',
-      `${WORKTREE}/context/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
+      `${WORKTREE}/content/plugins/blog-workflow/.claude-plugin/plugin.sources.json`
     )
     expect(result.ok).toBe(true)
     if (result.ok) {
@@ -216,7 +216,7 @@ describe('writeLockfile', () => {
 describe('checkStaleness (skills)', () => {
   test('reports fresh when hash matches', async () => {
     // Create a skill directory structure
-    const skillDir = join(tmp, 'context', 'skills', 'test-skill')
+    const skillDir = join(tmp, 'content', 'skills', 'test-skill')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: test\n---\n# Test')
 
@@ -249,7 +249,7 @@ describe('checkStaleness (skills)', () => {
   })
 
   test('reports stale when hash does not match', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'stale-skill')
+    const skillDir = join(tmp, 'content', 'skills', 'stale-skill')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: stale\n---\n# Stale')
 
@@ -308,8 +308,8 @@ describe('checkStaleness (skills)', () => {
 describe('checkStaleness (plugins)', () => {
   test('reports fresh for matching extended source', async () => {
     // Create a source file
-    const sourceFile = join(tmp, 'context', 'output-styles', 'feedback.md')
-    await mkdir(join(tmp, 'context', 'output-styles'), { recursive: true })
+    const sourceFile = join(tmp, 'content', 'output-styles', 'feedback.md')
+    await mkdir(join(tmp, 'content', 'output-styles'), { recursive: true })
     await writeFile(sourceFile, '# Feedback\nSubmit your feedback here.')
 
     const hash = await computeHash(sourceFile)
@@ -320,7 +320,7 @@ describe('checkStaleness (plugins)', () => {
       JSON.stringify({
         sources: {
           'styles/feedback.md': {
-            source: 'context/output-styles/feedback.md',
+            source: 'content/output-styles/feedback.md',
             hash: formatHash(hash),
           },
         },
@@ -336,8 +336,8 @@ describe('checkStaleness (plugins)', () => {
   })
 
   test('reports stale for mismatched hash', async () => {
-    const sourceFile = join(tmp, 'context', 'file.md')
-    await mkdir(join(tmp, 'context'), { recursive: true })
+    const sourceFile = join(tmp, 'content', 'file.md')
+    await mkdir(join(tmp, 'content'), { recursive: true })
     await writeFile(sourceFile, 'content')
 
     const lockPath = join(tmp, 'plugin.sources.json')
@@ -346,7 +346,7 @@ describe('checkStaleness (plugins)', () => {
       JSON.stringify({
         sources: {
           'file.md': {
-            source: 'context/file.md',
+            source: 'content/file.md',
             hash: 'sha256:' + '0'.repeat(64),
           },
         },
@@ -368,7 +368,7 @@ describe('checkStaleness (plugins)', () => {
       JSON.stringify({
         sources: {
           'missing.md': {
-            source: 'context/missing.md',
+            source: 'content/missing.md',
             hash: 'sha256:' + 'a'.repeat(64),
           },
         },
@@ -383,8 +383,8 @@ describe('checkStaleness (plugins)', () => {
   })
 
   test('reports no-hash for entry without hash', async () => {
-    const sourceFile = join(tmp, 'context', 'nohash.md')
-    await mkdir(join(tmp, 'context'), { recursive: true })
+    const sourceFile = join(tmp, 'content', 'nohash.md')
+    await mkdir(join(tmp, 'content'), { recursive: true })
     await writeFile(sourceFile, 'content')
 
     const lockPath = join(tmp, 'plugin.sources.json')
@@ -393,7 +393,7 @@ describe('checkStaleness (plugins)', () => {
       JSON.stringify({
         sources: {
           'nohash.md': {
-            source: 'context/nohash.md',
+            source: 'content/nohash.md',
           },
         },
       })
@@ -407,8 +407,8 @@ describe('checkStaleness (plugins)', () => {
   })
 
   test('reports no-hash for legacy string source', async () => {
-    const sourceFile = join(tmp, 'context', 'legacy.md')
-    await mkdir(join(tmp, 'context'), { recursive: true })
+    const sourceFile = join(tmp, 'content', 'legacy.md')
+    await mkdir(join(tmp, 'content'), { recursive: true })
     await writeFile(sourceFile, 'content')
 
     const lockPath = join(tmp, 'plugin.sources.json')
@@ -416,7 +416,7 @@ describe('checkStaleness (plugins)', () => {
       lockPath,
       JSON.stringify({
         sources: {
-          'legacy.md': 'context/legacy.md',
+          'legacy.md': 'content/legacy.md',
         },
       })
     )

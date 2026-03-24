@@ -27,7 +27,7 @@ import { CliError, err, ok, type Result, type SourceFormat } from './types'
 /**
  * Read and validate a plugin's `plugin.json` manifest.
  *
- * @param dir - Path to the plugin directory (e.g. `context/plugins/blog-workflow`).
+ * @param dir - Path to the plugin directory (e.g. `content/plugins/blog-workflow`).
  *              The function looks for `.claude-plugin/plugin.json` inside this dir.
  * @returns Validated PluginManifest or a descriptive error.
  */
@@ -223,7 +223,7 @@ export async function readSkillFrontmatter(skillPath: string): Promise<Result<Sk
 /**
  * Classify a plugin source entry as one of the three known formats.
  *
- * - `'legacy'`: bare string path (e.g. `"context/commands/foo.md"`)
+ * - `'legacy'`: bare string path (e.g. `"content/commands/foo.md"`)
  * - `'extended'`: object with `source` field (and optional `hash`, `forked`)
  * - `'planning'`: object with `type` field (and optional `base`, `notes`)
  *

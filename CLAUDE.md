@@ -94,7 +94,7 @@ See `docs/src/adr/` for architecture decisions.
 │   └── mcp/
 │       ├── knowledge-graph.db      # SQLite database (gitignored)
 │       └── knowledge-graph.sql     # SQL dump (version controlled)
-├── context/
+├── content/
 │   ├── agents/                 # Agent definitions
 │   ├── commands/               # Slash commands
 │   ├── skills/                 # SKILL.md files

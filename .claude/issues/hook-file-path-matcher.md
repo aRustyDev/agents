@@ -41,7 +41,7 @@ Add a `files` field (glob or regex pattern) to hook configuration:
 ```json
 {
   "matcher": "Write|Edit|MultiEdit",
-  "files": "context/plugins/**/*.json",
+  "files": "content/plugins/**/*.json",
   "hooks": [{
     "type": "command",
     "command": "cd cli && bun run bin/agents.ts plugin validate-all --quiet"
@@ -114,7 +114,7 @@ No one has filed a feature request specifically proposing a `files` glob field i
 ```json
 {
   "matcher": "Write|Edit|MultiEdit",
-  "files": "context/plugins/**/*.json",
+  "files": "content/plugins/**/*.json",
   "hooks": [{ "type": "command", "command": "validate-plugins.sh" }]
 }
 ```
@@ -135,7 +135,7 @@ No one has filed a feature request specifically proposing a `files` glob field i
 ```json
 {
   "matcher": "Write|Edit|MultiEdit",
-  "files": "context/plugins/.*\\.json$",
+  "files": "content/plugins/.*\\.json$",
   "hooks": [{ "type": "command", "command": "validate-plugins.sh" }]
 }
 ```
@@ -153,7 +153,7 @@ No one has filed a feature request specifically proposing a `files` glob field i
 
 ```json
 {
-  "matcher": "Edit:context/plugins/.*\\.json$"
+  "matcher": "Edit:content/plugins/.*\\.json$"
 }
 ```
 
@@ -173,7 +173,7 @@ No one has filed a feature request specifically proposing a `files` glob field i
 ```json
 {
   "matcher": "Write|Edit|MultiEdit",
-  "include": ["context/plugins/**/*.json", ".claude-plugin/**"],
+  "include": ["content/plugins/**/*.json", ".claude-plugin/**"],
   "exclude": ["**/node_modules/**"],
   "hooks": [{ "type": "command", "command": "validate-plugins.sh" }]
 }
@@ -254,7 +254,7 @@ With Option A, each concern gets its own scoped hook:
 },
 {
   "matcher": "Write|Edit|MultiEdit",
-  "files": "context/plugins/**/*.json",
+  "files": "content/plugins/**/*.json",
   "hooks": [{ "command": "cli/bin/validate-plugin.sh" }]
 }
 ```

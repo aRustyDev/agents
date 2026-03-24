@@ -12,7 +12,7 @@ just agents --help # CLI tool for component management
 ## Architecture
 
 ```
-context/               Component source of truth
+content/               Component source of truth
 ├── skills/            SKILL.md files (130+)
 ├── agents/            Agent definitions (markdown + frontmatter)
 ├── commands/          Slash commands (markdown + frontmatter)
@@ -85,11 +85,11 @@ All entity types flow through a universal `ComponentProvider` interface:
 | Provider | ID | Entity Types | Backend |
 |----------|----|-------------|---------|
 | LocalProvider | `local` | skill | Filesystem (wraps skill-* modules) |
-| LocalAgentProvider | `local-agent` | agent | `context/agents/**/*.md` |
-| LocalPluginProvider | `local-plugin` | plugin | `context/plugins/**/.claude-plugin/` |
-| LocalRuleProvider | `local-rule` | rule | `context/rules/**/*.md` |
-| LocalCommandProvider | `local-command` | command | `context/commands/**/*.md` |
-| LocalOutputStyleProvider | `local-output-style` | output_style | `context/output-styles/**/*.md` |
+| LocalAgentProvider | `local-agent` | agent | `content/agents/**/*.md` |
+| LocalPluginProvider | `local-plugin` | plugin | `content/plugins/**/.claude-plugin/` |
+| LocalRuleProvider | `local-rule` | rule | `content/rules/**/*.md` |
+| LocalCommandProvider | `local-command` | command | `content/commands/**/*.md` |
+| LocalOutputStyleProvider | `local-output-style` | output_style | `content/output-styles/**/*.md` |
 | SmitheryProvider | `smithery` | mcp_server | registry.smithery.ai API |
 
 The `ComponentManager` aggregates search across all providers, deduplicates results, and handles pagination.

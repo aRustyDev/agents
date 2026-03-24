@@ -70,7 +70,7 @@ Chose **Option 2: Two-file manifest + lock system** with:
 - `.external/sources.yaml` — hand-edited manifest declaring each skill's source, mode, and dependencies
 - `.external/sources.lock.json` — machine-managed lock with content-hash keys
 - `.external/<owner>/<repo>/<skill>/` — committed snapshots
-- Passthrough skills get symlinks in `context/skills/<name>`
+- Passthrough skills get symlinks in `content/skills/<name>`
 - Derived skills get GitHub issues on drift
 
 ## Diagram
@@ -94,7 +94,7 @@ graph TD
         EXT[.external/]
         EXT --> S1[steveyegge/beads/beads/]
         EXT --> S2[some-org/repo/their-skill/]
-        SK[context/skills/beads] -->|symlink| S1
+        SK[content/skills/beads] -->|symlink| S1
     end
 
     subgraph "Commands"

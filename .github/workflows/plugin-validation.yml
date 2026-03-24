@@ -5,19 +5,19 @@ on:
   push:
     branches: [main]
     paths:
-      - 'context/plugins/**'
-      - 'context/skills/**'
-      - 'context/commands/**'
-      - 'context/agents/**'
+      - 'content/plugins/**'
+      - 'content/skills/**'
+      - 'content/commands/**'
+      - 'content/agents/**'
       - 'cli/build-plugin.py'
       - 'cli/plugin-hash.py'
   pull_request:
     branches: [main]
     paths:
-      - 'context/plugins/**'
-      - 'context/skills/**'
-      - 'context/commands/**'
-      - 'context/agents/**'
+      - 'content/plugins/**'
+      - 'content/skills/**'
+      - 'content/commands/**'
+      - 'content/agents/**'
       - 'cli/build-plugin.py'
       - 'cli/plugin-hash.py'
   workflow_dispatch:

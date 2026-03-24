@@ -123,14 +123,14 @@ describe('initSkill -- built-in template', () => {
     expect(content).toContain('description: A new skill called auto-desc')
   })
 
-  test('uses default baseDir (context/skills) when not specified', async () => {
+  test('uses default baseDir (content/skills) when not specified', async () => {
     const result = await initSkill('default-dir', {
       cwd: tmp,
       description: 'Test default dir',
     })
 
     expect(result.ok).toBe(true)
-    expect(result.skillDir).toBe(join(tmp, 'context', 'skills', 'default-dir'))
+    expect(result.skillDir).toBe(join(tmp, 'content', 'skills', 'default-dir'))
   })
 })
 

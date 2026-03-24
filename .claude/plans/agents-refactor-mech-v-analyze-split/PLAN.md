@@ -157,7 +157,7 @@ Phase 3: analyzed skills → Sonnet agent (quality scoring, non-trivial only)
 {
   "source": "owner/repo",
   "skill": "skill-name",
-  "discoveredPath": "context/skills/skill-name",
+  "discoveredPath": "content/skills/skill-name",
   "lastSeenAt": "2026-03-23T...",
   "lastSeenHeadSha": "abc123",
   "movedFrom": "skills/old-name",

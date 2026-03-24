@@ -455,7 +455,7 @@ ${body}`
 
 describe('chunkFile', () => {
   test('reads and chunks a real SKILL.md file', async () => {
-    const skillPath = '/private/etc/infra/pub/ai/context/skills/beads/SKILL.md'
+    const skillPath = '/private/etc/infra/pub/ai/content/skills/beads/SKILL.md'
 
     const result = await chunkFile(skillPath)
 

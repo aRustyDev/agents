@@ -6,8 +6,8 @@
  * Classifies skill names into 19 categories using regex rules.
  * Usage: bun run cli/lib/taxonomy.ts
  *
- * Reads:  context/skills/.TODO.yaml   (key: skills, entries: org/repo@skill-name)
- * Writes: context/skills/.taxonomy.yaml
+ * Reads:  content/skills/.TODO.yaml   (key: skills, entries: org/repo@skill-name)
+ * Writes: content/skills/.taxonomy.yaml
  */
 
 import * as fs from 'node:fs'
@@ -242,7 +242,7 @@ export const RULES: [RegExp, Category, string][] = [
   [
     /^context[-_ ]fundamentals|^context[-_ ]optimization|^context[-_ ]compress|^context[-_ ]degradation/,
     'ai-ml',
-    'context',
+    'content',
   ],
   [/^memory[-_ ]systems/, 'ai-ml', 'memory'],
   [/^perplexity/, 'ai-ml', 'search'],
@@ -393,7 +393,7 @@ export const RULES: [RegExp, Category, string][] = [
   [
     /^context[-_ ]engineering|^context[-_ ]evaluation|^context[-_ ]optimization|^meta[-_ ]context/,
     'methodology',
-    'context',
+    'content',
   ],
   [
     /^skill[-_ ]|^meta[-_ ]skill|^writing[-_ ]skills|^using[-_ ]superpowers|^superpowers/,
@@ -507,7 +507,7 @@ export const RULES: [RegExp, Category, string][] = [
 
   // tooling — specific tools
   [/^beads$/, 'tooling', 'issue-tracking'],
-  [/^context7/, 'tooling', 'context'],
+  [/^context7/, 'tooling', 'content'],
   [/^notebooklm|^notebook[-_ ]lm/, 'tooling', 'productivity'],
   [/^writing[-_ ]hookify|^hookify/, 'tooling', 'claude'],
   [
@@ -709,8 +709,8 @@ function printReport(
 // ---------------------------------------------------------------------------
 
 const REPO_ROOT = path.resolve(currentDir(import.meta), '../..')
-const TODO_PATH = path.join(REPO_ROOT, 'context/skills/.TODO.yaml')
-const TAXONOMY_PATH = path.join(REPO_ROOT, 'context/skills/.taxonomy.yaml')
+const TODO_PATH = path.join(REPO_ROOT, 'content/skills/.TODO.yaml')
+const TAXONOMY_PATH = path.join(REPO_ROOT, 'content/skills/.taxonomy.yaml')
 
 const args = process.argv.slice(2)
 const force = args.includes('--force')

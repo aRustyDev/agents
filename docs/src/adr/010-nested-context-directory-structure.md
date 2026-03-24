@@ -6,10 +6,10 @@ Accepted
 
 ## Context
 
-The `context/` directory contains reusable AI context components organized by type: `rules/`, `plugins/`, `agents/`, `skills/`, `commands/`. As the library grew, flat directories became difficult to navigate:
+The `content/` directory contains reusable AI context components organized by type: `rules/`, `plugins/`, `agents/`, `skills/`, `commands/`. As the library grew, flat directories became difficult to navigate:
 
-- `context/rules/` had 33 markdown files with naming-convention prefixes (`pre-commit-bash.md`, `pre-commit-python.md`, `cicd-github-actions.md`) to group related rules
-- `context/plugins/` had 20 plugin directories (6 published, 14 scaffolded stubs) at a single level
+- `content/rules/` had 33 markdown files with naming-convention prefixes (`pre-commit-bash.md`, `pre-commit-python.md`, `cicd-github-actions.md`) to group related rules
+- `content/plugins/` had 20 plugin directories (6 published, 14 scaffolded stubs) at a single level
 
 The prefix-based grouping created long file names, made browsing tedious, and provided no structural indication of which rules/plugins relate to each other.
 
@@ -20,7 +20,7 @@ The prefix-based grouping created long file names, made browsing tedious, and pr
 ### Rules Structure
 
 ```
-context/rules/
+content/rules/
   agent/              # Claude Code configuration
     plugin/           # Plugin-specific rules
     skills/           # Skill-specific rules
@@ -37,7 +37,7 @@ context/rules/
 ### Plugins Structure
 
 ```
-context/plugins/
+content/plugins/
   .template/          # Plugin scaffold template
   blog-workflow/      # (top-level, published)
   job-hunting/        # (top-level, published)
@@ -53,7 +53,7 @@ context/plugins/
 ### Pattern
 
 ```
-context/<component-type>/
+content/<component-type>/
   <category>/                    # Optional grouping directory
     <component-name>/            # The actual component
       .claude-plugin/plugin.json # (plugins only)
@@ -69,8 +69,8 @@ All glob patterns that reference context components must use recursive globs (`*
 
 | Before | After |
 |--------|-------|
-| `context/rules/*.md` | `context/rules/**/*.md` |
-| `context/plugins/*/.claude-plugin/plugin.json` | `context/plugins/**/.claude-plugin/plugin.json` |
+| `content/rules/*.md` | `content/rules/**/*.md` |
+| `content/plugins/*/.claude-plugin/plugin.json` | `content/plugins/**/.claude-plugin/plugin.json` |
 
 Files updated:
 - `.claude/devrag.json` — document patterns
@@ -78,9 +78,9 @@ Files updated:
 - `cli/watch-embed.py` — uses recursive watchdog (no change needed)
 - `.pre-commit-config.yaml` — exclusion patterns
 - `.claude/settings.json` — cclint hook patterns (expanded for absolute paths)
-- `context/commands/context/rule/create.md` — target path documentation
-- `context/commands/context/rule/promote.md` — listing commands
-- `context/rules/justfile` — list/validate recipes use `find` instead of `ls`
+- `content/commands/content/rule/create.md` — target path documentation
+- `content/commands/content/rule/promote.md` — listing commands
+- `content/rules/justfile` — list/validate recipes use `find` instead of `ls`
 
 ### Relative Path Impact
 
@@ -88,20 +88,20 @@ Plugins that use `../../output-styles/` relative paths must add an extra `../` w
 
 | Location | Path to shared output-styles |
 |----------|------------------------------|
-| `context/plugins/<name>/` (top-level) | `../../output-styles/` |
-| `context/plugins/<category>/<name>/` (nested) | `../../../output-styles/` |
+| `content/plugins/<name>/` (top-level) | `../../output-styles/` |
+| `content/plugins/<category>/<name>/` (nested) | `../../../output-styles/` |
 
 Plugins that bundle their own styles locally (`./styles/`) are unaffected.
 
 ### Stubbed Components
 
-Template-only scaffolds (directories containing only `.gitkeep` files) should not be committed. Record planned components in a `TODO.md` at the component-type root (e.g., `context/plugins/TODO.md`) and create them with the appropriate `/context:<type>:create` command when ready to implement.
+Template-only scaffolds (directories containing only `.gitkeep` files) should not be committed. Record planned components in a `TODO.md` at the component-type root (e.g., `content/plugins/TODO.md`) and create them with the appropriate `/context:<type>:create` command when ready to implement.
 
 ## Consequences
 
 ### Positive
 
-- Browsing `context/rules/` shows 8 category directories instead of 33 files
+- Browsing `content/rules/` shows 8 category directories instead of 33 files
 - Related rules are co-located (all 9 pre-commit rules in one directory)
 - Plugin categories make the ecosystem structure visible at a glance
 - Naming prefixes eliminated — `pre-commit/python.md` instead of `pre-commit-python.md`

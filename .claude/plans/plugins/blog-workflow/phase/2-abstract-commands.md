@@ -55,8 +55,8 @@ Make publish commands platform-agnostic by replacing hardcoded Astro values with
 
 **Modify:**
 
-- `context/plugins/blog-workflow/commands/publish/promote.md`
-- `context/plugins/blog-workflow/commands/publish/validate.md`
-- `context/plugins/blog-workflow/commands/publish/pre-check.md`
-- `context/plugins/blog-workflow/commands/post/draft.md`
-- `context/plugins/blog-workflow/commands/init.md`
+- `content/plugins/blog-workflow/commands/publish/promote.md`
+- `content/plugins/blog-workflow/commands/publish/validate.md`
+- `content/plugins/blog-workflow/commands/publish/pre-check.md`
+- `content/plugins/blog-workflow/commands/post/draft.md`
+- `content/plugins/blog-workflow/commands/init.md`

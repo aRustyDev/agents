@@ -1,7 +1,7 @@
 /**
  * Local agent provider for the Component system.
  *
- * Discovers agent definition `.md` files from `context/agents/` nested
+ * Discovers agent definition `.md` files from `content/agents/` nested
  * category directories. Excludes application agents (directories containing
  * `pyproject.toml`), underscore-prefixed directories, and non-agent files
  * like `README.md` and `prompt.md`.
@@ -50,7 +50,7 @@ export class LocalAgentProvider implements ComponentProvider {
 
   constructor(cwd?: string) {
     this.cwd = cwd ?? process.cwd()
-    this.agentsDir = join(this.cwd, 'context', 'agents')
+    this.agentsDir = join(this.cwd, 'content', 'agents')
   }
 
   // -------------------------------------------------------------------------
@@ -205,7 +205,7 @@ export class LocalAgentProvider implements ComponentProvider {
         new CliError(
           `Agent "${name}" not found`,
           'E_AGENT_NOT_FOUND',
-          'Check the agent name and ensure it exists under context/agents/'
+          'Check the agent name and ensure it exists under content/agents/'
         )
       )
     }
@@ -218,7 +218,7 @@ export class LocalAgentProvider implements ComponentProvider {
       new CliError(
         'Local agent provider does not support adding agents',
         'E_UNSUPPORTED_OP',
-        'Agents are discovered from context/agents/ — add .md files directly.'
+        'Agents are discovered from content/agents/ — add .md files directly.'
       )
     )
   }
@@ -232,7 +232,7 @@ export class LocalAgentProvider implements ComponentProvider {
       new CliError(
         'Local agent provider does not support removing agents',
         'E_UNSUPPORTED_OP',
-        'Agents are discovered from context/agents/ — remove .md files directly.'
+        'Agents are discovered from content/agents/ — remove .md files directly.'
       )
     )
   }

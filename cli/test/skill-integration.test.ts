@@ -18,7 +18,7 @@ import { join } from 'node:path'
 
 /** Create a minimal project layout with a skills-lock.json. */
 async function setupProject(dir: string): Promise<void> {
-  await mkdir(join(dir, 'context', 'skills'), { recursive: true })
+  await mkdir(join(dir, 'content', 'skills'), { recursive: true })
   await writeFile(
     join(dir, 'skills-lock.json'),
     `${JSON.stringify({ version: 1, skills: {} }, null, 2)}\n`
@@ -114,7 +114,7 @@ describe('skill lifecycle integration', () => {
     const removeResult = await removeSkills(['my-test-skill'], { cwd: tmp, yes: true })
     expect(removeResult).toHaveLength(1)
     expect(removeResult[0]?.canonicalRemoved).toBe(true)
-    expect(existsSync(join(tmp, 'context', 'skills', 'my-test-skill'))).toBe(false)
+    expect(existsSync(join(tmp, 'content', 'skills', 'my-test-skill'))).toBe(false)
 
     // 5. List again -- should be gone
     const listAfter = await listSkills({ cwd: tmp })
@@ -215,7 +215,7 @@ describe('skill lifecycle integration', () => {
     expect(result.error).toBeDefined()
     expect(result.error?.code).toBe('E_INVALID_NAME')
     // The invalid skill directory should not have been created
-    expect(existsSync(join(tmp, 'context', 'skills', 'INVALID-NAME'))).toBe(false)
+    expect(existsSync(join(tmp, 'content', 'skills', 'INVALID-NAME'))).toBe(false)
   })
 
   // -------------------------------------------------------------------------

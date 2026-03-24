@@ -35,7 +35,7 @@ import { globalArgs } from './shared-args'
 const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
 
 /** Directory containing all plugins. */
-const PLUGINS_DIR = join(PROJECT_ROOT, 'context/plugins')
+const PLUGINS_DIR = join(PROJECT_ROOT, 'content/plugins')
 
 // ---------------------------------------------------------------------------
 // SourceStatus

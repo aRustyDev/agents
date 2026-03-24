@@ -61,8 +61,8 @@ describe('LocalAgentProvider capabilities', () => {
 
 describe('LocalAgentProvider search', () => {
   test('discovers agents in nested category dirs', async () => {
-    const coreDir = join(tmp, 'context', 'agents', 'development', 'core')
-    const infraDir = join(tmp, 'context', 'agents', 'infrastructure')
+    const coreDir = join(tmp, 'content', 'agents', 'development', 'core')
+    const infraDir = join(tmp, 'content', 'agents', 'infrastructure')
 
     await createAgent(coreDir, 'frontend-developer', 'Frontend expert')
     await createAgent(coreDir, 'backend-developer', 'Backend expert')
@@ -80,8 +80,8 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('excludes dirs with pyproject.toml', async () => {
-    const coreDir = join(tmp, 'context', 'agents', 'development', 'core')
-    const appDir = join(tmp, 'context', 'agents', 'skill-reviewer')
+    const coreDir = join(tmp, 'content', 'agents', 'development', 'core')
+    const appDir = join(tmp, 'content', 'agents', 'skill-reviewer')
 
     await createAgent(coreDir, 'frontend-developer')
     await createAppAgent(appDir)
@@ -102,7 +102,7 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('excludes README.md and prompt.md', async () => {
-    const dir = join(tmp, 'context', 'agents', 'meta')
+    const dir = join(tmp, 'content', 'agents', 'meta')
     await mkdir(dir, { recursive: true })
     await writeFile(
       join(dir, 'README.md'),
@@ -125,8 +125,8 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('excludes underscore-prefixed dirs', async () => {
-    const hiddenDir = join(tmp, 'context', 'agents', '_context-agents')
-    const visibleDir = join(tmp, 'context', 'agents', 'meta')
+    const hiddenDir = join(tmp, 'content', 'agents', '_context-agents')
+    const visibleDir = join(tmp, 'content', 'agents', 'meta')
 
     await createAgent(hiddenDir, 'hidden-agent', 'Should not appear')
     await createAgent(visibleDir, 'visible-agent', 'Should appear')
@@ -142,7 +142,7 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('filters by query on name and description', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await createAgent(dir, 'frontend-developer', 'Expert UI engineer')
     await createAgent(dir, 'backend-developer', 'Server-side specialist')
     await createAgent(dir, 'devops-engineer', 'Infrastructure automation')
@@ -165,7 +165,7 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('returns empty for non-agent type', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await createAgent(dir, 'frontend-developer')
 
     const provider = new LocalAgentProvider(tmp)
@@ -180,7 +180,7 @@ describe('LocalAgentProvider search', () => {
   })
 
   test('paginates results', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await createAgent(dir, 'alpha', 'Agent alpha')
     await createAgent(dir, 'beta', 'Agent beta')
     await createAgent(dir, 'gamma', 'Agent gamma')
@@ -205,8 +205,8 @@ describe('LocalAgentProvider search', () => {
 
 describe('LocalAgentProvider list', () => {
   test('returns all agents', async () => {
-    const dir1 = join(tmp, 'context', 'agents', 'dev', 'core')
-    const dir2 = join(tmp, 'context', 'agents', 'infra')
+    const dir1 = join(tmp, 'content', 'agents', 'dev', 'core')
+    const dir2 = join(tmp, 'content', 'agents', 'infra')
 
     await createAgent(dir1, 'frontend-developer', 'UI expert')
     await createAgent(dir2, 'devops-engineer', 'DevOps expert')
@@ -223,7 +223,7 @@ describe('LocalAgentProvider list', () => {
   })
 
   test('returns empty for unsupported type', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await createAgent(dir, 'some-agent')
 
     const provider = new LocalAgentProvider(tmp)
@@ -242,7 +242,7 @@ describe('LocalAgentProvider list', () => {
 
 describe('LocalAgentProvider info', () => {
   test('returns agent detail by name', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev', 'core')
+    const dir = join(tmp, 'content', 'agents', 'dev', 'core')
     await createAgent(dir, 'frontend-developer', 'Expert UI engineer')
 
     const provider = new LocalAgentProvider(tmp)
@@ -255,7 +255,7 @@ describe('LocalAgentProvider info', () => {
     expect(result.value.name).toBe('frontend-developer')
     expect(result.value.description).toBe('Expert UI engineer')
     expect(result.value.localPath).toBe(join(dir, 'frontend-developer.md'))
-    expect(result.value.source).toBe('context/agents/dev/core/frontend-developer.md')
+    expect(result.value.source).toBe('content/agents/dev/core/frontend-developer.md')
   })
 
   test('returns error for unknown agent', async () => {
@@ -285,7 +285,7 @@ describe('LocalAgentProvider info', () => {
 
 describe('LocalAgentProvider component shape', () => {
   test('agent Component has correct shape (type, source, tags from tools)', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await mkdir(dir, { recursive: true })
     await writeFile(
       join(dir, 'test-agent.md'),
@@ -302,13 +302,13 @@ describe('LocalAgentProvider component shape', () => {
     expect(agent.type).toBe('agent')
     expect(agent.name).toBe('test-agent')
     expect(agent.description).toBe('A test agent')
-    expect(agent.source).toBe('context/agents/dev/test-agent.md')
+    expect(agent.source).toBe('content/agents/dev/test-agent.md')
     expect(agent.localPath).toBe(join(dir, 'test-agent.md'))
     expect(agent.tags).toEqual(['Read', 'Write', 'Edit', 'Bash'])
   })
 
   test('derives name from filename when frontmatter name missing', async () => {
-    const dir = join(tmp, 'context', 'agents', 'dev')
+    const dir = join(tmp, 'content', 'agents', 'dev')
     await mkdir(dir, { recursive: true })
     await writeFile(
       join(dir, 'my-cool-agent.md'),
@@ -333,7 +333,7 @@ describe('LocalAgentProvider component shape', () => {
 
 describe('LocalAgentProvider edge cases', () => {
   test('handles missing agents dir gracefully (empty, no error)', async () => {
-    // tmp has no context/agents/ directory at all
+    // tmp has no content/agents/ directory at all
     const provider = new LocalAgentProvider(tmp)
 
     const searchResult = await provider.search({ query: '' })

@@ -123,7 +123,7 @@ export async function removeSkills(
     }
 
     // Determine whether any agent still has the skill
-    const canonicalPath = join(cwd, 'context', 'skills', name)
+    const canonicalPath = join(cwd, 'content', 'skills', name)
     let anyAgentStillHasIt = false
 
     if (opts.agent) {

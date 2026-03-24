@@ -1,0 +1,20 @@
+{
+  "$schema": "./plugin.sources.schema.json",
+  "sources": {
+    "skills/design-tokens-extraction": {
+      "type": "extend",
+      "base": "content/skills/design-brand-applying-dev/SKILL.md",
+      "notes": "Add extraction logic from MCP server data, token normalization"
+    },
+    "skills/design-system-management": {
+      "type": "extend",
+      "base": "content/skills/design-theme-factory-dev/SKILL.md",
+      "notes": "Add token CRUD, multi-format export, version tracking"
+    },
+    "agents/design-translator": {
+      "type": "extend",
+      "base": "content/agents/ui-designer.md",
+      "notes": "Add MCP integration, code generation pipelines, framework routing"
+    }
+  }
+}

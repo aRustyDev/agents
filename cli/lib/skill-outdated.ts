@@ -237,7 +237,7 @@ async function checkLocal(
   entry: SkillLockEntry,
   cwd: string
 ): Promise<OutdatedResult> {
-  const skillDir = join(cwd, 'context', 'skills', name)
+  const skillDir = join(cwd, 'content', 'skills', name)
   try {
     const localHash = await hashDirectory(skillDir)
     const status: OutdatedStatus = localHash === entry.computedHash ? 'current' : 'outdated'

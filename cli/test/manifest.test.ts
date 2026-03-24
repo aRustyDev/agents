@@ -30,7 +30,7 @@ afterEach(async () => {
 
 describe('readPluginManifest', () => {
   test('reads real blog-workflow plugin', async () => {
-    const result = await readPluginManifest(`${WORKTREE}/context/plugins/blog-workflow`)
+    const result = await readPluginManifest(`${WORKTREE}/content/plugins/blog-workflow`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('blog-workflow')
@@ -42,7 +42,7 @@ describe('readPluginManifest', () => {
   })
 
   test('reads real swiftui-dev plugin', async () => {
-    const result = await readPluginManifest(`${WORKTREE}/context/plugins/frontend/swiftui-dev`)
+    const result = await readPluginManifest(`${WORKTREE}/content/plugins/frontend/swiftui-dev`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('swiftui-dev')
@@ -52,7 +52,7 @@ describe('readPluginManifest', () => {
   })
 
   test('reads real job-hunting plugin', async () => {
-    const result = await readPluginManifest(`${WORKTREE}/context/plugins/job-hunting`)
+    const result = await readPluginManifest(`${WORKTREE}/content/plugins/job-hunting`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('job-hunting')
@@ -102,7 +102,7 @@ describe('readPluginManifest', () => {
 
 describe('readPluginSources', () => {
   test('reads real blog-workflow sources', async () => {
-    const result = await readPluginSources(`${WORKTREE}/context/plugins/blog-workflow`)
+    const result = await readPluginSources(`${WORKTREE}/content/plugins/blog-workflow`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.sources).toBeDefined()
@@ -113,7 +113,7 @@ describe('readPluginSources', () => {
   })
 
   test('reads real swiftui-dev sources', async () => {
-    const result = await readPluginSources(`${WORKTREE}/context/plugins/frontend/swiftui-dev`)
+    const result = await readPluginSources(`${WORKTREE}/content/plugins/frontend/swiftui-dev`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       // swiftui-dev has 3 sources
@@ -139,7 +139,7 @@ describe('readPluginSources', () => {
   })
 
   test('handles empty sources gracefully', async () => {
-    const result = await readPluginSources(`${WORKTREE}/context/plugins/job-hunting`)
+    const result = await readPluginSources(`${WORKTREE}/content/plugins/job-hunting`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(Object.keys(result.value.sources)).toHaveLength(0)
@@ -165,7 +165,7 @@ describe('readPluginSources', () => {
 
 describe('readSkillFrontmatter', () => {
   test('reads real beads SKILL.md', async () => {
-    const result = await readSkillFrontmatter(`${WORKTREE}/context/skills/beads/SKILL.md`)
+    const result = await readSkillFrontmatter(`${WORKTREE}/content/skills/beads/SKILL.md`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('beads')
@@ -176,7 +176,7 @@ describe('readSkillFrontmatter', () => {
   })
 
   test('reads real gitlab-cicd SKILL.md', async () => {
-    const result = await readSkillFrontmatter(`${WORKTREE}/context/skills/gitlab-cicd/SKILL.md`)
+    const result = await readSkillFrontmatter(`${WORKTREE}/content/skills/gitlab-cicd/SKILL.md`)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.name).toBe('gitlab-cicd')
@@ -256,13 +256,13 @@ describe('readSkillFrontmatter', () => {
 
 describe('detectSourceFormat', () => {
   test('detects legacy string format', () => {
-    expect(detectSourceFormat('context/commands/foo.md')).toBe('legacy')
+    expect(detectSourceFormat('content/commands/foo.md')).toBe('legacy')
   })
 
   test('detects extended object format', () => {
     expect(
       detectSourceFormat({
-        source: 'context/skills/foo/SKILL.md',
+        source: 'content/skills/foo/SKILL.md',
         hash: 'sha256:abc',
       })
     ).toBe('extended')
@@ -306,10 +306,10 @@ describe('detectSourceFormat', () => {
 
 describe('normalizeSource', () => {
   test('normalizes legacy string to extended', () => {
-    const result = normalizeSource('context/commands/foo.md')
+    const result = normalizeSource('content/commands/foo.md')
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.value.source).toBe('context/commands/foo.md')
+      expect(result.value.source).toBe('content/commands/foo.md')
       expect(result.value.hash).toBeUndefined()
       expect(result.value.forked).toBeUndefined()
     }
@@ -329,14 +329,14 @@ describe('normalizeSource', () => {
 
   test('passes through valid extended format', () => {
     const entry = {
-      source: 'context/skills/foo/SKILL.md',
+      source: 'content/skills/foo/SKILL.md',
       hash: 'sha256:0000000000000000000000000000000000000000000000000000000000000000',
       forked: false,
     }
     const result = normalizeSource(entry)
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.value.source).toBe('context/skills/foo/SKILL.md')
+      expect(result.value.source).toBe('content/skills/foo/SKILL.md')
       expect(result.value.hash).toBe(
         'sha256:0000000000000000000000000000000000000000000000000000000000000000'
       )
@@ -346,7 +346,7 @@ describe('normalizeSource', () => {
 
   test('passes through extended format with forked_at', () => {
     const entry = {
-      source: 'context/skills/foo/SKILL.md',
+      source: 'content/skills/foo/SKILL.md',
       hash: 'sha256:' + 'a'.repeat(64),
       forked: true,
       forked_at: '2025-01-15T12:00:00Z',

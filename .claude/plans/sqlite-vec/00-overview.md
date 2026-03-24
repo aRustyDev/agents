@@ -13,7 +13,7 @@ Enable semantic search, similarity detection, and relationship analysis across a
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    File System                               │
-│  context/agents/*.md  context/skills/*/SKILL.md  etc.       │
+│  content/agents/*.md  content/skills/*/SKILL.md  etc.       │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼

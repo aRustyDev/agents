@@ -43,7 +43,7 @@ function makeTestEntity(overrides?: Partial<IndexableEntity>): IndexableEntity {
     content:
       'This is the full text content of the test skill. It covers TypeScript patterns and best practices.',
     tags: ['test', 'typescript'],
-    filePath: 'context/skills/test-skill/SKILL.md',
+    filePath: 'content/skills/test-skill/SKILL.md',
     fileHash: 'abc123def456',
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-03-18T00:00:00Z',
@@ -60,7 +60,7 @@ function makeTestEntity2(): IndexableEntity {
     description: 'A test command for filtering',
     content: 'This command handles deployment automation for Kubernetes clusters.',
     tags: ['test', 'kubernetes'],
-    filePath: 'context/commands/test-command.md',
+    filePath: 'content/commands/test-command.md',
     fileHash: 'def789ghi012',
   })
 }
@@ -218,7 +218,7 @@ describe('indexEntity + searchKeyword', () => {
     expect(found).toBeDefined()
     expect(found!.type).toBe('skill')
     expect(found!.name).toBe('test-skill')
-    expect(found!.filePath).toBe('context/skills/test-skill/SKILL.md')
+    expect(found!.filePath).toBe('content/skills/test-skill/SKILL.md')
   })
 
   test('returns highlighted snippets', async () => {

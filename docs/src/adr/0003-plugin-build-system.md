@@ -26,7 +26,7 @@ Implement a content-addressed build system for plugins:
 {
   "sources": {
     "commands/example.md": {
-      "source": "context/commands/example.md",
+      "source": "content/commands/example.md",
       "hash": "sha256:abc123..."
     }
   }

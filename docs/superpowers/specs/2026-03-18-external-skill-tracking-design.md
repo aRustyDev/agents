@@ -10,7 +10,7 @@ Two modes of external skill usage:
 
 | Mode | Mechanism | Diff tracking |
 |------|-----------|---------------|
-| **Passthrough** | Symlink `context/skills/<name> -> .external/<source>/<skill>/` | No |
+| **Passthrough** | Symlink `content/skills/<name> -> .external/<source>/<skill>/` | No |
 | **Derived** | Vendored snapshot in `.external/`, local skill independently authored | Yes |
 
 **Constraint:** `passthrough` and `derived_by` are mutually exclusive. A skill cannot be both — if you need direct use AND drift tracking, create two manifest entries: one passthrough (for the symlink) and one derived (for tracking). This prevents unreviewed upstream changes from going live via symlink while a drift review is pending.
@@ -18,7 +18,7 @@ Two modes of external skill usage:
 ## Directory Layout
 
 ```
-context/skills/
+content/skills/
   .external/
     justfile                          # Module: just external:*
     sources.yaml                      # Manifest (hand-edited, declarative)
@@ -159,8 +159,8 @@ function lockKey(source: string, skill: string): string {
 ## Justfile Recipes
 
 ```just
-# context/skills/.external/justfile
-# Imported by context/skills/justfile as: mod external ".external/justfile"
+# content/skills/.external/justfile
+# Imported by content/skills/justfile as: mod external ".external/justfile"
 # Invoked as: just external:check, just external:sync, etc.
 
 set unstable := true
@@ -206,10 +206,10 @@ status *FLAGS:
 
 All recipes delegate to `bun run cli/bin/ai-tools.ts skill deps <verb>`.
 
-### Integration with `context/skills/justfile`
+### Integration with `content/skills/justfile`
 
 ```just
-# context/skills/justfile (existing, add this line)
+# content/skills/justfile (existing, add this line)
 mod external ".external/justfile"
 ```
 
@@ -271,8 +271,8 @@ Exit codes: 0 = all current, 1 = drift detected, 2 = process error (network, par
 
 Uses `lib/github.ts` (Octokit wrapper).
 
-1. Validate all `derived_by` entries reference existing directories in `context/skills/`. Warn on any that don't exist.
-2. For each skill with `derived_by` AND changed files in `.external/` (detected via `git diff HEAD -- context/skills/.external/<source>/<skill>/`):
+1. Validate all `derived_by` entries reference existing directories in `content/skills/`. Warn on any that don't exist.
+2. For each skill with `derived_by` AND changed files in `.external/` (detected via `git diff HEAD -- content/skills/.external/<source>/<skill>/`):
    - Group by local skill (`derived_by` value)
    - For each local skill:
      - Search: `gh api search/issues` for `[SKILL DRIFT] upstream changes (<local_skill>) is:open` in `aRustyDev/agents`
@@ -288,7 +288,7 @@ All writes — snapshot files, lock file updates — are left uncommitted in the
 1. Read `sources.yaml`
 2. For each skill with `passthrough: true`:
    - Compute target: `.external/<source>/<skill>/`
-   - Compute link: `context/skills/<name>`
+   - Compute link: `content/skills/<name>`
    - If symlink exists and points to correct target: skip
    - If symlink exists but wrong target: remove, recreate
    - If no symlink: create
@@ -339,7 +339,7 @@ Combined view of all state:
 </details>
 
 ## Local Skill
-`context/skills/<local-skill>/SKILL.md`
+`content/skills/<local-skill>/SKILL.md`
 
 ## Action Required
 Review upstream changes and decide whether to incorporate into local skill.
@@ -378,11 +378,11 @@ Review upstream changes and decide whether to incorporate into local skill.
 
 ```bash
 # Add an external skill to the manifest
-vim context/skills/.external/sources.yaml  # Add entry
+vim content/skills/.external/sources.yaml  # Add entry
 
 # Pull and commit the snapshot
 just external:sync
-git add context/skills/.external/
+git add content/skills/.external/
 git commit -m "chore(skills): vendor <skill-name> from <source>"
 
 # Create symlinks if passthrough
@@ -395,7 +395,7 @@ just external:links
 just external:check          # Network check, no writes
 # If drift detected:
 just external:update         # sync -> issues -> links -> status
-git add context/skills/.external/
+git add content/skills/.external/
 git commit -m "chore(skills): update external skill snapshots"
 ```
 
@@ -406,7 +406,7 @@ git commit -m "chore(skills): update external skill snapshots"
 just external:status --json | jq '.[] | select(.issue != null)'
 
 # Review the diff in git
-git diff HEAD~1 -- context/skills/.external/some-org/repo/their-skill/
+git diff HEAD~1 -- content/skills/.external/some-org/repo/their-skill/
 
 # After incorporating changes into local skill:
 # Close the GH issue manually
@@ -416,14 +416,14 @@ git diff HEAD~1 -- context/skills/.external/some-org/repo/their-skill/
 
 | File | Action | Notes |
 |------|--------|-------|
-| `context/skills/.external/sources.yaml` | Create | Manifest |
-| `context/skills/.external/sources.lock.yaml` | Create | Lock file (machine-managed) |
-| `context/skills/.external/justfile` | Create | Module with external:* recipes |
-| `context/skills/justfile` | Modify | Add `mod external ".external/justfile"` |
+| `content/skills/.external/sources.yaml` | Create | Manifest |
+| `content/skills/.external/sources.lock.yaml` | Create | Lock file (machine-managed) |
+| `content/skills/.external/justfile` | Create | Module with external:* recipes |
+| `content/skills/justfile` | Modify | Add `mod external ".external/justfile"` |
 | `cli/commands/skill.ts` | Modify | Add `deps` subcommand tree |
 | `cli/lib/schemas.ts` | Modify | Add ExternalSkillEntry, ExternalSourcesManifest schemas |
 | `cli/lib/lockfile.ts` | Modify | Register external-skills lock schema |
-| `context/skills/.gitignore` | Verify | Ensure `.external/` is NOT listed |
+| `content/skills/.gitignore` | Verify | Ensure `.external/` is NOT listed |
 
 ## Dependencies (already in migration spec)
 

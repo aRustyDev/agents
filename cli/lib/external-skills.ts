@@ -4,7 +4,7 @@
  * Provides the core business logic for the `skill deps` subcommand tree:
  * check, sync, issues, links, and status.
  *
- * External skills live in `context/skills/.external/` and are declared in
+ * External skills live in `content/skills/.external/` and are declared in
  * `sources.yaml` (hand-edited) with state tracked in `sources.lock.json`
  * (machine-managed).
  */
@@ -62,7 +62,7 @@ export function readManifest(externalDir: string): Result<ExternalSourcesManifes
       new CliError(
         `External sources manifest not found: ${manifestPath}`,
         'E_MANIFEST_NOT_FOUND',
-        'Create sources.yaml in context/skills/.external/'
+        'Create sources.yaml in content/skills/.external/'
       )
     )
   }
@@ -519,7 +519,7 @@ export async function createDriftIssues(
       }
     } else {
       // Create new issue
-      const body = `## Upstream Changes Affecting \`${localSkill}\`\n\n${checklist}\n\n${details}\n\n## Local Skill\n\`context/skills/${localSkill}/SKILL.md\`\n\n## Action Required\nReview upstream changes and decide whether to incorporate into local skill.`
+      const body = `## Upstream Changes Affecting \`${localSkill}\`\n\n${checklist}\n\n${details}\n\n## Local Skill\n\`content/skills/${localSkill}/SKILL.md\`\n\n## Action Required\nReview upstream changes and decide whether to incorporate into local skill.`
 
       const issueResult = await createIssue(repo, {
         title: issueTitle,
@@ -552,7 +552,7 @@ export async function createDriftIssues(
  * Create or refresh passthrough symlinks for all passthrough entries.
  *
  * For each passthrough skill, creates a symlink from
- * `context/skills/<name>` to `.external/<source>/<skill>/`.
+ * `content/skills/<name>` to `.external/<source>/<skill>/`.
  */
 export async function refreshLinks(
   externalDir: string,

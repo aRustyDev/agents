@@ -26,7 +26,7 @@ After processing ~30% of the catalog, four issues emerged:
 
 #### Error Log File
 
-**Path:** `context/skills/.catalog-errors.ndjson` (gitignored)
+**Path:** `content/skills/.catalog-errors.ndjson` (gitignored)
 
 **Schema:**
 
@@ -334,13 +334,13 @@ Retry mode: processing failed+retryable entries only
 | `cli/lib/catalog.ts` | Add `attemptCount`/`lastErrorType`/`retryable` to `Tier1Result`, remove `error`/`errorDetail`/`errorCode` from type, add error log functions, add mechanical compute functions (`computeContentHash`, `computeWordCount`, `computeSectionCount`, `computeHeadingTree`, `computeFileCount`), add `filterForProcessing`, update `mergeTier1Results` for error separation and success-clears-errors |
 | `cli/commands/skill.ts` | Update `preDownloadSkills` to compute mechanical fields, update agent prompt (5 steps instead of 9), update `--allowedTools` to `"Read Glob Grep"`, add `--retry-errors`/`--force` flags, change default to skip-analyzed, add `catalog scrub` subcommand, update `catalog errors` to read error log + support `--prune`, update `catalog cleanup`/`catalog forks` for new data model, update `processBatch` to route errors to error log |
 | `cli/test/catalog-tier1.test.ts` | Tests for mechanical compute functions, error log append/read, `filterForProcessing` (all flag combinations), merge behavior (success clears errors, failure increments attemptCount), `catalog scrub` logic |
-| `context/skills/.gitignore` | Add `.catalog-errors.ndjson` |
+| `content/skills/.gitignore` | Add `.catalog-errors.ndjson` |
 
 ## New Files
 
 | File | Purpose |
 |---|---|
-| `context/skills/.catalog-errors.ndjson` | Append-only error log (gitignored) |
+| `content/skills/.catalog-errors.ndjson` | Append-only error log (gitignored) |
 
 ## Migration
 

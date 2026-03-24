@@ -53,7 +53,7 @@ import { globalArgs } from './shared-args'
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
-const SKILLS_DIR = join(PROJECT_ROOT, 'context/skills')
+const SKILLS_DIR = join(PROJECT_ROOT, 'content/skills')
 const EXTERNAL_DIR = join(SKILLS_DIR, '.external')
 
 // ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ const EXTERNAL_DIR = join(SKILLS_DIR, '.external')
 // ---------------------------------------------------------------------------
 
 /**
- * List all valid skill directory names under context/skills/.
+ * List all valid skill directory names under content/skills/.
  * Skips dotdirs, .templates, and non-directories (e.g., justfile).
  */
 export function listSkills(): string[] {
@@ -588,7 +588,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error(
@@ -968,7 +968,7 @@ export default defineCommand({
               }
 
               // Merge results into catalog + error log
-              const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
+              const errorLogPath = join(PROJECT_ROOT, 'content/skills/.catalog-errors.ndjson')
               out.info(`Merging ${allResults.length} results into catalog...`)
               mergeTier1Results(catalogPath, errorLogPath, allResults)
 
@@ -1015,7 +1015,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error('Catalog not found. Run: bun run cli/lib/catalog.ts')
@@ -1083,7 +1083,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error('Catalog not found.')
@@ -1279,8 +1279,8 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const errorLogPath = join(PROJECT_ROOT, 'content/skills/.catalog-errors.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
             if (args.prune) {
               // Prune: remove error records for skills that have been resolved (attemptCount=0)
@@ -1373,9 +1373,9 @@ export default defineCommand({
               renameSync: renameS,
             } = require('node:fs')
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
-            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
-            const lockPath = join(PROJECT_ROOT, 'context/skills/.catalog.lock')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
+            const errorLogPath = join(PROJECT_ROOT, 'content/skills/.catalog-errors.ndjson')
+            const lockPath = join(PROJECT_ROOT, 'content/skills/.catalog.lock')
 
             if (!existsS(catalogPath)) {
               out.error('Catalog not found.')
@@ -1532,7 +1532,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error('Catalog not found.')
               process.exit(EXIT.ERROR)
@@ -1611,7 +1611,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error('Catalog not found.')
               process.exit(EXIT.ERROR)
@@ -1619,7 +1619,7 @@ export default defineCommand({
 
             const { backfillEntries } = await import('../lib/catalog-download')
             const { mergeBackfillResults } = await import('../lib/catalog')
-            const errorLogPath = join(PROJECT_ROOT, 'context/skills/.catalog-errors.ndjson')
+            const errorLogPath = join(PROJECT_ROOT, 'content/skills/.catalog-errors.ndjson')
 
             const allEntries = readCatalog(
               catalogPath
@@ -1728,7 +1728,7 @@ export default defineCommand({
               quiet: args.quiet as boolean,
             })
 
-            const catalogPath = join(PROJECT_ROOT, 'context/skills/.catalog.ndjson')
+            const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
             if (!require('node:fs').existsSync(catalogPath)) {
               out.error('Catalog not found.')
               process.exit(EXIT.ERROR)
@@ -1738,7 +1738,7 @@ export default defineCommand({
             const { readRepoManifest, mergeRepoManifest, writeRepoManifest } = await import(
               '../lib/catalog'
             )
-            const manifestPath = join(PROJECT_ROOT, 'context/skills/.catalog-repos.ndjson')
+            const manifestPath = join(PROJECT_ROOT, 'content/skills/.catalog-repos.ndjson')
 
             const allEntries = readCatalog(
               catalogPath
@@ -1890,7 +1890,7 @@ export default defineCommand({
         },
         path: {
           type: 'string',
-          description: 'Base directory for the new skill (default: context/skills/)',
+          description: 'Base directory for the new skill (default: content/skills/)',
         },
       },
       async run({ args }) {
@@ -1922,7 +1922,7 @@ export default defineCommand({
         ...filterArgs,
         path: {
           type: 'positional',
-          description: 'Skills directory to scan (default: context/skills/)',
+          description: 'Skills directory to scan (default: content/skills/)',
           required: false,
         },
       },

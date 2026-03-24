@@ -17,7 +17,7 @@ import { readSkillFrontmatter } from '../lib/manifest'
 // ---------------------------------------------------------------------------
 
 const WORKTREE = '/private/etc/infra/pub/ai'
-const SKILLS_DIR = join(WORKTREE, 'context/skills')
+const SKILLS_DIR = join(WORKTREE, 'content/skills')
 
 // ---------------------------------------------------------------------------
 // listSkills

@@ -24,7 +24,7 @@ afterEach(async () => {
 // ---------------------------------------------------------------------------
 
 async function createSkill(baseDir: string, name: string, desc = 'Test skill'): Promise<void> {
-  const skillDir = join(baseDir, 'context', 'skills', name)
+  const skillDir = join(baseDir, 'content', 'skills', name)
   await mkdir(skillDir, { recursive: true })
   await writeFile(
     join(skillDir, 'SKILL.md'),
@@ -152,7 +152,7 @@ describe('LocalProvider search', () => {
   })
 
   test('returns empty page when no skills dir exists', async () => {
-    // tmp is empty, no context/skills/
+    // tmp is empty, no content/skills/
     const provider = new LocalProvider(tmp)
     const result = await provider.search({ query: 'anything' })
 
@@ -187,7 +187,7 @@ describe('LocalProvider list', () => {
     expect(beads.type).toBe('skill')
     expect(beads.description).toBe('Issue tracker')
     expect(beads.version).toBe('0.1.0')
-    expect(beads.localPath).toBe(join(tmp, 'context', 'skills', 'beads'))
+    expect(beads.localPath).toBe(join(tmp, 'content', 'skills', 'beads'))
   })
 
   test('returns empty for unsupported type', async () => {
@@ -231,7 +231,7 @@ describe('LocalProvider info', () => {
     expect(result.value.name).toBe('beads')
     expect(result.value.description).toBe('Issue tracker')
     expect(result.value.version).toBe('0.1.0')
-    expect(result.value.localPath).toBe(join(tmp, 'context', 'skills', 'beads'))
+    expect(result.value.localPath).toBe(join(tmp, 'content', 'skills', 'beads'))
     // Not a symlink, so installMode should be 'copy'
     expect(result.value.installMode).toBe('copy')
   })
@@ -266,7 +266,7 @@ describe('LocalProvider remove', () => {
     await createSkill(tmp, 'to-remove')
 
     // Verify skill exists before removal
-    expect(existsSync(join(tmp, 'context', 'skills', 'to-remove'))).toBe(true)
+    expect(existsSync(join(tmp, 'content', 'skills', 'to-remove'))).toBe(true)
 
     const provider = new LocalProvider(tmp)
     const result = await provider.remove('to-remove', 'skill', { cwd: tmp })
@@ -278,7 +278,7 @@ describe('LocalProvider remove', () => {
     expect(result.value.component).toBe('to-remove')
 
     // Verify skill is gone from canonical location
-    expect(existsSync(join(tmp, 'context', 'skills', 'to-remove'))).toBe(false)
+    expect(existsSync(join(tmp, 'content', 'skills', 'to-remove'))).toBe(false)
   })
 
   test('returns error message when skill not found', async () => {
@@ -336,7 +336,7 @@ describe('LocalProvider add', () => {
     expect(result.value.components[0]?.type).toBe('skill')
 
     // Verify the skill was actually installed to the canonical path
-    const canonicalPath = join(tmp, 'context', 'skills', 'my-new-skill')
+    const canonicalPath = join(tmp, 'content', 'skills', 'my-new-skill')
     expect(existsSync(canonicalPath)).toBe(true)
     expect(existsSync(join(canonicalPath, 'SKILL.md'))).toBe(true)
   })

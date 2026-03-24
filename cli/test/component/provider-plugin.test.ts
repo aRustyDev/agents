@@ -28,7 +28,7 @@ async function createPlugin(
   desc = 'Test plugin',
   extra: Record<string, unknown> = {}
 ): Promise<void> {
-  const pluginDir = join(baseDir, 'context', 'plugins', name, '.claude-plugin')
+  const pluginDir = join(baseDir, 'content', 'plugins', name, '.claude-plugin')
   await mkdir(pluginDir, { recursive: true })
   await writeFile(
     join(pluginDir, 'plugin.json'),
@@ -94,7 +94,7 @@ describe('LocalPluginProvider search', () => {
     await createPlugin(tmp, 'real-plugin', 'A real plugin')
 
     // Create a .template plugin that should be excluded
-    const templateDir = join(tmp, 'context', 'plugins', '.template', '.claude-plugin')
+    const templateDir = join(tmp, 'content', 'plugins', '.template', '.claude-plugin')
     await mkdir(templateDir, { recursive: true })
     await writeFile(
       join(templateDir, 'plugin.json'),
@@ -249,8 +249,8 @@ describe('LocalPluginProvider info', () => {
     expect(result.value.author).toBe('Test Author')
     expect(result.value.tags).toEqual(['blog', 'writing'])
     expect(result.value.url).toBe('https://blog.example.com')
-    expect(result.value.localPath).toBe(join(tmp, 'context', 'plugins', 'blog-workflow'))
-    expect(result.value.source).toBe(join('context', 'plugins', 'blog-workflow'))
+    expect(result.value.localPath).toBe(join(tmp, 'content', 'plugins', 'blog-workflow'))
+    expect(result.value.source).toBe(join('content', 'plugins', 'blog-workflow'))
   })
 
   test('returns error for unknown plugin', async () => {
@@ -301,8 +301,8 @@ describe('LocalPluginProvider component shape', () => {
     expect(component.author).toBe('Jane Doe')
     expect(component.tags).toEqual(['alpha', 'beta'])
     expect(component.url).toBe('https://myplugin.dev')
-    expect(component.localPath).toBe(join(tmp, 'context', 'plugins', 'my-plugin'))
-    expect(component.source).toBe(join('context', 'plugins', 'my-plugin'))
+    expect(component.localPath).toBe(join(tmp, 'content', 'plugins', 'my-plugin'))
+    expect(component.source).toBe(join('content', 'plugins', 'my-plugin'))
   })
 })
 
@@ -316,7 +316,7 @@ describe('LocalPluginProvider error resilience', () => {
     await createPlugin(tmp, 'good-plugin', 'Works fine')
 
     // Create a directory with invalid JSON in plugin.json
-    const badDir = join(tmp, 'context', 'plugins', 'bad-plugin', '.claude-plugin')
+    const badDir = join(tmp, 'content', 'plugins', 'bad-plugin', '.claude-plugin')
     await mkdir(badDir, { recursive: true })
     await writeFile(join(badDir, 'plugin.json'), '{ not valid json !!!')
 
@@ -335,7 +335,7 @@ describe('LocalPluginProvider error resilience', () => {
     await createPlugin(tmp, 'good-plugin', 'Works fine')
 
     // Create a plugin with invalid schema (missing required fields)
-    const badDir = join(tmp, 'context', 'plugins', 'schema-fail', '.claude-plugin')
+    const badDir = join(tmp, 'content', 'plugins', 'schema-fail', '.claude-plugin')
     await mkdir(badDir, { recursive: true })
     await writeFile(join(badDir, 'plugin.json'), JSON.stringify({ name: 'schema-fail' }))
 
@@ -350,7 +350,7 @@ describe('LocalPluginProvider error resilience', () => {
   })
 
   test('handles missing plugins directory gracefully', async () => {
-    // tmp exists but has no context/plugins/ directory
+    // tmp exists but has no content/plugins/ directory
     const provider = new LocalPluginProvider(tmp)
 
     const searchResult = await provider.search({ query: '' })

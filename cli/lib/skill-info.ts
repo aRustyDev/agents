@@ -65,7 +65,7 @@ export async function skillInfo(
   opts: InfoOptions = {}
 ): Promise<Result<SkillDetail>> {
   const cwd = opts.cwd ?? process.cwd()
-  const skillPath = join(cwd, 'context', 'skills', name)
+  const skillPath = join(cwd, 'content', 'skills', name)
 
   if (!existsSync(skillPath)) {
     return err(

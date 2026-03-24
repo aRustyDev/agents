@@ -24,7 +24,7 @@ afterEach(async () => {
 
 describe('skillInfo', () => {
   test('returns full metadata for installed skill', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'beads')
+    const skillDir = join(tmp, 'content', 'skills', 'beads')
     await mkdir(skillDir, { recursive: true })
     await writeFile(
       join(skillDir, 'SKILL.md'),
@@ -66,7 +66,7 @@ describe('skillInfo', () => {
   })
 
   test('handles missing lock file gracefully', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'no-lock')
+    const skillDir = join(tmp, 'content', 'skills', 'no-lock')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: no-lock\ndescription: Test\n---\n')
 
@@ -81,7 +81,7 @@ describe('skillInfo', () => {
   })
 
   test('detects hash mismatch', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'drifted')
+    const skillDir = join(tmp, 'content', 'skills', 'drifted')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: drifted\ndescription: Changed\n---\n')
     await writeFile(
@@ -108,7 +108,7 @@ describe('skillInfo', () => {
   })
 
   test('handles missing frontmatter', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'bad-fm')
+    const skillDir = join(tmp, 'content', 'skills', 'bad-fm')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '# No frontmatter here')
 
@@ -120,7 +120,7 @@ describe('skillInfo', () => {
   })
 
   test('handles missing SKILL.md file', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'no-skillmd')
+    const skillDir = join(tmp, 'content', 'skills', 'no-skillmd')
     await mkdir(skillDir, { recursive: true })
     // Directory exists but no SKILL.md inside
 
@@ -133,7 +133,7 @@ describe('skillInfo', () => {
   })
 
   test('JSON-serializable output', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'json-test')
+    const skillDir = join(tmp, 'content', 'skills', 'json-test')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: json-test\ndescription: Test\n---\n')
 
@@ -149,7 +149,7 @@ describe('skillInfo', () => {
   })
 
   test('computes live hash for skill directory', async () => {
-    const skillDir = join(tmp, 'context', 'skills', 'hashed')
+    const skillDir = join(tmp, 'content', 'skills', 'hashed')
     await mkdir(skillDir, { recursive: true })
     await writeFile(join(skillDir, 'SKILL.md'), '---\nname: hashed\ndescription: Hash test\n---\n')
 
@@ -165,7 +165,7 @@ describe('skillInfo', () => {
 
   test('hashMatch is true when hashes agree', async () => {
     // First create the skill and get its hash
-    const skillDir = join(tmp, 'context', 'skills', 'matched')
+    const skillDir = join(tmp, 'content', 'skills', 'matched')
     await mkdir(skillDir, { recursive: true })
     await writeFile(
       join(skillDir, 'SKILL.md'),
@@ -202,7 +202,7 @@ describe('skillInfo', () => {
 
   test('skill with no lock entry for that name', async () => {
     // Lock file exists but does not have the skill we are querying
-    const skillDir = join(tmp, 'context', 'skills', 'unlisted')
+    const skillDir = join(tmp, 'content', 'skills', 'unlisted')
     await mkdir(skillDir, { recursive: true })
     await writeFile(
       join(skillDir, 'SKILL.md'),

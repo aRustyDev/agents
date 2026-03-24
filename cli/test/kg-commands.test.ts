@@ -131,12 +131,12 @@ describe('ENTITY_TYPES', () => {
 
 describe('entityIdFromPath', () => {
   test('replaces slashes with underscores', () => {
-    expect(entityIdFromPath('context/skills/beads/SKILL.md')).toBe('context_skills_beads_SKILL')
+    expect(entityIdFromPath('content/skills/beads/SKILL.md')).toBe('content_skills_beads_SKILL')
   })
 
   test('strips file extension', () => {
-    const id = entityIdFromPath('context/rules/agent/hooks.md')
-    expect(id).toBe('context_rules_agent_hooks')
+    const id = entityIdFromPath('content/rules/agent/hooks.md')
+    expect(id).toBe('content_rules_agent_hooks')
     expect(id).not.toContain('.md')
   })
 
@@ -149,12 +149,12 @@ describe('entityIdFromPath', () => {
   })
 
   test('handles paths with multiple dots', () => {
-    expect(entityIdFromPath('context/file.test.md')).toBe('context_file.test')
+    expect(entityIdFromPath('content/file.test.md')).toBe('content_file.test')
   })
 
   test('handles json extension', () => {
-    expect(entityIdFromPath('context/plugins/foo/.claude-plugin/plugin.json')).toBe(
-      'context_plugins_foo_.claude-plugin_plugin'
+    expect(entityIdFromPath('content/plugins/foo/.claude-plugin/plugin.json')).toBe(
+      'content_plugins_foo_.claude-plugin_plugin'
     )
   })
 })

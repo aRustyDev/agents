@@ -53,16 +53,16 @@ export const PROJECT_ROOT = resolve(currentDir(import.meta), '../..')
  * Keys match the EntityType union.
  */
 export const ENTITY_PATTERNS: Record<string, string[]> = {
-  skill: ['context/skills/*/SKILL.md'],
+  skill: ['content/skills/*/SKILL.md'],
   plugin: [
-    'context/plugins/*/.claude-plugin/plugin.json',
-    'context/plugins/**/.claude-plugin/plugin.json',
+    'content/plugins/*/.claude-plugin/plugin.json',
+    'content/plugins/**/.claude-plugin/plugin.json',
   ],
-  command: ['context/commands/**/*.md'],
-  rule: ['context/rules/*.md', 'context/rules/**/*.md'],
-  agent: ['context/agents/**/*.md'],
+  command: ['content/commands/**/*.md'],
+  rule: ['content/rules/*.md', 'content/rules/**/*.md'],
+  agent: ['content/agents/**/*.md'],
   claude_md: ['CLAUDE.md'],
-  output_style: ['context/output-styles/*.md'],
+  output_style: ['content/output-styles/*.md'],
 }
 
 /**

@@ -7,7 +7,7 @@ This document describes the embedding pipeline for the knowledge graph.
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           File System                                        │
-│  context/agents/*.md  context/skills/*/SKILL.md  .claude/rules/*.md  etc.   │
+│  content/agents/*.md  content/skills/*/SKILL.md  .claude/rules/*.md  etc.   │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -62,14 +62,14 @@ This document describes the embedding pipeline for the knowledge graph.
 See `scripts/watch-embed.py` for implementation.
 
 **Watched paths:**
-- `context/agents/*.md` → entity_type: `agent`
-- `context/skills/*/SKILL.md` → entity_type: `skill`
-- `context/commands/*.md` → entity_type: `command`
-- `context/rules/*.md` → entity_type: `rule`
+- `content/agents/*.md` → entity_type: `agent`
+- `content/skills/*/SKILL.md` → entity_type: `skill`
+- `content/commands/*.md` → entity_type: `command`
+- `content/rules/*.md` → entity_type: `rule`
 - `.claude/rules/*.md` → entity_type: `rule`
 - `**/CLAUDE.md` → entity_type: `claude_md`
-- `context/plugins/*/.claude-plugin/plugin.json` → entity_type: `plugin`
-- `context/output-styles/*.md` → entity_type: `output_style`
+- `content/plugins/*/.claude-plugin/plugin.json` → entity_type: `plugin`
+- `content/output-styles/*.md` → entity_type: `output_style`
 - `.claude/settings.json` hooks section → entity_type: `hook`
 
 ### 2. Content Extraction

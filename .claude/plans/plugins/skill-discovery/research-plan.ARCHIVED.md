@@ -96,14 +96,14 @@ Document known components per category from this repo:
 
 | Category | Local Path | Expected Count |
 |----------|------------|----------------|
-| Skills | `context/skills/` | 100+ |
-| Agents | `context/agents/` | 10+ |
-| Commands | `context/commands/` | 20+ |
-| Rules | `context/rules/` | 5+ |
-| Prompts | `context/output-styles/` | 10+ |
-| Hooks | `context/hooks/` | 5+ |
+| Skills | `content/skills/` | 100+ |
+| Agents | `content/agents/` | 10+ |
+| Commands | `content/commands/` | 20+ |
+| Rules | `content/rules/` | 5+ |
+| Prompts | `content/output-styles/` | 10+ |
+| Hooks | `content/hooks/` | 5+ |
 | MCP | `settings/mcp/` | 10+ |
-| Plugins | `context/plugins/` | 6 |
+| Plugins | `content/plugins/` | 6 |
 
 ### 0.4 Deliverables
 

@@ -23,7 +23,7 @@ afterEach(async () => {
 // ---------------------------------------------------------------------------
 
 async function createStyle(dir: string, name: string, content: string): Promise<void> {
-  const stylesDir = join(dir, 'context', 'output-styles')
+  const stylesDir = join(dir, 'content', 'output-styles')
   await mkdir(stylesDir, { recursive: true })
   await writeFile(join(stylesDir, `${name}.md`), content)
 }
@@ -72,7 +72,7 @@ describe('LocalOutputStyleProvider discovery', () => {
   test('excludes TODO.md', async () => {
     await createStyle(tmp, 'feedback-submission', '# Feedback\n\nStyle for feedback.')
     // Write TODO.md directly into the output-styles directory
-    const stylesDir = join(tmp, 'context', 'output-styles')
+    const stylesDir = join(tmp, 'content', 'output-styles')
     await writeFile(join(stylesDir, 'TODO.md'), '# TODO\n\n- Add more styles')
 
     const provider = new LocalOutputStyleProvider(tmp)
@@ -87,7 +87,7 @@ describe('LocalOutputStyleProvider discovery', () => {
 
   test('excludes dot-prefixed files', async () => {
     await createStyle(tmp, 'feedback-submission', '# Feedback\n\nStyle for feedback.')
-    const stylesDir = join(tmp, 'context', 'output-styles')
+    const stylesDir = join(tmp, 'content', 'output-styles')
     await writeFile(join(stylesDir, '.hidden-style.md'), '# Hidden\n\nDo not discover.')
 
     const provider = new LocalOutputStyleProvider(tmp)
@@ -179,7 +179,7 @@ describe('LocalOutputStyleProvider search', () => {
 
 describe('LocalOutputStyleProvider missing directory', () => {
   test('handles missing directory gracefully', async () => {
-    // tmp has no context/output-styles/ directory
+    // tmp has no content/output-styles/ directory
     const provider = new LocalOutputStyleProvider(tmp)
     const result = await provider.list('output_style')
 
@@ -220,7 +220,7 @@ describe('LocalOutputStyleProvider info', () => {
     expect(result.value.type).toBe('output_style')
     expect(result.value.description).toBe('Style for feedback.')
     expect(result.value.localPath).toBe(
-      join(tmp, 'context', 'output-styles', 'feedback-submission.md')
+      join(tmp, 'content', 'output-styles', 'feedback-submission.md')
     )
   })
 
