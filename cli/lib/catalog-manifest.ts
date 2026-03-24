@@ -138,3 +138,45 @@ export function formatManifestBatch(manifests: SkillManifest[]): string {
     })
     .join('\n')
 }
+
+// ---------------------------------------------------------------------------
+// Agent Prompt Builder (Judgment-Only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the Tier 1 agent prompt for a batch of skills.
+ *
+ * The agent receives pre-computed manifests with full SKILL.md content
+ * inline. It performs ZERO I/O — no file reads, no tool use.
+ * Returns structured judgments only.
+ */
+export function buildTier1AgentPrompt(manifests: SkillManifest[]): string {
+  return [
+    'You are a skill quality assessor. You receive pre-computed mechanical data for each skill.',
+    'Your job is JUDGMENT ONLY — assess quality, complexity, and patterns.',
+    'Do NOT read files or run commands. All data is provided below.',
+    '',
+    'Output ONLY raw NDJSON lines. No markdown, no code fences, no prose, no explanation.',
+    '',
+    'For each skill in the manifest, output ONE JSON line with these fields:',
+    '- source: string (echo back from manifest)',
+    '- skill: string (echo back from manifest)',
+    '- complexity: "simple" | "moderate" | "complex"',
+    '  - simple: <500 words, ≤5 sections, single-purpose',
+    '  - moderate: 500-2000 words, structured with examples',
+    '  - complex: >2000 words or >15 sections, comprehensive reference',
+    '- progressiveDisclosure: boolean (has <details>, collapsible sections, or layered content)',
+    '- pdTechniques: string[] (e.g., ["details-blocks", "collapsible-sections", "summary-then-detail"])',
+    '- bestPractices: {"score": 1-10, "violations": string[]}',
+    '  - Check: has frontmatter name+description, has clear structure, has examples, no broken references',
+    '- security: {"score": 1-10, "concerns": string[]}',
+    '  - Check: no hardcoded tokens/secrets, no absolute paths, no shell injection patterns',
+    '- refinedKeywords: string[] (improve/expand the mechanicalKeywords — add domain-specific terms the parser missed)',
+    '',
+    'Example output line:',
+    '{"source":"org/repo","skill":"my-skill","complexity":"moderate","progressiveDisclosure":true,"pdTechniques":["details-blocks"],"bestPractices":{"score":8,"violations":[]},"security":{"score":10,"concerns":[]},"refinedKeywords":["react","hooks","state-management"]}',
+    '',
+    `MANIFEST (${manifests.length} skills):`,
+    formatManifestBatch(manifests),
+  ].join('\n')
+}

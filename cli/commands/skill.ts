@@ -715,7 +715,7 @@ export default defineCommand({
             // Ensure worktree base dir exists
             mkdirSync(WORKTREE_BASE, { recursive: true })
 
-            const ALLOWED_TOOLS = 'Read Glob Grep'
+            // Agent uses no tools — judgment-only prompt receives content inline
 
             let totalProcessed = 0
             let totalErrors = 0
@@ -807,49 +807,37 @@ export default defineCommand({
                   )
                 }
 
-                // Build manifest with mechanical fields pre-computed
-                const manifest = batch.map((entry) => {
-                  const dl = downloaded.get(entry.skill)
-                  return {
-                    source: entry.source,
-                    skill: entry.skill,
-                    localPath: dl?.path ?? 'DOWNLOAD_FAILED',
-                    wordCount: dl?.wordCount,
-                    sectionCount: dl?.sectionCount,
-                    fileCount: dl?.fileCount,
-                    contentHash: dl?.contentHash,
-                  }
-                })
+                // Build manifests with content inline for judgment-only agent
+                const { buildManifestFromEntry, buildTier1AgentPrompt } = await import(
+                  '../lib/catalog-manifest'
+                )
+                const manifests = batch
+                  .filter((entry) => {
+                    const dl = downloaded.get(entry.skill)
+                    return dl?.path
+                  })
+                  .map((entry) => {
+                    const dl = downloaded.get(entry.skill)
+                    const content = require('node:fs').readFileSync(dl?.path, 'utf8') as string
+                    return buildManifestFromEntry(
+                      {
+                        ...entry,
+                        ...dl,
+                        wordCount: dl?.wordCount ?? 0,
+                      } as import('../lib/catalog').CatalogEntryWithTier1,
+                      content
+                    )
+                  })
 
-                // Phase 2: Dispatch agent (async — judgment-only analysis)
-                const agentPrompt = [
-                  'You are a skill inspector. Analyze each pre-downloaded skill and output ONE NDJSON line per skill to stdout.',
-                  'Skills are already downloaded. Metrics (wordCount, sectionCount, fileCount, contentHash) are pre-computed — use them directly.',
-                  '',
-                  'Output ONLY raw JSON lines. No markdown, no code fences, no prose, no explanation.',
-                  '',
-                  'For each skill with a valid localPath:',
-                  '1. Read the SKILL.md and extract keywords from headings + first paragraph',
-                  '2. Check for <details> blocks or collapsible sections (progressive disclosure)',
-                  '3. Check frontmatter for name/description fields (best practices score 0-5)',
-                  '4. Grep for hardcoded tokens, secrets, or absolute paths (security score 0-5)',
-                  '5. Determine complexity using the provided wordCount/sectionCount/fileCount: simple (<500 words, ≤5 sections), moderate (500-2000), complex (>2000 or >15 sections)',
-                  '',
-                  'Output format (one JSON line per skill):',
-                  '{"source":"org/repo","skill":"name","keywords":["k1","k2"],"complexity":"simple|moderate|complex","progressiveDisclosure":false,"pdTechniques":[],"bestPracticesMechanical":{"score":3,"violations":[]},"securityMechanical":{"score":5,"concerns":[]},"tier2Reviewed":false}',
-                  '',
-                  'For DOWNLOAD_FAILED entries, output: {"source":"org/repo","skill":"name","error":"download failed","tier2Reviewed":false}',
-                  '',
-                  'Skills to analyze:',
-                  JSON.stringify(manifest, null, 2),
-                ].join('\n')
+                // Phase 2: Dispatch agent (judgment-only — no tools, content inline)
+                const agentPrompt = buildTier1AgentPrompt(manifests)
 
                 // Write prompt to file to avoid shell arg length limits
                 const promptFile = join(wtPath, '.inspect-prompt.txt')
                 fsWriteSync(promptFile, agentPrompt, 'utf8')
 
                 const { stdout } = await execAsync(
-                  `cat ${JSON.stringify(promptFile)} | claude --model haiku --allowedTools ${JSON.stringify(ALLOWED_TOOLS)} -p -`,
+                  `cat ${JSON.stringify(promptFile)} | claude --model haiku -p -`,
                   {
                     encoding: 'utf8',
                     timeout: 300_000,
