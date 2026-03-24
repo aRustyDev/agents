@@ -42,10 +42,10 @@ related:
 
 | ID | Name | Status | Dependencies | Success Criteria |
 |----|------|--------|--------------|------------------|
-| phase-1 | Schema & Data Model Evolution | pending | - | Repo manifest type, enhanced entry fields, source_invalid rename, migration |
-| phase-2 | Repo-level Mechanical Discovery | pending | phase-1 | Clone once per repo, discover all skills, capture all deterministic values |
-| phase-3 | Catalog Reconciliation & State Management | pending | phase-2 | Match discovered vs. catalog, detect moves/renames/new/removed |
-| phase-4 | Tier 1 Analysis Refactor | pending | phase-3 | Haiku receives pre-computed data, does judgment-only (0 I/O, 0 mechanical work) |
+| phase-1 | Schema & Data Model Evolution | complete | - | Repo manifest type, enhanced entry fields, source_invalid rename, migration |
+| phase-2 | Repo-level Mechanical Discovery | complete | phase-1 | Clone once per repo, discover all skills, capture all deterministic values |
+| phase-3 | Catalog Reconciliation & State Management | complete | phase-2 | Match discovered vs. catalog, detect moves/renames/new/removed |
+| phase-4 | Tier 1 Analysis Refactor | complete | phase-3 | Haiku receives pre-computed data, does judgment-only (0 I/O, 0 mechanical work) |
 | phase-5 | Tier 2 Deep Analysis | pending | phase-4 | Sonnet agent for quality scoring on non-trivial, non-fork skills |
 
 ### Phase Details

@@ -31,7 +31,7 @@ Issues to be created via `/beads:string` after plan approval.
 
 | This Plan | Other Plan | Constraint |
 |-----------|-----------|------------|
-| phase-7 (decomposition) | agents-refactor phase-4 | **Done.** Refactor plan's processBatch refactored. skill.ts ready for decomposition. |
+| phase-7 (decomposition) | agents-refactor phases 1-4 | Refactor plan phases 1-4 implemented (beads closed), phase docs need status update. skill.ts processBatch refactored. Phase 7 must not start until refactor is fully verified. |
 | phase-5 (Part A done) | All other plans | All plans referencing `cli/` or `context/` paths break until Part A updates them |
 
 ## Version Strategy

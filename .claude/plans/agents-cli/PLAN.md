@@ -29,13 +29,13 @@ related:
 
 | # | Objective | Measurable | Done When |
 |---|-----------|------------|-----------|
-| 1 | CLI in `packages/cli/` with `src/`+`test/` structure | Yes | `cd packages/cli && bun test` passes all 1,580+ tests |
+| 1 | CLI in `packages/cli/` with `src/`+`test/` structure | Yes | `cd packages/cli && bun test` — zero regressions from pre-restructure baseline |
 | 2 | Content library in `content/` | Yes | All discovery still works |
 | 3 | Dead directories removed | Yes | `crew/`, `polecats/`, `witness/`, `mayor/`, `refinery/` gone |
 | 4 | Root workspace configured | Yes | `bun install` from root works |
 | 5 | Verb-first CLI grammar | Yes | `agents add skill`, `agents search mcp server`, `agents lint plugin` all work |
 | 6 | Shared library modules | Yes | Zero duplication between commands; all commands use shared lib |
-| 7 | Component model handles all 11 types | Yes | skill, persona, lsp, mcp-server, mcp-client, mcp-tool, rule, hook, plugin, output-style, command — all route through same verb commands |
+| 7 | Component model handles all 11 types | Yes | skill, persona, lsp, mcp-server, mcp-client, mcp-tool, rule, hook, plugin, output-style, command — unified registry |
 | 8 | `agents config` manages CLI settings | Yes | Default fail-on, debug, logging, search backends, db config |
 
 ### Current State
@@ -54,6 +54,8 @@ related:
 
 ```text
 agents [-h, -y/--yes, --json, --output, --fail-on, --debug, --trace, -vvv]
+│
+│ Component lifecycle (verb-first):
 ├── init <component-type>       # Scaffold from template
 ├── add <component-type> <source>  # Install from source
 ├── remove <component-type> <name> # Remove installed component
@@ -63,13 +65,29 @@ agents [-h, -y/--yes, --json, --output, --fail-on, --debug, --trace, -vvv]
 ├── info <component-type> <name>   # Describe a component
 ├── update [component-type] [name] # Download + update
 ├── check [component-type] [name]  # Quick health check (deferred)
+│
+│ Pipeline operations (noun-first exception):
+├── catalog                     # Catalog pipeline operations
+│   ├── discover                # Clone repos, discover skills, compute fields
+│   ├── analyze                 # Tier 1 analysis (Haiku, judgment-only)
+│   ├── analyze-deep            # Tier 2 analysis (Sonnet, quality grading)
+│   ├── backfill                # Fill missing mechanical fields
+│   ├── stale                   # Detect upstream content changes
+│   ├── summary                 # Catalog statistics
+│   ├── forks                   # Fork detection
+│   ├── errors                  # Error log viewer
+│   └── scrub                   # Data cleanup
+│
+│ System commands:
 ├── config                      # Configure agents CLI settings
 ├── doctor                      # Runtime health + static analysis
 ├── completions <shell>         # Shell completions
 └── serve [--web, --api]        # Web UI + API (MVP)
 ```
 
-**Component types:** skill, persona (placeholder), lsp (placeholder), mcp server, mcp client (placeholder), mcp tool (placeholder), rule, hook, plugin, output-style, script (placeholder), command, setting (placeholder)
+**Component types (11):** skill, persona (placeholder), lsp (placeholder), mcp server, mcp client (placeholder), mcp tool (placeholder), rule, hook, plugin, output-style, command
+
+**Named exceptions to verb-first:** `catalog` (pipeline operations on local data), `config` (CLI settings), `doctor` (health check), `completions` (shell integration), `serve` (server mode)
 
 ### Phases
 
@@ -158,6 +176,33 @@ interface ComponentType {
 
 Placeholder types have `providers: []` and stub implementations.
 
+**Type registry reconciliation needed in Phase 6:**
+- Current code (`component/types.ts`): 9 types — skill, mcp_server, agent, plugin, rule, command, hook, output_style, claude_md
+- Target: 11 types — skill, persona, lsp, mcp-server, mcp-client, mcp-tool, rule, hook, plugin, output-style, command
+- Disposition: `agent` → keep (not a placeholder), `claude_md` → remove (not a component type), add 7 placeholders (persona, lsp, mcp-client, mcp-tool, script, setting + rename mcp_server→mcp-server)
+
+#### Catalog Commands (Pipeline Exception)
+
+The `catalog` subcommand tree is a **named exception** to the verb-first grammar. Catalog commands are pipeline operations on local data (`.catalog.ndjson`), not component lifecycle operations. They stay as `agents catalog <subcommand>`.
+
+During Phase 7 decomposition of `skill.ts`, the ~1,300 lines of catalog code move to `packages/cli/src/commands/catalog.ts` as a standalone command module. This is not a verb — it's a pipeline noun, like `config` and `doctor`.
+
+#### Test Baseline
+
+92 pre-existing test failures exist before restructuring. Phase 0 includes a baseline task:
+- Document which tests fail and categorize (stale schemas, missing fixtures, etc.)
+- Success criterion for Phases 2-5: "zero regressions from baseline" not "all tests pass"
+- Fixing baseline failures is a separate effort, tracked independently
+
+#### Backward-Compat Aliases
+
+During the noun-first → verb-first transition:
+- Aliases implemented via Citty's `alias` option on each subcommand
+- `agents skill add foo` routes to `agents add skill foo` with a deprecation warning
+- Aliases active for one major version after Phase 7 ships
+- Removed in the next major version; deprecation warnings guide users to new grammar
+- Catalog subcommands (`agents skill catalog ...`) route directly to `agents catalog ...`
+
 ---
 
 ### Phase 0: Fix Broken components/ References
@@ -170,6 +215,13 @@ The justfile has 22 references to `components/` which doesn't exist.
 - [ ] Replace: `components/` → `context/` (will become `content/` in Phase 3)
 - [ ] Verify recipes work
 - [ ] Commit
+
+#### Task 0.2: Establish test baseline
+
+- [ ] Run `bun test --cwd cli` and record pass/fail counts
+- [ ] Categorize the 92 pre-existing failures (stale schemas, missing fixtures, etc.)
+- [ ] Document baseline in a `test-baseline.md` file for reference during restructure
+- [ ] This baseline is the regression benchmark for Phases 2-5
 
 ---
 
@@ -194,7 +246,10 @@ The justfile has 22 references to `components/` which doesn't exist.
 - [ ] `git mv cli/lib → packages/cli/src/lib`
 - [ ] `git mv cli/test/* → packages/cli/test/`
 - [ ] Move config files (package.json, tsconfig.json)
-- [ ] Move Python files to `packages/cli/` level
+- [ ] Move Python files to `packages/cli/` level:
+  - `cli/embed.py`, `cli/watch-embed.py`, `cli/init-db.py`, `cli/kg-stats.py`
+  - `cli/plugin-hash.py`, `cli/build-plugin.py`, `cli/migrate-plugin-sources.py`
+  - Note: CLAUDE.md references `.scripts/embed.py` (stale) — fix in Phase 5
 - [ ] Move lint-context.sh
 
 #### Task 2.2: Update test imports
@@ -222,6 +277,7 @@ The justfile has 22 references to `components/` which doesn't exist.
 - [ ] Update `CLAUDE.md`, `README.md`
 - [ ] Update `.mcp.json`
 - [ ] Update `content/rules/**/*.md` prose references
+- [ ] Update catalog path hardcodes in skill.ts (~10 occurrences of `context/skills/.catalog.ndjson`)
 - [ ] Verify no remaining `context/` references
 - [ ] Run tests
 
@@ -283,6 +339,7 @@ Same as original plan — see Files moved/modified/removed sections in the detai
 | `packages/cli/src/commands/lint.ts` | 7 | Validate schemas |
 | `packages/cli/src/commands/info.ts` | 7 | Describe components |
 | `packages/cli/src/commands/update.ts` | 7 | Download + update |
+| `packages/cli/src/commands/catalog.ts` | 7 | Pipeline operations (analyze, discover, backfill, stale, etc.) |
 | `packages/cli/src/commands/config.ts` | 8 | CLI settings management |
 | `packages/cli/src/commands/doctor.ts` | 9 | Health check |
 | `packages/cli/src/commands/serve.ts` | 9 | Web UI + API |
