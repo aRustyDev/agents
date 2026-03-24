@@ -6,6 +6,7 @@ const main = defineCommand({
   subCommands: {
     plugin: () => import('../commands/plugin').then((m) => m.default),
     skill: () => import('../commands/skill').then((m) => m.default),
+    catalog: () => import('../commands/catalog').then((m) => m.default),
     mcp: () => import('../commands/mcp').then((m) => m.default),
     component: () => import('../commands/component').then((m) => m.default),
     kg: () => import('../commands/kg').then((m) => m.default),
