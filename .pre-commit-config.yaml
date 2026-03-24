@@ -158,19 +158,20 @@ repos:
           )$
 
   # =============================================================================
-  # Claude Context Linting (cclint) - Local, requires cli/lint-context.sh
+  # Claude Context Linting (cclint SDK) - Local, requires cli/bin/agents.ts
   # =============================================================================
   - repo: local
     hooks:
       - id: cclint
         name: "cclint: validate claude context files"
-        entry: bash -c 'cli/lint-context.sh'
+        entry: bash -c 'bun run cli/bin/agents.ts plugin lint --quiet 2>&1 | tail -10'
         language: system
         files: |
           (?x)^(
-            context/.*\.md|
-            \.claude/.*\.md|
-            CLAUDE\.md
+            context/agents/.*\.md|
+            context/commands/.*\.md|
+            \.claude/agents/.*\.md|
+            \.claude/commands/.*\.md
           )$
         pass_filenames: false
 
@@ -181,7 +182,7 @@ repos:
     hooks:
       - id: plugin-validate
         name: "plugins: validate configs"
-        entry: bash -c 'cd cli && bun run bin/agents.ts plugin validate-all --quiet 2>&1 | tail -10'
+        entry: bash -c 'bun run cli/bin/agents.ts plugin validate-all --quiet 2>&1 | tail -10'
         language: system
         files: |
           (?x)^(

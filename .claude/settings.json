@@ -61,8 +61,8 @@
           },
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\" 2>/dev/null); [ -z \"$FILE\" ] && exit 0; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) echo \"$INPUT\" | cli/lint-context.sh;; esac; true'",
-            "timeout": 30
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\" 2>/dev/null); [ -z \"$FILE\" ] && exit 0; case \"$FILE\" in */agents/*.md|*/commands/*.md) BN=$(basename \"$FILE\"); case \"$BN\" in README.md|TODO.md) exit 0;; esac; if [ -f \"$FILE\" ] && ! head -1 \"$FILE\" | grep -q \"^---$\"; then echo \"⚠ $FILE: missing YAML frontmatter (must start with ---)\"; fi;; esac; true'",
+            "timeout": 10
           },
           {
             "type": "command",

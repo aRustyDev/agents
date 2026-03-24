@@ -53,7 +53,7 @@ Tool configs: `.github/pre-commit/`
 | Hook | Tool | Reason |
 |------|------|--------|
 | cspell | cspell | Custom dictionaries in `.github/pre-commit/words/` |
-| cclint | scripts/lint-context.sh | Project-specific Claude context validation |
+| cclint | `agents plugin lint` (cclint SDK) | Claude context validation |
 | brewfile-lint | ruby -c | Project-specific build file |
 | justfile-check/format | just | Project-specific build file |
 | json-validate | python3 | Explicit validation beyond check-json |

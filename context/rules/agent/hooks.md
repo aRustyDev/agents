@@ -21,7 +21,7 @@ Claude hooks run automatically after file operations (Write, Edit, MultiEdit). E
 | biome | `*.js,*.ts,*.jsx,*.tsx` | biome | JS/TS linting |
 | yamllint | `*.yaml,*.yml` | yamllint | YAML validation |
 | json | `*.json` | python3 | JSON syntax |
-| cclint | `context/*.md,.claude/*.md` | scripts/lint-context.sh | Claude context validation |
+| cclint | `*/agents/*.md,*/commands/*.md` | inline frontmatter check | Claude context validation |
 
 ## Hook Behavior
 
