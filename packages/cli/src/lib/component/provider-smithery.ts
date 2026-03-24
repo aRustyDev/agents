@@ -2,7 +2,7 @@
  * Smithery Registry provider for the Component system.
  *
  * Smithery is an MCP server registry. It only supports search for the
- * `mcp_server` component type. Add, remove, list, and info operations
+ * `mcp-server` component type. Add, remove, list, and info operations
  * are not supported -- installation is handled by other providers once
  * the user has discovered a server via search.
  */
@@ -30,11 +30,11 @@ export class SmitheryProvider implements ComponentProvider {
   readonly id = 'smithery'
   readonly displayName = 'Smithery Registry'
   readonly capabilities: ProviderCapabilities = {
-    search: ['mcp_server'],
+    search: ['mcp-server'],
     add: [],
     list: [],
     remove: [],
-    publish: ['mcp_server'],
+    publish: ['mcp-server'],
     info: [],
     outdated: [],
     update: [],
@@ -47,7 +47,7 @@ export class SmitheryProvider implements ComponentProvider {
   }
 
   async search(params: SearchParams): Promise<Result<PaginatedResult<Component>>> {
-    if (params.type && params.type !== 'mcp_server') {
+    if (params.type && params.type !== 'mcp-server') {
       return ok(emptyPage(clampPage(params.page), clampLimit(params.limit)))
     }
 
@@ -88,7 +88,7 @@ export class SmitheryProvider implements ComponentProvider {
           : []
 
       const items: Component[] = servers.map((s: Record<string, unknown>) => ({
-        type: 'mcp_server' as const,
+        type: 'mcp-server' as const,
         name: String(s.qualifiedName ?? s.name ?? ''),
         source: `smithery://${String(s.qualifiedName ?? s.name ?? '')}`,
         description: String(s.description ?? s.displayName ?? ''),
@@ -143,9 +143,9 @@ export class SmitheryProvider implements ComponentProvider {
   }
 
   async publish(type: ComponentType, opts: PublishOptions): Promise<Result<PublishResult>> {
-    if (type !== 'mcp_server') {
+    if (type !== 'mcp-server') {
       return err(
-        new CliError(`Smithery only supports publishing mcp_server, not ${type}`, 'E_UNSUPPORTED')
+        new CliError(`Smithery only supports publishing mcp-server, not ${type}`, 'E_UNSUPPORTED')
       )
     }
 

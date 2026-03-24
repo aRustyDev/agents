@@ -151,7 +151,7 @@ describe('transformToComponent', () => {
 
   test('uses owner field when author is missing', () => {
     const raw = { name: 'tool', owner: 'orgname' }
-    const result = transformToComponent(raw, 'mcp_server', 'github')
+    const result = transformToComponent(raw, 'mcp-server', 'github')
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.value.author).toBe('orgname')

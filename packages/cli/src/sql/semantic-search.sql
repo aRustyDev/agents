@@ -5,7 +5,7 @@
 --   embedding = ollama.embeddings(model='nomic-embed-text', prompt='kubernetes management')['embedding']
 --   results = conn.execute(open('scripts/sql/semantic-search.sql').read(), {
 --       'query_embedding': struct.pack(f'{len(embedding)}f', *embedding),
---       'entity_type': 'mcp_server',  -- or NULL for all types
+--       'entity_type': 'mcp_server',  -- or NULL for all types (KG EntityType format)
 --       'limit': 20
 --   })
 

@@ -172,7 +172,7 @@ describe('ComponentManager', () => {
     test('returns matching providers', () => {
       const mgr = new ComponentManager()
       mgr.register(mockProvider('a', { capabilities: { search: ['skill'] } }))
-      mgr.register(mockProvider('b', { capabilities: { search: ['mcp_server'] } }))
+      mgr.register(mockProvider('b', { capabilities: { search: ['mcp-server'] } }))
       const found = mgr.findProviders('search', 'skill')
       expect(found).toHaveLength(1)
       expect(found[0]?.id).toBe('a')
@@ -224,10 +224,10 @@ describe('ComponentManager', () => {
       const mgr = new ComponentManager()
       mgr.register(
         mockProvider('a', {
-          capabilities: { search: ['skill', 'mcp_server'] },
+          capabilities: { search: ['skill', 'mcp-server'] },
           searchResults: [
             makeComponent({ name: 'sk', type: 'skill', source: 'a' }),
-            makeComponent({ name: 'mcp', type: 'mcp_server', source: 'a' }),
+            makeComponent({ name: 'mcp', type: 'mcp-server', source: 'a' }),
           ],
         })
       )
@@ -248,11 +248,11 @@ describe('ComponentManager', () => {
       )
       mgr.register(
         mockProvider('mcp-only', {
-          capabilities: { search: ['mcp_server'] },
+          capabilities: { search: ['mcp-server'] },
           searchResults: [
             makeComponent({
               name: 'from-mcp-provider',
-              type: 'mcp_server',
+              type: 'mcp-server',
               source: 'mo',
             }),
           ],
@@ -352,7 +352,7 @@ describe('ComponentManager', () => {
 
     test('returns E_NO_PROVIDER when none support the type', async () => {
       const mgr = new ComponentManager()
-      mgr.register(mockProvider('a', { capabilities: { add: ['mcp_server'] } }))
+      mgr.register(mockProvider('a', { capabilities: { add: ['mcp-server'] } }))
       const result = await mgr.add('gh:user/skill', 'skill', {})
       expect(result.ok).toBe(false)
       if (result.ok) return
@@ -473,7 +473,7 @@ describe('ComponentManager', () => {
 
     test('returns E_NO_PROVIDER when none support the type', async () => {
       const mgr = new ComponentManager()
-      mgr.register(mockProvider('a', { capabilities: { remove: ['mcp_server'] } }))
+      mgr.register(mockProvider('a', { capabilities: { remove: ['mcp-server'] } }))
       const result = await mgr.remove('some-skill', 'skill')
       expect(result.ok).toBe(false)
       if (result.ok) return
@@ -498,11 +498,11 @@ describe('ComponentManager', () => {
       const mgr = new ComponentManager()
       mgr.register(
         mockProvider('pub-provider', {
-          capabilities: { publish: ['mcp_server'] },
+          capabilities: { publish: ['mcp-server'] },
           publishResult,
         })
       )
-      const result = await mgr.publish('mcp_server', { name: 'test-server' })
+      const result = await mgr.publish('mcp-server', { name: 'test-server' })
       expect(result.ok).toBe(true)
       if (!result.ok) return
       expect(result.value.status).toBe('published')
@@ -512,11 +512,11 @@ describe('ComponentManager', () => {
 
     test('returns E_NO_PROVIDER when none registered', async () => {
       const mgr = new ComponentManager()
-      const result = await mgr.publish('mcp_server', {})
+      const result = await mgr.publish('mcp-server', {})
       expect(result.ok).toBe(false)
       if (result.ok) return
       expect(result.error.code).toBe('E_NO_PROVIDER')
-      expect(result.error.message).toContain('mcp_server')
+      expect(result.error.message).toContain('mcp-server')
     })
 
     test('returns E_NO_PROVIDER when no provider supports the type', async () => {
@@ -526,7 +526,7 @@ describe('ComponentManager', () => {
           capabilities: { publish: ['skill'] },
         })
       )
-      const result = await mgr.publish('mcp_server', { name: 'test' })
+      const result = await mgr.publish('mcp-server', { name: 'test' })
       expect(result.ok).toBe(false)
       if (result.ok) return
       expect(result.error.code).toBe('E_NO_PROVIDER')

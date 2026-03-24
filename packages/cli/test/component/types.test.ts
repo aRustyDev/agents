@@ -1,13 +1,18 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  COMPONENT_TYPE_META,
   COMPONENT_TYPES,
   type Component,
   type ComponentAddOptions,
   type ComponentAddResult,
   type ComponentProvider,
   type ComponentType,
+  type ComponentTypeMetadata,
+  getActiveTypes,
+  getComponentMeta,
   isComponentType,
   type PaginatedResult,
+  parseComponentType,
   type ProviderCapabilities,
   type PublishOptions,
   type PublishResult,
@@ -20,25 +25,26 @@ import {
 // ---------------------------------------------------------------------------
 
 describe('COMPONENT_TYPES', () => {
-  test('contains exactly 9 types', () => {
-    expect(COMPONENT_TYPES).toHaveLength(9)
+  test('contains exactly 12 types', () => {
+    expect(COMPONENT_TYPES).toHaveLength(12)
   })
 
-  test('includes all expected component types', () => {
+  test('includes all expected component types in order', () => {
     const expected = [
       'skill',
-      'mcp_server',
       'agent',
-      'plugin',
+      'persona',
+      'lsp',
+      'mcp-server',
+      'mcp-client',
+      'mcp-tool',
       'rule',
-      'command',
       'hook',
-      'output_style',
-      'claude_md',
+      'plugin',
+      'output-style',
+      'command',
     ]
-    for (const t of expected) {
-      expect(COMPONENT_TYPES).toContain(t)
-    }
+    expect([...COMPONENT_TYPES]).toEqual(expected)
   })
 
   test('is a readonly tuple (const assertion)', () => {
@@ -63,7 +69,9 @@ describe('isComponentType', () => {
     expect(isComponentType('widget')).toBe(false)
     expect(isComponentType('')).toBe(false)
     expect(isComponentType('SKILL')).toBe(false) // case-sensitive
-    expect(isComponentType('mcp-server')).toBe(false) // hyphen, not underscore
+    expect(isComponentType('mcp_server')).toBe(false) // underscore, not hyphen
+    expect(isComponentType('output_style')).toBe(false) // underscore, not hyphen
+    expect(isComponentType('claude_md')).toBe(false) // removed from component types
   })
 
   test('narrows type after guard', () => {
@@ -75,6 +83,138 @@ describe('isComponentType', () => {
     } else {
       // Should not reach here for 'skill'
       expect(true).toBe(false)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// parseComponentType
+// ---------------------------------------------------------------------------
+
+describe('parseComponentType', () => {
+  test('parses exact matches', () => {
+    expect(parseComponentType('skill')).toBe('skill')
+    expect(parseComponentType('mcp-server')).toBe('mcp-server')
+    expect(parseComponentType('output-style')).toBe('output-style')
+  })
+
+  test('normalizes underscores to hyphens', () => {
+    expect(parseComponentType('mcp_server')).toBe('mcp-server')
+    expect(parseComponentType('output_style')).toBe('output-style')
+    expect(parseComponentType('mcp_client')).toBe('mcp-client')
+  })
+
+  test('normalizes spaces to hyphens', () => {
+    expect(parseComponentType('mcp server')).toBe('mcp-server')
+    expect(parseComponentType('output style')).toBe('output-style')
+  })
+
+  test('normalizes uppercase to lowercase', () => {
+    expect(parseComponentType('SKILL')).toBe('skill')
+    expect(parseComponentType('MCP-SERVER')).toBe('mcp-server')
+  })
+
+  test('returns undefined for invalid input', () => {
+    expect(parseComponentType('widget')).toBeUndefined()
+    expect(parseComponentType('')).toBeUndefined()
+    expect(parseComponentType('claude_md')).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getComponentMeta
+// ---------------------------------------------------------------------------
+
+describe('getComponentMeta', () => {
+  test('returns metadata for each component type', () => {
+    for (const t of COMPONENT_TYPES) {
+      const meta = getComponentMeta(t)
+      expect(meta).toBeDefined()
+      expect(meta.name).toBe(t)
+    }
+  })
+
+  test('skill metadata has expected values', () => {
+    const meta = getComponentMeta('skill')
+    expect(meta.pluralName).toBe('skills')
+    expect(meta.placeholder).toBe(false)
+    expect(meta.providers).toContain('local')
+  })
+
+  test('persona is a placeholder type', () => {
+    const meta = getComponentMeta('persona')
+    expect(meta.placeholder).toBe(true)
+    expect(meta.providers).toEqual([])
+  })
+
+  test('mcp-server has smithery provider', () => {
+    const meta = getComponentMeta('mcp-server')
+    expect(meta.providers).toContain('smithery')
+    expect(meta.placeholder).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getActiveTypes
+// ---------------------------------------------------------------------------
+
+describe('getActiveTypes', () => {
+  test('returns only non-placeholder types', () => {
+    const active = getActiveTypes()
+    for (const t of active) {
+      expect(COMPONENT_TYPE_META[t].placeholder).toBe(false)
+    }
+  })
+
+  test('excludes placeholder types', () => {
+    const active = getActiveTypes()
+    expect(active).not.toContain('persona')
+    expect(active).not.toContain('lsp')
+    expect(active).not.toContain('mcp-client')
+    expect(active).not.toContain('mcp-tool')
+    expect(active).not.toContain('hook')
+  })
+
+  test('includes known active types', () => {
+    const active = getActiveTypes()
+    expect(active).toContain('skill')
+    expect(active).toContain('agent')
+    expect(active).toContain('mcp-server')
+    expect(active).toContain('rule')
+    expect(active).toContain('plugin')
+    expect(active).toContain('output-style')
+    expect(active).toContain('command')
+  })
+
+  test('excludes hook (placeholder until provider exists)', () => {
+    const active = getActiveTypes()
+    expect(active).not.toContain('hook')
+  })
+
+  test('returns 7 active types', () => {
+    expect(getActiveTypes()).toHaveLength(7)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// COMPONENT_TYPE_META
+// ---------------------------------------------------------------------------
+
+describe('COMPONENT_TYPE_META', () => {
+  test('has metadata for every component type', () => {
+    for (const t of COMPONENT_TYPES) {
+      expect(COMPONENT_TYPE_META[t]).toBeDefined()
+    }
+  })
+
+  test('each entry has required fields', () => {
+    for (const t of COMPONENT_TYPES) {
+      const meta: ComponentTypeMetadata = COMPONENT_TYPE_META[t]
+      expect(meta.name).toBe(t)
+      expect(typeof meta.pluralName).toBe('string')
+      expect(typeof meta.discoveryPattern).toBe('string')
+      expect(Array.isArray(meta.providers)).toBe(true)
+      expect(typeof meta.placeholder).toBe('boolean')
     }
   })
 })
@@ -104,7 +244,7 @@ describe('Component', () => {
 
   test('full component includes all optional fields', () => {
     const c: Component = {
-      type: 'mcp_server',
+      type: 'mcp-server',
       name: 'context7',
       source: 'registry',
       description: 'Documentation retrieval server',
@@ -123,7 +263,7 @@ describe('Component', () => {
       installMode: 'symlink',
       localPath: '/opt/mcp/context7',
     }
-    expect(c.type).toBe('mcp_server')
+    expect(c.type).toBe('mcp-server')
     expect(c.version).toBe('1.2.0')
     expect(c.tags).toEqual(['docs', 'retrieval'])
     expect(c.installs).toBe(1500)
@@ -174,7 +314,7 @@ describe('SearchParams', () => {
   test('accepts all optional filters', () => {
     const params: SearchParams = {
       query: 'mcp',
-      type: 'mcp_server',
+      type: 'mcp-server',
       limit: 20,
       page: 2,
       agent: 'research',
@@ -182,7 +322,7 @@ describe('SearchParams', () => {
       namespace: 'arustydev',
       verified: true,
     }
-    expect(params.type).toBe('mcp_server')
+    expect(params.type).toBe('mcp-server')
     expect(params.limit).toBe(20)
     expect(params.page).toBe(2)
     expect(params.agent).toBe('research')
@@ -245,12 +385,12 @@ describe('PaginatedResult', () => {
 describe('ProviderCapabilities', () => {
   test('has all 8 operation categories', () => {
     const caps: ProviderCapabilities = {
-      search: ['skill', 'mcp_server'],
-      add: ['skill', 'mcp_server'],
-      list: ['skill', 'mcp_server', 'agent'],
+      search: ['skill', 'mcp-server'],
+      add: ['skill', 'mcp-server'],
+      list: ['skill', 'mcp-server', 'agent'],
       remove: ['skill'],
       publish: [],
-      info: ['skill', 'mcp_server'],
+      info: ['skill', 'mcp-server'],
       outdated: ['skill'],
       update: ['skill'],
     }
@@ -287,7 +427,7 @@ describe('ProviderCapabilities', () => {
     const caps: ProviderCapabilities = {
       search: COMPONENT_TYPES,
       add: ['skill'],
-      list: ['mcp_server', 'agent'],
+      list: ['mcp-server', 'agent'],
       remove: ['plugin'],
       publish: ['skill'],
       info: COMPONENT_TYPES,

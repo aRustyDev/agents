@@ -33,14 +33,14 @@ async function createStyle(dir: string, name: string, content: string): Promise<
 // ---------------------------------------------------------------------------
 
 describe('LocalOutputStyleProvider capabilities', () => {
-  test('declares output_style support for search, list, info', () => {
+  test('declares output-style support for search, list, info', () => {
     const provider = new LocalOutputStyleProvider(tmp)
 
     expect(provider.id).toBe('local-output-style')
     expect(provider.displayName).toBe('Local Output Styles')
-    expect(provider.capabilities.search).toContain('output_style')
-    expect(provider.capabilities.list).toContain('output_style')
-    expect(provider.capabilities.info).toContain('output_style')
+    expect(provider.capabilities.search).toContain('output-style')
+    expect(provider.capabilities.list).toContain('output-style')
+    expect(provider.capabilities.info).toContain('output-style')
     expect(provider.capabilities.add).toEqual([])
     expect(provider.capabilities.remove).toEqual([])
     expect(provider.capabilities.publish).toEqual([])
@@ -59,7 +59,7 @@ describe('LocalOutputStyleProvider discovery', () => {
     await createStyle(tmp, 'code-review', '# Code Review\n\nStyle for reviews.')
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -76,7 +76,7 @@ describe('LocalOutputStyleProvider discovery', () => {
     await writeFile(join(stylesDir, 'TODO.md'), '# TODO\n\n- Add more styles')
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -91,7 +91,7 @@ describe('LocalOutputStyleProvider discovery', () => {
     await writeFile(join(stylesDir, '.hidden-style.md'), '# Hidden\n\nDo not discover.')
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -104,14 +104,14 @@ describe('LocalOutputStyleProvider discovery', () => {
     await createStyle(tmp, 'my-custom-style', '# Custom\n\nA custom style.')
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
 
     expect(result.value).toHaveLength(1)
     expect(result.value[0]?.name).toBe('my-custom-style')
-    expect(result.value[0]?.type).toBe('output_style')
+    expect(result.value[0]?.type).toBe('output-style')
   })
 
   test('description extracted from first paragraph after heading', async () => {
@@ -128,7 +128,7 @@ describe('LocalOutputStyleProvider discovery', () => {
     await createStyle(tmp, 'feedback-submission', content)
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -158,7 +158,7 @@ describe('LocalOutputStyleProvider search', () => {
     expect(result.value.items[0]?.name).toBe('feedback-submission')
   })
 
-  test('returns empty for non-output_style type', async () => {
+  test('returns empty for non-output-style type', async () => {
     await createStyle(tmp, 'feedback-submission', '# Feedback\n\nStyle for feedback.')
 
     const provider = new LocalOutputStyleProvider(tmp)
@@ -181,7 +181,7 @@ describe('LocalOutputStyleProvider missing directory', () => {
   test('handles missing directory gracefully', async () => {
     // tmp has no content/output-styles/ directory
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.list('output_style')
+    const result = await provider.list('output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -211,13 +211,13 @@ describe('LocalOutputStyleProvider info', () => {
     await createStyle(tmp, 'code-review', '# Code Review\n\nStyle for reviews.')
 
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.info('feedback-submission', 'output_style')
+    const result = await provider.info('feedback-submission', 'output-style')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
 
     expect(result.value.name).toBe('feedback-submission')
-    expect(result.value.type).toBe('output_style')
+    expect(result.value.type).toBe('output-style')
     expect(result.value.description).toBe('Style for feedback.')
     expect(result.value.localPath).toBe(
       join(tmp, 'content', 'output-styles', 'feedback-submission.md')
@@ -226,7 +226,7 @@ describe('LocalOutputStyleProvider info', () => {
 
   test('returns error for missing style', async () => {
     const provider = new LocalOutputStyleProvider(tmp)
-    const result = await provider.info('nonexistent', 'output_style')
+    const result = await provider.info('nonexistent', 'output-style')
 
     expect(result.ok).toBe(false)
     if (result.ok) return

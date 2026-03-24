@@ -79,7 +79,7 @@ describe('LocalProvider search', () => {
     await createSkill(tmp, 'some-skill')
 
     const provider = new LocalProvider(tmp)
-    const result = await provider.search({ query: 'test', type: 'mcp_server' })
+    const result = await provider.search({ query: 'test', type: 'mcp-server' })
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -194,7 +194,7 @@ describe('LocalProvider list', () => {
     await createSkill(tmp, 'some-skill')
 
     const provider = new LocalProvider(tmp)
-    const result = await provider.list('mcp_server')
+    const result = await provider.list('mcp-server')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -248,7 +248,7 @@ describe('LocalProvider info', () => {
 
   test('returns error for unsupported type', async () => {
     const provider = new LocalProvider(tmp)
-    const result = await provider.info('something', 'mcp_server', { cwd: tmp })
+    const result = await provider.info('something', 'mcp-server', { cwd: tmp })
 
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -295,7 +295,7 @@ describe('LocalProvider remove', () => {
 
   test('returns error for unsupported type', async () => {
     const provider = new LocalProvider(tmp)
-    const result = await provider.remove('something', 'mcp_server', {
+    const result = await provider.remove('something', 'mcp-server', {
       cwd: tmp,
     })
 

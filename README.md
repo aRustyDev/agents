@@ -89,8 +89,8 @@ All entity types flow through a universal `ComponentProvider` interface:
 | LocalPluginProvider | `local-plugin` | plugin | `content/plugins/**/.claude-plugin/` |
 | LocalRuleProvider | `local-rule` | rule | `content/rules/**/*.md` |
 | LocalCommandProvider | `local-command` | command | `content/commands/**/*.md` |
-| LocalOutputStyleProvider | `local-output-style` | output_style | `content/output-styles/**/*.md` |
-| SmitheryProvider | `smithery` | mcp_server | registry.smithery.ai API |
+| LocalOutputStyleProvider | `local-output-style` | output-style | `content/output-styles/**/*.md` |
+| SmitheryProvider | `smithery` | mcp-server | registry.smithery.ai API |
 
 The `ComponentManager` aggregates search across all providers, deduplicates results, and handles pagination.
 

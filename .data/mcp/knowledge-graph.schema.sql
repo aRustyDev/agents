@@ -11,7 +11,8 @@
 -- Universal entity table (all context component types)
 CREATE TABLE IF NOT EXISTS entities (
   id INTEGER PRIMARY KEY,
-  entity_type TEXT NOT NULL,  -- 'mcp_server', 'skill', 'rule', 'agent', 'plugin', 'hook', 'claude_md', 'command', 'output_style'
+  entity_type TEXT NOT NULL,  -- KG EntityTypes (underscore format, distinct from CLI ComponentTypes):
+                             -- 'mcp_server', 'skill', 'rule', 'agent', 'plugin', 'hook', 'claude_md', 'command', 'output_style'
   slug TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   file_path TEXT,             -- Source file (for re-embedding triggers)

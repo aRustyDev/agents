@@ -14,14 +14,17 @@ import type { Result } from '../types'
 
 export const COMPONENT_TYPES = [
   'skill',
-  'mcp_server',
   'agent',
-  'plugin',
+  'persona',
+  'lsp',
+  'mcp-server',
+  'mcp-client',
+  'mcp-tool',
   'rule',
-  'command',
   'hook',
-  'output_style',
-  'claude_md',
+  'plugin',
+  'output-style',
+  'command',
 ] as const
 
 export type ComponentType = (typeof COMPONENT_TYPES)[number]
@@ -29,6 +32,52 @@ export type ComponentType = (typeof COMPONENT_TYPES)[number]
 /** Type guard: returns true when `value` is a valid ComponentType string. */
 export function isComponentType(value: string): value is ComponentType {
   return (COMPONENT_TYPES as readonly string[]).includes(value)
+}
+
+// ---------------------------------------------------------------------------
+// Component type metadata
+// ---------------------------------------------------------------------------
+
+export interface ComponentTypeMetadata {
+  readonly name: ComponentType
+  readonly pluralName: string
+  readonly discoveryPattern: string  // glob for finding installed components
+  readonly templateDir?: string      // for init scaffold
+  readonly schemaPath?: string       // for lint validation
+  readonly providers: string[]       // provider IDs that handle this type
+  readonly placeholder: boolean      // true if not yet fully implemented
+}
+
+export const COMPONENT_TYPE_META: Record<ComponentType, ComponentTypeMetadata> = {
+  'skill': { name: 'skill', pluralName: 'skills', discoveryPattern: '**/skills/**/*.md', providers: ['local', 'smithery'], placeholder: false },
+  'agent': { name: 'agent', pluralName: 'agents', discoveryPattern: '**/agents/**/*.md', providers: ['local-agent'], placeholder: false },
+  'persona': { name: 'persona', pluralName: 'personas', discoveryPattern: '**/personas/**/*.md', providers: [], placeholder: true },
+  'lsp': { name: 'lsp', pluralName: 'lsp-configs', discoveryPattern: '**/lsp/**/*.json', providers: [], placeholder: true },
+  'mcp-server': { name: 'mcp-server', pluralName: 'mcp-servers', discoveryPattern: '**/mcp/servers/**/*.json', providers: ['smithery'], placeholder: false },
+  'mcp-client': { name: 'mcp-client', pluralName: 'mcp-clients', discoveryPattern: '**/mcp/clients/**/*.json', providers: [], placeholder: true },
+  'mcp-tool': { name: 'mcp-tool', pluralName: 'mcp-tools', discoveryPattern: '**/mcp/tools/**/*.json', providers: [], placeholder: true },
+  'rule': { name: 'rule', pluralName: 'rules', discoveryPattern: '**/rules/**/*.md', providers: ['local-rule'], placeholder: false },
+  'hook': { name: 'hook', pluralName: 'hooks', discoveryPattern: '**/hooks/**/*.{ts,js,sh}', providers: [], placeholder: true },
+  'plugin': { name: 'plugin', pluralName: 'plugins', discoveryPattern: '**/plugins/**/*.json', providers: ['local-plugin'], placeholder: false },
+  'output-style': { name: 'output-style', pluralName: 'output-styles', discoveryPattern: '**/output-styles/**/*.md', providers: ['local-output-style'], placeholder: false },
+  'command': { name: 'command', pluralName: 'commands', discoveryPattern: '**/commands/**/*.md', providers: ['local-command'], placeholder: false },
+}
+
+/** Look up metadata for a component type. */
+export function getComponentMeta(type: ComponentType): ComponentTypeMetadata {
+  return COMPONENT_TYPE_META[type]
+}
+
+/** Get all non-placeholder component types. */
+export function getActiveTypes(): ComponentType[] {
+  return COMPONENT_TYPES.filter(t => !COMPONENT_TYPE_META[t].placeholder)
+}
+
+/** Parse a CLI input string to ComponentType (handles spaces and hyphens). */
+export function parseComponentType(input: string): ComponentType | undefined {
+  const normalized = input.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-')
+  if (isComponentType(normalized)) return normalized
+  return undefined
 }
 
 // ---------------------------------------------------------------------------
