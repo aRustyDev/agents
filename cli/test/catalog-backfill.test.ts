@@ -241,7 +241,7 @@ describe('mergeBackfillResults', () => {
 
     const results: BackfillResult[] = [
       { source: 'a/b', skill: 's1', headingTree: [{ depth: 1, title: 'T' }] },
-      { source: 'a/b', skill: 's2', error: 'nope', errorType: 'source_invalid' },
+      { source: 'a/b', skill: 's2', error: 'nope', errorType: 'invalid_source_entry' },
       { source: 'c/d', skill: 's3' }, // nothing to fill
     ]
 

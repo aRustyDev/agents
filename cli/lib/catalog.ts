@@ -473,7 +473,7 @@ export type Tier1ErrorType =
   | 'analysis_timeout'
   | 'rate_limited'
   | 'batch_failed'
-  | 'source_invalid'
+  | 'invalid_source_entry'
 
 export interface Tier1Result extends ComponentMetadata {
   source: string
@@ -638,6 +638,98 @@ export function computeFileCount(dir: string): number {
     return count
   } catch {
     return 0
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Component Metadata Compute Functions
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute a section map: heading text + line number for navigation.
+ */
+export function computeSectionMap(content: string): SectionMapEntry[] {
+  const entries: SectionMapEntry[] = []
+  const lines = content.split('\n')
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(/^(#{1,6})\s+(.+)$/)
+    if (match) {
+      entries.push({ heading: match[2].trim(), line: i + 1, depth: match[1].length })
+    }
+  }
+  return entries
+}
+
+/**
+ * Count lines in content.
+ */
+export function computeLineCount(content: string): number {
+  if (!content) return 0
+  return content.split('\n').length
+}
+
+/**
+ * List all files in a directory recursively (relative paths).
+ * Returns empty array for nonexistent directories.
+ */
+export function computeFileTree(dir: string): string[] {
+  const { readdirSync, statSync } = require('node:fs') as typeof import('node:fs')
+  const { relative } = require('node:path') as typeof import('node:path')
+  const files: string[] = []
+  try {
+    function walk(current: string): void {
+      for (const entry of readdirSync(current, { withFileTypes: true })) {
+        const full = join(current, entry.name)
+        if (entry.isFile()) {
+          files.push(relative(dir, full))
+        } else if (entry.isDirectory() && entry.name !== '.git' && entry.name !== 'node_modules') {
+          walk(full)
+        }
+      }
+    }
+    walk(dir)
+  } catch {
+    /* nonexistent dir */
+  }
+  return files.sort()
+}
+
+/**
+ * Compute total size of a directory in bytes.
+ * Returns 0 for nonexistent directories.
+ */
+export function computeSkillSizeBytes(dir: string): number {
+  const { statSync, readdirSync } = require('node:fs') as typeof import('node:fs')
+  try {
+    let total = 0
+    function walk(current: string): void {
+      for (const entry of readdirSync(current, { withFileTypes: true })) {
+        const full = join(current, entry.name)
+        if (entry.isFile()) {
+          total += statSync(full).size
+        } else if (entry.isDirectory() && entry.name !== '.git') {
+          walk(full)
+        }
+      }
+    }
+    walk(dir)
+    return total
+  } catch {
+    return 0
+  }
+}
+
+/**
+ * Check if a skill is "simple" — directory contains only SKILL.md.
+ * No resources, no subdirectories, no additional files.
+ */
+export function isSimpleSkill(dir: string): boolean {
+  const { readdirSync } = require('node:fs') as typeof import('node:fs')
+  try {
+    const entries = readdirSync(dir, { withFileTypes: true })
+    return entries.length === 1 && entries[0].isFile() && entries[0].name === 'SKILL.md'
+  } catch {
+    return false
   }
 }
 
@@ -957,6 +1049,30 @@ export function mergeRepoManifest(path: string, manifest: RepoManifest): void {
     existing.push(manifest)
   }
   writeRepoManifest(path, existing)
+}
+
+/**
+ * Migrate catalog entries: rename `source_invalid` → `invalid_source_entry`.
+ * Idempotent — safe to run multiple times.
+ */
+export function migrateCatalogSchema(catalogPath: string): number {
+  if (!existsSync(catalogPath)) return 0
+  const entries = readCatalogEntries(catalogPath)
+  let migrated = 0
+  for (const entry of entries) {
+    const e = entry as Record<string, unknown>
+    if (e.lastErrorType === 'source_invalid') {
+      e.lastErrorType = 'invalid_source_entry'
+      migrated++
+    }
+  }
+  if (migrated > 0) {
+    const tmpPath = `${catalogPath}.tmp`
+    const lines = `${entries.map((e) => JSON.stringify(e)).join('\n')}\n`
+    writeFileSync(tmpPath, lines, 'utf8')
+    renameSync(tmpPath, catalogPath)
+  }
+  return migrated
 }
 
 /**

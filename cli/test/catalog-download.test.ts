@@ -116,7 +116,7 @@ describe('downloadSkill', () => {
   it('returns error for invalid source format', async () => {
     const result = await downloadSkill('/tmp/bad/path', 'skill', {})
     expect(result.path).toBeNull()
-    expect(result.errorType).toBe('source_invalid')
+    expect(result.errorType).toBe('invalid_source_entry')
   })
 
   it('computes all mechanical fields on success', async () => {

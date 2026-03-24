@@ -219,7 +219,7 @@ export async function downloadSkill(
     return {
       path: null,
       error: validated.error.message,
-      errorType: 'source_invalid',
+      errorType: 'invalid_source_entry',
       errorDetail: validated.error.hint ?? validated.error.message,
     }
   }
@@ -399,7 +399,7 @@ async function downloadBatchForSource(
     fillGroupWithError(group, results, {
       path: null,
       error: validated.error.message,
-      errorType: 'source_invalid',
+      errorType: 'invalid_source_entry',
       errorDetail: validated.error.hint ?? validated.error.message,
     })
     return
@@ -525,7 +525,7 @@ async function backfillSource(
         source: entry.source,
         skill: entry.skill,
         error: validated.error.message,
-        errorType: 'source_invalid',
+        errorType: 'invalid_source_entry',
         errorDetail: validated.error.hint ?? validated.error.message,
       })
     }
