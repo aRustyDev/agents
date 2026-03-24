@@ -8,7 +8,7 @@
 
 import { existsSync, statSync } from 'node:fs'
 import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { dirname } from 'node:path'
 import { CliError, err, ok, type Result } from './types'
 
 // Re-export symlink utilities for single-import convenience
