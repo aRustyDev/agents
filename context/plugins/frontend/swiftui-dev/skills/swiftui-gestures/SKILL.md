@@ -1,3 +1,9 @@
+---
+name: swiftui-gestures
+description: Implementing touch interactions, gestures, and haptic feedback in SwiftUI for responsive user experiences
+tags: [swift, swiftui, gestures, touch, haptics, interactions]
+---
+
 # SwiftUI Gestures & Interactions
 
 ## Purpose

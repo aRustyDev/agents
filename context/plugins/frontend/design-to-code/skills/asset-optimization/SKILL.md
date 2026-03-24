@@ -1,3 +1,9 @@
+---
+name: asset-optimization
+description: Optimize design assets for production deployment with format-specific compression, resolution scaling, and bundle optimization
+tags: [design, assets, optimization, images, svg, performance]
+---
+
 # Asset Optimization
 
 Optimize design assets for production deployment across platforms. Apply format-specific compression, resolution scaling, and bundle optimization techniques.

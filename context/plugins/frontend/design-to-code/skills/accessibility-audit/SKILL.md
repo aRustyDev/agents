@@ -1,3 +1,9 @@
+---
+name: accessibility-audit
+description: Audit design components and generated code for WCAG 2.1 compliance including color contrast, touch targets, and screen reader compatibility
+tags: [accessibility, wcag, a11y, audit, design, compliance]
+---
+
 # Accessibility Audit
 
 Audit design components and generated code for WCAG 2.1 compliance. Check color contrast, touch targets, screen reader compatibility, and keyboard navigation.

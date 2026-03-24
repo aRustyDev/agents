@@ -1,3 +1,9 @@
+---
+name: manifest-v3-reference
+description: Complete reference for Manifest V3 browser extension development with cross-browser compatibility and migration guidance
+tags: [browser-extension, manifest-v3, chrome, firefox, safari, edge, cross-browser]
+---
+
 # Manifest V3 Reference
 
 Complete reference for Manifest V3 browser extension development with cross-browser compatibility notes, Firefox MV2 fallbacks, and Safari-specific considerations.

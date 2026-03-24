@@ -1,3 +1,9 @@
+---
+name: wasm-extension-integration
+description: Guide for integrating WebAssembly modules into browser extensions using wasm-pack, wasm-bindgen, and cross-browser loading
+tags: [browser-extension, webassembly, wasm, wasm-pack, wasm-bindgen, rust]
+---
+
 # WASM Extension Integration
 
 Guide for integrating WebAssembly modules into browser extensions using wasm-pack, wasm-bindgen, and cross-browser loading patterns.

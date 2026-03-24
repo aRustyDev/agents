@@ -1,3 +1,9 @@
+---
+name: extension-security
+description: Comprehensive security guide for browser extensions covering CSP, permissions, secure messaging, sandboxing, and threat mitigation
+tags: [browser-extension, security, csp, permissions, sandboxing]
+---
+
 # Extension Security
 
 Comprehensive security guide for browser extensions covering Content Security Policy, permissions model, secure messaging, sandboxing, storage security, and threat mitigation patterns.

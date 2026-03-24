@@ -1,3 +1,9 @@
+---
+name: swiftui-data-flow
+description: SwiftUI data flow mechanisms including @Observable, @State, @Binding, and environment values
+tags: [swift, swiftui, data-flow, state-management, observable]
+---
+
 # SwiftUI Data Flow
 
 ## Purpose

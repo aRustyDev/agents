@@ -1,3 +1,9 @@
+---
+name: browser-store-apis
+description: Reference for browser extension store APIs for querying extension info, checking compatibility, and tracking submission status
+tags: [browser-extension, api, chrome-web-store, firefox-addons, edge-addons]
+---
+
 # Browser Store APIs
 
 Reference for browser extension store APIs used for querying extension info, checking compatibility, and tracking submission status.

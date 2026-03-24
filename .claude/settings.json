@@ -63,6 +63,11 @@
             "type": "command",
             "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */context/*.md|*/context/*/*.md|*/context/*/*/*.md|*/context/*/*/*/*.md|*/.claude/*.md|*/CLAUDE.md) cli/lint-context.sh;; esac; true'",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in */plugins/*/plugin.json|*/.claude-plugin/plugin.json) NAME=$(echo \"$FILE\" | sed -E \"s|.*/plugins/([^/]+(/[^/]+)?)/\\.claude-plugin/plugin\\.json|\\1|\"); cd /private/etc/infra/pub/ai/cli && bun run bin/agents.ts plugin validate \"$NAME\" --quiet 2>&1 | tail -5;; */.claude-plugin/marketplace.json) cd /private/etc/infra/pub/ai/cli && bun run bin/agents.ts plugin validate-marketplace --quiet 2>&1 | tail -5;; */plugins/*/.lsp.json|*/plugins/*/.mcp.json) echo \"⚠ .lsp.json/.mcp.json edited — run: bun run cli/bin/agents.ts plugin validate-all\";; esac; true'",
+            "timeout": 15
           }
         ]
       }

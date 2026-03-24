@@ -1,3 +1,9 @@
+---
+name: wasm-architecture-decision
+description: Decision framework for WebAssembly usage in browser extensions including loading patterns, architecture, and performance considerations
+tags: [browser-extension, webassembly, wasm, architecture, performance]
+---
+
 # WASM Architecture Decision
 
 Decision framework for WebAssembly usage in browser extensions, including browser-specific loading patterns, architectural patterns, and performance considerations.

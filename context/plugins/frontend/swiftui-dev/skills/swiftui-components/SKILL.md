@@ -1,3 +1,9 @@
+---
+name: swiftui-components
+description: Reference for SwiftUI built-in components, layout tools, and visual styling for iOS-native interfaces
+tags: [swift, swiftui, components, layouts, ui, ios]
+---
+
 # SwiftUI Components & Layouts
 
 ## Purpose

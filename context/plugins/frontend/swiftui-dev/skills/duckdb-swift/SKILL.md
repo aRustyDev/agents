@@ -1,3 +1,9 @@
+---
+name: duckdb-swift
+description: Using DuckDB as an in-process analytical SQL engine for SwiftUI applications with CSV, Parquet, and SQLite support
+tags: [swift, swiftui, duckdb, sql, analytics, data]
+---
+
 # DuckDB Swift Integration
 
 ## Purpose

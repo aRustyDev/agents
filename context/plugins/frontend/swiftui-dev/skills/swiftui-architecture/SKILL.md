@@ -1,3 +1,9 @@
+---
+name: swiftui-architecture
+description: Architecture patterns for SwiftUI applications including MVVM, navigation, dependency injection, and the @Observable macro
+tags: [swift, swiftui, architecture, mvvm, navigation, dependency-injection]
+---
+
 # SwiftUI Architecture Patterns
 
 ## Purpose

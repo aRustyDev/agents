@@ -1,3 +1,9 @@
+---
+name: swift-charts
+description: Building data visualizations in SwiftUI using Apple's Swift Charts framework
+tags: [swift, swiftui, charts, data-visualization, ios]
+---
+
 # Swift Charts
 
 ## Purpose

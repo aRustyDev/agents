@@ -1,3 +1,9 @@
+---
+name: swiftui-testing
+description: Testing strategies for SwiftUI applications including unit tests, UI tests, and preview-based testing
+tags: [swift, swiftui, testing, xctest, unit-testing, ui-testing]
+---
+
 # SwiftUI Testing
 
 ## Purpose

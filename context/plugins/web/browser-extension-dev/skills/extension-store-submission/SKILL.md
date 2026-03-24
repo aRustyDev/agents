@@ -1,3 +1,9 @@
+---
+name: extension-store-submission
+description: Complete guides for submitting browser extensions to Chrome Web Store, Firefox Add-ons, Safari App Store, and Edge Add-ons
+tags: [browser-extension, submission, chrome-web-store, firefox-addons, safari, edge-addons, publishing]
+---
+
 # Extension Store Submission
 
 Complete guides for submitting browser extensions to Chrome Web Store, Firefox Add-ons (AMO), Safari App Store, and Edge Add-ons. Covers account setup, asset preparation, submission process, and post-publication management.

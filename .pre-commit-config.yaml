@@ -175,6 +175,24 @@ repos:
         pass_filenames: false
 
   # =============================================================================
+  # Plugin Config Validation - Local, requires cli/bin/agents.ts
+  # =============================================================================
+  - repo: local
+    hooks:
+      - id: plugin-validate
+        name: "plugins: validate configs"
+        entry: bash -c 'cd cli && bun run bin/agents.ts plugin validate-all --quiet 2>&1 | tail -10'
+        language: system
+        files: |
+          (?x)^(
+            context/plugins/.*plugin\.json|
+            context/plugins/.*/\.lsp\.json|
+            context/plugins/.*/\.mcp\.json|
+            \.claude-plugin/marketplace\.json
+          )$
+        pass_filenames: false
+
+  # =============================================================================
   # SQL Linting (sqlfluff)
   # =============================================================================
   - repo: https://github.com/sqlfluff/sqlfluff
