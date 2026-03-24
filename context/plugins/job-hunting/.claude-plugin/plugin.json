@@ -41,9 +41,7 @@
     "./skills/resume-content/SKILL.md",
     "./skills/resume-formatting/SKILL.md"
   ],
-  "mcpServers": "./.mcp.json",
   "outputStyles": [
     "../../output-styles/feedback-submission.md"
-  ],
-  "lspServers": "./.lsp.json"
+  ]
 }

@@ -40,11 +40,9 @@
     "./skills/duckdb-swift/SKILL.md",
     "./skills/swift-charts/SKILL.md"
   ],
-  "mcpServers": "./.mcp.json",
   "outputStyles": [
     "./styles/swift-code.md",
     "./styles/swiftui-view.md",
     "./styles/feedback-submission.md"
-  ],
-  "lspServers": "./.lsp.json"
+  ]
 }

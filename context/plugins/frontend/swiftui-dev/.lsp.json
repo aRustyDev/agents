@@ -1,1 +1,0 @@
-{"lspServers": {"sourcekit-lsp": {"command": "xcrun", "args": ["sourcekit-lsp"], "filetypes": ["swift"]}}}

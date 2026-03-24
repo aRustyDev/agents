@@ -44,7 +44,6 @@
     "./skills/asset-optimization/SKILL.md",
     "./skills/accessibility-audit/SKILL.md"
   ],
-  "mcpServers": "./.mcp.json",
   "outputStyles": [
     "./styles/feedback-submission.md",
     "./styles/design-token-json.md",
@@ -52,6 +51,5 @@
     "./styles/design-token-css.md",
     "./styles/design-token-tailwind.md",
     "./styles/component-spec.md"
-  ],
-  "lspServers": "./.lsp.json"
+  ]
 }

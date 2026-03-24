@@ -43,12 +43,10 @@
     "./skills/wasm-extension-integration/SKILL.md",
     "./skills/wxt-framework-patterns/SKILL.md"
   ],
-  "mcpServers": "./.mcp.json",
   "outputStyles": [
     "./styles/browser-compatibility-matrix.md",
     "./styles/extension-architecture-diagram.md",
     "./styles/wasm-decision-report.md",
     "../../../output-styles/feedback-submission.md"
-  ],
-  "lspServers": "./.lsp.json"
+  ]
 }

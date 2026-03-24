@@ -1,17 +1,15 @@
 {
-  "mcp": {
-    "servers": {
-      "homebrew": {
-        "command": "brew",
-        "args": ["mcp-server"]
-      },
-      "json-query": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "@gongrzhe/server-json-mcp@latest"
-        ]
-      }
+  "mcpServers": {
+    "homebrew": {
+      "command": "brew",
+      "args": ["mcp-server"]
+    },
+    "json-query": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@gongrzhe/server-json-mcp@latest"
+      ]
     }
   }
 }

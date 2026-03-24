@@ -18,9 +18,9 @@
     "macos"
   ],
   "commands": [
-    "./commands/add-formula.md",
-    "./commands/validate-formula.md",
-    "./commands/batch-formulas.md"
+    "./commands/add.md",
+    "./commands/validate.md",
+    "./commands/batch-add.md"
   ],
   "agents": [
     "./agents/homebrew-expert.md"
@@ -28,9 +28,7 @@
   "skills": [
     "./skills/pkgmgr-homebrew-formula-dev/SKILL.md"
   ],
-  "mcpServers": "./.mcp.json",
   "outputStyles": [
     "../../../output-styles/feedback-submission.md"
-  ],
-  "lspServers": "./.lsp.json"
+  ]
 }
