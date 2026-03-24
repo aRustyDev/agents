@@ -43,7 +43,7 @@ Edit `.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'FILE=\"$TOOL_INPUT_FILE_PATH\"; case \"$FILE\" in *.ext) tool \"$FILE\";; esac; true'",
+            "command": "bash -c 'INPUT=$(cat); FILE=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // empty\" 2>/dev/null); [ -z \"$FILE\" ] && exit 0; case \"$FILE\" in *.ext) tool \"$FILE\";; esac; true'",
             "timeout": 15
           }
         ]
@@ -53,12 +53,30 @@ Edit `.claude/settings.json`:
 }
 ```
 
+## Hook Input
+
+Hooks receive a JSON payload on **stdin** (not environment variables). Extract the file path with `jq`:
+
+```bash
+INPUT=$(cat)
+FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+```
+
+| Stdin Field | Description |
+|-------------|-------------|
+| `.tool_name` | Tool that was used (`Write`, `Edit`, etc.) |
+| `.tool_input.file_path` | Path to the modified file |
+| `.tool_input.content` | New file content (Write) or edit strings (Edit) |
+| `.hook_event_name` | Event type (`PostToolUse`, etc.) |
+
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `$TOOL_INPUT_FILE_PATH` | Path to the modified file |
-| `$TOOL_INPUT_*` | Other tool input parameters |
+| `CLAUDE_PROJECT_DIR` | Project root directory |
+| `CLAUDE_CODE_ENTRYPOINT` | How Claude Code was invoked |
+
+**Note:** `$TOOL_INPUT_FILE_PATH` does NOT exist as an environment variable. Use stdin JSON instead.
 
 ## Disabling Hooks
 
