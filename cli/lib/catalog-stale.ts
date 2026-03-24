@@ -77,8 +77,10 @@ export async function fetchUpstreamHashes(
       const entry = queue.shift()
       if (!entry) break
 
-      // Check well-known paths (shared with catalog-download.ts)
-      const paths = SKILL_LOOKUP_DIRS.map((prefix) => `${prefix}${entry.skill}`)
+      // Use discoveredPath if available (from discovery engine), else fall back to well-known paths
+      const paths = entry.discoveredPath
+        ? [entry.discoveredPath]
+        : SKILL_LOOKUP_DIRS.map((prefix) => `${prefix}${entry.skill}`)
 
       for (const path of paths) {
         const hash = await fetchSkillFolderHash(entry.source, path)
