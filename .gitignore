@@ -34,3 +34,6 @@ documents/
 
 # Dolt database files (added by bd init)
 .dolt/
+
+# Git worktrees
+.worktrees/
