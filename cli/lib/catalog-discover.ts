@@ -62,6 +62,11 @@ export interface RepoDiscoveryResult {
 /** Options for the discovery engine. */
 export interface DiscoverOptions {
   protocol?: GitProtocol
+  /** Existing repo manifests for incremental skip. */
+  cachedManifests?: RepoManifest[]
+  /** If true, skip repos whose HEAD matches cached headSha. */
+  incremental?: boolean
+  concurrency?: number
   onProgress?: (done: number, total: number, repo: string) => void
 }
 
@@ -238,18 +243,50 @@ export async function discoverRepo(
 }
 
 // ---------------------------------------------------------------------------
+// Incremental Discovery (HEAD SHA comparison)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the remote HEAD SHA for a repo without cloning.
+ * Uses `git ls-remote` — fast (~200ms per repo).
+ * Returns null if the repo is unreachable.
+ */
+export async function fetchRemoteHeadSha(
+  source: string,
+  protocol?: GitProtocol
+): Promise<string | null> {
+  const proto = protocol ?? detectGitProtocol()
+  const url = resolveCloneUrl(source, proto)
+  const result = await gitRaw(['ls-remote', url, 'HEAD'])
+  if (!result.ok) return null
+  const sha = result.value.trim().split(/\s/)[0]
+  return sha || null
+}
+
+// ---------------------------------------------------------------------------
 // Multi-Repo Discovery (Concurrent)
 // ---------------------------------------------------------------------------
+
+/** Summary of incremental skip decisions. */
+export interface DiscoverySummary {
+  totalRepos: number
+  cloned: number
+  skipped: number
+  results: RepoDiscoveryResult[]
+}
 
 /**
  * Discover all unique repos from catalog entries concurrently.
  * Groups entries by source, clones each repo once.
+ *
+ * In incremental mode (opts.incremental + opts.cachedManifests), skips repos
+ * whose remote HEAD SHA matches the cached manifest's headSha.
  */
 export async function discoverAllRepos(
   entries: CatalogEntryWithTier1[],
   opts: DiscoverOptions = {}
-): Promise<RepoDiscoveryResult[]> {
-  const concurrency = 5
+): Promise<DiscoverySummary> {
+  const concurrency = opts.concurrency ?? 5
 
   // Group catalog skills by source
   const bySource = new Map<string, string[]>()
@@ -260,15 +297,38 @@ export async function discoverAllRepos(
     bySource.set(entry.source, skills)
   }
 
+  // Build cache index for incremental mode
+  const cache = new Map<string, RepoManifest>()
+  if (opts.incremental && opts.cachedManifests) {
+    for (const m of opts.cachedManifests) {
+      cache.set(m.repo, m)
+    }
+  }
+
   const queue = [...bySource.entries()]
   const results: RepoDiscoveryResult[] = []
   let done = 0
+  let skipped = 0
 
   async function worker() {
     while (queue.length > 0) {
       const item = queue.shift()
       if (!item) break
       const [source, catalogSkills] = item
+
+      // Incremental: check if remote HEAD matches cache
+      if (opts.incremental && cache.has(source)) {
+        const cached = cache.get(source)
+        if (cached) {
+          const remoteHead = await fetchRemoteHeadSha(source, opts.protocol)
+          if (remoteHead && remoteHead === cached.headSha) {
+            skipped++
+            done++
+            opts.onProgress?.(done, bySource.size, `${source} (skipped)`)
+            continue
+          }
+        }
+      }
 
       const result = await discoverRepo(source, catalogSkills, {
         protocol: opts.protocol,
@@ -281,7 +341,12 @@ export async function discoverAllRepos(
   }
 
   await Promise.all(Array.from({ length: concurrency }, () => worker()))
-  return results
+  return {
+    totalRepos: bySource.size,
+    cloned: results.length,
+    skipped,
+    results,
+  }
 }
 
 // ---------------------------------------------------------------------------
