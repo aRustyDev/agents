@@ -33,6 +33,7 @@
     "meilisearch": "^0.56.0",
     "nanospinner": "^1.2.0",
     "ollama": "^0.5.0",
+    "picomatch": "^4.0.4",
     "sigma": "^3.0.2",
     "simple-git": "^3.33.0",
     "valibot": "^1.0.0",

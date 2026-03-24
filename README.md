@@ -22,7 +22,7 @@ content/               Component source of truth
 ├── output-styles/     Output formatting templates
 └── reference/         Reference documentation
 
-cli/              TypeScript tooling (Bun + Citty)
+packages/cli/              TypeScript tooling (Bun + Citty)
 ├── bin/agents.ts      CLI entrypoint
 ├── commands/          CLI command trees (skill, mcp, component, plugin, ...)
 ├── lib/               Library modules
@@ -125,7 +125,7 @@ Curated plugins at `.claude-plugin/marketplace.json`:
 | Layer | Tool | Config |
 |-------|------|--------|
 | System tools | Homebrew | `brewfile` |
-| TypeScript | Bun | `cli/package.json` |
+| TypeScript | Bun | `packages/cli/package.json` |
 | Python (KG only) | uv | `pyproject.toml` |
 | Task runner | just | `justfile` |
 | Issue tracking | beads (bd) | `.beads/config.yaml` |

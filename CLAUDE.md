@@ -36,16 +36,16 @@ TypeScript tooling is managed via Bun:
 
 ```bash
 # Install all deps
-cd cli && bun install
+cd packages/cli && bun install
 
 # Run the CLI tool
-bun run cli/bin/agents.ts <noun> <verb> [args]
+bun run packages/cli/src/bin/agents.ts <noun> <verb> [args]
 
 # Or via justfile
 just agents <noun> <verb> [args]
 
 # Run tests
-cd cli && bun test
+cd packages/cli && bun test
 ```
 
 The `bun.lock` file is version controlled for reproducible installs.
@@ -59,7 +59,7 @@ Python is used only for the knowledge graph system (sqlite-vec + Ollama embeddin
 uv sync
 
 # Run embedding CLI
-uv run python cli/embed.py
+uv run python packages/cli/embed.py
 ```
 
 ## Knowledge Graph
