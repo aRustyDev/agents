@@ -93,7 +93,7 @@ install target='all':
 _install-all: _install-claude
 
 ls-tags:
-    yq --output-format=json '.' "{{ justfile_directory() }}/components/skills/external.yaml" | jq '[ .manifest[] | add | .tags[] ] | unique'
+    yq --output-format=json '.' "{{ justfile_directory() }}/context/skills/external.yaml" | jq '[ .manifest[] | add | .tags[] ] | unique'
 
 [private]
 _install-claude: _install-claude-commands _install-claude-rules _install-claude-skills _install-claude-hooks _install-claude-settings
@@ -109,7 +109,7 @@ _install-claude-settings:
 _install-claude-commands:
     @echo "Installing commands..."
     @mkdir -p "{{ CLAUDE_DIR }}/commands"
-    @for f in components/commands/*.md; do \
+    @for f in context/commands/*.md; do \
         [ -f "$f" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/commands/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -117,7 +117,7 @@ _install-claude-commands:
 _install-claude-rules:
     @echo "Installing rules..."
     @mkdir -p "{{ CLAUDE_DIR }}/rules"
-    @for f in components/rules/*.md; do \
+    @for f in context/rules/*.md; do \
         [ -f "$f" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/rules/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -125,7 +125,7 @@ _install-claude-rules:
 _install-claude-skills:
     @echo "Installing skills..."
     @mkdir -p "{{ CLAUDE_DIR }}/skills"
-    @for d in components/skills/*/; do \
+    @for d in context/skills/*/; do \
         name=$(basename "$d"); \
         target="{{ CLAUDE_DIR }}/skills/$name"; \
         if [ -d "$d" ]; then \
@@ -142,7 +142,7 @@ _install-claude-skills:
 _install-claude-hooks:
     @echo "Installing hooks..."
     @mkdir -p "{{ CLAUDE_DIR }}/hooks"
-    @for f in components/hooks/*; do \
+    @for f in context/hooks/*; do \
         [ -f "$f" ] && [ "$(basename $f)" != ".gitkeep" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/hooks/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -157,16 +157,16 @@ _uninstall-all: _uninstall-claude
 [private]
 _uninstall-claude:
     @echo "Uninstalling Claude Code components..."
-    @for f in components/commands/*.md; do \
+    @for f in context/commands/*.md; do \
         [ -f "$f" ] && rm -f "{{ CLAUDE_DIR }}/commands/$(basename $f)"; \
     done || true
-    @for f in components/rules/*.md; do \
+    @for f in context/rules/*.md; do \
         [ -f "$f" ] && rm -f "{{ CLAUDE_DIR }}/rules/$(basename $f)"; \
     done || true
-    @for d in components/skills/*/; do \
+    @for d in context/skills/*/; do \
         [ -d "$d" ] && rm -f "{{ CLAUDE_DIR }}/skills/$(basename $d)"; \
     done || true
-    @for f in components/hooks/*; do \
+    @for f in context/hooks/*; do \
         [ -f "$f" ] && [ "$(basename $f)" != ".gitkeep" ] && rm -f "{{ CLAUDE_DIR }}/hooks/$(basename $f)"; \
     done || true
     @echo "✓ Claude Code components uninstalled"
@@ -186,7 +186,7 @@ list-claude:
 # Anthropic skills registry
 
 ANTHROPIC_SKILLS_REPO := "https://github.com/anthropics/skills.git"
-ANTHROPIC_VERSION_FILE := "components/skills/.anthropic-version"
+ANTHROPIC_VERSION_FILE := "context/skills/.anthropic-version"
 
 # Mapping: local-name -> upstream-path
 
@@ -234,8 +234,8 @@ sync-anthropic-skills:
         local_name="${mapping%%:*}"
         upstream_path="${mapping#*:}"
 
-        rm -rf "components/skills/$local_name"
-        cp -r "$TMPDIR/skills/$upstream_path" "components/skills/$local_name"
+        rm -rf "context/skills/$local_name"
+        cp -r "$TMPDIR/skills/$upstream_path" "context/skills/$local_name"
         echo "  → $local_name (from $upstream_path)"
     done
 
@@ -268,8 +268,8 @@ anthropic-version:
 
 # External skills manifest
 
-EXTERNAL_MANIFEST := justfile_directory() / "components/skills/external.yaml"
-EXTERNAL_VERSION_DIR := justfile_directory() / "components/skills/.versions"
+EXTERNAL_MANIFEST := justfile_directory() / "context/skills/external.yaml"
+EXTERNAL_VERSION_DIR := justfile_directory() / "context/skills/.versions"
 
 # List available external skills (optionally filter by category)
 [group('external')]
@@ -315,7 +315,7 @@ import-skill repo skill local_name='':
     set -euo pipefail
 
     SKILL_NAME="{{ if local_name != '' { local_name } else { skill } }}"
-    TARGET_DIR="{{ justfile_directory() }}/components/skills/$SKILL_NAME"
+    TARGET_DIR="{{ justfile_directory() }}/context/skills/$SKILL_NAME"
 
     echo "Importing $SKILL_NAME from {{ repo }}..."
 
@@ -454,7 +454,7 @@ check-external-updates:
 
 # Skill management
 
-SKILL_TEMPLATE_DIR := justfile_directory() / "components/skills/.templates"
+SKILL_TEMPLATE_DIR := justfile_directory() / "context/skills/.templates"
 
 # Create new skill from template
 [group('skills')]
@@ -463,7 +463,7 @@ create-skill name:
     set -euo pipefail
 
     SKILL_NAME="{{ name }}"
-    TARGET_DIR="{{ justfile_directory() }}/components/skills/$SKILL_NAME"
+    TARGET_DIR="{{ justfile_directory() }}/context/skills/$SKILL_NAME"
 
     # Validate naming convention (allows lowercase letters and numbers like k8s)
     if ! echo "$SKILL_NAME" | grep -qE '^[a-z0-9]+-([a-z0-9]+-)?[a-z0-9]+-[a-z]+$'; then
@@ -572,7 +572,7 @@ list-skills:
     set -euo pipefail
 
     echo "Local skills:"
-    for d in "{{ justfile_directory() }}"/components/skills/*/; do
+    for d in "{{ justfile_directory() }}"/context/skills/*/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
         # Skip hidden directories and templates
@@ -597,7 +597,7 @@ validate-all-skills:
     PASSED=0
     FAILED=0
 
-    for d in "{{ justfile_directory() }}"/components/skills/*/; do
+    for d in "{{ justfile_directory() }}"/context/skills/*/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
         [[ "$name" == .* ]] && continue
@@ -621,7 +621,7 @@ validate-pillars skill:
     set -euo pipefail
 
     SKILL_NAME="{{ skill }}"
-    SKILL_FILE="{{ justfile_directory() }}/components/skills/$SKILL_NAME/SKILL.md"
+    SKILL_FILE="{{ justfile_directory() }}/context/skills/$SKILL_NAME/SKILL.md"
 
     if [ ! -f "$SKILL_FILE" ]; then
         echo "❌ Skill not found: $SKILL_NAME"
@@ -724,7 +724,7 @@ validate-all-lang-skills:
     echo "=================================="
     echo ""
 
-    for d in "{{ justfile_directory() }}"/components/skills/lang-*-dev/; do
+    for d in "{{ justfile_directory() }}"/context/skills/lang-*-dev/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
 
@@ -769,7 +769,7 @@ import-and-normalize repo skill target:
     just import-skill "{{ repo }}" "{{ skill }}" "{{ target }}"
 
     # Validate the result
-    just validate-skill "{{ justfile_directory() }}/components/skills/{{ target }}"
+    just validate-skill "{{ justfile_directory() }}/context/skills/{{ target }}"
 
 # Plugin management
 
