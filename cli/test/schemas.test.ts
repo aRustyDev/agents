@@ -6,6 +6,12 @@ import {
   detectUnknownPluginFields,
   KNOWN_PLUGIN_FIELDS,
   LockfileV1,
+  LspConfig,
+  LspServerEntry,
+  MarketplaceEntry,
+  MarketplaceManifest,
+  McpConfig,
+  McpServerEntry,
   PluginAuthor,
   PluginManifest,
   PluginSource,
@@ -511,6 +517,326 @@ describe('StatusMessage', () => {
   test('rejects missing message', () => {
     const msg = { status: 'success' }
     const result = v.safeParse(StatusMessage, msg)
+    expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// LspConfig
+// ---------------------------------------------------------------------------
+
+describe('LspServerEntry', () => {
+  test('accepts valid entry with command and extensionToLanguage', () => {
+    const entry = {
+      command: 'typescript-language-server',
+      args: ['--stdio'],
+      extensionToLanguage: { '.ts': 'typescript', '.tsx': 'typescriptreact' },
+    }
+    const result = v.safeParse(LspServerEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts entry without optional args', () => {
+    const entry = {
+      command: 'pylsp',
+      extensionToLanguage: { '.py': 'python' },
+    }
+    const result = v.safeParse(LspServerEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects entry missing command', () => {
+    const entry = {
+      extensionToLanguage: { '.py': 'python' },
+    }
+    const result = v.safeParse(LspServerEntry, entry)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects entry missing extensionToLanguage', () => {
+    const entry = {
+      command: 'pylsp',
+    }
+    const result = v.safeParse(LspServerEntry, entry)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('LspConfig', () => {
+  test('accepts valid config with multiple servers', () => {
+    const config = {
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          args: ['--stdio'],
+          extensionToLanguage: { '.ts': 'typescript', '.tsx': 'typescriptreact' },
+        },
+        python: {
+          command: 'pylsp',
+          extensionToLanguage: { '.py': 'python' },
+        },
+      },
+    }
+    const result = v.safeParse(LspConfig, config)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts config with empty servers', () => {
+    const config = { lspServers: {} }
+    const result = v.safeParse(LspConfig, config)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(Object.keys(result.output.lspServers)).toHaveLength(0)
+    }
+  })
+
+  test('rejects config missing lspServers key', () => {
+    const config = { servers: {} }
+    const result = v.safeParse(LspConfig, config)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects server entry with invalid shape', () => {
+    const config = {
+      lspServers: {
+        broken: { command: 123 },
+      },
+    }
+    const result = v.safeParse(LspConfig, config)
+    expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// McpConfig
+// ---------------------------------------------------------------------------
+
+describe('McpServerEntry', () => {
+  test('accepts full server entry', () => {
+    const entry = {
+      command: 'npx',
+      args: ['-y', '@mcp/server'],
+      env: { API_KEY: 'test-key' },
+    }
+    const result = v.safeParse(McpServerEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts minimal server entry', () => {
+    const entry = { command: 'mcp-server-stdio' }
+    const result = v.safeParse(McpServerEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects entry missing command', () => {
+    const entry = { args: ['--flag'] }
+    const result = v.safeParse(McpServerEntry, entry)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('McpConfig', () => {
+  test('accepts flat mcpServers format', () => {
+    const config = {
+      mcpServers: {
+        crawl4ai: {
+          command: 'npx',
+          args: ['-y', 'crawl4ai-mcp'],
+          env: { CRAWL4AI_API_KEY: 'test' },
+        },
+      },
+    }
+    const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts nested mcp.servers format', () => {
+    const config = {
+      mcp: {
+        servers: {
+          crawl4ai: {
+            command: 'npx',
+            args: ['-y', 'crawl4ai-mcp'],
+          },
+        },
+      },
+    }
+    const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts flat format with empty servers', () => {
+    const config = { mcpServers: {} }
+    const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts nested format with empty servers', () => {
+    const config = { mcp: { servers: {} } }
+    const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects config with neither format', () => {
+    const config = { servers: {} }
+    const result = v.safeParse(McpConfig, config)
+    expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// MarketplaceManifest
+// ---------------------------------------------------------------------------
+
+describe('MarketplaceEntry', () => {
+  test('accepts valid entry', () => {
+    const entry = {
+      name: 'test-plugin',
+      source: './context/plugins/test-plugin',
+      description: 'A test plugin',
+      version: '1.0.0',
+      author: { name: 'Test Author', email: 'test@example.com' },
+      keywords: ['test'],
+      license: 'MIT',
+      homepage: 'https://example.com',
+      repository: 'https://github.com/test/repo.git',
+    }
+    const result = v.safeParse(MarketplaceEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts entry with prerelease semver', () => {
+    const entry = {
+      name: 'beta-plugin',
+      source: './context/plugins/beta',
+      description: 'Beta',
+      version: '1.0.0-beta.1',
+      author: { name: 'Author' },
+      keywords: [],
+      license: 'MIT',
+      homepage: 'https://example.com',
+      repository: 'https://github.com/test/repo',
+    }
+    const result = v.safeParse(MarketplaceEntry, entry)
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects invalid semver version', () => {
+    const entry = {
+      name: 'bad-version',
+      source: './context/plugins/bad',
+      description: 'Bad',
+      version: 'not-semver',
+      author: { name: 'Author' },
+      keywords: [],
+      license: 'MIT',
+      homepage: 'https://example.com',
+      repository: 'https://github.com/test/repo',
+    }
+    const result = v.safeParse(MarketplaceEntry, entry)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects missing required fields', () => {
+    const entry = { name: 'incomplete' }
+    const result = v.safeParse(MarketplaceEntry, entry)
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('MarketplaceManifest', () => {
+  test('parses real marketplace.json from repo', async () => {
+    const data = await readJson(`${REPO_ROOT}/.claude-plugin/marketplace.json`)
+    const result = v.safeParse(MarketplaceManifest, data)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.output.plugins.length).toBeGreaterThan(0)
+      expect(result.output.owner.name).toBe('aRustyDev')
+    }
+  })
+
+  test('accepts valid manifest', () => {
+    const manifest = {
+      name: 'test-marketplace',
+      owner: { name: 'Test Owner', email: 'test@example.com' },
+      plugins: [
+        {
+          name: 'plugin-a',
+          source: './plugins/a',
+          description: 'Plugin A',
+          version: '1.0.0',
+          author: { name: 'Author' },
+          keywords: ['a'],
+          license: 'MIT',
+          homepage: 'https://example.com/a',
+          repository: 'https://github.com/test/a',
+        },
+      ],
+    }
+    const result = v.safeParse(MarketplaceManifest, manifest)
+    expect(result.success).toBe(true)
+  })
+
+  test('accepts manifest with empty plugins array', () => {
+    const manifest = {
+      name: 'empty',
+      owner: { name: 'Owner' },
+      plugins: [],
+    }
+    const result = v.safeParse(MarketplaceManifest, manifest)
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects manifest missing owner', () => {
+    const manifest = { name: 'no-owner', plugins: [] }
+    const result = v.safeParse(MarketplaceManifest, manifest)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects manifest with invalid plugin entry', () => {
+    const manifest = {
+      name: 'bad-entry',
+      owner: { name: 'Owner' },
+      plugins: [{ name: 'incomplete' }],
+    }
+    const result = v.safeParse(MarketplaceManifest, manifest)
+    expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SkillFrontmatter — additional edge case tests
+// ---------------------------------------------------------------------------
+
+describe('SkillFrontmatter (edge cases)', () => {
+  test('rejects non-string tags', () => {
+    const fm = {
+      name: 'bad-tags',
+      description: 'Has bad tags',
+      tags: [1, 2, 3],
+    }
+    const result = v.safeParse(SkillFrontmatter, fm)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects nested object in place of string field', () => {
+    // The Astro platform: bug — a nested object where a string is expected
+    const fm = {
+      name: 'nested-obj',
+      description: 'Has nested object',
+      version: { major: 1, minor: 0, patch: 0 },
+    }
+    const result = v.safeParse(SkillFrontmatter, fm)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects tags as a string instead of array', () => {
+    const fm = {
+      name: 'string-tags',
+      description: 'Tags should be array',
+      tags: 'not-an-array',
+    }
+    const result = v.safeParse(SkillFrontmatter, fm)
     expect(result.success).toBe(false)
   })
 })

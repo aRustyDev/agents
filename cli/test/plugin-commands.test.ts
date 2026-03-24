@@ -51,10 +51,12 @@ describe('plugin command module', () => {
     expect(names).toContain('check')
     expect(names).toContain('hash')
     expect(names).toContain('lint')
+    expect(names).toContain('validate')
     expect(names).toContain('check-all')
     expect(names).toContain('build-all')
     expect(names).toContain('update')
     expect(names).toContain('update-all')
+    expect(names).toContain('validate-all')
   })
 
   test('exports listPlugins function', async () => {
@@ -198,7 +200,7 @@ describe('plugin fixture operations', () => {
     }
 
     const sourcesFile = join(fixturePluginDir, '.claude-plugin', 'plugin.sources.json')
-    await writeFile(sourcesFile, JSON.stringify(sourcesData, null, 2) + '\n')
+    await writeFile(sourcesFile, `${JSON.stringify(sourcesData, null, 2)}\n`)
 
     // Verify the file was written and is valid JSON
     const raw = await Bun.file(sourcesFile).text()
@@ -217,7 +219,7 @@ describe('plugin fixture operations', () => {
   test('empty sources object produces empty verify results', async () => {
     const sourcesData = { sources: {} }
     const sourcesFile = join(fixturePluginDir, '.claude-plugin', 'plugin.sources.json')
-    await writeFile(sourcesFile, JSON.stringify(sourcesData, null, 2) + '\n')
+    await writeFile(sourcesFile, `${JSON.stringify(sourcesData, null, 2)}\n`)
 
     // Import Plugin class indirectly by testing through the JSON structure
     const raw = await Bun.file(sourcesFile).text()
@@ -233,7 +235,7 @@ describe('plugin fixture operations', () => {
       },
     }
     const sourcesFile = join(fixturePluginDir, '.claude-plugin', 'plugin.sources.json')
-    await writeFile(sourcesFile, JSON.stringify(sourcesData, null, 2) + '\n')
+    await writeFile(sourcesFile, `${JSON.stringify(sourcesData, null, 2)}\n`)
 
     const raw = await Bun.file(sourcesFile).text()
     const parsed = JSON.parse(raw)
@@ -251,7 +253,7 @@ describe('plugin fixture operations', () => {
       },
     }
     const sourcesFile = join(fixturePluginDir, '.claude-plugin', 'plugin.sources.json')
-    await writeFile(sourcesFile, JSON.stringify(sourcesData, null, 2) + '\n')
+    await writeFile(sourcesFile, `${JSON.stringify(sourcesData, null, 2)}\n`)
 
     const raw = await Bun.file(sourcesFile).text()
     const parsed = JSON.parse(raw)
@@ -280,31 +282,56 @@ describe('status derivation logic', () => {
 
   test('forked takes priority', () => {
     expect(
-      deriveStatus({ forked: true, missing: true, expectedHash: 'abc', actualHash: 'def' })
+      deriveStatus({
+        forked: true,
+        missing: true,
+        expectedHash: 'abc',
+        actualHash: 'def',
+      })
     ).toBe('forked')
   })
 
   test('missing takes priority over hash checks', () => {
     expect(
-      deriveStatus({ forked: false, missing: true, expectedHash: 'abc', actualHash: null })
+      deriveStatus({
+        forked: false,
+        missing: true,
+        expectedHash: 'abc',
+        actualHash: null,
+      })
     ).toBe('missing')
   })
 
   test('no-hash when expected is null', () => {
     expect(
-      deriveStatus({ forked: false, missing: false, expectedHash: null, actualHash: 'abc' })
+      deriveStatus({
+        forked: false,
+        missing: false,
+        expectedHash: null,
+        actualHash: 'abc',
+      })
     ).toBe('no-hash')
   })
 
   test('fresh when hashes match', () => {
     expect(
-      deriveStatus({ forked: false, missing: false, expectedHash: 'abc', actualHash: 'abc' })
+      deriveStatus({
+        forked: false,
+        missing: false,
+        expectedHash: 'abc',
+        actualHash: 'abc',
+      })
     ).toBe('fresh')
   })
 
   test('stale when hashes differ', () => {
     expect(
-      deriveStatus({ forked: false, missing: false, expectedHash: 'abc', actualHash: 'def' })
+      deriveStatus({
+        forked: false,
+        missing: false,
+        expectedHash: 'abc',
+        actualHash: 'def',
+      })
     ).toBe('stale')
   })
 })
@@ -318,8 +345,8 @@ describe('sourceToDict output shape', () => {
     const s: SourceStatus = {
       localPath: 'skills/test',
       sourcePath: 'context/skills/test/SKILL.md',
-      expectedHash: 'abcd1234' + '0'.repeat(56),
-      actualHash: 'abcd1234' + '0'.repeat(56),
+      expectedHash: `abcd1234${'0'.repeat(56)}`,
+      actualHash: `abcd1234${'0'.repeat(56)}`,
       forked: false,
       forkedAt: null,
       missing: false,

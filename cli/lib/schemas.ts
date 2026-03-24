@@ -212,6 +212,86 @@ export const PluginManifest = v.object({
 export type PluginManifest = v.InferOutput<typeof PluginManifest>
 
 // ---------------------------------------------------------------------------
+// LSP server config schema (.lsp.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single LSP server entry in .lsp.json.
+ * Claude Code requires command + extensionToLanguage.
+ */
+export const LspServerEntry = v.object({
+  command: v.string(),
+  args: v.optional(v.array(v.string())),
+  extensionToLanguage: v.record(v.string(), v.string()),
+})
+export type LspServerEntry = v.InferOutput<typeof LspServerEntry>
+
+/**
+ * The .lsp.json file format.
+ */
+export const LspConfig = v.object({
+  lspServers: v.record(v.string(), LspServerEntry),
+})
+export type LspConfig = v.InferOutput<typeof LspConfig>
+
+// ---------------------------------------------------------------------------
+// MCP server config schema (.mcp.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single MCP server entry.
+ */
+export const McpServerEntry = v.object({
+  command: v.string(),
+  args: v.optional(v.array(v.string())),
+  env: v.optional(v.record(v.string(), v.string())),
+})
+export type McpServerEntry = v.InferOutput<typeof McpServerEntry>
+
+/**
+ * The .mcp.json file format.
+ * Supports both `mcpServers` (flat) and `mcp.servers` (nested) formats.
+ */
+export const McpConfig = v.union([
+  v.object({ mcpServers: v.record(v.string(), McpServerEntry) }),
+  v.object({ mcp: v.object({ servers: v.record(v.string(), McpServerEntry) }) }),
+])
+export type McpConfig = v.InferOutput<typeof McpConfig>
+
+// ---------------------------------------------------------------------------
+// Marketplace schema (marketplace.json)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single plugin entry in marketplace.json.
+ */
+export const MarketplaceEntry = v.object({
+  name: v.string(),
+  source: v.string(),
+  description: v.string(),
+  version: v.pipe(
+    v.string(),
+    v.regex(/^\d+\.\d+\.\d+(?:-[\w.]+)?(?:\+[\w.]+)?$/, 'Must be valid semver')
+  ),
+  author: PluginAuthor,
+  keywords: v.array(v.string()),
+  license: v.string(),
+  homepage: v.string(),
+  repository: v.string(),
+})
+export type MarketplaceEntry = v.InferOutput<typeof MarketplaceEntry>
+
+/**
+ * The marketplace.json file.
+ */
+export const MarketplaceManifest = v.object({
+  name: v.string(),
+  owner: v.object({ name: v.string(), email: v.optional(v.string()) }),
+  plugins: v.array(MarketplaceEntry),
+})
+export type MarketplaceManifest = v.InferOutput<typeof MarketplaceManifest>
+
+// ---------------------------------------------------------------------------
 // Skill frontmatter schema
 // ---------------------------------------------------------------------------
 

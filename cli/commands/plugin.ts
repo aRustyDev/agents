@@ -15,7 +15,15 @@ import * as v from 'valibot'
 import { computeHash, formatHash, parseHash } from '../lib/hash'
 import { createOutput, type OutputFormatter } from '../lib/output'
 import { currentDir } from '../lib/runtime'
-import { detectUnknownPluginFields, KNOWN_PLUGIN_FIELDS, PluginManifest } from '../lib/schemas'
+import {
+  detectUnknownPluginFields,
+  KNOWN_PLUGIN_FIELDS,
+  LspConfig,
+  MarketplaceManifest,
+  McpConfig,
+  PluginManifest,
+  SkillFrontmatter,
+} from '../lib/schemas'
 import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
@@ -686,6 +694,26 @@ export default defineCommand({
       },
     }),
 
+    'validate-marketplace': defineCommand({
+      meta: {
+        name: 'validate-marketplace',
+        description: 'Validate marketplace.json manifest',
+      },
+      args: { ...globalArgs },
+      async run({ args }) {
+        const out = createOutput({ json: args.json, quiet: args.quiet })
+        const result = await validateMarketplace()
+
+        if (args.json) {
+          out.raw(result)
+        } else {
+          printValidationResult(out, result)
+        }
+
+        process.exit(result.valid ? EXIT.OK : EXIT.FAILURES)
+      },
+    }),
+
     'validate-all': defineCommand({
       meta: { name: 'validate-all', description: 'Validate all plugin manifests' },
       args: { ...globalArgs },
@@ -1086,15 +1114,75 @@ export async function validatePlugin(name: string): Promise<ValidationResult> {
     }
   }
 
+  // 5b. Validate SKILL.md frontmatter for each skill
+  const skillPaths = rawData.skills
+  if (Array.isArray(skillPaths)) {
+    for (const entry of skillPaths) {
+      if (typeof entry !== 'string') continue
+      const resolved = join(pluginDir, entry)
+      if (!existsSync(resolved)) continue // already reported as missing
+
+      try {
+        const content = await readFile(resolved, 'utf-8')
+        // Extract YAML frontmatter between --- delimiters
+        const fmMatch = content.match(/^---\n([\s\S]*?)\n---/)
+        if (!fmMatch) {
+          warnings.push(`Skill ${entry}: no YAML frontmatter found`)
+          continue
+        }
+        // Parse YAML (simple key: value for flat frontmatter)
+        const fmLines = fmMatch[1].split('\n')
+        const fmData: Record<string, unknown> = {}
+        for (const line of fmLines) {
+          const match = line.match(/^(\w[\w-]*)\s*:\s*(.*)$/)
+          if (match) {
+            const [, key, val] = match
+            // Handle arrays (tags: [a, b, c])
+            const arrMatch = val!.match(/^\[(.*)\]$/)
+            if (arrMatch) {
+              fmData[key!] = arrMatch[1]!
+                .split(',')
+                .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+            } else {
+              fmData[key!] = val!.trim().replace(/^['"]|['"]$/g, '')
+            }
+          }
+        }
+
+        const fmResult = v.safeParse(SkillFrontmatter, fmData)
+        if (!fmResult.success) {
+          for (const issue of fmResult.issues) {
+            const path =
+              issue.path?.map((p) => (typeof p === 'object' && 'key' in p ? p.key : p)).join('.') ??
+              ''
+            warnings.push(
+              `Skill ${entry} frontmatter${path ? ` at ${path}` : ''}: ${issue.message}`
+            )
+          }
+        }
+      } catch {
+        /* skip if unreadable */
+      }
+    }
+  }
+
   // 6. Check .lsp.json if present
   const lspPath = join(pluginDir, '.lsp.json')
   if (existsSync(lspPath)) {
     try {
       const lspRaw = await readFile(lspPath, 'utf-8')
-      JSON.parse(lspRaw)
-      warnings.push(
-        '.lsp.json exists — ensure it has valid LSP server config (command, extensionToLanguage) or delete it'
-      )
+      const lspData = JSON.parse(lspRaw)
+      const lspResult = v.safeParse(LspConfig, lspData)
+      if (!lspResult.success) {
+        for (const issue of lspResult.issues) {
+          const path =
+            issue.path?.map((p) => (typeof p === 'object' && 'key' in p ? p.key : p)).join('.') ??
+            ''
+          errors.push(`.lsp.json schema error${path ? ` at ${path}` : ''}: ${issue.message}`)
+        }
+      } else if (Object.keys(lspResult.output.lspServers).length === 0) {
+        warnings.push('.lsp.json has no servers defined — consider deleting if unused')
+      }
     } catch {
       errors.push('.lsp.json contains invalid JSON')
     }
@@ -1105,10 +1193,24 @@ export async function validatePlugin(name: string): Promise<ValidationResult> {
   if (existsSync(mcpPath)) {
     try {
       const mcpRaw = await readFile(mcpPath, 'utf-8')
-      const mcpData = JSON.parse(mcpRaw) as Record<string, unknown>
-      const servers = (mcpData.mcpServers ?? mcpData.mcp) as Record<string, unknown> | undefined
-      if (servers && Object.keys(servers).length === 0) {
-        warnings.push('.mcp.json has empty servers — consider deleting if no MCP servers are used')
+      const mcpData = JSON.parse(mcpRaw)
+      const mcpResult = v.safeParse(McpConfig, mcpData)
+      if (!mcpResult.success) {
+        for (const issue of mcpResult.issues) {
+          const path =
+            issue.path?.map((p) => (typeof p === 'object' && 'key' in p ? p.key : p)).join('.') ??
+            ''
+          errors.push(`.mcp.json schema error${path ? ` at ${path}` : ''}: ${issue.message}`)
+        }
+      } else {
+        // Check for empty servers in whichever format matched
+        const output = mcpResult.output
+        const servers = 'mcpServers' in output ? output.mcpServers : output.mcp.servers
+        if (Object.keys(servers).length === 0) {
+          warnings.push(
+            '.mcp.json has empty servers — consider deleting if no MCP servers are used'
+          )
+        }
       }
     } catch {
       errors.push('.mcp.json contains invalid JSON')
@@ -1116,6 +1218,72 @@ export async function validatePlugin(name: string): Promise<ValidationResult> {
   }
 
   return { plugin: name, valid: errors.length === 0, errors, warnings }
+}
+
+export async function validateMarketplace(): Promise<ValidationResult> {
+  const marketplacePath = join(PROJECT_ROOT, '.claude-plugin', 'marketplace.json')
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  if (!existsSync(marketplacePath)) {
+    return { plugin: 'marketplace', valid: false, errors: ['marketplace.json not found'], warnings }
+  }
+
+  let rawData: unknown
+  try {
+    const raw = await readFile(marketplacePath, 'utf-8')
+    rawData = JSON.parse(raw)
+  } catch (e) {
+    return {
+      plugin: 'marketplace',
+      valid: false,
+      errors: [`Invalid JSON: ${e}`],
+      warnings,
+    }
+  }
+
+  const parseResult = v.safeParse(MarketplaceManifest, rawData)
+  if (!parseResult.success) {
+    for (const issue of parseResult.issues) {
+      const path =
+        issue.path?.map((p) => (typeof p === 'object' && 'key' in p ? p.key : p)).join('.') ?? ''
+      errors.push(`Schema error${path ? ` at ${path}` : ''}: ${issue.message}`)
+    }
+    return { plugin: 'marketplace', valid: errors.length === 0, errors, warnings }
+  }
+
+  // Check for duplicate plugin names
+  const names = parseResult.output.plugins.map((p) => p.name)
+  const dupes = names.filter((n, i) => names.indexOf(n) !== i)
+  for (const d of new Set(dupes)) {
+    errors.push(`Duplicate plugin name: "${d}"`)
+  }
+
+  // Check source paths exist
+  for (const entry of parseResult.output.plugins) {
+    const sourcePath = join(PROJECT_ROOT, entry.source)
+    if (!existsSync(sourcePath)) {
+      errors.push(`Plugin "${entry.name}" source path not found: ${entry.source}`)
+    }
+
+    // Version sync check -- compare with plugin's own plugin.json
+    const pluginJsonPath = join(sourcePath, '.claude-plugin', 'plugin.json')
+    if (existsSync(pluginJsonPath)) {
+      try {
+        const pluginRaw = await readFile(pluginJsonPath, 'utf-8')
+        const pluginData = JSON.parse(pluginRaw) as { version?: string }
+        if (pluginData.version && pluginData.version !== entry.version) {
+          warnings.push(
+            `Plugin "${entry.name}" version mismatch: marketplace has ${entry.version}, plugin.json has ${pluginData.version}`
+          )
+        }
+      } catch {
+        /* skip if unreadable */
+      }
+    }
+  }
+
+  return { plugin: 'marketplace', valid: errors.length === 0, errors, warnings }
 }
 
 function printValidationResult(out: OutputFormatter, result: ValidationResult): void {

@@ -33,13 +33,93 @@ import { currentDir } from './runtime'
 // Types
 // ---------------------------------------------------------------------------
 
-export type AvailabilityStatus = 'available' | 'archived' | 'not_found' | 'private' | 'error'
+export type AvailabilityStatus =
+  | 'available'
+  | 'archived'
+  | 'not_found'
+  | 'private'
+  | 'error'
+  | 'removed_from_repo'
 
 export interface CatalogEntry {
   source: string // org/repo
   skill: string // skill name (part after @)
   availability: AvailabilityStatus
 }
+
+// ---------------------------------------------------------------------------
+// Repo Manifest (per-repo metadata from discovery)
+// ---------------------------------------------------------------------------
+
+/** A single heading with its line number for section-level navigation. */
+export interface SectionMapEntry {
+  heading: string
+  line: number
+  depth: number
+}
+
+/**
+ * Repo-level metadata captured during discovery.
+ * Stored in `.catalog-repos.ndjson` (gitignored).
+ */
+export interface RepoManifest {
+  /** owner/repo identifier */
+  repo: string
+  /** ISO timestamp of last clone/discovery */
+  clonedAt: string
+  /** Git HEAD SHA at time of clone */
+  headSha: string
+  /** Total file count in repo */
+  totalFiles: number
+  /** Repo size in bytes */
+  repoSizeBytes: number
+  /** Whether the repo is archived on GitHub */
+  archived: boolean
+  /** ISO timestamp of most recent commit */
+  lastCommitAt?: string
+  /** Total number of commits */
+  commitCount?: number
+  /** Number of unique contributors */
+  contributorCount?: number
+  /** Number of skills discovered in this repo */
+  skillCount: number
+  /** Names of discovered skills */
+  skills: string[]
+}
+
+// ---------------------------------------------------------------------------
+// Component Metadata (per-skill enrichment from discovery)
+// ---------------------------------------------------------------------------
+
+/**
+ * Metadata computed per-component during repo discovery.
+ * These fields are added to Tier1Result and stored on catalog entries.
+ * All fields are optional — entries from before discovery won't have them.
+ */
+export interface ComponentMetadata {
+  /** Actual path where SKILL.md was found (e.g., "context/skills/foo") */
+  discoveredPath?: string
+  /** ISO timestamp when this skill was last seen in a discovery run */
+  lastSeenAt?: string
+  /** HEAD SHA of the repo when skill was last seen */
+  lastSeenHeadSha?: string
+  /** Previous discoveredPath if the skill was moved */
+  movedFrom?: string
+  /** Total size of the skill directory in bytes */
+  skillSizeBytes?: number
+  /** Line count of SKILL.md */
+  lineCount?: number
+  /** Section map: heading text + line number for navigation */
+  sectionMap?: SectionMapEntry[]
+  /** All files in the skill directory (relative paths) */
+  fileTree?: string[]
+  /** True if skill directory contains only SKILL.md (no resources, no subdirs) */
+  isSimple?: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Availability Check
+// ---------------------------------------------------------------------------
 
 interface CheckOptions {
   concurrency?: number // parallel requests (default: 20)
@@ -395,7 +475,7 @@ export type Tier1ErrorType =
   | 'batch_failed'
   | 'source_invalid'
 
-export interface Tier1Result {
+export interface Tier1Result extends ComponentMetadata {
   source: string
   skill: string
   wordCount?: number
@@ -828,6 +908,55 @@ export function validateBatchResults(results: Tier1Result[]): ValidationReport {
  */
 export function readCatalog(path: string): CatalogEntry[] {
   return readCatalogEntries(path)
+}
+
+// ---------------------------------------------------------------------------
+// Repo Manifest I/O
+// ---------------------------------------------------------------------------
+
+/**
+ * Read repo manifests from an NDJSON file.
+ * Returns empty array if file doesn't exist.
+ */
+export function readRepoManifest(path: string): RepoManifest[] {
+  if (!existsSync(path)) return []
+  const content = readFileSync(path, 'utf8')
+  const manifests: RepoManifest[] = []
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    try {
+      manifests.push(JSON.parse(trimmed) as RepoManifest)
+    } catch {
+      /* skip malformed lines */
+    }
+  }
+  return manifests
+}
+
+/**
+ * Write repo manifests to an NDJSON file (atomic: write tmp then rename).
+ */
+export function writeRepoManifest(path: string, manifests: RepoManifest[]): void {
+  const tmpPath = `${path}.tmp`
+  const lines = `${manifests.map((m) => JSON.stringify(m)).join('\n')}\n`
+  writeFileSync(tmpPath, lines, 'utf8')
+  renameSync(tmpPath, path)
+}
+
+/**
+ * Merge a single repo manifest into an existing manifest file.
+ * Updates existing entry by repo name or appends new.
+ */
+export function mergeRepoManifest(path: string, manifest: RepoManifest): void {
+  const existing = readRepoManifest(path)
+  const idx = existing.findIndex((m) => m.repo === manifest.repo)
+  if (idx >= 0) {
+    existing[idx] = manifest
+  } else {
+    existing.push(manifest)
+  }
+  writeRepoManifest(path, existing)
 }
 
 /**
