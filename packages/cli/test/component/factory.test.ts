@@ -51,13 +51,13 @@ describe('createComponentManager', () => {
   test('has local-output-style provider', () => {
     const manager = createComponentManager()
     expect(manager.getProvider('local-output-style')).toBeDefined()
-    expect(manager.getProvider('local-output-style')!.capabilities.search).toContain('output_style')
+    expect(manager.getProvider('local-output-style')!.capabilities.search).toContain('output-style')
   })
 
   test('has smithery provider for mcp_server', () => {
     const manager = createComponentManager()
     expect(manager.getProvider('smithery')).toBeDefined()
-    expect(manager.getProvider('smithery')!.capabilities.search).toContain('mcp_server')
+    expect(manager.getProvider('smithery')!.capabilities.search).toContain('mcp-server')
   })
 
   test('findProviders routes skill search to local', () => {
@@ -69,7 +69,7 @@ describe('createComponentManager', () => {
 
   test('findProviders routes mcp_server search to smithery', () => {
     const manager = createComponentManager()
-    const providers = manager.findProviders('search', 'mcp_server')
+    const providers = manager.findProviders('search', 'mcp-server')
     expect(providers.some((p) => p.id === 'smithery')).toBe(true)
   })
 
@@ -99,7 +99,7 @@ describe('createComponentManager', () => {
 
   test('findProviders routes output_style search to local-output-style', () => {
     const manager = createComponentManager()
-    const providers = manager.findProviders('search', 'output_style')
+    const providers = manager.findProviders('search', 'output-style')
     expect(providers.some((p) => p.id === 'local-output-style')).toBe(true)
   })
 
@@ -116,7 +116,7 @@ describe('createComponentManager', () => {
 
   test('findProviders routes publish mcp_server to smithery', () => {
     const manager = createComponentManager()
-    const providers = manager.findProviders('publish', 'mcp_server')
+    const providers = manager.findProviders('publish', 'mcp-server')
     expect(providers.some((p) => p.id === 'smithery')).toBe(true)
   })
 

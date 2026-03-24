@@ -27,7 +27,7 @@ import type {
   SearchParams,
 } from './types'
 
-const SUPPORTED_TYPES: readonly ComponentType[] = ['output_style'] as const
+const SUPPORTED_TYPES: readonly ComponentType[] = ['output-style'] as const
 
 /** Maximum description length before truncation. */
 const MAX_DESCRIPTION_LENGTH = 200
@@ -53,12 +53,12 @@ export class LocalOutputStyleProvider implements ComponentProvider {
   readonly id = 'local-output-style'
   readonly displayName = 'Local Output Styles'
   readonly capabilities: ProviderCapabilities = {
-    search: ['output_style'],
+    search: ['output-style'],
     add: [],
-    list: ['output_style'],
+    list: ['output-style'],
     remove: [],
     publish: [],
-    info: ['output_style'],
+    info: ['output-style'],
     outdated: [],
     update: [],
   }
@@ -107,7 +107,7 @@ export class LocalOutputStyleProvider implements ComponentProvider {
       const relativePath = relative(this.cwd, filePath)
 
       components.push({
-        type: 'output_style',
+        type: 'output-style',
         name,
         description,
         source: relativePath,

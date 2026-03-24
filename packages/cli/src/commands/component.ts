@@ -17,7 +17,7 @@ export default defineCommand({
           type: 'string',
           alias: 't',
           description:
-            'Filter by type (skill, mcp_server, agent, plugin, rule, command, output_style)',
+            'Filter by type (skill, mcp-server, agent, plugin, rule, command, output-style)',
         },
         limit: { type: 'string', description: 'Max results (default: 10)', default: '10' },
         page: { type: 'string', description: 'Page number (default: 1)', default: '1' },
@@ -28,7 +28,7 @@ export default defineCommand({
         const typeFilter = args.type as string | undefined
         if (typeFilter && !isComponentType(typeFilter)) {
           out.error(
-            `Invalid type: "${typeFilter}". Valid types: skill, mcp_server, agent, plugin, rule, command, output_style`
+            `Invalid type: "${typeFilter}". Valid types: skill, mcp-server, agent, plugin, rule, command, output-style`
           )
           process.exit(EXIT.ERROR)
         }
@@ -97,7 +97,7 @@ export default defineCommand({
         const manager = createComponentManager()
         const types: ComponentType[] = typeFilter
           ? [typeFilter as ComponentType]
-          : ['skill', 'agent', 'plugin', 'rule', 'command', 'output_style']
+          : ['skill', 'agent', 'plugin', 'rule', 'command', 'output-style']
 
         const allComponents: Component[] = []
         for (const type of types) {

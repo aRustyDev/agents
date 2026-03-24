@@ -62,7 +62,7 @@ describe('SmitheryProvider search', () => {
     expect(result.value.items).toHaveLength(2)
 
     const first = result.value.items[0]!
-    expect(first.type).toBe('mcp_server')
+    expect(first.type).toBe('mcp-server')
     expect(first.name).toBe('@anthropic/claude-code')
     expect(first.source).toBe('smithery://@anthropic/claude-code')
     expect(first.description).toBe('Claude Code MCP server')
@@ -209,7 +209,7 @@ describe('SmitheryProvider search', () => {
     expect(result.value.items).toHaveLength(1)
 
     const item = result.value.items[0]!
-    expect(item.type).toBe('mcp_server')
+    expect(item.type).toBe('mcp-server')
     expect(item.name).toBe('bare-server')
     expect(item.source).toBe('smithery://bare-server')
     expect(item.description).toBe('')
@@ -332,11 +332,11 @@ describe('SmitheryProvider capabilities', () => {
 
     expect(provider.id).toBe('smithery')
     expect(provider.displayName).toBe('Smithery Registry')
-    expect(provider.capabilities.search).toEqual(['mcp_server'])
+    expect(provider.capabilities.search).toEqual(['mcp-server'])
     expect(provider.capabilities.add).toEqual([])
     expect(provider.capabilities.list).toEqual([])
     expect(provider.capabilities.remove).toEqual([])
-    expect(provider.capabilities.publish).toEqual(['mcp_server'])
+    expect(provider.capabilities.publish).toEqual(['mcp-server'])
     expect(provider.capabilities.info).toEqual([])
     expect(provider.capabilities.outdated).toEqual([])
     expect(provider.capabilities.update).toEqual([])
@@ -361,7 +361,7 @@ describe('SmitheryProvider unsupported operations', () => {
 
   test('remove returns error', async () => {
     const provider = new SmitheryProvider()
-    const result = await provider.remove('some-server', 'mcp_server')
+    const result = await provider.remove('some-server', 'mcp-server')
 
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -372,7 +372,7 @@ describe('SmitheryProvider unsupported operations', () => {
 
   test('info returns error', async () => {
     const provider = new SmitheryProvider()
-    const result = await provider.info('some-server', 'mcp_server')
+    const result = await provider.info('some-server', 'mcp-server')
 
     expect(result.ok).toBe(false)
     if (result.ok) return
@@ -383,7 +383,7 @@ describe('SmitheryProvider unsupported operations', () => {
 
   test('list returns empty array (not error)', async () => {
     const provider = new SmitheryProvider()
-    const result = await provider.list('mcp_server')
+    const result = await provider.list('mcp-server')
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
@@ -412,7 +412,7 @@ describe('SmitheryProvider publish', () => {
     })
 
     const provider = new SmitheryProvider()
-    const result = await provider.publish('mcp_server', {
+    const result = await provider.publish('mcp-server', {
       name: 'ns/test-server',
       apiKey: 'test-key',
       externalUrl: 'https://my-server.com/mcp',
@@ -436,7 +436,7 @@ describe('SmitheryProvider publish', () => {
     delete process.env.SMITHERY_API_KEY
     try {
       const provider = new SmitheryProvider()
-      const result = await provider.publish('mcp_server', { name: 'ns/test' })
+      const result = await provider.publish('mcp-server', { name: 'ns/test' })
       expect(result.ok).toBe(false)
       if (!result.ok) expect(result.error.code).toBe('E_AUTH_REQUIRED')
     } finally {
@@ -446,14 +446,14 @@ describe('SmitheryProvider publish', () => {
 
   test('returns error when no name provided', async () => {
     const provider = new SmitheryProvider()
-    const result = await provider.publish('mcp_server', { apiKey: 'key' })
+    const result = await provider.publish('mcp-server', { apiKey: 'key' })
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error.code).toBe('E_MISSING_NAME')
   })
 
   test('supports dry run', async () => {
     const provider = new SmitheryProvider()
-    const result = await provider.publish('mcp_server', {
+    const result = await provider.publish('mcp-server', {
       name: 'ns/test',
       apiKey: 'key',
       externalUrl: 'https://example.com',
@@ -465,6 +465,6 @@ describe('SmitheryProvider publish', () => {
 
   test('capabilities includes mcp_server in publish', () => {
     const provider = new SmitheryProvider()
-    expect(provider.capabilities.publish).toContain('mcp_server')
+    expect(provider.capabilities.publish).toContain('mcp-server')
   })
 })

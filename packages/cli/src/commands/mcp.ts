@@ -11,7 +11,6 @@
  */
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
-import type { ComponentType } from '../lib/component/types'
 import { createOutput } from '../lib/output'
 import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
@@ -34,7 +33,7 @@ export default defineCommand({
         const manager = createComponentManager()
         const result = await manager.search({
           query: (args.query as string) ?? '',
-          type: 'mcp_server' as ComponentType,
+          type: 'mcp-server',
           limit: Number.parseInt(args.limit as string, 10),
           page: Number.parseInt(args.page as string, 10),
           verified: args.verified as boolean,
@@ -201,7 +200,7 @@ export default defineCommand({
         const manager = createComponentManager()
         const result = await manager.search({
           query: args.name as string,
-          type: 'mcp_server' as ComponentType,
+          type: 'mcp-server',
           limit: 1,
         })
         if (!result.ok) {
@@ -265,7 +264,7 @@ export default defineCommand({
           }
         }
 
-        const result = await manager.publish('mcp_server' as ComponentType, {
+        const result = await manager.publish('mcp-server', {
           name: args.name as string,
           apiKey: args['api-key'] as string | undefined,
           externalUrl: args.url as string | undefined,

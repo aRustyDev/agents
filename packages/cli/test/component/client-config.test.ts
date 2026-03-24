@@ -587,7 +587,7 @@ describe('complex config integration', () => {
         'server-b': { type: 'http', url: 'https://b.example.com' },
         'server-c': {
           command: 'python',
-          args: ['-m', 'mcp_server'],
+          args: ['-m', 'mcp-server'],
           env: { PORT: '8080' },
         },
       },

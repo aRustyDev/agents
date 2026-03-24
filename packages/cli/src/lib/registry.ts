@@ -421,7 +421,7 @@ export async function crawlGithubTopics(
     ['claude-skills', 'skill'],
     ['claude-code-agents', 'agent'],
     ['claude-code-hooks', 'hook'],
-    ['mcp-server', 'mcp_server'],
+    ['mcp-server', 'mcp-server'],
     ['claude-code-plugin', 'plugin'],
   ]
 
@@ -645,7 +645,7 @@ async function crawlMcpSo(state: CrawlState, output: string, opts?: CrawlOpts): 
           Array.isArray(data) ? data : ((data as Record<string, unknown>).servers ?? [])
         ) as Record<string, unknown>[]
 
-        appendNdjson(output, servers, 'mcp_server', 'mcp_so')
+        appendNdjson(output, servers, 'mcp-server', 'mcp_so')
 
         totalFetched = servers.length
         regState.status = 'completed'
@@ -710,7 +710,7 @@ async function scrapeMcpSoHtml(
 
     consecutiveEmpty = 0
 
-    appendNdjson(output, servers, 'mcp_server', 'mcp_so')
+    appendNdjson(output, servers, 'mcp-server', 'mcp_so')
 
     totalFetched += servers.length
     regState.lastPage = page
@@ -743,10 +743,10 @@ export async function crawlAwesomeLists(
   console.info('Crawling awesome lists...')
 
   const awesomeRepos: [string, string][] = [
-    ['punkpeye/awesome-mcp-servers', 'mcp_server'],
+    ['punkpeye/awesome-mcp-servers', 'mcp-server'],
     ['anthropics/anthropic-cookbook', 'skill'],
-    ['wong2/awesome-mcp-servers', 'mcp_server'],
-    ['modelcontextprotocol/servers', 'mcp_server'],
+    ['wong2/awesome-mcp-servers', 'mcp-server'],
+    ['modelcontextprotocol/servers', 'mcp-server'],
   ]
 
   const regState = getRegistryState(state, 'awesome', 'awesome_lists')

@@ -63,7 +63,7 @@ export const ENTITY_PATTERNS: Record<string, string[]> = {
   rule: ['content/rules/*.md', 'content/rules/**/*.md'],
   agent: ['content/agents/**/*.md'],
   claude_md: ['CLAUDE.md'],
-  output_style: ['content/output-styles/*.md'],
+  'output-style': ['content/output-styles/*.md'],
 }
 
 /**
