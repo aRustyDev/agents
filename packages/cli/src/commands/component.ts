@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
-import { type Component, type ComponentType, isComponentType } from '../lib/component/types'
+import { type Component, COMPONENT_TYPES, type ComponentType, getActiveTypes, parseComponentType } from '../lib/component/types'
 import { createOutput } from '../lib/output'
 import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
@@ -26,9 +26,10 @@ export default defineCommand({
         const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
 
         const typeFilter = args.type as string | undefined
-        if (typeFilter && !isComponentType(typeFilter)) {
+        const parsedType = typeFilter ? parseComponentType(typeFilter) : undefined
+        if (typeFilter && !parsedType) {
           out.error(
-            `Invalid type: "${typeFilter}". Valid types: skill, mcp-server, agent, plugin, rule, command, output-style`
+            `Invalid type: "${typeFilter}". Valid types: ${COMPONENT_TYPES.join(', ')}`
           )
           process.exit(EXIT.ERROR)
         }
@@ -36,7 +37,7 @@ export default defineCommand({
         const manager = createComponentManager()
         const result = await manager.search({
           query: args.query as string,
-          type: typeFilter as ComponentType | undefined,
+          type: parsedType,
           limit: Number.parseInt(args.limit as string, 10),
           page: Number.parseInt(args.page as string, 10),
         })
@@ -89,15 +90,16 @@ export default defineCommand({
         const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
 
         const typeFilter = args.type as string | undefined
-        if (typeFilter && !isComponentType(typeFilter)) {
-          out.error(`Invalid type: "${typeFilter}"`)
+        const parsedListType = typeFilter ? parseComponentType(typeFilter) : undefined
+        if (typeFilter && !parsedListType) {
+          out.error(`Invalid type: "${typeFilter}". Valid types: ${COMPONENT_TYPES.join(', ')}`)
           process.exit(EXIT.ERROR)
         }
 
         const manager = createComponentManager()
-        const types: ComponentType[] = typeFilter
-          ? [typeFilter as ComponentType]
-          : ['skill', 'agent', 'plugin', 'rule', 'command', 'output-style']
+        const types: ComponentType[] = parsedListType
+          ? [parsedListType]
+          : getActiveTypes()
 
         const allComponents: Component[] = []
         for (const type of types) {

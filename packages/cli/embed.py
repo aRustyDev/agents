@@ -35,8 +35,8 @@ ENTITY_PATTERNS = {
     'rule': ['context/rules/*.md', 'context/rules/**/*.md', '.claude/rules/*.md'],
     'claude_md': ['**/CLAUDE.md'],
     'plugin': ['context/plugins/*/.claude-plugin/plugin.json'],
-    'output-style': ['context/output-styles/*.md'],
-    'mcp-server': [],  # Loaded from registry, not files
+    'output_style': ['context/output-styles/*.md'],
+    'mcp_server': [],  # Loaded from registry, not files
 }
 
 
@@ -230,7 +230,7 @@ def guess_entity_type(path: Path) -> str:
     elif 'plugin.json' in path_str:
         return 'plugin'
     elif '/output-styles/' in path_str:
-        return 'output-style'
+        return 'output_style'
     else:
         return 'unknown'
 

@@ -57,7 +57,7 @@ export const COMPONENT_TYPE_META: Record<ComponentType, ComponentTypeMetadata> =
   'mcp-client': { name: 'mcp-client', pluralName: 'mcp-clients', discoveryPattern: '**/mcp/clients/**/*.json', providers: [], placeholder: true },
   'mcp-tool': { name: 'mcp-tool', pluralName: 'mcp-tools', discoveryPattern: '**/mcp/tools/**/*.json', providers: [], placeholder: true },
   'rule': { name: 'rule', pluralName: 'rules', discoveryPattern: '**/rules/**/*.md', providers: ['local-rule'], placeholder: false },
-  'hook': { name: 'hook', pluralName: 'hooks', discoveryPattern: '**/hooks/**/*.{ts,js,sh}', providers: [], placeholder: false },
+  'hook': { name: 'hook', pluralName: 'hooks', discoveryPattern: '**/hooks/**/*.{ts,js,sh}', providers: [], placeholder: true },
   'plugin': { name: 'plugin', pluralName: 'plugins', discoveryPattern: '**/plugins/**/*.json', providers: ['local-plugin'], placeholder: false },
   'output-style': { name: 'output-style', pluralName: 'output-styles', discoveryPattern: '**/output-styles/**/*.md', providers: ['local-output-style'], placeholder: false },
   'command': { name: 'command', pluralName: 'commands', discoveryPattern: '**/commands/**/*.md', providers: ['local-command'], placeholder: false },

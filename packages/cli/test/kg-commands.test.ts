@@ -88,7 +88,7 @@ describe('ENTITY_PATTERNS', () => {
     expect(ENTITY_PATTERNS).toHaveProperty('rule')
     expect(ENTITY_PATTERNS).toHaveProperty('agent')
     expect(ENTITY_PATTERNS).toHaveProperty('claude_md')
-    expect(ENTITY_PATTERNS).toHaveProperty('output-style')
+    expect(ENTITY_PATTERNS).toHaveProperty('output_style')
   })
 
   test('each entity type has at least one glob pattern', () => {
@@ -217,11 +217,11 @@ describe('discoverFiles', () => {
   })
 
   test('discovers output style files', async () => {
-    const files = await discoverFiles(['output-style'])
+    const files = await discoverFiles(['output_style'])
     expect(files.length).toBeGreaterThan(0)
 
     for (const f of files) {
-      expect(f.type).toBe('output-style')
+      expect(f.type).toBe('output_style')
     }
   })
 

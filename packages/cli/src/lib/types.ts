@@ -66,9 +66,9 @@ export type EntityType =
   | 'command'
   | 'agent'
   | 'rule'
-  | 'output-style'
+  | 'output_style'
   | 'claude_md'
-  | 'mcp-server'
+  | 'mcp_server'
 
 export type SourceFormat = 'legacy' | 'extended' | 'planning'
 

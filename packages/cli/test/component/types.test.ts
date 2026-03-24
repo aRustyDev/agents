@@ -172,6 +172,7 @@ describe('getActiveTypes', () => {
     expect(active).not.toContain('lsp')
     expect(active).not.toContain('mcp-client')
     expect(active).not.toContain('mcp-tool')
+    expect(active).not.toContain('hook')
   })
 
   test('includes known active types', () => {
@@ -180,14 +181,18 @@ describe('getActiveTypes', () => {
     expect(active).toContain('agent')
     expect(active).toContain('mcp-server')
     expect(active).toContain('rule')
-    expect(active).toContain('hook')
     expect(active).toContain('plugin')
     expect(active).toContain('output-style')
     expect(active).toContain('command')
   })
 
-  test('returns 8 active types', () => {
-    expect(getActiveTypes()).toHaveLength(8)
+  test('excludes hook (placeholder until provider exists)', () => {
+    const active = getActiveTypes()
+    expect(active).not.toContain('hook')
+  })
+
+  test('returns 7 active types', () => {
+    expect(getActiveTypes()).toHaveLength(7)
   })
 })
 
