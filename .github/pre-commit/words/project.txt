@@ -177,6 +177,7 @@ skillmd
 skillsmp
 slugified
 smithery
+smol
 sonnet
 Sortability
 sourcekit
