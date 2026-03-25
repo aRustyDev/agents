@@ -200,6 +200,10 @@ async function findSkillInDir(
 /**
  * Download and analyze a single skill from a catalog entry.
  *
+ * NOTE: This function is used by the `agents add skill` use case (single-skill
+ * download), NOT by catalog analysis. Catalog analysis uses discoverAllRepos()
+ * from catalog-discover.ts for efficient repo-level batch discovery.
+ *
  * Flow:
  * 1. Validate source with parseSource()
  * 2. Clone repo (or use localOverride)
@@ -293,6 +297,10 @@ export interface BatchDownloadOptions {
 
 /**
  * Download all skills in a batch.
+ *
+ * NOTE: This function is used by the `agents add skill` use case and tests,
+ * NOT by catalog analysis. Catalog analysis uses discoverAllRepos() from
+ * catalog-discover.ts for efficient repo-level batch discovery.
  *
  * Groups entries by source so repos are cloned once per source.
  * In test mode (localOverrideDir), maps skill names to subdirectories.
@@ -474,6 +482,10 @@ export interface BackfillOptions {
  * structured error types.
  *
  * No agent dispatch — purely mechanical.
+ *
+ * Future improvement: this could be refactored to use discoverAllRepos()
+ * from catalog-discover.ts for consistent repo-level discovery, but
+ * currently works correctly and is used by the `backfill` subcommand.
  */
 export async function backfillEntries(
   entries: CatalogEntryWithTier1[],

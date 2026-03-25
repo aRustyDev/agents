@@ -38,6 +38,8 @@ import { detectGitProtocol, type GitProtocol, resolveCloneUrl } from './source-p
 export interface DiscoveredSkillResult {
   source: string
   skill: string
+  /** Full SKILL.md content, stored during discovery for manifest building. */
+  content?: string
   /** All mechanical fields computed from the skill content + directory. */
   mechanical: ComponentMetadata & {
     wordCount: number
@@ -148,6 +150,7 @@ export async function computeAllMechanicalFields(
   return {
     source,
     skill: skillName,
+    content,
     mechanical: {
       discoveredPath: relPath || '.',
       lastSeenAt: new Date().toISOString(),
