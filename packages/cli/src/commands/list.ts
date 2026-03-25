@@ -79,5 +79,6 @@ export default defineCommand({
         ['name', 'source', 'description']
       )
     }
+    process.exit(EXIT.OK)
   },
 })

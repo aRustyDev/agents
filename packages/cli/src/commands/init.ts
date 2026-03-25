@@ -83,5 +83,6 @@ export default defineCommand({
     if (args.json) {
       out.raw({ type, supported: false })
     }
+    process.exit(EXIT.OK)
   },
 })

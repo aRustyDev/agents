@@ -91,11 +91,11 @@ describe('remove command', () => {
     expect(name.required).toBe(true)
   })
 
-  test('has agent, yes args', async () => {
+  test('has agent arg (yes removed — prompts not yet implemented)', async () => {
     const mod = await import('../../src/commands/remove')
     const args = mod.default.args ?? {}
     expect(args.agent).toBeDefined()
-    expect(args.yes).toBeDefined()
+    expect(args.yes).toBeUndefined()
   })
 })
 

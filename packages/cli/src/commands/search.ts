@@ -87,5 +87,6 @@ export default defineCommand({
     if (result.value.hasMore) {
       out.info(`Page ${result.value.page}. Use --page ${result.value.page + 1} for more.`)
     }
+    process.exit(EXIT.OK)
   },
 })

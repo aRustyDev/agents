@@ -64,5 +64,6 @@ export default defineCommand({
     if (c.installedAt) out.info(`Installed: ${c.installedAt}`)
     if (c.installMode) out.info(`Install mode: ${c.installMode}`)
     if (c.localPath) out.info(`Local path: ${c.localPath}`)
+    process.exit(EXIT.OK)
   },
 })

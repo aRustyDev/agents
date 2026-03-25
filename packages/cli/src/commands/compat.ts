@@ -67,8 +67,9 @@ export function nounAlias(
         process.exit(1)
       }
 
-      // Inject the noun as the `type` arg so the verb module sees it
-      await cmd.run({ args: { ...args, type: noun } as typeof args })
+      // Citty doesn't support cross-command arg delegation; cast is safe because
+      // verb modules validate args independently via parseComponentType()
+      await cmd.run!({ args: { ...args, type: noun } as any })
     },
   })
 }

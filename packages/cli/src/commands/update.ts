@@ -5,7 +5,7 @@
  * Currently supported: skill. Other types show a "not yet supported" message.
  */
 import { defineCommand } from 'citty'
-import { COMPONENT_TYPES, getComponentMeta, parseComponentType } from '../lib/component/types'
+import { COMPONENT_TYPES, getActiveTypes, getComponentMeta, parseComponentType } from '../lib/component/types'
 import { createOutput } from '../lib/output'
 import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
@@ -40,15 +40,22 @@ export default defineCommand({
     const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
 
     const typeArg = args.type as string | undefined
-    const parsedType = typeArg ? parseComponentType(typeArg) : undefined
 
-    if (typeArg && !parsedType) {
+    if (!typeArg) {
+      const activeTypes = getActiveTypes()
+      out.error(`No component type specified. Use: agents update <type>`)
+      out.info(`Valid types: ${activeTypes.join(', ')}`)
+      process.exit(EXIT.ERROR)
+    }
+
+    const parsedType = parseComponentType(typeArg)
+
+    if (!parsedType) {
       out.error(`Unknown component type: ${typeArg}. Valid types: ${COMPONENT_TYPES.join(', ')}`)
       process.exit(EXIT.ERROR)
     }
 
-    // Default to skill if no type specified (backward compat with `agents skill update`)
-    const type = parsedType ?? 'skill'
+    const type = parsedType
 
     // Skill has a dedicated update implementation
     if (type === 'skill') {
@@ -63,7 +70,7 @@ export default defineCommand({
 
       if (args.json) {
         out.raw(results)
-        return
+        process.exit(EXIT.OK)
       }
 
       const updated = results.filter((r) => r.status === 'updated')
@@ -82,7 +89,7 @@ export default defineCommand({
         }
         process.exit(EXIT.FAILURES)
       }
-      return
+      process.exit(EXIT.OK)
     }
 
     // Placeholder for other types
@@ -96,5 +103,6 @@ export default defineCommand({
     if (args.json) {
       out.raw({ type, supported: false })
     }
+    process.exit(EXIT.OK)
   },
 })
