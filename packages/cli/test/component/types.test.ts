@@ -12,12 +12,14 @@ import {
   getComponentMeta,
   isComponentType,
   type PaginatedResult,
-  parseComponentType,
   type ProviderCapabilities,
   type PublishOptions,
   type PublishResult,
+  parseComponentType,
   type RemoveResult,
   type SearchParams,
+  toComponentType,
+  toEntityType,
 } from '../../src/lib/component/types'
 
 // ---------------------------------------------------------------------------
@@ -765,5 +767,63 @@ describe('ComponentProvider', () => {
 
     const result = await provider.search({ query: 'test' })
     expect(result.ok).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// toEntityType / toComponentType bridge
+// ---------------------------------------------------------------------------
+
+describe('toEntityType', () => {
+  test('maps shared types correctly', () => {
+    expect(toEntityType('skill')).toBe('skill')
+    expect(toEntityType('agent')).toBe('agent')
+    expect(toEntityType('plugin')).toBe('plugin')
+    expect(toEntityType('rule')).toBe('rule')
+    expect(toEntityType('command')).toBe('command')
+    expect(toEntityType('mcp-server')).toBe('mcp_server')
+    expect(toEntityType('output-style')).toBe('output_style')
+  })
+
+  test('returns undefined for placeholder types with no KG mapping', () => {
+    expect(toEntityType('persona')).toBeUndefined()
+    expect(toEntityType('lsp')).toBeUndefined()
+    expect(toEntityType('mcp-client')).toBeUndefined()
+    expect(toEntityType('mcp-tool')).toBeUndefined()
+  })
+})
+
+describe('toComponentType', () => {
+  test('maps shared types correctly', () => {
+    expect(toComponentType('skill')).toBe('skill')
+    expect(toComponentType('agent')).toBe('agent')
+    expect(toComponentType('plugin')).toBe('plugin')
+    expect(toComponentType('rule')).toBe('rule')
+    expect(toComponentType('command')).toBe('command')
+    expect(toComponentType('mcp_server')).toBe('mcp-server')
+    expect(toComponentType('output_style')).toBe('output-style')
+  })
+
+  test('returns undefined for claude_md (KG-only type)', () => {
+    expect(toComponentType('claude_md')).toBeUndefined()
+  })
+})
+
+describe('EntityType <-> ComponentType round-trip', () => {
+  test('round-trips correctly for all shared types', () => {
+    const sharedComponentTypes: ComponentType[] = [
+      'skill',
+      'agent',
+      'plugin',
+      'rule',
+      'command',
+      'mcp-server',
+      'output-style',
+    ]
+    for (const ct of sharedComponentTypes) {
+      const et = toEntityType(ct)
+      expect(et).toBeDefined()
+      expect(toComponentType(et!)).toBe(ct)
+    }
   })
 })
