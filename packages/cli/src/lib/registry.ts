@@ -188,7 +188,8 @@ export function logFailure(state: CrawlState, url: string, error: string): void 
 // Component Normalization
 // ---------------------------------------------------------------------------
 
-export interface Component {
+/** Catalog entry from crawled registries. Distinct from component/types.ts Component. */
+export interface CatalogRecord {
   id: string
   name: string
   type: string
@@ -224,7 +225,7 @@ export function sanitizeId(rawId: string): string {
 }
 
 /**
- * Transform raw crawl data into a normalized Component record.
+ * Transform raw crawl data into a normalized CatalogRecord.
  *
  * Returns a Result to allow callers to handle transformation failures.
  */
@@ -232,7 +233,7 @@ export function transformToComponent(
   raw: unknown,
   componentType: string,
   sourceName: string
-): Result<Component> {
+): Result<CatalogRecord> {
   if (typeof raw !== 'object' || raw === null) {
     return err(new CliError('Expected object for component transform', 'E_TRANSFORM'))
   }
@@ -246,7 +247,7 @@ export function transformToComponent(
     return err(new CliError('Generated empty component ID', 'E_TRANSFORM'))
   }
 
-  const component: Component = {
+  const component: CatalogRecord = {
     id: componentId,
     name,
     type: componentType,

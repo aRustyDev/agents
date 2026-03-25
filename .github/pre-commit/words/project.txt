@@ -113,6 +113,8 @@ modelcontextprotocol
 monorepo
 mousemovebody
 myns
+mycomponent
+mycomponentv
 myproject
 myskill
 neuromorphic
@@ -123,6 +125,7 @@ octocat
 oldhash
 ollama
 onlynamespace
+orgname
 opto
 orbstack
 overclaiming
@@ -193,6 +196,7 @@ swiftui
 SwiftUI
 Tauri
 tenequm
+testuser
 timebox
 tmppath
 tokei
