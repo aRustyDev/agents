@@ -15,8 +15,9 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import * as TOML from 'smol-toml'
-import { CliError, err, ok, type Result } from './types'
+import * as v from 'valibot'
 import { pathExists, readTextFile, writeTextFile } from './file-io'
+import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -64,6 +65,31 @@ export const DEFAULT_CONFIG: Readonly<AgentsConfig> = {
 }
 
 // ---------------------------------------------------------------------------
+// Validation schema (snake_case keys matching TOML convention)
+// ---------------------------------------------------------------------------
+
+const GeneralSchema = v.object({
+  debug: v.optional(v.boolean()),
+  output_format: v.optional(v.picklist(['human', 'json'])),
+  fail_on: v.optional(v.picklist(['error', 'warning', 'none'])),
+})
+
+const SearchSchema = v.object({
+  backends: v.optional(v.array(v.string())),
+  default_limit: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+})
+
+const CatalogSchema = v.object({
+  path: v.optional(v.string()),
+})
+
+export const AgentsConfigTomlSchema = v.object({
+  general: v.optional(GeneralSchema),
+  search: v.optional(SearchSchema),
+  catalog: v.optional(CatalogSchema),
+})
+
+// ---------------------------------------------------------------------------
 // Paths
 // ---------------------------------------------------------------------------
 
@@ -92,7 +118,10 @@ function snakeToCamel(str: string): string {
 }
 
 /** Recursively transform all keys in an object. */
-function transformKeys(obj: Record<string, unknown>, fn: (key: string) => string): Record<string, unknown> {
+function transformKeys(
+  obj: Record<string, unknown>,
+  fn: (key: string) => string
+): Record<string, unknown> {
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(obj)) {
     const newKey = fn(key)
@@ -117,14 +146,25 @@ export async function readConfigFile(path: string): Promise<Result<Partial<Agent
   const text = await readTextFile(path)
   if (!text.ok) return text as Result<never>
   try {
-    const parsed = TOML.parse(text.value)
-    const camelCased = transformKeys(parsed as Record<string, unknown>, snakeToCamel)
-    return ok(camelCased as Partial<AgentsConfig>)
+    const raw = TOML.parse(text.value)
+    // Validate against schema (lenient: strip unknown keys)
+    const validated = v.safeParse(AgentsConfigTomlSchema, raw)
+    if (!validated.success) {
+      // Warn but continue with what we can parse
+      const issues = validated.issues.map((i) => i.message).join('; ')
+      console.error(`Warning: config validation issues in ${path}: ${issues}`)
+    }
+    const cleaned = validated.success ? validated.output : raw
+    // Transform snake_case TOML keys to camelCase
+    const transformed = transformKeys(cleaned as Record<string, unknown>, snakeToCamel)
+    return ok(transformed as Partial<AgentsConfig>)
   } catch (e) {
-    return err(new CliError(
-      `Failed to parse TOML config at ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_PARSE_CONFIG'
-    ))
+    return err(
+      new CliError(
+        `Failed to parse TOML config at ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_PARSE_CONFIG'
+      )
+    )
   }
 }
 
@@ -138,10 +178,12 @@ export async function writeConfigFile(
     const content = TOML.stringify(snakeCased)
     return writeTextFile(path, content)
   } catch (e) {
-    return err(new CliError(
-      `Failed to write config to ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_WRITE_CONFIG'
-    ))
+    return err(
+      new CliError(
+        `Failed to write config to ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_WRITE_CONFIG'
+      )
+    )
   }
 }
 
@@ -180,7 +222,7 @@ export function readEnvConfig(): Partial<AgentsConfig> {
     if (value === 'true') current[key] = true
     else if (value === 'false') current[key] = false
     else if (/^\d+$/.test(value)) current[key] = Number.parseInt(value, 10)
-    else if (value.includes(',')) current[key] = value.split(',').map(s => s.trim())
+    else if (value.includes(',')) current[key] = value.split(',').map((s) => s.trim())
     else current[key] = value
   }
 
@@ -196,13 +238,17 @@ export function deepMerge<T extends Record<string, unknown>>(target: T, source: 
   const result = { ...target }
   for (const [key, value] of Object.entries(source)) {
     if (value !== undefined && value !== null) {
-      if (typeof value === 'object' && !Array.isArray(value) && typeof (result as Record<string, unknown>)[key] === 'object') {
-        (result as Record<string, unknown>)[key] = deepMerge(
+      if (
+        typeof value === 'object' &&
+        !Array.isArray(value) &&
+        typeof (result as Record<string, unknown>)[key] === 'object'
+      ) {
+        ;(result as Record<string, unknown>)[key] = deepMerge(
           (result as Record<string, unknown>)[key] as Record<string, unknown>,
           value as Record<string, unknown>
         )
       } else {
-        (result as Record<string, unknown>)[key] = value
+        ;(result as Record<string, unknown>)[key] = value
       }
     }
   }
@@ -222,7 +268,9 @@ export async function loadConfig(opts?: { cwd?: string }): Promise<Result<Agents
   const userPath = getUserConfigPath()
   const userConfig = await readConfigFile(userPath)
   if (!userConfig.ok) {
-    console.error(`Warning: Failed to parse user config at ${userPath}: ${userConfig.error.message}`)
+    console.error(
+      `Warning: Failed to parse user config at ${userPath}: ${userConfig.error.message}`
+    )
   } else if (Object.keys(userConfig.value).length > 0) {
     config = deepMerge(config, userConfig.value)
   }
@@ -231,7 +279,9 @@ export async function loadConfig(opts?: { cwd?: string }): Promise<Result<Agents
   const projectPath = getProjectConfigPath(opts?.cwd)
   const projectConfig = await readConfigFile(projectPath)
   if (!projectConfig.ok) {
-    console.error(`Warning: Failed to parse project config at ${projectPath}: ${projectConfig.error.message}`)
+    console.error(
+      `Warning: Failed to parse project config at ${projectPath}: ${projectConfig.error.message}`
+    )
   } else if (Object.keys(projectConfig.value).length > 0) {
     config = deepMerge(config, projectConfig.value)
   }
