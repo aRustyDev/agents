@@ -2,9 +2,11 @@
  * Catalog reconciliation engine.
  *
  * Matches discovery results against existing catalog entries to detect
- * moves, renames, additions, and removals. Pure functions — no I/O.
+ * moves, renames, additions, and removals. Pure functions — no I/O
+ * (except applyReconciliation which writes atomically).
  */
 
+import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import type { CatalogEntryWithTier1, Tier1ErrorType } from './catalog'
 import type { DiscoveredSkillResult, RepoDiscoveryResult } from './catalog-discover'
 
@@ -258,4 +260,151 @@ export function detectMoveRenames(
   // Remove promoted entries from added/removed lists
   report.added = report.added.filter((e) => !promotedToMove.has(e))
   report.removed = report.removed.filter((e) => !demotedFromRemoved.has(e))
+}
+
+// ---------------------------------------------------------------------------
+// Apply Reconciliation — write changes back to catalog
+// ---------------------------------------------------------------------------
+
+/**
+ * Apply reconciliation results to an existing catalog NDJSON file.
+ *
+ * - **added**: inserts new entries with mechanical data from discovery
+ * - **removed**: marks entries as `removed_from_repo`
+ * - **updated/moved**: refreshes mechanical fields from discovery
+ * - **renamed**: updates skill name + mechanical fields, preserves analysis data
+ *
+ * Writes atomically (tmp + rename). Does not modify the NDJSON format.
+ */
+export function applyReconciliation(
+  catalogPath: string,
+  report: ReconciliationReport,
+  discoveryResults: DiscoveredSkillResult[]
+): { added: number; removed: number; updated: number; moved: number } {
+  // Read existing catalog
+  const existing: CatalogEntryWithTier1[] = []
+  const content = readFileSync(catalogPath, 'utf8')
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    try {
+      existing.push(JSON.parse(trimmed) as CatalogEntryWithTier1)
+    } catch {
+      /* skip malformed lines */
+    }
+  }
+
+  // Build index: "source\0skill" → index
+  const index = new Map<string, number>()
+  for (let i = 0; i < existing.length; i++) {
+    index.set(`${existing[i].source}\0${existing[i].skill}`, i)
+  }
+
+  // Build discovery lookup for fast access
+  const discoveryMap = new Map<string, DiscoveredSkillResult>()
+  for (const d of discoveryResults) {
+    discoveryMap.set(`${d.source}:${d.skill}`, d)
+  }
+
+  const stats = { added: 0, removed: 0, updated: 0, moved: 0 }
+
+  // Apply updates — refresh mechanical fields on existing entries
+  for (const entry of report.updated) {
+    const key = `${entry.source}\0${entry.skill}`
+    const idx = index.get(key)
+    if (idx === undefined || !entry.discovered) continue
+    mergeMechanical(existing[idx], entry.discovered)
+    stats.updated++
+  }
+
+  // Apply moves — update discoveredPath + mechanical fields
+  for (const entry of report.moved) {
+    const key = `${entry.source}\0${entry.skill}`
+    const idx = index.get(key)
+    if (idx === undefined || !entry.discovered) continue
+    existing[idx].movedFrom = entry.movedFrom
+    mergeMechanical(existing[idx], entry.discovered)
+    stats.moved++
+  }
+
+  // Apply renames — update skill name, preserve analysis data
+  for (const entry of report.renamed) {
+    if (!entry.renamedFrom || !entry.discovered) continue
+    const oldKey = `${entry.source}\0${entry.renamedFrom}`
+    const idx = index.get(oldKey)
+    if (idx === undefined) continue
+    // Update the skill name
+    existing[idx].skill = entry.skill
+    mergeMechanical(existing[idx], entry.discovered)
+    // Update index
+    index.delete(oldKey)
+    index.set(`${entry.source}\0${entry.skill}`, idx)
+  }
+
+  // Apply removals — mark as removed_from_repo
+  for (const entry of report.removed) {
+    const key = `${entry.source}\0${entry.skill}`
+    const idx = index.get(key)
+    if (idx === undefined) continue
+    existing[idx].availability = 'removed_from_repo'
+    stats.removed++
+  }
+
+  // Apply additions — create new entries with mechanical data
+  for (const entry of report.added) {
+    if (!entry.discovered) continue
+    const newEntry: CatalogEntryWithTier1 = {
+      source: entry.source,
+      skill: entry.skill,
+      availability: 'available',
+      discoveredPath: entry.discovered.mechanical.discoveredPath,
+      lastSeenAt: entry.discovered.mechanical.lastSeenAt,
+      lastSeenHeadSha: entry.discovered.mechanical.lastSeenHeadSha,
+      contentHash: entry.discovered.mechanical.contentHash,
+      wordCount: entry.discovered.mechanical.wordCount,
+      sectionCount: entry.discovered.mechanical.sectionCount,
+      fileCount: entry.discovered.mechanical.fileCount,
+      headingTree: entry.discovered.mechanical.headingTree,
+      keywords: entry.discovered.mechanical.keywords,
+      lineCount: entry.discovered.mechanical.lineCount,
+      sectionMap: entry.discovered.mechanical.sectionMap,
+      fileTree: entry.discovered.mechanical.fileTree,
+      skillSizeBytes: entry.discovered.mechanical.skillSizeBytes,
+      isSimple: entry.discovered.mechanical.isSimple,
+      treeSha: entry.discovered.mechanical.treeSha,
+    }
+    existing.push(newEntry)
+    index.set(`${entry.source}\0${entry.skill}`, existing.length - 1)
+    stats.added++
+  }
+
+  // Write atomically: tmp + rename
+  const tmpPath = `${catalogPath}.tmp`
+  const lines = `${existing.map((e) => JSON.stringify(e)).join('\n')}\n`
+  writeFileSync(tmpPath, lines, 'utf8')
+  renameSync(tmpPath, catalogPath)
+
+  return stats
+}
+
+/**
+ * Merge mechanical fields from a discovered skill onto an existing catalog entry.
+ * Overwrites only the deterministic fields — preserves LLM analysis data.
+ */
+function mergeMechanical(entry: CatalogEntryWithTier1, disc: DiscoveredSkillResult): void {
+  entry.discoveredPath = disc.mechanical.discoveredPath
+  entry.lastSeenAt = disc.mechanical.lastSeenAt
+  entry.lastSeenHeadSha = disc.mechanical.lastSeenHeadSha
+  entry.contentHash = disc.mechanical.contentHash
+  entry.wordCount = disc.mechanical.wordCount
+  entry.sectionCount = disc.mechanical.sectionCount
+  entry.fileCount = disc.mechanical.fileCount
+  entry.headingTree = disc.mechanical.headingTree
+  entry.keywords = disc.mechanical.keywords
+  entry.treeSha = disc.mechanical.treeSha
+  entry.lineCount = disc.mechanical.lineCount
+  entry.sectionMap = disc.mechanical.sectionMap
+  entry.fileTree = disc.mechanical.fileTree
+  entry.skillSizeBytes = disc.mechanical.skillSizeBytes
+  entry.isSimple = disc.mechanical.isSimple
 }

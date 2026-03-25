@@ -1241,6 +1241,16 @@ export default defineCommand({
           description: 'Skip repos whose HEAD matches cached manifest',
           default: true,
         },
+        full: {
+          type: 'boolean',
+          description: 'Force re-cloning all repos (bypass incremental cache)',
+          default: false,
+        },
+        apply: {
+          type: 'boolean',
+          description: 'Apply reconciliation changes to catalog (add/remove/update entries)',
+          default: false,
+        },
         'dry-run': {
           type: 'boolean',
           description: 'Show repo count without cloning',
@@ -1260,8 +1270,9 @@ export default defineCommand({
         }
 
         const { discoverAllRepos } = await import('../lib/catalog-discover')
-        const { readRepoManifest, mergeRepoManifest, writeRepoManifest } = await import(
-          '../lib/catalog'
+        const { readRepoManifest, mergeRepoManifest } = await import('../lib/catalog')
+        const { reconcile, detectMoveRenames, applyReconciliation } = await import(
+          '../lib/catalog-reconcile'
         )
         const manifestPath = join(PROJECT_ROOT, 'content/skills/.catalog-repos.ndjson')
 
@@ -1271,11 +1282,14 @@ export default defineCommand({
         const available = allEntries.filter((e) => e.availability === 'available')
         const uniqueRepos = new Set(available.map((e) => e.source))
         const concurrency = parseInt(args.concurrency as string, 10) || 5
-        const incremental = args.incremental as boolean
+        const forceFullClone = args.full as boolean
+        const incremental = forceFullClone ? false : (args.incremental as boolean)
         const cachedManifests = incremental ? readRepoManifest(manifestPath) : []
 
         out.info(`Catalog: ${allEntries.length} entries, ${uniqueRepos.size} unique repos`)
-        out.info(`Mode: ${incremental ? 'incremental' : 'full'} (${cachedManifests.length} cached)`)
+        out.info(
+          `Mode: ${forceFullClone ? 'full (--full)' : incremental ? 'incremental' : 'full'} (${cachedManifests.length} cached)`
+        )
 
         if (args['dry-run']) {
           if (args.json) {
@@ -1312,6 +1326,36 @@ export default defineCommand({
         const totalMissing = summary.results.reduce((n, r) => n + r.missing.length, 0)
         const totalErrors = summary.results.reduce((n, r) => n + r.errors.length, 0)
 
+        out.info(`\nDiscovery complete:`)
+        out.info(
+          `  Skipped ${summary.skipped} repos (unchanged HEAD), cloned ${summary.cloned} repos`
+        )
+        out.info(`  Skills found: ${totalSkills}`)
+        out.info(`  Missing from repos: ${totalMissing}`)
+        out.info(`  Clone errors: ${totalErrors}`)
+
+        // Reconcile discovery results against existing catalog
+        const report = reconcile(allEntries, summary.results)
+        detectMoveRenames(report, allEntries)
+
+        out.info(`\nReconciliation:`)
+        out.info(`  Updated: ${report.updated.length}`)
+        out.info(`  Added: ${report.added.length}`)
+        out.info(`  Removed: ${report.removed.length}`)
+        out.info(`  Moved: ${report.moved.length}`)
+        out.info(`  Renamed: ${report.renamed.length}`)
+        out.info(`  Errors: ${report.errors.length}`)
+
+        // Apply reconciliation changes if requested
+        if (args.apply) {
+          const allDiscovered = summary.results.flatMap((r) => r.skills)
+          const stats = applyReconciliation(catalogPath, report, allDiscovered)
+          out.info(`\nApplied to catalog:`)
+          out.info(
+            `  ${stats.added} added, ${stats.removed} removed, ${stats.updated} updated, ${stats.moved} moved`
+          )
+        }
+
         if (args.json) {
           out.raw({
             repos: summary.totalRepos,
@@ -1320,13 +1364,16 @@ export default defineCommand({
             skillsFound: totalSkills,
             missing: totalMissing,
             errors: totalErrors,
+            reconciliation: {
+              updated: report.updated.length,
+              added: report.added.length,
+              removed: report.removed.length,
+              moved: report.moved.length,
+              renamed: report.renamed.length,
+              errors: report.errors.length,
+            },
+            applied: !!args.apply,
           })
-        } else {
-          out.info(`\nDiscovery complete:`)
-          out.info(`  Repos: ${summary.cloned} cloned, ${summary.skipped} skipped (unchanged)`)
-          out.info(`  Skills found: ${totalSkills}`)
-          out.info(`  Missing from repos: ${totalMissing}`)
-          out.info(`  Clone errors: ${totalErrors}`)
         }
 
         process.exit(EXIT.OK)
