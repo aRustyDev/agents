@@ -22,7 +22,7 @@ Store data in JSON → Import to KuzuDB → Analyze with Cypher queries
 └── README.md               # Documentation
 ```
 
-For skills, this lives at `components/skills/<skill>/graphs/`.
+For skills, this lives at `content/skills/<skill>/graphs/`.
 For other projects, place at project root or appropriate subdirectory.
 
 ---
@@ -87,7 +87,7 @@ Projects should include a `kuzu.just` file (or equivalent recipes in their main 
 # KuzuDB Graph Data Recipes
 # =============================================================================
 # Implements the graph-data-pattern Recipe API
-# See: components/rules/graph-data-pattern.md
+# See: content/rules/graph-data-pattern.md
 # =============================================================================
 
 # Configuration (override in parent justfile or via env vars)
@@ -332,7 +332,7 @@ def get_db_path(args) -> tuple[Path, str]:
 ### Skills with Graph Data
 
 ```
-components/skills/meta-convert-guide/graphs/
+content/skills/meta-convert-guide/graphs/
 ├── data/difficulty.json
 ├── schema.cypher
 ├── queries.cypher

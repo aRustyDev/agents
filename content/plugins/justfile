@@ -50,4 +50,4 @@ update-all:
 # List all plugins with sources
 [group('plugin')]
 list:
-    @ls -1 {{ ROOT }}/context/plugins/*/\.claude-plugin/plugin.sources.json 2>/dev/null | sed 's|.*/context/plugins/||;s|/\.claude-plugin/plugin.sources.json||' | sort
+    @ls -1 {{ ROOT }}/content/plugins/*/\.claude-plugin/plugin.sources.json 2>/dev/null | sed 's|.*/content/plugins/||;s|/\.claude-plugin/plugin.sources.json||' | sort

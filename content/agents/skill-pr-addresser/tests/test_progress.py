@@ -33,14 +33,14 @@ class TestPRProgress:
             pr_number=795,
             status=PRStatus.IN_PROGRESS,
             title="Test PR",
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
         )
 
         data = pr.to_dict()
 
         assert data["pr_number"] == 795
         assert data["status"] == "in_progress"
-        assert data["skill_path"] == "components/skills/lang-rust-dev"
+        assert data["skill_path"] == "content/skills/lang-rust-dev"
 
 
 class TestBatchProgress:

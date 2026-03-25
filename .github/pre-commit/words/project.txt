@@ -26,6 +26,7 @@ bunx
 burpsuite
 cchooks
 cclint
+ccflare
 ccpm
 CHANGEME
 chunker
@@ -40,6 +41,7 @@ codebase
 codebases
 codecov
 codegraph
+compdef
 Composio
 Cpath
 crawl4ai
@@ -58,6 +60,9 @@ DTCG
 Duplicat
 elec
 embeddings
+ename
+eslug
+etype
 etypes
 fastmcp
 FDTD
@@ -94,6 +99,7 @@ jqueryscript
 justfile
 kwsites
 lackeyjb
+lastrowid
 LAPACK
 lintable
 litdb
@@ -160,6 +166,7 @@ pytestmark
 radon
 rahulvrane
 recieve
+rels
 reclassifiable
 reprioritize
 rereview

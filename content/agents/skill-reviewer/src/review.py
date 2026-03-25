@@ -21,18 +21,18 @@ def extract_skill_path(title: str) -> str | None:
     - "refine(skills): skill-name"
 
     Returns:
-        Skill path like "components/skills/skill-name" or None
+        Skill path like "content/skills/skill-name" or None
     """
     # Format: [skill-name] description
     if title.startswith("[") and "]" in title:
         skill_name = title[1 : title.index("]")]
-        return f"components/skills/{skill_name}"
+        return f"content/skills/{skill_name}"
 
     # Format: refine(skills): skill-name or review(skills): skill-name
     match = re.match(r"(?:refine|review)\(skills\):\s*([a-z0-9-]+)", title)
     if match:
         skill_name = match.group(1)
-        return f"components/skills/{skill_name}"
+        return f"content/skills/{skill_name}"
 
     return None
 

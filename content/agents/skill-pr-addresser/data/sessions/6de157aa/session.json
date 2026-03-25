@@ -1,6 +1,6 @@
 {
   "session_id": "6de157aa",
-  "skill_path": "components/skills/github-app-dev",
+  "skill_path": "content/skills/github-app-dev",
   "issue_number": 692,
   "repo_owner": "aRustyDev",
   "repo_name": "ai",
@@ -27,7 +27,7 @@
       "addressed": 4,
       "skipped": 0,
       "files_modified": [
-        "components/skills/github-app-dev/SKILL.md",
+        "content/skills/github-app-dev/SKILL.md",
         "SKILL.md"
       ],
       "commit_sha": "d105357f7267e0a7bcbc66158830f4460aa06726",

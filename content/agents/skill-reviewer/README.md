@@ -4,7 +4,7 @@ An orchestrated agent system for reviewing, validating, and improving Claude Cod
 
 ## Architecture
 
-```
+```text
 skill-reviewer/
 ├── skill-reviewer.md          # Entry point (discovered by Claude Code)
 ├── main.py                    # CLI entry point
@@ -44,13 +44,13 @@ cd /path/to/ai/repo
 
 # Basic usage
 python .claude/agents/skill-reviewer/main.py \
-  --skill components/skills/lang-rust-dev \
+  --skill content/skills/lang-rust-dev \
   --issue 123 \
   --verbose
 
 # Dry run (no GitHub changes)
 python .claude/agents/skill-reviewer/main.py \
-  --skill components/skills/lang-rust-dev \
+  --skill content/skills/lang-rust-dev \
   --issue 123 \
   --dry-run
 ```
@@ -87,13 +87,13 @@ python .claude/agents/skill-reviewer/main.py --resume abc123
 ```bash
 # Only validation
 python .claude/agents/skill-reviewer/main.py \
-  --skill components/skills/lang-rust-dev \
+  --skill content/skills/lang-rust-dev \
   --issue 123 \
   --stages validation
 
 # Validation + analysis (no fixing/PR)
 python .claude/agents/skill-reviewer/main.py \
-  --skill components/skills/lang-rust-dev \
+  --skill content/skills/lang-rust-dev \
   --issue 123 \
   --stages validation,complexity,analysis
 ```
@@ -111,6 +111,7 @@ python .claude/agents/skill-reviewer/main.py \
 | `github_end` | github-updater | Haiku 3.5 | Mark issue in-review |
 
 *Dynamic model selection based on complexity:
+
 - Low complexity → Haiku 3.5
 - Medium complexity → Sonnet 3.5
 - High complexity → Opus 4.5
@@ -152,12 +153,14 @@ Force specific models for sub-agents:
 ### Validator
 
 Checks:
+
 - SKILL.md line count (< 500 = pass, 500-800 = warning, > 800 = fail)
 - 8-pillar coverage for lang-* and convert-* skills
 - Progressive disclosure pattern
 - Required files
 
 Output:
+
 ```json
 {
   "pillar_coverage": {"module_system": true, ...},
@@ -171,12 +174,14 @@ Output:
 ### Complexity Assessor
 
 Evaluates:
+
 - Number of missing pillars
 - Structural issues count
 - Language paradigm complexity
 - Estimated scope of changes
 
 Output:
+
 ```json
 {
   "complexity": "medium",
@@ -188,6 +193,7 @@ Output:
 ### Analyzer
 
 Provides:
+
 - Detailed gap analysis
 - Specific content suggestions
 - Reference file recommendations
@@ -196,6 +202,7 @@ Provides:
 ### Fixer
 
 Applies:
+
 - New sections to SKILL.md
 - New reference files
 - Cross-reference updates
@@ -204,6 +211,7 @@ Applies:
 ### PR Creator
 
 Creates:
+
 - Properly formatted commit
 - PR with template
 - Issue links
@@ -224,7 +232,7 @@ Creates:
 
 Sessions are stored in `data/sessions/<session-id>/`:
 
-```
+```text
 session.json     # Current state
 validator.json   # Sub-agent outputs
 analyzer.json
@@ -247,7 +255,7 @@ Sessions can be resumed if interrupted.
 ```bash
 # Run just one sub-agent
 python main.py \
-  --skill components/skills/lang-rust-dev \
+  --skill content/skills/lang-rust-dev \
   --issue 123 \
   --stages validation
 ```
@@ -264,7 +272,7 @@ cat data/sessions/<id>/session.json | jq .
 
 ## Workflow
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Skill Review Pipeline                        │
 ├─────────────────────────────────────────────────────────────────────┤

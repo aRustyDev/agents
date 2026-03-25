@@ -35,6 +35,7 @@ citty
 clojars
 codefuse
 codegen
+compdef
 coderabbit
 colorlinks
 Columnstore

@@ -46,7 +46,7 @@ Always provide structured JSON output with all fields from the schema.
 
 ```json
 {
-  "skill_path": "components/skills/lang-rust-dev",
+  "skill_path": "content/skills/lang-rust-dev",
   "skill_type": "lang-dev",
   "token_count": 423,
   "token_budget_status": "pass",

@@ -69,7 +69,7 @@ Before creating a new skill, check if one already exists:
 
 ```bash
 # Check if skill directory exists
-ls components/skills/convert-$1-$2/
+ls content/skills/convert-$1-$2/
 
 # Search for existing PRs
 gh pr list --search "convert-$1-$2" --state all
@@ -97,7 +97,7 @@ gh pr list --search "convert-$1-$2" --state all
    |-------|-------|
    | Skill | `convert-$1-$2` |
    | Status | Already exists |
-   | Location | `components/skills/convert-$1-$2/SKILL.md` |
+   | Location | `content/skills/convert-$1-$2/SKILL.md` |
    | PR | #XXX (if known) |
 
    **Recommendation:** [Update / Skip / Review]
@@ -111,7 +111,7 @@ Check if a skill for the reverse direction (`convert-$2-$1`) already exists:
 
 ```bash
 # Check if reverse skill exists
-ls components/skills/convert-$2-$1/
+ls content/skills/convert-$2-$1/
 
 # Search for reverse skill PRs
 gh pr list --search "convert-$2-$1" --state all
@@ -137,7 +137,7 @@ gh pr list --search "convert-$2-$1" --state all
 | Field | Value |
 |-------|-------|
 | Reverse Skill | `convert-$2-$1` |
-| Location | `components/skills/convert-$2-$1/SKILL.md` |
+| Location | `content/skills/convert-$2-$1/SKILL.md` |
 | Key Insights | [List patterns that apply bidirectionally] |
 
 **Action**: Reference in "See Also" section, share pitfalls documentation
@@ -179,14 +179,14 @@ Example: /create-lang-conversion-skill typescript rust
 
 Read these skills to understand patterns and gather examples:
 
-1. **Meta-skill** (required): `components/skills/meta-convert-dev/SKILL.md`
+1. **Meta-skill** (required): `content/skills/meta-convert-dev/SKILL.md`
    - APTV workflow (Analyze → Plan → Transform → Validate)
    - Type mapping strategies
    - Idiom translation approaches
    - Testing strategies
 
 2. **Existing conversion skills** (required - read at least 1):
-   - Search for `convert-*` skills in `components/skills/`
+   - Search for `convert-*` skills in `content/skills/`
    - **Read one complete skill** (e.g., `convert-typescript-rust/SKILL.md` lines 1-300) to understand:
      - Expected depth for type mapping tables
      - "Why this translation" explanation style
@@ -244,7 +244,7 @@ Run this validation automatically when reading the lang-*-dev skills:
 ```bash
 # Check for section headers (example for bash, but do this by reading the file)
 for pillar in "Module" "Error" "Concurrency" "Metaprogramming" "Zero\|Default" "Serialization" "Build" "Testing"; do
-  grep -c "## .*$pillar" components/skills/lang-$1-dev/SKILL.md
+  grep -c "## .*$pillar" content/skills/lang-$1-dev/SKILL.md
 done
 ```
 
@@ -485,7 +485,7 @@ Rate the complexity of the language pair conversion to set expectations and guid
 ### Step 4: Create Skill Directory
 
 ```bash
-mkdir -p components/skills/convert-$1-$2
+mkdir -p content/skills/convert-$1-$2
 ```
 
 ### Step 5: Generate SKILL.md
@@ -892,7 +892,7 @@ Consider adding references to this skill in:
 | Field | Value |
 |-------|-------|
 | Skill Name | `convert-<source>-<target>` |
-| Location | `components/skills/convert-<source>-<target>/SKILL.md` |
+| Location | `content/skills/convert-<source>-<target>/SKILL.md` |
 | Extends | `meta-convert-dev` |
 
 **Validation Results:**
