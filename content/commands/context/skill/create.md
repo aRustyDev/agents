@@ -75,7 +75,7 @@ This provides `ccpm` CLI commands used throughout the discovery phase. If not in
    case "$LOCATION" in
      project)  SKILL_DIR=".claude/skills/$SKILL_NAME" ;;
      personal) SKILL_DIR="$HOME/.claude/skills/$SKILL_NAME" ;;
-     ai)       SKILL_DIR="${AI_CONFIG_REPO:-$HOME/repos/configs/ai}/components/skills/$SKILL_NAME" ;;
+     ai)       SKILL_DIR="${AI_CONFIG_REPO:-$HOME/repos/configs/ai}/content/skills/$SKILL_NAME" ;;
    esac
    ```
 
@@ -345,7 +345,7 @@ ls -la .claude/skills/
 ls -la ~/.claude/skills/
 
 # AI config library
-ls -la "${AI_CONFIG_REPO:-$HOME/repos/configs/ai}/components/skills/"
+ls -la "${AI_CONFIG_REPO:-$HOME/repos/configs/ai}/content/skills/"
 ```
 
 ### Phase 2: Assess Adopt vs Create

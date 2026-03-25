@@ -9,7 +9,7 @@ Usage:
     python main.py --issue 123
 
     # Review a single skill with explicit path
-    python main.py --issue 123 --skill components/skills/lang-rust-dev
+    python main.py --issue 123 --skill content/skills/lang-rust-dev
 
     # Resume an interrupted session
     python main.py --resume abc123

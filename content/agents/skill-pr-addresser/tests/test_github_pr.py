@@ -37,8 +37,8 @@ SAMPLE_PR_JSON = {
     "baseRefName": "main",
     "headRefOid": "abc123def456",
     "files": [
-        {"path": "components/skills/lang-rust-dev/SKILL.md"},
-        {"path": "components/skills/lang-rust-dev/examples/ownership.md"},
+        {"path": "content/skills/lang-rust-dev/SKILL.md"},
+        {"path": "content/skills/lang-rust-dev/examples/ownership.md"},
     ],
 }
 
@@ -81,7 +81,7 @@ SAMPLE_THREADS_GRAPHQL = {
                     "nodes": [
                         {
                             "id": "thread_1",
-                            "path": "components/skills/lang-rust-dev/SKILL.md",
+                            "path": "content/skills/lang-rust-dev/SKILL.md",
                             "line": 42,
                             "isResolved": False,
                             "isOutdated": False,
@@ -97,7 +97,7 @@ SAMPLE_THREADS_GRAPHQL = {
                         },
                         {
                             "id": "thread_2",
-                            "path": "components/skills/lang-rust-dev/SKILL.md",
+                            "path": "content/skills/lang-rust-dev/SKILL.md",
                             "line": 100,
                             "isResolved": True,
                             "isOutdated": False,
@@ -254,10 +254,10 @@ class TestInferSkillFromFiles:
     def test_infers_from_skill_path(self):
         """Should infer skill path from changed files."""
         files = [
-            "components/skills/lang-rust-dev/SKILL.md",
-            "components/skills/lang-rust-dev/examples/ownership.md",
+            "content/skills/lang-rust-dev/SKILL.md",
+            "content/skills/lang-rust-dev/examples/ownership.md",
         ]
-        assert infer_skill_from_files(files) == "components/skills/lang-rust-dev"
+        assert infer_skill_from_files(files) == "content/skills/lang-rust-dev"
 
     def test_returns_none_for_non_skill_files(self):
         """Should return None when no skill files changed."""
@@ -271,10 +271,10 @@ class TestInferSkillFromFiles:
         """Should find skill even with mixed file types."""
         files = [
             "README.md",
-            "components/skills/lang-rust-dev/SKILL.md",
+            "content/skills/lang-rust-dev/SKILL.md",
             ".github/workflows/ci.yml",
         ]
-        assert infer_skill_from_files(files) == "components/skills/lang-rust-dev"
+        assert infer_skill_from_files(files) == "content/skills/lang-rust-dev"
 
 
 class TestReviewThread:

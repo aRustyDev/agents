@@ -2,7 +2,7 @@
 # KuzuDB Graph Data Recipes
 # =============================================================================
 # Implements the graph-data-pattern Recipe API
-# See: components/rules/graph-data-pattern.md
+# See: content/rules/graph-data-pattern.md
 # =============================================================================
 
 # Configuration

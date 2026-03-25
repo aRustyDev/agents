@@ -92,7 +92,7 @@ def mock_discovery_context(mock_pr_details, mock_blocking_review, mock_thread, m
     return DiscoveryContext(
         pr=mock_pr_details,
         pr_number=795,
-        skill_path="components/skills/lang-rust-dev",
+        skill_path="content/skills/lang-rust-dev",
         blocking_reviews=[mock_blocking_review],
         unresolved_threads=[mock_thread],
         worktree=mock_worktree,

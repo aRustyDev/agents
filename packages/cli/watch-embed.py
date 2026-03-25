@@ -37,6 +37,7 @@ class DebounceHandler(FileSystemEventHandler):
 
     def _start_processor(self):
         """Start background thread to process pending changes."""
+
         def processor():
             while True:
                 time.sleep(DEBOUNCE_SECONDS / 2)
@@ -75,13 +76,13 @@ class DebounceHandler(FileSystemEventHandler):
     def _queue_change(self, path: str):
         """Queue a file change for processing."""
         # Only process markdown and json files
-        if not (path.endswith('.md') or path.endswith('.json')):
+        if not (path.endswith(".md") or path.endswith(".json")):
             return
 
         # Check if it matches any of our patterns
         path_obj = Path(path)
         entity_type = guess_entity_type(path_obj)
-        if entity_type == 'unknown':
+        if entity_type == "unknown":
             return
 
         with self.lock:
@@ -112,21 +113,25 @@ def process_file_change(path: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Watch and auto-embed context files')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be processed')
-    parser.add_argument('--model', default='st:all-MiniLM-L6-v2', help='Embedding model (use st: prefix for sentence-transformers)')
+    parser = argparse.ArgumentParser(description="Watch and auto-embed context files")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be processed")
+    parser.add_argument(
+        "--model",
+        default="st:all-MiniLM-L6-v2",
+        help="Embedding model (use st: prefix for sentence-transformers)",
+    )
     args = parser.parse_args()
 
     # Directories to watch
     watch_dirs = [
-        'context/agents',
-        'context/skills',
-        'context/commands',
-        'context/rules',
-        'context/plugins',
-        'context/output-styles',
-        '.claude/commands',
-        '.claude/rules',
+        "content/agents",
+        "content/skills",
+        "content/commands",
+        "content/rules",
+        "content/plugins",
+        "content/output-styles",
+        ".claude/commands",
+        ".claude/rules",
     ]
 
     # Filter to existing directories
@@ -157,5 +162,5 @@ def main():
     observer.join()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

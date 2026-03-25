@@ -47,7 +47,7 @@ For concrete, language-pair-specific examples, see these skills:
 | `convert-clojure-elixir` | Clojure → Elixir (JVM → BEAM, STM → actors) |
 | `convert-clojure-haskell` | Clojure → Haskell (dynamic → static, practical → pure) |
 
-**Note:** This list may not be complete. Search `components/skills/convert-*` for all available conversion skills.
+**Note:** This list may not be complete. Search `content/skills/convert-*` for all available conversion skills.
 
 ### Skill Categories
 
@@ -104,7 +104,7 @@ Cross-paradigm conversions require mental model shifts:
 
 ## Conversion Skill Naming Convention
 
-```
+```text
 convert-<source>-<target>
 ```
 
@@ -115,6 +115,7 @@ convert-<source>-<target>
 | `<target>` | Target language (lowercase) | `rust`, `python`, `golang` |
 
 **Examples:**
+
 - `convert-typescript-rust` - TypeScript → Rust
 - `convert-python-golang` - Python → Go
 - `convert-golang-rust` - Go → Rust
@@ -131,41 +132,53 @@ Every `convert-X-Y` skill should follow this structure:
 # Convert <Source> to <Target>
 
 ## Overview
+
 Brief description of the conversion, common use cases, and what to expect.
 
 ## When to Use
+
 - Scenarios where this conversion makes sense
 - Benefits of the target language for this use case
 
 ## When NOT to Use
+
 - Scenarios where conversion is not recommended
 - Better alternatives
 
 ## Type System Mapping
+
 Complete mapping table from source types to target types.
 
 ## Idiom Translation
+
 Source patterns and their idiomatic target equivalents.
 
 ## Error Handling
+
 How to convert error handling patterns.
 
 ## Concurrency Patterns
+
 How async/threading models translate.
 
 ## Memory & Ownership
+
 If applicable, how memory models differ and translate.
 
 ## Testing Strategy
+
 How to verify functional equivalence.
 
 ## Tooling
+
 Available tools, transpilers, and validation helpers.
 
 ## Common Pitfalls
+
 Mistakes to avoid during conversion.
 
 ## Examples
+
 Concrete before/after conversion examples.
 ```
 
@@ -204,7 +217,7 @@ When creating a new `convert-X-Y` skill:
 
 ### 1. Assess the Conversion
 
-- **Check for existing skill**: Search `components/skills/convert-*`
+- **Check for existing skill**: Search `content/skills/convert-*`
 - **Check for reverse skill**: If creating `convert-A-B`, check if `convert-B-A` exists
 - **Identify category**: Static→Dynamic, GC→Ownership, etc.
 - **Estimate difficulty**: See [difficulty-matrix.md](../meta-convert-guide/reference/difficulty-matrix.md) for pre-calculated ratings
@@ -285,6 +298,7 @@ Understanding the mapping between source and target concurrency models is crucia
 | **Asyncio (Python)** | **Async/Await (Rust)** | Tokio runtime, async functions, futures | Event loop → runtime, coroutines → async fn |
 
 **Key Insight**: Most conversions require not just syntactic translation but a fundamental shift in how you think about concurrency. For example:
+
 - **Shared memory (threads) → Message passing (actors)**: Stop thinking about locks; start thinking about process isolation
 - **Eager execution (Promises) → Lazy evaluation (Futures)**: Understand when work actually starts
 - **Preemptive scheduling (OS threads) → Cooperative scheduling (async/await)**: Be aware of blocking operations
@@ -296,6 +310,7 @@ Understanding the mapping between source and target concurrency models is crucia
 **Problem**: Clojure's STM allows multiple refs to be updated atomically in a transaction. Elixir's actor model has isolated processes.
 
 **Clojure (Source):**
+
 ```clojure
 (def account-a (ref 1000))
 (def account-b (ref 500))
@@ -311,6 +326,7 @@ Understanding the mapping between source and target concurrency models is crucia
 ```
 
 **Elixir (Target - Idiomatic Translation):**
+
 ```elixir
 defmodule Bank do
   use GenServer
@@ -361,17 +377,20 @@ end
 ```
 
 **Translation Strategy**:
+
 1. **Centralize coordinated state**: All accounts in single GenServer (serializes transactions)
 2. **Transaction semantics**: GenServer's synchronous call provides atomicity
 3. **Pattern matching**: Use guards to validate sufficient funds before update
 4. **Immutable updates**: Map.update! returns new map, pattern matches for validation
 
 **Edge Cases & Gotchas**:
+
 - **Deadlock prevention**: Single GenServer eliminates distributed deadlocks
 - **Scalability tradeoff**: STM allows concurrent reads; GenServer serializes all operations
 - **Alternative**: For high throughput, shard accounts across multiple GenServers with distributed coordination
 
 **Performance Implications**:
+
 - Clojure STM: Optimistic concurrency (retry on conflict), parallel reads
 - Elixir GenServer: Pessimistic serialization, all operations sequential
 - For read-heavy workloads, consider Agent for each account + coordinator for transfers
@@ -385,6 +404,7 @@ end
 **Problem**: Go channels provide natural backpressure through blocking sends/receives. JavaScript Promises execute eagerly and don't support backpressure natively.
 
 **Go (Source):**
+
 ```go
 func processStream(items []string) <-chan string {
     out := make(chan string, 10) // Buffered channel
@@ -413,6 +433,7 @@ func main() {
 ```
 
 **TypeScript (Target - Idiomatic Translation):**
+
 ```typescript
 async function* processStream(items: string[]): AsyncGenerator<string> {
   for (const item of items) {
@@ -436,6 +457,7 @@ main();
 ```
 
 **Alternative (Explicit Promise Queue with Backpressure):**
+
 ```typescript
 class Channel<T> {
   private queue: T[] = [];
@@ -486,18 +508,21 @@ async function processStreamWithChannel(items: string[]): Promise<Channel<string
 ```
 
 **Translation Strategy**:
+
 1. **Async generators**: Most idiomatic for streaming data in TypeScript
 2. **Yield control**: `yield` allows consumer to control pace (like channel receive blocking)
 3. **Custom Channel class**: For explicit buffering and backpressure semantics
 4. **Event-driven alternative**: Use Node.js streams for larger data pipelines
 
 **Edge Cases & Gotchas**:
+
 - **No native backpressure**: Promises execute eagerly; must implement queue manually
 - **Memory growth**: Without backpressure, fast producer overwhelms slow consumer
 - **Cancellation**: Go channels close; async generators must handle cleanup explicitly
 - **Error propagation**: Go errors via multiple returns; TypeScript uses try/catch or rejected promises
 
 **Performance Implications**:
+
 - Go channels: OS-level blocking, true concurrency across cores
 - TypeScript async: Event loop, single-threaded unless using worker threads
 - For CPU-bound work, consider worker threads or external processing
@@ -511,6 +536,7 @@ async function processStreamWithChannel(items: string[]): Promise<Channel<string
 **Problem**: Python's asyncio uses a single-threaded event loop with coroutines. Erlang uses lightweight processes with true preemptive concurrency.
 
 **Python (Source):**
+
 ```python
 import asyncio
 from typing import Dict
@@ -545,6 +571,7 @@ asyncio.run(main())
 ```
 
 **Erlang (Target - Idiomatic Translation):**
+
 ```erlang
 -module(connection_pool).
 -behaviour(gen_server).
@@ -648,6 +675,7 @@ connection_worker(ConnId) ->
 ```
 
 **Translation Strategy**:
+
 1. **Event loop → GenServer**: Central coordinator manages connection state
 2. **Semaphore → Capacity check**: Manual tracking of active connections vs max
 3. **Coroutines → Processes**: Each connection is a separate process (true isolation)
@@ -655,12 +683,14 @@ connection_worker(ConnId) ->
 5. **Queue for backpressure**: Explicitly manage waiting clients when pool full
 
 **Edge Cases & Gotchas**:
+
 - **Blocking vs message passing**: Python blocks on semaphore; Erlang queues requests
 - **Error handling**: Python exceptions in event loop; Erlang links and monitors for crash detection
 - **Process cleanup**: Must handle process termination and queue cleanup
 - **Timeout handling**: Add receive timeout patterns for connection timeouts
 
 **Performance Implications**:
+
 - Python asyncio: Single thread, cooperative scheduling, GIL limitations
 - Erlang: True concurrency, processes scheduled across cores, no GIL
 - Erlang's preemptive scheduling handles blocking better (processes don't block each other)
@@ -686,6 +716,7 @@ Supervision is a key pattern in fault-tolerant systems. Different concurrency mo
 #### Supervision Pattern: Erlang Supervision Tree → Go Error Handling
 
 **Erlang (Source - Let It Crash):**
+
 ```erlang
 -module(worker_sup).
 -behaviour(supervisor).
@@ -730,6 +761,7 @@ risky_operation(Data) ->
 ```
 
 **Go (Target - Explicit Error Handling + Retry):**
+
 ```go
 package main
 
@@ -866,6 +898,7 @@ func main() {
 ```
 
 **Translation Strategy**:
+
 1. **Supervisor behavior → Supervisor struct**: Encapsulate restart logic in struct
 2. **Restart strategies**: Implement one-for-one manually (each worker independent)
 3. **Intensity tracking**: Log restart times, check against intensity limits
@@ -873,6 +906,7 @@ func main() {
 5. **Error propagation**: Workers return errors instead of crashing
 
 **Supervision Translation Rules**:
+
 - `one_for_one` → Independent goroutines with individual supervisors
 - `one_for_all` → Cancel all workers if one fails, restart all
 - `rest_for_one` → Cancel dependent workers (those started after failed worker)
@@ -890,6 +924,7 @@ func main() {
 | **Python** | Threading/asyncio with try/except | Thread exceptions isolated, asyncio tasks can be cancelled |
 
 **Cross-reference**:
+
 - See `convert-python-erlang` for asyncio → supervision patterns
 - See `convert-golang-rust` for panic/recover → Result type patterns
 - See `convert-clojure-elixir` for agent error handling → OTP patterns

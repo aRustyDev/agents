@@ -115,7 +115,7 @@ class TestFallbackTemplate:
         """Should generate ready comment fallback."""
         data = {
             "pr_number": 795,
-            "skill_path": "components/skills/lang-rust-dev",
+            "skill_path": "content/skills/lang-rust-dev",
             "reviewers": ["reviewer1", "reviewer2"],
         }
 
@@ -198,7 +198,7 @@ class TestActualTemplates:
 
         data = {
             "pr_number": 795,
-            "skill_path": "components/skills/lang-rust-dev",
+            "skill_path": "content/skills/lang-rust-dev",
             "reviewers": ["reviewer1"],
             "timestamp": "2024-01-15T12:00:00Z",
         }

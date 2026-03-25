@@ -23,12 +23,16 @@ content/               Component source of truth
 └── reference/         Reference documentation
 
 packages/cli/              TypeScript tooling (Bun + Citty)
-├── bin/agents.ts      CLI entrypoint
-├── commands/          CLI command trees (skill, mcp, component, plugin, ...)
-├── lib/               Library modules
-│   ├── component/     Universal component model (7 providers)
-│   ├── skill-*.ts     Skill lifecycle (add/find/list/outdated/update/remove/info/init)
-│   └── ...            Hash, lockfile, output, runtime, schemas, etc.
+├── src/
+│   ├── bin/agents.ts  CLI entrypoint
+│   ├── commands/      Command modules (verb-first + legacy noun-first)
+│   ├── lib/           Library modules
+│   │   ├── component/ Universal component model (7 providers)
+│   │   ├── skill-*.ts Skill lifecycle (add/find/list/outdated/update/remove/info/init)
+│   │   └── ...        Hash, lockfile, output, runtime, schemas, etc.
+│   ├── client/        Graph viewer frontend
+│   ├── server/        Graph viewer backend
+│   └── sql/           SQL query files
 └── test/              bun:test suites (900+ tests)
 
 settings/mcp/          MCP server configurations
@@ -133,11 +137,11 @@ Curated plugins at `.claude-plugin/marketplace.json`:
 ## Development
 
 ```bash
-just init                          # One-time setup
-cd cli && bun test            # Run all tests
-cd cli && bun test test/component/  # Component tests only
-just agents skill validate <name>  # Validate a skill
-just agents plugin check <name>    # Validate a plugin
+just init                              # One-time setup
+bun test --cwd packages/cli            # Run all tests
+bun test --cwd packages/cli test/component/  # Component tests only
+just agents lint --type skill <name>   # Validate a skill
+just agents lint --type plugin <name>  # Validate a plugin
 ```
 
 ## License

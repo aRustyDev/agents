@@ -30,7 +30,7 @@ brew bundle
 
 Add new tools to `brewfile`, not installed ad-hoc.
 
-### TypeScript Dependencies (cli/package.json)
+### TypeScript Dependencies (packages/cli/package.json)
 
 TypeScript tooling is managed via Bun:
 
@@ -39,13 +39,13 @@ TypeScript tooling is managed via Bun:
 cd packages/cli && bun install
 
 # Run the CLI tool
-bun run packages/cli/src/bin/agents.ts <noun> <verb> [args]
+bun run packages/cli/src/bin/agents.ts <verb> <type> [args]
 
 # Or via justfile
-just agents <noun> <verb> [args]
+just agents <verb> <type> [args]
 
 # Run tests
-cd packages/cli && bun test
+bun test --cwd packages/cli
 ```
 
 The `bun.lock` file is version controlled for reproducible installs.
@@ -89,6 +89,8 @@ See `docs/src/adr/` for architecture decisions.
 ├── brewfile                    # Tool dependencies (Homebrew)
 ├── pyproject.toml              # Python dependencies (uv)
 ├── justfile                    # Task runner
+├── package.json                # Root workspace (Bun)
+├── bun.lock                    # Lockfile (version controlled)
 ├── CLAUDE.md                   # This file
 ├── .data/
 │   └── mcp/
@@ -99,15 +101,19 @@ See `docs/src/adr/` for architecture decisions.
 │   ├── commands/               # Slash commands
 │   ├── skills/                 # SKILL.md files
 │   ├── rules/                  # Rule files
+│   ├── hooks/                  # Hook scripts
 │   ├── plugins/                # Plugin bundles
 │   └── output-styles/          # Output formatting styles
-├── cli/
-│   ├── bin/agents.ts         # Unified CLI (Bun + Citty)
-│   ├── lib/                    # TypeScript modules (hash, output, schemas, etc.)
-│   ├── commands/               # CLI subcommands (plugin, skill, kg, registry)
-│   ├── test/                   # bun:test suites
-│   ├── embed.py                # KG embedding CLI (Python, sqlite-vec)
-│   └── sql/                    # SQL query files
+├── packages/
+│   └── cli/
+│       ├── package.json        # CLI package
+│       └── src/
+│           ├── bin/agents.ts   # CLI entrypoint
+│           ├── commands/       # Command modules (verb-first + legacy)
+│           ├── lib/            # Shared library modules
+│           ├── client/         # Graph viewer frontend
+│           ├── server/         # Graph viewer backend
+│           └── sql/            # SQL query files
 ├── settings/
 │   └── mcp/                    # MCP server configurations
 └── docs/
@@ -122,9 +128,9 @@ See `docs/src/adr/` for architecture decisions.
 |------|---------|
 | Initialize project | `just init` |
 | Install to ~/.claude | `just install` |
-| **CLI tool** | `just agents <noun> <verb> [args]` |
-| Plugin check | `just agents plugin check <name>` |
-| Skill validate | `just agents skill validate <name>` |
+| **CLI tool** | `just agents <verb> <type> [args]` |
+| Plugin check | `just agents lint --type plugin <name>` |
+| Skill validate | `just agents lint --type skill <name>` |
 | External skill check | `just skill external:check` |
 | Semantic search | `just kg-search "query"` |
 
@@ -178,9 +184,9 @@ See `.claude/skills/beads/` for full documentation.
 ## Conventions
 
 - **Brewfile**: Tool-level dependencies only (ollama, uv, bun, yq, etc.)
-- **package.json** (`cli/`): TypeScript packages for `agents` CLI (Bun)
+- **package.json** (`packages/cli/`): TypeScript packages for `agents` CLI (Bun)
 - **pyproject.toml**: Python packages for KG only (sqlite-vec, ollama, watchdog)
 - **`just init`**: Must be idempotent — safe to run multiple times
 - **SQL dumps**: `.data/**/*.sql` files are version controlled; `.db` files are gitignored
 - **Plans**: Written as markdown in `.claude/plans/`, converted to beads issues
-- **`agents`**: Unified CLI tool — `just agents <noun> <verb>` for plugin/skill/registry operations
+- **`agents`**: Unified CLI tool — `just agents <verb> <type>` for plugin/skill/registry operations (verb-first grammar)

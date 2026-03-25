@@ -26,6 +26,7 @@ const main = defineCommand({
     kg: () => import('../commands/kg').then((m) => m.default),
     registry: () => import('../commands/registry').then((m) => m.default),
     'graph-viewer': () => import('../commands/graph-viewer').then((m) => m.default),
+    completions: () => import('../commands/completions').then((m) => m.default),
   },
 })
 

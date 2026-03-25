@@ -12,9 +12,9 @@ exclude = [
     "node_modules",
     "dist",
     "build",
-    "context/.context",
-    "context/skills/**/examples",
-    "context/skills/**/references",
+    "content/.context",
+    "content/skills/**/examples",
+    "content/skills/**/references",
 ]
 
 [lint]
@@ -43,6 +43,9 @@ ignore = [
 [lint.per-file-ignores]
 ".scripts/**/*.py" = ["T201"]  # Allow print in scripts
 "tests/**/*.py" = ["S101"]    # Allow assert in tests
+"packages/cli/*.py" = [
+    "ARG001", "B007", "PLR0911",  # Utility scripts with flexible patterns
+]
 # Agent code has dynamic imports and internal patterns
 ".claude/agents/**/*.py" = [
     "ARG001", # Unused function args (hook signatures)
@@ -71,6 +74,15 @@ ignore = [
     "UP038",  # isinstance union style
 ]
 ".claude/agents/**/tests/*.py" = ["S101"]  # Allow assert in tests
+# content/agents has same patterns as .claude/agents
+"content/agents/**/*.py" = [
+    "ARG001", "ARG002", "ARG003", "ARG005",
+    "B007", "B011", "B904", "C416", "E402",
+    "PLR0912", "PLR0915", "PLW0603", "PLW2901",
+    "PTH123", "RUF001", "RUF005", "RUF012", "RUF022",
+    "SIM102", "SIM103", "SIM105", "SIM115", "SIM117", "UP038",
+]
+"content/agents/**/tests/*.py" = ["S101"]
 
 [lint.isort]
 known-first-party = [".scripts"]

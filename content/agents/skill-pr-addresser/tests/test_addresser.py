@@ -78,7 +78,7 @@ def mock_discovery_context(mock_pr_details, mock_worktree, mock_blocking_review,
     ctx = DiscoveryContext(
         pr=mock_pr_details,
         pr_number=795,
-        skill_path="components/skills/lang-rust-dev",
+        skill_path="content/skills/lang-rust-dev",
         blocking_reviews=[mock_blocking_review],
         worktree=mock_worktree,
         session=mock_session,

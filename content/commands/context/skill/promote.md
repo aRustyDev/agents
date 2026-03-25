@@ -59,7 +59,7 @@ AI_REPO="${AI_CONFIG_REPO:-$(git config --file .gitmodules --get submodule.ai.pa
    - Store the absolute path to the skill for later copying
 
 3. **Check for existing skill in ai repo**:
-   - Search `$AI_REPO/components/skills/` for a skill with the same name
+   - Search `$AI_REPO/content/skills/` for a skill with the same name
    - Also check `$AI_REPO/legacy/skills/` for legacy versions
    - If found, compare the content to determine relationship:
      - **Identical**: No promotion needed
@@ -131,8 +131,8 @@ If an existing skill was found, present options to the user using AskUserQuestio
 2. **Copy skill files to ai repo**:
 
    ```bash
-   mkdir -p "$AI_REPO/components/skills/<skill-name>/"
-   cp -r "<absolute-path-to-skill>/"* "$AI_REPO/components/skills/<skill-name>/"
+   mkdir -p "$AI_REPO/content/skills/<skill-name>/"
+   cp -r "<absolute-path-to-skill>/"* "$AI_REPO/content/skills/<skill-name>/"
    ```
 
    - If upgrading/extending, handle the merge appropriately
@@ -140,7 +140,7 @@ If an existing skill was found, present options to the user using AskUserQuestio
 3. **Commit changes** (use -C flag for git commands):
 
    ```bash
-   git -C "$AI_REPO" add components/skills/<skill-name>/
+   git -C "$AI_REPO" add content/skills/<skill-name>/
    git -C "$AI_REPO" commit -m "feat(skill): add <skill-name>
 
    ### Added
@@ -210,7 +210,7 @@ This will:
 
 1. Validate the skill at `.claude/skills/homebrew-formula/`
 2. Check if `homebrew-formula` exists in ai repo
-3. Create issue and PR to add it to `components/skills/homebrew-formula/`
+3. Create issue and PR to add it to `content/skills/homebrew-formula/`
 
 ## Troubleshooting
 
@@ -241,6 +241,6 @@ If the SKILL.md contains triple backticks, they may break the issue/PR body form
 
 - The ai repo location is configurable (see Configuration section)
 - You must have push access to aRustyDev/agents
-- The skill will be added to `components/skills/` (not legacy/)
+- The skill will be added to `content/skills/` (not legacy/)
 - If promoting an upgrade, the old skill in legacy/ is preserved
 - All git commands use `-C "$AI_REPO"` to avoid working directory issues
