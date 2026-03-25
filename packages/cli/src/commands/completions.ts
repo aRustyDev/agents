@@ -65,33 +65,33 @@ _agents_completions() {
 
   case "\${words[1]}" in
     add|remove|list|search|info|init|lint|update)
-      if [[ \$cword -eq 2 ]]; then
-        COMPREPLY=( \$(compgen -W "\$types" -- "\$cur") )
+      if [[ $cword -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "$types" -- "$cur") )
         return
       fi
       ;;
     catalog)
-      if [[ \$cword -eq 2 ]]; then
-        COMPREPLY=( \$(compgen -W "\$catalog_subs" -- "\$cur") )
+      if [[ $cword -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "$catalog_subs" -- "$cur") )
         return
       fi
       ;;
     config)
-      if [[ \$cword -eq 2 ]]; then
-        COMPREPLY=( \$(compgen -W "\$config_subs" -- "\$cur") )
+      if [[ $cword -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "$config_subs" -- "$cur") )
         return
       fi
       ;;
     completions)
-      if [[ \$cword -eq 2 ]]; then
-        COMPREPLY=( \$(compgen -W "bash zsh fish" -- "\$cur") )
+      if [[ $cword -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
         return
       fi
       ;;
   esac
 
-  if [[ \$cword -eq 1 ]]; then
-    COMPREPLY=( \$(compgen -W "\$commands" -- "\$cur") )
+  if [[ $cword -eq 1 ]]; then
+    COMPREPLY=( $(compgen -W "$commands" -- "$cur") )
   fi
 }
 complete -F _agents_completions agents
@@ -120,7 +120,7 @@ _agents() {
     return
   fi
 
-  case "\$words[2]" in
+  case "$words[2]" in
     add|remove|list|search|info|init|lint|update)
       if (( CURRENT == 3 )); then
         _describe 'component type' types
