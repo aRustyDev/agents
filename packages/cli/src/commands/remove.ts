@@ -30,12 +30,8 @@ export default defineCommand({
       alias: 'a',
       description: 'Agent to remove from',
     },
-    yes: {
-      type: 'boolean',
-      alias: 'y',
-      description: 'Skip confirmation prompts',
-      default: false,
-    },
+    // Confirmation prompts are not yet implemented in ComponentProvider.remove()
+    // TODO: add --yes flag when interactive confirmation is supported
   },
   async run({ args }) {
     const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
@@ -70,5 +66,6 @@ export default defineCommand({
       out.error(result.value.error ?? 'Remove failed')
       process.exit(EXIT.FAILURES)
     }
+    process.exit(EXIT.OK)
   },
 })

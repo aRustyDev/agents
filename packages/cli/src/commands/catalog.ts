@@ -8,7 +8,22 @@
  * Subcommands: analyze, summary, forks, cleanup, errors, scrub, stale, backfill, discover
  */
 
+import { exec as execCb, execSync } from 'node:child_process'
+import {
+  appendFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { join, resolve } from 'node:path'
+import { promisify } from 'node:util'
 import { defineCommand } from 'citty'
 import {
   createBatches,
@@ -101,7 +116,7 @@ export default defineCommand({
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error(
             'Catalog not found. Run availability check first: bun run cli/lib/catalog.ts'
           )
@@ -157,15 +172,6 @@ export default defineCommand({
 
         // Dispatch agents in isolated git worktrees with pre-downloaded skills
         // All I/O is async to enable true concurrent execution
-        const { exec: execCb } = require('node:child_process')
-        const {
-          existsSync: fsExists,
-          rmSync,
-          mkdirSync,
-          writeFileSync: fsWriteSync,
-          cpSync,
-        } = require('node:fs')
-        const { promisify } = require('node:util')
         const execAsync = promisify(execCb)
 
         const WORKTREE_BASE = '/tmp/worktrees'
@@ -181,7 +187,7 @@ export default defineCommand({
           const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
           const git = createGit(PROJECT_ROOT)
 
-          if (fsExists(wtPath)) {
+          if (existsSync(wtPath)) {
             try {
               await git.raw(['worktree', 'unlock', wtPath])
             } catch {
@@ -329,7 +335,7 @@ export default defineCommand({
               })
               .map((entry) => {
                 const dl = downloaded.get(entry.skill)
-                const content = require('node:fs').readFileSync(dl?.path, 'utf8') as string
+                const content = readFileSync(dl?.path as string, 'utf8') as string
                 return buildManifestFromEntry(
                   {
                     ...entry,
@@ -345,7 +351,7 @@ export default defineCommand({
 
             // Write prompt to file to avoid shell arg length limits
             const promptFile = join(wtPath, '.inspect-prompt.txt')
-            fsWriteSync(promptFile, agentPrompt, 'utf8')
+            writeFileSync(promptFile, agentPrompt, 'utf8')
 
             const { stdout } = await execAsync(
               `cat ${JSON.stringify(promptFile)} | claude --model haiku -p -`,
@@ -528,7 +534,7 @@ export default defineCommand({
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found. Run: bun run cli/lib/catalog.ts')
           process.exit(EXIT.ERROR)
         }
@@ -596,7 +602,7 @@ export default defineCommand({
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found.')
           process.exit(EXIT.ERROR)
         }
@@ -649,21 +655,13 @@ export default defineCommand({
           json: args.json as boolean,
           quiet: args.quiet as boolean,
         })
-        const { execSync: execS } = require('node:child_process')
-        const {
-          rmSync: rmS,
-          existsSync: existsS,
-          readdirSync: readdirS,
-          statSync: statS,
-        } = require('node:fs')
-
         const dryRun = args['dry-run'] as boolean
         const WORKTREE_BASE = '/tmp/worktrees'
         const cleaned: { type: string; path: string; size?: string }[] = []
 
         // 1. Find stale git worktrees
         try {
-          const wtList = execS('git worktree list --porcelain', {
+          const wtList = execSync('git worktree list --porcelain', {
             cwd: PROJECT_ROOT,
             encoding: 'utf8',
           }) as string
@@ -680,7 +678,7 @@ export default defineCommand({
               cleaned.push({ type: 'worktree', path: wt })
             } else {
               try {
-                execS(`git worktree unlock ${JSON.stringify(wt)}`, {
+                execSync(`git worktree unlock ${JSON.stringify(wt)}`, {
                   cwd: PROJECT_ROOT,
                   stdio: 'pipe',
                 })
@@ -688,7 +686,7 @@ export default defineCommand({
                 /* ignore */
               }
               try {
-                execS(`git worktree remove --force ${JSON.stringify(wt)}`, {
+                execSync(`git worktree remove --force ${JSON.stringify(wt)}`, {
                   cwd: PROJECT_ROOT,
                   stdio: 'pipe',
                 })
@@ -696,7 +694,7 @@ export default defineCommand({
                 /* ignore */
               }
               try {
-                rmS(wt, { recursive: true, force: true })
+                rmSync(wt, { recursive: true, force: true })
               } catch {
                 /* ignore */
               }
@@ -708,15 +706,15 @@ export default defineCommand({
         }
 
         // 2. Find orphaned /tmp/worktrees/skill-inspect-* dirs not tracked by git
-        if (existsS(WORKTREE_BASE)) {
+        if (existsSync(WORKTREE_BASE)) {
           try {
-            const dirs = readdirS(WORKTREE_BASE).filter((d: string) =>
+            const dirs = readdirSync(WORKTREE_BASE).filter((d: string) =>
               d.startsWith('skill-inspect')
             )
             for (const dir of dirs) {
               const fullPath = join(WORKTREE_BASE, dir)
               try {
-                if (!statS(fullPath).isDirectory()) continue
+                if (!statSync(fullPath).isDirectory()) continue
               } catch {
                 continue
               }
@@ -728,7 +726,7 @@ export default defineCommand({
                 cleaned.push({ type: 'orphan-dir', path: fullPath })
               } else {
                 try {
-                  rmS(fullPath, { recursive: true, force: true })
+                  rmSync(fullPath, { recursive: true, force: true })
                 } catch {
                   /* ignore */
                 }
@@ -743,7 +741,7 @@ export default defineCommand({
         // 3. Prune git worktree refs for already-deleted directories
         if (!dryRun) {
           try {
-            execS('git worktree prune', { cwd: PROJECT_ROOT, stdio: 'pipe' })
+            execSync('git worktree prune', { cwd: PROJECT_ROOT, stdio: 'pipe' })
             cleaned.push({ type: 'prune', path: 'git worktree prune' })
           } catch {
             /* ignore */
@@ -795,8 +793,7 @@ export default defineCommand({
 
         if (args.prune) {
           // Prune: remove error records for skills that have been resolved (attemptCount=0)
-          const { existsSync: existsS, writeFileSync: writeS } = require('node:fs')
-          if (!existsS(errorLogPath)) {
+          if (!existsSync(errorLogPath)) {
             out.info('No error log found. Nothing to prune.')
             process.exit(EXIT.OK)
           }
@@ -810,7 +807,7 @@ export default defineCommand({
           const errors = readErrorLog(errorLogPath)
           const kept = errors.filter((e) => !resolved.has(`${e.source}\0${e.skill}`))
           const pruned = errors.length - kept.length
-          writeS(
+          writeFileSync(
             errorLogPath,
             kept.map((e) => JSON.stringify(e)).join('\n') + (kept.length > 0 ? '\n' : ''),
             'utf8'
@@ -877,23 +874,16 @@ export default defineCommand({
           json: args.json as boolean,
           quiet: args.quiet as boolean,
         })
-        const {
-          existsSync: existsS,
-          readFileSync: readS,
-          writeFileSync: writeS,
-          renameSync: renameS,
-        } = require('node:fs')
-
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
         const errorLogPath = join(PROJECT_ROOT, 'content/skills/.catalog-errors.ndjson')
         const lockPath = join(PROJECT_ROOT, 'content/skills/.catalog.lock')
 
-        if (!existsS(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found.')
           process.exit(EXIT.ERROR)
         }
 
-        if (existsS(lockPath)) {
+        if (existsSync(lockPath)) {
           out.error('Catalog is locked (.catalog.lock exists). Another operation in progress?')
           process.exit(EXIT.ERROR)
         }
@@ -901,7 +891,7 @@ export default defineCommand({
         const dryRun = args['dry-run'] as boolean
 
         // Read all entries
-        const content = readS(catalogPath, 'utf8') as string
+        const content = readFileSync(catalogPath, 'utf8') as string
         const entries: Array<Record<string, unknown>> = []
         for (const line of content.split('\n')) {
           const trimmed = line.trim()
@@ -960,7 +950,7 @@ export default defineCommand({
         }
 
         // Acquire lock
-        writeS(lockPath, `pid=${process.pid}\n`, 'utf8')
+        writeFileSync(lockPath, `pid=${process.pid}\n`, 'utf8')
 
         try {
           // Process entries
@@ -995,14 +985,13 @@ export default defineCommand({
           // Write error log
           if (errorRecords.length > 0) {
             const errorLines = `${errorRecords.map((r) => JSON.stringify(r)).join('\n')}\n`
-            const { appendFileSync: appendS } = require('node:fs')
-            appendS(errorLogPath, errorLines, 'utf8')
+            appendFileSync(errorLogPath, errorLines, 'utf8')
           }
 
           // Write catalog atomically
           const tmpPath = `${catalogPath}.tmp`
-          writeS(tmpPath, `${cleaned.map((e) => JSON.stringify(e)).join('\n')}\n`, 'utf8')
-          renameS(tmpPath, catalogPath)
+          writeFileSync(tmpPath, `${cleaned.map((e) => JSON.stringify(e)).join('\n')}\n`, 'utf8')
+          renameSync(tmpPath, catalogPath)
 
           out.info(`Scrub complete:`)
           out.info(`  ${dataAndError} entries cleaned (error fields stripped)`)
@@ -1010,7 +999,7 @@ export default defineCommand({
         } finally {
           // Release lock
           try {
-            require('node:fs').unlinkSync(lockPath)
+            unlinkSync(lockPath)
           } catch {
             /* ignore */
           }
@@ -1044,7 +1033,7 @@ export default defineCommand({
         })
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found.')
           process.exit(EXIT.ERROR)
         }
@@ -1123,7 +1112,7 @@ export default defineCommand({
         })
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found.')
           process.exit(EXIT.ERROR)
         }
@@ -1240,7 +1229,7 @@ export default defineCommand({
         })
 
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
-        if (!require('node:fs').existsSync(catalogPath)) {
+        if (!existsSync(catalogPath)) {
           out.error('Catalog not found.')
           process.exit(EXIT.ERROR)
         }

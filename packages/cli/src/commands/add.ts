@@ -86,5 +86,6 @@ export default defineCommand({
     }
 
     for (const w of result.value.warnings) out.warn(w)
+    process.exit(EXIT.OK)
   },
 })
