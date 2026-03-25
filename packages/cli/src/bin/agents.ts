@@ -19,6 +19,8 @@ const main = defineCommand({
     plugin: () => import('../commands/plugin').then((m) => m.default),
     skill: () => import('../commands/skill').then((m) => m.default),
     mcp: () => import('../commands/mcp').then((m) => m.default),
+    // Configuration
+    config: () => import('../commands/config').then((m) => m.default),
     // Other
     component: () => import('../commands/component').then((m) => m.default),
     kg: () => import('../commands/kg').then((m) => m.default),
