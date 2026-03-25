@@ -27,6 +27,8 @@ const main = defineCommand({
     registry: () => import('../commands/registry').then((m) => m.default),
     'graph-viewer': () => import('../commands/graph-viewer').then((m) => m.default),
     completions: () => import('../commands/completions').then((m) => m.default),
+    doctor: () => import('../commands/doctor').then((m) => m.default),
+    serve: () => import('../commands/serve').then((m) => m.default),
   },
 })
 
