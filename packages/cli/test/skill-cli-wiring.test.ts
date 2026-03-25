@@ -8,21 +8,20 @@ describe('skill CLI wiring', () => {
     expect(cmd.subCommands).toBeDefined()
   })
 
-  test('all new subcommands are registered', async () => {
-    const mod = await import('../src/commands/skill')
-    const subs = mod.default.subCommands ?? {}
-    const expected = ['add', 'init', 'list', 'find', 'outdated', 'update', 'remove', 'info']
-    for (const name of expected) {
-      expect(subs[name]).toBeDefined()
-      expect(subs[name].meta?.name).toBe(name)
-      expect(subs[name].meta?.description?.length).toBeGreaterThan(0)
-    }
-  })
-
-  test('existing subcommands still present', async () => {
+  test('foundation subcommands are registered', async () => {
     const mod = await import('../src/commands/skill')
     const subs = mod.default.subCommands ?? {}
     for (const name of ['validate', 'hash', 'lint', 'check-all', 'deps', 'catalog']) {
+      expect(subs[name]).toBeDefined()
+    }
+  })
+
+  test('verb subcommands exist as backward-compat aliases', async () => {
+    const mod = await import('../src/commands/skill')
+    const subs = mod.default.subCommands ?? {}
+    // These verb commands are now backward-compat aliases that proxy to verb-first modules
+    const aliased = ['add', 'init', 'list', 'search', 'find', 'outdated', 'update', 'remove', 'info']
+    for (const name of aliased) {
       expect(subs[name]).toBeDefined()
     }
   })
