@@ -119,12 +119,14 @@ export default defineCommand({
       if (args.json) {
         out.raw(summary)
       } else {
-        const rows = summary.results.map((r: { file: string; valid: boolean; errors: unknown[]; warnings: unknown[] }) => ({
-          file: r.file,
-          valid: r.valid ? 'yes' : 'NO',
-          errors: r.errors.length,
-          warnings: r.warnings.length,
-        }))
+        const rows = summary.results.map(
+          (r: { file: string; valid: boolean; errors: unknown[]; warnings: unknown[] }) => ({
+            file: r.file,
+            valid: r.valid ? 'yes' : 'NO',
+            errors: r.errors.length,
+            warnings: r.warnings.length,
+          })
+        )
 
         if (rows.length > 0) {
           out.table(rows)
@@ -138,11 +140,92 @@ export default defineCommand({
       process.exit(summary.totalErrors > 0 ? EXIT.FAILURES : EXIT.OK)
     }
 
-    // Other lintable types: placeholder (plugin linting not yet wired up)
+    // Plugin type: delegate to plugin-ops validatePlugin
+    if (type === 'plugin') {
+      const { validatePlugin, listPlugins, printValidationResult } = await import(
+        '../lib/plugin-ops'
+      )
+      type ValidationResult = Awaited<ReturnType<typeof validatePlugin>>
+
+      const pluginName = args.name as string | undefined
+
+      if (pluginName) {
+        const result = await validatePlugin(pluginName)
+
+        if (args.json) {
+          out.raw(result)
+        } else {
+          printValidationResult(out, result)
+        }
+
+        process.exit(result.valid ? EXIT.OK : EXIT.FAILURES)
+      }
+
+      // Validate all plugins
+      const plugins = listPlugins()
+
+      if (plugins.length === 0) {
+        if (args.json) {
+          out.raw({ plugins: [], ok: true })
+        } else {
+          out.info('No plugins found')
+        }
+        process.exit(EXIT.OK)
+      }
+
+      const spinner = out.spinner(`Validating ${plugins.length} plugins...`)
+      const results: ValidationResult[] = []
+      const failed: string[] = []
+
+      for (const name of plugins) {
+        spinner.update({ text: `Validating ${name}...` })
+        const result = await validatePlugin(name)
+        results.push(result)
+        if (!result.valid) failed.push(name)
+      }
+
+      spinner.success({ text: `Validated ${plugins.length} plugins` })
+
+      if (args.json) {
+        out.raw({
+          plugins: results,
+          summary: {
+            total: plugins.length,
+            ok: plugins.length - failed.length,
+            failed: failed.length,
+          },
+          failed,
+          ok: failed.length === 0,
+        })
+      } else {
+        for (const r of results) {
+          if (r.valid && r.warnings.length === 0) {
+            console.log(`  \u2713 ${r.plugin}: OK`)
+          } else if (r.valid) {
+            console.log(`  \u26A0 ${r.plugin}: ${r.warnings.length} warning(s)`)
+          } else {
+            console.log(
+              `  \u2717 ${r.plugin}: ${r.errors.length} error(s), ${r.warnings.length} warning(s)`
+            )
+          }
+        }
+
+        const okCount = plugins.length - failed.length
+        const icon = failed.length ? '\u2717' : '\u2713'
+        console.log(`\n${icon} ${okCount}/${plugins.length} plugins valid`)
+        if (failed.length) {
+          console.log(`\nFailed: ${failed.join(', ')}`)
+        }
+      }
+
+      process.exit(failed.length ? EXIT.FAILURES : EXIT.OK)
+    }
+
+    // Fallback for future lintable types
     out.info(`Linting ${type}${args.name ? `: ${args.name}` : ' (all)'}...`)
 
     if (args.json) {
-      out.raw({ type, name: args.name ?? null, supported: true, status: 'delegated' })
+      out.raw({ type, name: args.name ?? null, supported: true, status: 'not-implemented' })
     }
     process.exit(EXIT.OK)
   },
