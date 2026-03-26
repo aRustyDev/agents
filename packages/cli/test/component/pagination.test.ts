@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { clampLimit, clampPage, emptyPage, paginateArray } from '../../src/lib/component/pagination'
+import { clampLimit, clampPage, emptyPage, paginateArray } from '@agents/core/component/pagination'
 
 describe('clampLimit', () => {
   test('defaults to 10', () => expect(clampLimit(undefined)).toBe(10))

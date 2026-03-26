@@ -5,15 +5,15 @@
  * Currently supported: skill. Other types show a "not yet supported" message.
  */
 
-import { createOutput } from '@agents/core/output'
-import { EXIT } from '@agents/core/types'
-import { defineCommand } from 'citty'
 import {
   COMPONENT_TYPES,
   getActiveTypes,
   getComponentMeta,
   parseComponentType,
-} from '../lib/component/types'
+} from '@agents/core/component/types'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({

@@ -20,7 +20,7 @@ import {
   type SearchParams,
   toComponentType,
   toEntityType,
-} from '../../src/lib/component/types'
+} from '@agents/core/component/types'
 
 // ---------------------------------------------------------------------------
 // COMPONENT_TYPES

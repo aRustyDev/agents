@@ -1,14 +1,14 @@
-import { createOutput } from '@agents/core/output'
-import { EXIT } from '@agents/core/types'
-import { defineCommand } from 'citty'
-import { createComponentManager } from '../lib/component/factory'
 import {
   COMPONENT_TYPES,
   type Component,
   type ComponentType,
   getActiveTypes,
   parseComponentType,
-} from '../lib/component/types'
+} from '@agents/core/component/types'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
+import { defineCommand } from 'citty'
+import { createComponentManager } from '../lib/component/factory'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({

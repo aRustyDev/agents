@@ -99,7 +99,7 @@ export default defineCommand({
           return
         }
 
-        const { getClientConfig } = await import('../lib/component/clients')
+        const { getClientConfig } = await import('@agents/core/component/clients')
         const clientConfig = getClientConfig(clientId)
         if (!clientConfig) {
           out.error(`Unknown client: "${clientId}"`)
@@ -109,7 +109,7 @@ export default defineCommand({
 
         const serverName =
           (args.name as string) || (args.source as string).split('/').pop() || 'mcp-server'
-        const { writeServerToClient } = await import('../lib/component/client-config')
+        const { writeServerToClient } = await import('@agents/core/component/client-config')
         const result = await writeServerToClient(clientId, serverName, {
           name: serverName,
           transport: args.transport as string as 'stdio' | 'http' | 'http-oauth',
@@ -137,7 +137,7 @@ export default defineCommand({
       },
       async run({ args }) {
         const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
-        const { listServersInClient } = await import('../lib/component/client-config')
+        const { listServersInClient } = await import('@agents/core/component/client-config')
         const result = await listServersInClient(args.client as string)
         if (!result.ok) {
           out.error(result.error.display())
@@ -176,7 +176,7 @@ export default defineCommand({
       },
       async run({ args }) {
         const out = createOutput({ json: args.json as boolean, quiet: args.quiet as boolean })
-        const { removeServerFromClient } = await import('../lib/component/client-config')
+        const { removeServerFromClient } = await import('@agents/core/component/client-config')
         const result = await removeServerFromClient(args.client as string, args.name as string)
         if (!result.ok) {
           out.error(result.error.display())

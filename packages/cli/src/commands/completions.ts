@@ -5,10 +5,10 @@
  * Users can eval or source the output in their shell profile.
  */
 
+import { COMPONENT_TYPES } from '@agents/core/component/types'
 import { createOutput } from '@agents/core/output'
 import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
-import { COMPONENT_TYPES } from '../lib/component/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
