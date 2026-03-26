@@ -1,5 +1,5 @@
-import { CliError, err, ok, type Result } from '@agents/core/types'
-import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
+import type { Result } from '@agents/core/types'
+import { err, ok } from '@agents/core/types'
 import type {
   Component,
   ComponentAddOptions,
@@ -11,11 +11,13 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from './types'
+} from '../context/types'
+import { SdkError } from '../util/errors'
+import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
 
 type Operation = 'search' | 'add' | 'list' | 'remove' | 'publish' | 'info' | 'outdated' | 'update'
 
-export class ComponentManager {
+export class ProviderManager {
   private readonly registry = new Map<string, ComponentProvider>()
 
   register(provider: ComponentProvider): void {
@@ -85,7 +87,9 @@ export class ComponentManager {
   ): Promise<Result<ComponentAddResult>> {
     const providers = this.findProviders('add', type)
     if (providers.length === 0) {
-      return err(new CliError(`No provider supports adding ${type} components`, 'E_NO_PROVIDER'))
+      return err(
+        new SdkError(`No provider supports adding ${type} components`, 'E_PROVIDER_UNAVAILABLE')
+      )
     }
     return providers[0]?.add(source, opts)
   }
@@ -114,7 +118,10 @@ export class ComponentManager {
       if (result.ok) return result
     }
     return err(
-      new CliError(`Component "${name}" (${type}) not found in any provider`, 'E_NOT_FOUND')
+      new SdkError(
+        `Component "${name}" (${type}) not found in any provider`,
+        'E_COMPONENT_NOT_FOUND'
+      )
     )
   }
 
@@ -125,7 +132,9 @@ export class ComponentManager {
   ): Promise<Result<RemoveResult>> {
     const providers = this.findProviders('remove', type)
     if (providers.length === 0) {
-      return err(new CliError(`No provider supports removing ${type} components`, 'E_NO_PROVIDER'))
+      return err(
+        new SdkError(`No provider supports removing ${type} components`, 'E_PROVIDER_UNAVAILABLE')
+      )
     }
     return providers[0]?.remove(name, type, opts)
   }
@@ -133,8 +142,11 @@ export class ComponentManager {
   async publish(type: ComponentType, opts: PublishOptions): Promise<Result<PublishResult>> {
     const providers = this.findProviders('publish', type)
     if (providers.length === 0) {
-      return err(new CliError(`No provider supports publishing ${type}`, 'E_NO_PROVIDER'))
+      return err(new SdkError(`No provider supports publishing ${type}`, 'E_PROVIDER_UNAVAILABLE'))
     }
     return providers[0]!.publish(type, opts)
   }
 }
+
+/** @deprecated Use `ProviderManager` instead. */
+export { ProviderManager as ComponentManager }

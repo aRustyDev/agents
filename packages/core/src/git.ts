@@ -8,7 +8,7 @@
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { CliError, err, ok, type Result } from '@agents/core/types'
+import { BaseError, err, ok, type Result } from '@agents/core/types'
 import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git'
 import { getClient, parseRepo } from './github'
 
@@ -16,7 +16,7 @@ import { getClient, parseRepo } from './github'
 // Errors
 // ---------------------------------------------------------------------------
 
-export class GitCloneError extends CliError {
+export class GitCloneError extends BaseError {
   constructor(
     message: string,
     readonly isTimeout: boolean = false,
@@ -129,7 +129,7 @@ export async function cleanupTempDir(dir: string): Promise<void> {
   const resolvedDir = resolve(dir)
   const resolvedTmp = resolve(tmpdir())
   if (!resolvedDir.startsWith(resolvedTmp)) {
-    throw new CliError(
+    throw new BaseError(
       `Refusing to delete directory outside tmpdir: ${dir}`,
       'E_UNSAFE_CLEANUP',
       `Expected path under ${resolvedTmp}`
@@ -156,7 +156,7 @@ export async function lsRemote(repoUrl: string, ref?: string): Promise<Result<st
     const trimmed = output.trim()
     if (!trimmed) {
       return err(
-        new CliError(
+        new BaseError(
           `No refs found for ${repoUrl}${ref ? ` at ${ref}` : ''}`,
           'E_NO_REFS',
           ref
@@ -167,12 +167,14 @@ export async function lsRemote(repoUrl: string, ref?: string): Promise<Result<st
     }
     const sha = trimmed.split(/\s+/)[0]
     if (!sha) {
-      return err(new CliError('Could not parse commit SHA from ls-remote output', 'E_PARSE_FAILED'))
+      return err(
+        new BaseError('Could not parse commit SHA from ls-remote output', 'E_PARSE_FAILED')
+      )
     }
     return ok(sha)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `git ls-remote failed for ${repoUrl}`,
         'E_GIT_LS_REMOTE',
         e instanceof Error ? e.message : String(e)
@@ -198,7 +200,11 @@ export async function gitRaw(args: string[], baseDir?: string): Promise<Result<s
     return ok(output)
   } catch (e) {
     return err(
-      new CliError(`git ${args[0]} failed`, 'E_GIT_RAW', e instanceof Error ? e.message : String(e))
+      new BaseError(
+        `git ${args[0]} failed`,
+        'E_GIT_RAW',
+        e instanceof Error ? e.message : String(e)
+      )
     )
   }
 }

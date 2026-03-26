@@ -10,8 +10,8 @@
  * prints usage hints.
  */
 
-import { createOutput, type OutputFormatter } from '@agents/core/output'
 import type { SearchBackendType, SkillSearchResult } from '@agents/core/schemas'
+import { createOutput, type OutputFormatter } from '@agents/sdk/ui'
 import { searchSkillsAPI } from './skill-search-api'
 
 // ---------------------------------------------------------------------------

@@ -12,10 +12,10 @@
  */
 
 import { join } from 'node:path'
-import { clampLimit, clampPage } from '@agents/core/component/pagination'
 import { readText } from '@agents/core/runtime'
 import type { SearchBackendType, SkillSearchResult } from '@agents/core/schemas'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import { clampLimit, clampPage } from '@agents/sdk/providers/pagination'
 import { checkHealth, createClient, searchKeyword } from './meilisearch'
 
 // ---------------------------------------------------------------------------

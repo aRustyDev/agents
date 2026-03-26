@@ -7,8 +7,10 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { CliError, err, ok, type Result } from '@agents/core/types'
-import { type ClientTransport, getClientConfig, getConfigPath } from './clients'
+import type { Result } from '@agents/core/types'
+import { err, ok } from '@agents/core/types'
+import { SdkError } from '../../util/errors'
+import { type ClientTransport, getClientConfig, getConfigPath } from './registry'
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -48,9 +50,9 @@ export async function readJsonFile(path: string): Promise<Result<Record<string, 
     return ok(JSON.parse(raw))
   } catch (e) {
     return err(
-      new CliError(
+      new SdkError(
         `Failed to read JSON: ${path}`,
-        'E_READ_FAILED',
+        'E_STORAGE_BACKEND',
         e instanceof Error ? e.message : String(e)
       )
     )
@@ -63,9 +65,9 @@ export async function readJsoncFile(path: string): Promise<Result<Record<string,
     return ok(JSON.parse(stripJsonComments(raw)))
   } catch (e) {
     return err(
-      new CliError(
+      new SdkError(
         `Failed to read JSONC: ${path}`,
-        'E_READ_FAILED',
+        'E_STORAGE_BACKEND',
         e instanceof Error ? e.message : String(e)
       )
     )
@@ -81,9 +83,9 @@ export async function readYamlFile(path: string): Promise<Result<Record<string, 
     return ok(data as Record<string, unknown>)
   } catch (e) {
     return err(
-      new CliError(
+      new SdkError(
         `Failed to read YAML: ${path}`,
-        'E_READ_FAILED',
+        'E_STORAGE_BACKEND',
         e instanceof Error ? e.message : String(e)
       )
     )
@@ -100,9 +102,9 @@ export async function writeJsonFile(
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new SdkError(
         `Failed to write: ${path}`,
-        'E_WRITE_FAILED',
+        'E_STORAGE_BACKEND',
         e instanceof Error ? e.message : String(e)
       )
     )
@@ -120,9 +122,9 @@ export async function writeYamlFile(
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new SdkError(
         `Failed to write YAML: ${path}`,
-        'E_WRITE_FAILED',
+        'E_STORAGE_BACKEND',
         e instanceof Error ? e.message : String(e)
       )
     )
@@ -186,13 +188,17 @@ export function formatServerConfig(entry: McpServerEntry): Record<string, unknow
 /** Read the full client config file. Returns `{}` when the file does not exist. */
 export async function readClientConfig(clientId: string): Promise<Result<Record<string, unknown>>> {
   const client = getClientConfig(clientId)
-  if (!client) return err(new CliError(`Unknown client: ${clientId}`, 'E_UNKNOWN_CLIENT'))
+  if (!client) return err(new SdkError(`Unknown client: ${clientId}`, 'E_PROVIDER_UNAVAILABLE'))
   if (client.installMethod !== 'file')
-    return err(new CliError(`Client ${clientId} uses command-based install`, 'E_COMMAND_CLIENT'))
+    return err(
+      new SdkError(`Client ${clientId} uses command-based install`, 'E_PROVIDER_UNAVAILABLE')
+    )
 
   const path = getConfigPath(client)
   if (!path)
-    return err(new CliError(`No config path for ${clientId} on this platform`, 'E_NO_PATH'))
+    return err(
+      new SdkError(`No config path for ${clientId} on this platform`, 'E_PROVIDER_UNAVAILABLE')
+    )
   if (!existsSync(path)) return ok({}) // missing file = empty config
 
   return readConfigFile(path, client.format ?? 'json')
@@ -205,13 +211,17 @@ export async function writeServerToClient(
   entry: McpServerEntry
 ): Promise<Result<void>> {
   const client = getClientConfig(clientId)
-  if (!client) return err(new CliError(`Unknown client: ${clientId}`, 'E_UNKNOWN_CLIENT'))
+  if (!client) return err(new SdkError(`Unknown client: ${clientId}`, 'E_PROVIDER_UNAVAILABLE'))
   if (client.installMethod !== 'file')
-    return err(new CliError(`Client ${clientId} uses command-based install`, 'E_COMMAND_CLIENT'))
+    return err(
+      new SdkError(`Client ${clientId} uses command-based install`, 'E_PROVIDER_UNAVAILABLE')
+    )
 
   const path = getConfigPath(client)
   if (!path)
-    return err(new CliError(`No config path for ${clientId} on this platform`, 'E_NO_PATH'))
+    return err(
+      new SdkError(`No config path for ${clientId} on this platform`, 'E_PROVIDER_UNAVAILABLE')
+    )
 
   // Read existing config (or start with empty object)
   const existing = existsSync(path)
@@ -236,9 +246,11 @@ export async function removeServerFromClient(
   serverName: string
 ): Promise<Result<void>> {
   const client = getClientConfig(clientId)
-  if (!client) return err(new CliError(`Unknown client: ${clientId}`, 'E_UNKNOWN_CLIENT'))
+  if (!client) return err(new SdkError(`Unknown client: ${clientId}`, 'E_PROVIDER_UNAVAILABLE'))
   if (client.installMethod !== 'file')
-    return err(new CliError(`Client ${clientId} uses command-based install`, 'E_COMMAND_CLIENT'))
+    return err(
+      new SdkError(`Client ${clientId} uses command-based install`, 'E_PROVIDER_UNAVAILABLE')
+    )
 
   const path = getConfigPath(client)
   if (!path || !existsSync(path)) return ok(undefined) // nothing to remove

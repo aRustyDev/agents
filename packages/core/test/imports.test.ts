@@ -8,12 +8,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.CliError).toBeDefined()
   })
 
-  test('exports ComponentType system', async () => {
-    const mod = await import('@agents/core/component/types')
-    expect(mod.COMPONENT_TYPES).toBeDefined()
-    expect(mod.parseComponentType).toBeDefined()
-  })
-
   test('exports file-io', async () => {
     const mod = await import('@agents/core/file-io')
     expect(mod.readTextFile).toBeDefined()
@@ -22,11 +16,6 @@ describe('@agents/core barrel exports', () => {
   test('exports config', async () => {
     const mod = await import('@agents/core/config')
     expect(mod.loadConfig).toBeDefined()
-  })
-
-  test('exports output', async () => {
-    const mod = await import('@agents/core/output')
-    expect(mod.createOutput).toBeDefined()
   })
 
   test('exports hash', async () => {
@@ -69,17 +58,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.parseSource).toBeDefined()
   })
 
-  test('exports component/manager', async () => {
-    const mod = await import('@agents/core/component/manager')
-    expect(mod.ComponentManager).toBeDefined()
-  })
-
-  test('exports component/pagination', async () => {
-    const mod = await import('@agents/core/component/pagination')
-    expect(mod.paginateArray).toBeDefined()
-    expect(mod.clampPage).toBeDefined()
-  })
-
   test('barrel exports all modules', async () => {
     const mod = await import('@agents/core')
     // types
@@ -90,8 +68,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.readTextFile).toBeDefined()
     // config
     expect(mod.loadConfig).toBeDefined()
-    // output
-    expect(mod.createOutput).toBeDefined()
     // hash
     expect(mod.hashDirectory).toBeDefined()
     // uuid
@@ -100,9 +76,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.currentDir).toBeDefined()
     // schemas
     expect(mod.LockfileV1).toBeDefined()
-    // component
-    expect(mod.COMPONENT_TYPES).toBeDefined()
-    expect(mod.ComponentManager).toBeDefined()
     // git
     expect(mod.cloneRepo).toBeDefined()
     // github

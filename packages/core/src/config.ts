@@ -17,7 +17,7 @@ import { join } from 'node:path'
 import * as TOML from 'smol-toml'
 import * as v from 'valibot'
 import { pathExists, readTextFile, writeTextFile } from './file-io'
-import { CliError, err, ok, type Result } from './types'
+import { BaseError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -160,7 +160,7 @@ export async function readConfigFile(path: string): Promise<Result<Partial<Agent
     return ok(transformed as Partial<AgentsConfig>)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to parse TOML config at ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_PARSE_CONFIG'
       )
@@ -179,7 +179,7 @@ export async function writeConfigFile(
     return writeTextFile(path, content)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to write config to ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_WRITE_CONFIG'
       )

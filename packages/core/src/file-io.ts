@@ -1,7 +1,7 @@
 /**
  * Unified file I/O operations with Result error handling.
  *
- * All operations return Result<T, CliError> to avoid scattered try/catch
+ * All operations return Result<T, BaseError> to avoid scattered try/catch
  * blocks across command implementations. Designed for use by verb-first
  * command modules in the agents CLI.
  */
@@ -9,7 +9,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { CliError, err, ok, type Result } from './types'
+import { BaseError, err, ok, type Result } from './types'
 
 export type { AuditOptions, SymlinkReport, SymlinkStatus } from './symlink'
 // Re-export symlink utilities for single-import convenience
@@ -26,7 +26,7 @@ export async function readTextFile(path: string): Promise<Result<string>> {
     return ok(content)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to read ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_READ_FILE'
       )
@@ -42,7 +42,7 @@ export async function readJsonFile<T = unknown>(path: string): Promise<Result<T>
     return ok(JSON.parse(text.value) as T)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to parse JSON in ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_PARSE_JSON'
       )
@@ -60,7 +60,7 @@ export async function listDirectory(
     return ok(entries)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to read directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_READ_DIR'
       )
@@ -80,7 +80,7 @@ export async function writeTextFile(path: string, content: string): Promise<Resu
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to write ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_WRITE_FILE'
       )
@@ -99,7 +99,7 @@ export async function writeJsonFile(
     return writeTextFile(path, content)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to serialize JSON for ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_SERIALIZE_JSON'
       )
@@ -118,7 +118,7 @@ export async function ensureDir(path: string): Promise<Result<void>> {
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to create directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_MKDIR'
       )
@@ -138,7 +138,7 @@ export async function copyFileSafe(src: string, dest: string): Promise<Result<vo
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to copy ${src} → ${dest}: ${e instanceof Error ? e.message : String(e)}`,
         'E_COPY_FILE'
       )
@@ -156,7 +156,7 @@ export async function removePath(
     return ok(undefined)
   } catch (e) {
     return err(
-      new CliError(
+      new BaseError(
         `Failed to remove ${path}: ${e instanceof Error ? e.message : String(e)}`,
         'E_REMOVE'
       )

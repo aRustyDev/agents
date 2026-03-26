@@ -1,4 +1,4 @@
-import type { PaginatedResult } from './types'
+import type { PaginatedResult } from '../context/types'
 
 /** Clamp limit to [1, 100], default 10. Handles NaN. */
 export function clampLimit(limit: number | undefined): number {

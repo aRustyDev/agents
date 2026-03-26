@@ -1,4 +1,5 @@
-// Re-export core component model
-export { ComponentManager } from '@agents/core/component/manager'
-export * from '@agents/core/component/pagination'
-export * from '@agents/core/component/types'
+// Re-export SDK component model
+
+export * from '@agents/sdk/context/types'
+export { ComponentManager } from '@agents/sdk/providers/manager'
+export * from '@agents/sdk/providers/pagination'

@@ -8,8 +8,6 @@
  * smaller imports, use deep paths: `@agents/core/types`, etc.
  */
 
-// Component model
-export * from './component'
 // Note: symlink is re-exported via file-io, not directly
 export * from './config'
 export * from './file-io'
@@ -17,7 +15,6 @@ export * from './file-io'
 export * from './git'
 export * from './github'
 export * from './hash'
-export * from './output'
 export * from './runtime'
 export * from './schemas'
 export * from './source-parser'

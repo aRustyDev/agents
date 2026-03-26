@@ -5,15 +5,15 @@
  * Supported: skill (dedicated), persona/hook (template-based). Others: placeholder.
  */
 
+import { EXIT } from '@agents/core/types'
 import {
   COMPONENT_TYPES,
   type ComponentType,
   getComponentMeta,
   parseComponentType,
-} from '@agents/core/component/types'
-import type { OutputFormatter } from '@agents/core/output'
-import { createOutput } from '@agents/core/output'
-import { EXIT } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import type { OutputFormatter } from '@agents/sdk/ui'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 

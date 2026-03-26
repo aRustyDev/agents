@@ -181,6 +181,17 @@ export interface Component {
 }
 
 // ---------------------------------------------------------------------------
+// Component metadata (for parsed components)
+// ---------------------------------------------------------------------------
+
+export interface ComponentMetadata {
+  readonly wordCount: number
+  readonly sectionCount: number
+  readonly headingTree: Array<{ depth: number; title: string }>
+  readonly lineCount: number
+}
+
+// ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
 
@@ -307,7 +318,7 @@ export interface ComponentProvider {
 }
 
 // ---------------------------------------------------------------------------
-// EntityType ↔ ComponentType bridge
+// EntityType <-> ComponentType bridge
 // ---------------------------------------------------------------------------
 
 /** Map between ComponentType (CLI, kebab-case) and EntityType (KG, snake_case). */

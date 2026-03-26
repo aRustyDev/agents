@@ -7,7 +7,6 @@
  */
 
 import { join, resolve } from 'node:path'
-import { type ComponentType, getComponentMeta } from '@agents/core/component/types'
 import {
   ensureDir,
   listDirectory,
@@ -17,6 +16,7 @@ import {
 } from '@agents/core/file-io'
 import { currentDir } from '@agents/core/runtime'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import { type ComponentType, getComponentMeta } from '@agents/sdk/context/types'
 
 const PROJECT_ROOT = resolve(currentDir(import.meta), '../../../..')
 

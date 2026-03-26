@@ -5,18 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*.ts",
-    "./component": "./src/component/index.ts",
-    "./component/*": "./src/component/*.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@napi-rs/keyring": "^1.2.0",
     "@octokit/auth-oauth-device": "^7.0.0",
     "@octokit/core": "^6.0.0",
-    "ansis": "^4.0.0",
-    "console-table-printer": "^2.15.0",
     "js-yaml": "^4.1.0",
-    "nanospinner": "^1.2.0",
     "simple-git": "^3.33.0",
     "smol-toml": "^1.6.1",
     "valibot": "^1.0.0"

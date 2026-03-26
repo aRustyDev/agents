@@ -6,7 +6,7 @@ import {
   type ClientTransport,
   getClientConfig,
   getConfigPath,
-} from '@agents/core/component/clients'
+} from '@agents/sdk/providers/clients/registry'
 
 // ---------------------------------------------------------------------------
 // Registry size

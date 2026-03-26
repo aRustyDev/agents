@@ -5,14 +5,14 @@
  * Currently supported: skill. Other types show a "not yet supported" message.
  */
 
+import { EXIT } from '@agents/core/types'
 import {
   COMPONENT_TYPES,
   getActiveTypes,
   getComponentMeta,
   parseComponentType,
-} from '@agents/core/component/types'
-import { createOutput } from '@agents/core/output'
-import { EXIT } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 

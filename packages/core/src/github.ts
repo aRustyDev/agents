@@ -10,7 +10,7 @@
 import { existsSync, readFileSync, unlinkSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { CliError, type Result, tryAsync } from '@agents/core/types'
+import { BaseError, type Result, tryAsync } from '@agents/core/types'
 import { Entry } from '@napi-rs/keyring'
 import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
 import { Octokit } from '@octokit/core'
@@ -398,7 +398,7 @@ export async function createIssue(repo: string, opts: CreateIssueOpts): Promise<
       return mapIssue(response.data)
     },
     (e) =>
-      new CliError(
+      new BaseError(
         `Failed to create issue in ${repo}`,
         'E_GITHUB_CREATE',
         e instanceof Error ? e.message : String(e),
@@ -436,7 +436,7 @@ export async function updateIssue(
       })
     },
     (e) =>
-      new CliError(
+      new BaseError(
         `Failed to update issue #${number} in ${repo}`,
         'E_GITHUB_UPDATE',
         e instanceof Error ? e.message : String(e),
@@ -471,7 +471,7 @@ export async function addComment(
       })
     },
     (e) =>
-      new CliError(
+      new BaseError(
         `Failed to add comment to issue #${number} in ${repo}`,
         'E_GITHUB_COMMENT',
         e instanceof Error ? e.message : String(e),
