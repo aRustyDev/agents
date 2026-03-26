@@ -24,13 +24,12 @@ brewfile
 buildwithclaude
 bunx
 burpsuite
+categorise
+ccflare
 cchooks
 cclint
-ccflare
 ccpm
 CHANGEME
-CRDT
-crdt
 chunker
 cicd
 claudecode
@@ -46,10 +45,11 @@ codegraph
 compdef
 Composio
 Cpath
+cpython
 crawl4ai
 crawlable
-categorise
-cpython
+crdt
+CRDT
 cspell
 Csvg
 cupertino
@@ -67,8 +67,8 @@ embeddings
 ename
 eslug
 etype
-evals
 etypes
+evals
 fastmcp
 FDTD
 ffuf
@@ -100,14 +100,14 @@ iconify
 Iconify
 Izhikevich
 Jeffallan
+Jina
 jkitchin
 jqueryscript
-Jina
 justfile
 kwsites
 lackeyjb
-lastrowid
 LAPACK
+lastrowid
 libquiche
 lintable
 litdb
@@ -118,6 +118,7 @@ lychee
 Manim
 markdownify
 markmap
+matrixng
 mcphub
 mcpregistry
 mcpservers
@@ -128,8 +129,8 @@ microarchitectural
 mihaelamj
 modelcontextprotocol
 monorepo
-msquic
 mousemovebody
+msquic
 mycomponent
 mycomponentv
 myns
@@ -147,6 +148,7 @@ opto
 orbstack
 orgname
 overclaiming
+Paperswith
 pargs
 pdate
 penpot
@@ -163,7 +165,6 @@ productionization
 promptbase
 PRRT
 PRRTC
-Paperswith
 Pryce
 publishability
 punkpeye
@@ -176,8 +177,8 @@ pytestmark
 radon
 rahulvrane
 recieve
-rels
 reclassifiable
+rels
 reprioritize
 rereview
 ripgrep
@@ -209,6 +210,8 @@ sqlite
 STDP
 subagent
 subdirs
+subtab
+subtabs
 subviews
 Sundell
 surrealdb
@@ -225,6 +228,7 @@ tenequm
 testuser
 timebox
 tmppath
+toggleable
 tokei
 trafilatura
 trailofbits
