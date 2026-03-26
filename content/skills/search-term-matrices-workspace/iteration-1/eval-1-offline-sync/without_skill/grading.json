@@ -1,0 +1,20 @@
+{
+  "eval_id": 1,
+  "eval_name": "offline-sync-frameworks",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "passed": false, "evidence": "Output is a research plan with phases, not a tiered search matrix. No Tier 1/2/3 structure present"},
+    {"text": "Matrix uses at least 3 different engine categories (e.g., npm, GitHub, Google Scholar, StackOverflow)", "passed": false, "evidence": "Plan lists generic search terms without specifying target engines or engine-specific operators"},
+    {"text": "Search queries use engine-specific operators such as stars:>100, language:typescript, or site: filters", "passed": false, "evidence": "No engine-specific operators used. Queries are plain text phrases like 'offline first sync framework'"},
+    {"text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "passed": false, "evidence": "No tier structure exists. Phases are organized by research objective, not by search scope escalation"},
+    {"text": "Each row includes specific acceptance criteria for evaluating search results", "passed": false, "evidence": "No per-query acceptance criteria. Phase-level expected outputs are general (e.g., 'a list of 5-8 frameworks')"},
+    {"text": "Output includes a Runtime Recovery section with fallback strategies", "passed": false, "evidence": "No Runtime Recovery section. A Risks section exists but describes general project risks, not search fallbacks"},
+    {"text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "passed": false, "evidence": "No Grading Summary section present"},
+    {"text": "Queries specifically reference CRDT, operational transform, or offline-sync terminology", "passed": true, "evidence": "Multiple search terms reference CRDT, operational transform, and offline-first terminology"},
+    {"text": "At least one query targets latency or performance benchmark data", "passed": false, "evidence": "Phase 3 mentions benchmarks but queries are generic ('CRDT sync latency benchmark') without engine targeting"},
+    {"text": "Matrix covers at least 3 of the named frameworks (Automerge, Yjs, PowerSync, ElectricSQL)", "passed": false, "evidence": "Plan mentions Automerge and Yjs in search terms but does not structure queries to cover all named frameworks systematically"}
+  ],
+  "pass_rate": 0.1,
+  "passed": 1,
+  "total": 10
+}

@@ -29,6 +29,8 @@ cclint
 ccflare
 ccpm
 CHANGEME
+CRDT
+crdt
 chunker
 cicd
 claudecode
@@ -65,6 +67,7 @@ embeddings
 ename
 eslug
 etype
+evals
 etypes
 fastmcp
 FDTD
@@ -92,17 +95,20 @@ homoiconic
 homoiconicity
 Hyperdimensional
 iannuttall
+iapp
 iconify
 Iconify
 Izhikevich
 Jeffallan
 jkitchin
 jqueryscript
+Jina
 justfile
 kwsites
 lackeyjb
 lastrowid
 LAPACK
+libquiche
 lintable
 litdb
 Livelocks
@@ -122,6 +128,7 @@ microarchitectural
 mihaelamj
 modelcontextprotocol
 monorepo
+msquic
 mousemovebody
 mycomponent
 mycomponentv
@@ -156,6 +163,7 @@ productionization
 promptbase
 PRRT
 PRRTC
+Paperswith
 Pryce
 publishability
 punkpeye
@@ -177,6 +185,7 @@ Riverpod
 rumdl
 Rxiv
 sandboxer
+Scopus
 secops
 Segoe
 semgrep
@@ -211,6 +220,7 @@ SwiftLint
 swiftui
 SwiftUI
 Tauri
+Tavily
 tenequm
 testuser
 timebox
@@ -242,6 +252,7 @@ Wassette
 wdispatch
 webfetch
 websearch
+webtransport
 Wextra
 worktree
 worktrees

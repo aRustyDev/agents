@@ -1,0 +1,16 @@
+{
+  "eval_id": 2,
+  "eval_name": "llm-regulatory-landscape",
+  "prompt": "I need to research the current regulatory landscape for large language models across the EU, US, and China. Specifically, I want to understand the EU AI Act's requirements for foundation model providers, NIST AI RMF compliance pathways, and China's Interim Measures for generative AI. I also need to find case studies of companies that have completed regulatory audits or received enforcement actions related to LLM deployments.",
+  "assertions": [
+    {"id": "matrix-structure", "text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "type": "structural"},
+    {"id": "engine-diversity", "text": "Matrix uses at least 3 different engine categories including legal or policy databases", "type": "quality"},
+    {"id": "operator-usage", "text": "Search queries use engine-specific operators such as site:, filetype:pdf, or date range filters", "type": "structural"},
+    {"id": "tier-escalation", "text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "type": "behavioral"},
+    {"id": "acceptance-criteria", "text": "Each row includes specific acceptance criteria for evaluating search results", "type": "structural"},
+    {"id": "recovery-plan", "text": "Output includes a Runtime Recovery section with fallback strategies", "type": "structural"},
+    {"id": "jurisdiction-coverage", "text": "Matrix covers regulatory frameworks from at least EU, US, and China", "type": "quality"},
+    {"id": "enforcement-queries", "text": "At least one query specifically targets enforcement actions or audit case studies", "type": "quality"},
+    {"id": "grading-summary", "text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "type": "structural"}
+  ]
+}

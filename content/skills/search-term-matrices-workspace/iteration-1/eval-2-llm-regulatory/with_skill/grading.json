@@ -1,0 +1,19 @@
+{
+  "eval_id": 2,
+  "eval_name": "llm-regulatory-landscape",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "passed": true, "evidence": "All three tiers present with proper markdown table headers and a Context section with Goal, Type, Domain"},
+    {"text": "Matrix uses at least 3 different engine categories including legal or policy databases", "passed": true, "evidence": "Uses Google, Google Scholar, Semantic Scholar, YouTube, GitHub, and targets legal domains via site: filters (eur-lex.europa.eu, nist.gov, iapp.org)"},
+    {"text": "Search queries use engine-specific operators such as site:, filetype:pdf, or date range filters", "passed": true, "evidence": "Includes site:eur-lex.europa.eu, site:nist.gov, filetype:pdf, site:iapp.org, after:2023, and year:2023-2026"},
+    {"text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "passed": true, "evidence": "Tier 1 targets primary regulatory texts; Tier 2 adds enforcement case studies and risk classification; Tier 3 explores compliance tooling and video content"},
+    {"text": "Each row includes specific acceptance criteria for evaluating search results", "passed": true, "evidence": "All 10 rows have an Acceptance column with specific criteria"},
+    {"text": "Output includes a Runtime Recovery section with fallback strategies", "passed": true, "evidence": "Runtime Recovery section contains 4 bullet points including fallbacks for EUR-Lex, NIST, and China translation sources"},
+    {"text": "Matrix covers regulatory frameworks from at least EU, US, and China", "passed": true, "evidence": "Tier 1 rows 1-3 explicitly target EU AI Act, NIST AI RMF, and China Interim Measures respectively"},
+    {"text": "At least one query specifically targets enforcement actions or audit case studies", "passed": true, "evidence": "Tier 2 row 1 queries for 'LLM regulatory audit case study compliance enforcement action'"},
+    {"text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "passed": false, "evidence": "Grading Summary is present but the Tier 2 threshold rationale could be more specific about enforcement data requirements"}
+  ],
+  "pass_rate": 0.889,
+  "passed": 8,
+  "total": 9
+}
