@@ -39,7 +39,7 @@ _init-pre-commit:
 [private]
 _init-bun:
     @echo "Installing TypeScript dependencies..."
-    @cd packages/cli && bun install --silent
+    @bun install --silent
 
 [private]
 _init-python:

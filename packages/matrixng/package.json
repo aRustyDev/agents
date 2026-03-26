@@ -1,0 +1,19 @@
+{
+  "name": "@arustydev/matrixng",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "matrixng": "./src/bin.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "citty": "^0.2.1",
+    "fast-glob": "^3.3.3"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.11"
+  }
+}
