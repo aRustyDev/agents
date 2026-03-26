@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import {
   ComponentRecord,
   detectUnknownPluginFields,
@@ -35,7 +36,7 @@ async function readJson(path: string): Promise<unknown> {
 }
 
 // Base paths for real test files
-const REPO_ROOT = '/private/etc/infra/pub/ai'
+const REPO_ROOT = resolve(import.meta.dir, '../../..')
 const WORKTREE = `${REPO_ROOT}`
 
 // ---------------------------------------------------------------------------

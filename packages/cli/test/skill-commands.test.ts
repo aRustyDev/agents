@@ -7,7 +7,7 @@
 
 import { describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { formatHash, hashDirectory } from '@agents/core/hash'
 import { listSkills } from '../src/commands/skill'
 import { readSkillFrontmatter } from '../src/lib/manifest'
@@ -16,7 +16,7 @@ import { readSkillFrontmatter } from '../src/lib/manifest'
 // Constants
 // ---------------------------------------------------------------------------
 
-const WORKTREE = '/private/etc/infra/pub/ai'
+const WORKTREE = resolve(import.meta.dir, '../../..')
 const SKILLS_DIR = join(WORKTREE, 'content/skills')
 
 // ---------------------------------------------------------------------------

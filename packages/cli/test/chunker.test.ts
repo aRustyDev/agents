@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { resolve } from 'node:path'
 import {
   chunkFile,
   chunkMarkdown,
@@ -455,7 +456,7 @@ ${body}`
 
 describe('chunkFile', () => {
   test('reads and chunks a real SKILL.md file', async () => {
-    const skillPath = '/private/etc/infra/pub/ai/content/skills/beads/SKILL.md'
+    const skillPath = resolve(import.meta.dir, '../../..', 'content/skills/beads/SKILL.md')
 
     const result = await chunkFile(skillPath)
 

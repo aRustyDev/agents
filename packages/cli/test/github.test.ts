@@ -85,7 +85,7 @@ describe('parseRepo', () => {
   test('parses owner/repo correctly', () => {
     const result = parseRepo('aRustyDev/agents')
     expect(result.owner).toBe('aRustyDev')
-    expect(result.repo).toBe('ai')
+    expect(result.repo).toBe('agents')
   })
 
   test('parses different owner/repo values', () => {

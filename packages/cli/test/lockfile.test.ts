@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { computeHash, formatHash } from '@agents/core/hash'
 import type { LockfileV1, PluginSourcesManifest } from '@agents/core/schemas'
 import * as v from 'valibot'
@@ -16,7 +16,7 @@ import {
 } from '../src/lib/lockfile'
 
 // Base paths for real test files
-const REPO_ROOT = '/private/etc/infra/pub/ai'
+const REPO_ROOT = resolve(import.meta.dir, '../../..')
 const WORKTREE = `${REPO_ROOT}`
 
 // Temp directory created fresh before each test group
