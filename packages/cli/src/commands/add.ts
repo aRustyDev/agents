@@ -5,9 +5,9 @@
  * Routes through ComponentManager.add() for all supported types.
  */
 
-import { COMPONENT_TYPES, parseComponentType } from '@agents/core/component/types'
-import { createOutput } from '@agents/core/output'
 import { EXIT } from '@agents/core/types'
+import { COMPONENT_TYPES, parseComponentType } from '@agents/sdk/context/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
 import { globalArgs } from './shared-args'

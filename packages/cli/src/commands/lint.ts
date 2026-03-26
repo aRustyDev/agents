@@ -6,16 +6,16 @@
  */
 import { statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { currentDir } from '@agents/core/runtime'
+import { EXIT } from '@agents/core/types'
 import {
   COMPONENT_TYPES,
   type ComponentType,
   getActiveTypes,
   getComponentMeta,
   parseComponentType,
-} from '@agents/core/component/types'
-import { createOutput } from '@agents/core/output'
-import { currentDir } from '@agents/core/runtime'
-import { EXIT } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 

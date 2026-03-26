@@ -20,8 +20,8 @@ import {
   writeConfigFile,
 } from '@agents/core/config'
 import { pathExists } from '@agents/core/file-io'
-import { createOutput } from '@agents/core/output'
 import { EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 

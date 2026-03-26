@@ -1,4 +1,4 @@
-import { ComponentManager } from '@agents/core/component/manager'
+import { ComponentManager } from '@agents/sdk/providers/manager'
 import { LocalAgentProvider } from './provider-agent'
 import { LocalCommandProvider } from './provider-command'
 import { LocalProvider } from './provider-local'

@@ -7,7 +7,7 @@
  * the user has discovered a server via search.
  */
 
-import { clampLimit, clampPage, emptyPage } from '@agents/core/component/pagination'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import type {
   Component,
   ComponentAddOptions,
@@ -20,8 +20,8 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from '@agents/core/component/types'
-import { CliError, err, ok, type Result } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import { clampLimit, clampPage, emptyPage } from '@agents/sdk/providers/pagination'
 
 const SMITHERY_API_BASE = 'https://registry.smithery.ai/api/v1'
 const TIMEOUT_MS = 3_000

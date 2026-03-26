@@ -5,15 +5,15 @@
  * Routes through ComponentManager.list() per type.
  */
 
+import { EXIT } from '@agents/core/types'
 import {
   COMPONENT_TYPES,
   type Component,
   type ComponentType,
   getActiveTypes,
   parseComponentType,
-} from '@agents/core/component/types'
-import { createOutput } from '@agents/core/output'
-import { EXIT } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
 import { globalArgs } from './shared-args'

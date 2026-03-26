@@ -3,7 +3,7 @@
  */
 
 import { createCliRenderer } from './cli'
-import type { Renderer } from './interface'
+import type { ProgressHandle, Renderer } from './interface'
 import { createJsonRenderer } from './json'
 import { createSilentRenderer } from './silent'
 
@@ -17,8 +17,14 @@ export function createRenderer(opts?: {
   return createCliRenderer({ json: false, quiet: opts?.quiet ?? false })
 }
 
-// Backward compat alias
+// Backward compat aliases
 export { createCliRenderer, createOutput } from './cli'
 export * from './interface'
 export { createJsonRenderer } from './json'
 export { createSilentRenderer } from './silent'
+
+// Legacy type aliases for CLI backward compatibility
+/** @deprecated Use `Renderer` instead. */
+export type OutputFormatter = Renderer & { spinner(message: string): ProgressHandle }
+/** @deprecated Use `ProgressHandle` instead. */
+export type SpinnerHandle = ProgressHandle

@@ -12,7 +12,7 @@
 import { existsSync } from 'node:fs'
 import { readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { clampLimit, clampPage, emptyPage, paginateArray } from '@agents/core/component/pagination'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import type {
   Component,
   ComponentAddOptions,
@@ -24,8 +24,8 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from '@agents/core/component/types'
-import { CliError, err, ok, type Result } from '@agents/core/types'
+} from '@agents/sdk/context/types'
+import { clampLimit, clampPage, emptyPage, paginateArray } from '@agents/sdk/providers/pagination'
 import { readPluginManifest } from '../manifest'
 
 const SUPPORTED_TYPES: readonly ComponentType[] = ['plugin'] as const

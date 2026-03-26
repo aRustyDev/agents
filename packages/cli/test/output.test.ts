@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import type { OutputFormatter, SpinnerHandle } from '@agents/core/output'
-import { createOutput } from '@agents/core/output'
+import type { OutputFormatter, SpinnerHandle } from '@agents/sdk/ui'
+import { createOutput } from '@agents/sdk/ui'
 
 // ---------------------------------------------------------------------------
 // Capture helper

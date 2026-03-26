@@ -15,9 +15,9 @@
 
 import { resolve } from 'node:path'
 import { hashFile } from '@agents/core/hash'
-import { createOutput } from '@agents/core/output'
 import { currentDir, readText } from '@agents/core/runtime'
 import { type EntityType, EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import fg from 'fast-glob'
 import { Ollama } from 'ollama'

@@ -13,7 +13,7 @@ import {
   writeConfigFile,
   writeJsonFile,
   writeYamlFile,
-} from '@agents/core/component/client-config'
+} from '@agents/sdk/providers/clients/config'
 
 // ---------------------------------------------------------------------------
 // Shared temp directory setup
@@ -114,7 +114,7 @@ describe('readJsonFile', () => {
     const result = await readJsonFile(path)
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('E_READ_FAILED')
+      expect(result.error.code).toBe('E_STORAGE_BACKEND')
     }
   })
 
@@ -122,7 +122,7 @@ describe('readJsonFile', () => {
     const result = await readJsonFile(join(tmpDir, 'nonexistent.json'))
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('E_READ_FAILED')
+      expect(result.error.code).toBe('E_STORAGE_BACKEND')
     }
   })
 })
@@ -185,7 +185,7 @@ describe('readJsoncFile', () => {
     const result = await readJsoncFile(path)
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('E_READ_FAILED')
+      expect(result.error.code).toBe('E_STORAGE_BACKEND')
     }
   })
 })
@@ -242,7 +242,7 @@ describe('readYamlFile', () => {
     const result = await readYamlFile(join(tmpDir, 'missing.yaml'))
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('E_READ_FAILED')
+      expect(result.error.code).toBe('E_STORAGE_BACKEND')
     }
   })
 })

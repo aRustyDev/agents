@@ -139,16 +139,120 @@ export function createCliRenderer(opts?: CliRendererOptions): Renderer {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Column filtering helper (for JSON mode)
+// ---------------------------------------------------------------------------
+
+function filterColumnsJson(
+  data: Record<string, unknown>[],
+  columns: string[]
+): Record<string, unknown>[] {
+  return data.map((row) => {
+    const filtered: Record<string, unknown> = {}
+    for (const col of columns) {
+      if (col in row) {
+        filtered[col] = row[col]
+      }
+    }
+    return filtered
+  })
+}
+
+// ---------------------------------------------------------------------------
+// JSON formatter (backward-compatible with @agents/core/output)
+// ---------------------------------------------------------------------------
+
+const noopSpinner: ProgressHandle = {
+  update() {},
+  success() {},
+  error() {},
+}
+
+function createJsonFormatter(): Renderer & { spinner(message: string): ProgressHandle } {
+  const renderer: Renderer = {
+    table(data, columns) {
+      const output = columns ? filterColumnsJson(data, columns) : data
+      console.log(JSON.stringify(output, null, 2))
+    },
+
+    success(message, data) {
+      console.log(
+        JSON.stringify({
+          status: 'success',
+          message,
+          ...(data !== undefined && { data }),
+        })
+      )
+    },
+
+    error(message, data) {
+      console.error(
+        JSON.stringify({
+          status: 'error',
+          message,
+          ...(data !== undefined && { data }),
+        })
+      )
+    },
+
+    warn(message, data) {
+      console.error(
+        JSON.stringify({
+          status: 'warning',
+          message,
+          ...(data !== undefined && { data }),
+        })
+      )
+    },
+
+    info(message, data) {
+      console.log(
+        JSON.stringify({
+          status: 'info',
+          message,
+          ...(data !== undefined && { data }),
+        })
+      )
+    },
+
+    tree(label, children) {
+      console.log(JSON.stringify({ label, children }, null, 2))
+    },
+
+    ndjson(data) {
+      console.log(JSON.stringify(data))
+    },
+
+    raw(data) {
+      console.log(JSON.stringify(data, null, 2))
+    },
+
+    progress() {
+      return noopSpinner
+    },
+  }
+
+  return {
+    ...renderer,
+    spinner(message: string): ProgressHandle {
+      return renderer.progress(message)
+    },
+  }
+}
+
 /**
- * @deprecated Use `createCliRenderer` and its `progress()` method instead.
+ * @deprecated Use `createCliRenderer` or `createJsonRenderer` instead.
  *
- * Backward-compatible alias — returns a renderer whose `progress()` method
- * is also available as `spinner()`.
+ * Backward-compatible factory — dispatches to JSON or human-friendly
+ * renderer based on the `json` flag, with `spinner()` as an alias for
+ * `progress()`.
  */
 export function createOutput(opts: {
   json: boolean
   quiet: boolean
 }): Renderer & { spinner(message: string): ProgressHandle } {
+  if (opts.json) return createJsonFormatter()
+
   const renderer = createCliRenderer({ quiet: opts.quiet })
   return {
     ...renderer,

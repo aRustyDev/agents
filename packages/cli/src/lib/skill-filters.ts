@@ -6,7 +6,7 @@
  * commands.
  */
 
-import type { OutputFormatter } from '@agents/core/output'
+import type { OutputFormatter } from '@agents/sdk/ui'
 import type { AgentType } from './agents'
 import { AGENT_CONFIGS } from './agents'
 

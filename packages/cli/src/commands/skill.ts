@@ -8,9 +8,9 @@
 import { readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { formatHash, hashDirectory } from '@agents/core/hash'
-import { createOutput } from '@agents/core/output'
 import { currentDir } from '@agents/core/runtime'
 import { EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import {
   checkDrift,
@@ -578,7 +578,7 @@ export default defineCommand({
       },
       async (args) => {
         const { checkOutdated } = await import('../lib/skill-outdated')
-        const out = (await import('@agents/core/output')).createOutput({
+        const out = (await import('@agents/sdk/ui')).createOutput({
           json: args.json as boolean,
           quiet: args.quiet as boolean,
         })
