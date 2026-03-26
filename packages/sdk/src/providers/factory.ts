@@ -22,12 +22,15 @@ export function createDefaultProviders(opts?: {
   cwd?: string
   logger?: Logger
   skillOps?: SkillOperations
+  smitheryBaseUrl?: string
 }): ProviderManager {
   const manager = new ProviderManager()
   const cwd = opts?.cwd
 
   // Remote providers (always registered)
-  manager.register(new SmitheryProvider())
+  manager.register(
+    new SmitheryProvider(opts?.smitheryBaseUrl ? { baseUrl: opts.smitheryBaseUrl } : undefined)
+  )
   manager.register(new GitHubProvider())
 
   // Local providers that don't need skill ops (always registered)
