@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { pollDeployment, publishToSmithery } from '../../src/lib/component/smithery-publish'
+import { pollDeployment, publishToSmithery } from '../../src/providers/smithery/publish'
 
 // ---------------------------------------------------------------------------
 // Fetch mock helpers
@@ -152,7 +152,7 @@ describe('publishToSmithery -- external URL', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_SERVER_NOT_FOUND')
+    expect(result.error.code).toBe('E_COMPONENT_NOT_FOUND')
   })
 
   test('returns E_AUTH_FAILED on 401', async () => {
@@ -165,7 +165,7 @@ describe('publishToSmithery -- external URL', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_AUTH_FAILED')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 
   test('returns E_RATE_LIMITED on 429', async () => {
@@ -178,7 +178,7 @@ describe('publishToSmithery -- external URL', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_RATE_LIMITED')
+    expect(result.error.code).toBe('E_PROVIDER_TIMEOUT')
   })
 
   test('returns E_API_ERROR on 500', async () => {
@@ -191,7 +191,7 @@ describe('publishToSmithery -- external URL', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_API_ERROR')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     expect(result.error.message).toContain('HTTP 500')
   })
 })
@@ -210,7 +210,7 @@ describe('publishToSmithery -- validation', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_INVALID_NAME')
+    expect(result.error.code).toBe('E_VALIDATION_FAILED')
     expect(result.error.message).toContain('no-slash-name')
   })
 
@@ -242,7 +242,7 @@ describe('publishToSmithery -- validation', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_MISSING_SOURCE')
+    expect(result.error.code).toBe('E_VALIDATION_FAILED')
   })
 
   test('missing source returns E_MISSING_SOURCE when neither URL nor bundleDir', async () => {
@@ -252,7 +252,7 @@ describe('publishToSmithery -- validation', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_MISSING_SOURCE')
+    expect(result.error.code).toBe('E_VALIDATION_FAILED')
   })
 })
 
@@ -305,7 +305,7 @@ describe('publishToSmithery -- bundle', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_MISSING_MANIFEST')
+    expect(result.error.code).toBe('E_VALIDATION_FAILED')
   })
 
   test('returns E_INVALID_MANIFEST on bad JSON', async () => {
@@ -320,7 +320,7 @@ describe('publishToSmithery -- bundle', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_INVALID_MANIFEST')
+    expect(result.error.code).toBe('E_VALIDATION_FAILED')
   })
 })
 
@@ -382,7 +382,7 @@ describe('pollDeployment', () => {
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.error.code).toBe('E_DEPLOY_TIMEOUT')
+    expect(result.error.code).toBe('E_PROVIDER_TIMEOUT')
   })
 
   test('continues polling on PENDING status then succeeds', async () => {

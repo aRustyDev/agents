@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { resolveSmitheryAuth, validateSmitheryApiKey } from '../../src/lib/component/smithery-auth'
+import { resolveSmitheryAuth, validateSmitheryApiKey } from '../../src/providers/smithery/auth'
 
 describe('resolveSmitheryAuth', () => {
   const originalEnv = process.env.SMITHERY_API_KEY
@@ -37,8 +37,8 @@ describe('resolveSmitheryAuth', () => {
     const result = resolveSmitheryAuth()
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe('E_AUTH_REQUIRED')
-      expect(result.error.hint).toContain('SMITHERY_API_KEY')
+      expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
+      expect(result.error.detail).toContain('SMITHERY_API_KEY')
     }
   })
 
@@ -85,7 +85,7 @@ describe('validateSmitheryApiKey', () => {
     globalThis.fetch = (async () => new Response('', { status: 500 })) as typeof fetch
     const result = await validateSmitheryApiKey('key')
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('E_API_ERROR')
+    if (!result.ok) expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 
   test('returns E_NETWORK on network error', async () => {
@@ -94,7 +94,7 @@ describe('validateSmitheryApiKey', () => {
     }) as typeof fetch
     const result = await validateSmitheryApiKey('key')
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('E_NETWORK')
+    if (!result.ok) expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 
   test('returns E_TIMEOUT on timeout', async () => {
@@ -103,7 +103,7 @@ describe('validateSmitheryApiKey', () => {
     }) as typeof fetch
     const result = await validateSmitheryApiKey('key')
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('E_TIMEOUT')
+    if (!result.ok) expect(result.error.code).toBe('E_PROVIDER_TIMEOUT')
   })
 
   test('sends Authorization header', async () => {

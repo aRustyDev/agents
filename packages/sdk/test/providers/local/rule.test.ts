@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { LocalRuleProvider } from '../../src/lib/component/provider-rule'
+import { LocalRuleProvider } from '../../../src/providers/local/rule'
 
 // ---------------------------------------------------------------------------
 // Temp directory setup
@@ -189,7 +189,7 @@ describe('LocalRuleProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_RULE_NOT_FOUND')
+    expect(result.error.code).toBe('E_COMPONENT_NOT_FOUND')
   })
 
   test('returns error for unsupported type', async () => {
@@ -199,6 +199,6 @@ describe('LocalRuleProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED_TYPE')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 })

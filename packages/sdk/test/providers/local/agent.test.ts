@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { LocalAgentProvider } from '../../src/lib/component/provider-agent'
+import { LocalAgentProvider } from '../../../src/providers/local/agent'
 
 // ---------------------------------------------------------------------------
 // Temp directory setup
@@ -265,7 +265,7 @@ describe('LocalAgentProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_AGENT_NOT_FOUND')
+    expect(result.error.code).toBe('E_COMPONENT_NOT_FOUND')
   })
 
   test('returns error for unsupported type', async () => {
@@ -275,7 +275,7 @@ describe('LocalAgentProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED_TYPE')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 })
 
@@ -360,7 +360,7 @@ describe('LocalAgentProvider unsupported ops', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED_OP')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 
   test('remove returns unsupported error', async () => {
@@ -370,6 +370,6 @@ describe('LocalAgentProvider unsupported ops', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED_OP')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 })

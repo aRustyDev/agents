@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
-import { LocalCommandProvider } from '../../src/lib/component/provider-command'
+import { LocalCommandProvider } from '../../../src/providers/local/command'
 
 // ---------------------------------------------------------------------------
 // Temp directory setup
@@ -217,7 +217,7 @@ describe('LocalCommandProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_COMMAND_NOT_FOUND')
+    expect(result.error.code).toBe('E_COMPONENT_NOT_FOUND')
   })
 
   test('returns error for unsupported type', async () => {
@@ -227,7 +227,7 @@ describe('LocalCommandProvider info', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED_TYPE')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 })
 

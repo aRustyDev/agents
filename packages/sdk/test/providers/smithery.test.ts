@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { SmitheryProvider } from '../../src/lib/component/provider-smithery'
+import { SmitheryProvider } from '../../src/providers/smithery'
 
 // ---------------------------------------------------------------------------
 // Fetch mock helpers
@@ -355,7 +355,7 @@ describe('SmitheryProvider unsupported operations', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     expect(result.error.message).toContain('add')
   })
 
@@ -366,7 +366,7 @@ describe('SmitheryProvider unsupported operations', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     expect(result.error.message).toContain('remove')
   })
 
@@ -377,7 +377,7 @@ describe('SmitheryProvider unsupported operations', () => {
     expect(result.ok).toBe(false)
     if (result.ok) return
 
-    expect(result.error.code).toBe('E_UNSUPPORTED')
+    expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     expect(result.error.message).toContain('info')
   })
 
@@ -428,7 +428,7 @@ describe('SmitheryProvider publish', () => {
     const provider = new SmitheryProvider()
     const result = await provider.publish('skill', { name: 'ns/test', apiKey: 'key' })
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('E_UNSUPPORTED')
+    if (!result.ok) expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
   })
 
   test('returns error when no API key', async () => {
@@ -438,7 +438,7 @@ describe('SmitheryProvider publish', () => {
       const provider = new SmitheryProvider()
       const result = await provider.publish('mcp-server', { name: 'ns/test' })
       expect(result.ok).toBe(false)
-      if (!result.ok) expect(result.error.code).toBe('E_AUTH_REQUIRED')
+      if (!result.ok) expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     } finally {
       if (origEnv) process.env.SMITHERY_API_KEY = origEnv
     }
@@ -448,7 +448,7 @@ describe('SmitheryProvider publish', () => {
     const provider = new SmitheryProvider()
     const result = await provider.publish('mcp-server', { apiKey: 'key' })
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.code).toBe('E_MISSING_NAME')
+    if (!result.ok) expect(result.error.code).toBe('E_VALIDATION_FAILED')
   })
 
   test('supports dry run', async () => {
