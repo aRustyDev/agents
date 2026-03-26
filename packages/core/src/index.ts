@@ -8,4 +8,19 @@
  * smaller imports, use deep paths: `@agents/core/types`, etc.
  */
 
-// Populated in Phase 5 after all modules are moved
+// Component model
+export * from './component'
+// Note: symlink is re-exported via file-io, not directly
+export * from './config'
+export * from './file-io'
+// Integration
+export * from './git'
+export * from './github'
+export * from './hash'
+export * from './output'
+export * from './runtime'
+export * from './schemas'
+export * from './source-parser'
+// Foundation
+export * from './types'
+export * from './uuid'
