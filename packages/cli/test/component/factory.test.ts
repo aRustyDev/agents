@@ -13,9 +13,9 @@ describe('createComponentManager', () => {
     expect(typeof manager.publish).toBe('function')
   })
 
-  test('has 7 providers registered', () => {
+  test('has 8 providers registered', () => {
     const manager = createComponentManager()
-    expect(manager.providers()).toHaveLength(7)
+    expect(manager.providers()).toHaveLength(8)
   })
 
   test('has local provider for skills', () => {
@@ -60,11 +60,18 @@ describe('createComponentManager', () => {
     expect(manager.getProvider('smithery')!.capabilities.search).toContain('mcp-server')
   })
 
-  test('findProviders routes skill search to local', () => {
+  test('has github provider for skill search', () => {
+    const manager = createComponentManager()
+    expect(manager.getProvider('github')).toBeDefined()
+    expect(manager.getProvider('github')!.capabilities.search).toContain('skill')
+  })
+
+  test('findProviders routes skill search to local and github', () => {
     const manager = createComponentManager()
     const providers = manager.findProviders('search', 'skill')
-    expect(providers.length).toBeGreaterThanOrEqual(1)
+    expect(providers.length).toBeGreaterThanOrEqual(2)
     expect(providers.some((p) => p.id === 'local')).toBe(true)
+    expect(providers.some((p) => p.id === 'github')).toBe(true)
   })
 
   test('findProviders routes mcp-server search to smithery', () => {
@@ -105,7 +112,7 @@ describe('createComponentManager', () => {
 
   test('accepts cwd option', () => {
     const manager = createComponentManager({ cwd: '/tmp/test' })
-    expect(manager.providers()).toHaveLength(7)
+    expect(manager.providers()).toHaveLength(8)
   })
 
   test('accepts smitheryBaseUrl option', () => {
