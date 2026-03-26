@@ -25,6 +25,7 @@ CLI (packages/cli/src/lib/component/)       SDK (packages/sdk/src/providers/)
 +-- smithery-auth.ts (91 lines)             +-- smithery/auth.ts (97 lines)
 +-- smithery-publish.ts (359 lines)         +-- smithery/publish.ts (376 lines)
 +-- index.ts (5 lines)                      +-- github/index.ts (NEW)
+(11 CLI files total)
 ```
 
 **Key difference:** SDK's `LocalSkillProvider` uses a `SkillOperations` DI interface instead of dynamic imports to `skill-list.ts`, `skill-add.ts`, etc.

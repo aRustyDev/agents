@@ -25,10 +25,11 @@ Rewrite `packages/cli/src/lib/component/factory.ts` to delegate to SDK's `create
 
 ## Steps
 
-- [ ] **2.1** Update `packages/sdk/src/providers/factory.ts` to accept `smitheryBaseUrl` in its options and forward it to `SmitheryProvider`
+- [ ] **2.1** **REQUIRED CODE CHANGE:** Update `packages/sdk/src/providers/factory.ts` to accept `smitheryBaseUrl` in its options and forward it to `SmitheryProvider`. The SDK factory currently does NOT have a `smitheryBaseUrl` parameter -- this must be added (see Examples below for before/after).
 - [ ] **2.2** Rewrite `packages/cli/src/lib/component/factory.ts` to call `createDefaultProviders()` with `skillOps` and `smitheryBaseUrl`
-- [ ] **2.3** Run `bun test --cwd packages/cli` -- expect the factory test's `toHaveLength(7)` assertions to fail (SDK registers 8 providers). All other tests should pass.
-- [ ] **2.4** Commit: `refactor(cli): rewrite factory to use SDK providers`
+- [ ] **2.3** Add a test in `packages/cli/test/component/factory.test.ts` that verifies `createComponentManager({ smitheryBaseUrl: 'https://custom.url' })` passes the URL to the SmitheryProvider. Verify by checking the provider's internal state or by mocking the SmitheryProvider constructor.
+- [ ] **2.4** Run `bun test --cwd packages/cli` -- expect the factory test's `toHaveLength(7)` assertions to fail (SDK registers 8 providers). All other tests should pass.
+- [ ] **2.5** Commit: `refactor(cli): rewrite factory to use SDK providers`
 
 ## Acceptance Criteria
 

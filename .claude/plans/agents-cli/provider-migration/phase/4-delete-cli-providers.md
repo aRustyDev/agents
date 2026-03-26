@@ -59,7 +59,7 @@ git rm packages/cli/src/lib/component/smithery-auth.ts
 git rm packages/cli/src/lib/component/smithery-publish.ts
 ```
 
-- [ ] **4.3** Update `packages/cli/src/lib/component/index.ts` barrel:
+- [ ] **4.3** Verify `packages/cli/src/lib/component/index.ts` already re-exports from SDK. If it does, no change needed. If it still imports from local providers, update it to:
 
 ```typescript
 // Re-export from SDK for any CLI code that imports from this barrel

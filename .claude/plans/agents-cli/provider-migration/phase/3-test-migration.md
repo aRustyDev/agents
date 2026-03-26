@@ -68,7 +68,9 @@ Move provider test files from `packages/cli/test/component/` to `packages/sdk/te
 
 ### Task 3.3: Update CLI factory test
 
-- [ ] **3.3.1** Change `toHaveLength(7)` to `toHaveLength(8)` in both assertions
+- [ ] **3.3.1** Change BOTH `toHaveLength(7)` assertions to `toHaveLength(8)`:
+  - Line 17: `expect(manager.providers()).toHaveLength(7)` → `toHaveLength(8)` (in `has 7 providers registered` test)
+  - Line 109: `expect(manager.providers()).toHaveLength(7)` → `toHaveLength(8)` (in `accepts cwd option` test)
 - [ ] **3.3.2** Add test: `has github provider for skill search`
 - [ ] **3.3.3** Run `bun test --cwd packages/cli` -- factory test should pass
 
@@ -102,7 +104,7 @@ When moving tests from CLI to SDK, update import paths as follows:
 | `from '../../src/lib/component/provider-output-style'` | `from '../../src/providers/local/output-style'` |
 | `from '../../src/lib/component/provider-plugin'` | `from '../../src/providers/local/plugin'` |
 | `from '../../src/lib/component/provider-rule'` | `from '../../src/providers/local/rule'` |
-| `from '../../src/lib/component/provider-local'` | `from '../../src/providers/local/index'` |
+| `from '../../src/lib/component/provider-local'` (LocalProvider) | `from '../../src/providers/local/index'` (LocalSkillProvider) — **NOTE: Class renamed.** Constructor changed from `(cwd?)` to `(ops, cwd?)`. |
 | `from '../../src/lib/component/provider-smithery'` | `from '../../src/providers/smithery/index'` |
 | `from '../../src/lib/component/smithery-auth'` | `from '../../src/providers/smithery/auth'` |
 | `from '../../src/lib/component/smithery-publish'` | `from '../../src/providers/smithery/publish'` |
@@ -168,12 +170,13 @@ All error code assertions in moved tests must be updated. The CLI providers used
 
 ## Acceptance Criteria
 
-1. All 10 test files successfully moved via `git mv` (tracked by git as renames)
+1. 8-10 test files moved via `git mv` (tracked by git as renames). `provider-local.test.ts` may stay in CLI as an integration test if the DI mock does not cover all scenarios.
 2. All moved tests pass when run from SDK: `bun test --cwd packages/sdk`
 3. CLI factory test passes with updated count (8 providers)
 4. CLI test baseline maintained: 1929 pass / 11 fail (minus moved tests, plus any new tests)
 5. No moved test file imports anything from `packages/cli/src/`
 6. Every error code assertion in moved tests uses an `SdkErrorCode` value
+7. If `provider-local.test.ts` stays in CLI, add a simple mock-based test for `LocalSkillProvider` in `packages/sdk/test/providers/local/skill.test.ts` as minimum SDK coverage
 
 ## Failure Criteria
 
