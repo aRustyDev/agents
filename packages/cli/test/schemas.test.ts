@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
-import * as v from 'valibot'
 import {
   ComponentRecord,
   detectUnknownPluginFields,
@@ -22,7 +21,8 @@ import {
   SkillFrontmatter,
   SkillLockEntry,
   StatusMessage,
-} from '../src/lib/schemas'
+} from '@agents/core/schemas'
+import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------
 // Helpers

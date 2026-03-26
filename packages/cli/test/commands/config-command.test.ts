@@ -8,7 +8,7 @@ import {
   loadConfig,
   readConfigFile,
   writeConfigFile,
-} from '../../src/lib/config'
+} from '@agents/core/config'
 
 // ---------------------------------------------------------------------------
 // Shared fixture directory
@@ -210,7 +210,7 @@ describe('config list coverage', () => {
 
 describe('config path subcommand data', () => {
   test('getUserConfigPath returns a valid path', async () => {
-    const { getUserConfigPath } = await import('../../src/lib/config')
+    const { getUserConfigPath } = await import('@agents/core/config')
     const path = getUserConfigPath()
     expect(path).toContain('.config')
     expect(path).toContain('agents')
@@ -218,7 +218,7 @@ describe('config path subcommand data', () => {
   })
 
   test('getProjectConfigPath returns .agents.toml', async () => {
-    const { getProjectConfigPath } = await import('../../src/lib/config')
+    const { getProjectConfigPath } = await import('@agents/core/config')
     const path = getProjectConfigPath('/tmp/test-project')
     expect(path).toBe('/tmp/test-project/.agents.toml')
   })

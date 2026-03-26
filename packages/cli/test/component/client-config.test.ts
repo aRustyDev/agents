@@ -13,7 +13,7 @@ import {
   writeConfigFile,
   writeJsonFile,
   writeYamlFile,
-} from '../../src/lib/component/client-config'
+} from '@agents/core/component/client-config'
 
 // ---------------------------------------------------------------------------
 // Shared temp directory setup

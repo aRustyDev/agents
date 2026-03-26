@@ -5,13 +5,17 @@
  * 1. gitLsRemote delegates to lsRemote from git.ts
  * 2. Error codes are preserved (E_GIT_LS_REMOTE, E_NO_REFS)
  * 3. syncSkill uses cloneRepo (verified via cleanup being called)
+ *
+ * NOTE: We use mock.module inside beforeAll (not at top-level) to avoid
+ * contaminating other test files. Bun evaluates top-level mock.module()
+ * during file loading, which can leak mocks into unrelated tests.
  */
 
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { CliError, err, ok } from '../src/lib/types'
+import { beforeAll, beforeEach, describe, expect, mock, test } from 'bun:test'
+import { CliError, err, ok } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
-// Mock setup: replace git.ts functions before importing external-skills
+// Mock setup (deferred to beforeAll to avoid top-level contamination)
 // ---------------------------------------------------------------------------
 
 const mockLsRemote = mock(() => Promise.resolve(ok('abc123def456')))
@@ -26,31 +30,24 @@ const mockCloneRepo = mock(() =>
 )
 const mockGitRaw = mock(() => Promise.resolve(ok('')))
 
-mock.module('../src/lib/git', () => ({
-  lsRemote: mockLsRemote,
-  cloneRepo: mockCloneRepo,
-  gitRaw: mockGitRaw,
-  cleanupTempDir: mock(() => Promise.resolve()),
-  createGit: mock(() => ({})),
-  fetchSkillFolderHash: mock(() => Promise.resolve(null)),
-}))
+let gitLsRemote: Awaited<typeof import('../src/lib/external-skills')>['gitLsRemote']
+let syncSkill: Awaited<typeof import('../src/lib/external-skills')>['syncSkill']
 
-// Also mock spawnSync so npx/which calls don't run real processes
-mock.module('../src/lib/runtime', () => ({
-  spawnSync: mock(() => ({ stdout: '', stderr: '', exitCode: 1, success: false })),
-  isBun: true,
-  readText: mock(),
-  readJson: mock(),
-  writeText: mock(),
-  fileExists: mock(),
-  fileStream: mock(),
-  createSha256Hasher: mock(),
-  spawnAsync: mock(),
-  currentDir: mock(),
-}))
+beforeAll(async () => {
+  mock.module('@agents/core/git', () => ({
+    lsRemote: mockLsRemote,
+    cloneRepo: mockCloneRepo,
+    gitRaw: mockGitRaw,
+    cleanupTempDir: mock(() => Promise.resolve()),
+    createGit: mock(() => ({})),
+    fetchSkillFolderHash: mock(() => Promise.resolve(null)),
+  }))
 
-// Import AFTER mocks are set up
-const { gitLsRemote, syncSkill } = await import('../src/lib/external-skills')
+  // Import AFTER mocks are set up
+  const externalSkills = await import('../src/lib/external-skills')
+  gitLsRemote = externalSkills.gitLsRemote
+  syncSkill = externalSkills.syncSkill
+})
 
 // ---------------------------------------------------------------------------
 // Tests

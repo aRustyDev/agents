@@ -7,7 +7,7 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-import { CliError, err, ok, type Result } from '../types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { type ClientTransport, getClientConfig, getConfigPath } from './clients'
 
 // ---------------------------------------------------------------------------

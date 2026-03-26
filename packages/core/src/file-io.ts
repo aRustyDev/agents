@@ -7,13 +7,13 @@
  */
 
 import { existsSync, statSync } from 'node:fs'
-import { copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { CliError, err, ok, type Result } from './types'
 
+export type { AuditOptions, SymlinkReport, SymlinkStatus } from './symlink'
 // Re-export symlink utilities for single-import convenience
 export { auditSymlinks, checkSymlink, createSymlink, resolveChain } from './symlink'
-export type { AuditOptions, SymlinkReport, SymlinkStatus } from './symlink'
 
 // ---------------------------------------------------------------------------
 // Read operations
@@ -25,10 +25,12 @@ export async function readTextFile(path: string): Promise<Result<string>> {
     const content = await readFile(path, 'utf-8')
     return ok(content)
   } catch (e) {
-    return err(new CliError(
-      `Failed to read ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_READ_FILE'
-    ))
+    return err(
+      new CliError(
+        `Failed to read ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_READ_FILE'
+      )
+    )
   }
 }
 
@@ -39,10 +41,12 @@ export async function readJsonFile<T = unknown>(path: string): Promise<Result<T>
   try {
     return ok(JSON.parse(text.value) as T)
   } catch (e) {
-    return err(new CliError(
-      `Failed to parse JSON in ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_PARSE_JSON'
-    ))
+    return err(
+      new CliError(
+        `Failed to parse JSON in ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_PARSE_JSON'
+      )
+    )
   }
 }
 
@@ -55,10 +59,12 @@ export async function listDirectory(
     const entries = await readdir(path, { withFileTypes: true, recursive: opts?.recursive })
     return ok(entries)
   } catch (e) {
-    return err(new CliError(
-      `Failed to read directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_READ_DIR'
-    ))
+    return err(
+      new CliError(
+        `Failed to read directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_READ_DIR'
+      )
+    )
   }
 }
 
@@ -73,23 +79,31 @@ export async function writeTextFile(path: string, content: string): Promise<Resu
     await writeFile(path, content, 'utf-8')
     return ok(undefined)
   } catch (e) {
-    return err(new CliError(
-      `Failed to write ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_WRITE_FILE'
-    ))
+    return err(
+      new CliError(
+        `Failed to write ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_WRITE_FILE'
+      )
+    )
   }
 }
 
 /** Serialize data as JSON and write to a file. */
-export async function writeJsonFile(path: string, data: unknown, indent = 2): Promise<Result<void>> {
+export async function writeJsonFile(
+  path: string,
+  data: unknown,
+  indent = 2
+): Promise<Result<void>> {
   try {
     const content = JSON.stringify(data, null, indent) + '\n'
     return writeTextFile(path, content)
   } catch (e) {
-    return err(new CliError(
-      `Failed to serialize JSON for ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_SERIALIZE_JSON'
-    ))
+    return err(
+      new CliError(
+        `Failed to serialize JSON for ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_SERIALIZE_JSON'
+      )
+    )
   }
 }
 
@@ -103,10 +117,12 @@ export async function ensureDir(path: string): Promise<Result<void>> {
     await mkdir(path, { recursive: true })
     return ok(undefined)
   } catch (e) {
-    return err(new CliError(
-      `Failed to create directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_MKDIR'
-    ))
+    return err(
+      new CliError(
+        `Failed to create directory ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_MKDIR'
+      )
+    )
   }
 }
 
@@ -121,23 +137,30 @@ export async function copyFileSafe(src: string, dest: string): Promise<Result<vo
     await copyFile(src, dest)
     return ok(undefined)
   } catch (e) {
-    return err(new CliError(
-      `Failed to copy ${src} → ${dest}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_COPY_FILE'
-    ))
+    return err(
+      new CliError(
+        `Failed to copy ${src} → ${dest}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_COPY_FILE'
+      )
+    )
   }
 }
 
 /** Remove a file or directory. */
-export async function removePath(path: string, opts?: { recursive?: boolean }): Promise<Result<void>> {
+export async function removePath(
+  path: string,
+  opts?: { recursive?: boolean }
+): Promise<Result<void>> {
   try {
     await rm(path, { recursive: opts?.recursive, force: true })
     return ok(undefined)
   } catch (e) {
-    return err(new CliError(
-      `Failed to remove ${path}: ${e instanceof Error ? e.message : String(e)}`,
-      'E_REMOVE'
-    ))
+    return err(
+      new CliError(
+        `Failed to remove ${path}: ${e instanceof Error ? e.message : String(e)}`,
+        'E_REMOVE'
+      )
+    )
   }
 }
 

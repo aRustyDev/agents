@@ -46,6 +46,8 @@ Composio
 Cpath
 crawl4ai
 crawlable
+categorise
+cpython
 cspell
 Csvg
 cupertino

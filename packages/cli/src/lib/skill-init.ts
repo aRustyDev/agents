@@ -15,7 +15,7 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { CliError } from './types'
+import { CliError } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
 // Types

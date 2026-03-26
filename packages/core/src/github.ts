@@ -10,10 +10,10 @@
 import { existsSync, readFileSync, unlinkSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { CliError, type Result, tryAsync } from '@agents/core/types'
 import { Entry } from '@napi-rs/keyring'
 import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device'
 import { Octokit } from '@octokit/core'
-import { CliError, type Result, tryAsync } from './types'
 
 // ---------------------------------------------------------------------------
 // Types

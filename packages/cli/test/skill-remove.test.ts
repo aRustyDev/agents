@@ -260,7 +260,7 @@ describe('RemoveError', () => {
   })
 
   test('extends CliError', () => {
-    const { CliError } = require('../src/lib/types')
+    const { CliError } = require('@agents/core/types')
     const e = new RemoveError('test', 'E_SKILL_NOT_FOUND')
     expect(e).toBeInstanceOf(CliError)
   })

@@ -13,8 +13,7 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { CliError, err, ok, type Result } from '../types'
-import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
+import { clampLimit, clampPage, emptyPage, paginateArray } from '@agents/core/component/pagination'
 import type {
   Component,
   ComponentAddOptions,
@@ -26,7 +25,8 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from './types'
+} from '@agents/core/component/types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 const SUPPORTED_TYPES: readonly ComponentType[] = ['rule']
 

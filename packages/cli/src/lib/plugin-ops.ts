@@ -12,10 +12,9 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import * as v from 'valibot'
-import { computeHash, formatHash, parseHash } from './hash'
-import type { OutputFormatter } from './output'
-import { currentDir } from './runtime'
+import { computeHash, formatHash, parseHash } from '@agents/core/hash'
+import type { OutputFormatter } from '@agents/core/output'
+import { currentDir } from '@agents/core/runtime'
 import {
   detectUnknownPluginFields,
   LspConfig,
@@ -23,7 +22,8 @@ import {
   McpConfig,
   PluginManifest,
   SkillFrontmatter,
-} from './schemas'
+} from '@agents/core/schemas'
+import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------
 // Constants

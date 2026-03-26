@@ -18,15 +18,21 @@ import {
 } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import * as v from 'valibot'
-import { getStatus, readLock, readManifest, refreshLinks, writeLock } from '../src/lib/external-skills'
-import { lockKey } from '../src/lib/hash'
+import { lockKey } from '@agents/core/hash'
 import {
   ExternalLockEntry,
   ExternalLockfile,
   ExternalSkillEntry,
   ExternalSourcesManifest,
-} from '../src/lib/schemas'
+} from '@agents/core/schemas'
+import * as v from 'valibot'
+import {
+  getStatus,
+  readLock,
+  readManifest,
+  refreshLinks,
+  writeLock,
+} from '../src/lib/external-skills'
 
 // ---------------------------------------------------------------------------
 // Helpers

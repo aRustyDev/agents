@@ -4,10 +4,11 @@
  * `agents completions bash|zsh|fish` — prints a completion script to stdout.
  * Users can eval or source the output in their shell profile.
  */
+
+import { COMPONENT_TYPES } from '@agents/core/component/types'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
-import { COMPONENT_TYPES } from '../lib/component/types'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

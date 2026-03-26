@@ -6,7 +6,7 @@
  * across local, registry, and marketplace providers.
  */
 
-import type { EntityType, Result } from '../types'
+import type { EntityType, Result } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
 // Component taxonomy

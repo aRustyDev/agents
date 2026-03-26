@@ -8,8 +8,7 @@
  * (agents, plugins, rules, etc.) will be added in Phase 3.
  */
 
-import { CliError, err, ok, type Result } from '../types'
-import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
+import { clampLimit, clampPage, emptyPage, paginateArray } from '@agents/core/component/pagination'
 import type {
   Component,
   ComponentAddOptions,
@@ -21,7 +20,8 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from './types'
+} from '@agents/core/component/types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 const SUPPORTED_TYPES: ComponentType[] = ['skill']
 

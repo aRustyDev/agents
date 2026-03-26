@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { CliError, err, ok, type Result, tryAsync } from '../src/lib/types'
+import { CliError, err, ok, type Result, tryAsync } from '@agents/core/types'
 
 describe('Result', () => {
   test('ok() creates success result', () => {

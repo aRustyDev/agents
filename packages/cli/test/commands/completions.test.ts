@@ -5,7 +5,7 @@
  * containing the expected commands, types, and shell-specific patterns.
  */
 import { describe, expect, test } from 'bun:test'
-import { COMPONENT_TYPES } from '../../src/lib/component/types'
+import { COMPONENT_TYPES } from '@agents/core/component/types'
 
 // ---------------------------------------------------------------------------
 // Module structure

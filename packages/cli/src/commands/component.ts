@@ -1,8 +1,14 @@
+import {
+  COMPONENT_TYPES,
+  type Component,
+  type ComponentType,
+  getActiveTypes,
+  parseComponentType,
+} from '@agents/core/component/types'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
-import { type Component, COMPONENT_TYPES, type ComponentType, getActiveTypes, parseComponentType } from '../lib/component/types'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({
@@ -28,9 +34,7 @@ export default defineCommand({
         const typeFilter = args.type as string | undefined
         const parsedType = typeFilter ? parseComponentType(typeFilter) : undefined
         if (typeFilter && !parsedType) {
-          out.error(
-            `Invalid type: "${typeFilter}". Valid types: ${COMPONENT_TYPES.join(', ')}`
-          )
+          out.error(`Invalid type: "${typeFilter}". Valid types: ${COMPONENT_TYPES.join(', ')}`)
           process.exit(EXIT.ERROR)
         }
 
@@ -97,9 +101,7 @@ export default defineCommand({
         }
 
         const manager = createComponentManager()
-        const types: ComponentType[] = parsedListType
-          ? [parsedListType]
-          : getActiveTypes()
+        const types: ComponentType[] = parsedListType ? [parsedListType] : getActiveTypes()
 
         const allComponents: Component[] = []
         for (const type of types) {

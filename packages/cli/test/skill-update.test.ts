@@ -59,7 +59,7 @@ function addOk(name: string, source: string): AddResult {
 
 /** Build a failed AddResult. */
 function addFailed(message: string): AddResult {
-  const { CliError } = require('../src/lib/types') as typeof import('../src/lib/types')
+  const { CliError } = require('@agents/core/types') as typeof import('@agents/core/types')
   return {
     ok: false,
     installed: [],

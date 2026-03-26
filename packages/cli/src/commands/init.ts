@@ -4,16 +4,17 @@
  * Scaffolds a new component of the given type.
  * Supported: skill (dedicated), persona/hook (template-based). Others: placeholder.
  */
-import { defineCommand } from 'citty'
+
 import {
   COMPONENT_TYPES,
   type ComponentType,
   getComponentMeta,
   parseComponentType,
-} from '../lib/component/types'
-import type { OutputFormatter } from '../lib/output'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
+} from '@agents/core/component/types'
+import type { OutputFormatter } from '@agents/core/output'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

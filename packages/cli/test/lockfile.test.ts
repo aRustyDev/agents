@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { computeHash, formatHash } from '@agents/core/hash'
+import type { LockfileV1, PluginSourcesManifest } from '@agents/core/schemas'
 import * as v from 'valibot'
-import { computeHash, formatHash } from '../src/lib/hash'
 import {
   checkStaleness,
   getSchema,
@@ -13,7 +14,6 @@ import {
   type StalenessReport,
   writeLockfile,
 } from '../src/lib/lockfile'
-import type { LockfileV1, PluginSourcesManifest } from '../src/lib/schemas'
 
 // Base paths for real test files
 const REPO_ROOT = '/private/etc/infra/pub/ai'

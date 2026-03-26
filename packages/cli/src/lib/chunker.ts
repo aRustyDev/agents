@@ -10,8 +10,8 @@
  * so that both implementations produce the same chunks for the same input.
  */
 
+import { readText } from '@agents/core/runtime'
 import yaml from 'js-yaml'
-import { readText } from './runtime'
 
 // ---------------------------------------------------------------------------
 // Types

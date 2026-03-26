@@ -4,11 +4,12 @@
  * Shows detailed information about a single component.
  * Routes through ComponentManager.info().
  */
+
+import { COMPONENT_TYPES, parseComponentType } from '@agents/core/component/types'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
-import { COMPONENT_TYPES, parseComponentType } from '../lib/component/types'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({

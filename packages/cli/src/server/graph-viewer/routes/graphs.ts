@@ -10,9 +10,9 @@
  */
 
 import { resolve } from 'node:path'
+import { fileExists, readJson } from '@agents/core/runtime'
 import type { GraphData } from '../../../lib/graph'
 import type { LockFile } from '../../../lib/graph-lock'
-import { fileExists, readJson } from '../../../lib/runtime'
 import { atomicWrite, directWrite } from '../fs-helpers'
 import { validateGraph } from '../validation'
 

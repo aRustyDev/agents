@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from 'bun:test'
-import type { OutputFormatter } from '../src/lib/output'
+import type { OutputFormatter } from '@agents/core/output'
 import {
   filterByAgent,
   filterBySkill,

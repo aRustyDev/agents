@@ -4,8 +4,9 @@
  * Parses various source formats (short form, tree URLs, SSH, local paths)
  * into a normalized ParsedSource structure.
  */
+
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import * as v from 'valibot'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Types & schemas

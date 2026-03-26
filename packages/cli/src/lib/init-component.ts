@@ -7,10 +7,16 @@
  */
 
 import { join, resolve } from 'node:path'
-import { type ComponentType, getComponentMeta } from './component/types'
-import { ensureDir, listDirectory, pathExists, readTextFile, writeTextFile } from './file-io'
-import { currentDir } from './runtime'
-import { CliError, err, ok, type Result } from './types'
+import { type ComponentType, getComponentMeta } from '@agents/core/component/types'
+import {
+  ensureDir,
+  listDirectory,
+  pathExists,
+  readTextFile,
+  writeTextFile,
+} from '@agents/core/file-io'
+import { currentDir } from '@agents/core/runtime'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 const PROJECT_ROOT = resolve(currentDir(import.meta), '../../../..')
 
