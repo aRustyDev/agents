@@ -37,5 +37,9 @@ export const skillModule: ComponentTypeModule<SkillFrontmatter> = {
 }
 
 export { parseSkill } from './parser'
-export { skillSchemaValidator } from './schema'
-export type { SkillFrontmatter } from './types'
+export {
+  SkillFrontmatter,
+  SkillFrontmatterSchema,
+  skillSchemaValidator,
+} from './schema'
+export type { SkillFrontmatter as SkillFrontmatterType } from './types'

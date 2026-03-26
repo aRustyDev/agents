@@ -15,8 +15,8 @@
 import { join } from 'node:path'
 import { fetchSkillFolderHash, lsRemote } from '@agents/core/git'
 import { hashDirectory } from '@agents/core/hash'
-import type { LockfileV1, SkillLockEntry } from '@agents/core/schemas'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import type { LockfileV1, SkillLockEntry } from '@agents/sdk/providers/local/schemas'
 import { readLockfile } from './lockfile'
 
 // ---------------------------------------------------------------------------

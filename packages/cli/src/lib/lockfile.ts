@@ -10,8 +10,9 @@ import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { computeHash, formatHash, parseHash } from '@agents/core/hash'
-import { LockfileV1, type PluginSourceExtended, PluginSourcesManifest } from '@agents/core/schemas'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import { type PluginSourceExtended, PluginSourcesManifest } from '@agents/sdk/context/plugin/schema'
+import { LockfileV1 } from '@agents/sdk/providers/local/schemas'
 import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------

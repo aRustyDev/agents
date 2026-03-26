@@ -15,4 +15,8 @@ export const SkillFrontmatterSchema = v.object({
   'allowed-tools': v.optional(v.string()),
 })
 
+/** Alias for backward compat with consumers using the un-suffixed name. */
+export const SkillFrontmatter = SkillFrontmatterSchema
+export type SkillFrontmatter = v.InferOutput<typeof SkillFrontmatterSchema>
+
 export const skillSchemaValidator = createSchemaValidator(SkillFrontmatterSchema)

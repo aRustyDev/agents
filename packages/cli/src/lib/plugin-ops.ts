@@ -20,8 +20,8 @@ import {
   MarketplaceManifest,
   McpConfig,
   PluginManifest,
-  SkillFrontmatter,
-} from '@agents/core/schemas'
+} from '@agents/sdk/context/plugin/schema'
+import { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
 import type { OutputFormatter } from '@agents/sdk/ui'
 import * as v from 'valibot'
 

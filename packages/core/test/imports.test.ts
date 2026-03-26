@@ -36,11 +36,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.readText).toBeDefined()
   })
 
-  test('exports schemas', async () => {
-    const mod = await import('@agents/core/schemas')
-    expect(mod.LockfileV1).toBeDefined()
-  })
-
   test('exports git', async () => {
     const mod = await import('@agents/core/git')
     expect(mod.cloneRepo).toBeDefined()
@@ -74,8 +69,6 @@ describe('@agents/core barrel exports', () => {
     expect(mod.uuid7).toBeDefined()
     // runtime
     expect(mod.currentDir).toBeDefined()
-    // schemas
-    expect(mod.LockfileV1).toBeDefined()
     // git
     expect(mod.cloneRepo).toBeDefined()
     // github

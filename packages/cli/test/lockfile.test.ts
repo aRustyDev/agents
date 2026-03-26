@@ -3,7 +3,8 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { computeHash, formatHash } from '@agents/core/hash'
-import type { LockfileV1, PluginSourcesManifest } from '@agents/core/schemas'
+import type { PluginSourcesManifest } from '@agents/sdk/context/plugin/schema'
+import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
 import * as v from 'valibot'
 import {
   checkStaleness,

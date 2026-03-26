@@ -17,8 +17,8 @@
 import { existsSync } from 'node:fs'
 import { readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import type { SkillFrontmatter } from '@agents/core/schemas'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import type { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
 import { readSkillFrontmatter } from './manifest'
 
 // ---------------------------------------------------------------------------

@@ -13,8 +13,8 @@
 
 import { join } from 'node:path'
 import { readText } from '@agents/core/runtime'
-import type { SearchBackendType, SkillSearchResult } from '@agents/core/schemas'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import type { SearchBackendType, SkillSearchResult } from '@agents/sdk/providers/local/schemas'
 import { clampLimit, clampPage } from '@agents/sdk/providers/pagination'
 import { checkHealth, createClient, searchKeyword } from './meilisearch'
 

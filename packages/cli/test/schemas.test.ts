@@ -2,10 +2,8 @@ import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import {
-  ComponentRecord,
   detectUnknownPluginFields,
   KNOWN_PLUGIN_FIELDS,
-  LockfileV1,
   LspConfig,
   LspServerEntry,
   MarketplaceEntry,
@@ -19,10 +17,14 @@ import {
   PluginSourceLegacy,
   PluginSourcePlanning,
   PluginSourcesManifest,
-  SkillFrontmatter,
+} from '@agents/sdk/context/plugin/schema'
+import { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+import {
+  ComponentRecord,
+  LockfileV1,
   SkillLockEntry,
   StatusMessage,
-} from '@agents/core/schemas'
+} from '@agents/sdk/providers/local/schemas'
 import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ import {
   ExternalLockfile,
   ExternalSkillEntry,
   ExternalSourcesManifest,
-} from '@agents/core/schemas'
+} from '@agents/sdk/providers/local/schemas'
 import * as v from 'valibot'
 import {
   getStatus,

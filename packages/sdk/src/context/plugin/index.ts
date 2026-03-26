@@ -44,5 +44,33 @@ export const pluginModule: ComponentTypeModule<PluginManifest> = {
 }
 
 export { parsePlugin } from './parser'
-export { pluginSchemaValidator } from './schema'
-export type { BuildResult, PluginAuthor, PluginManifest, PluginSourceDef } from './types'
+export {
+  detectUnknownPluginFields,
+  KNOWN_PLUGIN_FIELDS,
+  LspConfig,
+  LspServerEntry,
+  MarketplaceEntry,
+  MarketplaceEntrySchema,
+  MarketplaceManifest,
+  MarketplaceManifestSchema,
+  McpConfig,
+  McpServerEntry,
+  PluginAuthor,
+  PluginAuthorSchema,
+  PluginManifest,
+  PluginManifestSchema,
+  PluginSource,
+  PluginSourceDefSchema,
+  PluginSourceExtended,
+  PluginSourceLegacy,
+  PluginSourcePlanning,
+  PluginSourcesManifest,
+  PluginSourcesManifestSchema,
+  pluginSchemaValidator,
+} from './schema'
+export type {
+  BuildResult,
+  PluginAuthor as PluginAuthorType,
+  PluginManifest as PluginManifestType,
+  PluginSourceDef,
+} from './types'

@@ -16,13 +16,13 @@ import { cloneRepo, gitRaw, lsRemote } from '@agents/core/git'
 import { addComment, createIssue, type Issue, searchIssues } from '@agents/core/github'
 import { formatHash, hashDirectory, lockKey } from '@agents/core/hash'
 import { spawnSync } from '@agents/core/runtime'
+import { checkSymlink, createSymlink } from '@agents/core/symlink'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import {
   type ExternalLockEntry,
   type ExternalSkillEntry,
   ExternalSourcesManifest,
-} from '@agents/core/schemas'
-import { checkSymlink, createSymlink } from '@agents/core/symlink'
-import { CliError, err, ok, type Result } from '@agents/core/types'
+} from '@agents/sdk/providers/local/schemas'
 import yaml from 'js-yaml'
 import * as v from 'valibot'
 
