@@ -9,6 +9,8 @@
 
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { cloneRepo, gitRaw } from '@agents/core/git'
+import { detectGitProtocol, type GitProtocol, resolveCloneUrl } from '@agents/core/source-parser'
 import {
   type CatalogEntryWithTier1,
   type ComponentMetadata,
@@ -26,9 +28,7 @@ import {
   type RepoManifest,
   type Tier1ErrorType,
 } from './catalog'
-import { cloneRepo, gitRaw } from './git'
 import { discoverSkills } from './skill-discovery'
-import { detectGitProtocol, type GitProtocol, resolveCloneUrl } from './source-parser'
 
 // ---------------------------------------------------------------------------
 // Types

@@ -7,6 +7,14 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { cloneRepo, type GitCloneError, gitRaw } from '@agents/core/git'
+import {
+  detectGitProtocol,
+  type GitProtocol,
+  getOwnerRepo,
+  parseSource,
+  resolveCloneUrl,
+} from '@agents/core/source-parser'
 import { CliError, err, ok, type Result } from '@agents/core/types'
 import {
   type BackfillResult,
@@ -20,15 +28,7 @@ import {
   extractKeywords,
   type Tier1ErrorType,
 } from './catalog'
-import { cloneRepo, type GitCloneError, gitRaw } from './git'
 import { discoverSkills } from './skill-discovery'
-import {
-  detectGitProtocol,
-  type GitProtocol,
-  getOwnerRepo,
-  parseSource,
-  resolveCloneUrl,
-} from './source-parser'
 
 /** Well-known subdirectory prefixes where skills may live in a repo. */
 export const SKILL_LOOKUP_DIRS = ['', 'skills/', 'content/skills/', '.claude/skills/']

@@ -8,10 +8,10 @@ const TEST_ACCOUNT = 'test-user'
 
 describe('KeyringTokenStore', () => {
   // Dynamically import to allow mocking
-  let _store: typeof import('../src/lib/github')
+  let _store: typeof import('@agents/core/github')
 
   beforeEach(async () => {
-    _store = await import('../src/lib/github')
+    _store = await import('@agents/core/github')
   })
 
   afterEach(() => {
@@ -65,7 +65,7 @@ describe('GitHubTokenProvider', () => {
     try {
       process.env.GITHUB_TOKEN = 'gho_env_override_test'
       // Re-import to pick up env change
-      const { GitHubTokenProvider } = await import('../src/lib/github')
+      const { GitHubTokenProvider } = await import('@agents/core/github')
       const provider = new GitHubTokenProvider({
         service: TEST_SERVICE,
         account: TEST_ACCOUNT,
@@ -82,7 +82,7 @@ describe('GitHubTokenProvider', () => {
   })
 
   it('mutex: concurrent calls return the same token', async () => {
-    const { GitHubTokenProvider } = await import('../src/lib/github')
+    const { GitHubTokenProvider } = await import('@agents/core/github')
     const provider = new GitHubTokenProvider({
       service: TEST_SERVICE,
       account: TEST_ACCOUNT,
@@ -115,7 +115,7 @@ describe('GitHubTokenProvider', () => {
       })
     )
 
-    const { GitHubTokenProvider } = await import('../src/lib/github')
+    const { GitHubTokenProvider } = await import('@agents/core/github')
     let deviceFlowCalled = false
     const provider = new GitHubTokenProvider({
       service: TEST_SERVICE,
@@ -142,7 +142,7 @@ describe('GitHubTokenProvider', () => {
       })
     )
 
-    const { GitHubTokenProvider } = await import('../src/lib/github')
+    const { GitHubTokenProvider } = await import('@agents/core/github')
     const provider = new GitHubTokenProvider({
       service: TEST_SERVICE,
       account: TEST_ACCOUNT,

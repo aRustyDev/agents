@@ -3,8 +3,8 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { cleanupTempDir, GitCloneError, gitRaw, lsRemote } from '@agents/core/git'
 import { CliError } from '@agents/core/types'
-import { cleanupTempDir, GitCloneError, gitRaw, lsRemote } from '../src/lib/git'
 
 // ---------------------------------------------------------------------------
 // GitCloneError

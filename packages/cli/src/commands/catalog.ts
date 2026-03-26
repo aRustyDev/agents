@@ -23,6 +23,8 @@ import {
 } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { promisify } from 'node:util'
+// downloadBatch removed — analyze now uses discoverAllRepos (imported dynamically)
+import { createGit } from '@agents/core/git'
 import { createOutput } from '@agents/core/output'
 import { currentDir } from '@agents/core/runtime'
 import { EXIT } from '@agents/core/types'
@@ -39,8 +41,6 @@ import {
   readErrorLog,
   validateBatchResults,
 } from '../lib/catalog'
-// downloadBatch removed — analyze now uses discoverAllRepos (imported dynamically)
-import { createGit } from '../lib/git'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

@@ -77,7 +77,7 @@ export async function addSkill(source: string, opts: AddOptions = {}): Promise<A
   const cwd = opts.cwd ?? process.cwd()
 
   // Step 1: Parse the source
-  const { parseSource } = await import('./source-parser')
+  const { parseSource } = await import('@agents/core/source-parser')
   const parseResult = parseSource(source)
   if (!parseResult.ok) {
     return { ok: false, installed, error: parseResult.error, warnings }
@@ -105,7 +105,7 @@ export async function addSkill(source: string, opts: AddOptions = {}): Promise<A
     searchDir = localPath
   } else {
     // Remote source -- clone
-    const { cloneRepo } = await import('./git')
+    const { cloneRepo } = await import('@agents/core/git')
     // biome-ignore lint/style/noNonNullAssertion: url is guaranteed set for non-local parsed sources
     const cloneResult = await cloneRepo(parsed.url!, parsed.ref)
     if (!cloneResult.ok) {
