@@ -10,7 +10,7 @@ Extract a domain SDK (`@agents/sdk`) from the CLI codebase to enable multiple co
 
 ## Package Architecture
 
-```
+```text
 @agents/core          Pure utilities — no domain knowledge
 @agents/sdk           Domain framework — component model + workflows
 @agents/cli           Thin CLI commands (consumer)
@@ -19,7 +19,7 @@ Extract a domain SDK (`@agents/sdk`) from the CLI codebase to enable multiple co
 
 ### Dependency Flow
 
-```
+```text
 core ← sdk/util ← sdk/context ← sdk/providers ← sdk/catalog
 core ← sdk/ui ← sdk/context
 core ← sdk ← cli
@@ -45,7 +45,7 @@ Each surface is independently importable. A read-only viewer need not import cat
 
 ## Surface 1: `util/` — Cross-cutting Concerns
 
-```
+```text
 @agents/sdk/util
 ├── logger.ts        # Logger interface + default implementation
 ├── tracer.ts        # Tracer interface + noop default
@@ -119,64 +119,76 @@ type SdkErrorCode =
   | 'E_SCHEMA_INVALID'
   | 'E_PROVIDER_TIMEOUT'
 
-class SdkError extends CliError {
+class SdkError extends Error {
   readonly code: SdkErrorCode
+  readonly detail?: string
+
+  display(): string  // human-readable error message
 }
 ```
+
+Note: `SdkError` extends `Error` directly (not `CliError`) to avoid coupling SDK consumers to core's CLI-specific error class. The `display()` method mirrors `CliError`'s pattern for consistency. Core's `CliError` will be renamed to `BaseError` in the migration to reflect its domain-neutral role.
 
 ---
 
 ## Surface 2: `context/` — Component Domain Model
 
-```
+```text
 @agents/sdk/context
-├── component.ts       # Abstract Component interface + base utilities
+├── component.ts # Abstract Component interface + base utilities
 ├── registry.ts        # Type registry (maps type string → module)
-├── parser.ts          # Generic parse(type, path) dispatcher
-├── validator.ts       # Generic validate(component) dispatcher
+├── parser.ts # Generic parse(type, path) dispatcher
+├── validator.ts # Generic validate(component) dispatcher
 ├── skill/
-│   ├── types.ts       # SkillFrontmatter, SkillComponent
-│   ├── schema.ts      # Valibot schema for skill frontmatter
-│   └── parser.ts      # SKILL.md → ParsedSkill
+│ ├── types.ts # SkillFrontmatter, SkillComponent
+│ ├── schema.ts # Valibot schema for skill frontmatter
+│ └── parser.ts # SKILL.md → ParsedSkill
 ├── plugin/
-│   ├── types.ts       # PluginManifest, SourceDef, BuildResult
-│   ├── schema.ts      # plugin.json + plugin.sources.json + marketplace.json schemas
-│   └── parser.ts      # Plugin parsing (composes skill, rule, mcp, output-style, command)
+│ ├── types.ts # PluginManifest, SourceDef, BuildResult
+│ ├── schema.ts # plugin.json + plugin.sources.json + marketplace.json schemas
+│ └── parser.ts # Plugin parsing (composes skill, rule, mcp, output-style, command)
 ├── mcp/
-│   ├── types.ts       # McpServerConfig, McpClientConfig, McpToolConfig
-│   ├── schema.ts      # MCP JSON schemas
-│   └── parser.ts
+│ ├── types.ts # McpServerConfig, McpClientConfig, McpToolConfig
+│ ├── schema.ts # MCP JSON schemas
+│ └── parser.ts
 ├── rule/
-│   ├── types.ts
-│   ├── schema.ts
-│   └── parser.ts
+│ ├── types.ts
+│ ├── schema.ts
+│ └── parser.ts
 ├── agent/
-│   ├── types.ts
-│   ├── schema.ts
-│   └── parser.ts
+│ ├── types.ts
+│ ├── schema.ts
+│ └── parser.ts
 ├── hook/
-│   ├── types.ts
-│   ├── schema.ts
-│   └── parser.ts
+│ ├── types.ts
+│ ├── schema.ts
+│ └── parser.ts
 ├── output-style/
-│   ├── types.ts
-│   ├── schema.ts
-│   └── parser.ts
+│ ├── types.ts
+│ ├── schema.ts
+│ └── parser.ts
 ├── command/
-│   ├── types.ts
-│   ├── schema.ts
-│   └── parser.ts
-├── persona/           # placeholder
-│   └── types.ts
-├── lsp/               # placeholder
-│   └── types.ts
+│ ├── types.ts
+│ ├── schema.ts
+│ └── parser.ts
+├── persona/ # placeholder
+│ └── types.ts
+├── lsp/ # placeholder
+│ └── types.ts
 └── index.ts
 ```
 
-### Abstract Component Interface
+### Two Component Types (naming disambiguation)
+
+- **`ParsedComponent<T>`** (`sdk/context`) — a fully parsed component with raw content, typed frontmatter, and computed metadata. Used by context parsers and validators.
+- **`Component`** (`sdk/providers`) — a flat registry record with source, description, version, tags, install status. Used by providers and catalog entries.
+
+These are different views of the same concept: `ParsedComponent` is what you get from reading a file, `Component` is what you get from searching a registry.
+
+### Abstract ParsedComponent Interface
 
 ```typescript
-interface Component<T extends Record<string, unknown> = Record<string, unknown>> {
+interface ParsedComponent<T extends Record<string, unknown> = Record<string, unknown>> {
   readonly type: ComponentType
   readonly name: string
   readonly content: string
@@ -200,6 +212,22 @@ interface ComponentMetadata {
 }
 ```
 
+### Validation
+
+```typescript
+interface ValidationResult {
+  valid: boolean
+  errors: ValidationIssue[]
+  warnings: ValidationIssue[]
+}
+
+interface ValidationIssue {
+  path: string       // dotted path to field (e.g., "frontmatter.version")
+  message: string
+  severity: 'error' | 'warning'
+}
+```
+
 ### Component Type Module Pattern
 
 Each type directory exports a module implementing:
@@ -207,9 +235,14 @@ Each type directory exports a module implementing:
 ```typescript
 interface ComponentTypeModule<T extends Record<string, unknown>> {
   readonly type: ComponentType
-  readonly schema: BaseSchema
-  parse(path: string): Promise<Result<Component<T>>>
-  validate(component: Component<T>): ValidationResult
+  readonly schema: SchemaValidator<T>  // opaque wrapper, not Valibot-specific
+  parse(path: string): Promise<Result<ParsedComponent<T>>>
+  validate(component: ParsedComponent<T>): ValidationResult
+}
+
+/** Opaque schema validator — wraps Valibot internally but consumers never touch it. */
+interface SchemaValidator<T> {
+  validate(data: unknown): Result<T>
 }
 ```
 
@@ -230,7 +263,7 @@ function getActiveTypes(): ComponentType[]
 
 ### Composite Types
 
-```
+```text
 context/rule/         ← leaf
 context/hook/         ← leaf
 context/output-style/ ← leaf
@@ -261,7 +294,7 @@ No central `schemas.ts`. Each schema lives next to the code that uses it.
 
 ## Surface 3: `providers/` — Registry Adapters
 
-```
+```text
 @agents/sdk/providers
 ├── interface.ts       # ComponentProvider interface
 ├── manager.ts         # ProviderManager (fan-out, dedup, pagination)
@@ -286,8 +319,11 @@ No central `schemas.ts`. Each schema lives next to the code that uses it.
 ├── github/
 │   ├── index.ts       # GitHubProvider
 │   └── search.ts      # GitHub search queries
+├── factory.ts         # createProviderManager() convenience (wires default providers)
 └── index.ts
 ```
+
+Note: `factory.ts` provides a convenience `createDefaultProviders()` that assembles the standard provider set (local + smithery + github). Consumers can also assemble providers manually via `createProviderManager({ providers: [...] })`.
 
 ### Provider Interface
 
@@ -340,12 +376,11 @@ interface ProviderManager {
 
 ## Surface 4: `catalog/` — Storage & Indexing
 
-```
+```text
 @agents/sdk/catalog
 ├── interface.ts       # CatalogReader, CatalogWriter, CatalogStore
-├── types.ts           # CatalogEntry, CatalogQuery, SyncResult
+├── types.ts           # CatalogEntry, CatalogQuery, CatalogFilter, SyncResult, StaleResult, ErrorRecord, DiscoveryResult
 ├── manager.ts         # CatalogManager (orchestrates sync, query, staleness)
-├── schemas.ts         # MarketplaceManifest (moved from context note: actually in plugin)
 ├── ndjson/
 │   ├── index.ts       # NdjsonStore implements CatalogStore
 │   └── io.ts          # Atomic read/write/append
@@ -415,6 +450,53 @@ interface CatalogEntry {
 }
 
 type AvailabilityStatus = 'available' | 'archived' | 'not_found' | 'private' | 'error' | 'removed_from_repo'
+
+/** Filter predicate for catalog queries. */
+interface CatalogFilter {
+  type?: ComponentType
+  availability?: AvailabilityStatus
+  hasAnalysis?: boolean
+  source?: string
+}
+
+/** Result of a catalog sync/discovery merge. */
+interface SyncResult {
+  added: number
+  updated: number
+  removed: number
+  moved: number
+  errors: number
+}
+
+/** Result of a staleness check for a single entry. */
+interface StaleResult {
+  source: string
+  name: string
+  status: 'current' | 'stale' | 'unknown'
+  localHash?: string
+  upstreamHash?: string
+}
+
+/** Persistent error record for failed operations. */
+interface ErrorRecord {
+  source: string
+  name: string
+  runId: string
+  error: string
+  errorType: string
+  errorDetail: string
+  attemptCount: number
+  lastAttemptAt: string
+}
+
+/** Discovery result for a single component (from repo cloning). */
+interface DiscoveryResult {
+  source: string
+  name: string
+  type: ComponentType
+  mechanical: ComponentMetadata
+  content?: string
+}
 ```
 
 ### Backend Priority
@@ -427,7 +509,7 @@ type AvailabilityStatus = 'available' | 'archived' | 'not_found' | 'private' | '
 
 ## Surface 5: `ui/` — Renderer Interface & Adapters
 
-```
+```text
 @agents/sdk/ui
 ├── interface.ts       # Renderer, ProgressHandle, TreeNode
 ├── cli.ts             # CliRenderer (colored terminal — from core/output.ts)
@@ -446,6 +528,7 @@ interface Renderer {
   error(message: string, data?: unknown): void
   warn(message: string, data?: unknown): void
   info(message: string, data?: unknown): void
+  ndjson(data: Record<string, unknown>): void
   progress(message: string): ProgressHandle
   raw(data: unknown): void
 }
@@ -468,6 +551,8 @@ function createRenderer(opts?: {
 ```
 
 Future extensions: WebRenderer (emits events), TuiRenderer, interactive headless components.
+
+**Dependency note:** `sdk/ui` depends on `sdk/context` only for `ComponentType` in display formatting (e.g., rendering component tables with typed columns). This is a lightweight type-only dependency. A consumer importing `sdk/ui` will transitively pull in `sdk/context` types but NOT providers or catalog. If this coupling becomes a concern, the `Renderer` interface itself is context-free — only the `CliRenderer` implementation imports context types for formatting.
 
 ---
 
@@ -525,7 +610,7 @@ Future extensions: WebRenderer (emits events), TuiRenderer, interactive headless
 
 ### `@agents/core` After Extraction
 
-```
+```text
 core/
 ├── types.ts         # Result, CliError, EntityType, EXIT
 ├── file-io.ts       # Result-wrapped file I/O
