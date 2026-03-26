@@ -8,3 +8,9 @@
  *   - catalog/   — Storage-agnostic catalog operations
  *   - ui/        — Renderer interface for CLI/TUI output
  */
+
+export * from './catalog'
+export * from './context'
+export * from './providers'
+export * from './ui'
+export * from './util'
