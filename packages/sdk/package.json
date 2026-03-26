@@ -19,7 +19,10 @@
   },
   "dependencies": {
     "@agents/core": "workspace:*",
-    "valibot": "^1.0.0",
-    "js-yaml": "^4.1.0"
+    "ansis": "^4.0.0",
+    "console-table-printer": "^2.15.0",
+    "js-yaml": "^4.1.0",
+    "nanospinner": "^1.2.0",
+    "valibot": "^1.0.0"
   }
 }

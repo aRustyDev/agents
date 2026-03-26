@@ -72,7 +72,10 @@
       "version": "0.1.0",
       "dependencies": {
         "@agents/core": "workspace:*",
+        "ansis": "^4.0.0",
+        "console-table-printer": "^2.15.0",
         "js-yaml": "^4.1.0",
+        "nanospinner": "^1.2.0",
         "valibot": "^1.0.0",
       },
     },
