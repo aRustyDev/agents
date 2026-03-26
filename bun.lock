@@ -10,6 +10,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@agents/core": "workspace:*",
+        "@agents/sdk": "workspace:*",
         "@bomb.sh/tab": "^0.0.14",
         "@carlrannaberg/cclint": "^0.2.10",
         "@napi-rs/keyring": "^1.2.0",
@@ -66,9 +67,20 @@
         "@types/js-yaml": "^4.0.0",
       },
     },
+    "packages/sdk": {
+      "name": "@agents/sdk",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agents/core": "workspace:*",
+        "js-yaml": "^4.1.0",
+        "valibot": "^1.0.0",
+      },
+    },
   },
   "packages": {
     "@agents/core": ["@agents/core@workspace:packages/core"],
+
+    "@agents/sdk": ["@agents/sdk@workspace:packages/sdk"],
 
     "@arustydev/agents": ["@arustydev/agents@workspace:packages/cli"],
 
