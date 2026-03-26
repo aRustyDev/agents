@@ -5,7 +5,7 @@
  * into a normalized ParsedSource structure.
  */
 
-import { CliError, err, ok, type Result } from '@agents/core/types'
+import { BaseError, err, ok, type Result } from '@agents/core/types'
 import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------
@@ -59,7 +59,7 @@ export function parseSource(source: string): Result<ParsedSource> {
   const trimmed = source.trim()
   if (!trimmed) {
     return err(
-      new CliError('Empty source string', 'E_INVALID_SOURCE', 'Provide a non-empty source')
+      new BaseError('Empty source string', 'E_INVALID_SOURCE', 'Provide a non-empty source')
     )
   }
 
@@ -134,7 +134,7 @@ export function parseSource(source: string): Result<ParsedSource> {
   }
 
   return err(
-    new CliError(
+    new BaseError(
       `Cannot parse source: "${trimmed}"`,
       'E_INVALID_SOURCE',
       'Expected owner/repo, ./local/path, or https:// URL'
@@ -159,7 +159,7 @@ export function sanitizeSubpath(subpath: string): Result<string> {
   const segments = subpath.split('/')
   if (segments.some((s) => s === '..')) {
     return err(
-      new CliError(
+      new BaseError(
         `Subpath contains ".." traversal: "${subpath}"`,
         'E_UNSAFE_SUBPATH',
         'Subpaths must not contain ".." segments'

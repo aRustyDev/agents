@@ -6,7 +6,7 @@
 // Result<T, E>
 // ---------------------------------------------------------------------------
 
-export type Result<T, E = CliError> =
+export type Result<T, E = BaseError> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: E }
 
@@ -28,7 +28,7 @@ export function unwrapOrExit<T>(result: Result<T>): T {
  */
 export async function tryAsync<T>(
   fn: () => Promise<T>,
-  mapError: (e: unknown) => CliError
+  mapError: (e: unknown) => BaseError
 ): Promise<Result<T>> {
   try {
     return ok(await fn())
@@ -38,10 +38,10 @@ export async function tryAsync<T>(
 }
 
 // ---------------------------------------------------------------------------
-// CliError
+// BaseError (formerly CliError)
 // ---------------------------------------------------------------------------
 
-export class CliError {
+export class BaseError {
   constructor(
     readonly message: string,
     readonly code: string,
@@ -55,6 +55,9 @@ export class CliError {
     return output
   }
 }
+
+/** @deprecated Use `BaseError` instead. */
+export { BaseError as CliError }
 
 // ---------------------------------------------------------------------------
 // Shared enums / constants
