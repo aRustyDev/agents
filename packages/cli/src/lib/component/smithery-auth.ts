@@ -1,4 +1,4 @@
-import { CliError, err, ok, type Result } from '../types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 const SMITHERY_API_BASE = 'https://registry.smithery.ai/api/v1'
 

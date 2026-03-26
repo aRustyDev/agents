@@ -12,8 +12,8 @@
  * callers control instantiation and lifecycle.
  */
 
+import { CliError, type EntityType, err, ok, type Result } from '@agents/core/types'
 import { type EnqueuedTask, MeiliSearch, type SearchResponse } from 'meilisearch'
-import { CliError, type EntityType, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Types

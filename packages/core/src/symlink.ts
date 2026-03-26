@@ -126,7 +126,7 @@ export async function resolveChain(path: string): Promise<string[]> {
     if (seen.has(current)) break
     seen.add(current)
 
-    let stats
+    let stats: Awaited<ReturnType<typeof lstat>> | undefined
     try {
       stats = await lstat(current)
     } catch {
@@ -184,7 +184,7 @@ export async function auditSymlinks(dir: string, opts?: AuditOptions): Promise<S
 // ---------------------------------------------------------------------------
 
 async function scanDir(dir: string, recursive: boolean, report: SymlinkReport): Promise<void> {
-  let entries
+  let entries: Awaited<ReturnType<typeof readdir<{ withFileTypes: true }>>> | undefined
   try {
     entries = await readdir(dir, { withFileTypes: true })
   } catch {

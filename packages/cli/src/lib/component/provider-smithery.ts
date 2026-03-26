@@ -7,7 +7,7 @@
  * the user has discovered a server via search.
  */
 
-import { CliError, err, ok, type Result } from '../types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { clampLimit, clampPage, emptyPage } from './pagination'
 import type {
   Component,

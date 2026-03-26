@@ -4,17 +4,18 @@
  * Lists installed components. If type is omitted, lists ALL active types.
  * Routes through ComponentManager.list() per type.
  */
+
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
 import {
-  type Component,
   COMPONENT_TYPES,
+  type Component,
   type ComponentType,
   getActiveTypes,
   parseComponentType,
 } from '../lib/component/types'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({

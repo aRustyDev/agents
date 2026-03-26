@@ -8,7 +8,7 @@
  * (agents, plugins, rules, etc.) will be added in Phase 3.
  */
 
-import { CliError, err, ok, type Result } from '../types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
 import type {
   Component,

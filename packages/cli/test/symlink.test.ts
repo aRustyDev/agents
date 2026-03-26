@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { lstat, mkdir, mkdtemp, readlink, realpath, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { auditSymlinks, checkSymlink, createSymlink, resolveChain } from '../src/lib/symlink'
+import { auditSymlinks, checkSymlink, createSymlink, resolveChain } from '@agents/core/symlink'
 
 // ---------------------------------------------------------------------------
 // Shared fixture directory

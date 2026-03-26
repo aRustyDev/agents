@@ -10,10 +10,10 @@
  */
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { createOutput } from '@agents/core/output'
+import { currentDir } from '@agents/core/runtime'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
-import { createOutput } from '../lib/output'
-import { currentDir } from '../lib/runtime'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

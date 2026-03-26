@@ -8,8 +8,8 @@
 import { describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { formatHash, hashDirectory } from '@agents/core/hash'
 import { listSkills } from '../src/commands/skill'
-import { formatHash, hashDirectory } from '../src/lib/hash'
 import { readSkillFrontmatter } from '../src/lib/manifest'
 
 // ---------------------------------------------------------------------------

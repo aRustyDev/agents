@@ -8,7 +8,7 @@
  */
 
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { CliError, err, ok } from '../src/lib/types'
+import { CliError, err, ok } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
 // Mock setup: replace git.ts functions before importing external-skills

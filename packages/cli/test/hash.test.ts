@@ -9,7 +9,7 @@ import {
   hashFile,
   parseHash,
   verifyHash,
-} from '../src/lib/hash'
+} from '@agents/core/hash'
 
 const HEX64_REGEX = /^[0-9a-f]{64}$/
 

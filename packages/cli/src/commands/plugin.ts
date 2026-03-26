@@ -11,9 +11,10 @@
 
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { computeHash, formatHash } from '@agents/core/hash'
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
-import { computeHash, formatHash } from '../lib/hash'
-import { createOutput } from '../lib/output'
 import {
   type BuildResult,
   buildResultSuccess,
@@ -29,7 +30,6 @@ import {
   validateMarketplace,
   validatePlugin,
 } from '../lib/plugin-ops'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

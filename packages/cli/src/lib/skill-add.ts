@@ -19,7 +19,7 @@
 import { existsSync } from 'node:fs'
 import { cp, mkdir, readdir } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { CliError, err, ok, type Result } from './types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -185,7 +185,7 @@ export async function addSkill(source: string, opts: AddOptions = {}): Promise<A
 
       // Create symlinks from each agent's skills dir
       const agentLinks: string[] = []
-      const { createSymlink } = await import('./symlink')
+      const { createSymlink } = await import('@agents/core/symlink')
 
       for (const agentName of targetAgents) {
         const baseDirResult = getAgentBaseDir(
@@ -264,7 +264,7 @@ async function updateLockfile(
   installed: InstalledEntry[]
 ): Promise<Result<void>> {
   const lockfilePath = join(cwd, 'skills-lock.json')
-  const { computeHash } = await import('./hash')
+  const { computeHash } = await import('@agents/core/hash')
 
   // Read existing lockfile or create a fresh one
   let lockData: {
@@ -273,7 +273,7 @@ async function updateLockfile(
   }
 
   if (existsSync(lockfilePath)) {
-    const { readText } = await import('./runtime')
+    const { readText } = await import('@agents/core/runtime')
     try {
       const raw = await readText(lockfilePath)
       lockData = JSON.parse(raw)
@@ -295,7 +295,7 @@ async function updateLockfile(
   }
 
   // Write the lockfile
-  const { writeText } = await import('./runtime')
+  const { writeText } = await import('@agents/core/runtime')
   try {
     await writeText(lockfilePath, `${JSON.stringify(lockData, null, 2)}\n`)
     return ok(undefined)

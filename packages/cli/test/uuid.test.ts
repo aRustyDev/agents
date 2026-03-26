@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { UUID_NAMESPACE, uuid4, uuid5, uuid7 } from '../src/lib/uuid'
+import { UUID_NAMESPACE, uuid4, uuid5, uuid7 } from '@agents/core/uuid'
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 

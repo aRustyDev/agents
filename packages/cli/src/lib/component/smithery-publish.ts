@@ -10,7 +10,7 @@
  * the configured timeout elapses.
  */
 
-import { CliError, err, ok, type Result } from '../types'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import type { PublishResult } from './types'
 
 const SMITHERY_API_BASE = 'https://registry.smithery.ai/api/v1'

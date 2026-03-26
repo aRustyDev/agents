@@ -12,9 +12,9 @@
  * are still processed.  The function never throws.
  */
 
+import { CliError } from '@agents/core/types'
 import { addSkill } from './skill-add'
 import { checkOutdated, type OutdatedOptions, type OutdatedResult } from './skill-outdated'
-import { CliError } from './types'
 
 // ---------------------------------------------------------------------------
 // Errors

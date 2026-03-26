@@ -15,10 +15,10 @@
 import { existsSync } from 'node:fs'
 import { lstat, readdir, readlink } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
+import { CliError } from '@agents/core/types'
 import type { AgentType } from './agents'
 import { AGENT_CONFIGS } from './agents'
 import { filterByAgent, filterBySkill, type InstalledSkillEntry } from './skill-filters'
-import { CliError } from './types'
 
 // ---------------------------------------------------------------------------
 // Types

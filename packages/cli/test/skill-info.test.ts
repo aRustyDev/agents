@@ -173,7 +173,7 @@ describe('skillInfo', () => {
     )
 
     // Compute the actual hash first
-    const { hashDirectory } = await import('../src/lib/hash')
+    const { hashDirectory } = await import('@agents/core/hash')
     const actualHash = await hashDirectory(skillDir)
 
     // Write a lockfile with the matching hash

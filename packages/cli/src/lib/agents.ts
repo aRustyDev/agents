@@ -7,9 +7,9 @@
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import * as v from 'valibot'
 import { xdgConfig } from 'xdg-basedir'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Schema

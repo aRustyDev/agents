@@ -16,8 +16,8 @@
 import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { parseFrontmatter } from '../chunker'
-import { CliError, err, ok, type Result } from '../types'
 import { clampLimit, clampPage, emptyPage, paginateArray } from './pagination'
 import type {
   Component,

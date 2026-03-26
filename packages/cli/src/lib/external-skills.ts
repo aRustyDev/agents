@@ -12,15 +12,19 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
+import { formatHash, hashDirectory, lockKey } from '@agents/core/hash'
+import { spawnSync } from '@agents/core/runtime'
+import {
+  type ExternalLockEntry,
+  type ExternalSkillEntry,
+  ExternalSourcesManifest,
+} from '@agents/core/schemas'
+import { checkSymlink, createSymlink } from '@agents/core/symlink'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import yaml from 'js-yaml'
 import * as v from 'valibot'
 import { cloneRepo, gitRaw, lsRemote } from './git'
 import { addComment, createIssue, type Issue, searchIssues } from './github'
-import { formatHash, hashDirectory, lockKey } from './hash'
-import { spawnSync } from './runtime'
-import { type ExternalLockEntry, type ExternalSkillEntry, ExternalSourcesManifest } from './schemas'
-import { checkSymlink, createSymlink } from './symlink'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Types

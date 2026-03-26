@@ -122,16 +122,8 @@ describe('local source', () => {
     await createSkillDir(tmp, 'local-skill', '# Skill\nStable content')
 
     // Compute the real hash of the directory we just created
-<<<<<<< HEAD:cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
+    const { hashDirectory } = await import('@agents/core/hash')
     const realHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-skill'))
-||||||| parent of 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
-    const realHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-skill'))
-=======
-    const { hashDirectory } = await import('../src/lib/hash')
-    const realHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-skill'))
->>>>>>> 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):packages/cli/test/skill-outdated.test.ts
 
     // No need to mock hash module for local -- use real implementation
     mock.module('../src/lib/git', () => ({
@@ -381,16 +373,8 @@ describe('mixed sources', () => {
     // Set up a real local skill directory
     await createSkillDir(tmp, 'local-one', '# Local Skill')
 
-<<<<<<< HEAD:cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
+    const { hashDirectory } = await import('@agents/core/hash')
     const localHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-one'))
-||||||| parent of 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
-    const localHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-one'))
-=======
-    const { hashDirectory } = await import('../src/lib/hash')
-    const localHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-one'))
->>>>>>> 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):packages/cli/test/skill-outdated.test.ts
 
     const GITHUB_HASH = 'b'.repeat(64)
 

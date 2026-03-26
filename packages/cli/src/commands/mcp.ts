@@ -9,10 +9,11 @@
  *   info    - Show details for an MCP server from Smithery
  *   publish - Publish an MCP server to Smithery
  */
+
+import { createOutput } from '@agents/core/output'
+import { EXIT } from '@agents/core/types'
 import { defineCommand } from 'citty'
 import { createComponentManager } from '../lib/component/factory'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 export default defineCommand({

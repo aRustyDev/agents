@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { ComponentManager } from '../../src/lib/component/manager'
 import type {
   Component,
@@ -13,7 +14,6 @@ import type {
   RemoveResult,
   SearchParams,
 } from '../../src/lib/component/types'
-import { CliError, err, ok, type Result } from '../../src/lib/types'
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -16,9 +16,9 @@
 import { existsSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
+import { CliError } from '@agents/core/types'
 import type { AgentType } from './agents'
 import { AGENT_CONFIGS, getAgentBaseDir } from './agents'
-import { CliError } from './types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -187,7 +187,7 @@ interface LockData {
  * Read the skills lockfile, returning a default empty structure on any failure.
  */
 async function readLock(path: string): Promise<LockData> {
-  const { readText } = await import('./runtime')
+  const { readText } = await import('@agents/core/runtime')
   try {
     const raw = await readText(path)
     return JSON.parse(raw) as LockData
@@ -200,6 +200,6 @@ async function readLock(path: string): Promise<LockData> {
  * Write the skills lockfile.
  */
 async function writeLock(path: string, data: LockData): Promise<void> {
-  const { writeText } = await import('./runtime')
+  const { writeText } = await import('@agents/core/runtime')
   await writeText(path, JSON.stringify(data, null, 2) + '\n')
 }

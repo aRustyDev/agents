@@ -8,9 +8,9 @@
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import { type SimpleGit, type SimpleGitOptions, simpleGit } from 'simple-git'
 import { getClient, parseRepo } from './github'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Errors
