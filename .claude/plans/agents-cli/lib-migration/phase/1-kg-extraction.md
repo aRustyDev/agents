@@ -166,6 +166,14 @@ Create a new `packages/kg/` workspace package containing all knowledge-graph mod
 2. If Ollama types cause issues in `embedder.ts`, add `ollama` to `@agents/kg` devDependencies and use dynamic import.
 3. If test count drops, diff the test output against the baseline and identify which tests regressed -- do not proceed to Phase 2 until resolved.
 
+## Test Files
+
+Move corresponding test files from `packages/cli/test/` to `packages/kg/test/`:
+- `chunker.test.ts` --> `packages/kg/test/chunker.test.ts`
+- `graph.test.ts` --> `packages/kg/test/graph.test.ts`
+
+Update imports in moved tests to use `@agents/kg/*` paths. If tests have CLI-specific fixtures, keep them in CLI and update imports to point to `@agents/kg`.
+
 ## Dependency Notes
 
 - `chunker.ts` is imported by `manifest.ts` (for `parseFrontmatter`). After Phase 1 moves chunker to `@agents/kg`, `manifest.ts` temporarily imports from `@agents/kg/chunker`. Phase 2 resolves this by switching manifest to use `@agents/sdk/context/frontmatter.parseFrontmatter` instead, removing the cross-package KG dependency from the content-parsing layer.

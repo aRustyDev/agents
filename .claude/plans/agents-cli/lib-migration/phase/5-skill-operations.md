@@ -22,13 +22,13 @@ Move the 11 skill lifecycle modules from `cli/src/lib/` into the SDK, using the 
 
 | Source (cli/src/lib/) | Destination (sdk/src/) | Lines | Agent Dependency |
 |-----------------------|------------------------|-------|------------------|
-| `skill-add.ts` (311) | `providers/local/skill/add.ts` | 311 | None |
+| `skill-add.ts` (311) | `providers/local/skill/add.ts` | 311 | Yes — uses `detectInstalledAgents`, `getAgentBaseDir` |
 | `skill-remove.ts` (205) | `providers/local/skill/remove.ts` | 205 | Yes (`AGENT_CONFIGS`, `getAgentBaseDir`) |
 | `skill-list.ts` (174) | `providers/local/skill/list.ts` | 174 | Yes (`AGENT_CONFIGS`) |
 | `skill-info.ts` (143) | `providers/local/skill/info.ts` | 143 | Yes (`detectInstalledAgents`, `getAgentBaseDir`) |
 | `skill-init.ts` (203) | `context/skill/init.ts` | 203 | None |
 | `skill-outdated.ts` (334) | `providers/local/skill/outdated.ts` | 334 | None (uses lockfile) |
-| `skill-update.ts` (162) | `providers/local/skill/update.ts` | 162 | None (delegates to add + outdated) |
+| `skill-update.ts` (162) | `providers/local/skill/update.ts` | 162 | Yes (indirect — delegates to `addSkill` which uses `AgentResolver`) |
 | `skill-discovery.ts` (168) | `context/skill/discovery.ts` | 168 | None |
 | `skill-filters.ts` (96) | `providers/local/skill/filters.ts` | 96 | Yes (`AgentType`, `AGENT_CONFIGS`) |
 | `skill-find.ts` (117) | `providers/local/skill/find.ts` | 117 | None |
@@ -85,25 +85,57 @@ Move modules that do NOT import from `agents.ts` -- these are simpler because th
   - Already imports from `@agents/core` (fine)
 - [ ] **5.2** Copy `skill-discovery.ts` to `sdk/src/context/skill/discovery.ts`. Update imports:
   - `import { readSkillFrontmatter } from './manifest'` -> `import { readSkillFrontmatter } from '../manifest'` (now sibling in SDK context)
-- [ ] **5.3** Copy `skill-add.ts` to `sdk/src/providers/local/skill/add.ts`. Update imports:
-  - `CliError` -> `SdkError`
-- [ ] **5.4** Copy `skill-outdated.ts` to `sdk/src/providers/local/skill/outdated.ts`. Update imports:
+- [ ] **5.3** Copy `skill-outdated.ts` to `sdk/src/providers/local/skill/outdated.ts`. Update imports:
   - `import { readLockfile } from './lockfile'` -> `import { readLockfile } from '../lockfile'` (sibling in providers/local)
-- [ ] **5.5** Copy `skill-update.ts` to `sdk/src/providers/local/skill/update.ts`. Update imports:
-  - `import { addSkill } from './skill-add'` -> `import { addSkill } from './add'`
-  - `import { checkOutdated } from './skill-outdated'` -> `import { checkOutdated } from './outdated'`
-- [ ] **5.6** Copy `skill-find.ts` to `sdk/src/providers/local/skill/find.ts`. Update imports:
+- [ ] **5.4** Copy `skill-find.ts` to `sdk/src/providers/local/skill/find.ts`. Update imports:
   - Schema imports from `@agents/sdk` become relative.
   - `import { searchSkillsAPI } from './skill-search-api'` -> `import { searchSkillsAPI } from './search-api'`
-- [ ] **5.7** Copy `skill-search-api.ts` to `sdk/src/providers/local/skill/search-api.ts`. Update imports:
+- [ ] **5.5** Copy `skill-search-api.ts` to `sdk/src/providers/local/skill/search-api.ts`. Update imports:
   - `import { checkHealth, createClient, searchKeyword } from './meilisearch'` -> `import { checkHealth, createClient, searchKeyword } from '@agents/kg/meilisearch'`
   - This creates an SDK -> KG dependency. Evaluate if acceptable. If not, use dynamic import.
 
 ### Stage B: Agent-Dependent Modules
 
-These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refactor them to accept an `AgentResolver` parameter.
+These modules import `AGENT_CONFIGS`, `AgentType`, `detectInstalledAgents`, or `getAgentBaseDir`. Refactor them to accept an `AgentResolver` parameter.
 
-- [ ] **5.8** Copy `skill-filters.ts` to `sdk/src/providers/local/skill/filters.ts`. Refactor:
+- [ ] **5.7** Copy `skill-add.ts` to `sdk/src/providers/local/skill/add.ts`. Refactor:
+  - `CliError` -> `SdkError`
+  - Replace dynamic `import('./agents')` calls (`detectInstalledAgents`, `getAgentBaseDir`) with `AgentResolver` parameter:
+
+  ```typescript
+  // Before
+  const { detectInstalledAgents } = await import('./agents')
+  const installed = await detectInstalledAgents()
+  const { getAgentBaseDir } = await import('./agents')
+
+  // After
+  import type { AgentResolver } from '../../../context/agent/config'
+  export async function addSkill(
+    resolver: AgentResolver,
+    source: string,
+    opts: AddSkillOpts
+  ) {
+    const installed = resolver.detectInstalled()
+    // Use resolver.getBaseDir() instead of getAgentBaseDir()
+  }
+  ```
+
+- [ ] **5.8** Copy `skill-update.ts` to `sdk/src/providers/local/skill/update.ts`. Refactor:
+  - `import { addSkill } from './skill-add'` -> `import { addSkill } from './add'`
+  - `import { checkOutdated } from './skill-outdated'` -> `import { checkOutdated } from './outdated'`
+  - Since `addSkill` now requires `AgentResolver`, thread the resolver parameter through `updateSkill`:
+
+  ```typescript
+  // Before
+  export async function updateSkill(opts: UpdateOpts) {
+    const result = await addSkill(opts.source, opts)
+  // After
+  import type { AgentResolver } from '../../../context/agent/config'
+  export async function updateSkill(resolver: AgentResolver, opts: UpdateOpts) {
+    const result = await addSkill(resolver, opts.source, opts)
+  ```
+
+- [ ] **5.9** Copy `skill-filters.ts` to `sdk/src/providers/local/skill/filters.ts`. Refactor:
 
   ```typescript
   // Before
@@ -132,7 +164,7 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
   }
   ```
 
-- [ ] **5.9** Copy `skill-list.ts` to `sdk/src/providers/local/skill/list.ts`. Refactor:
+- [ ] **5.10** Copy `skill-list.ts` to `sdk/src/providers/local/skill/list.ts`. Refactor:
 
   ```typescript
   // Before
@@ -150,8 +182,8 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
       : resolver.list()
   ```
 
-- [ ] **5.10** Copy `skill-remove.ts` to `sdk/src/providers/local/skill/remove.ts`. Refactor similarly -- replace `AGENT_CONFIGS` and `getAgentBaseDir` with `resolver` parameter.
-- [ ] **5.11** Copy `skill-info.ts` to `sdk/src/providers/local/skill/info.ts`. Refactor:
+- [ ] **5.11** Copy `skill-remove.ts` to `sdk/src/providers/local/skill/remove.ts`. Refactor similarly -- replace `AGENT_CONFIGS` and `getAgentBaseDir` with `resolver` parameter.
+- [ ] **5.12** Copy `skill-info.ts` to `sdk/src/providers/local/skill/info.ts`. Refactor:
   - Replace `detectInstalledAgents` with `resolver.detectInstalled()`
   - Replace `getAgentBaseDir` with `resolver.getBaseDir()`
   - Replace `readLockfile` import to SDK path
@@ -159,7 +191,7 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
 
 ### Stage C: Wire Up
 
-- [ ] **5.12** Create `sdk/src/providers/local/skill/index.ts` barrel:
+- [ ] **5.13** Create `sdk/src/providers/local/skill/index.ts` barrel:
 
   ```typescript
   export * from './add'
@@ -173,15 +205,15 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
   export * from './update'
   ```
 
-- [ ] **5.13** Update `sdk/src/context/skill/index.ts` to add:
+- [ ] **5.14** Update `sdk/src/context/skill/index.ts` to add:
 
   ```typescript
   export * from './init'
   export * from './discovery'
   ```
 
-- [ ] **5.14** Update `sdk/package.json` exports for new paths.
-- [ ] **5.15** Update `cli/src/lib/component/skill-ops-impl.ts`:
+- [ ] **5.15** Update `sdk/package.json` exports for new paths.
+- [ ] **5.16** Update `cli/src/lib/component/skill-ops-impl.ts`:
 
   ```typescript
   // Before
@@ -208,8 +240,8 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
       },
   ```
 
-- [ ] **5.16** Update CLI command files (`add.ts`, `remove.ts`, `list.ts`, `info.ts`, `search.ts`, `update.ts`) to import from SDK or go through the component manager.
-- [ ] **5.17** Consider extending the `SkillOperations` interface in `sdk/src/providers/local/skill-ops.ts` to include operations not currently covered:
+- [ ] **5.17** Update CLI command files (`add.ts`, `remove.ts`, `list.ts`, `info.ts`, `search.ts`, `update.ts`) to import from SDK or go through the component manager.
+- [ ] **5.18** Consider extending the `SkillOperations` interface in `sdk/src/providers/local/skill-ops.ts` to include operations not currently covered:
 
   ```typescript
   export interface SkillOperations {
@@ -229,11 +261,11 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
 
 ### Stage D: Verify and Clean
 
-- [ ] **5.18** Run `bun test --cwd packages/sdk` -- expect significant increase (382 + new skill tests).
-- [ ] **5.19** Run `bun test --cwd packages/cli` -- 1684 / 10 maintained.
-- [ ] **5.20** Delete the 11 source files from `cli/src/lib/`.
-- [ ] **5.21** Run full test suite after deletion.
-- [ ] **5.22** Verify skill commands work end-to-end:
+- [ ] **5.19** Run `bun test --cwd packages/sdk` -- expect significant increase (382 + new skill tests).
+- [ ] **5.20** Run `bun test --cwd packages/cli` -- 1684 / 10 maintained.
+- [ ] **5.21** Delete the 11 source files from `cli/src/lib/`.
+- [ ] **5.22** Run full test suite after deletion.
+- [ ] **5.23** Verify skill commands work end-to-end:
 
   ```bash
   bun run packages/cli/src/bin/agents.ts list --type skill
@@ -270,8 +302,8 @@ These modules import `AGENT_CONFIGS`, `AgentType`, or `getAgentBaseDir`. Refacto
 ## Fallback Logic
 
 1. **Incremental shims:** If moving all 11 files at once is too risky, move them in sub-batches:
-   - Batch A (no agent deps): skill-init, skill-discovery, skill-add, skill-outdated, skill-update (5 files)
-   - Batch B (agent deps): skill-list, skill-remove, skill-info, skill-filters (4 files)
+   - Batch A (no agent deps): skill-init, skill-discovery, skill-outdated (3 files)
+   - Batch B (agent deps): skill-add, skill-update, skill-list, skill-remove, skill-info, skill-filters (6 files)
    - Batch C (search): skill-find, skill-search-api (2 files)
    Leave re-export shims in CLI for each batch.
 
@@ -364,12 +396,25 @@ export function createSkillOps(): SkillOperations {
     },
 ```
 
+## Test Files
+
+Move corresponding test files from `packages/cli/test/` to `packages/sdk/test/providers/local/`:
+- `skill-add.test.ts` --> `packages/sdk/test/providers/local/skill/add.test.ts`
+- `skill-remove.test.ts` --> `packages/sdk/test/providers/local/skill/remove.test.ts`
+- `skill-list.test.ts` --> `packages/sdk/test/providers/local/skill/list.test.ts`
+- `skill-info.test.ts` --> `packages/sdk/test/providers/local/skill/info.test.ts`
+- `skill-outdated.test.ts` --> `packages/sdk/test/providers/local/skill/outdated.test.ts`
+- `skill-filters.test.ts` --> `packages/sdk/test/providers/local/skill/filters.test.ts`
+- `skill-find.test.ts` --> `packages/sdk/test/providers/local/skill/find.test.ts`
+
+Update imports in moved tests to use `@agents/sdk/providers/local/skill/*` paths. Tests for agent-dependent modules (Stage B) will need mock `AgentResolver` instances instead of importing from `cli/src/lib/agents.ts` directly. If tests have CLI-specific fixtures, keep them in CLI and update imports to point to the new SDK package paths.
+
 ## Dependency Notes
 
 - **skill-search-api -> meilisearch:** After Phase 1, meilisearch is in `@agents/kg`. Moving skill-search-api to SDK creates `@agents/sdk` -> `@agents/kg` dependency. This may be acceptable (SDK can depend on KG for search features). If not, use dynamic import or keep search-api in CLI.
 - **skill-discovery -> manifest:** Already resolved by Phase 2. Discovery imports `readSkillFrontmatter` from `@agents/sdk/context/manifest`.
 - **skill-outdated -> lockfile:** Already resolved by Phase 2. Outdated imports `readLockfile` from `@agents/sdk/providers/local/lockfile`.
-- **skill-update -> skill-add + skill-outdated:** Both move together in this phase. Internal relative imports.
+- **skill-update -> skill-add + skill-outdated:** All three move in this phase. `skill-update` and `skill-add` are both in Stage B (agent-dependent); internal relative imports. `skill-update` must also pass `AgentResolver` through to `addSkill()`.
 - **skill-filters -> agents:** Resolved by Phase 4's `AgentResolver`. Filters accept resolver as parameter.
 - **skill-list -> skill-filters:** Both move to `sdk/providers/local/skill/`. Internal relative import.
 - **skill-info -> agents + lockfile + manifest:** All resolved by Phases 2 + 4.

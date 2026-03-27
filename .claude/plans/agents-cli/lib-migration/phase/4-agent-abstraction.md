@@ -168,6 +168,12 @@ None. This phase only adds new code.
 
   This keeps full backward compatibility -- existing code that imports `AGENT_CONFIGS` directly still works. Phase 5 will progressively switch to `AgentResolver`.
 
+  **Important: sync vs async detection.** There are two distinct "detect installed" concepts:
+  - `AgentConfig.detectInstalled()` — per-config **synchronous** method (returns `boolean`). Checks a single agent.
+  - `detectInstalledAgents()` — module-level **async** function in `cli/src/lib/agents.ts`. Iterates all agents and returns the installed subset.
+
+  The new `AgentResolver.detectInstalled()` returns `AgentConfig[]` **synchronously** (it calls each config's sync `detectInstalled()` and filters). Phase 5 call sites that currently `await detectInstalledAgents()` should switch to the synchronous `resolver.detectInstalled()` — no `await` needed.
+
 - [ ] **4.6** Write tests:
   - `sdk/test/context/agent/config.test.ts`: Verify interface contract with mock data.
   - `sdk/test/context/agent/resolver.test.ts`: Test `createAgentResolver` with sample configs.

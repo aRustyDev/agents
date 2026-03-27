@@ -122,11 +122,12 @@ Move content-parsing leaf modules (`manifest.ts`, `lockfile.ts`, `taxonomy.ts`, 
   }
   ```
 
-- [ ] **2.11** Update SDK barrel exports:
+- [ ] **2.11** **Verify frontmatter compatibility:** Run `bun test packages/cli/test/manifest.test.ts` to verify the SDK's `parseMarkdownFrontmatter` adapter produces identical output to the chunker's `parseFrontmatter` for all existing test cases. Both parsers must agree on frontmatter extraction for every `.md` fixture. Fix any discrepancies before proceeding.
+- [ ] **2.12** Update SDK barrel exports:
   - `sdk/src/context/index.ts`: Add exports for manifest, taxonomy, scaffold.
   - `sdk/src/providers/local/index.ts`: Add export for lockfile.
-- [ ] **2.12** Update `sdk/package.json` exports map if needed (add `./context/manifest`, `./context/taxonomy`, `./context/scaffold`, `./providers/local/lockfile`).
-- [ ] **2.13** Update all CLI consumers (commands and remaining lib files) to import from SDK:
+- [ ] **2.13** Update `sdk/package.json` exports map if needed (add `./context/manifest`, `./context/taxonomy`, `./context/scaffold`, `./providers/local/lockfile`).
+- [ ] **2.14** Update all CLI consumers (commands and remaining lib files) to import from SDK:
   - `commands/plugin.ts`: `import { readPluginManifest } from '@agents/sdk/context/manifest'`
   - `commands/add.ts`: `import { readLockfile, writeLockfile } from '@agents/sdk/providers/local/lockfile'`
   - `commands/init.ts`: `import { initComponent } from '@agents/sdk/context/scaffold'`
@@ -134,10 +135,10 @@ Move content-parsing leaf modules (`manifest.ts`, `lockfile.ts`, `taxonomy.ts`, 
   - `lib/skill-info.ts`: Update manifest and lockfile imports.
   - `lib/skill-outdated.ts`: Update lockfile import.
   - `lib/catalog-download.ts`: Check for lockfile/manifest imports and update.
-- [ ] **2.14** Run `bun test --cwd packages/sdk` -- expect 382+ pass / 0 fail.
-- [ ] **2.15** Run `bun test --cwd packages/cli` -- expect 1684 pass / 10 fail.
-- [ ] **2.16** Delete the 4 source files from `cli/src/lib/`.
-- [ ] **2.17** Run test suite again to confirm clean deletion.
+- [ ] **2.15** Run `bun test --cwd packages/sdk` -- expect 382+ pass / 0 fail.
+- [ ] **2.16** Run `bun test --cwd packages/cli` -- expect 1684 pass / 10 fail.
+- [ ] **2.17** Delete the 4 source files from `cli/src/lib/`.
+- [ ] **2.18** Run test suite again to confirm clean deletion.
 
 ## Acceptance Criteria
 
@@ -209,6 +210,14 @@ import { readSkillFrontmatter } from './manifest'
 import { readLockfile } from '@agents/sdk/providers/local/lockfile'
 import { readSkillFrontmatter } from '@agents/sdk/context/manifest'
 ```
+
+## Test Files
+
+Move corresponding test files from `packages/cli/test/` to `packages/sdk/test/`:
+- `manifest.test.ts` --> `packages/sdk/test/context/manifest.test.ts`
+- `lockfile.test.ts` --> `packages/sdk/test/providers/local/lockfile.test.ts`
+
+Update imports in moved tests to use `@agents/sdk/*` paths or relative SDK-internal paths. If tests have CLI-specific fixtures, keep them in CLI and update imports to point to the new SDK package paths.
 
 ## Dependency Notes
 

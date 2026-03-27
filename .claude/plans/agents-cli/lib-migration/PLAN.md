@@ -103,6 +103,20 @@ Modules use `CliError` codes. After migration, SDK modules should use `SdkError`
 | `E_KG_*` | `E_KG_*` (new) | graph*.ts, embedder.ts |
 | `E_SEARCH_*` | `E_SEARCH_*` | search.ts, meilisearch.ts |
 
+## Test Migration Policy
+
+For each module moved from CLI to SDK/KG:
+1. If a corresponding test exists in `packages/cli/test/`, move it to the destination package's test directory.
+2. Update test imports to use the new package path.
+3. If the test has CLI-specific fixtures or setup, keep it in CLI and update imports to point to the new package.
+
+**Test files per phase:**
+- **Phase 1:** `chunker.test.ts`, `graph.test.ts` --> `packages/kg/test/`
+- **Phase 2:** `manifest.test.ts`, `lockfile.test.ts` --> `packages/sdk/test/`
+- **Phase 3:** `catalog-*.test.ts` (7 files) --> `packages/sdk/test/catalog/`
+- **Phase 5:** `skill-*.test.ts` (7 files) --> `packages/sdk/test/providers/local/`
+- **Phase 6:** `external-skills*.test.ts` --> `packages/sdk/test/`
+
 ## Non-Goals
 
 - **No behavioral changes.** This is a pure structural refactor. Functions keep the same signatures and semantics.

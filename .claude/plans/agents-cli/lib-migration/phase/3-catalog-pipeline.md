@@ -117,6 +117,22 @@ The monolithic `catalog.ts` contains several distinct concerns that map to exist
   - `@agents/core/git` stays.
   - `@agents/core/source-parser` stays.
   - Types from `./catalog` become relative to pipeline/types.
+  - **Known dependency:** `catalog-discover.ts` has a static import of `discoverSkills` from `./skill-discovery` (line 31). Since `skill-discovery.ts` does not move until Phase 5, rewrite to a dynamic import that resolves from the CLI package temporarily:
+
+    ```typescript
+    // Before (static import that will break after move)
+    import { discoverSkills } from './skill-discovery'
+
+    // After (dynamic import — resolves at runtime from CLI until Phase 5 moves it)
+    const { discoverSkills } = await import('@agents/cli/lib/skill-discovery')
+    ```
+
+    When Phase 5 moves `skill-discovery.ts` to `sdk/src/context/skill/discovery.ts`, update this import to:
+
+    ```typescript
+    import { discoverSkills } from '../../context/skill/discovery'
+    ```
+
 - [ ] **3.9** Copy `catalog-download.ts` to `sdk/src/catalog/pipeline/download.ts`. Update imports:
   - `readSkillFrontmatter` from `../context/manifest` (moved in Phase 2).
   - Types from `./types`.
@@ -176,7 +192,7 @@ The monolithic `catalog.ts` contains several distinct concerns that map to exist
 
 ## Failure Criteria
 
-- **Stop if:** `catalog-discover.ts` or `catalog-download.ts` depend on `skill-discovery.ts` (Phase 5 module) at import time (not just type imports). Check if it is a runtime dependency. If so, use dynamic import (`await import(...)`) to defer the dependency. The type can be imported from the CLI shim until Phase 5 completes.
+- **Known dependency (handled in step 3.8):** `catalog-discover.ts` has a confirmed static import of `discoverSkills` from `skill-discovery.ts` (line 31). This IS a runtime dependency — not hypothetical. Step 3.8 rewrites it to a dynamic import from `@agents/cli/lib/skill-discovery` until Phase 5 moves `skill-discovery.ts` to SDK. If the dynamic import pattern fails at runtime, fall back to leaving a re-export shim at the old path.
 - **Stop if:** Dissolving `catalog.ts` breaks more than 20 tests. In that case, move it as a whole file first (`sdk/src/catalog/legacy.ts`) and split in a follow-up.
 
 ## Fallback Logic
@@ -235,9 +251,22 @@ import { checkRepoAvailability } from '@agents/sdk/catalog/availability'
 import { discoverSkills } from '@agents/sdk/catalog/pipeline/discover'
 ```
 
+## Test Files
+
+Move corresponding test files from `packages/cli/test/` to `packages/sdk/test/catalog/`:
+- `catalog-discover.test.ts` --> `packages/sdk/test/catalog/pipeline/discover.test.ts`
+- `catalog-download.test.ts` --> `packages/sdk/test/catalog/pipeline/download.test.ts`
+- `catalog-manifest.test.ts` --> `packages/sdk/test/catalog/pipeline/manifest.test.ts`
+- `catalog-reconcile.test.ts` --> `packages/sdk/test/catalog/pipeline/reconcile.test.ts`
+- `catalog-stale.test.ts` --> `packages/sdk/test/catalog/pipeline/stale.test.ts`
+- `catalog.test.ts` --> `packages/sdk/test/catalog/catalog.test.ts` (split across new SDK files as needed)
+- `registry.test.ts` --> `packages/sdk/test/catalog/pipeline/crawl.test.ts`
+
+Update imports in moved tests to use `@agents/sdk/catalog/*` paths. If tests have CLI-specific fixtures or heavy CLI setup, keep them in CLI and update imports to point to the new SDK package paths.
+
 ## Dependency Notes
 
-- **catalog-discover -> skill-discovery:** `catalog-discover.ts` may import types or functions from `skill-discovery.ts`. Since skill-discovery moves in Phase 5, use a type-only import or dynamic import for now.
+- **catalog-discover -> skill-discovery:** `catalog-discover.ts` has a confirmed static import of `discoverSkills` from `skill-discovery.ts` (line 31). Since skill-discovery moves in Phase 5, step 3.8 rewrites this to a dynamic import from `@agents/cli/lib/skill-discovery`. After Phase 5, update to a relative SDK import.
 - **catalog-download -> manifest:** Already resolved by Phase 2 moving manifest to SDK.
 - **catalog-stale -> catalog-download:** `SKILL_LOOKUP_DIRS` constant is imported from catalog-download. Both move to SDK in this phase, so the relative import just needs updating.
 - **catalog-reconcile -> catalog + catalog-discover:** Pure type imports from sibling modules. After moving, these become pipeline-relative.

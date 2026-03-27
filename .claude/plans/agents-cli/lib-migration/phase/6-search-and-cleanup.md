@@ -208,6 +208,8 @@ Also remaining but non-TypeScript (not counted):
   grep -r "@arustydev/agents\|packages/cli" packages/sdk/src/ || echo "OK: sdk is clean"
   # KG should not import from CLI or SDK
   grep -r "@arustydev/agents\|@agents/sdk" packages/kg/src/ || echo "OK: kg is clean"
+  # SDK should not have a static dependency on KG
+  grep -r "@agents/kg" packages/sdk/src/ || echo "OK: sdk has no kg dependency"
   ```
 
 - [ ] **6.30** Update `cli/package.json` -- remove dependencies that were only used by moved modules. Audit:
@@ -308,10 +310,19 @@ packages/cli/src/lib/
 
 **TypeScript files: 4** (agents.ts + 3 in component/).
 
+## Test Files
+
+Move corresponding test files from `packages/cli/test/` to `packages/sdk/test/`:
+- `external-skills.test.ts` --> `packages/sdk/test/providers/local/external.test.ts`
+- `search.test.ts` --> `packages/sdk/test/catalog/search.test.ts`
+- `plugin-ops.test.ts` --> `packages/sdk/test/context/plugin/ops.test.ts`
+
+Update imports in moved tests to use SDK package paths. If tests have CLI-specific fixtures, keep them in CLI and update imports to point to the new SDK package paths.
+
 ## Dependency Notes
 
 - `search.ts` has zero dependencies -- safest possible move. Do this first.
 - `external-skills.ts` depends heavily on `@agents/core` (git, github, hash, runtime, symlink, types). These are all stable cross-package dependencies. It also depends on `@agents/sdk/providers/local/schemas` for type definitions -- these become relative imports after the move.
 - `plugin-ops.ts` depends on `@agents/core/hash`, `@agents/core/runtime`, `@agents/core/types`, `@agents/sdk/context/skill/schema`, and `@agents/sdk/ui`. All become relative imports within SDK.
 - After this phase, CLI depends on: `@agents/core`, `@agents/sdk`, `@agents/kg` plus its own direct deps (citty, vite, ws, etc.).
-- The dependency DAG is clean: `core` <- `sdk` <- `cli`, `core` <- `kg` <- `cli`. SDK and KG do not depend on each other (unless skill-search-api in Phase 5 created an SDK -> KG link, which should be resolved via dynamic import).
+- The dependency DAG is clean: `core` <- `sdk` <- `cli`, `core` <- `kg` <- `cli`. SDK and KG do not depend on each other — unless `skill-search-api.ts` (moved in Phase 5) uses a static import of `@agents/kg/meilisearch`. Per Phase 5's guidance, dynamic import is preferred to avoid this cross-dependency. Verify with: `grep -r "@agents/kg" packages/sdk/src/ || echo "OK: sdk has no kg dependency"`. If a static import exists, convert it to a dynamic import to preserve the DAG.
