@@ -21,6 +21,8 @@
     "./providers": "./src/providers/index.ts",
     "./providers/*": "./src/providers/*.ts",
     "./providers/local/*": "./src/providers/local/*.ts",
+    "./providers/local/skill": "./src/providers/local/skill/index.ts",
+    "./providers/local/skill/*": "./src/providers/local/skill/*.ts",
     "./providers/github/*": "./src/providers/github/*.ts",
     "./providers/smithery/*": "./src/providers/smithery/*.ts",
     "./providers/clients/*": "./src/providers/clients/*.ts",
