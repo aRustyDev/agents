@@ -7,6 +7,7 @@ export interface ViewerData {
   evals: EvalCase[]
   benchmark: Benchmark
   engineOperators: Record<string, EngineOperator[]>
+  previousEvals?: EvalCase[]
 }
 
 export interface EvalCase {

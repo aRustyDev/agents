@@ -642,3 +642,133 @@ pre.edit-mode .line::before {
 #nav-buttons button:hover {
 	border-color: var(--primary);
 }
+
+/* === Overlay Ribbon === */
+#overlay-ribbon {
+	display: flex;
+	gap: 4px;
+	padding: 6px 24px;
+	border-bottom: 1px solid var(--border);
+	background: var(--surface);
+}
+#overlay-ribbon.hidden { display: none; }
+.overlay-toggle {
+	padding: 4px 10px;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	background: var(--surface);
+	cursor: pointer;
+	font-size: 11px;
+	transition: background 0.15s, border-color 0.15s;
+}
+.overlay-toggle:hover { border-color: var(--primary); }
+.overlay-toggle.active {
+	background: var(--primary);
+	color: white;
+	border-color: var(--primary);
+}
+
+/* === Structural Compliance Overlay === */
+.structural-badge {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 18px;
+	font-size: 11px;
+	margin-left: 8px;
+	vertical-align: middle;
+}
+.structural-badge.pass { background: #dcfce7; color: var(--success); }
+.structural-badge.fail { background: #fef2f2; color: var(--danger); }
+.structural-badge.unknown { background: #f3f4f6; color: #9ca3af; }
+
+/* === Operator Hover Tooltips === */
+.op-token {
+	border-bottom: 1px dashed var(--primary);
+	cursor: help;
+}
+.op-tooltip {
+	position: fixed;
+	z-index: 1001;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	padding: 10px 14px;
+	max-width: 320px;
+	font-size: 12px;
+	display: none;
+}
+.op-tooltip.visible { display: block; }
+.op-tooltip-engine { font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+.op-tooltip-syntax { font-family: var(--font-mono); margin-bottom: 4px; }
+.op-tooltip-example { color: var(--text-muted); font-style: italic; }
+
+/* === Tier Progression Overlay === */
+.progression-panel {
+	display: flex;
+	gap: 12px;
+	margin-top: 20px;
+	padding: 16px;
+	background: var(--sidebar-bg);
+	border-radius: 6px;
+	border: 1px solid var(--border);
+}
+.progression-tier {
+	flex: 1;
+	min-width: 0;
+}
+.progression-tier-header {
+	font-weight: 600;
+	font-size: 13px;
+	margin-bottom: 8px;
+	padding-bottom: 6px;
+	border-bottom: 2px solid var(--border);
+}
+.progression-row {
+	padding: 6px 8px;
+	margin-bottom: 4px;
+	border-radius: 4px;
+	font-size: 12px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+}
+.precision-tag {
+	display: inline-block;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 10px;
+	font-weight: 600;
+}
+.precision-high { background: #dcfce7; color: var(--success); }
+.precision-medium { background: #fef3c7; color: var(--warning); }
+.precision-broad { background: #fed7aa; color: #c2410c; }
+.engine-chip {
+	display: inline-block;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-size: 10px;
+	background: #e0e7ff;
+	color: #3730a3;
+	margin: 1px 2px;
+}
+.engine-chip.new { background: #dbeafe; border: 1px solid var(--primary); }
+
+/* === Decomposition Suggestions === */
+.decomp-suggestions {
+	margin-top: 20px;
+}
+.decomp-card {
+	padding: 12px 16px;
+	margin-bottom: 8px;
+	border-radius: 6px;
+	border-left: 4px solid;
+	background: var(--surface);
+	font-size: 13px;
+}
+.decomp-card.info { border-left-color: var(--primary); }
+.decomp-card.warning { border-left-color: var(--warning); }
+.decomp-card-title { font-weight: 600; margin-bottom: 4px; }
+.decomp-card-body { color: var(--text-muted); }

@@ -17,6 +17,7 @@ awesomeclaude
 backfillable
 BehiSecc
 biome
+biorxiv
 blockquotes
 blader
 BLAS
@@ -57,12 +58,16 @@ cupertino
 datasheet
 davepoon
 DDIA
+decomp
+deepwiki
 Dennard
 deprioritized
 devrag
 dsgvo
 DTCG
+duckduckgo
 Duplicat
+eiopa
 elec
 embeddings
 ename
@@ -84,6 +89,7 @@ gitea
 Gitea
 gitignore
 glama
+godocs
 gopls
 grdb
 GRDB
@@ -91,6 +97,7 @@ groue
 haiku
 hashintel
 henkisdabro
+hexdocs
 hesreallyhim
 homoiconic
 homoiconicity
@@ -125,6 +132,7 @@ mcphub
 mcpregistry
 mcpservers
 mcpxcodebuild
+medrxiv
 meetrais
 Metaclasses
 microarchitectural
@@ -151,6 +159,7 @@ orbstack
 orgname
 overclaiming
 Paperswith
+paperswithcode
 pargs
 pdate
 penpot
@@ -168,6 +177,7 @@ promptbase
 PRRT
 PRRTC
 Pryce
+pubmed
 publishability
 punkpeye
 pybars
@@ -209,6 +219,7 @@ Sortability
 sourcekit
 sqlfluff
 sqlite
+stackoverflow
 STDP
 subagent
 subdirs
