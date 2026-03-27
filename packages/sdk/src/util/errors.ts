@@ -19,6 +19,10 @@ export type SdkErrorCode =
   | 'E_NO_TEMPLATE'
   | 'E_TEMPLATE_MISSING'
   | 'E_EXISTS'
+  | 'E_NOT_GITHUB'
+  | 'E_CLONE_TIMEOUT'
+  | 'E_CLONE_FAILED'
+  | 'E_TRANSFORM'
 
 export class SdkError extends Error {
   readonly code: SdkErrorCode
