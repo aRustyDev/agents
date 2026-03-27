@@ -17,6 +17,7 @@ awesomeclaude
 backfillable
 BehiSecc
 biome
+blockquotes
 blader
 BLAS
 blencorp
