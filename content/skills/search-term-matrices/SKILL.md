@@ -1,13 +1,16 @@
 ---
 name: search-term-matrices
 description: >-
-  Strategic search planning for agent-driven research workflows. Use when you
-  need to research a topic, find documentation, compare technologies, verify
-  claims, or gather evidence before making decisions. Generates structured
+  Strategic search planning for agent-driven research. Generates structured
   search-term matrices with tiered fallback strategies, engine-specific
-  operators, and grading criteria. Produces a complete research plan — not
-  ad-hoc queries — so every search is deliberate, gradable, and recoverable.
-  Applies to any domain: technical, academic, regulatory, or general.
+  operators, and grading criteria before executing any searches. Use this
+  skill whenever research requires more than a single search query — comparing
+  technologies, verifying claims across sources, surveying a landscape,
+  investigating a multi-faceted question, or building evidence for a decision.
+  Do NOT use for quick factual lookups, fetching a single known URL, or
+  questions answerable from a single source. Covers tech, academic,
+  regulatory, and general domains. Think of it as "research planning" — the
+  matrix is the plan, execution comes after.
 license: AGPL-3.0
 metadata:
   triggers:
@@ -90,13 +93,15 @@ Hints for when all tiers are exhausted:
 - [ ] Try a different domain classification
 - [ ] Escalate to the human for guidance
 
-### Per-Tier Thresholds
+### Grading Summary
 
 | Tier | Acceptance (minimum / gate) | Success (ideal / goal) |
 |------|----------------------------|----------------------|
 | 1    | ...                        | ...                  |
 | 2    | ...                        | ...                  |
 | 3    | ...                        | ...                  |
+
+**Overall success**: [one sentence — what "done" looks like for this research question]
 
 (Full grading methodology: [references/grading.md](references/grading.md))
 ```
@@ -137,7 +142,7 @@ Hybrid types are allowed and often appropriate. For example, "survey + compariso
 
 ### Step 3: Select Engines
 
-Choose engines based on the research type and domain. Group engines in a single row when they share operators; split into separate rows when operators diverge.
+Choose engines based on the research type and domain. Group engines in a single row when the operators you are actually using overlap (e.g., Google and Bing both support `"exact phrase"` and `site:`). Split into separate rows when the operators you need differ between engines — the full operator sets don't need to match, only the ones used in that query.
 
 Engine references (load only the categories you need):
 - [references/engines/general-search.md](references/engines/general-search.md) -- Google, Bing, DDG, Brave, SearXNG, Marginalia
@@ -239,13 +244,15 @@ Domain: tech
 - [ ] Try HuggingFace or PaperswithCode for ML-adjacent CRDT work
 - [ ] Escalate to user: share what was found, ask for domain clarification
 
-### Per-Tier Thresholds
+### Grading Summary
 
 | Tier | Acceptance (minimum / gate)           | Success (ideal / goal)                    |
 |------|---------------------------------------|-------------------------------------------|
 | 1    | >=3 distinct libraries identified     | >=5 libraries with maturity indicators    |
 | 2    | >=2 additional libraries or comparisons | Comparison data for top candidates       |
 | 3    | Any new library not found in earlier tiers | Complete landscape with maturity ratings |
+
+**Overall success**: Enough information to recommend a specific CRDT library for TypeScript collaborative editing with rationale and trade-offs.
 ```
 
 ## Issue Reporting

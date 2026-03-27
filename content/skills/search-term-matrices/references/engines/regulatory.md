@@ -6,6 +6,7 @@ Operators and tips for searching regulatory databases, government agencies, and 
 
 - [FDA (U.S. Food and Drug Administration)](#fda-us-food-and-drug-administration)
 - [SEC (U.S. Securities and Exchange Commission)](#sec-us-securities-and-exchange-commission)
+- [EUR-Lex and EU Regulatory Portals](#eur-lex-and-eu-regulatory-portals)
 - [PubMed (Regulatory Context)](#pubmed-regulatory-context)
 - [medRxiv (Regulatory Context)](#medrxiv-regulatory-context)
 - [bioRxiv (Regulatory Context)](#biorxiv-regulatory-context)
@@ -96,6 +97,66 @@ Regulatory filings, company disclosures, financial statements, and enforcement a
 - Use SIC codes to find all companies in a specific industry sector
 - SEC enforcement actions (litigation releases) are useful for compliance research
 - The SEC's proposed rules page shows upcoming regulatory changes
+
+---
+
+## EUR-Lex and EU Regulatory Portals
+
+EU legislation, regulation, and policy search. Use for questions involving the EU AI Act, GDPR, digital services regulation, or any EU-wide compliance topic.
+
+### EUR-Lex (Official EU Law)
+
+Primary source for EU legislation, case law, and preparatory documents.
+
+| Operator | Syntax | Example |
+|----------|--------|---------|
+| Free text | Search bar at `eur-lex.europa.eu` | `artificial intelligence insurance` |
+| CELEX number | Direct access by document ID | `32024R1689` (EU AI Act) |
+| Document type filter | Regulation, Directive, Decision, etc. | Filter sidebar |
+| Date range | Publication date filter | 2024-2026 |
+| In force filter | Show only current legislation | Toggle |
+
+**Via Google:** `site:eur-lex.europa.eu "AI Act" OR "2024/1689" insurance`
+
+### European Commission Digital Strategy
+
+Policy documents, implementation guidance, and consultations.
+
+| Source | URL Pattern | Content |
+|--------|------------|---------|
+| EC Digital Strategy | `digital-strategy.ec.europa.eu` | AI policy, digital regulation |
+| EC AI Office | `ai-watch.ec.europa.eu` | AI Act implementation, AI Watch reports |
+| EC consultations | `ec.europa.eu/info/law/better-regulation` | Public consultations on new rules |
+
+**Via Google:** `site:digital-strategy.ec.europa.eu "artificial intelligence" insurance`
+
+### EIOPA (European Insurance and Occupational Pensions Authority)
+
+Insurance-specific EU regulatory guidance.
+
+| Source | URL Pattern | Content |
+|--------|------------|---------|
+| EIOPA publications | `eiopa.europa.eu/publications` | Guidelines, reports, consultations |
+| EIOPA AI guidance | `eiopa.europa.eu` search for "artificial intelligence" | AI governance for insurers |
+
+**Via Google:** `site:eiopa.europa.eu artificial intelligence governance`
+
+### European Parliament Legislative Observatory
+
+Track legislative progress of EU laws.
+
+| Source | URL Pattern | Content |
+|--------|------------|---------|
+| OEIL | `oeil.secure.europarl.europa.eu` | Legislative procedures, amendments, votes |
+
+### Tips
+
+- EUR-Lex is the authoritative source for EU legal text — always prefer over summaries
+- The EU AI Act is Regulation (EU) 2024/1689; use CELEX number `32024R1689` for direct access
+- EIOPA guidance is essential for insurance-specific EU AI compliance
+- EC Digital Strategy pages often have plain-language explanations of complex regulations
+- For GDPR intersection with AI (Article 22, automated decision-making), search EUR-Lex directly
+- Google `site:` operators are often more effective than the portals' native search
 
 ---
 

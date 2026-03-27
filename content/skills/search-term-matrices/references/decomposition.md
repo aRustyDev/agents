@@ -92,6 +92,24 @@ Split when the question asks about both historical and current/future states.
 
 **Why this works:** Historical questions benefit from `before:` date operators and may rely on archived content. Current questions use `after:` operators and prioritize recency.
 
+### By Jurisdiction
+
+Split when the question spans regulatory or legal jurisdictions that have different governing bodies, terminology, and source databases.
+
+**When to use:** The question asks about regulations, compliance, or legal frameworks across multiple countries or governing bodies (e.g., US federal + EU + state-level).
+
+**Example:**
+- Original: "Does our AI insurance tool need regulatory approval?"
+- Sub-questions:
+  1. "Does the FDA regulate AI software used in insurance claim processing?" (US federal — FDA)
+  2. "What SEC disclosure obligations apply to AI in insurance?" (US federal — SEC)
+  3. "How does the EU AI Act classify AI systems used in insurance?" (EU — EC/EIOPA)
+  4. "What state-level AI insurance regulations exist?" (US state — NAIC, Colorado AI Act)
+
+**Why this works:** Each jurisdiction has different authoritative sources (FDA.gov vs EUR-Lex vs state DOI sites), different terminology ("SaMD" vs "high-risk AI system" vs "algorithmic discrimination"), and different engine strategies (EDGAR for SEC filings vs EU legislative portals). A single matrix cannot efficiently target all of these — the operator sets and acceptance criteria are too different.
+
+**Execution note:** Jurisdiction sub-questions are usually independent and can run in parallel. The synthesis step is where jurisdictional findings get combined into a unified compliance picture.
+
 ---
 
 ## Decomposition Process

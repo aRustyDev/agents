@@ -92,6 +92,25 @@ Sum the four dimension scores for a tier composite: 0-12 scale.
 
 **Note:** The composite score is a guideline, not a formula. Acceptance and success thresholds should be defined in terms of concrete outcomes (e.g., ">=3 libraries found"), not composite scores. The rubric helps structure your assessment, not replace your judgment.
 
+### Type-Specific Weighting
+
+Not all dimensions matter equally for every research type:
+
+| Type | Weight higher | Weight lower | Why |
+|------|--------------|-------------|-----|
+| deep-dive | Coverage, Recency | — | Need thorough, current understanding |
+| survey | Coverage | Authority | Breadth matters more than source prestige |
+| comparison | Relevance, Coverage | Recency | Need all candidates, not just recent ones |
+| verification | Authority | Coverage | A single authoritative source can settle a claim |
+
+For **verification** specifically: frame acceptance criteria to allow for three outcomes, not just binary confirm/deny:
+
+- **Confirmed**: authoritative evidence supports the claim
+- **Refuted**: authoritative evidence contradicts the claim
+- **Nuanced**: the claim is partially true — some aspects hold, others don't
+
+Example: "Is Rust's borrow checker memory-safe?" — the answer is "mostly yes, with known soundness holes." Acceptance criteria should be: ">=1 authoritative source addressing the claim, in any direction." Success criteria should be: "definitive answer with specific evidence, including any caveats or edge cases."
+
 ---
 
 ## Per-Tier Grading
