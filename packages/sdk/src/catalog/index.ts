@@ -13,6 +13,7 @@ export {
   writeNdjsonFile,
 } from './ndjson/io'
 export * as pipeline from './pipeline/index'
+export * from './search'
 export { SqliteStore } from './sqlite/index'
 export type {
   AnalysisFields,
