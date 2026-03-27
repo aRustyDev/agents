@@ -29,6 +29,8 @@ export const agentModule: ComponentTypeModule<AgentFrontmatter> = {
   },
 }
 
+export type { AgentConfig, AgentId, AgentResolver } from './config'
 export { parseAgent } from './parser'
+export { createAgentResolver } from './resolver'
 export { agentSchemaValidator } from './schema'
 export type { AgentFrontmatter } from './types'
