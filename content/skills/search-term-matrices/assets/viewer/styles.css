@@ -177,6 +177,13 @@ body {
 	min-width: 40px;
 	overflow: hidden;
 }
+#comment-sidebar.collapsed #sidebar-header {
+	justify-content: center;
+	padding: 10px 0;
+}
+#comment-sidebar.collapsed #sidebar-header h3 {
+	display: none;
+}
 #comment-sidebar.collapsed #comment-list {
 	display: none;
 }
