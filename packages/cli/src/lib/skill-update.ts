@@ -1,73 +1,23 @@
-/**
- * Batch update orchestrator for outdated skills.
- *
- * Combines `checkOutdated()` and `addSkill()` into a single workflow:
- *
- * 1. Run checkOutdated() to discover which locked skills have changed upstream.
- * 2. Optionally filter to a user-supplied subset of skill names.
- * 3. Re-install each outdated skill via addSkill(source, { yes: true }).
- * 4. Collect and return structured per-skill results.
- *
- * Partial failures are tolerated -- if one skill fails, the remaining skills
- * are still processed.  The function never throws.
- */
+// Re-export shim — logic moved to @agents/sdk/providers/local/skill/update
+// This shim preserves CLI test compatibility by importing checkOutdated and
+// addSkill from the CLI-level shims (which tests can mock.module on).
 
 import { CliError } from '@agents/core/types'
-import { addSkill } from './skill-add'
-import { checkOutdated, type OutdatedOptions, type OutdatedResult } from './skill-outdated'
+import { createCliAgentResolver } from './agents'
 
-// ---------------------------------------------------------------------------
-// Errors
-// ---------------------------------------------------------------------------
+// Re-export types from SDK
+export {
+  UpdateError,
+  type UpdateOptions,
+  type UpdateResult,
+  type UpdateStatus,
+} from '@agents/sdk/providers/local/skill/update'
 
-export class UpdateError extends CliError {
-  constructor(
-    readonly skill: string,
-    message: string,
-    code: string,
-    hint?: string,
-    cause?: unknown
-  ) {
-    super(message, code, hint, cause)
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
-
-export type UpdateStatus = 'updated' | 'current' | 'failed' | 'skipped'
-
-export interface UpdateResult {
-  skill: string
-  source: string
-  status: UpdateStatus
-  error?: string
-}
-
-export interface UpdateOptions {
-  /** Specific skills to update (empty = all outdated). */
-  skills?: string[]
-  /** Pass through to checkOutdated. */
-  stdin?: boolean
-  fromFile?: string
-  fromUrl?: string
-  /** Pass through to addSkill. */
-  copy?: boolean
-  yes?: boolean
-  json?: boolean
-  quiet?: boolean
-  cwd?: string
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+import type { UpdateOptions, UpdateResult } from '@agents/sdk/providers/local/skill/update'
+import type { OutdatedOptions, OutdatedResult } from './skill-outdated'
 
 /**
  * Map an OutdatedResult that will NOT be updated into an UpdateResult.
- * - `current` stays `current`
- * - everything else (`unavailable`, `unknown`) becomes `skipped`
  */
 function toPassthrough(r: OutdatedResult): UpdateResult {
   return {
@@ -77,16 +27,14 @@ function toPassthrough(r: OutdatedResult): UpdateResult {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Main export
-// ---------------------------------------------------------------------------
-
 /**
- * Update outdated skills by re-installing from their upstream source.
- *
- * Never throws -- all errors are captured per-skill in the returned array.
+ * CLI-specific updateSkills that uses CLI-level shim imports.
+ * This allows tests to mock ../skill-outdated and ../skill-add individually.
  */
 export async function updateSkills(opts: UpdateOptions = {}): Promise<UpdateResult[]> {
+  const { checkOutdated } = await import('./skill-outdated')
+  const { addSkill } = await import('./skill-add')
+
   const outdatedOpts: OutdatedOptions = {
     stdin: opts.stdin,
     fromFile: opts.fromFile,
@@ -122,9 +70,9 @@ export async function updateSkills(opts: UpdateOptions = {}): Promise<UpdateResu
       const addResult = await addSkill(entry.source, {
         cwd: opts.cwd,
         copy: opts.copy,
-        yes: true, // Always non-interactive during batch update
+        yes: true,
         json: opts.json,
-        quiet: true, // Suppress per-skill output during batch
+        quiet: true,
       })
 
       if (addResult.ok) {

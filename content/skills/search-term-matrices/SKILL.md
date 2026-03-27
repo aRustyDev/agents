@@ -157,7 +157,7 @@ Engine references (load only the categories you need):
 
 Fill in the template tier by tier.
 
-**Tier 1 (Primary / high-precision):** Your best guesses — specific queries with tight operators aimed at authoritative sources. These should have the highest chance of returning exactly what you need.
+**Tier 1 (Primary / high-precision):** Your best guesses — specific queries with tight operators aimed at authoritative sources. These should have the highest chance of returning exactly what you need. After drafting Tier 1 rows, check information type diversity — see [references/information-types.md](references/information-types.md) for a coverage checklist. Aim for at least 3 of 6 information types (Facts, Examples, Expert Opinions, Trends, Comparisons, Challenges) represented across your Tier 1 queries.
 
 **Tier 2 (Broadened):** Relaxed versions of Tier 1 queries — broader terms, fewer operators, more general engines. Use when Tier 1 falls below its acceptance threshold.
 
@@ -296,3 +296,4 @@ If you encounter problems with this skill — incorrect operators, missing engin
 | [references/grading.md](references/grading.md) | Scoring rubrics, two-threshold model, worked example |
 | [references/issue-template.md](references/issue-template.md) | Issue template, labels, severity levels |
 | [references/decomposition.md](references/decomposition.md) | When and how to decompose broad questions |
+| [references/information-types.md](references/information-types.md) | Coverage diversity checklist for Tier 1 queries |

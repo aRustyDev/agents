@@ -16,9 +16,9 @@ import {
   loadGraph,
   NODE_ID_PREFIX,
   serializeGraph,
-} from '../src/lib/graph'
-import { type LockFile, readLock, reconcileLock, writeLock } from '../src/lib/graph-lock'
-import { validateGraphData } from '../src/lib/graph-schema'
+} from '../src/graph'
+import { type LockFile, readLock, reconcileLock, writeLock } from '../src/graph-lock'
+import { validateGraphData } from '../src/graph-schema'
 
 // ---------------------------------------------------------------------------
 // Fixtures

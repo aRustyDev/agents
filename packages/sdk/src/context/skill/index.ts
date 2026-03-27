@@ -36,6 +36,8 @@ export const skillModule: ComponentTypeModule<SkillFrontmatter> = {
   },
 }
 
+export * from './discovery'
+export * from './init'
 export { parseSkill } from './parser'
 export {
   SkillFrontmatter,

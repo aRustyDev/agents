@@ -389,3 +389,27 @@ export function getAgentBaseDir(
   }
   return ok(join(cwd, config.skillsDir))
 }
+
+// ---------------------------------------------------------------------------
+// AgentResolver adapter (Phase 4)
+// ---------------------------------------------------------------------------
+
+import type { AgentResolver } from '@agents/sdk/context/agent/config'
+
+/** Create an AgentResolver backed by the full 44-agent CLI registry. */
+export function createCliAgentResolver(): AgentResolver {
+  return {
+    list: () => [...AGENT_CONFIGS.values()],
+    get: (name) => AGENT_CONFIGS.get(name as AgentType),
+    detectInstalled: () =>
+      AGENT_TYPES.filter((t) => AGENT_CONFIGS.get(t)?.detectInstalled()).map(
+        // biome-ignore lint/style/noNonNullAssertion: filtered from AGENT_TYPES — key guaranteed in Map
+        (t) => AGENT_CONFIGS.get(t)!
+      ),
+    getUniversal: () => getUniversalAgents(),
+    getBaseDir: (name, global, cwd) => {
+      const result = getAgentBaseDir(name as AgentType, global, cwd)
+      return result.ok ? result.value : undefined
+    },
+  }
+}
