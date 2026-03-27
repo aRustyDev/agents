@@ -15,7 +15,7 @@ import {
   isAvailable,
   searchKeyword,
   searchSemantic,
-} from '../src/lib/meilisearch'
+} from '../src/meilisearch'
 
 // ---------------------------------------------------------------------------
 // Skip logic -- all integration tests are skipped if Meilisearch is down

@@ -9,8 +9,8 @@
  */
 
 import { describe, expect, test } from 'bun:test'
-import { hasModel, isOllamaAvailable, prepareEmbeddingText } from '../src/lib/embedder'
-import { checkHealth, createClient, hasEmbeddings, isAvailable } from '../src/lib/meilisearch'
+import { hasModel, isOllamaAvailable, prepareEmbeddingText } from '@agents/kg/embedder'
+import { checkHealth, createClient, hasEmbeddings, isAvailable } from '@agents/kg/meilisearch'
 import { hybridSearch, type RankedResult } from '../src/lib/search'
 
 // ---------------------------------------------------------------------------

@@ -7,8 +7,8 @@ import {
   parseFrontmatter,
   splitIntoParagraphs,
   splitIntoSections,
-} from '../src/lib/chunker'
-import { prepareEmbeddingText } from '../src/lib/embedder'
+} from '../src/chunker'
+import { prepareEmbeddingText } from '../src/embedder'
 
 // ---------------------------------------------------------------------------
 // parseFrontmatter

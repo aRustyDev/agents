@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@agents/core": "workspace:*",
+    "@agents/kg": "workspace:*",
     "@agents/sdk": "workspace:*",
     "@bomb.sh/tab": "^0.0.14",
     "@carlrannaberg/cclint": "^0.2.10",

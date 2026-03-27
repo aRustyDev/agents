@@ -11,8 +11,8 @@
 
 import { resolve } from 'node:path'
 import { fileExists, readJson } from '@agents/core/runtime'
-import type { GraphData } from '../../../lib/graph'
-import type { LockFile } from '../../../lib/graph-lock'
+import type { GraphData } from '@agents/kg/graph'
+import type { LockFile } from '@agents/kg/graph-lock'
 import { atomicWrite, directWrite } from '../fs-helpers'
 import { validateGraph } from '../validation'
 
