@@ -128,6 +128,7 @@
 
     // Render benchmark
     if (MV.renderBenchmark) MV.renderBenchmark()
+    if (MV.initRibbon) MV.initRibbon()
   }
 
   // --- Tab Management ---

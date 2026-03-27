@@ -642,3 +642,28 @@ pre.edit-mode .line::before {
 #nav-buttons button:hover {
 	border-color: var(--primary);
 }
+
+/* === Overlay Ribbon === */
+#overlay-ribbon {
+	display: flex;
+	gap: 4px;
+	padding: 6px 24px;
+	border-bottom: 1px solid var(--border);
+	background: var(--surface);
+}
+#overlay-ribbon.hidden { display: none; }
+.overlay-toggle {
+	padding: 4px 10px;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	background: var(--surface);
+	cursor: pointer;
+	font-size: 11px;
+	transition: background 0.15s, border-color 0.15s;
+}
+.overlay-toggle:hover { border-color: var(--primary); }
+.overlay-toggle.active {
+	background: var(--primary);
+	color: white;
+	border-color: var(--primary);
+}
