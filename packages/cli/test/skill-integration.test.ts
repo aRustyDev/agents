@@ -11,6 +11,44 @@ import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+// ---------------------------------------------------------------------------
+// Convenience wrappers — auto-inject CLI agent resolver
+// ---------------------------------------------------------------------------
+
+const resolver = createCliAgentResolver()
+
+async function getInitSkill() {
+  const { initSkill } = await import('@agents/sdk/context/skill/init')
+  return initSkill
+}
+
+async function getListSkills() {
+  const { listSkills } = await import('@agents/sdk/providers/local/skill/list')
+  return (opts?: Parameters<typeof listSkills>[1]) => listSkills(resolver, opts)
+}
+
+async function getSkillInfo() {
+  const { skillInfo } = await import('@agents/sdk/providers/local/skill/info')
+  return (name: string, opts?: Parameters<typeof skillInfo>[2]) => skillInfo(resolver, name, opts)
+}
+
+async function getRemoveSkills() {
+  const { removeSkills } = await import('@agents/sdk/providers/local/skill/remove')
+  return (names: string[], opts?: Parameters<typeof removeSkills>[2]) =>
+    removeSkills(resolver, names, opts)
+}
+
+async function getAddSkill() {
+  const { addSkill } = await import('@agents/sdk/providers/local/skill/add')
+  return (source: string, opts?: Parameters<typeof addSkill>[2]) => addSkill(resolver, source, opts)
+}
+
+async function getCheckOutdated() {
+  const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
+  return checkOutdated
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -78,10 +116,10 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('init -> list -> info -> remove lifecycle', async () => {
-    const { initSkill } = await import('../src/lib/skill-init')
-    const { listSkills } = await import('../src/lib/skill-list')
-    const { skillInfo } = await import('../src/lib/skill-info')
-    const { removeSkills } = await import('../src/lib/skill-remove')
+    const initSkill = await getInitSkill()
+    const listSkills = await getListSkills()
+    const skillInfo = await getSkillInfo()
+    const removeSkills = await getRemoveSkills()
 
     // 1. Init a new skill
     const initResult = await initSkill('my-test-skill', {
@@ -126,9 +164,9 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('add from local source -> list -> remove', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
-    const { listSkills } = await import('../src/lib/skill-list')
-    const { removeSkills } = await import('../src/lib/skill-remove')
+    const addSkill = await getAddSkill()
+    const listSkills = await getListSkills()
+    const removeSkills = await getRemoveSkills()
 
     // Create a source skill
     const sourceDir = join(tmp, 'external-source')
@@ -161,8 +199,8 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('add same skill twice is idempotent', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
-    const { listSkills } = await import('../src/lib/skill-list')
+    const addSkill = await getAddSkill()
+    const listSkills = await getListSkills()
 
     const sourceDir = join(tmp, 'idem-source')
     await createSourceSkill(sourceDir, 'idem-skill', 'Idempotent skill')
@@ -180,8 +218,8 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('remove all skills results in clean lock file', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
-    const { removeSkills } = await import('../src/lib/skill-remove')
+    const addSkill = await getAddSkill()
+    const removeSkills = await getRemoveSkills()
 
     // Add two skills
     for (const name of ['alpha', 'beta']) {
@@ -207,7 +245,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('init with invalid name does not create files', async () => {
-    const { initSkill } = await import('../src/lib/skill-init')
+    const initSkill = await getInitSkill()
 
     // "INVALID-NAME" has uppercase letters -- rejected by NAME_RE
     const result = await initSkill('INVALID-NAME', { cwd: tmp })
@@ -223,7 +261,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('info on non-existent skill returns clean error', async () => {
-    const { skillInfo } = await import('../src/lib/skill-info')
+    const skillInfo = await getSkillInfo()
     const result = await skillInfo('ghost', { cwd: tmp })
     expect(result.ok).toBe(false)
     if (!result.ok) {
@@ -236,7 +274,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('checkOutdated with empty lock returns empty array', async () => {
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const checkOutdated = await getCheckOutdated()
     const results = await checkOutdated({ cwd: tmp })
     expect(results).toEqual([])
   })
@@ -246,9 +284,9 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('all module results are JSON-serializable', async () => {
-    const { initSkill } = await import('../src/lib/skill-init')
-    const { listSkills } = await import('../src/lib/skill-list')
-    const { skillInfo } = await import('../src/lib/skill-info')
+    const initSkill = await getInitSkill()
+    const listSkills = await getListSkills()
+    const skillInfo = await getSkillInfo()
 
     await initSkill('json-skill', {
       cwd: tmp,
@@ -279,8 +317,8 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('add from local populates lock metadata visible in info', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
-    const { skillInfo } = await import('../src/lib/skill-info')
+    const addSkill = await getAddSkill()
+    const skillInfo = await getSkillInfo()
 
     const sourceDir = join(tmp, 'meta-source')
     await createSourceSkill(sourceDir, 'meta-skill', 'Metadata test')
@@ -306,7 +344,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('remove non-existent skill returns graceful result', async () => {
-    const { removeSkills } = await import('../src/lib/skill-remove')
+    const removeSkills = await getRemoveSkills()
 
     const results = await removeSkills(['no-such-skill'], { cwd: tmp, yes: true })
     expect(results).toHaveLength(1)
@@ -322,7 +360,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('list on empty project returns ok with empty skills', async () => {
-    const { listSkills } = await import('../src/lib/skill-list')
+    const listSkills = await getListSkills()
     const result = await listSkills({ cwd: tmp })
     expect(result.ok).toBe(true)
     expect(result.skills).toEqual([])
@@ -333,7 +371,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('init same skill name twice fails on second call', async () => {
-    const { initSkill } = await import('../src/lib/skill-init')
+    const initSkill = await getInitSkill()
 
     const first = await initSkill('dup-skill', { cwd: tmp, description: 'First' })
     expect(first.ok).toBe(true)
@@ -348,7 +386,7 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('add from source with no SKILL.md returns error', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
+    const addSkill = await getAddSkill()
 
     const emptyDir = join(tmp, 'empty-source')
     await mkdir(emptyDir, { recursive: true })
@@ -368,8 +406,8 @@ describe('skill lifecycle integration', () => {
   // -------------------------------------------------------------------------
 
   test('checkOutdated reports current for freshly-added local skill', async () => {
-    const { addSkill } = await import('../src/lib/skill-add')
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const addSkill = await getAddSkill()
+    const checkOutdated = await getCheckOutdated()
 
     const sourceDir = join(tmp, 'fresh-source')
     await createSourceSkill(sourceDir, 'fresh-skill', 'Fresh')

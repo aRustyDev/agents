@@ -11,7 +11,7 @@
 import { describe, expect, test } from 'bun:test'
 import { hasModel, isOllamaAvailable, prepareEmbeddingText } from '@agents/kg/embedder'
 import { checkHealth, createClient, hasEmbeddings, isAvailable } from '@agents/kg/meilisearch'
-import { hybridSearch, type RankedResult } from '../src/lib/search'
+import { hybridSearch, type RankedResult } from '@agents/sdk/catalog/search'
 
 // ---------------------------------------------------------------------------
 // lib/embedder.ts health checks

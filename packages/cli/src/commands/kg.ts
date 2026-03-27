@@ -31,12 +31,12 @@ import {
   searchKeyword,
   searchSemantic,
 } from '@agents/kg/meilisearch'
+import { hybridSearch, type RankedResult } from '@agents/sdk/catalog/search'
 import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import fg from 'fast-glob'
 import { Ollama } from 'ollama'
 import picomatch from 'picomatch'
-import { hybridSearch, type RankedResult } from '../lib/search'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'bun:test'
-import { parseTodoYaml, uniqueRepos } from '../src/lib/catalog'
+import { parseTodoYaml, uniqueRepos } from '@agents/sdk/catalog/pipeline/io'
 
 // ---------------------------------------------------------------------------
 // parseTodoYaml

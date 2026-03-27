@@ -11,15 +11,15 @@ import { formatHash, hashDirectory } from '@agents/core/hash'
 import { currentDir } from '@agents/core/runtime'
 import { EXIT } from '@agents/core/types'
 import { readSkillFrontmatter } from '@agents/sdk/context/manifest'
-import { createOutput } from '@agents/sdk/ui'
-import { defineCommand } from 'citty'
 import {
   checkDrift,
   createDriftIssues,
   getStatus,
   refreshLinks,
   syncAll,
-} from '../lib/external-skills'
+} from '@agents/sdk/providers/local/external'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
 import { deprecatedCommand, nounAlias } from './compat'
 import { globalArgs } from './shared-args'
 

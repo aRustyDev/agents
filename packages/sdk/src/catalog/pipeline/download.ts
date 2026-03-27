@@ -62,12 +62,10 @@ async function loadDiscoverSkills(): Promise<
   >
 > {
   try {
-    const mod = await import('../../../../cli/src/lib/skill-discovery')
+    const mod = await import('../../context/skill/discovery')
     return mod.discoverSkills
   } catch {
-    throw new Error(
-      'Failed to load discoverSkills. skill-discovery.ts is in @agents/cli (Phase 5 will move it to SDK).'
-    )
+    throw new Error('Failed to load discoverSkills from @agents/sdk/context/skill/discovery.')
   }
 }
 

@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { listSkills } from '../src/lib/skill-list'
+import { listSkills as _listSkills } from '@agents/sdk/providers/local/skill/list'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+/** Convenience wrapper — auto-injects the CLI agent resolver. */
+const listSkills = (opts?: Parameters<typeof _listSkills>[1]) =>
+  _listSkills(createCliAgentResolver(), opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup

@@ -22,7 +22,7 @@ import {
   saveState,
   transformToComponent,
   validateNdjson,
-} from '../src/lib/registry'
+} from '@agents/sdk/catalog/pipeline/crawl'
 
 // ---------------------------------------------------------------------------
 // Test helpers

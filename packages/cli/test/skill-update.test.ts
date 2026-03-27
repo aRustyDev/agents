@@ -1,5 +1,5 @@
 /**
- * Tests for lib/skill-update.ts
+ * Tests for @agents/sdk/providers/local/skill/update (updateSkills)
  *
  * Uses bun's mock.module() to replace checkOutdated and addSkill so that
  * updateSkills is exercised in isolation without network or filesystem
@@ -10,8 +10,8 @@ import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import type { AddResult } from '../src/lib/skill-add'
-import type { OutdatedResult } from '../src/lib/skill-outdated'
+import type { AddResult } from '@agents/sdk/providers/local/skill/add'
+import type { OutdatedResult } from '@agents/sdk/providers/local/skill/outdated'
 
 // ---------------------------------------------------------------------------
 // Temp directory lifecycle
@@ -74,7 +74,7 @@ function addFailed(message: string): AddResult {
 
 describe('UpdateError', () => {
   test('has skill, message, and code fields', async () => {
-    const { UpdateError } = await import('../src/lib/skill-update')
+    const { UpdateError } = await import('@agents/sdk/providers/local/skill/update')
     const err = new UpdateError('beads', 'failed to update', 'E_UPDATE_FAILED')
     expect(err.skill).toBe('beads')
     expect(err.code).toBe('E_UPDATE_FAILED')
@@ -82,7 +82,7 @@ describe('UpdateError', () => {
   })
 
   test('supports optional hint and cause', async () => {
-    const { UpdateError } = await import('../src/lib/skill-update')
+    const { UpdateError } = await import('@agents/sdk/providers/local/skill/update')
     const cause = new Error('root cause')
     const err = new UpdateError('foo', 'msg', 'E_X', 'try Y', cause)
     expect(err.hint).toBe('try Y')
@@ -90,7 +90,7 @@ describe('UpdateError', () => {
   })
 
   test('extends CliError with display()', async () => {
-    const { UpdateError } = await import('../src/lib/skill-update')
+    const { UpdateError } = await import('@agents/sdk/providers/local/skill/update')
     const err = new UpdateError('bar', 'boom', 'E_BOOM', 'check logs')
     expect(err.display()).toContain('E_BOOM')
     expect(err.display()).toContain('boom')
@@ -104,35 +104,35 @@ describe('UpdateError', () => {
 
 describe('updateSkills -- nothing outdated', () => {
   test('returns "current" for all skills when none are outdated', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('alpha', 'org/alpha', 'current'),
         outdated('beta', 'org/beta', 'current'),
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('unused', 'unused'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(2)
     expect(results.every((r) => r.status === 'current')).toBe(true)
   })
 
   test('returns empty array when lockfile has no skills', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('unused', 'unused'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toEqual([])
   })
@@ -144,16 +144,16 @@ describe('updateSkills -- nothing outdated', () => {
 
 describe('updateSkills -- outdated skills', () => {
   test('updates a single outdated skill', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('stale-skill', 'org/repo', 'outdated')],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('stale-skill', 'org/repo'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(1)
     expect(results[0]!.skill).toBe('stale-skill')
@@ -161,19 +161,19 @@ describe('updateSkills -- outdated skills', () => {
   })
 
   test('updates outdated and passes through current', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('fresh', 'org/fresh', 'current'),
         outdated('stale', 'org/stale', 'outdated'),
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('stale', 'org/stale'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(2)
 
@@ -194,7 +194,7 @@ describe('updateSkills -- outdated skills', () => {
 
 describe('updateSkills -- skill filtering', () => {
   test('only updates specified skills', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('alpha', 'org/alpha', 'outdated'),
         outdated('beta', 'org/beta', 'outdated'),
@@ -203,15 +203,15 @@ describe('updateSkills -- skill filtering', () => {
     }))
 
     const addCalls: string[] = []
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (source: string) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, source: string) => {
         addCalls.push(source)
         return addOk('any', source)
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, {
       cwd: tmp,
       skills: ['alpha', 'gamma'],
     })
@@ -232,16 +232,16 @@ describe('updateSkills -- skill filtering', () => {
   })
 
   test('filter is case-insensitive', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('MySkill', 'org/repo', 'outdated')],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('MySkill', 'org/repo'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, {
       cwd: tmp,
       skills: ['myskill'],
     })
@@ -251,20 +251,20 @@ describe('updateSkills -- skill filtering', () => {
   })
 
   test('filter for non-existent skill skips everything', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('alpha', 'org/alpha', 'outdated')],
     }))
 
     const addCalls: string[] = []
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (source: string) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, source: string) => {
         addCalls.push(source)
         return addOk('alpha', source)
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, {
       cwd: tmp,
       skills: ['nonexistent'],
     })
@@ -284,22 +284,22 @@ describe('updateSkills -- skill filtering', () => {
 
 describe('updateSkills -- partial failures', () => {
   test('continues after one skill fails via AddResult.ok=false', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('bad', 'org/bad', 'outdated'),
         outdated('good', 'org/good', 'outdated'),
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (source: string) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, source: string) => {
         if (source === 'org/bad') return addFailed('clone failed')
         return addOk('good', source)
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(2)
 
@@ -313,22 +313,22 @@ describe('updateSkills -- partial failures', () => {
   })
 
   test('continues after one skill throws an exception', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('throws', 'org/throws', 'outdated'),
         outdated('works', 'org/works', 'outdated'),
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (source: string) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, source: string) => {
         if (source === 'org/throws') throw new Error('unexpected crash')
         return addOk('works', source)
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(2)
 
@@ -342,18 +342,18 @@ describe('updateSkills -- partial failures', () => {
   })
 
   test('handles non-Error throws gracefully', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('throws-string', 'org/x', 'outdated')],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => {
         throw 'raw string error'
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(1)
     expect(results[0]!.status).toBe('failed')
@@ -367,34 +367,34 @@ describe('updateSkills -- partial failures', () => {
 
 describe('updateSkills -- passthrough statuses', () => {
   test('unavailable skills are skipped', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('gone', 'org/gone', 'unavailable')],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('unused', 'unused'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(1)
     expect(results[0]!.status).toBe('skipped')
   })
 
   test('unknown source type skills are skipped', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('weird', 'ftp://host/path', 'unknown', { sourceType: 'ftp' }),
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('unused', 'unused'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(1)
     expect(results[0]!.status).toBe('skipped')
@@ -409,19 +409,19 @@ describe('updateSkills -- option passthrough', () => {
   test('passes cwd and copy to addSkill', async () => {
     let capturedOpts: Record<string, unknown> = {}
 
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [outdated('skill-a', 'org/a', 'outdated')],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (_source: string, opts: Record<string, unknown>) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, _source: string, opts: Record<string, unknown>) => {
         capturedOpts = opts
         return addOk('skill-a', 'org/a')
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    await updateSkills({ cwd: '/custom/path', copy: true })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    await updateSkills(undefined, { cwd: '/custom/path', copy: true })
 
     expect(capturedOpts.cwd).toBe('/custom/path')
     expect(capturedOpts.copy).toBe(true)
@@ -432,19 +432,19 @@ describe('updateSkills -- option passthrough', () => {
   test('passes stdin/fromFile/fromUrl to checkOutdated', async () => {
     let capturedOpts: Record<string, unknown> = {}
 
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async (opts: Record<string, unknown>) => {
         capturedOpts = opts
         return []
       },
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
       addSkill: async () => addOk('unused', 'unused'),
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    await updateSkills({
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    await updateSkills(undefined, {
       fromFile: '/path/to/lockfile.json',
       fromUrl: 'https://example.com/lock.json',
       stdin: true,
@@ -464,7 +464,7 @@ describe('updateSkills -- option passthrough', () => {
 
 describe('updateSkills -- mixed scenario', () => {
   test('handles a realistic mix of current, outdated, unavailable, and unknown', async () => {
-    mock.module('../src/lib/skill-outdated', () => ({
+    mock.module('@agents/sdk/providers/local/skill/outdated', () => ({
       checkOutdated: async () => [
         outdated('fresh-skill', 'org/fresh', 'current'),
         outdated('stale-1', 'org/stale1', 'outdated'),
@@ -474,15 +474,15 @@ describe('updateSkills -- mixed scenario', () => {
       ],
     }))
 
-    mock.module('../src/lib/skill-add', () => ({
-      addSkill: async (source: string) => {
+    mock.module('@agents/sdk/providers/local/skill/add', () => ({
+      addSkill: async (_resolver: unknown, source: string) => {
         if (source === 'org/stale2') return addFailed('disk full')
         return addOk('any', source)
       },
     }))
 
-    const { updateSkills } = await import('../src/lib/skill-update')
-    const results = await updateSkills({ cwd: tmp })
+    const { updateSkills } = await import('@agents/sdk/providers/local/skill/update')
+    const results = await updateSkills(undefined, { cwd: tmp })
 
     expect(results).toHaveLength(5)
 

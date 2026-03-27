@@ -1,7 +1,7 @@
 // cli/test/catalog-stale.test.ts
 import { describe, expect, it } from 'bun:test'
-import type { CatalogEntryWithTier1 } from '../src/lib/catalog'
-import { identifyStaleEntries, type StaleCheckResult } from '../src/lib/catalog-stale'
+import { identifyStaleEntries, type StaleCheckResult } from '@agents/sdk/catalog/pipeline/stale'
+import type { CatalogEntryWithTier1 } from '@agents/sdk/catalog/pipeline/types'
 
 describe('identifyStaleEntries', () => {
   it('flags entries where upstream treeSha differs from stored treeSha', () => {

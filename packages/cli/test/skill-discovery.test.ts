@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { type DiscoveredSkill, discoverSkills, filterSkills } from '../src/lib/skill-discovery'
+import {
+  type DiscoveredSkill,
+  discoverSkills,
+  filterSkills,
+} from '@agents/sdk/context/skill/discovery'
 
 // Worktree root for integration tests
 const WORKTREE = resolve(import.meta.dir, '../../..')

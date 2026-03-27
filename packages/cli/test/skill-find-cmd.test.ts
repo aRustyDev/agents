@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { findSkills } from '../src/lib/skill-find'
+import { findSkills } from '@agents/sdk/providers/local/skill/find'
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -30,8 +30,8 @@ const mockCloneRepo = mock(() =>
 )
 const mockGitRaw = mock(() => Promise.resolve(ok('')))
 
-let gitLsRemote: Awaited<typeof import('../src/lib/external-skills')>['gitLsRemote']
-let syncSkill: Awaited<typeof import('../src/lib/external-skills')>['syncSkill']
+let gitLsRemote: Awaited<typeof import('@agents/sdk/providers/local/external')>['gitLsRemote']
+let syncSkill: Awaited<typeof import('@agents/sdk/providers/local/external')>['syncSkill']
 
 beforeAll(async () => {
   mock.module('@agents/core/git', () => ({
@@ -44,7 +44,7 @@ beforeAll(async () => {
   }))
 
   // Import AFTER mocks are set up
-  const externalSkills = await import('../src/lib/external-skills')
+  const externalSkills = await import('@agents/sdk/providers/local/external')
   gitLsRemote = externalSkills.gitLsRemote
   syncSkill = externalSkills.syncSkill
 })

@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import type { CatalogEntryWithTier1 } from '../src/lib/catalog'
-import type { DiscoveredSkillResult } from '../src/lib/catalog-discover'
-import { buildManifest, buildManifestFromEntry, formatManifestBatch } from '../src/lib/catalog-manifest'
+import type { DiscoveredSkillResult } from '@agents/sdk/catalog/pipeline/discover'
+import {
+  buildManifest,
+  buildManifestFromEntry,
+  formatManifestBatch,
+} from '@agents/sdk/catalog/pipeline/manifest'
+import type { CatalogEntryWithTier1 } from '@agents/sdk/catalog/pipeline/types'
 
 const sampleDiscovery: DiscoveredSkillResult = {
   source: 'org/repo',

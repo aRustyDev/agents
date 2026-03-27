@@ -8,7 +8,7 @@ import {
   readPluginManifest,
   readPluginSources,
   readSkillFrontmatter,
-} from '../src/lib/manifest'
+} from '@agents/sdk/context/manifest'
 
 // Base paths for real test files
 const WORKTREE = resolve(import.meta.dir, '../../..')

@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import { hybridSearch, type MergedResult, type RankedResult, rrfMerge } from '../src/lib/search'
+import {
+  hybridSearch,
+  type MergedResult,
+  type RankedResult,
+  rrfMerge,
+} from '@agents/sdk/catalog/search'
 
 // ---------------------------------------------------------------------------
 // Test data
