@@ -203,6 +203,69 @@ The agent reads this file and maps each comment back to the matrix via the
 
 Shortcuts are disabled when typing in an input field or textarea.
 
+## Analysis Overlays
+
+Pass 2 adds four analysis overlays accessible via the overlay ribbon below the Rendered/Edit toggle. Each overlay can be toggled independently and multiple can be active simultaneously.
+
+### Overlay Ribbon
+
+When the viewer loads, a ribbon appears with four toggle buttons:
+- **Structural** — compliance badges
+- **Operators** — hover tooltips
+- **Progression** — tier broadening view
+- **Decomposition** — heuristic suggestions
+
+Click a button to activate/deactivate. Active overlays are highlighted in blue.
+
+### Structural Compliance
+
+Shows green/red badges next to each required matrix section heading (Context, Tier 1, Tier 2, Tier 3, Runtime Recovery, Grading Summary). Badges reflect whether the corresponding structural assertion in the grading data passed or failed. A gray "?" badge indicates no matching assertion was found.
+
+### Operator Hover Tooltips
+
+When activated, operator syntax within the Operators column cells gets underlined with a dashed line. Hover over any recognized operator to see a tooltip with:
+- Engine name (which search engine uses this operator)
+- Syntax pattern (how to write it)
+- Example usage
+
+Operator data comes from the skill's `references/engines/*.md` files, parsed by the CLI at build time.
+
+### Tier Progression
+
+Renders a side-by-side 3-column layout below the matrix showing how queries broaden across tiers:
+- **Engine chips** — colored labels for each engine, with "new" engines in Tier 2/3 highlighted
+- **Precision tags** — green (high), yellow (medium), orange (broad) based on operator specificity
+- **Query text** — showing what's being searched at each tier level
+
+### Decomposition Suggestions
+
+Runs heuristic analysis on the matrix and shows suggestion cards:
+- **Large Tier 1** (warning) — more than 5 rows suggests the matrix could be split
+- **Multiple engine categories** (info) — 3+ categories may indicate multi-domain scope
+- **Mixed domain** (warning) — domain field contains "+" or "mixed"
+- **Independent queries** (info) — Tier 1 rows with no shared engines may be separate questions
+
+If no issues are found, shows a "No decomposition issues detected" card.
+
+## Token-Level Comments
+
+In addition to cell-level comments, you can anchor comments to specific text within a cell:
+
+- **With operator overlay active:** Click any underlined operator token to open a comment anchored to that specific operator
+- **With text selection:** Select text within a table cell, then click the comment icon — the selected text becomes the comment anchor
+
+Token-level comments show the anchored text in the sidebar label: `"Eval 1 -> Tier 1, Row 3 -> Operators -> "site:""`.
+
+## Iteration Diff (--previous)
+
+Build with the `--previous` flag to include data from a prior iteration:
+
+```bash
+just matrixng build <workspace> --previous <previous-workspace>
+```
+
+When previous data is available, each eval subtab shows a collapsible "Previous Iteration" section between the current output and the baseline, making it easy to compare how the matrix evolved.
+
 ## Architecture
 
 The viewer is a single self-contained HTML file with no external dependencies.
