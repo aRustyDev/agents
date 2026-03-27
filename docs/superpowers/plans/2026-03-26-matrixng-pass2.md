@@ -266,10 +266,12 @@ const JS_LOAD_ORDER = [
 ]
 ```
 
-Also add overlay files (loaded after ribbon):
+Also add overlay files (loaded after ribbon) with **graceful fallback** — overlays are created one at a time in Tasks 3-6, so the build must not crash on missing files:
 
 ```typescript
-const OVERLAY_LOAD_ORDER = [
+import { access } from 'node:fs/promises'
+
+const OVERLAY_FILES = [
   'overlays/structural.js',
   'overlays/operators.js',
   'overlays/progression.js',
@@ -277,7 +279,22 @@ const OVERLAY_LOAD_ORDER = [
 ]
 ```
 
-Read overlay files with graceful fallback (they may not all exist yet during development).
+Update the `assembleHtml` function to load overlays with try/catch after the core scripts:
+
+```typescript
+// Load overlay files (skip missing — they're added incrementally)
+for (const filename of OVERLAY_FILES) {
+  try {
+    await access(join(scriptsDir, filename))
+    const content = await readFile(join(scriptsDir, filename), 'utf-8')
+    jsContents.push(`/* === ${filename} === */\n${content}`)
+  } catch {
+    // File doesn't exist yet — skip silently
+  }
+}
+```
+
+This ensures the build works at every stage: after Task 2 (0 overlays), after Task 3 (1 overlay), etc. Core JS files in `JS_LOAD_ORDER` still fail hard on missing files (they're required).
 
 - [ ] **Step 5: Wire ribbon initialization in core.js**
 
@@ -308,13 +325,14 @@ Green/red badges on each required section of the matrix. Uses grading data from 
 
 The overlay:
 
-- On activate: scans the rendered matrix for `[data-section]` elements. For each section, checks if there's a matching structural assertion in the grading data. Adds a badge (green checkmark or red X) next to the section heading.
+- On activate: gets the current eval via `MV.getState()` (needs `currentEvalIndex` and `data.evals`). Scans the rendered matrix for `[data-section]` elements. For each section, checks grading data for a matching structural assertion. Adds a badge next to the section heading.
+- **Grading-to-section mapping**: the grading data has `GradedExpectation.text` (free text), not section IDs. Match by keyword search — e.g., if expectation text contains "Context" or "context" → maps to section `context`; if it contains "Tier 1" → maps to `tier1`; "Runtime Recovery" or "recovery" → `recovery`; "Grading Summary" or "grading" → `grading`. Only match assertions with `type: "structural"` from the eval's assertion list.
 - On deactivate: removes all `.structural-badge` elements.
 - Required sections to check: `context`, `tier1`, `tier2`, `tier3`, `recovery`, `grading`.
 - If grading data has no matching assertion for a section, show a gray "?" badge.
 - Register on `MV.overlays.structural = { activate, deactivate }`.
 
-~80 lines.
+~90 lines.
 
 - [ ] **Step 2: Add badge styles to styles.css**
 
@@ -542,6 +560,8 @@ git commit -m "feat(matrixng): add decomposition suggestions overlay"
 
 ## Task 7: Token-Level Comments
 
+**Depends on:** Task 4 (operators overlay — creates the `.op-token` spans this task references)
+
 **Files:**
 
 - Modify: `content/skills/search-term-matrices/scripts/viewer/comments.js`
@@ -647,6 +667,31 @@ test('includes overlay JS modules', async () => {
   expect(html).toContain('overlays.progression')
   expect(html).toContain('overlays.decomposition')
   expect(html).toContain('overlay-ribbon')
+  await rm(outputPath, { force: true })
+})
+
+test('builds successfully when overlay files are missing', async () => {
+  // This tests the graceful fallback in assemble.ts
+  // Use a temp skill path with no overlays/ directory
+  const tmpSkill = join(tmpdir(), 'matrixng-no-overlays-test')
+  // (Copy shell.html, styles.css, and core JS but NOT overlays/)
+  // Build should succeed, just without overlay scripts in the HTML
+  // Actual implementation: the build function's try/catch handles missing files
+})
+
+test('populates previousEvals when --previous is provided', async () => {
+  // Use the same workspace as both current and previous (for testing)
+  await build({
+    workspace: WORKSPACE,
+    skillPath: SKILL_PATH,
+    output: outputPath,
+    iteration: 1,
+    open: false,
+    previous: WORKSPACE,
+  })
+  const html = await readFile(outputPath, 'utf-8')
+  expect(html).toContain('previousEvals')
+  await rm(outputPath, { force: true })
   await rm(outputPath, { force: true })
 })
 ```
