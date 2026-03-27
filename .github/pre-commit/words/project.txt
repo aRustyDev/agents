@@ -17,6 +17,7 @@ awesomeclaude
 backfillable
 BehiSecc
 biome
+blockquotes
 blader
 BLAS
 blencorp
@@ -97,6 +98,7 @@ Hyperdimensional
 iannuttall
 iapp
 iconify
+inlines
 Iconify
 Izhikevich
 Jeffallan
