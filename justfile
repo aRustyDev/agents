@@ -16,6 +16,11 @@ mod rule "content/rules/justfile"
 agents *args:
     @bun run packages/cli/src/bin/agents.ts {{ args }}
 
+# Matrix review viewer
+[group('tools')]
+matrixng *args:
+    @bun run packages/matrixng/src/bin.ts {{ args }}
+
 # Claude Code configuration directory
 
 CLAUDE_DIR := env("HOME") / ".claude"
