@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path'
 import { formatHash, hashDirectory } from '@agents/core/hash'
 import { currentDir } from '@agents/core/runtime'
 import { EXIT } from '@agents/core/types'
+import { readSkillFrontmatter } from '@agents/sdk/context/manifest'
 import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import {
@@ -19,7 +20,6 @@ import {
   refreshLinks,
   syncAll,
 } from '../lib/external-skills'
-import { readSkillFrontmatter } from '../lib/manifest'
 import { deprecatedCommand, nounAlias } from './compat'
 import { globalArgs } from './shared-args'
 

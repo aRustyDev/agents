@@ -12,13 +12,13 @@ import { join } from 'node:path'
 import { hashDirectory } from '@agents/core/hash'
 import { checkSymlink } from '@agents/core/symlink'
 import { CliError, err, ok, type Result } from '@agents/core/types'
+import { readSkillFrontmatter } from '@agents/sdk/context/manifest'
 import type { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+// Importing lockfile registers the built-in 'skills' schema as a side effect.
+import { readLockfile } from '@agents/sdk/providers/local/lockfile'
 import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
 import type { AgentType } from './agents'
 import { detectInstalledAgents, getAgentBaseDir } from './agents'
-// Importing lockfile registers the built-in 'skills' schema as a side effect.
-import { readLockfile } from './lockfile'
-import { readSkillFrontmatter } from './manifest'
 
 // ---------------------------------------------------------------------------
 // Error

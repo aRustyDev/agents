@@ -13,6 +13,15 @@ export function parseFrontmatter(content: string): {
   }
 }
 
+/** Chunker-compatible frontmatter parser (returns { meta, body } shape). */
+export function parseMarkdownFrontmatter(raw: string): {
+  meta: Record<string, unknown>
+  body: string
+} {
+  const { attrs, body } = parseFrontmatter(raw)
+  return { meta: attrs, body }
+}
+
 export function computeBasicMetadata(content: string, body: string) {
   const lines = content.split('\n')
   const headings = lines

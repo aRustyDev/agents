@@ -26,7 +26,10 @@ for (const mod of [
 
 export * from './component'
 export * from './frontmatter'
+export * from './manifest'
 export * from './parser'
 export * from './registry'
+export * from './scaffold'
+export * from './taxonomy'
 export * from './types'
 export * from './validator'
