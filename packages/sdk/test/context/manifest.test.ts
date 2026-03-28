@@ -11,7 +11,7 @@ import {
 } from '@agents/sdk/context/manifest'
 
 // Base paths for real test files
-const WORKTREE = resolve(import.meta.dir, '../../..')
+const WORKTREE = resolve(import.meta.dir, '../../../..')
 
 // Temp directory created fresh before each test group
 let tmp: string

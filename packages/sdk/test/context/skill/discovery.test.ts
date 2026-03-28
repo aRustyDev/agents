@@ -9,7 +9,7 @@ import {
 } from '@agents/sdk/context/skill/discovery'
 
 // Worktree root for integration tests
-const WORKTREE = resolve(import.meta.dir, '../../..')
+const WORKTREE = resolve(import.meta.dir, '../../../../..')
 
 // Temp directory created fresh before each test
 let tmp: string

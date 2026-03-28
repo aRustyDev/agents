@@ -3,11 +3,11 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { listSkills as _listSkills } from '@agents/sdk/providers/local/skill/list'
-import { createCliAgentResolver } from '../src/lib/agents'
+import { createMockResolver } from '../../../_utils/mock-resolver'
 
-/** Convenience wrapper — auto-injects the CLI agent resolver. */
+/** Convenience wrapper — auto-injects a mock agent resolver. */
 const listSkills = (opts?: Parameters<typeof _listSkills>[1]) =>
-  _listSkills(createCliAgentResolver(), opts)
+  _listSkills(createMockResolver(), opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup
