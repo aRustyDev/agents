@@ -131,7 +131,7 @@ See `docs/src/adr/` for architecture decisions.
 | **CLI tool** | `just agents <verb> <type> [args]` |
 | Plugin check | `just agents lint --type plugin <name>` |
 | Skill validate | `just agents lint --type skill <name>` |
-| External skill check | `just skill external:check` |
+| External skill check | `just agents update --type skill --check` |
 | Semantic search | `just kg-search "query"` |
 
 ## Issue Tracking with Beads
