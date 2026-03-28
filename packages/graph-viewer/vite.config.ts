@@ -2,7 +2,7 @@ import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  root: resolve(__dirname, 'src/client/graph-viewer'),
+  root: resolve(__dirname, 'src/client'),
   publicDir: false,
   build: {
     outDir: resolve(__dirname, 'dist/graph-viewer'),

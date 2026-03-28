@@ -1,0 +1,29 @@
+{
+  "name": "@agents/graph-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./bin": "./src/bin.ts"
+  },
+  "scripts": {
+    "serve": "bun run src/bin.ts",
+    "dev": "concurrently \"bun run src/bin.ts\" \"npx vite --config vite.config.ts\"",
+    "build": "npx vite build --config vite.config.ts"
+  },
+  "dependencies": {
+    "@agents/core": "workspace:*",
+    "@agents/kg": "workspace:*",
+    "graphology": "^0.26.0",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "graphology-types": "^0.24.8",
+    "sigma": "^3.0.2",
+    "ws": "^8.19.0",
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  }
+}

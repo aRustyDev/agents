@@ -16,9 +16,9 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { extname, resolve } from 'node:path'
 import { currentDir } from '@agents/core/runtime'
 import { WebSocket, WebSocketServer } from 'ws'
-import { handleGitRoute } from '../server/graph-viewer/routes/git'
-import { handleGraphsRoute, handleSchemasRoute } from '../server/graph-viewer/routes/graphs'
-import { createWatcher, type FileChangeEvent } from '../server/graph-viewer/watcher'
+import { handleGitRoute } from './server/routes/git'
+import { handleGraphsRoute, handleSchemasRoute } from './server/routes/graphs'
+import { createWatcher, type FileChangeEvent } from './server/watcher'
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -26,8 +26,8 @@ import { createWatcher, type FileChangeEvent } from '../server/graph-viewer/watc
 
 const PORT = Number(process.env.GV_PORT) || 3000
 const __dir = currentDir(import.meta)
-const DIST_DIR = resolve(__dir, '../../dist/graph-viewer')
-const GRAPHS_DIR = resolve(__dir, '../../../../.data/graphs')
+const DIST_DIR = resolve(__dir, '../dist/graph-viewer')
+const GRAPHS_DIR = resolve(__dir, '../../../.data/graphs')
 
 // ---------------------------------------------------------------------------
 // MIME types for static file serving

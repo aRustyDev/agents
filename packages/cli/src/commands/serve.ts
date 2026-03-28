@@ -155,6 +155,6 @@ export default defineCommand({
     // Default: delegate to graph-viewer serve (web mode)
     process.env.GV_PORT = String(port)
     out.info(`Starting graph viewer on port ${port}...`)
-    await import('../bin/graph-viewer')
+    await import('@agents/graph-viewer/bin')
   },
 })
