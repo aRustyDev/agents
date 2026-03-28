@@ -29,14 +29,14 @@ Before proceeding, verify the appropriate skill is available:
 
 1. Check if `mdbook-plugin-preprocessor` skill exists in:
    - `.claude/skills/mdbook-plugin-preprocessor/SKILL.md`
-   - `~/repos/configs/ai/components/skills/mdbook-plugin-preprocessor/SKILL.md`
+   - `~/repos/configs/ai/content/skills/mdbook-plugin-preprocessor/SKILL.md`
 2. If not found, read the skill from the ai config repo
 
 **For alt-backend plugins:**
 
 1. Check if `mdbook-plugin-alt-backend` skill exists in:
    - `.claude/skills/mdbook-plugin-alt-backend/SKILL.md`
-   - `~/repos/configs/ai/components/skills/mdbook-plugin-alt-backend/SKILL.md`
+   - `~/repos/configs/ai/content/skills/mdbook-plugin-alt-backend/SKILL.md`
 2. If not found, create a minimal placeholder skill:
 
 ```markdown

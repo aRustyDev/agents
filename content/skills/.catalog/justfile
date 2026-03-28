@@ -1,12 +1,12 @@
 # Skill catalog pipeline recipes
-# Imported by context/skills/justfile as: mod catalog ".catalog/justfile"
+# Imported by content/skills/justfile as: mod catalog ".catalog/justfile"
 # Invoked as: just catalog:run, just catalog:taxonomy, etc.
 
 set unstable := true
 
 # ROOT is not inherited from parent module scope
 ROOT := source_directory() / "../../.."
-TOOLS := ROOT / "cli/bin/agents.ts"
+TOOLS := ROOT / "packages/cli/src/bin/agents.ts"
 run := "bun run " + TOOLS + " skill catalog"
 
 # Full pipeline: taxonomy -> availability -> analyze -> grade

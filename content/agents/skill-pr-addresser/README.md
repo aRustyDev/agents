@@ -239,10 +239,10 @@ gh pr view 795 --json state
 
 ### "Could not infer skill path"
 
-The changed files don't match `components/skills/*`. Specify explicitly:
+The changed files don't match `content/skills/*`. Specify explicitly:
 
 ```bash
-just address-skill 795 components/skills/lang-rust-dev
+just address-skill 795 content/skills/lang-rust-dev
 ```
 
 ## Related

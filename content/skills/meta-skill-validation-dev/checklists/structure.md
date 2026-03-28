@@ -16,7 +16,7 @@ SKILL.md should be concise to avoid consuming excessive context.
 
 ```bash
 # Count body lines (excluding frontmatter)
-wc -l < components/skills/my-skill/SKILL.md
+wc -l < content/skills/my-skill/SKILL.md
 ```
 
 ### Why 500 Lines?
@@ -139,11 +139,11 @@ Move to subdirectories:
 
 ```bash
 # Count SKILL.md lines
-wc -l components/skills/my-skill/SKILL.md
+wc -l content/skills/my-skill/SKILL.md
 
 # Check for progressive disclosure
-ls -la components/skills/my-skill/
+ls -la content/skills/my-skill/
 
 # Validate structure
-just validate-skill components/skills/my-skill
+just validate-skill content/skills/my-skill
 ```

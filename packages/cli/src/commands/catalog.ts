@@ -11,11 +11,10 @@
 import { exec as execCb, execSync } from 'node:child_process'
 import {
   appendFileSync,
-  cpSync,
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   renameSync,
   rmSync,
   statSync,
@@ -36,7 +35,7 @@ import {
   readErrorLog,
   validateBatchResults,
 } from '../lib/catalog'
-import { downloadBatch } from '../lib/catalog-download'
+// downloadBatch removed — analyze now uses discoverAllRepos (imported dynamically)
 import { createGit } from '../lib/git'
 import { createOutput } from '../lib/output'
 import { currentDir } from '../lib/runtime'
@@ -117,9 +116,7 @@ export default defineCommand({
         const catalogPath = join(PROJECT_ROOT, 'content/skills/.catalog.ndjson')
 
         if (!existsSync(catalogPath)) {
-          out.error(
-            'Catalog not found. Run availability check first: bun run cli/lib/catalog.ts'
-          )
+          out.error('Catalog not found. Run availability check first: bun run cli/lib/catalog.ts')
           process.exit(EXIT.ERROR)
         }
 
@@ -182,6 +179,62 @@ export default defineCommand({
         out.info(`Concurrency: ${concurrency} parallel agents`)
         out.info(`Run ID: ${runId}`)
 
+        // --- Discovery phase: clone each unique repo ONCE, compute all fields ---
+        const gitProtocol = args['git-protocol'] as string
+        const protocol = gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
+        const { discoverAllRepos } = await import('../lib/catalog-discover')
+        out.info('Discovering skills across all repos...')
+        const discoverySummary = await discoverAllRepos(
+          toProcess as import('../lib/catalog').CatalogEntryWithTier1[],
+          {
+            concurrency: 5,
+            protocol,
+            onProgress: (done, total, repo) => {
+              if (done % 10 === 0 || done === total) {
+                out.info(`  Discovery: ${done}/${total} repos (${repo})`)
+              }
+            },
+          }
+        )
+
+        // Build lookup map: "source:skill" → DiscoveredSkillResult
+        const discoveryMap = new Map<
+          string,
+          import('../lib/catalog-discover').DiscoveredSkillResult
+        >()
+        for (const repoResult of discoverySummary.results) {
+          for (const skill of repoResult.skills) {
+            discoveryMap.set(`${skill.source}:${skill.skill}`, skill)
+          }
+        }
+
+        // Collect discovery-level errors (clone failures, missing skills)
+        const discoveryErrors = new Map<
+          string,
+          { error: string; errorType: import('../lib/catalog').Tier1ErrorType }
+        >()
+        for (const repoResult of discoverySummary.results) {
+          for (const e of repoResult.errors) {
+            // errors have source-level scope; apply to all skills in that source
+            for (const entry of toProcess.filter((en) => en.source === e.source)) {
+              discoveryErrors.set(`${entry.source}:${entry.skill}`, {
+                error: e.error,
+                errorType: e.errorType,
+              })
+            }
+          }
+          for (const m of repoResult.missing) {
+            discoveryErrors.set(`${m.source}:${m.skill}`, {
+              error: `skill "${m.skill}" not found in ${m.source}`,
+              errorType: 'download_failed',
+            })
+          }
+        }
+
+        out.info(
+          `Discovery complete: ${discoveryMap.size} skills found, ${discoveryErrors.size} errors`
+        )
+
         /** Create a git worktree for a batch using simple-git, returns worktree path */
         async function createWorktree(batchId: number): Promise<string> {
           const wtPath = join(WORKTREE_BASE, `skill-inspect-${batchId}`)
@@ -239,7 +292,8 @@ export default defineCommand({
         const allResults: import('../lib/catalog').Tier1Result[] = []
 
         /**
-         * Process a single batch: create worktree, download, analyze, cleanup.
+         * Process a single batch: create worktree, build manifests from discovery, analyze, cleanup.
+         * Uses pre-computed discovery results (discoveryMap) instead of per-batch downloads.
          * Returns the Tier1Results for this batch with detailed error info.
          */
         async function processBatch(
@@ -262,89 +316,66 @@ export default defineCommand({
           }
 
           try {
-            const gitProtocol = args['git-protocol'] as string
-
-            // Phase 1: Create worktree and pre-download skills (async)
+            // Phase 1: Create worktree + resolve skills from discovery map
             wtPath = await createWorktree(batchNum)
             out.info(
-              `[${batchNum}/${totalBatches}] Worktree ready, downloading ${batch.length} skills...`
+              `[${batchNum}/${totalBatches}] Worktree ready, resolving ${batch.length} skills from discovery...`
             )
 
-            // Download skills via git.ts + skill-discovery
-            // deferCleanup keeps temp clone dirs alive until we copy files
-            const cleanups: (() => Promise<void>)[] = []
-            const protocol =
-              gitProtocol === 'auto' ? undefined : (gitProtocol as 'ssh' | 'https')
-            const downloaded = await downloadBatch(batch, { protocol, deferCleanup: cleanups })
+            // Collect per-skill error results from discovery
+            const discoveryErrorResults: import('../lib/catalog').Tier1Result[] = []
+            const resolvedEntries: Array<{
+              entry: import('../lib/catalog').CatalogEntry
+              discovered: import('../lib/catalog-discover').DiscoveredSkillResult
+            }> = []
 
-            // Copy downloaded skills into worktree for agent access
-            const wtSkillsDir = join(wtPath, '.claude', 'skills')
-            mkdirSync(wtSkillsDir, { recursive: true })
-            for (const [skillName, dl] of downloaded) {
-              if (dl.path) {
-                const destDir = join(wtSkillsDir, skillName)
-                mkdirSync(destDir, { recursive: true })
-                const skillSrcDir = join(dl.path, '..')
-                cpSync(skillSrcDir, destDir, { recursive: true })
-                dl.path = join(destDir, 'SKILL.md')
-              }
-            }
-
-            // Now clean up temp clone dirs
-            for (const fn of cleanups) await fn()
-            const successCount = [...downloaded.values()].filter((r) => r.path).length
-            const failCount = batch.length - successCount
-
-            // Collect per-skill download error results immediately
-            const downloadErrorResults: import('../lib/catalog').Tier1Result[] = []
             for (const entry of batch) {
-              const dl = downloaded.get(entry.skill)
-              if (dl && !dl.path && dl.error) {
-                downloadErrorResults.push({
+              const key = `${entry.source}:${entry.skill}`
+              const discovered = discoveryMap.get(key)
+              const discError = discoveryErrors.get(key)
+
+              if (discovered?.content) {
+                resolvedEntries.push({ entry, discovered })
+              } else if (discError) {
+                discoveryErrorResults.push({
                   source: entry.source,
                   skill: entry.skill,
-                  error: dl.error,
-                  errorType: dl.errorType,
-                  errorDetail: dl.errorDetail,
-                  errorCode: dl.errorCode,
-                  retryable: dl.errorType === 'download_timeout',
+                  error: discError.error,
+                  errorType: discError.errorType,
+                  retryable: discError.errorType === 'download_timeout',
+                  tier2Reviewed: false,
+                })
+              } else {
+                discoveryErrorResults.push({
+                  source: entry.source,
+                  skill: entry.skill,
+                  error: `skill "${entry.skill}" not found in discovery results for ${entry.source}`,
+                  errorType: 'download_failed',
+                  retryable: false,
                   tier2Reviewed: false,
                 })
               }
             }
 
+            const successCount = resolvedEntries.length
+            const failCount = batch.length - successCount
+
             if (successCount === 0) {
-              out.error(`[${batchNum}/${totalBatches}] All downloads failed`)
-              return stamp(downloadErrorResults)
+              out.error(`[${batchNum}/${totalBatches}] All skills failed discovery`)
+              return stamp(discoveryErrorResults)
             }
 
             if (failCount > 0) {
               out.info(
-                `[${batchNum}/${totalBatches}] Downloaded ${successCount}/${batch.length} (${failCount} failed)`
+                `[${batchNum}/${totalBatches}] Resolved ${successCount}/${batch.length} (${failCount} failed)`
               )
             }
 
-            // Build manifests with content inline for judgment-only agent
-            const { buildManifestFromEntry, buildTier1AgentPrompt } = await import(
-              '../lib/catalog-manifest'
+            // Build manifests from discovery results (content is already available)
+            const { buildManifest, buildTier1AgentPrompt } = await import('../lib/catalog-manifest')
+            const manifests = resolvedEntries.map(({ discovered }) =>
+              buildManifest(discovered, discovered.content as string)
             )
-            const manifests = batch
-              .filter((entry) => {
-                const dl = downloaded.get(entry.skill)
-                return dl?.path
-              })
-              .map((entry) => {
-                const dl = downloaded.get(entry.skill)
-                const content = readFileSync(dl?.path as string, 'utf8') as string
-                return buildManifestFromEntry(
-                  {
-                    ...entry,
-                    ...dl,
-                    wordCount: dl?.wordCount ?? 0,
-                  } as import('../lib/catalog').CatalogEntryWithTier1,
-                  content
-                )
-              })
 
             // Phase 2: Dispatch agent (judgment-only — no tools, content inline)
             const agentPrompt = buildTier1AgentPrompt(manifests)
@@ -367,43 +398,49 @@ export default defineCommand({
 
             // Merge orchestrator mechanical data (authoritative) with agent judgment data
             const batchResults: import('../lib/catalog').Tier1Result[] = []
-            for (const entry of batch) {
-              const dl = downloaded.get(entry.skill)
+            for (const { entry, discovered } of resolvedEntries) {
               const agentResult = agentResults.find(
                 (r) => r.source === entry.source && r.skill === entry.skill
               )
 
-              if (dl?.path && dl.contentHash) {
-                // Success: orchestrator mechanical fields + agent judgment fields
-                batchResults.push({
-                  source: entry.source,
-                  skill: entry.skill,
-                  // Orchestrator mechanical data (authoritative)
-                  contentHash: dl.contentHash,
-                  wordCount: dl.wordCount,
-                  sectionCount: dl.sectionCount,
-                  fileCount: dl.fileCount,
-                  headingTree: dl.headingTree,
-                  // Agent judgment data (overlay)
-                  ...(agentResult
-                    ? {
-                        keywords: agentResult.keywords,
-                        complexity: agentResult.complexity,
-                        progressiveDisclosure: agentResult.progressiveDisclosure,
-                        pdTechniques: agentResult.pdTechniques,
-                        bestPracticesMechanical: agentResult.bestPracticesMechanical,
-                        securityMechanical: agentResult.securityMechanical,
-                        internalLinks: agentResult.internalLinks,
-                        externalLinks: agentResult.externalLinks,
-                      }
-                    : {}),
-                  tier2Reviewed: false,
-                })
-              }
+              // Success: discovery mechanical fields + agent judgment fields
+              batchResults.push({
+                source: entry.source,
+                skill: entry.skill,
+                // Discovery mechanical data (authoritative)
+                contentHash: discovered.mechanical.contentHash,
+                wordCount: discovered.mechanical.wordCount,
+                sectionCount: discovered.mechanical.sectionCount,
+                fileCount: discovered.mechanical.fileCount,
+                headingTree: discovered.mechanical.headingTree,
+                treeSha: discovered.mechanical.treeSha,
+                discoveredPath: discovered.mechanical.discoveredPath,
+                lastSeenAt: discovered.mechanical.lastSeenAt,
+                lastSeenHeadSha: discovered.mechanical.lastSeenHeadSha,
+                lineCount: discovered.mechanical.lineCount,
+                sectionMap: discovered.mechanical.sectionMap,
+                fileTree: discovered.mechanical.fileTree,
+                skillSizeBytes: discovered.mechanical.skillSizeBytes,
+                isSimple: discovered.mechanical.isSimple,
+                // Agent judgment data (overlay)
+                ...(agentResult
+                  ? {
+                      keywords: agentResult.keywords,
+                      complexity: agentResult.complexity,
+                      progressiveDisclosure: agentResult.progressiveDisclosure,
+                      pdTechniques: agentResult.pdTechniques,
+                      bestPracticesMechanical: agentResult.bestPracticesMechanical,
+                      securityMechanical: agentResult.securityMechanical,
+                      internalLinks: agentResult.internalLinks,
+                      externalLinks: agentResult.externalLinks,
+                    }
+                  : {}),
+                tier2Reviewed: false,
+              })
             }
 
-            // Combine with download errors
-            const combined = [...batchResults, ...downloadErrorResults]
+            // Combine with discovery errors
+            const combined = [...batchResults, ...discoveryErrorResults]
             const errors = combined.filter((r) => r.error)
             out.info(
               `[${batchNum}/${totalBatches}] Analyzed ${batchResults.length}/${batch.length}${errors.length > 0 ? ` (${errors.length} errors)` : ''}`
@@ -470,9 +507,7 @@ export default defineCommand({
         }
 
         // Launch `concurrency` workers
-        const workers = Array.from({ length: Math.min(concurrency, totalBatches) }, () =>
-          runNext()
-        )
+        const workers = Array.from({ length: Math.min(concurrency, totalBatches) }, () => runNext())
         await Promise.all(workers)
 
         // Fork detection pass
@@ -616,9 +651,7 @@ export default defineCommand({
           process.exit(EXIT.OK)
         }
 
-        const results = detectForks(
-          withHash as unknown as import('../lib/catalog').Tier1Result[]
-        )
+        const results = detectForks(withHash as unknown as import('../lib/catalog').Tier1Result[])
         const forks = results.filter((r) => r.possibleForkOf)
 
         if (args.json) {
@@ -943,9 +976,7 @@ export default defineCommand({
           out.info(`Summary:`)
           out.info(`  Catalog entries modified: ${dataAndError + errorOnly}`)
           out.info(`  Error log entries created: ${errorOnly}`)
-          out.info(
-            `  Catalog size: ${entries.length} entries (count unchanged, fields stripped)`
-          )
+          out.info(`  Catalog size: ${entries.length} entries (count unchanged, fields stripped)`)
           process.exit(EXIT.OK)
         }
 
@@ -1038,9 +1069,7 @@ export default defineCommand({
           process.exit(EXIT.ERROR)
         }
 
-        const { identifyStaleEntries, fetchUpstreamHashes } = await import(
-          '../lib/catalog-stale'
-        )
+        const { identifyStaleEntries, fetchUpstreamHashes } = await import('../lib/catalog-stale')
         const allEntries = readCatalog(
           catalogPath
         ) as import('../lib/catalog').CatalogEntryWithTier1[]
@@ -1067,9 +1096,7 @@ export default defineCommand({
             )
           }
           if (stale.length > 0) {
-            out.info(
-              '\nRe-analyze stale skills with: just agents skill catalog analyze --force'
-            )
+            out.info('\nRe-analyze stale skills with: just agents skill catalog analyze --force')
           }
         }
 
@@ -1148,9 +1175,7 @@ export default defineCommand({
         ).length
         const batchFailed = toProcess.filter((e) => e.lastErrorType === 'batch_failed').length
 
-        out.info(
-          `Backfill candidates: ${needsBackfill.length} (processing ${toProcess.length})`
-        )
+        out.info(`Backfill candidates: ${needsBackfill.length} (processing ${toProcess.length})`)
         out.info(`  Missing headingTree: ${missingHeadingTree}`)
         out.info(`  Missing treeSha:     ${missingTreeSha}`)
         out.info(`  Missing keywords:    ${missingKeywords}`)
@@ -1216,6 +1241,16 @@ export default defineCommand({
           description: 'Skip repos whose HEAD matches cached manifest',
           default: true,
         },
+        full: {
+          type: 'boolean',
+          description: 'Force re-cloning all repos (bypass incremental cache)',
+          default: false,
+        },
+        apply: {
+          type: 'boolean',
+          description: 'Apply reconciliation changes to catalog (add/remove/update entries)',
+          default: false,
+        },
         'dry-run': {
           type: 'boolean',
           description: 'Show repo count without cloning',
@@ -1235,8 +1270,9 @@ export default defineCommand({
         }
 
         const { discoverAllRepos } = await import('../lib/catalog-discover')
-        const { readRepoManifest, mergeRepoManifest, writeRepoManifest } = await import(
-          '../lib/catalog'
+        const { readRepoManifest, mergeRepoManifest } = await import('../lib/catalog')
+        const { reconcile, detectMoveRenames, applyReconciliation } = await import(
+          '../lib/catalog-reconcile'
         )
         const manifestPath = join(PROJECT_ROOT, 'content/skills/.catalog-repos.ndjson')
 
@@ -1246,12 +1282,13 @@ export default defineCommand({
         const available = allEntries.filter((e) => e.availability === 'available')
         const uniqueRepos = new Set(available.map((e) => e.source))
         const concurrency = parseInt(args.concurrency as string, 10) || 5
-        const incremental = args.incremental as boolean
+        const forceFullClone = args.full as boolean
+        const incremental = forceFullClone ? false : (args.incremental as boolean)
         const cachedManifests = incremental ? readRepoManifest(manifestPath) : []
 
         out.info(`Catalog: ${allEntries.length} entries, ${uniqueRepos.size} unique repos`)
         out.info(
-          `Mode: ${incremental ? 'incremental' : 'full'} (${cachedManifests.length} cached)`
+          `Mode: ${forceFullClone ? 'full (--full)' : incremental ? 'incremental' : 'full'} (${cachedManifests.length} cached)`
         )
 
         if (args['dry-run']) {
@@ -1289,6 +1326,36 @@ export default defineCommand({
         const totalMissing = summary.results.reduce((n, r) => n + r.missing.length, 0)
         const totalErrors = summary.results.reduce((n, r) => n + r.errors.length, 0)
 
+        out.info(`\nDiscovery complete:`)
+        out.info(
+          `  Skipped ${summary.skipped} repos (unchanged HEAD), cloned ${summary.cloned} repos`
+        )
+        out.info(`  Skills found: ${totalSkills}`)
+        out.info(`  Missing from repos: ${totalMissing}`)
+        out.info(`  Clone errors: ${totalErrors}`)
+
+        // Reconcile discovery results against existing catalog
+        const report = reconcile(allEntries, summary.results)
+        detectMoveRenames(report, allEntries)
+
+        out.info(`\nReconciliation:`)
+        out.info(`  Updated: ${report.updated.length}`)
+        out.info(`  Added: ${report.added.length}`)
+        out.info(`  Removed: ${report.removed.length}`)
+        out.info(`  Moved: ${report.moved.length}`)
+        out.info(`  Renamed: ${report.renamed.length}`)
+        out.info(`  Errors: ${report.errors.length}`)
+
+        // Apply reconciliation changes if requested
+        if (args.apply) {
+          const allDiscovered = summary.results.flatMap((r) => r.skills)
+          const stats = applyReconciliation(catalogPath, report, allDiscovered)
+          out.info(`\nApplied to catalog:`)
+          out.info(
+            `  ${stats.added} added, ${stats.removed} removed, ${stats.updated} updated, ${stats.moved} moved`
+          )
+        }
+
         if (args.json) {
           out.raw({
             repos: summary.totalRepos,
@@ -1297,13 +1364,16 @@ export default defineCommand({
             skillsFound: totalSkills,
             missing: totalMissing,
             errors: totalErrors,
+            reconciliation: {
+              updated: report.updated.length,
+              added: report.added.length,
+              removed: report.removed.length,
+              moved: report.moved.length,
+              renamed: report.renamed.length,
+              errors: report.errors.length,
+            },
+            applied: !!args.apply,
           })
-        } else {
-          out.info(`\nDiscovery complete:`)
-          out.info(`  Repos: ${summary.cloned} cloned, ${summary.skipped} skipped (unchanged)`)
-          out.info(`  Skills found: ${totalSkills}`)
-          out.info(`  Missing from repos: ${totalMissing}`)
-          out.info(`  Clone errors: ${totalErrors}`)
         }
 
         process.exit(EXIT.OK)

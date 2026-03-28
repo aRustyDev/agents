@@ -509,10 +509,10 @@ def infer_skill_from_files(changed_files: list[str]) -> str | None:
         changed_files: List of file paths changed in PR
 
     Returns:
-        Skill path (e.g., "components/skills/lang-rust-dev") or None
+        Skill path (e.g., "content/skills/lang-rust-dev") or None
     """
     for f in changed_files:
-        if f.startswith("components/skills/"):
+        if f.startswith("content/skills/"):
             parts = f.split("/")
             if len(parts) >= 3:
                 return "/".join(parts[:3])

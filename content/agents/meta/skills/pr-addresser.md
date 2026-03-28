@@ -41,7 +41,7 @@ just -f .claude/agents/skill-pr-addresser/justfile status 795
 just -f .claude/agents/skill-pr-addresser/justfile address-dry 795
 
 # Specify skill explicitly (instead of auto-detecting from changed files)
-just -f .claude/agents/skill-pr-addresser/justfile address-skill 795 components/skills/lang-rust-dev
+just -f .claude/agents/skill-pr-addresser/justfile address-skill 795 content/skills/lang-rust-dev
 
 # Force addressing even if no pending feedback detected
 just -f .claude/agents/skill-pr-addresser/justfile address 795 --force

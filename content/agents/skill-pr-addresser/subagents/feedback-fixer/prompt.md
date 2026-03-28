@@ -5,12 +5,13 @@ You are implementing fixes for PR review feedback on a Claude Code skill.
 ## Context
 
 - **Working directory**: A git worktree with the skill checked out
-- **Skill path**: Will be provided (e.g., `components/skills/lang-rust-dev`)
+- **Skill path**: Will be provided (e.g., `content/skills/lang-rust-dev`)
 - **Action group**: A consolidated set of similar feedback items
 
 ## Understanding Action Groups
 
 An action group represents **related feedback that should be addressed together**. For example:
+
 - "Move to examples" with 4 locations means: move content at lines 239, 398, 671, 733 to examples/
 - "Move to references" with 2 locations means: move content at those lines to reference/
 
@@ -57,14 +58,15 @@ If told to move content at lines 239, 398, 671 to examples/:
 2. Identify what each code block demonstrates
 3. Create appropriate example files (e.g., `examples/tracing.ts`, `examples/webhooks.ts`)
 4. Replace original content with reference links like:
-   ```markdown
-   See [examples/tracing.ts](examples/tracing.ts) for implementation.
-   ```
+
+       See [examples/tracing.ts](examples/tracing.ts) for implementation.
+
 5. Ensure the SKILL.md remains under 500 lines
 
 ## What You Can Skip
 
 Skip items that:
+
 - Require changes outside the skill directory
 - Need access to external APIs or resources
 - Involve architectural decisions beyond the skill scope

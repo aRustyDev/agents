@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
   BACKOFF_CONFIG,
-  type Component,
+  type CatalogRecord,
   type CrawlState,
   computeStats,
   createCrawlState,

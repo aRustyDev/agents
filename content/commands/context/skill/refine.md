@@ -9,7 +9,7 @@ Review and refine a Claude Code skill to follow best practices from the [officia
 
 ## Arguments
 
-- `$1` - Path to skill directory (required). Example: `components/skills/my-skill`
+- `$1` - Path to skill directory (required). Example: `content/skills/my-skill`
 - `--check-only` - Only analyze, don't make changes (optional)
 - `--create-issues` - Create GitHub issues for findings (optional)
 
@@ -221,22 +221,22 @@ After creating issues, report:
 
 ```bash
 # Analyze a skill (no changes)
-/refine-skill components/skills/my-skill --check-only
+/refine-skill content/skills/my-skill --check-only
 
 # Analyze and apply refinements
-/refine-skill components/skills/my-skill
+/refine-skill content/skills/my-skill
 
 # Refine a skill in current directory
 /refine-skill .
 
 # Analyze and create GitHub issues for findings
-/refine-skill components/skills/my-skill --create-issues
+/refine-skill content/skills/my-skill --create-issues
 
 # Check only + create issues (no local changes, just report and track)
-/refine-skill components/skills/my-skill --check-only --create-issues
+/refine-skill content/skills/my-skill --check-only --create-issues
 
 # Batch analyze multiple skills and create issues
-for skill in components/skills/*/; do
+for skill in content/skills/*/; do
   /refine-skill "$skill" --check-only --create-issues
 done
 ```

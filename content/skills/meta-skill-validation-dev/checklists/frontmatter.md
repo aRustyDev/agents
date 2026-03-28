@@ -118,7 +118,7 @@ Start with verbs or capability statements:
 
 ```bash
 # Quick validation via justfile
-just validate-skill components/skills/my-skill
+just validate-skill content/skills/my-skill
 
 # Output includes frontmatter checks:
 # ✓ SKILL.md exists

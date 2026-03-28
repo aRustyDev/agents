@@ -3,6 +3,8 @@ import { mkdtemp, realpath, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
+  type AgentsConfig,
+  AgentsConfigTomlSchema,
   DEFAULT_CONFIG,
   deepMerge,
   getConfigValue,
@@ -13,7 +15,6 @@ import {
   readEnvConfig,
   setConfigValue,
   writeConfigFile,
-  type AgentsConfig,
 } from '../../src/lib/config'
 import { writeTextFile } from '../../src/lib/file-io'
 
@@ -190,7 +191,10 @@ describe('writeConfigFile', () => {
 describe('readConfigFile snake_case support', () => {
   test('reads snake_case TOML and maps to camelCase', async () => {
     const path = join(root, 'snake-input.toml')
-    await writeTextFile(path, '[general]\noutput_format = "json"\nfail_on = "warning"\n\n[search]\ndefault_limit = 42\n')
+    await writeTextFile(
+      path,
+      '[general]\noutput_format = "json"\nfail_on = "warning"\n\n[search]\ndefault_limit = 42\n'
+    )
 
     const result = await readConfigFile(path)
     expect(result.ok).toBe(true)
@@ -323,10 +327,7 @@ describe('loadConfig', () => {
     const { mkdir } = await import('node:fs/promises')
     await mkdir(dir, { recursive: true })
 
-    await writeTextFile(
-      join(dir, '.agents.toml'),
-      '[general]\ndebug = false\n'
-    )
+    await writeTextFile(join(dir, '.agents.toml'), '[general]\ndebug = false\n')
 
     process.env.AGENTS_DEBUG = 'true'
 
@@ -393,6 +394,79 @@ describe('setConfigValue', () => {
     // Force a missing intermediate
     ;(config as Record<string, unknown>).newSection = undefined
     const updated = setConfigValue(config, 'newSection.key', 'value')
-    expect((updated as Record<string, unknown> & { newSection: { key: string } }).newSection.key).toBe('value')
+    expect(
+      (updated as Record<string, unknown> & { newSection: { key: string } }).newSection.key
+    ).toBe('value')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Valibot validation
+// ---------------------------------------------------------------------------
+
+describe('AgentsConfigTomlSchema validation', () => {
+  test('valid config passes validation', async () => {
+    const path = join(root, 'valid-schema.toml')
+    await writeTextFile(
+      path,
+      '[general]\ndebug = true\noutput_format = "json"\nfail_on = "warning"\n\n[search]\nbackends = ["local"]\ndefault_limit = 20\n\n[catalog]\npath = "custom/path"\n'
+    )
+
+    const result = await readConfigFile(path)
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      const parsed = result.value as AgentsConfig
+      expect(parsed.general?.debug).toBe(true)
+      expect(parsed.general?.outputFormat).toBe('json')
+      expect(parsed.general?.failOn).toBe('warning')
+      expect(parsed.search?.backends).toEqual(['local'])
+      expect(parsed.search?.defaultLimit).toBe(20)
+      expect(parsed.catalog?.path).toBe('custom/path')
+    }
+  })
+
+  test('config with unknown keys warns but still works (lenient)', async () => {
+    const path = join(root, 'unknown-keys.toml')
+    await writeTextFile(path, '[general]\ndebug = true\nunknown_key = "value"\n')
+
+    // Capture console.error output
+    const errors: string[] = []
+    const origError = console.error
+    console.error = (...args: unknown[]) => {
+      errors.push(args.map(String).join(' '))
+    }
+    try {
+      const result = await readConfigFile(path)
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        // debug should still be parsed even though there was an unknown key warning
+        expect(result.value.general).toBeDefined()
+      }
+    } finally {
+      console.error = origError
+    }
+  })
+
+  test('config with wrong types warns', async () => {
+    const path = join(root, 'wrong-types.toml')
+    await writeTextFile(path, '[general]\ndebug = "not-a-boolean"\n')
+
+    const errors: string[] = []
+    const origError = console.error
+    console.error = (...args: unknown[]) => {
+      errors.push(args.map(String).join(' '))
+    }
+    try {
+      const result = await readConfigFile(path)
+      expect(result.ok).toBe(true)
+      // Should have warned about the type mismatch
+      expect(errors.some((e) => e.includes('Warning: config validation issues'))).toBe(true)
+    } finally {
+      console.error = origError
+    }
+  })
+
+  test('schema is exported for reuse', () => {
+    expect(AgentsConfigTomlSchema).toBeDefined()
   })
 })

@@ -34,8 +34,8 @@ def mock_pr_details():
         base_branch="main",
         head_sha="abc123",
         changed_files=[
-            "components/skills/lang-rust-dev/SKILL.md",
-            "components/skills/lang-rust-dev/examples/ownership.md",
+            "content/skills/lang-rust-dev/SKILL.md",
+            "content/skills/lang-rust-dev/examples/ownership.md",
         ],
     )
 
@@ -56,7 +56,7 @@ def mock_unresolved_thread():
     """Sample unresolved thread."""
     return ReviewThread(
         id="thread_1",
-        path="components/skills/lang-rust-dev/SKILL.md",
+        path="content/skills/lang-rust-dev/SKILL.md",
         line=42,
         is_resolved=False,
         is_outdated=False,
@@ -216,7 +216,7 @@ class TestDiscoverContext:
         ctx = DiscoveryContext(
             pr=mock_pr_details,
             pr_number=795,
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
             blocking_reviews=[mock_blocking_review],
             unresolved_threads=[mock_unresolved_thread],
         )
@@ -227,7 +227,7 @@ class TestDiscoverContext:
         ctx = DiscoveryContext(
             pr=mock_pr_details,
             pr_number=795,
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
             blocking_reviews=[mock_blocking_review],
         )
         assert ctx.blocking_reviewers == ["reviewer1"]
@@ -237,7 +237,7 @@ class TestDiscoverContext:
         ctx = DiscoveryContext(
             pr=mock_pr_details,
             pr_number=795,
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
             blocking_reviews=[mock_blocking_review],
         )
         assert ctx.needs_changes is True
@@ -247,7 +247,7 @@ class TestDiscoverContext:
         ctx = DiscoveryContext(
             pr=mock_pr_details,
             pr_number=795,
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
             unresolved_threads=[mock_unresolved_thread],
         )
         assert ctx.needs_changes is True
@@ -257,7 +257,7 @@ class TestDiscoverContext:
         ctx = DiscoveryContext(
             pr=mock_pr_details,
             pr_number=795,
-            skill_path="components/skills/lang-rust-dev",
+            skill_path="content/skills/lang-rust-dev",
         )
         assert ctx.needs_changes is False
 
@@ -300,7 +300,7 @@ class TestInferSkillPath:
                             worktree_base=tmp_worktree_base,
                             repo_path=Path("/fake/repo"),
                         )
-                        assert ctx.skill_path == "components/skills/lang-rust-dev"
+                        assert ctx.skill_path == "content/skills/lang-rust-dev"
 
     def test_explicit_skill_path_overrides_inference(
         self, mock_pr_details, mock_blocking_review, tmp_sessions_dir, tmp_worktree_base
@@ -336,6 +336,6 @@ class TestInferSkillPath:
                             sessions_dir=tmp_sessions_dir,
                             worktree_base=tmp_worktree_base,
                             repo_path=Path("/fake/repo"),
-                            skill_path="components/skills/other-skill",
+                            skill_path="content/skills/other-skill",
                         )
-                        assert ctx.skill_path == "components/skills/other-skill"
+                        assert ctx.skill_path == "content/skills/other-skill"

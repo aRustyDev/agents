@@ -34,10 +34,10 @@ Map user requests to expected skill categories:
 
 ### Gap Detection Algorithm
 
-```
+```text
 1. Parse user request for domain keywords
 2. For each keyword:
-   a. Search local skills: components/skills/*<keyword>*
+   a. Search local skills: content/skills/*<keyword>*
    b. Search loaded skills in current context
    c. If no match → GAP DETECTED
 3. Check for compound gaps:
@@ -61,11 +61,13 @@ Map user requests to expected skill categories:
 ### When to Create Issues
 
 Create issue when:
+
 - User confirms gap should be addressed
 - Gap is "Complete" or "Derivative" type
 - Domain is general enough to benefit future tasks
 
 Skip issue when:
+
 - One-off project-specific need
 - User declines
 - Very niche domain unlikely to recur
@@ -116,6 +118,7 @@ gh issue create --repo aRustyDev/agents \
 ### Review Triggers
 
 Evaluate skills when:
+
 - Task completes successfully
 - User corrects Claude's approach
 - User provides information the skill should have covered
@@ -131,12 +134,14 @@ Evaluate skills when:
 | **Accuracy** | Was the information correct? | 0-3 |
 
 **Scoring:**
+
 - 0 = Not at all
 - 1 = Partially
 - 2 = Mostly
 - 3 = Completely
 
 **Action thresholds:**
+
 - Total < 6: Major revision needed
 - Total 6-9: Refinement opportunities
 - Total 10-12: Skill is effective
@@ -158,6 +163,7 @@ Evaluate skills when:
 ### When to Refactor
 
 Refactor skill structure when:
+
 - SKILL.md exceeds 500 lines
 - Specific sections rarely used together
 - Different user personas need different depths
@@ -165,7 +171,8 @@ Refactor skill structure when:
 ### Refactoring Patterns
 
 **Extract to References:**
-```
+
+```text
 Before: 800-line SKILL.md with everything inline
 
 After:
@@ -177,7 +184,8 @@ After:
 ```
 
 **Split by Use Case:**
-```
+
+```text
 Before: One skill covers dev + ops + troubleshooting
 
 After:
@@ -187,7 +195,8 @@ After:
 ```
 
 **Create Derivatives:**
-```
+
+```text
 Before: Generic skill tries to cover all languages
 
 After:
@@ -217,6 +226,7 @@ After:
 ### When to Suggest Derivatives
 
 Suggest derivative when:
+
 - Meta-skill loaded but user needs language-specific patterns
 - Multiple languages/platforms apply same pattern
 - User asks for "<domain> <pattern>" combination
@@ -233,6 +243,7 @@ Suggest derivative when:
 ### Derivative Creation Checklist
 
 Before creating derivative:
+
 - [ ] Meta-skill exists and is stable
 - [ ] Domain has enough specific content to warrant skill
 - [ ] Not a one-off need
@@ -260,16 +271,19 @@ Before creating derivative:
 **Task:** <brief description>
 
 ### Skills Loaded
+
 | Skill | Sections Used | Effectiveness |
 |-------|---------------|---------------|
 | `skill-1` | Overview, Quick Ref | High |
 | `skill-2` | None (loaded but unused) | Low |
 
 ### Gaps Identified
+
 - [ ] No skill for <domain-1>
 - [ ] `skill-2` missing <topic> coverage
 
 ### Improvement Opportunities
+
 - `skill-1`: Consider extracting <section> to reference
 - `skill-2`: Trigger too broad, refine description
 ```
@@ -280,7 +294,7 @@ Before creating derivative:
 
 | Task | Action |
 |------|--------|
-| Check for gaps | Search `components/skills/*<keyword>*` |
+| Check for gaps | Search `content/skills/*<keyword>*` |
 | Create gap issue | `gh issue create --repo aRustyDev/agents ...` |
 | Evaluate skill | Score relevance, coverage, precision, accuracy |
 | Refactor large skill | Extract to `references/` |

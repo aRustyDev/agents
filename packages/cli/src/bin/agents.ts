@@ -19,11 +19,16 @@ const main = defineCommand({
     plugin: () => import('../commands/plugin').then((m) => m.default),
     skill: () => import('../commands/skill').then((m) => m.default),
     mcp: () => import('../commands/mcp').then((m) => m.default),
+    // Configuration
+    config: () => import('../commands/config').then((m) => m.default),
     // Other
     component: () => import('../commands/component').then((m) => m.default),
     kg: () => import('../commands/kg').then((m) => m.default),
     registry: () => import('../commands/registry').then((m) => m.default),
     'graph-viewer': () => import('../commands/graph-viewer').then((m) => m.default),
+    completions: () => import('../commands/completions').then((m) => m.default),
+    doctor: () => import('../commands/doctor').then((m) => m.default),
+    serve: () => import('../commands/serve').then((m) => m.default),
   },
 })
 

@@ -14,6 +14,7 @@ asciinema
 ashleytower
 atcyrus
 awesomeclaude
+backfillable
 BehiSecc
 biome
 blader
@@ -25,6 +26,7 @@ bunx
 burpsuite
 cchooks
 cclint
+ccflare
 ccpm
 CHANGEME
 chunker
@@ -39,6 +41,7 @@ codebase
 codebases
 codecov
 codegraph
+compdef
 Composio
 Cpath
 crawl4ai
@@ -57,10 +60,14 @@ DTCG
 Duplicat
 elec
 embeddings
+ename
+eslug
+etype
 etypes
 fastmcp
 FDTD
 ffuf
+filetree
 Floorplan
 flowgpt
 forceatlas
@@ -92,7 +99,9 @@ jqueryscript
 justfile
 kwsites
 lackeyjb
+lastrowid
 LAPACK
+lintable
 litdb
 Livelocks
 lockfiles
@@ -112,6 +121,8 @@ mihaelamj
 modelcontextprotocol
 monorepo
 mousemovebody
+mycomponent
+mycomponentv
 myns
 myproject
 myskill
@@ -125,6 +136,7 @@ ollama
 onlynamespace
 opto
 orbstack
+orgname
 overclaiming
 pargs
 pdate
@@ -154,6 +166,8 @@ pytestmark
 radon
 rahulvrane
 recieve
+rels
+reclassifiable
 reprioritize
 rereview
 ripgrep
@@ -171,9 +185,11 @@ shellharden
 shfmt
 simctl
 skillmd
+skillsize
 skillsmp
 slugified
 smithery
+smol
 sonnet
 Sortability
 sourcekit
@@ -181,6 +197,7 @@ sqlfluff
 sqlite
 STDP
 subagent
+subdirs
 subviews
 Sundell
 surrealdb
@@ -193,6 +210,7 @@ swiftui
 SwiftUI
 Tauri
 tenequm
+testuser
 timebox
 tmppath
 tokei
@@ -242,8 +260,3 @@ yamllint
 yara
 zeroize
 Zotero
-reclassifiable
-backfillable
-subdirs
-filetree
-skillsize

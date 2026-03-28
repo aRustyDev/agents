@@ -7,7 +7,7 @@ mod external ".external/justfile"
 mod catalog ".catalog/justfile"
 
 ROOT := source_directory() / "../.."
-SCRIPTS := ROOT / "cli"
+SCRIPTS := ROOT / "packages/cli"
 SKILLS := source_directory()
 
 # Validate a skill's SKILL.md structure
@@ -53,7 +53,7 @@ hash name:
 # List all skills
 [group('skill')]
 list:
-    @ls -1 {{ SKILLS }}/*/SKILL.md 2>/dev/null | sed 's|.*/context/skills/||;s|/SKILL.md||' | sort
+    @ls -1 {{ SKILLS }}/*/SKILL.md 2>/dev/null | sed 's|.*/content/skills/||;s|/SKILL.md||' | sort
 
 # Check all skills
 [group('skill')]
@@ -61,7 +61,7 @@ check-all:
     #!/usr/bin/env bash
     set -euo pipefail
     SKILLS_DIR="{{ SKILLS }}"
-    skills=$(ls -1 "$SKILLS_DIR"/*/SKILL.md 2>/dev/null | sed 's|.*/context/skills/||;s|/SKILL.md||' | sort)
+    skills=$(ls -1 "$SKILLS_DIR"/*/SKILL.md 2>/dev/null | sed 's|.*/content/skills/||;s|/SKILL.md||' | sort)
     count=0
     failed=0
     for skill in $skills; do

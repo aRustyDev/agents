@@ -27,13 +27,13 @@ Validate a `convert-X-Y` skill against `meta-convert-dev` (structure) and `meta-
 
 ### Step 1: Locate and Read Skill
 
-1. Construct skill path: `components/skills/$1/SKILL.md`
+1. Construct skill path: `content/skills/$1/SKILL.md`
 2. Verify file exists
 3. Read the skill file completely
 4. Extract source and target languages from skill name
 
 ```bash
-SKILL_PATH="components/skills/$1/SKILL.md"
+SKILL_PATH="content/skills/$1/SKILL.md"
 # Extract languages: convert-python-rust → python, rust
 SOURCE=$(echo "$1" | sed 's/convert-//' | cut -d'-' -f1)
 TARGET=$(echo "$1" | sed 's/convert-//' | cut -d'-' -f2-)
@@ -44,22 +44,22 @@ If skill not found, report error and exit:
 ```markdown
 ## Error: Skill Not Found
 
-Skill `$1` not found at `components/skills/$1/SKILL.md`
+Skill `$1` not found at `content/skills/$1/SKILL.md`
 
 **Available conversion skills:**
-[List from components/skills/convert-*/]
+[List from content/skills/convert-*/]
 ```
 
 ### Step 2: Read Meta-Skills for Comparison
 
 Read both meta-skills to understand validation criteria:
 
-1. **`components/skills/meta-convert-dev/SKILL.md`** - Skill structure:
+1. **`content/skills/meta-convert-dev/SKILL.md`** - Skill structure:
    - Required sections
    - Naming conventions
    - Reference tables to update
 
-2. **`components/skills/meta-convert-guide/SKILL.md`** - Content quality:
+2. **`content/skills/meta-convert-guide/SKILL.md`** - Content quality:
    - APTV workflow coverage
    - 8 Pillars content expectations (see `reference/` directory)
    - Example quality standards (see `examples/` directory)
@@ -193,7 +193,7 @@ gh issue create --repo aRustyDev/agents \
 
 ### Step 7: Update Meta-Convert-Dev Tables
 
-Update the following tables in `components/skills/meta-convert-dev/SKILL.md`:
+Update the following tables in `content/skills/meta-convert-dev/SKILL.md`:
 
 #### 7.1 Existing Conversion Skills Table
 

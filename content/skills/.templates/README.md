@@ -78,5 +78,5 @@ just create-skill observability-metrics-prometheus-ops
 
 ```bash
 # Validate skill structure and naming
-just validate-skill components/skills/<skill-name>
+just validate-skill content/skills/<skill-name>
 ```

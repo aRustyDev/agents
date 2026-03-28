@@ -35,7 +35,7 @@ Framework for validating Claude Code skills against best practices. This skill p
 ### Quick Validation
 
 ```bash
-just validate-skill components/skills/my-skill
+just validate-skill content/skills/my-skill
 ```
 
 Checks:
@@ -46,7 +46,7 @@ Checks:
 ### Standard Validation
 
 ```bash
-/refine-skill components/skills/my-skill --check-only
+/refine-skill content/skills/my-skill --check-only
 ```
 
 Adds:
