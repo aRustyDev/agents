@@ -32,7 +32,7 @@ Refactor blog-workflow plugin to make Astro/AstroPaper-specific instructions a p
 ### Directory Structure
 
 ```
-context/plugins/blog-workflow/
+content/plugins/blog-workflow/
 ├── skills/
 │   └── platforms/
 │       ├── _interface.md              # Platform interface contract

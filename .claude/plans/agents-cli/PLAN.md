@@ -43,7 +43,7 @@ related:
 | Metric | Current | Target | Gap |
 |--------|---------|--------|-----|
 | CLI location | `cli/` (flat) | `packages/cli/src/` | No src/test split, no workspace |
-| Content location | `context/` | `content/` | Naming mismatch |
+| Content location | `content/` | `content/` | Naming mismatch |
 | Dead directories | 7 | 0 | Cleanup needed |
 | CLI architecture | Noun-first (`skill.ts`: 2000+ lines) | Verb-first (13 command modules) | Full decomposition |
 | Component types | 4 implemented (skill, plugin, agent, mcp-server) | 11 (with placeholders) | 7 placeholders needed |
@@ -97,7 +97,7 @@ agents [-h, -y/--yes, --json, --output, --fail-on, --debug, --trace, -vvv]
 | phase-0 | Fix broken components/ recipes | planned | None | justfile |
 | phase-1 | Cleanup dead directories | planned | None | rm dirs, move models |
 | phase-2 | Move CLI to packages/cli with src/test split | planned | None | git mv, import rewrites |
-| phase-3 | Rename context/ → content/ + update ALL config | planned | None | rename + 34 config updates |
+| phase-3 | Rename content/ → content/ + update ALL config | planned | None | rename + 34 config updates |
 | phase-4 | Root workspace configuration | planned | phase-2 | root package.json, justfile |
 | phase-5 | Final verification (Part A) | planned | phase-0-4 | tests, hooks, docs |
 | **Part B: CLI Decomposition** |  |  |  |  |
@@ -121,7 +121,7 @@ agents [-h, -y/--yes, --json, --output, --fail-on, --debug, --trace, -vvv]
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
 | Import paths break after src/test split | High | High | Systematic regex + test verification after each batch |
-| Pre-commit hooks break after context/ rename | Certain | High | Update all config in same commit as rename |
+| Pre-commit hooks break after content/ rename | Certain | High | Update all config in same commit as rename |
 | 2000+ line skill.ts decomposition introduces regressions | High | High | Extract one verb at a time, test after each |
 | Verb-first breaks existing `just agents skill ...` commands | Certain | Medium | Backward-compat aliases during transition |
 | Config file format bikeshedding | Low | Low | Start with TOML, match gitconfig patterns |
@@ -212,7 +212,7 @@ The justfile has 22 references to `components/` which doesn't exist.
 #### Task 0.1: Audit and fix components/ references
 
 - [ ] Identify all components/ references: `grep -n 'components/' justfile`
-- [ ] Replace: `components/` → `context/` (will become `content/` in Phase 3)
+- [ ] Replace: `components/` → `content/` (will become `content/` in Phase 3)
 - [ ] Verify recipes work
 - [ ] Commit
 
@@ -262,7 +262,7 @@ The justfile has 22 references to `components/` which doesn't exist.
 
 ---
 
-### Phase 3: Rename context/ → content/ + Update ALL Config
+### Phase 3: Rename content/ → content/ + Update ALL Config
 
 **MUST commit ALL config changes together with the rename.**
 
@@ -277,8 +277,8 @@ The justfile has 22 references to `components/` which doesn't exist.
 - [ ] Update `CLAUDE.md`, `README.md`
 - [ ] Update `.mcp.json`
 - [ ] Update `content/rules/**/*.md` prose references
-- [ ] Update catalog path hardcodes in skill.ts (~10 occurrences of `context/skills/.catalog.ndjson`)
-- [ ] Verify no remaining `context/` references
+- [ ] Update catalog path hardcodes in skill.ts (~10 occurrences of `content/skills/.catalog.ndjson`)
+- [ ] Verify no remaining `content/` references
 - [ ] Run tests
 
 ---
@@ -303,7 +303,7 @@ The justfile has 22 references to `components/` which doesn't exist.
 - [ ] Full test suite passes
 - [ ] `just agents --help` works
 - [ ] Pre-commit hooks pass
-- [ ] Grep for stale paths: 0 refs to `.scripts/`, `cli/`, `context/`, `components/`
+- [ ] Grep for stale paths: 0 refs to `.scripts/`, `cli/`, `content/`, `components/`
 - [ ] Update CLAUDE.md directory structure
 - [ ] Update README.md
 - [ ] Update memory files

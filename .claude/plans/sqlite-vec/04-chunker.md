@@ -298,7 +298,7 @@ Final paragraph in troubleshooting.
     print("Testing with real file...")
 
     # Find a skill file
-    skill_files = list(Path('context/skills').glob('*/SKILL.md'))
+    skill_files = list(Path('content/skills').glob('*/SKILL.md'))
     if skill_files:
         test_file = skill_files[0]
         print(f"Using: {test_file}")

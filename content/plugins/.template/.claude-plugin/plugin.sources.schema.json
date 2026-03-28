@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.arusty.dev/ai/schemas/plugin.sources.schema.json",
+  "title": "Plugin Sources",
+  "description": "Maps local plugin paths to central source components with content-addressed hashes",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "sources": {
+      "type": "object",
+      "description": "Map of local paths to source definitions",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Legacy format: direct path to source (deprecated)"
+          },
+          {
+            "type": "object",
+            "description": "Extended format with hash verification",
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Path to source component in central context directory"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "description": "Content hash in format sha256:<hex>"
+              },
+              "forked": {
+                "type": "boolean",
+                "default": false,
+                "description": "True if component has been forked and customized locally"
+              },
+              "forked_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO 8601 timestamp when component was forked"
+              }
+            },
+            "required": ["source"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "description": "Planning format for components to create/extend from external sources",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["reuse", "extend", "create"],
+                "description": "Action type for this component"
+              },
+              "base": {
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } }
+                ],
+                "description": "External source URL(s) to extend from"
+              },
+              "notes": {
+                "type": "string",
+                "description": "Implementation notes for this component"
+              },
+              "package": {
+                "type": "string",
+                "description": "Package name for MCP servers"
+              },
+              "install": {
+                "type": "string",
+                "description": "Installation command for MCP servers"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "description": "Placeholder hash (not verified for planning format)"
+              }
+            },
+            "required": ["type"],
+            "additionalProperties": true
+          }
+        ]
+      }
+    }
+  },
+  "required": ["sources"],
+  "examples": [
+    {
+      "sources": {
+        "commands/add-formula.md": {
+          "source": "content/commands/add-formula.md",
+          "hash": "sha256:4501741ed27b4f5a05fd819b7890cf42b74422a3d2613f9324946fdfc3d9f84c"
+        },
+        "skills/homebrew-formula-dev": {
+          "source": "content/skills/pkgmgr-homebrew-formula-dev",
+          "hash": "sha256:5476d4399297910089b4bc217ebfd337c1272c3b568ea08971c7e1b688a43235",
+          "forked": true,
+          "forked_at": "2026-02-20T12:00:00Z"
+        }
+      }
+    }
+  ]
+}

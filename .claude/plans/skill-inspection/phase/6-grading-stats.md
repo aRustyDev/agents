@@ -32,7 +32,7 @@ Compute final weighted grades for all catalog entries, generate summary statisti
 | Deliverable | Location | Format |
 |-------------|----------|--------|
 | Grading logic | `cli/lib/catalog.ts` (additions) | TypeScript |
-| Stats output | `context/skills/.catalog-stats.json` | JSON |
+| Stats output | `content/skills/.catalog-stats.json` | JSON |
 | CLI commands | `cli/commands/skill.ts` (additions) | TypeScript |
 | Tests | `cli/test/catalog-grading.test.ts` | TypeScript |
 
@@ -40,7 +40,7 @@ Compute final weighted grades for all catalog entries, generate summary statisti
 
 **Create:**
 - `cli/test/catalog-grading.test.ts`
-- `context/skills/.catalog-stats.json` — generated output (committed)
+- `content/skills/.catalog-stats.json` — generated output (committed)
 
 **Modify:**
 - `cli/lib/catalog.ts` — add grading formula, stats aggregation
@@ -87,7 +87,7 @@ score = min(6.0,
   - `avgScore`: mean score across all entries
   - `tier2ReviewedCount` vs `tier1OnlyCount`
   - `generatedAt`: ISO timestamp
-- [ ] Write to `context/skills/.catalog-stats.json`
+- [ ] Write to `content/skills/.catalog-stats.json`
 
 ### CLI Implementation
 - [ ] `ai-tools skill catalog grade [--json]` — compute and write grades

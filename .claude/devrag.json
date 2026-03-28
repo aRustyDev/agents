@@ -1,12 +1,12 @@
 {
   "document_patterns": [
-    "./context/agents/*.md",
-    "./context/hooks/*.json",
-    "./context/commands/*.md",
-    "./context/output-styles/*.md",
-    "./context/plugins/**/*.md",
-    "./context/rules/**/*.md",
-    "./context/skills/**/*.md",
+    "./content/agents/*.md",
+    "./content/hooks/*.json",
+    "./content/commands/*.md",
+    "./content/output-styles/*.md",
+    "./content/plugins/**/*.md",
+    "./content/rules/**/*.md",
+    "./content/skills/**/*.md",
     "./docs/src/**/*.md"
   ],
   "db_path": "./.data/devrag.db",

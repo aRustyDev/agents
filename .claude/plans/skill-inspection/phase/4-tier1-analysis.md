@@ -34,7 +34,7 @@ Dispatch Tier 1 (Haiku) agents in isolated worktrees to perform mechanical analy
 |-------------|----------|--------|
 | Orchestrator logic | `cli/lib/catalog.ts` (additions) | TypeScript |
 | Analyze CLI | `cli/commands/skill.ts` (additions) | TypeScript |
-| Updated catalog | `context/skills/.catalog.ndjson` | NDJSON |
+| Updated catalog | `content/skills/.catalog.ndjson` | NDJSON |
 | Tests | `cli/test/catalog-analyze.test.ts` | TypeScript |
 
 ## Files

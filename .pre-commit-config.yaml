@@ -40,9 +40,9 @@ repos:
         name: "security: detect private keys"
         exclude: |
           (?x)^(
-            context/\.context/legacy/.*|
-            context/skills/.*/references/.*|
-            context/skills/.*/examples/.*
+            content/\.content/legacy/.*|
+            content/skills/.*/references/.*|
+            content/skills/.*/examples/.*
           )$
 
       - id: check-symlinks
@@ -50,22 +50,22 @@ repos:
 
       - id: check-executables-have-shebangs
         name: "bash: check shebangs"
-        exclude: 'context/\.context/legacy/.*'
+        exclude: 'content/\.content/legacy/.*'
 
       - id: check-json
         name: "json: check syntax"
         exclude: |
           (?x)^(
-            context/plugins/.*/\..*\.json$|
-            context/plugins/.*/hooks/hooks\.json$|
-            context/\.context/.*|
+            content/plugins/.*/\..*\.json$|
+            content/plugins/.*/hooks/hooks\.json$|
+            content/\.content/.*|
             \.zed/.*
           )$
 
       - id: check-yaml
         name: "yaml: check syntax"
         args: ["--unsafe"] # Allow custom tags
-        exclude: 'context/\.context/legacy/.*'
+        exclude: 'content/\.content/legacy/.*'
 
   # =============================================================================
   # Markdown Linting (rumdl)
@@ -79,9 +79,9 @@ repos:
           - "--config=.github/pre-commit/rumdl.toml"
         exclude: |
           (?x)^(
-            context/\.context/.*|
-            context/skills/.*/examples/.*|
-            context/skills/.*/references/.*
+            content/\.content/.*|
+            content/skills/.*/examples/.*|
+            content/skills/.*/references/.*
           )$
 
   # =============================================================================
@@ -97,9 +97,9 @@ repos:
         types: [markdown]
         exclude: |
           (?x)^(
-            context/\.context/.*|
-            context/skills/.*/examples/.*|
-            context/skills/.*/references/.*
+            content/\.content/.*|
+            content/skills/.*/examples/.*|
+            content/skills/.*/references/.*
           )$
 
   # =============================================================================
@@ -142,19 +142,19 @@ repos:
             .*\.min\..*|
             package-lock\.json$|
             uv\.lock$|
-            context/\.context/.*|
-            context/skills/.*/examples/.*|
-            context/skills/.*/references/.*|
-            context/skills/.*/assets/.*|
-            context/skills/convert-.*|
-            context/skills/analysis\.md$|
-            context/rules/arustydev/schemas\.md$|
+            content/\.content/.*|
+            content/skills/.*/examples/.*|
+            content/skills/.*/references/.*|
+            content/skills/.*/assets/.*|
+            content/skills/convert-.*|
+            content/skills/analysis\.md$|
+            content/rules/arustydev/schemas\.md$|
             settings/mcp/.*|
             settings/claude/.*|
-            context/skills/pkgmgr-homebrew-formula-dev/.*|
-            context/skills/external\.yaml$|
+            content/skills/pkgmgr-homebrew-formula-dev/.*|
+            content/skills/external\.yaml$|
             assets/templates/.*|
-            context/plugins/homebrew-dev/skills/.*
+            content/plugins/homebrew-dev/skills/.*
           )$
 
   # =============================================================================
@@ -168,8 +168,8 @@ repos:
         language: system
         files: |
           (?x)^(
-            context/agents/.*\.md|
-            context/commands/.*\.md|
+            content/agents/.*\.md|
+            content/commands/.*\.md|
             \.claude/agents/.*\.md|
             \.claude/commands/.*\.md
           )$
@@ -186,9 +186,9 @@ repos:
         language: system
         files: |
           (?x)^(
-            context/plugins/.*plugin\.json|
-            context/plugins/.*/\.lsp\.json|
-            context/plugins/.*/\.mcp\.json|
+            content/plugins/.*plugin\.json|
+            content/plugins/.*/\.lsp\.json|
+            content/plugins/.*/\.mcp\.json|
             \.claude-plugin/marketplace\.json
           )$
         pass_filenames: false
@@ -327,9 +327,9 @@ repos:
             dist/|
             build/|
             .*\.min\..*|
-            context/\.context/.*|
-            context/skills/.*/examples/.*|
-            context/skills/.*/references/.*
+            content/\.content/.*|
+            content/skills/.*/examples/.*|
+            content/skills/.*/references/.*
           )$
 
       - id: biome-format
@@ -344,8 +344,8 @@ repos:
             dist/|
             build/|
             .*\.min\..*|
-            context/\.context/.*|
-            context/skills/.*/examples/.*|
-            context/skills/.*/references/.*
+            content/\.content/.*|
+            content/skills/.*/examples/.*|
+            content/skills/.*/references/.*
           )$
         stages: [manual]

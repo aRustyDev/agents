@@ -1,0 +1,9 @@
+{
+  "$schema": "Plugin source mapping - maps local paths to repo source paths",
+  "sources": {
+    "styles/feedback-submission.md": {
+      "source": "content/output-styles/feedback-submission.md",
+      "hash": "sha256:c5d040cc678ca459d978d576058254b8096eea7fbd6453df59112af5d0a5f218"
+    }
+  }
+}

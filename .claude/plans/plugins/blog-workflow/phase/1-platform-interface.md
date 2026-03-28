@@ -52,11 +52,11 @@ Extract Astro-specific knowledge into a platform skill and define the interface 
 
 **Create:**
 
-- `context/plugins/blog-workflow/skills/platforms/_interface.md`
-- `context/plugins/blog-workflow/skills/platforms/astro/SKILL.md`
-- `context/plugins/blog-workflow/skills/platforms/astro/reference/frontmatter.md`
-- `context/plugins/blog-workflow/skills/platforms/astro/reference/publishing.md`
-- `context/plugins/blog-workflow/skills/platforms/astro/reference/paths.md`
+- `content/plugins/blog-workflow/skills/platforms/_interface.md`
+- `content/plugins/blog-workflow/skills/platforms/astro/SKILL.md`
+- `content/plugins/blog-workflow/skills/platforms/astro/reference/frontmatter.md`
+- `content/plugins/blog-workflow/skills/platforms/astro/reference/publishing.md`
+- `content/plugins/blog-workflow/skills/platforms/astro/reference/paths.md`
 
 **Modify:**
 

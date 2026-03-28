@@ -12,7 +12,7 @@ just agents --help # CLI tool for component management
 ## Architecture
 
 ```
-context/               Component source of truth
+content/               Component source of truth
 ├── skills/            SKILL.md files (130+)
 ├── agents/            Agent definitions (markdown + frontmatter)
 ├── commands/          Slash commands (markdown + frontmatter)
@@ -22,7 +22,7 @@ context/               Component source of truth
 ├── output-styles/     Output formatting templates
 └── reference/         Reference documentation
 
-cli/              TypeScript tooling (Bun + Citty)
+packages/cli/              TypeScript tooling (Bun + Citty)
 ├── bin/agents.ts      CLI entrypoint
 ├── commands/          CLI command trees (skill, mcp, component, plugin, ...)
 ├── lib/               Library modules
@@ -85,12 +85,12 @@ All entity types flow through a universal `ComponentProvider` interface:
 | Provider | ID | Entity Types | Backend |
 |----------|----|-------------|---------|
 | LocalProvider | `local` | skill | Filesystem (wraps skill-* modules) |
-| LocalAgentProvider | `local-agent` | agent | `context/agents/**/*.md` |
-| LocalPluginProvider | `local-plugin` | plugin | `context/plugins/**/.claude-plugin/` |
-| LocalRuleProvider | `local-rule` | rule | `context/rules/**/*.md` |
-| LocalCommandProvider | `local-command` | command | `context/commands/**/*.md` |
-| LocalOutputStyleProvider | `local-output-style` | output_style | `context/output-styles/**/*.md` |
-| SmitheryProvider | `smithery` | mcp_server | registry.smithery.ai API |
+| LocalAgentProvider | `local-agent` | agent | `content/agents/**/*.md` |
+| LocalPluginProvider | `local-plugin` | plugin | `content/plugins/**/.claude-plugin/` |
+| LocalRuleProvider | `local-rule` | rule | `content/rules/**/*.md` |
+| LocalCommandProvider | `local-command` | command | `content/commands/**/*.md` |
+| LocalOutputStyleProvider | `local-output-style` | output-style | `content/output-styles/**/*.md` |
+| SmitheryProvider | `smithery` | mcp-server | registry.smithery.ai API |
 
 The `ComponentManager` aggregates search across all providers, deduplicates results, and handles pagination.
 
@@ -125,7 +125,7 @@ Curated plugins at `.claude-plugin/marketplace.json`:
 | Layer | Tool | Config |
 |-------|------|--------|
 | System tools | Homebrew | `brewfile` |
-| TypeScript | Bun | `cli/package.json` |
+| TypeScript | Bun | `packages/cli/package.json` |
 | Python (KG only) | uv | `pyproject.toml` |
 | Task runner | just | `justfile` |
 | Issue tracking | beads (bd) | `.beads/config.yaml` |

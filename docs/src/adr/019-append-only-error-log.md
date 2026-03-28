@@ -55,7 +55,7 @@ Store errors in a SQLite table with foreign keys.
 
 ## Decision Outcome
 
-**Separate append-only NDJSON error log** at `context/skills/.catalog-errors.ndjson`.
+**Separate append-only NDJSON error log** at `content/skills/.catalog-errors.ndjson`.
 
 Catalog entries carry `attemptCount` (number), `lastErrorType` (string), and `retryable` (boolean) as a performance cache. These are set during merge and allow `filterForProcessing` to work without reading the error log. The error log is the source of truth for full error history.
 

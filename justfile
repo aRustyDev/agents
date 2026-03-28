@@ -5,16 +5,16 @@ default:
     @just --list
 
 # Component build system modules
-mod plugin "context/plugins/justfile"
-mod skill "context/skills/justfile"
-mod command "context/commands/justfile"
-mod agent "context/agents/justfile"
-mod rule "context/rules/justfile"
+mod plugin "content/plugins/justfile"
+mod skill "content/skills/justfile"
+mod command "content/commands/justfile"
+mod agent "content/agents/justfile"
+mod rule "content/rules/justfile"
 
 # TypeScript CLI tooling
 [group('tools')]
 agents *args:
-    @bun run cli/bin/agents.ts {{ args }}
+    @bun run packages/cli/src/bin/agents.ts {{ args }}
 
 # Claude Code configuration directory
 
@@ -39,7 +39,7 @@ _init-pre-commit:
 [private]
 _init-bun:
     @echo "Installing TypeScript dependencies..."
-    @cd cli && bun install --silent
+    @cd packages/cli && bun install --silent
 
 [private]
 _init-python:
@@ -93,7 +93,7 @@ install target='all':
 _install-all: _install-claude
 
 ls-tags:
-    yq --output-format=json '.' "{{ justfile_directory() }}/context/skills/external.yaml" | jq '[ .manifest[] | add | .tags[] ] | unique'
+    yq --output-format=json '.' "{{ justfile_directory() }}/content/skills/external.yaml" | jq '[ .manifest[] | add | .tags[] ] | unique'
 
 [private]
 _install-claude: _install-claude-commands _install-claude-rules _install-claude-skills _install-claude-hooks _install-claude-settings
@@ -109,7 +109,7 @@ _install-claude-settings:
 _install-claude-commands:
     @echo "Installing commands..."
     @mkdir -p "{{ CLAUDE_DIR }}/commands"
-    @for f in context/commands/*.md; do \
+    @for f in content/commands/*.md; do \
         [ -f "$f" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/commands/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -117,7 +117,7 @@ _install-claude-commands:
 _install-claude-rules:
     @echo "Installing rules..."
     @mkdir -p "{{ CLAUDE_DIR }}/rules"
-    @for f in context/rules/*.md; do \
+    @for f in content/rules/*.md; do \
         [ -f "$f" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/rules/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -125,7 +125,7 @@ _install-claude-rules:
 _install-claude-skills:
     @echo "Installing skills..."
     @mkdir -p "{{ CLAUDE_DIR }}/skills"
-    @for d in context/skills/*/; do \
+    @for d in content/skills/*/; do \
         name=$(basename "$d"); \
         target="{{ CLAUDE_DIR }}/skills/$name"; \
         if [ -d "$d" ]; then \
@@ -142,7 +142,7 @@ _install-claude-skills:
 _install-claude-hooks:
     @echo "Installing hooks..."
     @mkdir -p "{{ CLAUDE_DIR }}/hooks"
-    @for f in context/hooks/*; do \
+    @for f in content/hooks/*; do \
         [ -f "$f" ] && [ "$(basename $f)" != ".gitkeep" ] && ln -sf "$(pwd)/$f" "{{ CLAUDE_DIR }}/hooks/$(basename $f)" && echo "  → $(basename $f)"; \
     done || true
 
@@ -157,16 +157,16 @@ _uninstall-all: _uninstall-claude
 [private]
 _uninstall-claude:
     @echo "Uninstalling Claude Code components..."
-    @for f in context/commands/*.md; do \
+    @for f in content/commands/*.md; do \
         [ -f "$f" ] && rm -f "{{ CLAUDE_DIR }}/commands/$(basename $f)"; \
     done || true
-    @for f in context/rules/*.md; do \
+    @for f in content/rules/*.md; do \
         [ -f "$f" ] && rm -f "{{ CLAUDE_DIR }}/rules/$(basename $f)"; \
     done || true
-    @for d in context/skills/*/; do \
+    @for d in content/skills/*/; do \
         [ -d "$d" ] && rm -f "{{ CLAUDE_DIR }}/skills/$(basename $d)"; \
     done || true
-    @for f in context/hooks/*; do \
+    @for f in content/hooks/*; do \
         [ -f "$f" ] && [ "$(basename $f)" != ".gitkeep" ] && rm -f "{{ CLAUDE_DIR }}/hooks/$(basename $f)"; \
     done || true
     @echo "✓ Claude Code components uninstalled"
@@ -186,7 +186,7 @@ list-claude:
 # Anthropic skills registry
 
 ANTHROPIC_SKILLS_REPO := "https://github.com/anthropics/skills.git"
-ANTHROPIC_VERSION_FILE := "context/skills/.anthropic-version"
+ANTHROPIC_VERSION_FILE := "content/skills/.anthropic-version"
 
 # Mapping: local-name -> upstream-path
 
@@ -234,8 +234,8 @@ sync-anthropic-skills:
         local_name="${mapping%%:*}"
         upstream_path="${mapping#*:}"
 
-        rm -rf "context/skills/$local_name"
-        cp -r "$TMPDIR/skills/$upstream_path" "context/skills/$local_name"
+        rm -rf "content/skills/$local_name"
+        cp -r "$TMPDIR/skills/$upstream_path" "content/skills/$local_name"
         echo "  → $local_name (from $upstream_path)"
     done
 
@@ -268,8 +268,8 @@ anthropic-version:
 
 # External skills manifest
 
-EXTERNAL_MANIFEST := justfile_directory() / "context/skills/external.yaml"
-EXTERNAL_VERSION_DIR := justfile_directory() / "context/skills/.versions"
+EXTERNAL_MANIFEST := justfile_directory() / "content/skills/external.yaml"
+EXTERNAL_VERSION_DIR := justfile_directory() / "content/skills/.versions"
 
 # List available external skills (optionally filter by category)
 [group('external')]
@@ -315,7 +315,7 @@ import-skill repo skill local_name='':
     set -euo pipefail
 
     SKILL_NAME="{{ if local_name != '' { local_name } else { skill } }}"
-    TARGET_DIR="{{ justfile_directory() }}/context/skills/$SKILL_NAME"
+    TARGET_DIR="{{ justfile_directory() }}/content/skills/$SKILL_NAME"
 
     echo "Importing $SKILL_NAME from {{ repo }}..."
 
@@ -454,7 +454,7 @@ check-external-updates:
 
 # Skill management
 
-SKILL_TEMPLATE_DIR := justfile_directory() / "context/skills/.templates"
+SKILL_TEMPLATE_DIR := justfile_directory() / "content/skills/.templates"
 
 # Create new skill from template
 [group('skills')]
@@ -463,7 +463,7 @@ create-skill name:
     set -euo pipefail
 
     SKILL_NAME="{{ name }}"
-    TARGET_DIR="{{ justfile_directory() }}/context/skills/$SKILL_NAME"
+    TARGET_DIR="{{ justfile_directory() }}/content/skills/$SKILL_NAME"
 
     # Validate naming convention (allows lowercase letters and numbers like k8s)
     if ! echo "$SKILL_NAME" | grep -qE '^[a-z0-9]+-([a-z0-9]+-)?[a-z0-9]+-[a-z]+$'; then
@@ -572,7 +572,7 @@ list-skills:
     set -euo pipefail
 
     echo "Local skills:"
-    for d in "{{ justfile_directory() }}"/context/skills/*/; do
+    for d in "{{ justfile_directory() }}"/content/skills/*/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
         # Skip hidden directories and templates
@@ -597,7 +597,7 @@ validate-all-skills:
     PASSED=0
     FAILED=0
 
-    for d in "{{ justfile_directory() }}"/context/skills/*/; do
+    for d in "{{ justfile_directory() }}"/content/skills/*/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
         [[ "$name" == .* ]] && continue
@@ -621,7 +621,7 @@ validate-pillars skill:
     set -euo pipefail
 
     SKILL_NAME="{{ skill }}"
-    SKILL_FILE="{{ justfile_directory() }}/context/skills/$SKILL_NAME/SKILL.md"
+    SKILL_FILE="{{ justfile_directory() }}/content/skills/$SKILL_NAME/SKILL.md"
 
     if [ ! -f "$SKILL_FILE" ]; then
         echo "❌ Skill not found: $SKILL_NAME"
@@ -724,7 +724,7 @@ validate-all-lang-skills:
     echo "=================================="
     echo ""
 
-    for d in "{{ justfile_directory() }}"/context/skills/lang-*-dev/; do
+    for d in "{{ justfile_directory() }}"/content/skills/lang-*-dev/; do
         [ -d "$d" ] || continue
         name=$(basename "$d")
 
@@ -769,7 +769,7 @@ import-and-normalize repo skill target:
     just import-skill "{{ repo }}" "{{ skill }}" "{{ target }}"
 
     # Validate the result
-    just validate-skill "{{ justfile_directory() }}/context/skills/{{ target }}"
+    just validate-skill "{{ justfile_directory() }}/content/skills/{{ target }}"
 
 # Plugin management
 
@@ -778,7 +778,7 @@ import-and-normalize repo skill target:
 install-plugin name:
     #!/usr/bin/env bash
     set -euo pipefail
-    PLUGIN_DIR="context/plugins/{{ name }}"
+    PLUGIN_DIR="content/plugins/{{ name }}"
     SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
     if [ ! -f "$SOURCES" ]; then
       echo "Error: $SOURCES not found"; exit 1
@@ -801,7 +801,7 @@ install-plugin name:
 build-plugin name:
     #!/usr/bin/env bash
     set -euo pipefail
-    PLUGIN_DIR="context/plugins/{{ name }}"
+    PLUGIN_DIR="content/plugins/{{ name }}"
     SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
     if [ ! -f "$SOURCES" ]; then
       echo "Error: $SOURCES not found"; exit 1
@@ -810,7 +810,7 @@ build-plugin name:
     # Check for stale sources before building
     echo "Checking source hashes..."
     verify_exit=0
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "$PLUGIN_DIR" --interactive || verify_exit=$?
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "$PLUGIN_DIR" --interactive || verify_exit=$?
     if [ "$verify_exit" -eq 1 ]; then
       echo ""
       echo "✗ Build aborted"
@@ -858,7 +858,7 @@ uninstall-plugin name:
 check-plugin-sources name:
     #!/usr/bin/env bash
     set -euo pipefail
-    PLUGIN_DIR="context/plugins/{{ name }}"
+    PLUGIN_DIR="content/plugins/{{ name }}"
     SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
     errors=0
     jq -r '.sources | to_entries[] | "\(.key)\t\(.value)"' "$SOURCES" | while IFS=$'\t' read -r local_path source_path; do
@@ -874,7 +874,7 @@ check-plugin-sources name:
 list-plugins:
     #!/usr/bin/env bash
     echo "Available plugins:"
-    for d in context/plugins/*/; do
+    for d in content/plugins/*/; do
       name=$(basename "$d")
       [ "$name" = "TODO.md" ] && continue
       installed=""
@@ -887,8 +887,8 @@ list-plugins:
 add-feedback-infra name:
     #!/usr/bin/env bash
     set -euo pipefail
-    PLUGIN_DIR="context/plugins/{{ name }}"
-    TEMPLATE_DIR="context/plugins/.template"
+    PLUGIN_DIR="content/plugins/{{ name }}"
+    TEMPLATE_DIR="content/plugins/.template"
 
     if [ ! -d "$PLUGIN_DIR" ]; then
       echo "Error: Plugin directory $PLUGIN_DIR not found"; exit 1
@@ -985,7 +985,7 @@ add-feedback-infra-all:
     set -euo pipefail
     echo "Adding feedback infrastructure to all plugins..."
     echo ""
-    for d in context/plugins/*/; do
+    for d in content/plugins/*/; do
       name=$(basename "$d")
       [ "$name" = ".template" ] && continue
       [ "$name" = "TODO.md" ] && continue
@@ -999,18 +999,18 @@ add-feedback-infra-all:
 # Compute content-addressed hash for a file or directory
 [group('plugins')]
 plugin-hash path:
-    @"{{ which("uv") }}" run python cli/plugin-hash.py "{{ path }}"
+    @"{{ which("uv") }}" run python packages/cli/plugin-hash.py "{{ path }}"
 
 # Verify a component hash matches expected value
 [group('plugins')]
 plugin-hash-verify path expected:
-    @"{{ which("uv") }}" run python cli/plugin-hash.py "{{ path }}" --verify "{{ expected }}"
+    @"{{ which("uv") }}" run python packages/cli/plugin-hash.py "{{ path }}" --verify "{{ expected }}"
 
 # Verify all sources in a plugin's plugin.sources.json (exit 0=ok, 1=stale, 2=no-hash warning)
 [group('plugins')]
 plugin-verify-sources name:
     #!/usr/bin/env bash
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "context/plugins/{{ name }}"
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
     exit_code=$?
     if [ $exit_code -eq 2 ]; then
       echo "⚠ Warning: Plugin uses legacy format without hashes"
@@ -1022,7 +1022,7 @@ plugin-verify-sources name:
 [group('plugins')]
 plugin-check name:
     #!/usr/bin/env bash
-    "{{ which("uv") }}" run python cli/plugin-hash.py --verify-sources "context/plugins/{{ name }}"
+    "{{ which("uv") }}" run python packages/cli/plugin-hash.py --verify-sources "content/plugins/{{ name }}"
     exit_code=$?
     if [ $exit_code -eq 2 ]; then
       echo ""
@@ -1036,7 +1036,7 @@ plugin-check name:
 plugin-update name:
     #!/usr/bin/env bash
     set -euo pipefail
-    PLUGIN_DIR="context/plugins/{{ name }}"
+    PLUGIN_DIR="content/plugins/{{ name }}"
     SOURCES="$PLUGIN_DIR/.claude-plugin/plugin.sources.json"
     if [ ! -f "$SOURCES" ]; then
       echo "Error: $SOURCES not found"; exit 1
@@ -1044,7 +1044,7 @@ plugin-update name:
     echo "Updating hashes for {{ name }}..."
     # Update hash for each source component
     jq -r '.sources | to_entries[] | .key' "$SOURCES" | while read -r local_path; do
-      "{{ which("uv") }}" run python cli/plugin-hash.py \
+      "{{ which("uv") }}" run python packages/cli/plugin-hash.py \
         --verify-sources "$PLUGIN_DIR" \
         --update-hash "$local_path" || true
     done
@@ -1055,90 +1055,90 @@ plugin-update name:
 # Check all plugins (for CI)
 [group('plugins')]
 plugin-check-all:
-    @"{{ which("uv") }}" run python cli/build-plugin.py check-all
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py check-all
 
 # Build all plugins
 [group('plugins')]
 plugin-build-all *args='':
-    @"{{ which("uv") }}" run python cli/build-plugin.py build-all {{ args }}
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py build-all {{ args }}
 
 # Update all plugin hashes
 [group('plugins')]
 plugin-update-all:
-    @"{{ which("uv") }}" run python cli/build-plugin.py update-all
+    @"{{ which("uv") }}" run python packages/cli/build-plugin.py update-all
 
 # Check migration status of all plugins
 [group('plugins')]
 migrate-check:
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py --check
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py --check
 
 # Migrate a single plugin to extended format
 [group('plugins')]
 migrate-plugin name:
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py "context/plugins/{{ name }}"
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py "content/plugins/{{ name }}"
 
 # Migrate all plugins to extended format
 [group('plugins')]
 migrate-all-plugins *args='':
-    @"{{ which("uv") }}" run python cli/migrate-plugin-sources.py --all {{ args }}
+    @"{{ which("uv") }}" run python packages/cli/migrate-plugin-sources.py --all {{ args }}
 
 # Knowledge graph operations
 
 # Initialize knowledge graph database
 [group('kg')]
 kg-init:
-    @"{{ which("uv") }}" run python cli/init-db.py
+    @"{{ which("uv") }}" run python packages/cli/init-db.py
 
 # Ingest all context files into knowledge graph
 [group('kg')]
 kg-ingest:
-    @"{{ which("uv") }}" run python cli/embed.py ingest --all
+    @"{{ which("uv") }}" run python packages/cli/embed.py ingest --all
 
 # Check for stale entities
 [group('kg')]
 kg-check:
-    @"{{ which("uv") }}" run python cli/embed.py check
+    @"{{ which("uv") }}" run python packages/cli/embed.py check
 
 # Semantic search
 [group('kg')]
 kg-search query:
-    @"{{ which("uv") }}" run python cli/embed.py search "{{ query }}"
+    @"{{ which("uv") }}" run python packages/cli/embed.py search "{{ query }}"
 
 # Find similar entities
 [group('kg')]
 kg-similar entity:
-    @"{{ which("uv") }}" run python cli/embed.py similar "{{ entity }}"
+    @"{{ which("uv") }}" run python packages/cli/embed.py similar "{{ entity }}"
 
 # Compute similarity cache
 [group('kg')]
 kg-similarity:
-    @"{{ which("uv") }}" run python cli/embed.py similarity
+    @"{{ which("uv") }}" run python packages/cli/embed.py similarity
 
 # Watch for changes and auto-embed
 [group('kg')]
 kg-watch:
-    @"{{ which("uv") }}" run python cli/watch-embed.py
+    @"{{ which("uv") }}" run python packages/cli/watch-embed.py
 
 # Dump knowledge graph to SQL (essential tables only, ~40MB)
 [group('kg')]
 kg-dump:
-    @"{{ which("uv") }}" run python cli/init-db.py --dump
+    @"{{ which("uv") }}" run python packages/cli/init-db.py --dump
 
 # Load knowledge graph from SQL dump
 [group('kg')]
 kg-load:
-    @"{{ which("uv") }}" run python cli/init-db.py --load
+    @"{{ which("uv") }}" run python packages/cli/init-db.py --load
 
 # Rebuild vector embeddings from existing chunks (after loading from dump)
 [group('kg')]
 kg-rebuild-embeddings:
-    @"{{ which("uv") }}" run python cli/embed.py rebuild-embeddings
+    @"{{ which("uv") }}" run python packages/cli/embed.py rebuild-embeddings
     @just kg-similarity
 
 # Show knowledge graph statistics
 [group('kg')]
 kg-stats:
-    @"{{ which("uv") }}" run python cli/kg-stats.py
+    @"{{ which("uv") }}" run python packages/cli/kg-stats.py
 
 # Force re-embed all entities
 [group('kg')]

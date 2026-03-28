@@ -1,4 +1,5 @@
 dist/
+build/
 .DS_Store
 
 # MCP swarm/flow state directories
@@ -33,3 +34,6 @@ documents/
 
 # Dolt database files (added by bd init)
 .dolt/
+
+# Git worktrees
+.worktrees/

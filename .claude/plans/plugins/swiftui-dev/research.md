@@ -12,23 +12,23 @@
 
 | Need | Existing | Source | Coverage | Action |
 |------|----------|--------|----------|--------|
-| swiftui-architecture | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 40% | extend |
-| swiftui-components | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 50% | extend |
-| swiftui-data-flow | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 60% | extend |
-| swiftui-testing | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 40% | extend |
-| swift-concurrency | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 70% | reuse |
+| swiftui-architecture | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 40% | extend |
+| swiftui-components | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 50% | extend |
+| swiftui-data-flow | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 60% | extend |
+| swiftui-testing | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 40% | extend |
+| swift-concurrency | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 70% | reuse |
 | duckdb-swift | None | — | 0% | create |
 | grdb-swift | None | — | 0% | create |
-| swiftdata-patterns | Partially in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 20% | create |
+| swiftdata-patterns | Partially in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 20% | create |
 | kuzu-swift | None | — | 0% | create |
 | dolt-swift | None | — | 0% | create |
 | swift-charts | None | — | 0% | create |
 | grape-graphs | None | — | 0% | create |
 | accelerate-numerics | None | — | 0% | create |
 | sketch-to-swiftui | None | — | 0% | create |
-| xctest-patterns | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 50% | extend |
-| xcuitest-patterns | Embedded in lang-swift-dev | context/skills/lang-swift-dev/SKILL.md | 30% | extend |
-| swift-package-manager | lang-swift-library-dev | context/skills/lang-swift-library-dev/SKILL.md | 80% | reuse |
+| xctest-patterns | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 50% | extend |
+| xcuitest-patterns | Embedded in lang-swift-dev | content/skills/lang-swift-dev/SKILL.md | 30% | extend |
+| swift-package-manager | lang-swift-library-dev | content/skills/lang-swift-library-dev/SKILL.md | 80% | reuse |
 | xcode-previews | None | — | 0% | create |
 | instruments-profiling | None | — | 0% | create |
 
@@ -49,11 +49,11 @@
 
 | Need | Existing | Source | Coverage | Action |
 |------|----------|--------|----------|--------|
-| swiftui-architect | swift-expert | context/agents/swift-expert.md | 60% | extend |
-| swiftui-code-reviewer | swift-expert | context/agents/swift-expert.md | 50% | extend |
+| swiftui-architect | swift-expert | content/agents/swift-expert.md | 60% | extend |
+| swiftui-code-reviewer | swift-expert | content/agents/swift-expert.md | 50% | extend |
 | swift-test-generator | None | — | 0% | create |
 | sketch-translator | None | — | 0% | create |
-| swift-debugger | swift-expert | context/agents/swift-expert.md | 40% | extend |
+| swift-debugger | swift-expert | content/agents/swift-expert.md | 40% | extend |
 
 ### Output Styles
 

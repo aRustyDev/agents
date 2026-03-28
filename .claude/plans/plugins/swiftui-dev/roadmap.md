@@ -17,8 +17,8 @@
 
 | Component | Type | Source Path |
 |-----------|------|-------------|
-| swift-concurrency | skill | context/skills/lang-swift-dev/SKILL.md (embedded) |
-| swift-package-manager | skill | context/skills/lang-swift-library-dev/SKILL.md |
+| swift-concurrency | skill | content/skills/lang-swift-dev/SKILL.md (embedded) |
+| swift-package-manager | skill | content/skills/lang-swift-library-dev/SKILL.md |
 | sourcekit-lsp | lsp | system (Xcode toolchain) |
 
 ### Extend

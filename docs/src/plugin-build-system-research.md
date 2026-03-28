@@ -23,8 +23,8 @@ Current plugin architecture has two pain points:
 ```json
 {
   "sources": {
-    "commands/add-formula.md": "context/commands/add-formula.md",
-    "skills/homebrew-formula-dev": "context/skills/pkgmgr-homebrew-formula-dev"
+    "commands/add-formula.md": "content/commands/add-formula.md",
+    "skills/homebrew-formula-dev": "content/skills/pkgmgr-homebrew-formula-dev"
   }
 }
 ```
@@ -94,14 +94,14 @@ Current plugin architecture has two pain points:
 
 ### Extended `plugin.sources.json`
 
-**JSON Schema**: `context/plugins/.template/.claude-plugin/plugin.sources.schema.json`
+**JSON Schema**: `content/plugins/.template/.claude-plugin/plugin.sources.schema.json`
 
 #### Legacy Format (deprecated)
 
 ```json
 {
   "sources": {
-    "commands/add-formula.md": "context/commands/add-formula.md"
+    "commands/add-formula.md": "content/commands/add-formula.md"
   }
 }
 ```
@@ -113,11 +113,11 @@ Current plugin architecture has two pain points:
   "$schema": "./plugin.sources.schema.json",
   "sources": {
     "commands/add-formula.md": {
-      "source": "context/commands/add-formula.md",
+      "source": "content/commands/add-formula.md",
       "hash": "sha256:a1b2c3d4e5f6..."
     },
     "skills/homebrew-formula-dev": {
-      "source": "context/skills/pkgmgr-homebrew-formula-dev",
+      "source": "content/skills/pkgmgr-homebrew-formula-dev",
       "hash": "sha256:1a2b3c4d5e6f...",
       "forked": true
     }
@@ -182,7 +182,7 @@ Current plugin architecture has two pain points:
 4. **Commit the changes**:
 
    ```bash
-   git add context/plugins/<name>/.claude-plugin/plugin.sources.json
+   git add content/plugins/<name>/.claude-plugin/plugin.sources.json
    git commit -m "feat: migrate <name> plugin to extended format"
    ```
 
@@ -206,7 +206,7 @@ To fork a component for plugin-specific customization:
    ```json
    {
      "commands/custom.md": {
-       "source": "context/commands/original.md",
+       "source": "content/commands/original.md",
        "hash": "sha256:...",
        "forked": true,
        "forked_at": "2026-02-20T12:00:00Z"

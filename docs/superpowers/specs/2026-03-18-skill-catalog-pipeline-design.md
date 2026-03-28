@@ -17,7 +17,7 @@ Phase 4: Grading & Indexing     → grades + .catalog-stats.json
 
 ## Input
 
-`context/skills/.TODO.yaml` — 13,644 entries as `<org>/<repo>@<skill>`, 9,429 unique skill names across 3,333 repos.
+`content/skills/.TODO.yaml` — 13,644 entries as `<org>/<repo>@<skill>`, 9,429 unique skill names across 3,333 repos.
 
 ## Taxonomy (19 categories)
 
@@ -68,7 +68,7 @@ const rules: [RegExp, string, string][] = [
 ### Output: `.taxonomy.yaml`
 
 ```yaml
-# context/skills/.taxonomy.yaml
+# content/skills/.taxonomy.yaml
 # Auto-generated. Maps unique skill names to category/subcategory.
 taxonomy:
   webapp-testing: { category: testing, subcategory: e2e }
@@ -107,7 +107,7 @@ Analysis is split into two tiers by cognitive demand. Tier 1 handles mechanical/
 
 ### Tier 1: Mechanical Analysis (Haiku)
 
-**Agent:** `context/agents/catalog/skill-inspector-t1.md`
+**Agent:** `content/agents/catalog/skill-inspector-t1.md`
 **Model:** Haiku (fast, cheap, sufficient for deterministic checks)
 **Isolation:** Git worktree per batch
 **Batch size:** 15-20 skills per dispatch, 5-10 concurrent agents
@@ -207,7 +207,7 @@ Output: `contentHash: string`, `possibleForkOf: string | null`
 
 ### Tier 2: Qualitative Analysis (Sonnet)
 
-**Agent:** `context/agents/catalog/skill-inspector-t2.md`
+**Agent:** `content/agents/catalog/skill-inspector-t2.md`
 **Model:** Sonnet (stronger judgment, reading comprehension, domain expertise)
 **Isolation:** Git worktree per batch
 **Batch size:** 10-15 skills per dispatch
@@ -322,7 +322,7 @@ Provisional grades are capped at **C** — a skill cannot receive A or B without
 ### `.catalog.ndjson`
 
 ```jsonc
-// context/skills/.catalog.ndjson — one line per entry
+// content/skills/.catalog.ndjson — one line per entry
 {
   "source": "org/repo",
   "skill": "skill-name",
@@ -466,7 +466,7 @@ ai-tools skill catalog run    # Full pipeline: taxonomy → availability → ana
 ### Justfile Integration
 
 ```just
-# context/skills/.catalog/justfile (or in .external/justfile)
+# content/skills/.catalog/justfile (or in .external/justfile)
 mod catalog ".catalog/justfile"
 
 # Invoked as:
@@ -483,12 +483,12 @@ just catalog:search       # Query catalog
 
 | File | Purpose |
 |---|---|
-| `context/agents/catalog/skill-inspector-t1.md` | Tier 1 mechanical analysis agent (Haiku) |
-| `context/agents/catalog/skill-inspector-t2.md` | Tier 2 qualitative analysis agent (Sonnet) |
-| `context/skills/.taxonomy.yaml` | Skill name → category mapping (generated) |
-| `context/skills/.catalog.ndjson` | Full catalog data (generated) |
-| `context/skills/.catalog-stats.json` | Summary statistics (generated) |
-| `context/skills/.catalog/justfile` | Catalog pipeline recipes |
+| `content/agents/catalog/skill-inspector-t1.md` | Tier 1 mechanical analysis agent (Haiku) |
+| `content/agents/catalog/skill-inspector-t2.md` | Tier 2 qualitative analysis agent (Sonnet) |
+| `content/skills/.taxonomy.yaml` | Skill name → category mapping (generated) |
+| `content/skills/.catalog.ndjson` | Full catalog data (generated) |
+| `content/skills/.catalog-stats.json` | Summary statistics (generated) |
+| `content/skills/.catalog/justfile` | Catalog pipeline recipes |
 | `cli/commands/skill.ts` | Add `catalog` subcommand tree |
 | `cli/lib/taxonomy.ts` | Rule engine + LLM batch classification |
 | `cli/lib/catalog.ts` | Catalog I/O, grading, fork detection |

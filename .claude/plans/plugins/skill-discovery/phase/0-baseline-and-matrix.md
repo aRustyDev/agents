@@ -80,13 +80,13 @@ patterns:
 
 ```bash
 # Skills
-find context/skills -name "SKILL.md" | wc -l
+find content/skills -name "SKILL.md" | wc -l
 
 # Agents
-find context/agents -name "*.md" | wc -l
+find content/agents -name "*.md" | wc -l
 
 # Commands
-find context/commands -name "*.md" | wc -l
+find content/commands -name "*.md" | wc -l
 
 # etc.
 ```

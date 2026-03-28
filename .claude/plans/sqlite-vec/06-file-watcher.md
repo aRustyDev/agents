@@ -139,12 +139,12 @@ def main():
 
     # Directories to watch
     watch_dirs = [
-        'context/agents',
-        'context/skills',
-        'context/commands',
-        'context/rules',
-        'context/plugins',
-        'context/output-styles',
+        'content/agents',
+        'content/skills',
+        'content/commands',
+        'content/rules',
+        'content/plugins',
+        'content/output-styles',
         '.claude/commands',
         '.claude/rules',
     ]
@@ -188,8 +188,8 @@ if __name__ == '__main__':
 uv run python scripts/watch-embed.py
 
 # Terminal 2: Make a change
-echo "# Test change" >> context/agents/mcp-server-profiler.md
-git checkout context/agents/mcp-server-profiler.md  # Revert
+echo "# Test change" >> content/agents/mcp-server-profiler.md
+git checkout content/agents/mcp-server-profiler.md  # Revert
 
 # Watch Terminal 1 for processing output
 ```

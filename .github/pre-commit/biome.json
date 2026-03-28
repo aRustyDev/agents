@@ -51,9 +51,9 @@
       "!dist/**",
       "!build/**",
       "!*.min.*",
-      "!context/.context/**",
-      "!context/skills/**/examples/**",
-      "!context/skills/**/references/**"
+      "!content/.content/**",
+      "!content/skills/**/examples/**",
+      "!content/skills/**/references/**"
     ]
   }
 }

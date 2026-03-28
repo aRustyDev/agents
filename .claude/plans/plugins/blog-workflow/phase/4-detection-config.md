@@ -60,8 +60,8 @@ Implement automatic platform detection and project-level configuration storage s
 
 **Modify:**
 
-- `context/plugins/blog-workflow/commands/init.md`
-- `context/plugins/blog-workflow/.claude-plugin/plugin.json`
+- `content/plugins/blog-workflow/commands/init.md`
+- `content/plugins/blog-workflow/.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json` (version sync)
 
 ## Notes

@@ -93,7 +93,7 @@
   },
 
   "notes": [
-    "Large agent count (276) suggests many subagent definitions in context/agents/",
+    "Large agent count (276) suggests many subagent definitions in content/agents/",
     "MCP count includes 21 plugin configs + 1 root .mcp.json",
     "42 external sources: 27 GitHub repos + 15 independent sites",
     "Estimated 2500+ unique skills across all external sources",

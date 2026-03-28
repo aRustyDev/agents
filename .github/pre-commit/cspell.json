@@ -48,15 +48,15 @@
     "*.min.*",
     ".git/**",
     ".github/pre-commit/words/**",
-    "context/.context/**",
-    "context/skills/**/examples/**",
-    "context/skills/**/references/**",
-    "context/skills/**/assets/**",
+    "content/.content/**",
+    "content/skills/**/examples/**",
+    "content/skills/**/references/**",
+    "content/skills/**/assets/**",
     "**/convert-*/**",
     "**/analysis.md",
     "**/schemas.md",
-    "context/skills/.taxonomy.yaml",
-    "context/skills/.TODO.yaml"
+    "content/skills/.taxonomy.yaml",
+    "content/skills/.TODO.yaml"
   ],
   "ignoreRegExpList": [
     "```[\\s\\S]*?```",
