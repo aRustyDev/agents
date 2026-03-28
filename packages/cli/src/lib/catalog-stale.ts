@@ -6,9 +6,9 @@
  * re-analysis due to content changes.
  */
 
+import { fetchSkillFolderHash } from '@agents/core/git'
 import type { CatalogEntryWithTier1 } from './catalog'
 import { SKILL_LOOKUP_DIRS } from './catalog-download'
-import { fetchSkillFolderHash } from './git'
 
 export type StaleStatus = 'current' | 'stale' | 'unknown'
 

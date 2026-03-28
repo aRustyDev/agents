@@ -12,11 +12,11 @@
  */
 
 import { join } from 'node:path'
-import { clampLimit, clampPage } from './component/pagination'
+import { readText } from '@agents/core/runtime'
+import { CliError, err, ok, type Result } from '@agents/core/types'
+import type { SearchBackendType, SkillSearchResult } from '@agents/sdk/providers/local/schemas'
+import { clampLimit, clampPage } from '@agents/sdk/providers/pagination'
 import { checkHealth, createClient, searchKeyword } from './meilisearch'
-import { readText } from './runtime'
-import type { SearchBackendType, SkillSearchResult } from './schemas'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Public types

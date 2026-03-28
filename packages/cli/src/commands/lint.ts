@@ -6,17 +6,17 @@
  */
 import { statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { defineCommand } from 'citty'
+import { currentDir } from '@agents/core/runtime'
+import { EXIT } from '@agents/core/types'
 import {
   COMPONENT_TYPES,
   type ComponentType,
   getActiveTypes,
   getComponentMeta,
   parseComponentType,
-} from '../lib/component/types'
-import { createOutput } from '../lib/output'
-import { currentDir } from '../lib/runtime'
-import { EXIT } from '../lib/types'
+} from '@agents/sdk/context/types'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 /** Types that currently have linting support. */

@@ -8,8 +8,8 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { spawnSync } from './runtime'
-import { CliError, err, ok, type Result } from './types'
+import { spawnSync } from '@agents/core/runtime'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 
 // ---------------------------------------------------------------------------
 // Constants

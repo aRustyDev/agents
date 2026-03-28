@@ -9,15 +9,16 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { hashDirectory } from '@agents/core/hash'
+import { checkSymlink } from '@agents/core/symlink'
+import { CliError, err, ok, type Result } from '@agents/core/types'
+import type { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
 import type { AgentType } from './agents'
 import { detectInstalledAgents, getAgentBaseDir } from './agents'
-import { hashDirectory } from './hash'
 // Importing lockfile registers the built-in 'skills' schema as a side effect.
 import { readLockfile } from './lockfile'
 import { readSkillFrontmatter } from './manifest'
-import type { LockfileV1, SkillFrontmatter } from './schemas'
-import { checkSymlink } from './symlink'
-import { CliError, err, ok, type Result } from './types'
 
 // ---------------------------------------------------------------------------
 // Error

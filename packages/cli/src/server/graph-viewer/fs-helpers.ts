@@ -10,7 +10,7 @@
  */
 
 import { rename } from 'node:fs/promises'
-import { writeText } from '../../lib/runtime'
+import { writeText } from '@agents/core/runtime'
 
 /**
  * Atomically write data to a file.

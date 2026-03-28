@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import {
   detectSourceFormat,
   normalizeSource,
@@ -11,7 +11,7 @@ import {
 } from '../src/lib/manifest'
 
 // Base paths for real test files
-const WORKTREE = '/private/etc/infra/pub/ai'
+const WORKTREE = resolve(import.meta.dir, '../../..')
 
 // Temp directory created fresh before each test group
 let tmp: string

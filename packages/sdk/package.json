@@ -1,0 +1,40 @@
+{
+  "name": "@agents/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./util": "./src/util/index.ts",
+    "./util/*": "./src/util/*.ts",
+    "./context": "./src/context/index.ts",
+    "./context/*": "./src/context/*.ts",
+    "./context/plugin/*": "./src/context/plugin/*.ts",
+    "./context/skill/*": "./src/context/skill/*.ts",
+    "./context/agent/*": "./src/context/agent/*.ts",
+    "./context/command/*": "./src/context/command/*.ts",
+    "./context/hook/*": "./src/context/hook/*.ts",
+    "./context/mcp/*": "./src/context/mcp/*.ts",
+    "./context/rule/*": "./src/context/rule/*.ts",
+    "./context/output-style/*": "./src/context/output-style/*.ts",
+    "./providers": "./src/providers/index.ts",
+    "./providers/*": "./src/providers/*.ts",
+    "./providers/local/*": "./src/providers/local/*.ts",
+    "./providers/github/*": "./src/providers/github/*.ts",
+    "./providers/smithery/*": "./src/providers/smithery/*.ts",
+    "./providers/clients/*": "./src/providers/clients/*.ts",
+    "./catalog": "./src/catalog/index.ts",
+    "./catalog/*": "./src/catalog/*.ts",
+    "./ui": "./src/ui/index.ts",
+    "./ui/*": "./src/ui/*.ts"
+  },
+  "dependencies": {
+    "@agents/core": "workspace:*",
+    "ansis": "^4.0.0",
+    "console-table-printer": "^2.15.0",
+    "js-yaml": "^4.1.0",
+    "nanospinner": "^1.2.0",
+    "valibot": "^1.0.0"
+  }
+}

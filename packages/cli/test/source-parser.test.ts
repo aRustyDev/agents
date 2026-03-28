@@ -1,12 +1,12 @@
 import { describe, expect, it, test } from 'bun:test'
-import type { ParsedSource } from '../src/lib/source-parser'
+import type { ParsedSource } from '@agents/core/source-parser'
 import {
   detectGitProtocol,
   getOwnerRepo,
   parseSource,
   resolveCloneUrl,
   sanitizeSubpath,
-} from '../src/lib/source-parser'
+} from '@agents/core/source-parser'
 
 // ---------------------------------------------------------------------------
 // parseSource — short form

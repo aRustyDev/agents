@@ -15,8 +15,8 @@ import {
   readEnvConfig,
   setConfigValue,
   writeConfigFile,
-} from '../../src/lib/config'
-import { writeTextFile } from '../../src/lib/file-io'
+} from '@agents/core/config'
+import { writeTextFile } from '@agents/core/file-io'
 
 // ---------------------------------------------------------------------------
 // Shared fixture directory
@@ -174,7 +174,7 @@ describe('writeConfigFile', () => {
     }
 
     await writeConfigFile(path, config)
-    const raw = await (await import('../../src/lib/file-io')).readTextFile(path)
+    const raw = await (await import('@agents/core/file-io')).readTextFile(path)
     expect(raw.ok).toBe(true)
     if (raw.ok) {
       expect(raw.value).toContain('output_format')

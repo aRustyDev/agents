@@ -53,7 +53,7 @@ describe('github source', () => {
   test('reports "current" when fetchSkillFolderHash returns matching hash', async () => {
     const HASH = 'a'.repeat(64)
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => HASH,
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
@@ -76,7 +76,7 @@ describe('github source', () => {
     const LOCAL_HASH = 'a'.repeat(64)
     const REMOTE_HASH = 'b'.repeat(64)
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => REMOTE_HASH,
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
@@ -95,7 +95,7 @@ describe('github source', () => {
   })
 
   test('reports "unavailable" when Trees API returns null', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
@@ -122,19 +122,11 @@ describe('local source', () => {
     await createSkillDir(tmp, 'local-skill', '# Skill\nStable content')
 
     // Compute the real hash of the directory we just created
-<<<<<<< HEAD:cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
+    const { hashDirectory } = await import('@agents/core/hash')
     const realHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-skill'))
-||||||| parent of 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
-    const realHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-skill'))
-=======
-    const { hashDirectory } = await import('../src/lib/hash')
-    const realHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-skill'))
->>>>>>> 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):packages/cli/test/skill-outdated.test.ts
 
     // No need to mock hash module for local -- use real implementation
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -154,7 +146,7 @@ describe('local source', () => {
   test('reports "outdated" when directory hash differs', async () => {
     await createSkillDir(tmp, 'changed-skill', '# Changed content')
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -175,7 +167,7 @@ describe('local source', () => {
   })
 
   test('reports "unavailable" when directory is missing', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -203,7 +195,7 @@ describe('local source', () => {
 
 describe('edge cases', () => {
   test('empty lock file returns empty array', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -217,7 +209,7 @@ describe('edge cases', () => {
   })
 
   test('no lock file returns empty array', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -230,7 +222,7 @@ describe('edge cases', () => {
   })
 
   test('unknown source type returns "unknown" status', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
@@ -260,7 +252,7 @@ describe('--from-url', () => {
   test(
     'timeout produces OutdatedError with E_FETCH_TIMEOUT',
     async () => {
-      mock.module('../src/lib/git', () => ({
+      mock.module('@agents/core/git', () => ({
         fetchSkillFolderHash: async () => null,
         lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
       }))
@@ -303,7 +295,7 @@ describe('git source', () => {
   test('reports "current" when lsRemote returns matching hash', async () => {
     const HASH = 'e'.repeat(64)
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: true, value: HASH }),
     }))
@@ -326,7 +318,7 @@ describe('git source', () => {
   test('reports "outdated" when lsRemote returns different hash', async () => {
     const REMOTE = 'b'.repeat(64)
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({ ok: true, value: REMOTE }),
     }))
@@ -347,7 +339,7 @@ describe('git source', () => {
   })
 
   test('reports "unavailable" when lsRemote fails', async () => {
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => null,
       lsRemote: async () => ({
         ok: false,
@@ -381,20 +373,12 @@ describe('mixed sources', () => {
     // Set up a real local skill directory
     await createSkillDir(tmp, 'local-one', '# Local Skill')
 
-<<<<<<< HEAD:cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
+    const { hashDirectory } = await import('@agents/core/hash')
     const localHash = await hashDirectory(join(tmp, 'content', 'skills', 'local-one'))
-||||||| parent of 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):cli/test/skill-outdated.test.ts
-    const { hashDirectory } = await import('../lib/hash')
-    const localHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-one'))
-=======
-    const { hashDirectory } = await import('../src/lib/hash')
-    const localHash = await hashDirectory(join(tmp, 'context', 'skills', 'local-one'))
->>>>>>> 592faac (refactor: move CLI to packages/cli with src/test split (ai-jbr, ai-bgj)):packages/cli/test/skill-outdated.test.ts
 
     const GITHUB_HASH = 'b'.repeat(64)
 
-    mock.module('../src/lib/git', () => ({
+    mock.module('@agents/core/git', () => ({
       fetchSkillFolderHash: async () => GITHUB_HASH,
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))

@@ -9,11 +9,11 @@
 import { execSync } from 'node:child_process'
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { getProjectConfigPath, getUserConfigPath, readConfigFile } from '@agents/core/config'
+import { currentDir } from '@agents/core/runtime'
+import { EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
-import { getProjectConfigPath, getUserConfigPath, readConfigFile } from '../lib/config'
-import { createOutput } from '../lib/output'
-import { currentDir } from '../lib/runtime'
-import { EXIT } from '../lib/types'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

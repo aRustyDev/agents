@@ -6,8 +6,8 @@
  */
 
 import { afterEach, describe, expect, test } from 'bun:test'
+import { GitHubTokenProvider, parseRepo, resetClient } from '@agents/core/github'
 import { Entry } from '@napi-rs/keyring'
-import { GitHubTokenProvider, parseRepo, resetClient } from '../src/lib/github'
 
 const TEST_SERVICE = 'arustydev/agents/test-github-compat'
 const TEST_ACCOUNT = 'test-compat'
@@ -85,7 +85,7 @@ describe('parseRepo', () => {
   test('parses owner/repo correctly', () => {
     const result = parseRepo('aRustyDev/agents')
     expect(result.owner).toBe('aRustyDev')
-    expect(result.repo).toBe('ai')
+    expect(result.repo).toBe('agents')
   })
 
   test('parses different owner/repo values', () => {
@@ -129,7 +129,7 @@ describe('integration', () => {
 
     // This import must be dynamic to avoid initializing the client during
     // unit-test-only runs where no token is available.
-    const { readIssue } = await import('../src/lib/github')
+    const { readIssue } = await import('@agents/core/github')
 
     // Reading a public issue does not strictly require auth,
     // but the Octokit client always sends a token if one is set.

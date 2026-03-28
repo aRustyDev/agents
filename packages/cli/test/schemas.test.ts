@@ -1,11 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import { readFile } from 'node:fs/promises'
-import * as v from 'valibot'
+import { resolve } from 'node:path'
 import {
-  ComponentRecord,
   detectUnknownPluginFields,
   KNOWN_PLUGIN_FIELDS,
-  LockfileV1,
   LspConfig,
   LspServerEntry,
   MarketplaceEntry,
@@ -19,10 +17,15 @@ import {
   PluginSourceLegacy,
   PluginSourcePlanning,
   PluginSourcesManifest,
-  SkillFrontmatter,
+} from '@agents/sdk/context/plugin/schema'
+import { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+import {
+  ComponentRecord,
+  LockfileV1,
   SkillLockEntry,
   StatusMessage,
-} from '../src/lib/schemas'
+} from '@agents/sdk/providers/local/schemas'
+import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,7 +38,7 @@ async function readJson(path: string): Promise<unknown> {
 }
 
 // Base paths for real test files
-const REPO_ROOT = '/private/etc/infra/pub/ai'
+const REPO_ROOT = resolve(import.meta.dir, '../../..')
 const WORKTREE = `${REPO_ROOT}`
 
 // ---------------------------------------------------------------------------

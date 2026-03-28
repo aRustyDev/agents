@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { ComponentManager } from '../../src/lib/component/manager'
+import { CliError, err, ok, type Result } from '@agents/core/types'
 import type {
   Component,
   ComponentAddOptions,
@@ -12,8 +12,8 @@ import type {
   PublishResult,
   RemoveResult,
   SearchParams,
-} from '../../src/lib/component/types'
-import { CliError, err, ok, type Result } from '../../src/lib/types'
+} from '@agents/sdk/context/types'
+import { ComponentManager } from '@agents/sdk/providers/manager'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -356,7 +356,7 @@ describe('ComponentManager', () => {
       const result = await mgr.add('gh:user/skill', 'skill', {})
       expect(result.ok).toBe(false)
       if (result.ok) return
-      expect(result.error.code).toBe('E_NO_PROVIDER')
+      expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
       expect(result.error.message).toContain('skill')
     })
   })
@@ -445,7 +445,7 @@ describe('ComponentManager', () => {
       const result = await mgr.info('ghost', 'skill')
       expect(result.ok).toBe(false)
       if (result.ok) return
-      expect(result.error.code).toBe('E_NOT_FOUND')
+      expect(result.error.code).toBe('E_COMPONENT_NOT_FOUND')
       expect(result.error.message).toContain('ghost')
       expect(result.error.message).toContain('skill')
     })
@@ -477,7 +477,7 @@ describe('ComponentManager', () => {
       const result = await mgr.remove('some-skill', 'skill')
       expect(result.ok).toBe(false)
       if (result.ok) return
-      expect(result.error.code).toBe('E_NO_PROVIDER')
+      expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
       expect(result.error.message).toContain('skill')
     })
   })
@@ -515,7 +515,7 @@ describe('ComponentManager', () => {
       const result = await mgr.publish('mcp-server', {})
       expect(result.ok).toBe(false)
       if (result.ok) return
-      expect(result.error.code).toBe('E_NO_PROVIDER')
+      expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
       expect(result.error.message).toContain('mcp-server')
     })
 
@@ -529,7 +529,7 @@ describe('ComponentManager', () => {
       const result = await mgr.publish('mcp-server', { name: 'test' })
       expect(result.ok).toBe(false)
       if (result.ok) return
-      expect(result.error.code).toBe('E_NO_PROVIDER')
+      expect(result.error.code).toBe('E_PROVIDER_UNAVAILABLE')
     })
   })
 })

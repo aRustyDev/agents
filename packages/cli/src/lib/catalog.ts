@@ -27,7 +27,7 @@
 
 import { createWriteStream, existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { currentDir } from './runtime'
+import { currentDir } from '@agents/core/runtime'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -578,7 +578,8 @@ export function getErrorsForSkill(
  * Returns `sha256:<hex>` format.
  */
 export function computeContentHash(content: string): string {
-  const { createSha256Hasher } = require('./runtime') as typeof import('./runtime')
+  const { createSha256Hasher } =
+    require('@agents/core/runtime') as typeof import('@agents/core/runtime')
   const hasher = createSha256Hasher()
   hasher.update(content)
   return `sha256:${hasher.digest('hex')}`

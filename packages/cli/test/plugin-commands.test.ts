@@ -13,8 +13,8 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { computeHash, formatHash } from '@agents/core/hash'
 import { listPlugins, type SourceStatus } from '../src/commands/plugin'
-import { computeHash, formatHash } from '../src/lib/hash'
 
 const HEX64_REGEX = /^[0-9a-f]{64}$/
 const SHA256_PREFIXED_REGEX = /^sha256:[0-9a-f]{64}$/

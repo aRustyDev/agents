@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 
 import {
   EDGE_ID_PREFIX,
@@ -648,7 +648,9 @@ describe('graph-schema.ts', () => {
     })
 
     test('accepts the example.json data file', async () => {
-      const raw = await Bun.file('/private/etc/infra/pub/ai/.data/graphs/example.json').text()
+      const raw = await Bun.file(
+        resolve(import.meta.dir, '../../..', '.data/graphs/example.json')
+      ).text()
       const data = JSON.parse(raw)
       const result = validateGraphData(data)
       expect(result.valid).toBe(true)

@@ -9,8 +9,8 @@
 
 import { existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
-import { createOutput } from '../lib/output'
 import { computeStats, crawlTier, loadState, saveState, validateNdjson } from '../lib/registry'
 import { globalArgs } from './shared-args'
 

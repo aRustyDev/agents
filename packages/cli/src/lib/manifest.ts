@@ -8,17 +8,17 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import * as v from 'valibot'
-import { parseFrontmatter } from './chunker'
+import { CliError, err, ok, type Result, type SourceFormat } from '@agents/core/types'
 import {
   PluginManifest,
   type PluginSource,
   PluginSourceExtended,
   PluginSourcePlanning,
   PluginSourcesManifest,
-  SkillFrontmatter,
-} from './schemas'
-import { CliError, err, ok, type Result, type SourceFormat } from './types'
+} from '@agents/sdk/context/plugin/schema'
+import { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+import * as v from 'valibot'
+import { parseFrontmatter } from './chunker'
 
 // ---------------------------------------------------------------------------
 // Plugin manifest

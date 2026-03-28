@@ -9,7 +9,7 @@
  * Bun and Node.js.
  */
 
-import { spawnAsync } from '../../../lib/runtime'
+import { spawnAsync } from '@agents/core/runtime'
 
 // ---------------------------------------------------------------------------
 // Types

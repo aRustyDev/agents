@@ -9,7 +9,6 @@
  *   path               - Show config file paths
  */
 import { execSync } from 'node:child_process'
-import { defineCommand } from 'citty'
 import {
   DEFAULT_CONFIG,
   getConfigValue,
@@ -19,10 +18,11 @@ import {
   readConfigFile,
   setConfigValue,
   writeConfigFile,
-} from '../lib/config'
-import { pathExists } from '../lib/file-io'
-import { createOutput } from '../lib/output'
-import { EXIT } from '../lib/types'
+} from '@agents/core/config'
+import { pathExists } from '@agents/core/file-io'
+import { EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

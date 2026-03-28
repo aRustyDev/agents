@@ -12,18 +12,18 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import * as v from 'valibot'
-import { computeHash, formatHash, parseHash } from './hash'
-import type { OutputFormatter } from './output'
-import { currentDir } from './runtime'
+import { computeHash, formatHash, parseHash } from '@agents/core/hash'
+import { currentDir } from '@agents/core/runtime'
 import {
   detectUnknownPluginFields,
   LspConfig,
   MarketplaceManifest,
   McpConfig,
   PluginManifest,
-  SkillFrontmatter,
-} from './schemas'
+} from '@agents/sdk/context/plugin/schema'
+import { SkillFrontmatter } from '@agents/sdk/context/skill/schema'
+import type { OutputFormatter } from '@agents/sdk/ui'
+import * as v from 'valibot'
 
 // ---------------------------------------------------------------------------
 // Constants

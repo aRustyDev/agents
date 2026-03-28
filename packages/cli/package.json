@@ -11,6 +11,8 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@agents/core": "workspace:*",
+    "@agents/sdk": "workspace:*",
     "@bomb.sh/tab": "^0.0.14",
     "@carlrannaberg/cclint": "^0.2.10",
     "@napi-rs/keyring": "^1.2.0",

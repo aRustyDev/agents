@@ -9,6 +9,8 @@
       "name": "@arustydev/agents",
       "version": "0.1.0",
       "dependencies": {
+        "@agents/core": "workspace:*",
+        "@agents/sdk": "workspace:*",
         "@bomb.sh/tab": "^0.0.14",
         "@carlrannaberg/cclint": "^0.2.10",
         "@napi-rs/keyring": "^1.2.0",
@@ -46,8 +48,40 @@
         "@types/ws": "^8.18.1",
       },
     },
+    "packages/core": {
+      "name": "@agents/core",
+      "version": "0.1.0",
+      "dependencies": {
+        "@napi-rs/keyring": "^1.2.0",
+        "@octokit/auth-oauth-device": "^7.0.0",
+        "@octokit/core": "^6.0.0",
+        "js-yaml": "^4.1.0",
+        "simple-git": "^3.33.0",
+        "smol-toml": "^1.6.1",
+        "valibot": "^1.0.0",
+      },
+      "devDependencies": {
+        "@types/js-yaml": "^4.0.0",
+      },
+    },
+    "packages/sdk": {
+      "name": "@agents/sdk",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agents/core": "workspace:*",
+        "ansis": "^4.0.0",
+        "console-table-printer": "^2.15.0",
+        "js-yaml": "^4.1.0",
+        "nanospinner": "^1.2.0",
+        "valibot": "^1.0.0",
+      },
+    },
   },
   "packages": {
+    "@agents/core": ["@agents/core@workspace:packages/core"],
+
+    "@agents/sdk": ["@agents/sdk@workspace:packages/sdk"],
+
     "@arustydev/agents": ["@arustydev/agents@workspace:packages/cli"],
 
     "@bomb.sh/tab": ["@bomb.sh/tab@0.0.14", "", { "peerDependencies": { "cac": "^6.7.14", "citty": "^0.1.6 || ^0.2.0", "commander": "^13.1.0" }, "optionalPeers": ["cac", "citty", "commander"], "bin": { "tab": "dist/bin/cli.mjs" } }, "sha512-cHMk2LI430MVoX1unTt9oK1iZzQS4CYDz97MSxKLNErW69T43Z2QLFTpdS/3jVOIKrIADWfuxQ+nQNJkNV7E4w=="],

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { mkdtemp, realpath, writeFile } from 'node:fs/promises'
 import { existsSync, statSync } from 'node:fs'
+import { mkdtemp, realpath, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -15,7 +15,7 @@ import {
   removePath,
   writeJsonFile,
   writeTextFile,
-} from '../../src/lib/file-io'
+} from '@agents/core/file-io'
 
 // ---------------------------------------------------------------------------
 // Shared fixture directory
@@ -329,7 +329,7 @@ describe('listDirectory', () => {
     const result = await listDirectory(dir)
     expect(result.ok).toBe(true)
     if (result.ok) {
-      const names = result.value.map(e => e.name).sort()
+      const names = result.value.map((e) => e.name).sort()
       expect(names).toContain('a.txt')
       expect(names).toContain('b.txt')
       expect(names).toContain('sub')
@@ -354,7 +354,7 @@ describe('listDirectory', () => {
     const result = await listDirectory(dir, { recursive: true })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      const names = result.value.map(e => e.name)
+      const names = result.value.map((e) => e.name)
       expect(names).toContain('top.txt')
       expect(names).toContain('bottom.txt')
     }

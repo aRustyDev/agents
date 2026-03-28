@@ -169,8 +169,8 @@ describe('PROJECT_ROOT', () => {
   })
 
   test('contains expected parent directory', () => {
-    // PROJECT_ROOT should point to the repo root (two levels up from commands/)
-    expect(PROJECT_ROOT).toContain('infra/pub/ai')
+    // PROJECT_ROOT should point to the repo root (four levels up from commands/)
+    expect(PROJECT_ROOT).toContain('infra/pub/agents')
     expect(PROJECT_ROOT).not.toContain('cli')
   })
 })

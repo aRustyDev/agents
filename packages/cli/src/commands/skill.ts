@@ -7,6 +7,10 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { formatHash, hashDirectory } from '@agents/core/hash'
+import { currentDir } from '@agents/core/runtime'
+import { EXIT } from '@agents/core/types'
+import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
 import {
   checkDrift,
@@ -15,11 +19,7 @@ import {
   refreshLinks,
   syncAll,
 } from '../lib/external-skills'
-import { formatHash, hashDirectory } from '../lib/hash'
 import { readSkillFrontmatter } from '../lib/manifest'
-import { createOutput } from '../lib/output'
-import { currentDir } from '../lib/runtime'
-import { EXIT } from '../lib/types'
 import { deprecatedCommand, nounAlias } from './compat'
 import { globalArgs } from './shared-args'
 
@@ -507,7 +507,11 @@ export default defineCommand({
     // Remove in the next major version.
     // -----------------------------------------------------------------
     add: nounAlias('skill', 'add', {
-      source: { type: 'positional', description: 'Source path, URL, or registry id', required: true },
+      source: {
+        type: 'positional',
+        description: 'Source path, URL, or registry id',
+        required: true,
+      },
       copy: { type: 'boolean', description: 'Copy files instead of symlinking', default: false },
       yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
       agent: { type: 'string', alias: 'a', description: 'Target agent' },
@@ -541,7 +545,9 @@ export default defineCommand({
       yes: { type: 'boolean', alias: 'y', description: 'Skip prompts', default: false },
     }),
     find: deprecatedCommand(
-      'agents skill find', 'agents search skill', 'find',
+      'agents skill find',
+      'agents search skill',
+      'find',
       {
         query: { type: 'positional', description: 'Search query' },
         limit: { type: 'string', description: 'Max results', default: '10' },
@@ -551,21 +557,20 @@ export default defineCommand({
       },
       async (args) => {
         const { findSkills } = await import('../lib/skill-find')
-        await findSkills(
-          args.query ? [args.query as string] : [],
-          {
-            limit: args.limit ? Number.parseInt(args.limit as string, 10) : undefined,
-            json: args.json as boolean,
-            quiet: args.quiet as boolean,
-            source: args.source as 'auto' | 'skills-sh' | 'meilisearch' | 'catalog' | undefined,
-            agent: args.agent as string | undefined,
-            yes: args.yes as boolean,
-          },
-        )
-      },
+        await findSkills(args.query ? [args.query as string] : [], {
+          limit: args.limit ? Number.parseInt(args.limit as string, 10) : undefined,
+          json: args.json as boolean,
+          quiet: args.quiet as boolean,
+          source: args.source as 'auto' | 'skills-sh' | 'meilisearch' | 'catalog' | undefined,
+          agent: args.agent as string | undefined,
+          yes: args.yes as boolean,
+        })
+      }
     ),
     outdated: deprecatedCommand(
-      'agents skill outdated', 'agents update skill --check', 'outdated',
+      'agents skill outdated',
+      'agents update skill --check',
+      'outdated',
       {
         stdin: { type: 'boolean', description: 'Read lockfile from stdin', default: false },
         'from-file': { type: 'string', description: 'Lockfile path' },
@@ -573,7 +578,7 @@ export default defineCommand({
       },
       async (args) => {
         const { checkOutdated } = await import('../lib/skill-outdated')
-        const out = (await import('../lib/output')).createOutput({
+        const out = (await import('@agents/sdk/ui')).createOutput({
           json: args.json as boolean,
           quiet: args.quiet as boolean,
         })
@@ -602,7 +607,7 @@ export default defineCommand({
             status: r.status,
             error: r.error ?? '',
           })),
-          ['skill', 'source', 'status', 'error'],
+          ['skill', 'source', 'status', 'error']
         )
 
         const outdated = results.filter((r) => r.status === 'outdated')
@@ -610,7 +615,7 @@ export default defineCommand({
           out.warn(`${outdated.length} skill(s) outdated`)
           process.exit(1)
         }
-      },
+      }
     ),
 
     // -----------------------------------------------------------------

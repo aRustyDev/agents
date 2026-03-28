@@ -7,8 +7,8 @@
  *   dev   - Start both Vite dev server and Bun API server
  */
 
+import { currentDir } from '@agents/core/runtime'
 import { defineCommand } from 'citty'
-import { currentDir } from '../lib/runtime'
 
 const serveCommand = defineCommand({
   meta: { name: 'serve', description: 'Start the graph viewer server' },
