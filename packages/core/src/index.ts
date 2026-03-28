@@ -8,6 +8,8 @@
  * smaller imports, use deep paths: `@agents/core/types`, etc.
  */
 
+// Archive
+export * from './archive'
 // Note: symlink is re-exported via file-io, not directly
 export * from './config'
 export * from './file-io'
