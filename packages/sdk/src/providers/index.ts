@@ -9,6 +9,12 @@ export {
   stripJsonComments,
   writeServerToClient,
 } from './clients/config'
+export type { InstallResult, InstallTarget } from './clients/install'
+export {
+  getClientSkillsDir,
+  getInstallableClients,
+  installSkillToClient,
+} from './clients/install'
 export type { ClientConfig, ClientFormat, ClientTransport, InstallMethod } from './clients/registry'
 // Client registry
 export {
