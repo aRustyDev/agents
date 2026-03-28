@@ -19,6 +19,7 @@
     "ollama": "^0.5.0"
   },
   "devDependencies": {
+    "@agents/sdk": "workspace:*",
     "@types/js-yaml": "^4.0.0"
   }
 }
