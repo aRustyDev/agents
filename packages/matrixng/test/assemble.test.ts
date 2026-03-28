@@ -42,6 +42,7 @@ describe('assembleHtml', () => {
     await writeFile(join(scriptsDir, 'core.js'), '// core')
     await writeFile(join(scriptsDir, 'comments.js'), '// comments')
     await writeFile(join(scriptsDir, 'benchmark.js'), '// benchmark')
+    await writeFile(join(scriptsDir, 'ribbon.js'), '// ribbon')
 
     const outputPath = join(tmpDir, 'output.html')
     await assembleHtml(tmpDir, MINIMAL_VIEWER_DATA, outputPath)
@@ -55,6 +56,7 @@ describe('assembleHtml', () => {
     expect(html).toContain('// core')
     expect(html).toContain('// comments')
     expect(html).toContain('// benchmark')
+    expect(html).toContain('// ribbon')
   })
 
   test('inlines JS files in correct order', async () => {
@@ -73,6 +75,7 @@ describe('assembleHtml', () => {
     await writeFile(join(scriptsDir, 'core.js'), '/* 3-core */')
     await writeFile(join(scriptsDir, 'comments.js'), '/* 4-comments */')
     await writeFile(join(scriptsDir, 'benchmark.js'), '/* 5-benchmark */')
+    await writeFile(join(scriptsDir, 'ribbon.js'), '/* 6-ribbon */')
 
     const outputPath = join(tmpDir, 'output.html')
     await assembleHtml(tmpDir, MINIMAL_VIEWER_DATA, outputPath)
@@ -83,6 +86,7 @@ describe('assembleHtml', () => {
     const idx3 = html.indexOf('3-core')
     const idx4 = html.indexOf('4-comments')
     const idx5 = html.indexOf('5-benchmark')
+    const idx6 = html.indexOf('6-ribbon')
     const idxData = html.indexOf('__VIEWER_DATA__')
 
     // Data injected before scripts
@@ -92,5 +96,6 @@ describe('assembleHtml', () => {
     expect(idx2).toBeLessThan(idx3)
     expect(idx3).toBeLessThan(idx4)
     expect(idx4).toBeLessThan(idx5)
+    expect(idx5).toBeLessThan(idx6)
   })
 })

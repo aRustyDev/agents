@@ -4,11 +4,11 @@ import { lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, writeFile } fro
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { addSkill as _addSkill } from '@agents/sdk/providers/local/skill/add'
-import { createCliAgentResolver } from '../src/lib/agents'
+import { createMockResolver } from '../../../_utils/mock-resolver'
 
-/** Convenience wrapper — auto-injects the CLI agent resolver. */
+/** Convenience wrapper — auto-injects a mock agent resolver. */
 const addSkill = (source: string, opts?: Parameters<typeof _addSkill>[2]) =>
-  _addSkill(createCliAgentResolver(), source, opts)
+  _addSkill(createMockResolver(), source, opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup

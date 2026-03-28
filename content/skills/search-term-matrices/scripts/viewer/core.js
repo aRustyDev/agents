@@ -128,6 +128,7 @@
 
     // Render benchmark
     if (MV.renderBenchmark) MV.renderBenchmark()
+    if (MV.initRibbon) MV.initRibbon()
   }
 
   // --- Tab Management ---
@@ -170,21 +171,34 @@
 
     if (state.editMode) {
       container.innerHTML = renderEditMode(raw)
-    } else {
-      const anchorCtx = { evalId: evalCase.evalId, configuration: 'with_skill' }
-      let html = MV.renderMarkdown(raw, anchorCtx)
-
-      // Add baseline section
-      const baselineRaw = evalCase.configurations.without_skill.raw
-      if (baselineRaw) {
-        html += renderBaselineSection(baselineRaw, evalCase.evalId)
-      }
-
-      container.innerHTML = html
-
-      // Re-attach comment click handlers
-      if (MV.attachCellHandlers) MV.attachCellHandlers()
+      return
     }
+
+    container.innerHTML = renderRenderedMode(evalCase, raw)
+
+    // Re-attach comment click handlers
+    if (MV.attachCellHandlers) MV.attachCellHandlers()
+  }
+
+  function renderRenderedMode(evalCase, raw) {
+    var anchorCtx = { evalId: evalCase.evalId, configuration: 'with_skill' }
+    var html = MV.renderMarkdown(raw, anchorCtx)
+
+    // Add baseline section
+    var baselineRaw = evalCase.configurations.without_skill.raw
+    if (baselineRaw) {
+      html += renderBaselineSection(baselineRaw, evalCase.evalId)
+    }
+
+    // Previous iteration (if --previous was provided)
+    var prevEval = state.data.previousEvals
+      ? state.data.previousEvals[state.currentEvalIndex]
+      : null
+    if (prevEval) {
+      html += renderPreviousSection(prevEval.configurations.with_skill.raw, evalCase.evalId)
+    }
+
+    return html
   }
 
   function renderEditMode(raw) {
@@ -202,6 +216,16 @@
       evalId: evalId,
       configuration: 'without_skill',
     })
+    html += '</div></div>'
+    return html
+  }
+
+  function renderPreviousSection(raw, evalId) {
+    var html = '<div class="baseline-section">'
+    html +=
+      '<button class="baseline-toggle" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\')">Previous Iteration</button>'
+    html += '<div class="baseline-content">'
+    html += MV.renderMarkdown(raw, { evalId: evalId, configuration: 'with_skill' })
     html += '</div></div>'
     return html
   }

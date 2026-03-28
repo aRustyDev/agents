@@ -63,4 +63,49 @@ describe('build integration', () => {
     expect(html).toContain('window.__VIEWER_DATA__')
     await rm(out, { force: true })
   })
+
+  test('includes engine operators when skill path provided', async () => {
+    await build({
+      workspace: WORKSPACE,
+      skillPath: SKILL_PATH,
+      output: outputPath,
+      iteration: 1,
+      open: false,
+    })
+    const html = await readFile(outputPath, 'utf-8')
+    expect(html).toContain('"Google"')
+    expect(html).toContain('"site:"')
+    await rm(outputPath, { force: true })
+  })
+
+  test('includes overlay JS modules', async () => {
+    await build({
+      workspace: WORKSPACE,
+      skillPath: SKILL_PATH,
+      output: outputPath,
+      iteration: 1,
+      open: false,
+    })
+    const html = await readFile(outputPath, 'utf-8')
+    expect(html).toContain('overlays.structural')
+    expect(html).toContain('overlays.operators')
+    expect(html).toContain('overlays.progression')
+    expect(html).toContain('overlays.decomposition')
+    expect(html).toContain('overlay-ribbon')
+    await rm(outputPath, { force: true })
+  })
+
+  test('populates previousEvals when --previous is provided', async () => {
+    await build({
+      workspace: WORKSPACE,
+      skillPath: SKILL_PATH,
+      output: outputPath,
+      iteration: 1,
+      open: false,
+      previous: WORKSPACE,
+    })
+    const html = await readFile(outputPath, 'utf-8')
+    expect(html).toContain('previousEvals')
+    await rm(outputPath, { force: true })
+  })
 })

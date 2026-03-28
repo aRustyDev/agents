@@ -23,13 +23,28 @@
 
   MV.attachCellHandlers = () => {
     document.querySelectorAll('td[data-col]').forEach((td) => {
+      // Operator token clicks
+      td.querySelectorAll('.op-token').forEach((span, idx) => {
+        span.addEventListener('click', (e) => {
+          e.stopPropagation()
+          showPopover(td, { token: span.textContent, tokenOffset: idx })
+        })
+      })
+
       td.addEventListener('click', (e) => {
         // Only trigger on the + icon (pseudo-element area) or direct click
         var rect = td.getBoundingClientRect()
         var isIconArea = e.clientX > rect.right - 24 && e.clientY < rect.top + 24
         if (isIconArea || e.detail === 2) {
-          // double-click or icon area
-          showPopover(td)
+          // Capture text selection as token anchor if present
+          let tokenInfo = null
+          const sel = window.getSelection()
+          if (sel?.toString().trim()) {
+            const selText = sel.toString().trim()
+            const cellText = td.textContent || ''
+            tokenInfo = { token: selText, tokenOffset: cellText.indexOf(selText) }
+          }
+          showPopover(td, tokenInfo)
         }
       })
 
@@ -43,11 +58,16 @@
 
   // --- Popover ---
 
-  function showPopover(td) {
+  function showPopover(td, tokenInfo) {
     var popover = document.getElementById('comment-popover')
     var textarea = document.getElementById('popover-textarea')
     var label = document.getElementById('popover-anchor-label')
     var anchor = anchorFromCell(td)
+
+    if (anchor && tokenInfo) {
+      anchor.token = tokenInfo.token
+      anchor.tokenOffset = tokenInfo.tokenOffset
+    }
 
     if (!anchor) return
 
@@ -247,7 +267,11 @@
       }
       parts.push(colLabels[anchor.column] || anchor.column)
     }
-    return parts.join(' \u2192 ')
+    var result = parts.join(' \u2192 ')
+    if (anchor.token) {
+      result += ` \u2192 "${anchor.token}"`
+    }
+    return result
   }
 
   function hasComment(anchor) {
@@ -271,6 +295,36 @@
       setTimeout(() => {
         el.style.outline = ''
       }, 2000)
+
+      // Highlight the specific token within the cell
+      if (anchor.token) {
+        highlightToken(el, anchor.token)
+      }
+    }
+  }
+
+  function highlightToken(cell, token) {
+    var walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT)
+    var node = walker.nextNode()
+    var idx, range, mark
+    while (node) {
+      idx = node.textContent.indexOf(token)
+      if (idx !== -1) {
+        range = document.createRange()
+        range.setStart(node, idx)
+        range.setEnd(node, idx + token.length)
+        mark = document.createElement('mark')
+        mark.style.background = 'var(--primary)'
+        mark.style.color = '#fff'
+        range.surroundContents(mark)
+        setTimeout(() => {
+          var parent = mark.parentNode
+          parent.replaceChild(document.createTextNode(mark.textContent), mark)
+          parent.normalize()
+        }, 2000)
+        return
+      }
+      node = walker.nextNode()
     }
   }
 

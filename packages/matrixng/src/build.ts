@@ -12,6 +12,7 @@ export interface BuildOptions {
   output?: string
   iteration?: number
   open?: boolean
+  previous?: string
 }
 
 export async function build(options: BuildOptions): Promise<string> {
@@ -32,6 +33,11 @@ export async function build(options: BuildOptions): Promise<string> {
     evals,
     benchmark,
     engineOperators,
+  }
+
+  if (options.previous) {
+    const { evals: prevEvals } = await parseWorkspace(resolve(options.previous), iteration)
+    data.previousEvals = prevEvals
   }
 
   const outputPath = options.output ?? `/tmp/matrix-review-${skillName}.html`

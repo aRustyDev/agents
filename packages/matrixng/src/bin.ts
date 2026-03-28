@@ -29,6 +29,10 @@ const buildCommand = defineCommand({
       description: 'Open in browser after build',
       default: true,
     },
+    previous: {
+      type: 'string',
+      description: 'Previous iteration workspace path (for diff view)',
+    },
   },
   async run({ args }) {
     try {
@@ -38,6 +42,7 @@ const buildCommand = defineCommand({
         output: args.output as string | undefined,
         iteration: args.iteration ? parseInt(args.iteration as string) : undefined,
         open: args.open as boolean,
+        previous: args.previous as string | undefined,
       })
       console.log(`Viewer built: ${outputPath}`)
     } catch (err) {

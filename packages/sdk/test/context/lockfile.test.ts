@@ -17,7 +17,7 @@ import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
 import * as v from 'valibot'
 
 // Base paths for real test files
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dir, '../../../..')
 const WORKTREE = `${REPO_ROOT}`
 
 // Temp directory created fresh before each test group
