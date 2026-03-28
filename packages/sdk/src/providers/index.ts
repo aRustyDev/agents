@@ -27,10 +27,18 @@ export {
   buildTopicSearchQuery,
 } from './github/search'
 export * from './interface'
-// Local providers
 export { LocalSkillProvider } from './local'
 export { LocalAgentProvider } from './local/agent'
 export { LocalCommandProvider } from './local/command'
+export type { LockfileSchema, StalenessEntry, StalenessReport } from './local/lockfile'
+// Local providers
+export {
+  checkStaleness,
+  getSchema,
+  readLockfile,
+  registerSchema,
+  writeLockfile,
+} from './local/lockfile'
 export { LocalOutputStyleProvider } from './local/output-style'
 export { LocalPluginProvider } from './local/plugin'
 export { LocalRuleProvider } from './local/rule'

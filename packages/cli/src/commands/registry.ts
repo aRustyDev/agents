@@ -9,9 +9,15 @@
 
 import { existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
+import {
+  computeStats,
+  crawlTier,
+  loadState,
+  saveState,
+  validateNdjson,
+} from '@agents/sdk/catalog/pipeline/crawl'
 import { createOutput } from '@agents/sdk/ui'
 import { defineCommand } from 'citty'
-import { computeStats, crawlTier, loadState, saveState, validateNdjson } from '../lib/registry'
 import { globalArgs } from './shared-args'
 
 const DEFAULT_OUTPUT_DIR = '/private/etc/dotfiles/adam/services/databases/meilisearch/indices'

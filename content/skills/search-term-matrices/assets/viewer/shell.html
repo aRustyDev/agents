@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrix Review</title>
+  <!--STYLES-->
+</head>
+<body>
+  <header id="header">
+    <h1 id="skill-name"></h1>
+    <span id="meta-info"></span>
+  </header>
+
+  <nav id="tab-bar">
+    <button class="tab active" data-tab="outputs">Outputs</button>
+    <button class="tab" data-tab="benchmark">Benchmark</button>
+  </nav>
+
+  <div id="tab-content">
+    <div id="outputs-tab" class="tab-panel active">
+      <nav id="subtab-bar"></nav>
+      <div id="mode-bar">
+        <button id="mode-rendered" class="mode-btn active">Rendered</button>
+        <button id="mode-edit" class="mode-btn">Edit</button>
+      </div>
+      <div id="outputs-container">
+        <aside id="comment-sidebar" class="collapsed">
+          <div id="sidebar-header">
+            <h3>Comments (<span id="comment-count">0</span>)</h3>
+            <button id="sidebar-toggle" title="Toggle sidebar">&#9776;</button>
+          </div>
+          <div id="comment-list"></div>
+        </aside>
+        <main id="matrix-content"></main>
+      </div>
+    </div>
+
+    <div id="benchmark-tab" class="tab-panel">
+      <nav id="bench-subtab-bar">
+        <button class="bench-subtab active" data-subtab="metrics">Metrics</button>
+        <button class="bench-subtab" data-subtab="criteria">Criteria Detail</button>
+      </nav>
+      <div id="bench-content">
+        <div id="metrics-panel" class="bench-panel active"></div>
+        <div id="criteria-panel" class="bench-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="footer">
+    <button id="export-comments">Export Comments</button>
+    <div id="nav-buttons">
+      <button id="prev-subtab" title="Previous">&#8592; Prev</button>
+      <button id="next-subtab" title="Next">Next &#8594;</button>
+    </div>
+  </footer>
+
+  <div id="comment-popover" class="hidden">
+    <div id="popover-anchor-label"></div>
+    <textarea id="popover-textarea" placeholder="Add a comment..."></textarea>
+    <div id="popover-actions">
+      <button id="popover-cancel">Cancel</button>
+      <button id="popover-save">Save</button>
+    </div>
+  </div>
+
+  <!--SCRIPTS-->
+</body>
+</html>

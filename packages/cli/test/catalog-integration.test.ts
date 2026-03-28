@@ -1,6 +1,6 @@
 // cli/test/catalog-integration.test.ts
 import { describe, expect, it } from 'bun:test'
-import { downloadSkill } from '../src/lib/catalog-download'
+import { downloadSkill } from '@agents/sdk/catalog/pipeline/download'
 
 describe('catalog-download integration', () => {
   it('downloads a real public skill (0x2e/superpowers@systematic-debugging)', async () => {

@@ -43,6 +43,7 @@ export const pluginModule: ComponentTypeModule<PluginManifest> = {
   },
 }
 
+export * from './ops'
 export { parsePlugin } from './parser'
 export {
   detectUnknownPluginFields,

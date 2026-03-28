@@ -1,0 +1,20 @@
+{
+  "eval_id": 3,
+  "eval_name": "webtransport-readiness",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "passed": false, "evidence": "Output is a phased research plan with 6 phases, not a tiered search matrix"},
+    {"text": "Matrix uses at least 3 different engine categories (e.g., MDN, GitHub, Google, caniuse)", "passed": false, "evidence": "No engine categories specified. Plan mentions caniuse by name in search terms but does not structure queries by engine"},
+    {"text": "Search queries use engine-specific operators such as language:, stars:>50, or site: filters", "passed": false, "evidence": "No engine-specific operators. All search terms are plain text phrases"},
+    {"text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "passed": false, "evidence": "No tier-based escalation. Phases are organized by topic (specs, browsers, servers, benchmarks, migration)"},
+    {"text": "Each row includes specific acceptance criteria for evaluating search results", "passed": false, "evidence": "Phase 2 mentions 'expected output' of a support table, but no per-query acceptance criteria with thresholds"},
+    {"text": "Output includes a Runtime Recovery section with fallback strategies", "passed": false, "evidence": "No Runtime Recovery section. Risks section mentions general adoption concerns but not search fallbacks"},
+    {"text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "passed": false, "evidence": "No Grading Summary section present"},
+    {"text": "At least one query targets browser compatibility or feature detection data", "passed": true, "evidence": "Phase 2 is dedicated to browser support with search terms like 'WebTransport browser support' and 'WebTransport caniuse'"},
+    {"text": "At least one query targets latency or throughput benchmarks comparing WebTransport and WebSocket", "passed": true, "evidence": "Phase 4 includes 'WebTransport vs WebSocket benchmark' and lists specific metrics (p50, p99, throughput)"},
+    {"text": "Matrix includes queries for server-side WebTransport implementations in at least 2 languages", "passed": true, "evidence": "Phase 3 lists search terms for Go, Rust, and Node.js server implementations"}
+  ],
+  "pass_rate": 0.3,
+  "passed": 3,
+  "total": 10
+}

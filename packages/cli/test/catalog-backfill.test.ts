@@ -2,12 +2,9 @@ import { describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import {
-  type BackfillResult,
-  type CatalogEntryWithTier1,
-  extractKeywords,
-  mergeBackfillResults,
-} from '../src/lib/catalog'
+import { extractKeywords } from '@agents/sdk/catalog/pipeline/compute'
+import { mergeBackfillResults } from '@agents/sdk/catalog/pipeline/io'
+import type { BackfillResult, CatalogEntryWithTier1 } from '@agents/sdk/catalog/pipeline/types'
 
 // ---------------------------------------------------------------------------
 // extractKeywords

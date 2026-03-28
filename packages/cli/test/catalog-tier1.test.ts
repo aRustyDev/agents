@@ -9,18 +9,17 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
-  appendError,
-  appendErrors,
-  type CatalogEntry,
-  type CatalogEntryWithTier1,
   computeContentHash,
   computeFileCount,
   computeHeadingTree,
   computeSectionCount,
   computeWordCount,
+} from '@agents/sdk/catalog/pipeline/compute'
+import {
+  appendError,
+  appendErrors,
   createBatches,
   detectForks,
-  type ErrorRecord,
   filterAvailable,
   filterForProcessing,
   formatBatchPrompt,
@@ -29,10 +28,15 @@ import {
   parseTier1Output,
   readCatalog,
   readErrorLog,
-  type Tier1Result,
-  type Tier1ResultWithTransient,
   validateBatchResults,
-} from '../src/lib/catalog'
+} from '@agents/sdk/catalog/pipeline/io'
+import type {
+  CatalogEntry,
+  CatalogEntryWithTier1,
+  ErrorRecord,
+  Tier1Result,
+  Tier1ResultWithTransient,
+} from '@agents/sdk/catalog/pipeline/types'
 
 // ---------------------------------------------------------------------------
 // filterAvailable

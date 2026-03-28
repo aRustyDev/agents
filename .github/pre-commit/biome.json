@@ -53,7 +53,8 @@
       "!*.min.*",
       "!content/.content/**",
       "!content/skills/**/examples/**",
-      "!content/skills/**/references/**"
+      "!content/skills/**/references/**",
+      "!docs/superpowers/plans/**"
     ]
   }
 }

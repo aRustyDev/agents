@@ -7,7 +7,7 @@
  * schema across server and CLI entry points.
  */
 
-import { type ValidationResult, validateGraphData } from '../../lib/graph-schema'
+import { type ValidationResult, validateGraphData } from '@agents/kg/graph-schema'
 
 /**
  * Validate unknown data against the graph JSON Schema.

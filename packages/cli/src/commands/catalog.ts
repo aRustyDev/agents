@@ -28,8 +28,6 @@ import { createGit } from '@agents/core/git'
 import { currentDir } from '@agents/core/runtime'
 import { EXIT } from '@agents/core/types'
 import { uuid7 } from '@agents/core/uuid'
-import { createOutput } from '@agents/sdk/ui'
-import { defineCommand } from 'citty'
 import {
   createBatches,
   detectForks,
@@ -40,7 +38,9 @@ import {
   readCatalog,
   readErrorLog,
   validateBatchResults,
-} from '../lib/catalog'
+} from '@agents/sdk/catalog/pipeline/io'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

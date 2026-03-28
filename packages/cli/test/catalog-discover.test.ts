@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { computeAllMechanicalFields } from '../src/lib/catalog-discover'
+import { computeAllMechanicalFields } from '@agents/sdk/catalog/pipeline/discover'
 
 // ---------------------------------------------------------------------------
 // computeAllMechanicalFields (local directory, no clone needed)

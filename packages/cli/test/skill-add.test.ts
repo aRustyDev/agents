@@ -3,7 +3,12 @@ import { existsSync } from 'node:fs'
 import { lstat, mkdir, mkdtemp, readdir, readFile, readlink, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
-import { addSkill } from '../src/lib/skill-add'
+import { addSkill as _addSkill } from '@agents/sdk/providers/local/skill/add'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+/** Convenience wrapper — auto-injects the CLI agent resolver. */
+const addSkill = (source: string, opts?: Parameters<typeof _addSkill>[2]) =>
+  _addSkill(createCliAgentResolver(), source, opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup

@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { InfoError, skillInfo } from '../src/lib/skill-info'
+import { skillInfo as _skillInfo, InfoError } from '@agents/sdk/providers/local/skill/info'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+/** Convenience wrapper — auto-injects the CLI agent resolver. */
+const skillInfo = (name: string, opts?: Parameters<typeof _skillInfo>[2]) =>
+  _skillInfo(createCliAgentResolver(), name, opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup

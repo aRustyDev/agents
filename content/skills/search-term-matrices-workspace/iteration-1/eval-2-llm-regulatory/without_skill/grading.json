@@ -1,0 +1,19 @@
+{
+  "eval_id": 2,
+  "eval_name": "llm-regulatory-landscape",
+  "configuration": "without_skill",
+  "expectations": [
+    {"text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "passed": false, "evidence": "Output is a phased research plan, not a tiered search matrix. No Context/Tier structure present"},
+    {"text": "Matrix uses at least 3 different engine categories including legal or policy databases", "passed": false, "evidence": "No engine categories specified. Search terms are listed as plain text without target engine designation"},
+    {"text": "Search queries use engine-specific operators such as site:, filetype:pdf, or date range filters", "passed": false, "evidence": "No engine-specific operators used. All queries are natural language phrases"},
+    {"text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "passed": false, "evidence": "Phases are organized by jurisdiction (EU, US, China), not by search scope escalation"},
+    {"text": "Each row includes specific acceptance criteria for evaluating search results", "passed": false, "evidence": "No per-query acceptance criteria. Phases list key questions but not measurable acceptance thresholds"},
+    {"text": "Output includes a Runtime Recovery section with fallback strategies", "passed": false, "evidence": "No Runtime Recovery section. A Risks section discusses general research risks but not search fallback strategies"},
+    {"text": "Matrix covers regulatory frameworks from at least EU, US, and China", "passed": true, "evidence": "Phases 1-3 explicitly cover EU AI Act, NIST AI RMF, and China Interim Measures"},
+    {"text": "At least one query specifically targets enforcement actions or audit case studies", "passed": true, "evidence": "Phase 4 includes search terms for 'AI regulation enforcement action' and 'LLM regulatory audit'"},
+    {"text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "passed": true, "evidence": "No formal Grading Summary, but the timeline section provides implicit phase completion targets"}
+  ],
+  "pass_rate": 0.333,
+  "passed": 3,
+  "total": 9
+}

@@ -8,12 +8,14 @@ import {
   computeSectionMap,
   computeSkillSizeBytes,
   isSimpleSkill,
+} from '@agents/sdk/catalog/pipeline/compute'
+import {
   mergeRepoManifest,
   migrateCatalogSchema,
-  type RepoManifest,
   readRepoManifest,
   writeRepoManifest,
-} from '../src/lib/catalog'
+} from '@agents/sdk/catalog/pipeline/io'
+import type { RepoManifest } from '@agents/sdk/catalog/pipeline/types'
 
 // ---------------------------------------------------------------------------
 // computeSectionMap

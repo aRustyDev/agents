@@ -17,6 +17,7 @@ awesomeclaude
 backfillable
 BehiSecc
 biome
+blockquotes
 blader
 BLAS
 blencorp
@@ -24,9 +25,10 @@ brewfile
 buildwithclaude
 bunx
 burpsuite
+categorise
+ccflare
 cchooks
 cclint
-ccflare
 ccpm
 CHANGEME
 chunker
@@ -44,10 +46,11 @@ codegraph
 compdef
 Composio
 Cpath
+cpython
 crawl4ai
 crawlable
-categorise
-cpython
+crdt
+CRDT
 cspell
 Csvg
 cupertino
@@ -66,6 +69,7 @@ ename
 eslug
 etype
 etypes
+evals
 fastmcp
 FDTD
 ffuf
@@ -92,17 +96,21 @@ homoiconic
 homoiconicity
 Hyperdimensional
 iannuttall
+iapp
 iconify
+inlines
 Iconify
 Izhikevich
 Jeffallan
+Jina
 jkitchin
 jqueryscript
 justfile
 kwsites
 lackeyjb
-lastrowid
 LAPACK
+lastrowid
+libquiche
 lintable
 litdb
 Livelocks
@@ -112,6 +120,7 @@ lychee
 Manim
 markdownify
 markmap
+matrixng
 mcphub
 mcpregistry
 mcpservers
@@ -123,6 +132,7 @@ mihaelamj
 modelcontextprotocol
 monorepo
 mousemovebody
+msquic
 mycomponent
 mycomponentv
 myns
@@ -140,6 +150,7 @@ opto
 orbstack
 orgname
 overclaiming
+Paperswith
 pargs
 pdate
 penpot
@@ -168,8 +179,8 @@ pytestmark
 radon
 rahulvrane
 recieve
-rels
 reclassifiable
+rels
 reprioritize
 rereview
 ripgrep
@@ -177,6 +188,7 @@ Riverpod
 rumdl
 Rxiv
 sandboxer
+Scopus
 secops
 Segoe
 semgrep
@@ -200,6 +212,8 @@ sqlite
 STDP
 subagent
 subdirs
+subtab
+subtabs
 subviews
 Sundell
 surrealdb
@@ -211,10 +225,12 @@ SwiftLint
 swiftui
 SwiftUI
 Tauri
+Tavily
 tenequm
 testuser
 timebox
 tmppath
+toggleable
 tokei
 trafilatura
 trailofbits
@@ -242,6 +258,7 @@ Wassette
 wdispatch
 webfetch
 websearch
+webtransport
 Wextra
 worktree
 worktrees

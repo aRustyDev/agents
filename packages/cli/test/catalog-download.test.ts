@@ -4,7 +4,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { downloadBatch, downloadSkill, validateCatalogSource } from '../src/lib/catalog-download'
+import {
+  downloadBatch,
+  downloadSkill,
+  validateCatalogSource,
+} from '@agents/sdk/catalog/pipeline/download'
 
 describe('validateCatalogSource', () => {
   it('accepts valid org/repo format', () => {

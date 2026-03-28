@@ -1,0 +1,17 @@
+{
+  "eval_id": 3,
+  "eval_name": "webtransport-readiness",
+  "prompt": "I need to assess the production readiness of WebTransport as a replacement for WebSockets in real-time applications. The research should cover browser support matrices, server-side implementations (Go, Rust, Node.js), QUIC transport layer considerations, and migration strategies from existing WebSocket infrastructure. I also need benchmarks comparing WebTransport vs WebSocket latency and throughput under load.",
+  "assertions": [
+    {"id": "matrix-structure", "text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "type": "structural"},
+    {"id": "engine-diversity", "text": "Matrix uses at least 3 different engine categories (e.g., MDN, GitHub, Google, caniuse)", "type": "quality"},
+    {"id": "operator-usage", "text": "Search queries use engine-specific operators such as language:, stars:>50, or site: filters", "type": "structural"},
+    {"id": "tier-escalation", "text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "type": "behavioral"},
+    {"id": "acceptance-criteria", "text": "Each row includes specific acceptance criteria for evaluating search results", "type": "structural"},
+    {"id": "recovery-plan", "text": "Output includes a Runtime Recovery section with fallback strategies", "type": "structural"},
+    {"id": "grading-summary", "text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "type": "structural"},
+    {"id": "browser-compat", "text": "At least one query targets browser compatibility or feature detection data", "type": "quality"},
+    {"id": "benchmark-queries", "text": "At least one query targets latency or throughput benchmarks comparing WebTransport and WebSocket", "type": "quality"},
+    {"id": "server-impl", "text": "Matrix includes queries for server-side WebTransport implementations in at least 2 languages", "type": "quality"}
+  ]
+}

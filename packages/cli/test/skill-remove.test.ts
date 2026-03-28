@@ -3,7 +3,15 @@ import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { RemoveError, removeSkills } from '../src/lib/skill-remove'
+import {
+  removeSkills as _removeSkills,
+  RemoveError,
+} from '@agents/sdk/providers/local/skill/remove'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+/** Convenience wrapper — auto-injects the CLI agent resolver. */
+const removeSkills = (names: string[], opts?: Parameters<typeof _removeSkills>[2]) =>
+  _removeSkills(createCliAgentResolver(), names, opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup

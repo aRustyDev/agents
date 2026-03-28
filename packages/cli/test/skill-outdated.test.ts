@@ -58,7 +58,7 @@ describe('github source', () => {
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'my-skill': { source: 'owner/repo', sourceType: 'github', computedHash: HASH },
@@ -81,7 +81,7 @@ describe('github source', () => {
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'my-skill': { source: 'owner/repo', sourceType: 'github', computedHash: LOCAL_HASH },
@@ -100,7 +100,7 @@ describe('github source', () => {
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'gone-skill': { source: 'owner/deleted', sourceType: 'github', computedHash: 'c'.repeat(64) },
@@ -131,7 +131,7 @@ describe('local source', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'local-skill': { source: 'local', sourceType: 'local', computedHash: realHash },
@@ -151,7 +151,7 @@ describe('local source', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'changed-skill': {
@@ -172,7 +172,7 @@ describe('local source', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'missing-skill': {
@@ -200,7 +200,7 @@ describe('edge cases', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {})
 
@@ -214,7 +214,7 @@ describe('edge cases', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     // Point cwd to a directory with no skills-lock.json
     const results = await checkOutdated({ cwd: tmp })
@@ -227,7 +227,7 @@ describe('edge cases', () => {
       lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'weird-skill': {
@@ -257,7 +257,9 @@ describe('--from-url', () => {
         lsRemote: async () => ({ ok: false, error: { message: 'unused' } }),
       }))
 
-      const { resolveInput, OutdatedError } = await import('../src/lib/skill-outdated')
+      const { resolveInput, OutdatedError } = await import(
+        '@agents/sdk/providers/local/skill/outdated'
+      )
 
       // Start a server that never responds
       const server = Bun.serve({
@@ -300,7 +302,7 @@ describe('git source', () => {
       lsRemote: async () => ({ ok: true, value: HASH }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'git-skill': {
@@ -323,7 +325,7 @@ describe('git source', () => {
       lsRemote: async () => ({ ok: true, value: REMOTE }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'git-skill': {
@@ -347,7 +349,7 @@ describe('git source', () => {
       }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'git-skill': {
@@ -383,7 +385,7 @@ describe('mixed sources', () => {
       lsRemote: async () => ({ ok: true, value: 'unused' }),
     }))
 
-    const { checkOutdated } = await import('../src/lib/skill-outdated')
+    const { checkOutdated } = await import('@agents/sdk/providers/local/skill/outdated')
 
     const lockPath = await writeLockfile(tmp, {
       'gh-skill': {

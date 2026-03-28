@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { SearchError, searchSkillsAPI } from '../src/lib/skill-search-api'
+import { SearchError, searchSkillsAPI } from '@agents/sdk/providers/local/skill/search-api'
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -1,11 +1,16 @@
 import { describe, expect, mock, test } from 'bun:test'
-import type { OutputFormatter } from '@agents/sdk/ui'
 import {
+  validateAgentFilter as _validateAgentFilter,
   filterByAgent,
   filterBySkill,
   type InstalledSkillEntry,
-  validateAgentFilter,
-} from '../src/lib/skill-filters'
+} from '@agents/sdk/providers/local/skill/filters'
+import type { OutputFormatter } from '@agents/sdk/ui'
+import { createCliAgentResolver } from '../src/lib/agents'
+
+/** Convenience wrapper — auto-injects the CLI agent resolver. */
+const validateAgentFilter = (agentName: string, out: OutputFormatter) =>
+  _validateAgentFilter(agentName, out, createCliAgentResolver())
 
 // ---------------------------------------------------------------------------
 // Test fixtures

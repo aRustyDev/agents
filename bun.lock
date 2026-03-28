@@ -10,6 +10,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@agents/core": "workspace:*",
+        "@agents/kg": "workspace:*",
         "@agents/sdk": "workspace:*",
         "@bomb.sh/tab": "^0.0.14",
         "@carlrannaberg/cclint": "^0.2.10",
@@ -64,6 +65,24 @@
         "@types/js-yaml": "^4.0.0",
       },
     },
+    "packages/kg": {
+      "name": "@agents/kg",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agents/core": "workspace:*",
+        "ajv": "^8.18.0",
+        "ajv-formats": "^3.0.1",
+        "graphology": "^0.26.0",
+        "graphology-layout": "^0.6.1",
+        "graphology-layout-forceatlas2": "^0.10.1",
+        "js-yaml": "^4.1.0",
+        "meilisearch": "^0.56.0",
+        "ollama": "^0.5.0",
+      },
+      "devDependencies": {
+        "@types/js-yaml": "^4.0.0",
+      },
+    },
     "packages/sdk": {
       "name": "@agents/sdk",
       "version": "0.1.0",
@@ -79,6 +98,8 @@
   },
   "packages": {
     "@agents/core": ["@agents/core@workspace:packages/core"],
+
+    "@agents/kg": ["@agents/kg@workspace:packages/kg"],
 
     "@agents/sdk": ["@agents/sdk@workspace:packages/sdk"],
 

@@ -2,8 +2,14 @@ import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
 import { mkdtemp, readFile, realpath } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { initComponent } from '../../src/lib/init-component'
+import { join, resolve } from 'node:path'
+import { initComponent as sdkInitComponent } from '@agents/sdk/context/scaffold'
+
+const PROJECT_ROOT = resolve(import.meta.dir, '../../../..')
+
+/** Wrapper matching old CLI shim — pre-fills projectRoot. */
+const initComponent: typeof sdkInitComponent = (type, name, opts) =>
+  sdkInitComponent(type, name, { ...opts, projectRoot: PROJECT_ROOT })
 
 // ---------------------------------------------------------------------------
 // Shared temp directory

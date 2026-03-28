@@ -17,13 +17,8 @@ import { resolve } from 'node:path'
 import { hashFile } from '@agents/core/hash'
 import { currentDir, readText } from '@agents/core/runtime'
 import { type EntityType, EXIT } from '@agents/core/types'
-import { createOutput } from '@agents/sdk/ui'
-import { defineCommand } from 'citty'
-import fg from 'fast-glob'
-import { Ollama } from 'ollama'
-import picomatch from 'picomatch'
-import { chunkMarkdown, parseFrontmatter } from '../lib/chunker'
-import { isOllamaAvailable, prepareEmbeddingText } from '../lib/embedder'
+import { chunkMarkdown, parseFrontmatter } from '@agents/kg/chunker'
+import { isOllamaAvailable, prepareEmbeddingText } from '@agents/kg/embedder'
 import {
   checkHealth,
   createClient,
@@ -35,8 +30,13 @@ import {
   indexEntity,
   searchKeyword,
   searchSemantic,
-} from '../lib/meilisearch'
-import { hybridSearch, type RankedResult } from '../lib/search'
+} from '@agents/kg/meilisearch'
+import { hybridSearch, type RankedResult } from '@agents/sdk/catalog/search'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
+import fg from 'fast-glob'
+import { Ollama } from 'ollama'
+import picomatch from 'picomatch'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------

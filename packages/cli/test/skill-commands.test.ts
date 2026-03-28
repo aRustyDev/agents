@@ -9,8 +9,8 @@ import { describe, expect, test } from 'bun:test'
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { formatHash, hashDirectory } from '@agents/core/hash'
+import { readSkillFrontmatter } from '@agents/sdk/context/manifest'
 import { listSkills } from '../src/commands/skill'
-import { readSkillFrontmatter } from '../src/lib/manifest'
 
 // ---------------------------------------------------------------------------
 // Constants

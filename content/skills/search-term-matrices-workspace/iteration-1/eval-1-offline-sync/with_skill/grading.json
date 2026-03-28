@@ -1,0 +1,20 @@
+{
+  "eval_id": 1,
+  "eval_name": "offline-sync-frameworks",
+  "configuration": "with_skill",
+  "expectations": [
+    {"text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "passed": true, "evidence": "All three tiers present with proper markdown table headers and a Context section with Goal, Type, Domain"},
+    {"text": "Matrix uses at least 3 different engine categories (e.g., npm, GitHub, Google Scholar, StackOverflow)", "passed": true, "evidence": "Uses GitHub, npm, Google Scholar, Google, StackOverflow, Semantic Scholar, YouTube, Hacker News"},
+    {"text": "Search queries use engine-specific operators such as stars:>100, language:typescript, or site: filters", "passed": true, "evidence": "Includes language:typescript, stars:>100, site:blog.*, keywords:crdt, votes:5, and date filters"},
+    {"text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "passed": true, "evidence": "Tier 1 focuses on direct CRDT framework searches; Tier 2 adds StackOverflow and HN for practitioner input; Tier 3 uses Semantic Scholar and YouTube"},
+    {"text": "Each row includes specific acceptance criteria for evaluating search results", "passed": true, "evidence": "All 11 rows have an Acceptance column with specific minimum-count thresholds"},
+    {"text": "Output includes a Runtime Recovery section with fallback strategies", "passed": true, "evidence": "Runtime Recovery section contains 4 bullet points with concrete fallback strategies"},
+    {"text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "passed": true, "evidence": "Grading Summary table lists thresholds for Tier 1 (3/4), Tier 2 (2/4), Tier 3 (1/3), and Overall (6/11)"},
+    {"text": "Queries specifically reference CRDT, operational transform, or offline-sync terminology", "passed": true, "evidence": "Multiple queries reference CRDT, conflict-free replicated data types, offline-first, and event sourcing"},
+    {"text": "At least one query targets latency or performance benchmark data", "passed": true, "evidence": "Tier 1 row 3 targets Google Scholar for CRDT synchronization benchmarks; Tier 3 row 3 seeks latency numbers"},
+    {"text": "Matrix covers at least 3 of the named frameworks (Automerge, Yjs, PowerSync, ElectricSQL)", "passed": true, "evidence": "Automerge, Yjs, PowerSync, and ElectricSQL are all referenced across Tier 1 and Tier 2 queries"}
+  ],
+  "pass_rate": 1.0,
+  "passed": 10,
+  "total": 10
+}

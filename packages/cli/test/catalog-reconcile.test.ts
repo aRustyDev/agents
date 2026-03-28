@@ -1,11 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import type { CatalogEntryWithTier1 } from '../src/lib/catalog'
 import type {
   DiscoveredSkillResult,
   RepoDiscoveryResult,
-  RepoManifest,
-} from '../src/lib/catalog-discover'
-import { detectMoveRenames, reconcile } from '../src/lib/catalog-reconcile'
+} from '@agents/sdk/catalog/pipeline/discover'
+import { detectMoveRenames, reconcile } from '@agents/sdk/catalog/pipeline/reconcile'
+import type { CatalogEntryWithTier1, RepoManifest } from '@agents/sdk/catalog/pipeline/types'
 
 // ---------------------------------------------------------------------------
 // Helpers

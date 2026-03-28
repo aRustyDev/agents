@@ -4,8 +4,6 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { computeHash, formatHash } from '@agents/core/hash'
 import type { PluginSourcesManifest } from '@agents/sdk/context/plugin/schema'
-import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
-import * as v from 'valibot'
 import {
   checkStaleness,
   getSchema,
@@ -14,7 +12,9 @@ import {
   registerSchema,
   type StalenessReport,
   writeLockfile,
-} from '../src/lib/lockfile'
+} from '@agents/sdk/providers/local/lockfile'
+import type { LockfileV1 } from '@agents/sdk/providers/local/schemas'
+import * as v from 'valibot'
 
 // Base paths for real test files
 const REPO_ROOT = resolve(import.meta.dir, '../../..')

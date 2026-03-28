@@ -1,0 +1,28 @@
+{
+  "skill_name": "search-term-matrices",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "description": "Using search-term-matrices SKILL.md",
+      "evals": [
+        {"eval_id": 1, "eval_name": "offline-sync-frameworks", "pass_rate": 1.0, "passed": 10, "total": 10, "tokens": 42509, "duration_seconds": 136.6},
+        {"eval_id": 2, "eval_name": "llm-regulatory-landscape", "pass_rate": 0.889, "passed": 8, "total": 9, "tokens": 37067, "duration_seconds": 158.4},
+        {"eval_id": 3, "eval_name": "webtransport-readiness", "pass_rate": 0.9, "passed": 9, "total": 10, "tokens": 39964, "duration_seconds": 103.7}
+      ],
+      "aggregate": {"mean_pass_rate": 0.93, "mean_tokens": 39847, "mean_duration_seconds": 132.9, "total_passed": 27, "total_assertions": 29}
+    },
+    {
+      "name": "without_skill",
+      "description": "Baseline -- no skill",
+      "evals": [
+        {"eval_id": 1, "eval_name": "offline-sync-frameworks", "pass_rate": 0.1, "passed": 1, "total": 10, "tokens": 14959, "duration_seconds": 73.9},
+        {"eval_id": 2, "eval_name": "llm-regulatory-landscape", "pass_rate": 0.333, "passed": 3, "total": 9, "tokens": 14720, "duration_seconds": 72.6},
+        {"eval_id": 3, "eval_name": "webtransport-readiness", "pass_rate": 0.3, "passed": 3, "total": 10, "tokens": 14453, "duration_seconds": 59.9}
+      ],
+      "aggregate": {"mean_pass_rate": 0.244, "mean_tokens": 14711, "mean_duration_seconds": 68.8, "total_passed": 7, "total_assertions": 29}
+    }
+  ],
+  "delta": {"pass_rate": "+0.686 (93% vs 24.4%)", "tokens": "+25136 (2.71x more)", "duration": "+64.1s (1.93x longer)"},
+  "analysis": {"observations": ["Skill dramatically improves structural compliance", "Baselines produce good research PLANS but not executable search MATRICES"]}
+}

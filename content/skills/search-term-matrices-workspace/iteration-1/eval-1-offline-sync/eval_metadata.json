@@ -1,0 +1,17 @@
+{
+  "eval_id": 1,
+  "eval_name": "offline-sync-frameworks",
+  "prompt": "I need to research how different edge computing frameworks handle offline-first sync patterns. Specifically, I want to compare CRDTs, operational transforms, and event sourcing approaches used in production systems. The research should cover frameworks like Automerge, Yjs, PowerSync, ElectricSQL, and similar tools, focusing on conflict resolution strategies, storage backends, and real-world latency benchmarks.",
+  "assertions": [
+    {"id": "matrix-structure", "text": "Output contains a properly structured search matrix with Context, Tier 1, Tier 2, and Tier 3 sections", "type": "structural"},
+    {"id": "engine-diversity", "text": "Matrix uses at least 3 different engine categories (e.g., npm, GitHub, Google Scholar, StackOverflow)", "type": "quality"},
+    {"id": "operator-usage", "text": "Search queries use engine-specific operators such as stars:>100, language:typescript, or site: filters", "type": "structural"},
+    {"id": "tier-escalation", "text": "Tier 2 queries broaden scope compared to Tier 1, and Tier 3 explores alternative or lateral sources", "type": "behavioral"},
+    {"id": "acceptance-criteria", "text": "Each row includes specific acceptance criteria for evaluating search results", "type": "structural"},
+    {"id": "recovery-plan", "text": "Output includes a Runtime Recovery section with fallback strategies", "type": "structural"},
+    {"id": "grading-summary", "text": "Output includes a Grading Summary section with per-tier pass/fail thresholds", "type": "structural"},
+    {"id": "domain-relevance", "text": "Queries specifically reference CRDT, operational transform, or offline-sync terminology", "type": "quality"},
+    {"id": "benchmark-focus", "text": "At least one query targets latency or performance benchmark data", "type": "quality"},
+    {"id": "framework-coverage", "text": "Matrix covers at least 3 of the named frameworks (Automerge, Yjs, PowerSync, ElectricSQL)", "type": "quality"}
+  ]
+}

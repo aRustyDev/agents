@@ -13,8 +13,6 @@ import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { computeHash, formatHash } from '@agents/core/hash'
 import { EXIT } from '@agents/core/types'
-import { createOutput } from '@agents/sdk/ui'
-import { defineCommand } from 'citty'
 import {
   type BuildResult,
   buildResultSuccess,
@@ -29,7 +27,9 @@ import {
   type ValidationResult,
   validateMarketplace,
   validatePlugin,
-} from '../lib/plugin-ops'
+} from '@agents/sdk/context/plugin/ops'
+import { createOutput } from '@agents/sdk/ui'
+import { defineCommand } from 'citty'
 import { globalArgs } from './shared-args'
 
 // ---------------------------------------------------------------------------
