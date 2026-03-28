@@ -6,11 +6,11 @@ import {
   type InstalledSkillEntry,
 } from '@agents/sdk/providers/local/skill/filters'
 import type { OutputFormatter } from '@agents/sdk/ui'
-import { createCliAgentResolver } from '../src/lib/agents'
+import { createMockResolver } from '../../../_utils/mock-resolver'
 
-/** Convenience wrapper — auto-injects the CLI agent resolver. */
+/** Convenience wrapper — auto-injects a mock agent resolver. */
 const validateAgentFilter = (agentName: string, out: OutputFormatter) =>
-  _validateAgentFilter(agentName, out, createCliAgentResolver())
+  _validateAgentFilter(agentName, out, createMockResolver())
 
 // ---------------------------------------------------------------------------
 // Test fixtures

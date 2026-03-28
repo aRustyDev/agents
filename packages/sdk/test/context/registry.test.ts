@@ -664,30 +664,8 @@ describe('constants', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Command module exports
+// Command module exports — CLI-specific, tested in packages/cli/
 // ---------------------------------------------------------------------------
-
-describe('registry command module', () => {
-  test('exports a default defineCommand', async () => {
-    const mod = await import('../src/commands/registry')
-    expect(mod.default).toBeDefined()
-    expect(mod.default.meta).toBeDefined()
-    expect(mod.default.meta!.name).toBe('registry')
-  })
-
-  test('has crawl subcommand', async () => {
-    const mod = await import('../src/commands/registry')
-    expect(mod.default.subCommands).toBeDefined()
-    expect(mod.default.subCommands!.crawl).toBeDefined()
-  })
-
-  test('has validate subcommand', async () => {
-    const mod = await import('../src/commands/registry')
-    expect(mod.default.subCommands!.validate).toBeDefined()
-  })
-
-  test('has stats subcommand', async () => {
-    const mod = await import('../src/commands/registry')
-    expect(mod.default.subCommands!.stats).toBeDefined()
-  })
-})
+// The 'registry command module' tests were removed during test migration
+// because they import from CLI command modules (../src/commands/registry).
+// Those tests remain in packages/cli/test/ as part of CLI command wiring tests.

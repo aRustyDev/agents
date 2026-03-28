@@ -38,7 +38,7 @@ async function readJson(path: string): Promise<unknown> {
 }
 
 // Base paths for real test files
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dir, '../../../..')
 const WORKTREE = `${REPO_ROOT}`
 
 // ---------------------------------------------------------------------------

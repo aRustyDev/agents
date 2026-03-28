@@ -7,11 +7,11 @@ import {
   removeSkills as _removeSkills,
   RemoveError,
 } from '@agents/sdk/providers/local/skill/remove'
-import { createCliAgentResolver } from '../src/lib/agents'
+import { createMockResolver } from '../../../_utils/mock-resolver'
 
-/** Convenience wrapper — auto-injects the CLI agent resolver. */
+/** Convenience wrapper — auto-injects a mock agent resolver. */
 const removeSkills = (names: string[], opts?: Parameters<typeof _removeSkills>[2]) =>
-  _removeSkills(createCliAgentResolver(), names, opts)
+  _removeSkills(createMockResolver(), names, opts)
 
 // ---------------------------------------------------------------------------
 // Temp directory setup
