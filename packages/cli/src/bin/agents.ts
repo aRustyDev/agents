@@ -22,7 +22,6 @@ const main = defineCommand({
     // Configuration
     config: () => import('../commands/config').then((m) => m.default),
     // Other
-    component: () => import('../commands/component').then((m) => m.default),
     kg: () => import('../commands/kg').then((m) => m.default),
     registry: () => import('../commands/registry').then((m) => m.default),
     'graph-viewer': () => import('../commands/graph-viewer').then((m) => m.default),

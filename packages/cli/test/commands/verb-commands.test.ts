@@ -7,16 +7,7 @@
  */
 import { describe, expect, test } from 'bun:test'
 
-const VERB_MODULES = [
-  'add',
-  'remove',
-  'list',
-  'search',
-  'info',
-  'init',
-  'lint',
-  'update',
-] as const
+const VERB_MODULES = ['add', 'remove', 'list', 'search', 'info', 'init', 'lint', 'update'] as const
 
 // ---------------------------------------------------------------------------
 // Shared structural checks for all 8 verbs
@@ -228,10 +219,7 @@ describe('agents.ts entrypoint wiring', () => {
   test('agents.ts source contains all expected subcommand registrations', async () => {
     const fs = await import('node:fs')
     const path = await import('node:path')
-    const agentsPath = path.resolve(
-      import.meta.dir,
-      '../../src/bin/agents.ts'
-    )
+    const agentsPath = path.resolve(import.meta.dir, '../../src/bin/agents.ts')
     const source = fs.readFileSync(agentsPath, 'utf-8')
 
     // Verify verb-first commands
@@ -240,7 +228,7 @@ describe('agents.ts entrypoint wiring', () => {
     }
 
     // Verify legacy noun commands
-    for (const noun of ['plugin', 'skill', 'mcp', 'component', 'kg', 'registry']) {
+    for (const noun of ['plugin', 'skill', 'mcp', 'kg', 'registry']) {
       expect(source).toContain(`${noun}: () => import('../commands/${noun}')`)
     }
 
